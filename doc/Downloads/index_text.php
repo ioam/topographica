@@ -38,7 +38,7 @@ HREF="#postinstall">After Installation</A> section below.
 <P>Install the <A
 HREF="http://www.enthought.com/products/getepd.php">EPD</A> scientific
 Python environment, then run Topographica's <A
-HREF="https://sourceforge.net/projects/topographica/0.9.7/topographica-0.9.7-py26-macosx10.6.mpkg">installer
+HREF="https://sourceforge.net/projects/topographica/files/topographica/0.9.7/topographica-0.9.7-py2.6-macosx10.6.mpkg.zip/download">installer
 for EPD on Mac</A>. Once complete, proceed to the <A
 HREF="#postinstall">After Installation</A> section below.
 
