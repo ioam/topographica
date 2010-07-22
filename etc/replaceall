@@ -1,0 +1,31 @@
+#!/bin/tcsh
+# 
+# JABALERT: Should probably be rewritten in python
+#
+# 971208 James A. Bednar: Replaces the given regular expression in the given list of files
+#
+# Usage:  replaceall from-regexp to-regexp [file]*
+# E.g.:   replaceall '\\cite\(.*\){\(.*\)}' '\\makecitation\1{\2}' file1 file2
+#
+# $Id$
+
+# Find the pipecap command from any sub or subsubdir of topographica
+setenv PATH ../topographica/etc/:../../topographica/etc/:../../../topographica/etc/:${PATH}
+
+set pipecap=pipecap
+set fromregexp="$1"
+set toregexp="$2"
+foreach file ($argv[3-])
+    if (-e ${file}) then 
+	echo "Replacing <${fromregexp}> with <${toregexp}> in file ${file}."
+	mv ${file} ${file}~
+	cat ${file}~ | sed -e "s|${fromregexp}|${toregexp}|g" | ${pipecap} ${file}
+	# restore file to original name if pipeline aborted
+	if (! -e ${file}) then 
+	    mv ${file}~ ${file}
+	endif
+    else
+	echo "File ${file} not found."
+    endif
+end
+

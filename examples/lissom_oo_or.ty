@@ -1,0 +1,197 @@
+"""
+Example of a LISSOM-based orientation map (with ON/OFF channels).
+
+Intended to be a close (but approximate) match to the orientation map
+simulation from figure 5.9 of Miikkulainen, Bednar, Choe, and Sirosh
+(2005), Computational Maps in the Visual Cortex, Springer.  Known
+differences include:
+
+ - The cortex_density is smaller for practicality (142 in the book).
+ - The matching is not yet perfect at different densities
+ - The lateral inhibitory radius is up to 0.5 matrix units greater
+   than in the book, because Topographica enforces good
+   circular-shaped CF outlines.
+ - Input patterns are evaluated on the entire retina, instead of only up
+   to bounds_multiplier=2.5 times the gaussian sigma in the book
+ - Initial weight patterns are not smoothed around the edges, unlike
+   smooth_circular_outlines=True and smooth_circular_radius_trim=-0.25
+   used in the book
+ - Initial weight patterns are all random within a gaussian envelope
+   rather than random afferent and Gaussian sigma preset_sigma_exc=11.076
+   preset_sigma_inh=71.76 lateral weights used in the book.
+ - Inhibitory weight pruning is disabled (not pruning all weights below
+   1e-5 as in the book)
+
+There may be other small differences, as this file has not yet been
+compared exhaustively to the original simulations.
+
+$Id$
+"""
+__version__='$Revision$'
+
+
+from math import pi, sqrt
+
+import numpy
+import param
+
+from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
+
+import topo.learningfn.optimized
+import topo.learningfn.projfn 
+import topo.transferfn.optimized 
+import topo.pattern.random
+import topo.responsefn.optimized 
+import topo.sheet.lissom
+import topo.sheet.optimized
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+
+    num_inputs=param.Integer(default=2,bounds=(1,None),doc="""
+        How many input patterns to present per unit area at each
+        iteration, when using discrete patterns (e.g. Gaussians)."""),
+
+    area=param.Number(default=1.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        Linear size of cortical area to simulate.
+        2.0 gives a 2.0x2.0 Sheet area in V1."""),
+
+    retina_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    lgn_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the LGN."""),
+
+    cortex_density=param.Number(default=48.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""))
+
+
+### Specify weight initialization, response function, and learning function
+projection.CFProjection.cf_shape=pattern.Disk(smoothing=0.0)
+projection.CFProjection.weights_generator=pattern.Constant()
+projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
+projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
+projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+
+### Default for tutorial
+pattern.Line.scale=0.9
+pattern.Gaussian.size=0.08333
+pattern.Gaussian.aspect_ratio=4.0
+
+
+### Input patterns
+total_num_inputs=int(p.num_inputs*p.area*p.area)
+input_type=pattern.Gaussian
+inputs=[input_type(x=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
+                                             ubound= (p.area/2.0+0.25),seed=12+i),
+                   y=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
+                                             ubound= (p.area/2.0+0.25),seed=34+i),
+                   orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56+i),
+                   size=0.088388, aspect_ratio=4.66667, scale=1.0,
+                   bounds=sheet.BoundingBox(radius=0.8))
+        for i in xrange(total_num_inputs)]
+
+combined_inputs = pattern.SeparatedComposite(min_separation=2.2*0.27083,generators=inputs)
+
+
+### Sheets
+topo.sim['Retina']=sheet.GeneratorSheet(nominal_density=p.retina_density,
+    input_generator=combined_inputs, period=1.0, phase=0.05,
+    nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25+0.375))
+
+topo.sim['LGNOn']=sheet.CFSheet(nominal_density=p.lgn_density,
+    nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25),
+    output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)],
+    measure_maps=False)
+
+topo.sim['LGNOff']=sheet.CFSheet(nominal_density=p.lgn_density,
+    nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25),
+    output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)],
+    measure_maps=False)
+
+topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
+    nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),tsettle=9,
+    output_fns=[transferfn.PiecewiseLinear(lower_bound=0.083,upper_bound=0.633)],
+    joint_norm_fn=sheet.optimized.compute_joint_norm_totals_opt)
+
+
+
+### Connections
+
+# DoG weights for the LGN
+centerg   = pattern.Gaussian(size=0.07385,aspect_ratio=1.0,
+                             output_fns=[transferfn.DivisiveNormalizeL1()])
+surroundg = pattern.Gaussian(size=0.29540,aspect_ratio=1.0,
+                             output_fns=[transferfn.DivisiveNormalizeL1()])
+
+on_weights = pattern.Composite(
+    generators=[centerg,surroundg],operator=numpy.subtract)
+
+off_weights = pattern.Composite(
+    generators=[surroundg,centerg],operator=numpy.subtract)
+
+
+topo.sim.connect(
+    'Retina','LGNOn',delay=0.05,strength=2.33,name='Afferent',
+    connection_type=projection.SharedWeightCFProjection,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.375),
+    weights_generator=on_weights)
+
+topo.sim.connect(
+    'Retina','LGNOff',delay=0.05,strength=2.33,name='Afferent',
+    connection_type=projection.SharedWeightCFProjection,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.375),
+    weights_generator=off_weights)
+
+topo.sim.connect(
+    'LGNOn','V1',delay=0.05,strength=1.0,name='LGNOnAfferent',
+    dest_port=('Activity','JointNormalize','Afferent'),
+    connection_type=projection.CFProjection,learning_rate=0.9590/2,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083))
+
+topo.sim.connect(
+    'LGNOff','V1',delay=0.05,strength=1.0,name='LGNOffAfferent',
+    dest_port=('Activity','JointNormalize','Afferent'),
+    connection_type=projection.CFProjection,learning_rate=0.9590/2,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083))
+
+topo.sim.connect(
+    'V1','V1',delay=0.05,strength=0.9,name='LateralExcitatory',
+    connection_type=projection.ResizableCFProjection,learning_rate=2.55528,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.10417),
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.10417))
+            
+topo.sim.connect(
+    'V1','V1',delay=0.05,strength=-0.9,name='LateralInhibitory',
+    connection_type=projection.CFProjection,learning_rate=1.80873,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.22917),
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.22917))
+
+
+
+### Actions scheduled to occur as the simulation proceeds.
+sheet.lissom.schedule_events("topo.sim['V1']",st=1.0/p.num_inputs,aff_name="Afferent")
+
+
+### Default locations for model editor
+topo.sim.grid_layout([[None,    'V1',     None],
+                      ['LGNOn', None,     'LGNOff'],
+                      [None,    'Retina', None]], xstart=150)
+
+
+### Set up appropriate defaults for analysis
+
+# Measure feature maps based on unthresholded initial response for
+# speed and reliability
+from topo.analysis.featureresponses import MeasureResponseCommand
+MeasureResponseCommand.duration=0.175
+MeasureResponseCommand.apply_output_fns=False

@@ -1,0 +1,126 @@
+"""
+SOM-based orientation map based on Obermayer et al., PNAS 87, pp. 8345-8349, 1990.
+
+Contains a Retina (2D Gaussian generator) and a V1 (SOM) sheet.
+Each V1 neuron receives input from the entire Retina.
+
+Known differences from the reference simulation:
+
+  - The reference simulation uses periodic boundary conditions, so the
+    borders of our simulation will have edge effects not present in the
+    original.
+
+  - Currently only isotropic Gaussian neighborhood functions are implemented.
+
+  - Not tested. :-)
+
+$Id$
+"""
+__version__='$Revision$'
+
+from math import sqrt, pi
+
+import numpy
+import param
+
+import topo
+
+from topo.base.boundingregion import BoundingBox
+from topo.base.cf import CFSheet,CFProjection
+from topo.learningfn.projfn import CFPLF_EuclideanHebbian
+from topo.transferfn.basic import DivisiveNormalizeL1
+from topo.transferfn.misc import KernelMax
+from topo.responsefn.optimized import CFPRF_DotProduct_opt
+from topo.sheet import GeneratorSheet
+
+from topo import numbergen
+
+import topo.pattern.basic
+import topo.pattern.random
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+
+    retina_density=param.Number(default=30.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    # original network had a density of 256, but that is too large for normal use
+    cortex_density=param.Number(default=25.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""))
+
+
+# ALERT: Consider moving these to the main topo/ directory, perhaps
+# after generalizing them.
+
+class LinearDecay(param.Parameterized):
+    """Linear function decreasing from the starting_value to the ending_value."""
+    starting_value = param.Number(0.09,doc="""Value at the beginning of learning.""")
+    ending_value = param.Number(0.02,doc="""Value at the end of learning.""")
+    duration = param.Number(30000,doc="""Time for the ending_value.""")
+    time_fn = topo.sim.time
+    
+    def __call__(self):
+        return self.starting_value + (self.ending_value-self.starting_value)/self.duration*float(self.time_fn())
+
+
+class PiecewiseLinearDecay(param.Parameterized):
+    """Two-part piecewise-linear decay function."""
+
+    starting_value = param.Number(240.0/256.0,doc="""Value at the beginning of learning.""")
+    middle_value = param.Number(60.0/256.0,doc="""Value at the midpoint of learning.""")
+    ending_value = param.Number(2.0/256.0,doc="""Value at the end of learning.""")
+    midpoint = param.Number(15000,doc="""Time for the middle_value.""")
+    duration = param.Number(30000,doc="""Time for the ending_value.""")
+    time_fn = topo.sim.time
+
+    def __call__(self):
+       if self.time_fn() < self.midpoint:
+         return self.starting_value + (self.middle_value-self.starting_value)/self.midpoint*float(self.time_fn())
+       else:
+         return self.middle_value + (self.ending_value-self.middle_value)/(self.duration-self.midpoint)*float(self.time_fn()-self.midpoint)
+
+
+
+###########################################
+# Set parameters
+
+# input patterns
+GeneratorSheet.period = 1.0
+GeneratorSheet.phase = 0.05
+GeneratorSheet.nominal_density = p.retina_density
+
+gaussian_width = 0.23/sqrt(2)
+gaussian_height = 0.09/sqrt(2)
+
+input_pattern = topo.pattern.basic.Gaussian(
+    x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=12),
+    y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=34),
+    orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56),
+    size=2*gaussian_height,aspect_ratio=gaussian_width/gaussian_height,
+    bounds=BoundingBox(radius=0.5))
+
+
+topo.sim['Retina'] = GeneratorSheet(input_generator=input_pattern)
+
+default_density=p.cortex_density
+
+KernelMax.kernel_radius=PiecewiseLinearDecay()
+
+topo.sim['V1'] = CFSheet(
+    nominal_density = p.cortex_density,
+    output_fns = [KernelMax(density=p.cortex_density)])
+
+CFProjection.learning_rate=LinearDecay()
+topo.sim.connect('Retina','V1',delay=0.10,connection_type=CFProjection,
+                 response_fn = CFPRF_DotProduct_opt(),
+                 learning_fn = CFPLF_EuclideanHebbian(),
+                 nominal_bounds_template = BoundingBox(radius=1.0),
+                 weights_generator = topo.pattern.random.UniformRandom())
+
+# Initialize weight values once; should verify that it does this ok
+from topo.transferfn.basic import IdentityTF
+topo.sim.schedule_command(0,'topo.sim["V1"].weights_output_fn=IdentityTF()')

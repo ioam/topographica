@@ -1,0 +1,195 @@
+#!./lissom
+#
+# Orientation map measurement based on presentation of sine gratings at various
+# orientations, frequencies, and phases.
+# 
+# $Header: /disk/cvs/jbcvsglobal/lissom/command/measure_or_pref,v 1.30 2005/08/08 16:33:51 jbednar Exp $
+
+define_param_set measure_or_pref
+
+# Set up plotting
+define_plot plastic=True plotgroup="OrientationPreference" "" "OrientationPreference"
+define_plot plastic=True plotgroup="OrientationPreference" name="OrientationPreferenceAndSelectivity" "OrientationSelectivity" "OrientationPreference"
+define_plot plastic=True plotgroup="OrientationPreference" "OrientationSelectivity"
+
+define_plot plastic=True plotgroup="OcularPreference" "OcularPreference"
+define_plot plastic=True plotgroup="OcularPreference" "OcularSelectivity"
+
+define_plot plastic=True plotgroup="SpatialFrequencyPreference" "SpatialFrequencyPreference"
+define_plot plastic=True plotgroup="SpatialFrequencyPreference" "SpatialFrequencySelectivity"
+
+
+### Arguments
+
+# These will keep the value last set; they are not overwritten like arguments usually are
+define_param measure_or_pref::histograms        Param_Integer False True \
+"Whether to use OrientationPreference as the axis for activity and other\n\
+histograms.  This parameter should probably be replaced with the name\n\
+of the map to use for such purposes, so that e.g. OcularPreference could\n\
+be used instead." \
+False
+
+define_param measure_or_pref::or_num_angles     Param_Integer 0 -1 \
+"The number of angles to use in measure_or_pref.  The angles are generally\n\
+chosen at regular intervals in the range [0,PI] radians." \
+4
+  
+define_param measure_or_pref::save_images       Param_Integer 0 -1 \
+"Use nonzero values for debugging only -- if nonzero, plots some or all of\n\
+the images used when calculating orientation preferences.  If set to 1,\n\
+every such image will be saved, which for some settings of or_num_angles,\n\
+sp_num_frequencies, and sp_num_phases will generate a huge number of images.\n\
+Often you will rather want to set this parameter to some higher value, e.g. 10,\n\
+so that only images from every 10th angle (for example) will be saved.  Since\n\
+these images would normally be used to make sure that the spatial frequencies\n\
+are reasonable (given that angles and phases are straightforward), you may want\n\
+(also or instead) to reduce or_num_angles and sp_num_phases to correspondingly\n\
+reduce the number of images generated." \
+0
+
+define_param measure_or_pref::sp_min_frequency  Param_String 0 -1 \
+"The minimum spatial frequency to use in measure_or_pref.  The scale of this\n\
+parameter is relative to the anatomical RF width (2*rf_radius+1) and (inversely)\n\
+to the area of the retina, so it's simplest to consider it an arbitrary relative\n\
+scale for any given network.  The default is suitable when sp_num_frequencies\n\
+is 1, but when more frequencies are used you may wish to start with a lower\n\
+value to cover a wider range, instead of having only medium and high\n\
+frequencies." \
+10
+
+define_param measure_or_pref::sp_num_frequencies Param_Integer 0 -1 \
+"The number of spatial frequencies to use in measure_or_pref.  The frequencies\n\
+range from sp_min_frequency to sp_num_frequencies*sp_min_frequency.  The\n\
+intermediate frequencies are chosen using the formula sp_min_frequency * \n\
+sp_num_frequencies/n, where n is an integer from 1 to sp_num_frequencies,\n\
+and thus the spacing is nonlinear (by design)." \
+0
+
+define_param measure_or_pref::sp_num_phases     Param_Integer 0 -1 \
+"The number of different spatial phases (i.e. positions) to use in\n\
+measure_or_pref.  Unless you supply some other specific ValueGenerator, the\n\
+retina is divided evenly by this number, and each of the resulting positions\n\
+is used; otherwise sp_num_phases are chosen at random from across the\n\
+retina. The Nyquist minimum to avoid aliasing depends on the frequency,\n\
+with an upper limit of RN*2 but lower values for typical frequencies." \
+BaseRN*0.75
+
+
+# Normal arguments
+define_param measure_or_pref::drawing_command    Param_String 0 -1 \
+"For the default measure_or_pref::input_command, the command to use to draw\n\
+each pattern."
+
+define_param measure_or_pref::input_present_options    Param_String 0 -1 \
+"For the default measure_or_pref::input_command, optional set of arguments to\n\
+pass to input_present.  Any of the named arguments accepted by input_present\n\
+may be used, and they override the values in measure_or_pref::input_command.  For\n\
+instance, one can enable settling ('activate=True settle=True'), etc."
+
+define_param measure_or_pref::input_command    Param_String 0 -1 \
+"The command to call at each iteration of measure_or_pref; usually\n\
+input_present_object or a variant."
+
+define_param measure_or_pref::freq_factor      Param_String 0 -1  \
+"Factor to be divided by the spatial frequency magnitude to get the actual\n\
+spatial frequency for use in measure_or_pref.  The default formula will result\n\
+in a frequency that decreases towards sp_min_frequency in divisive steps."
+
+define_param measure_or_pref::weighted_average  Param_Boolean False True \
+"Whether to use the weighted average method of computing an orientation map.\n\
+See measure_stimulus_map for more details."
+
+define_param measure_or_pref::force_eye         Param_Integer -1 MaxInt \
+"If non-negative, specifies the number of the eye in which to present stimuli,\n\
+as an integer less than num_eyes.  If negative (the default), inputs are\n\
+presented alternately in each eye, and orientation of the pattern (in any eye)\n\
+causing the highest response is taken as the preferred orientation."\
+-1
+
+define_param measure_or_pref::od_num_levels Param_Integer 0 -1 \
+"The total number of different values of Ocular-ity to use during\n\
+measure_or_pref.  The default is 1 if force_eyes is true, and\n\
+num_eyes otherwise.  As long as num_eyes correctly reports the number\n\
+of eyes, there should not be any need to change this parameter." \
+num_eyes
+
+define_param measure_or_pref::eye_guard Param_String -1 -1 \
+"Expression used to determine if the stimulus should be present for the\n\
+input_current_eye." \
+""
+
+
+### Default values (reset for every call)
+
+set measure_or_pref::eye_guard="(((measure_or_pref::force_eye<0)*((Ocular*(num_eyes-1))==input_current_eye))+((measure_or_pref::force_eye>=0)*(input_current_eye==::measure_or_pref::force_eye)))"
+
+set measure_or_pref::drawing_command="input_draw All Input_SineGrating theta=(PI*Orientation) freq=($$$${::measure_or_pref::freq_factor}/($$$${::measure_or_pref::sp_num_frequencies}*SpatialFrequency+1)) phase=(2*PI*SpatialPhase) scale=0.5*($$$${measure_or_pref::eye_guard}) offset=0.5*($$$${measure_or_pref::eye_guard})"
+
+set measure_or_pref::force_eye=-1
+set measure_or_pref::od_num_levels=num_eyes
+#set PlotGroup::OrientationPreference::filename_format="$$$${filebase}.$$$${06iteration}.or"
+
+set measure_or_pref::input_present_options=""
+
+set measure_or_pref::input_command="exec 'input_clear' '$$$${measure_or_pref::drawing_command}' 'input_present learning=False display=$$$${measure_or_pref::save_images} settle=False activate=False $$$${measure_or_pref::input_present_options}'"
+
+set measure_or_pref::freq_factor="((2.0*rf_radius+1.0)/BaseRN*$$$${measure_or_pref::sp_min_frequency}*PI/BaseRN)"
+
+set measure_or_pref::weighted_average=True
+
+### Read arguments
+read_args measure_or_pref
+
+if (measure_or_pref::histograms) set PlotGroup::Histogram::name="OrientationPreference" Region::histo_colorspec=Hue
+
+
+### Definitions
+
+if (::measure_or_pref::force_eye>=0) set \
+  ::PlotGroup::OrientationPreference::filename_format="$$$${filebase}.$$$${06iteration}.or_Eye$$$${::measure_or_pref::force_eye}" \
+  ::measure_or_pref::od_num_levels=1 
+
+
+define_param Orientation Param_Float   0 1.0 \
+"Magnitude specifying the orientation to be used for a given input pattern in\n\
+measure_or_pref."\
+0
+
+define_param SpatialFrequency Param_Float   0 1.0 \
+"Magnitude specifying the spatial frequency, which together with the\n\
+measure_or_pref::freq_factor specifies the actual frequency."\
+1
+
+define_param SpatialPhase Param_Float   0 1.0 \
+"Magnitude specifying the phase to be used for a given input pattern in\n\
+measure_or_pref."\
+0
+
+define_param Ocular Param_Float 0.0 1.0 \
+"The amount to which the activation level of the input pattern in\n\
+measure_od_pref favors the first eye.  Should be called Ocularity, perhaps,\n\
+but Ocular sounds better when Preference and Selectivity are appended to it."\
+0.0
+
+
+### Command
+#
+#   Usage: measure_stimulus_map <input_command> [<dimension_spec>]*
+#   where: <dimension_spec>: "[<named_arguments>]* <name> <num_bins>"
+#
+# Some possible <named_arguments> include:
+#
+# valuegenerator='Random 0.5 0.5' num_bins=1024
+# valuegenerator='Increment 1+1.0/or_num_angles -1.0/or_num_angles'
+# 
+measure_stimulus_map ${measure_or_pref::input_command}\
+ "name=Orientation       divisions=${measure_or_pref::or_num_angles}      cyclic=True   register=True   weighted_average=${measure_or_pref::weighted_average} measure_distribution=True  selectivity_scale=${::measure_or_pref::ppm_selectivity_multiplier}" \
+ "name=SpatialFrequency  divisions=${measure_or_pref::sp_num_frequencies} cyclic=False  register=(${measure_or_pref::sp_num_frequencies}>0) weighted_average=True"  \
+ "name=Ocular            divisions=${measure_or_pref::od_num_levels}-1    cyclic=False  register=(${measure_or_pref::od_num_levels}>1)      weighted_average=True"  \
+ "name=SpatialPhase      divisions=${measure_or_pref::sp_num_phases}      cyclic=True   register=False"
+
+
+# Restore contents of retina
+input_present reset=True
+
+#

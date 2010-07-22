@@ -1,0 +1,173 @@
+"""
+Implementation of Sullivan & de Sa's model from "A temporal trace and
+SOM-based model of complex cell development",  Neurocomputing, Volumes
+58-60, June 2004, pages 827-833.
+
+NOT YET TESTED.
+
+The following parameters aren't specified in the paper:
+Sheet sizes(estimated from diagrams),
+Learning rates for both Hebbian and Trace functions,
+Input line thickness.
+
+$Id$
+"""
+__version__='$Revision$'
+
+
+from math import exp,sqrt,fmod,pi,radians,sin,cos
+
+import param
+
+from topo import coordmapper,learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
+from topo.misc import patternfn
+
+import topo.learningfn.projfn 
+import topo.pattern.random
+import topo.responsefn.optimized 
+import topo.transferfn.misc
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+
+    retina_density=param.Number(default=40.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    cortex_density=param.Number(default=50.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""))
+
+
+# CEBALERT: keep old behavior until we investigate why changing
+# to time-controlled dynamic parameters alters the results. 
+param.Dynamic.time_fn = None
+
+
+# JABALERT: Should be generalized; could be replaced with having 8
+# separate sheets for the different orientations.
+class XYModulo(coordmapper.CoordinateMapperFn):
+    """Return the x coordinate of the given coordinate, modulo the specified step distance."""
+ 
+    grid_element_width = param.Number(1.0/5.0,
+        doc="Length in Sheet coordinates of one large grid element.")
+
+    def __call__(self,x,y):
+        #Distance between 8 cells is 0.165, so offset by half that to align with center of box, not corner
+        xmod=fmod(x+0.4875,self.grid_element_width)
+        ymod=fmod(y+0.4875,self.grid_element_width)
+        # x: 0.1 offset to align with center of box, not corner
+        # y: offset to align with center of box, not corner
+        return x-xmod+0.1,y-ymod+0.08125
+
+
+class OrientedLine(pattern.PatternGenerator):
+    """2D line pattern generator to match that of Sullivan et al."""
+
+    thickness = param.Number(
+        default=0.006,bounds=(0.0,None),softbounds=(0.0,1.0),precedence=0.60,
+        doc="Thickness (width) of the solid central part of the line.")
+    
+    smoothing = param.Number(
+        default=0.05,bounds=(0.0,None),softbounds=(0.0,0.5),precedence=0.61,
+        doc="Width of the Gaussian fall-off.")
+
+    angle = param.Number(default=0.0,doc="")
+    
+    # 1 if previous line has gone off edge of grid, 0 otherwise
+    offEdge=1
+
+    # JABALERT: Surely this need not be so complicated?
+    def function(self,params):
+        if (self.offEdge==1):
+            angle=params['angle']
+            if (angle>180):
+                angle-=180
+                direction=-1
+            else:
+                direction=1
+            delta=0.03 #0.03 as grid is 40 cells wide and line moves 1.2 per step
+            if (angle == 0):
+                self.deltaX = 0 #1000 * XGRIDEND
+                self.deltaY = delta
+            elif (angle == 90):
+                self.deltaY = 0 #1000 * YGRIDEND
+                self.deltaX = delta
+            elif (angle< 90):
+                self.deltaX = delta / sin(radians(angle))
+                self.deltaY = delta / sin(radians(90 - angle))
+            else:
+                self.deltaY = delta / sin(radians(angle - 90))
+                self.deltaX = delta / sin(radians(180 - angle))
+            if ((angle >= 0) and ( angle < 90)):
+                if (direction == 1):
+                    startPointx = -0.5
+                    startPointy = -0.5
+                else:
+                    startPointx = 0.5
+                    startPointy = 0.5
+                    self.deltaX *= -1
+                    self.deltaY *= -1
+            elif (direction == 1):
+                startPointx = -0.5
+                startPointy = 0.5
+                self.deltaY *= -1;
+            else:
+                startPointx = 0.5
+                startPointy = -0.5 
+                self.deltaX*= -1
+
+            self.x=startPointx
+            self.y=startPointy
+            self.offEdge=0
+            self.orientation=angle
+        else:
+            self.offEdge=0
+            self.x+=self.deltaX
+            self.y+=self.deltaY
+            if (self.x<-0.5 or self.x>0.5 or self.y<-0.5 or self.y>0.5):
+               self.offEdge=1
+        return patternfn.line(self.pattern_y,params['thickness'],params['smoothing'])
+
+
+sheet.GeneratorSheet.period = 1.0
+sheet.GeneratorSheet.phase = 0
+
+input_pattern = OrientedLine(angle=numbergen.UniformRandom(lbound=0,ubound=360,seed=13))
+
+
+# Sheets, connections, and their parameters
+topo.sim['Retina'] = sheet.GeneratorSheet(input_generator=input_pattern,
+                                          period=1.0,phase=0.05,nominal_density=p.retina_density)
+
+# Note that the learning rates from the original paper must be scaled
+# by the number of units in a typical ConnectionField, either 5x5 or 40x40
+topo.sim['V1'] = sheet.CFSheet(nominal_density=p.cortex_density,
+                         #RPHACKALERT Find correct radius value 
+                         output_fns = [transferfn.misc.KernelMax(density=p.cortex_density,kernel_radius=3.5)])
+
+topo.sim.connect('Retina','V1',delay=0.05,connection_type=projection.CFProjection,
+                 weights_generator = topo.pattern.basic.Line(orientation=
+                     numbergen.UniformRandom(lbound=0.0,ubound=2*pi,seed=30)),
+                 nominal_bounds_template=sheet.BoundingBox(radius=0.1),
+                 response_fn = responsefn.optimized.CFPRF_DotProduct_opt(),
+                 coord_mapper=XYModulo())
+
+topo.sim['Complex Cell Layer'] = sheet.CFSheet(
+    nominal_density = p.cortex_density,
+    output_fns = [transferfn.misc.KernelMax(density=p.cortex_density,
+        kernel_radius=numbergen.ExponentialDecay(
+            starting_value=0.25,time_constant=12000/8.0,base=0.5))])
+
+
+topo.sim.connect('V1','Complex Cell Layer',delay=0.05,connection_type=projection.CFProjection,
+                 weights_generator = pattern.random.UniformRandom(),
+                 nominal_bounds_template=sheet.BoundingBox(radius=0.1),
+                 response_fn = responsefn.optimized.CFPRF_DotProduct_opt(),
+                 learning_fn=learningfn.projfn.CFPLF_Trace(trace_strength=0.2),
+                 learning_rate=numbergen.ExponentialDecay(
+                     starting_value=0.99,time_constant=12000/8.0,base=0.5))
+
+

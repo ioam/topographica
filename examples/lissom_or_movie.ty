@@ -1,0 +1,86 @@
+"""
+This example shows how to create an activity movie.
+
+It does the following:
+
+1) run the lissom_or.ty script.
+2) instrument the simulation with a DataRecorder.
+3) run the simulation for a while to collect some data.
+4) construct an ActivityMovie object from a period of collected data.
+5) save the frames of the movie to files.
+
+$Id$
+"""
+__version__='$Revision: 8217 $'
+
+import pdb
+#import ImageFont
+import os
+
+from numpy import arange
+
+from topo.plotting.bitmap import MontageBitmap
+from topo.misc.trace import ActivityMovie,InMemoryRecorder
+from topo.misc.genexamples import find_examples
+
+
+# Can use any TrueType font on your system
+#title_font = ImageFont.truetype(os.path.join(application_path,'lib/python2.5/site-packages/matplotlib/mpl-data/fonts/ttf/Vera.ttf'),20)
+
+# Add a timecode to each movie
+ActivityMovie.add_timecode = True
+ActivityMovie.timecode_fmt = '%.2f'
+
+# The format for times in filenames
+ActivityMovie.filename_time_fmt = '%06.2f'
+
+# Frame filenames should be like: "frame002.30.tif"
+ActivityMovie.filename_fmt = 'frame%t.%T'
+
+# The directory for movie frames:
+ActivityMovie.filename_prefix = 'lissom_or_movie/'
+
+# Frames should be on a white background
+MontageBitmap.bg_color = (1,1,1)
+# Maps within each frame will fit to 200x200 pixel tiles
+MontageBitmap.tile_size = (200,200)
+
+# The montages will contain 1x2 images
+MontageBitmap.shape = (1,2)
+# Frame title parameters
+MontageBitmap.title_pos = (5,5)
+#MontageBitmap.title_options = dict(fill='white')
+
+
+print "Loading the simulation..."
+examples_dir = find_examples()
+execfile(os.path.join(examples_dir,'lissom_or.ty'))
+
+# Add a data recorder and record the activity from the Retina and V1
+
+topo.sim['Data'] = InMemoryRecorder()
+
+topo.sim.connect('Retina','Data',
+                 src_port = 'Activity',
+                 name = 'Retina Activity')
+topo.sim.connect('V1','Data',
+                 src_port = 'Activity',
+                 name = 'V1 Activity')
+
+# Run for a while
+print 'Running...'
+topo.sim.run(10)
+
+# Create a movie
+print 'Composing movie...'
+movie = ActivityMovie(name = 'Lissom Orientation Movie',
+                      recorder = topo.sim['Data'],
+                      montage_params = dict(titles=['Retina','V1']),
+                      variables = ['Retina Activity','V1 Activity'],
+                      frame_times = list(arange(0,10.0,0.1)))
+
+# Save the frames to files:
+print 'Saving movie to %s...' % ActivityMovie.filename_prefix
+movie.save()
+
+                      

@@ -1,0 +1,367 @@
+"""
+LISSOM simulation designed to match C++ LISSOM's FSA simulation.
+
+
+$Id$
+"""
+__version__='$Revision$'
+
+# CEBERRORALERT: need to remove DynamicNumber
+
+# This simulation is still being worked on
+
+## from topo.param import Parameterized
+## Parameterized.print_level=300
+
+import numpy.oldnumeric.random_array as RandomArray
+import numpy
+import fixedpoint
+
+from math import pi, sqrt
+from fixedpoint import FixedPoint
+from numpy.oldnumeric import  sum,ones,exp, tan, sin, cos
+import numpy.oldnumeric as Numeric
+
+from topo.sheet.lissom import LISSOM
+from topo.sheet import GeneratorSheet
+from topo.projection.basic import CFProjection, SharedWeightCFProjection,ResizableCFProjection
+from topo.responsefn.optimized import CFPRF_DotProduct_opt
+from topo.base.parameterclasses import DynamicNumber
+from topo.base.cf import CFSheet
+from topo.base.boundingregion import BoundingBox
+from topo.learningfn.optimized import CFPLF_Hebbian_opt
+from topo.transferfn.optimized import CFPOF_DivisiveNormalizeL1_opt
+from topo.transferfn.basic import DivisiveNormalizeL1, PiecewiseLinear
+#from topo.responsefn.optimized import CFPRF_SharedWeightDotProduct_opt
+from topo.base.patterngenerator import PatternGenerator
+from topo.numbergen import UniformRandom, NormalRandom, Choice
+from topo.base.parameterclasses import DynamicNumber, Number, ListParameter
+from topo.param import Parameter
+from topo.pattern.basic import Composite, SeparatedComposite, Gaussian, Disk, Constant
+from topo.pattern.image import Image
+
+#from topo.tests.reference.lissom_log_parser import get_input_params
+
+topo.sim.name = "lissom_fsa"
+
+###########################################
+# Variables to match the C++ version of LISSOM
+
+### (1)
+BaseN = 24.0
+BaseLN = 24.0
+world_size_scale = 2.0
+BaseRN = BaseLN * world_size_scale
+area_scale = 1.0
+#num_eyes = 2
+rf_radius_ref = 9.5
+orig_rf_radius = 6.5  # \r_{A0} in the book
+rf_radius_scale = orig_rf_radius / rf_radius_ref
+rf_radius_scale_inv = rf_radius_ref / orig_rf_radius
+rf_radius = 25.5
+
+num_aff_inputs = 2.0
+inh_rad = 10.0
+exc_rad = 4.0
+min_exc_rad = 1.5
+#default_afferent_size_scale=BaseN/BaseRN
+gammaexc = 0.9
+gammainh = 0.9
+gammaaff = 1.07 
+delta = 0.1
+beta = delta + 0.55
+
+# number of units in LGN afferent and lateral receptive fields
+# Instead of counting the exact number of units, I use the area of circle to approximate it. This should not result in significant differences.
+n_aff_units = pi * (rf_radius ** 2.0)
+n_exc_units = pi * (exc_rad ** 2.0)
+n_inh_units = pi * (inh_rad ** 2.0)
+
+### These are unused in the simulation.
+randomness = 0.0
+#smooth_circular_radius_trim = -0.25
+#retina_area_scale = (BaseRN*area_scale/24.0*rf_radius_scale)*(BaseRN*area_scale/24.0*rf_radius_scale)
+#inputs_pereye=max(retina_area_scale,1)
+xsigma = 10.2308
+ysigma = 2.19231
+scale_input = 0.5
+
+# radius of LGN afferent Gaussian
+# In the book it is set to rf_radius_ref / 1.3. However it is too large to match the initial Gaussians in C++ LISSOM. I change it to orig_rf_radius / 1.3 = 5.0. After normalized to the C++ LISSOM afferent scale, this value nearly exactly matches. Numerically, the fittest value is 5.18.
+sigma_aff = orig_rf_radius / 1.3
+
+# radius of LGN DoG center Gaussian
+# the value set in the book (0.75 * rf_radius_scale_inv)
+# is adjusted
+sigma_c = 0.75 * rf_radius_scale_inv * rf_radius_scale
+
+# radius of LGN DoG surround Gaussian
+blur_radius_surround_multiplier = 1.6
+sigma_s = blur_radius_surround_multiplier * sigma_c
+
+# radius of LGN afferent connections
+blur_range = 4.7
+blur_range_multiplier = 1.0
+r_L = blur_range_multiplier * blur_range * sigma_s
+
+# buffers so sheet above has full rfs...
+lgn_edge_buffer = round(rf_radius,0)
+retina_edge_buffer = 25.0
+
+# Instead of calculating the actual numbers of neurons in the sheets using buffer equations, I set them directly according to the C++ simulation parameter list.
+#RN = round(BaseRN * area_scale + 2 * retina_edge_buffer, 0)
+#LN = round(BaseLN * area_scale + 2 * lgn_edge_buffer, 0)
+RN = 170.0
+LN = 74.0
+N = 24.0
+
+### (3)
+acs = 1 / 2.0
+ecs = (19.5 ** 2.0) / (exc_rad ** 2.0)
+ics = (47.5 ** 2.0) / (inh_rad ** 2.0)
+ids = 1.5  # s_d in the book
+ts = 0.5  # s_d in the book
+alpha_input = 0.007 / (ts * ids) * acs
+alpha_exc = 0.002 / (ts * ids) * ecs
+alpha_inh = 0.00025 / (ts * ids) * ics
+
+# In the C++ LISSOM parameter list, it is 1e-5 (w_{d0} in the book), and changed to the one in the book (6 * 0.00005 * ics) after 10000 iterations. However I did not find the way to set this parameter in topographica. So this setting doesn't affect my simulation and I presume it uses default inhibitory death rate.
+inh_death = 0.00005
+
+# In the C++ LISSOM parameter list, this is 20.4 and in the book it is 10.2. In topographica the scaling factor applies for only one sheet, so it is set to 10.2.
+blur_scale = 10.2
+
+tsettle = 9
+
+### I cannot rememebr where these references are from. They may be from a previous version of lissom_oo_or_reference.ty. But anyhow they are not important any more and unused here.
+## assert LN == 76
+## assert lgn_edge_buffer == 25
+## assert xsigma == 6
+## assert ysigma == 1.5
+## #assert inputs_pereye == 1
+## #assert round(retina_area_scale,6) == 0.591716
+## assert rf_radius == 6.5
+## assert delta == 0.083
+## assert beta == 0.633
+## #assert default_afferent_size_scale == 3
+## assert rf_radius == 6.5
+## assert inh_rad == 11
+## assert exc_rad == 4.8
+## assert area_scale == 1
+## assert BaseRN == 48
+## assert BaseN == 24
+## #assert num_eyes==1
+## assert gammaexc==0.9
+## assert gammainh==0.9
+## assert randomness == 0.0
+## assert round(rf_radius_scale,6)==0.769231
+## assert scale_input==1.0
+## assert acs==1
+## assert round(ecs,4)==16.5039
+## assert round(ics,4)==18.6467
+## assert round(alpha_input,3)==0.007
+## assert round(alpha_exc,7)==0.0330078
+## assert round(alpha_inh,8)==0.00466167
+## assert tsettle == 8
+## assert round(min_exc_rad,5) == 1.59091
+
+
+###########################################
+# Set parameters
+
+# Number of decimal places for simulator time
+fixedpoint.DEFAULT_PRECISION=3
+
+# input generation params
+GeneratorSheet.nominal_density = BaseRN * area_scale
+GeneratorSheet.period = 1
+GeneratorSheet.phase = 0.05
+
+# input patterns
+# The distance between eyes and mouth follows the setting in the C++ LISSOM parameter list. However the size and color of each Gaussian is hacked.
+# The size and offset from the C++ parameter should be: size = 2.0 * 1.0 * retina_scale / 1.7, offset = 0.5. Judging from the retina activity in the C++ simulation, this is not the fittest case. After work on numerical fitting, I choose the best setting: expand the Gaussian size by 1.21 and increase backgound slightly by 0.0059. Corresponding LGN and FSA activities are changed, but not too much. I tested both the original C++ parameter case and this new setting on 10001 iterations. In the C++ parameter case, some neurons still have not formed desired weights, but in the new setting all the weights are well formed. This may be due to smaller retinal patterns that reduce responses. In this regard, I use the fittest setting here.
+size_scale = 1.0
+retina_scale = 1.0 / 24.0 * size_scale
+lefteye =  Gaussian(aspect_ratio = 1.0, x = 1 * retina_scale, y = 2.5 * retina_scale,
+                    size = 2.0 * 1.21 * retina_scale / 1.7, scale = 0.5, offset = 0.5059)
+righteye = Gaussian(aspect_ratio = 1.0, x = 1 * retina_scale, y = -2.5 * retina_scale,
+                    size = 2.0 * 1.21 * retina_scale / 1.7, scale = 0.5, offset = 0.5059)
+mouth   =  Gaussian(aspect_ratio = 1.0, x = -5 * retina_scale, y = 0.0 * retina_scale,
+                    size = 2.0 * 1.21 * retina_scale / 1.7, scale = 0.5, offset = 0.5059)
+
+num_inputs=3
+inputs=[Composite(generators = [lefteye, righteye, mouth],
+                  operator = numpy.maximum, size = 1.7,
+                  orientation=DynamicNumber(UniformRandom(lbound=17.0/36.0*pi,  # 18.8/36.0*pi value of the first C++ LISSOM iteration
+                                                          ubound = 19.0/36.0*pi,seed=56+i)),
+                  x=DynamicNumber(UniformRandom(lbound=-85.0 / BaseRN,
+                                                ubound= 85.0 / BaseRN,seed=12+i)),
+                  y=DynamicNumber(UniformRandom(lbound=-85.0 / BaseRN,
+                                                ubound= 85.0 / BaseRN,seed=34+i)))
+        for i in xrange(num_inputs)]
+
+# minimum distance among pattersn
+# In the C++ LISSOM parameter list, it is 36 (in LGN scale). But in the book it is not (less than 20). Here I use the setting from C++ LISSOM.
+input_separation_min = RN / LN * 36.0
+
+combined_inputs = SeparatedComposite(
+    min_separation = input_separation_min / BaseRN,
+    generators = inputs,
+    operator = numpy.maximum)
+
+retina_bounds = BoundingBox(radius = RN / (2.0 * BaseRN * area_scale))
+lgn_bounds = BoundingBox(radius = LN / (2.0 * BaseLN * area_scale))
+fsa_bounds = BoundingBox(radius = N / (2.0 * BaseN * area_scale))
+
+
+# division done here once for convenience
+min_exc_radius = min_exc_rad / (BaseN * area_scale)
+
+# Connection parameters
+lgn_weight_bounds = BoundingBox(radius = r_L / BaseLN)
+afferent_weight_bounds   = BoundingBox(radius = rf_radius / (BaseLN * area_scale))
+excitatory_weight_bounds = BoundingBox(radius = exc_rad / (BaseN * area_scale), min_radius = min_exc_radius)  
+inhibitory_weight_bounds = BoundingBox(radius = inh_rad / (BaseN * area_scale))                  
+
+# Circular ConnectionFields
+RandomArray.seed(500,500)
+CFProjection.weights_generator = topo.pattern.basic.Gaussian(
+    size = 2.0 * sigma_aff / (BaseLN), aspect_ratio = 1.0)
+CFProjection.response_fn=CFPRF_DotProduct_opt()
+CFProjection.learning_fn=CFPLF_Hebbian_opt()
+CFProjection.weights_output_fn=CFPOF_DivisiveNormalizeL1_opt()
+#SharedWeightCFProjection.response_fn=CFPRF_SharedWeightDotProduct_opt()
+SharedWeightCFProjection.response_fn=CFPRF_DotProduct_opt()
+
+topo.sim['Retina'] = GeneratorSheet(nominal_bounds=retina_bounds, nominal_density=BaseRN,
+                                    input_generator=combined_inputs)
+
+topo.sim['LGNOn'] = CFSheet(nominal_bounds=lgn_bounds,nominal_density=BaseLN,
+                      output_fn=PiecewiseLinear(lower_bound=0.0,upper_bound=1.0))
+
+topo.sim['LGNOff'] = CFSheet(nominal_bounds=lgn_bounds,nominal_density=BaseLN,
+                      output_fn=PiecewiseLinear(lower_bound=0.0,upper_bound=1.0))
+
+topo.sim['FSA'] = LISSOM(nominal_bounds=fsa_bounds,nominal_density=BaseN,
+            output_fn=PiecewiseLinear(lower_bound=delta,upper_bound=beta))
+
+
+# C++ LISSOM divides by pi in RadialFunction::Gaussian but not for
+# Gaussian in retinalobjs (and elsewhere)
+# So here each original sigma values are multiplied by sqrt(pi). Because sigma_c and sigma_s were adjusted, the produced Gaussians match the C++ LISSOM simulation.
+
+centerg = topo.pattern.basic.Gaussian(
+    size = 2.0 * sigma_c * sqrt(pi) / BaseLN, aspect_ratio = 1.0, output_fn = DivisiveNormalizeL1(norm_value = 2.33))
+
+surroundg = topo.pattern.basic.Gaussian(
+    size = 2.0 * sigma_s * sqrt(pi) / BaseLN, aspect_ratio = 1.0, output_fn = DivisiveNormalizeL1(norm_value = 2.33))
+
+on_weights = topo.pattern.basic.Composite(
+    generators = [centerg,surroundg], operator = numpy.subtract)
+
+off_weights = topo.pattern.basic.Composite(
+    generators = [surroundg,centerg], operator = numpy.subtract)
+
+topo.sim.connect('Retina','LGNOn',delay=FixedPoint("0.05"),
+          connection_type=SharedWeightCFProjection,strength=blur_scale,
+          nominal_bounds_template=lgn_weight_bounds,
+          weights_generator=on_weights)
+
+topo.sim.connect('Retina','LGNOff',delay = FixedPoint("0.05"),
+          connection_type=SharedWeightCFProjection,strength=blur_scale,
+          nominal_bounds_template=lgn_weight_bounds,
+          weights_generator=off_weights)
+
+
+topo.sim.connect('LGNOn','FSA',delay=FixedPoint("0.05"),
+                 dest_port=('Activity','JointNormalize', 'Afferent'),
+          connection_type=CFProjection,strength=gammaaff,name='LGNOnAfferent',
+          nominal_bounds_template=afferent_weight_bounds, learning_rate = alpha_input * n_aff_units)
+
+topo.sim.connect('LGNOff','FSA',delay=FixedPoint("0.05"),
+                 dest_port=('Activity','JointNormalize', 'Afferent'),
+          connection_type=CFProjection,strength=gammaaff,name='LGNOffAfferent',
+          nominal_bounds_template=afferent_weight_bounds, learning_rate = alpha_input * n_aff_units)
+
+# Temporarily moved here to avoid masking the LGN weights until we can do it in a way that doesn't change the sum of the weights
+CFProjection.cf_shape = topo.pattern.basic.Disk(smoothing=0.0)
+
+topo.sim.connect('FSA','FSA',delay=FixedPoint("0.05"),
+          connection_type=ResizableCFProjection,strength=gammaexc,name='LateralExcitatory',
+          nominal_bounds_template=excitatory_weight_bounds, learning_rate = alpha_exc * n_exc_units)
+
+topo.sim.connect('FSA','FSA',delay=FixedPoint("0.05"),
+          connection_type=CFProjection,strength=-gammainh,name='LateralInhibitory',
+          nominal_bounds_template=inhibitory_weight_bounds, learning_rate = alpha_inh * n_inh_units)
+
+#LISSOM.tsettle = tsettle
+topo.sim['FSA'].tsettle = tsettle
+
+# CEBHACKALERT: this is out of date and the times should be corrected.
+#
+# Times are 1 less than the or_map_topo.param c++ lissom simulation
+# because that one uses "hook before_input" to schedule events. So, an
+# event at t=200 is executed before t=200's input pattern is
+# presented. In Topographica, an event scheduled at t=0 is executed
+# after time=0's input pattern is presented. So one at t=199 is
+# executed before t=200's input pattern is presented, and is therefore
+# equivalent to or_map_topo's event scheduled at t=200.
+
+
+
+# note: you can't pickle this simulation unless you make variables
+# like exc_rad available again.
+
+
+### Schedule lateral excitatory learning rate, and bounding box size changes
+### The following setting were directly translated from C++ LISSOM parameter list.
+
+topo.sim.schedule_command(  99, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.6*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=9;topo.sim["FSA"].projections()["LateralExcitatory"].learning_rate=0.002*ecs*(1.0/ts/ids)*n_exc_units')
+topo.sim.schedule_command( 249, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.7*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=9;topo.sim["FSA"].projections()["LateralExcitatory"].learning_rate=0.001*ecs*(1.0/ts/ids)*n_exc_units')
+topo.sim.schedule_command( 499, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.8*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=9')
+topo.sim.schedule_command( 999, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.8*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=10')
+topo.sim.schedule_command(1499, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.8*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=10')
+topo.sim.schedule_command(1999, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.6*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=10')
+topo.sim.schedule_command(2499, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.6*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=11')
+topo.sim.schedule_command(3249, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.6*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=12')
+topo.sim.schedule_command(4999, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.6*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=13')  # n_exc_units=21')
+topo.sim.schedule_command(9999, 'topo.sim["FSA"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.6*exc_rad/BaseN,min_radius=min_exc_radius));topo.sim["FSA"].tsettle=13')
+
+
+### Schedule FSA afferent learning rate changes
+
+topo.sim.schedule_command(  99, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0070*n_aff_units')
+topo.sim.schedule_command( 249, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0050*n_aff_units')
+topo.sim.schedule_command( 499, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0050*n_aff_units')
+topo.sim.schedule_command( 999, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0040*n_aff_units')
+topo.sim.schedule_command(1499, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0040*n_aff_units')
+topo.sim.schedule_command(1999, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(2499, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(3249, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(4999, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(9999, 'topo.sim["FSA"].projections()["LGNOnAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0015*n_aff_units')
+
+topo.sim.schedule_command(  99, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0070*n_aff_units')
+topo.sim.schedule_command( 249, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0050*n_aff_units')
+topo.sim.schedule_command( 499, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0050*n_aff_units')
+topo.sim.schedule_command( 999, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0040*n_aff_units')
+topo.sim.schedule_command(1499, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0040*n_aff_units')
+topo.sim.schedule_command(1999, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(2499, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(3249, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(4999, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0030*n_aff_units')
+topo.sim.schedule_command(9999, 'topo.sim["FSA"].projections()["LGNOffAfferent"].learning_rate=acs*(1.0/ts/ids)*0.0015*n_aff_units')
+
+
+### Schedule sigmoid bound changes
+
+topo.sim.schedule_command(  99, 'topo.sim["FSA"].output_fn.lower_bound=0.093; topo.sim["FSA"].output_fn.upper_bound=0.643')
+topo.sim.schedule_command( 249, 'topo.sim["FSA"].output_fn.lower_bound=0.103; topo.sim["FSA"].output_fn.upper_bound=0.653')
+topo.sim.schedule_command( 499, 'topo.sim["FSA"].output_fn.lower_bound=0.133; topo.sim["FSA"].output_fn.upper_bound=0.663')
+topo.sim.schedule_command( 999, 'topo.sim["FSA"].output_fn.lower_bound=0.163; topo.sim["FSA"].output_fn.upper_bound=0.683')
+topo.sim.schedule_command(1499, 'topo.sim["FSA"].output_fn.lower_bound=0.183; topo.sim["FSA"].output_fn.upper_bound=0.713')
+topo.sim.schedule_command(1999, 'topo.sim["FSA"].output_fn.lower_bound=0.183; topo.sim["FSA"].output_fn.upper_bound=0.743')
+topo.sim.schedule_command(2499, 'topo.sim["FSA"].output_fn.lower_bound=0.193; topo.sim["FSA"].output_fn.upper_bound=0.773')
+topo.sim.schedule_command(3249, 'topo.sim["FSA"].output_fn.lower_bound=0.203; topo.sim["FSA"].output_fn.upper_bound=0.803')
+topo.sim.schedule_command(4999, 'topo.sim["FSA"].output_fn.lower_bound=0.213; topo.sim["FSA"].output_fn.upper_bound=0.833')
+topo.sim.schedule_command(9999, 'topo.sim["FSA"].output_fn.lower_bound=0.223; topo.sim["FSA"].output_fn.upper_bound=0.863')

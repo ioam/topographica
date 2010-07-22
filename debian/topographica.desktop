@@ -1,0 +1,13 @@
+# CEBALERT: actually, this should be installed by setup.py (it's not
+# specific to ubuntu...although it is specific to linux)
+
+[Desktop Entry]
+Version=0.9.7
+Name=Topographica
+Comment=Neural map simulator
+Exec=topographica -g %U
+Icon=topographica
+Terminal=true
+Type=Application
+Categories=Education;Science
+

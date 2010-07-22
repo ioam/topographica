@@ -1,0 +1,31 @@
+#!./lissom
+
+# RF-LISSOM parameter file for an ON/OFF orientation-map simulation.
+#
+# $Header: /cvsroot/topographica/topographica/topo/tests/reference/oo_or_map_topo.param,v 1.3 2007/02/07 09:36:42 ceball Exp $
+
+
+### Will be overwritten
+# CB: each 'set' must be on a line of its own for clunky auto-filling to work.
+set BaseN=8  
+set BaseRN=8  
+set rf_radius=BaseRN/4+0.5 
+set inh_rad=2.5>?(BaseN/4-1)+0.5
+set exc_rad=2.5>?(BaseN/10)
+###
+
+set area_scale=1
+
+set num_eyes=1 layers_pereye=2 inputs_pereye=1
+
+call or_defs onoff=True ids=1.0
+
+############
+set input_separation_min_enforce=True
+set input_offset=0.0
+set scale_input=1.0
+############
+
+call common.param
+
+

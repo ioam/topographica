@@ -1,0 +1,170 @@
+"""
+Example of an SLISSOM-based spiking orientation map.
+
+Work in progress.
+
+$Id$
+"""
+__version__='$Revision$'
+
+from math import pi, sqrt
+
+import numpy
+import param
+
+import topo.pattern.basic
+import topo.pattern.random
+
+from topo.sheet.slissom import SLISSOM
+from topo.sheet import GeneratorSheet
+from topo.projection.basic import CFProjection,LeakyCFProjection
+from topo.responsefn.optimized import CFPRF_DotProduct_opt
+from topo.base.sheet import BoundingBox
+from topo.base.cf import CFPLF_Plugin
+from topo.learningfn.optimized import CFPLF_Hebbian_opt
+from topo.transferfn.optimized import CFPOF_DivisiveNormalizeL1_opt
+from topo.transferfn.optimized import CFPOF_DivisiveNormalizeL1
+from topo.learningfn.projfn import CFPLF_OutstarHebbian
+from topo import numbergen
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+
+    retina_density=param.Number(default=36.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    cortex_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""))
+
+
+# CEBHACKALERT: should be changed over to use circular connection fields.
+# (This requires that the learning rates be adjusted.)
+
+
+### Setup input
+#
+GeneratorSheet.nominal_density = p.retina_density
+GeneratorSheet.period = 1
+GeneratorSheet.phase = 0.05
+GeneratorSheet.nominal_bounds = BoundingBox(radius=0.72)
+
+input_pattern = topo.pattern.basic.Gaussian(
+    scale=1.0,size=2*0.0468,aspect_ratio=4.0,
+    bounds=BoundingBox(radius=0.72),
+    x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=12),
+    y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=34),
+    orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56))
+
+# YC use test pattern
+input_pattern = topo.pattern.basic.TwoRectangles(scale=1.0)
+
+
+
+### LISSOM parameters
+#
+SLISSOM.nominal_density = p.cortex_density
+
+
+### Specify weight initialization, response function, and learning function
+#
+CFProjection.weights_generator=topo.pattern.random.UniformRandom()
+CFProjection.response_fn=CFPRF_DotProduct_opt()
+CFProjection.learning_fn=CFPLF_Hebbian_opt()
+CFProjection.weights_output_fns=[CFPOF_DivisiveNormalizeL1_opt()]
+
+LeakyCFProjection.weights_generator=topo.pattern.basic.Rectangle(size=1.0,smoothing=0.0)
+LeakyCFProjection.response_fn=CFPRF_DotProduct_opt()
+##- LeakyCFProjection.learning_fn=CFPLF_Hebbian_opt()
+##- LeakyCFProjection.weights_output_fns=[CFPOF_DivisiveNormalizeL1_opt()]
+#LeakyCFProjection.learning_fn=CFPLF_OutstarHebbian()
+#LeakyCFProjection.weights_output_fn=CFPOF_DivisiveNormalizeL1()
+
+## YCHACKALERT: for now, just use instar normalization
+LeakyCFProjection.learning_fn=CFPLF_Hebbian_opt()
+LeakyCFProjection.weights_output_fns=[CFPOF_DivisiveNormalizeL1_opt()]
+
+
+### Build simulation
+
+#
+topo.sim['Retina'] = GeneratorSheet(input_generator=input_pattern)
+topo.sim['V1'] = SLISSOM(tsettle=1,threshold=0.05,noise_rate=0.001,
+          absolute_refractory=1, threshold_decay_rate=0.1,
+          trace_coords=[[0.29,0.29],[0.34,0.34],[-0.29,-0.29],[-0.34,-0.34]],trace_n=400)
+
+V1 = topo.sim['V1']
+
+topo.sim.connect('Retina','V1', delay=0.1,
+          connection_type=LeakyCFProjection,strength=1.0,name='Afferent0',
+          nominal_bounds_template=BoundingBox(radius=0.05),learning_rate=0.0,
+          decay_rate=0.2)
+
+topo.sim.connect('V1','V1', delay=0.1, 
+          connection_type=LeakyCFProjection,strength = 0.9, 
+          name='LateralExcitatory',
+          nominal_bounds_template=BoundingBox(radius=0.2),learning_rate=0.1,
+          decay_rate=0.05)
+            
+topo.sim.connect('V1','V1', delay=0.1, 
+          connection_type=LeakyCFProjection,strength = -1.1, 
+          name='LateralInhibitory',
+          nominal_bounds_template=BoundingBox(radius=1.0),learning_rate=0.1,
+          decay_rate=0.01)
+
+
+# CEBHACKALERT: scheduled events are missing. e.g. change_bounds are
+# ok for this density, but for higher ones there are others that would
+# make a difference. Now we can have a minimum radius for the bounds,
+# we can include those events. (From c++ lissom's or_defs.)  Also
+# applies to lissom_oo_or.ty.
+
+
+#### Schedule bounds changes
+##
+#topo.sim.schedule_command( 200, 'topo.sim["V1"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.06))')
+#topo.sim.schedule_command( 500, 'topo.sim["V1"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.042))')
+#topo.sim.schedule_command(1000,'topo.sim["V1"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.0336))')
+#topo.sim.schedule_command(2000,'topo.sim["V1"].projections()["LateralExcitatory"].change_bounds(BoundingBox(radius=0.021))')
+#
+#
+#### Schedule learning rate changes
+##
+#topo.sim.schedule_command(  200,'topo.sim["V1"].projections()["LateralExcitatory"].learning_rate=1.445')
+#topo.sim.schedule_command(  500,'topo.sim["V1"].projections()["LateralExcitatory"].learning_rate=0.205')
+#topo.sim.schedule_command( 1000,'topo.sim["V1"].projections()["LateralExcitatory"].learning_rate=0.149') 
+#
+#topo.sim.schedule_command(  500,'topo.sim["V1"].projections()["Afferent0"].learning_rate=0.911')
+#topo.sim.schedule_command( 2000,'topo.sim["V1"].projections()["Afferent0"].learning_rate=0.729')
+#topo.sim.schedule_command( 4000,'topo.sim["V1"].projections()["Afferent0"].learning_rate=0.545')
+#topo.sim.schedule_command(20000,'topo.sim["V1"].projections()["Afferent0"].learning_rate=0.273')
+#
+#
+#### Schedule SLISSOM output function threshold changes
+##
+topo.sim.schedule_command(  0, 'topo.sim["V1"].output_fn[0].lower_bound=0.0; topo.sim["V1"].output_fn[0].upper_bound=1.3')
+#topo.sim.schedule_command(  200, 'topo.sim["V1"].output_fn.lower_bound=0.11; topo.sim["V1"].output_fn.upper_bound=0.66')
+#topo.sim.schedule_command(  500, 'topo.sim["V1"].output_fn.lower_bound=0.12; topo.sim["V1"].output_fn.upper_bound=0.67')
+#topo.sim.schedule_command( 1000, 'topo.sim["V1"].output_fn.lower_bound=0.15; topo.sim["V1"].output_fn.upper_bound=0.68')
+#topo.sim.schedule_command( 2000, 'topo.sim["V1"].output_fn.lower_bound=0.18; topo.sim["V1"].output_fn.upper_bound=0.70')
+#topo.sim.schedule_command( 3000, 'topo.sim["V1"].output_fn.lower_bound=0.20; topo.sim["V1"].output_fn.upper_bound=0.73')
+#topo.sim.schedule_command( 4000, 'topo.sim["V1"].output_fn.lower_bound=0.20; topo.sim["V1"].output_fn.upper_bound=0.76')
+#topo.sim.schedule_command( 5000, 'topo.sim["V1"].output_fn.lower_bound=0.21; topo.sim["V1"].output_fn.upper_bound=0.79')
+#topo.sim.schedule_command( 6500, 'topo.sim["V1"].output_fn.lower_bound=0.22; topo.sim["V1"].output_fn.upper_bound=0.82')
+#topo.sim.schedule_command( 8000, 'topo.sim["V1"].output_fn.lower_bound=0.23; topo.sim["V1"].output_fn.upper_bound=0.85')
+#topo.sim.schedule_command(20000, 'topo.sim["V1"].output_fn.lower_bound=0.24; topo.sim["V1"].output_fn.upper_bound=0.88')
+
+
+
+### Uncomment lines below to profile performance
+#
+## import hotshot,hotshot.stats
+## prof = hotshot.Profile("abc")
+## prof.runctx('top.sim.run(198)',globals(),locals())
+## prof.close()
+## p = hotshot.stats.load("abc")
+## p.strip_dirs().sort_stats('cumulative','time').print_stats()
+

@@ -1,0 +1,126 @@
+"""
+  Example of wrapping objects in an external simulator as Topographica Sheets.
+  
+  Based on Laurent Perrinet's retina.py model implemented in
+  PyNEST/PyNN (see perrinet_retina_pynest.py).
+  
+  To run this, first meet these prerequisites:
+
+  1. Make sure libgsl0-dev is installed.
+
+  2. Download nest-1 and Pynest1 from:
+  
+       http://www.nest-initiative.uni-freiburg.de/index.php/Software:Download
+       http://www.nest-initiative.org/index.php/Image:Pynest1.tgz
+
+     and PyNN 0.3 from:
+     
+       http://neuralensemble.org/trac/PyNN/wiki/Download
+
+  3. Build and install NEST as described in its documentation.  E.g.:
+      > cd ~/research/
+      > tar -xzf /tmp/nest-1.0.13.tar.gz
+      > mkdir nest-obj
+      > cd nest-obj
+      > ~/research/nest-1.0.13/configure 
+      (45 sec)
+      > make
+      (10 min)
+      > export SLIHOME=~/research/nest-1.0.13
+      > export SLIBUILD=~/research/nest-obj
+
+  4. Build PyNEST for Topographica's copy of python.  E.g.:
+      > cd ~/research/
+      > tar -xzf /tmp/Pynest1.tgz
+      > cd pynest1
+      > ~/research/topographica/bin/python setup.py install
+
+  5. Build PyNN for Topographica's copy of python.  E.g.:
+      > cd ~/research/
+      > tar -xzf /tmp/PyNN-0.3.0.tar.gz 
+      > cd PyNN-0.3.0
+      > ~/research/topographica/bin/python setup.py install
+
+  Then just run this file using Topographica as for any other example
+  (being sure to run the exports in step 3 beforehand):
+
+      ./topographica -g examples/perrinet_retina.ty
+
+  You can then present any input pattern you like and see the results.
+
+  For comparison, you can also run the underlying code directly
+  (without Topographica):
+
+      bin/python examples/perrinet_retina_pynest.py
+"""
+
+import numpy
+import param
+
+from topo import sheet,numbergen,pattern,projection
+from topo.base.simulation import EventProcessor
+import perrinet_retina_pynest as pynr
+
+
+class PyNNRetina(EventProcessor):
+    """
+    Wrapper around Laurent Perrinet's spiking retina.py model
+    implemented in PyNEST/PyNN.
+    """
+
+    dest_ports=["Activity"]
+    src_ports=["ONActivity","OFFActivity"]
+    N = param.Number(default=8,bounds=(0,None),doc="Network width")
+    simtime = param.Number(default=4000*0.1,bounds=(0,None),
+        doc="Duration to simulate for each input")
+
+    def __init__(self,**params):
+        super(PyNNRetina,self).__init__(**params)
+        self.ps=pynr.retina_default()
+        self.ps.update({"N":self.N})
+        self.dt=self.ps["dt"]
+
+    def input_event(self,conn,data):
+        self.ps.update({"simtime":self.simtime})
+        self.ps.update({"amplitude":.10*data})
+        on_list,off_list=pynr.run_retina(self.ps)
+        self.process_spikelist(on_list,"ONActivity")
+        self.process_spikelist(off_list,"OFFActivity")
+
+    def process_spikelist(self,spikelist,port):
+        spikes=numpy.array(spikelist)
+        spike_time=numpy.cumsum(spikes[:,0]) * self.dt
+        spike_out=pynr.spikelist2spikematrix(
+            spikes,self.N,self.simtime/self.dt,self.dt)
+        self.send_output(src_port=port,data=spike_out)
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(retina_density=param.Integer(default=32,bounds=(0,None),
+          inclusive_bounds=(False,True),doc="""
+          The nominal_density to use for the retina."""))
+
+
+N=p.retina_density
+topo.sim["PyNNR"]=PyNNRetina(N=N)
+
+topo.sim["Photoreceptors"]=sheet.GeneratorSheet(
+     nominal_density=N, period=1.0, phase=0.05,
+     input_generator=pattern.Gaussian(
+         orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=1)))
+
+topo.sim["ON_RGC"] =sheet.ActivityCopy(nominal_density=N, precedence=0.7)
+topo.sim["OFF_RGC"]=sheet.ActivityCopy(nominal_density=N, precedence=0.7)
+
+topo.sim.connect("Photoreceptors","PyNNR",name=' ',
+    delay=0.05,src_port="Activity",dest_port="Activity")
+topo.sim.connect("PyNNR","ON_RGC",name='  ',
+    delay=0.05,src_port="ONActivity",dest_port="Activity")
+topo.sim.connect("PyNNR","OFF_RGC",name='   ',
+    delay=0.05,src_port="OFFActivity",dest_port="Activity")
+
+topo.sim['OFF_RGC'].layout_location=(359,62)
+topo.sim['ON_RGC'].layout_location=(135,62)
+topo.sim['PyNNR'].layout_location=(247,118)
+topo.sim['Photoreceptors'].layout_location=(247,166)

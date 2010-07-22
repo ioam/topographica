@@ -1,0 +1,26 @@
+This package was debianized by:
+
+    Krzysztof Gorgolewski <krzysztof.gorgolewski@gmail.com> on Mon, 21 Sep 2009 16:56:38 +0100
+
+It was downloaded from:
+
+    <http://www.topographica.org/>
+
+Upstream Author(s):
+
+    Topographica Developers <developers@topographica.org>
+
+Copyright:
+
+    Copyright (C) 2005-2010 Topographica Developers
+
+License:
+
+    This program is free, open-source software available under the BSD
+license (see Topographica's LICENSE.txt).
+
+The Debian packaging is:
+
+    Copyright (C) 2009-2010, Topographica Developers <developers@topographica.org>
+
+and is BSD licensed (see Topographica's LICENSE.txt).

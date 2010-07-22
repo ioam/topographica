@@ -1,0 +1,718 @@
+#!/usr/bin/perl -w
+eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
+	if 0;
+
+$version = '$Id$';
+
+#
+# Convert from bibtex to HTML.
+#
+# Copyright 1995, 1996 David Hull.
+# David Hull / hull@cs.uiuc.edu / http://www.uiuc.edu/ph/www/dlhull
+
+# This program is free software.  You can redistribute it and/or modify
+# it under the terms of the GNU General Public License.  See the
+# files README and COPYING for details.
+
+require 'getopts.pl';
+require 'ctime.pl';
+
+# Label styles.
+$label_styles{'plain'} = 	$LABEL_PLAIN = 		1;
+$label_styles{'numbered'} = 	$LABEL_NUMBERED = 	2;
+$label_styles{'default'} = 	$LABEL_DEFAULT = 	3;
+
+$list_start[$LABEL_PLAIN] = "UL";
+$list_end[$LABEL_PLAIN] = "/UL";
+$list_start[$LABEL_NUMBERED] = "DL COMPACT";
+$list_end[$LABEL_NUMBERED] = "/DL";
+$list_start[$LABEL_DEFAULT] = "DL";
+$list_end[$LABEL_DEFAULT] = "/DL";
+
+@tmpfiles = ();
+
+sub usage {
+    $program = $0;
+    $program =~ s+^.*/++;
+    print STDERR <<_EOF_;
+usage: $program [-A] [-a] [-b bibtex-options] [-d delim] [-h heading]
+		[-s style] [-c] [-r] [-t] [-v] [-3] sourcefile [htmlfile]
+    -a  Write abstract to htmlfile.
+    -b bibtex-options
+	Options to pass to bibtex.
+    -c	Sort chronologically, by year and then by author.
+    -d delim
+	Specify bibliography delimiter.
+    -h heading
+	String to use instead of default title when creating a new htmlfile.
+	If updating an existing htmlfile, this option is ignored.
+    -r	Sort in reverse chronological order.
+    -s style
+	Control style of bibliography (empty, plain, alpha, named, or unsort).
+    -t  Write timestamp to htmlfile.
+    -v  Report the version number.
+    -3  Perform HTML 3.0 character entity mappings.
+_EOF_
+    exit(1);
+}
+
+# Return the command needed to open a (perhaps compressed) file,
+# as well as the type of compression.
+sub openCommand {
+    local($path) = @_;
+    local($cmd);
+    local($cmp);
+
+command: {
+	($path =~ m/\.Z$/ &&
+	  ($cmd = "uncompress -c $path |", $cmp = "Compressed", last command));
+	($path =~ m/\.g?z$/ &&
+	  ($cmd = "gzip -d -c $path |", $cmp = "Gzipped", last command));
+	($cmd = "<$path", $cmp = "", last command);
+    }
+
+    ($cmd, $cmp);
+}
+
+@paperTypes = ("PostScript", "PDF", "DVI");
+
+sub PostScriptPageCount {
+    local($cmd) = @_;
+    local($pageCount);
+
+    #print "in PostScriptPageCount $cmd\n";
+
+    open(FILE, $cmd) || (warn "error opening $cmd: $!\n", return undef);
+
+    local($_);
+    local($/) = "\n";
+
+line:
+    while (<FILE>) {
+	last line if m/^%%EndComments/;
+	if (m/^%%Pages:\s*(\d+)/) {
+	    $pageCount = $1 if ($1 > 0);
+	    last line;
+	}
+    }
+    close(FILE);
+
+    $pageCount;
+}
+
+# Don't know how to determine page count of PDF file.
+sub PDFPageCount { undef; }
+
+sub DVIPageCount {
+    local($cmd) = @_;
+    local($pageCount);
+
+    #print "in DVIPageCount $cmd\n";
+
+    if ($cmd =~ m/^</) {
+	# Simple file.
+	$cmd = "dviselect : $cmd >/dev/null";
+    } else {
+	# Compressed file.
+	$cmd .= "dviselect : >/dev/null";
+    }
+
+    # Look at dviselect's stderr.
+    open(DVISELECT, "-|") || (open(STDERR, ">&STDOUT"), exec $cmd);
+
+    local($_);
+    local($/) = "\n";
+line:
+    while (<DVISELECT>) {
+	if (m/[Ww]rote (\d+) pages/) {
+	    $pageCount = $1;
+	    last line;
+	}
+    }
+    close(DVISELECT);
+
+    $pageCount;
+}
+
+# Make an intelligent link to a paper file.
+sub doPaperLinks {
+    local($file);
+    local($url);
+    local($cstr, $pstr, $sstr);
+
+papertype:
+    foreach $paper (@paperTypes) {
+
+	$sstr = "";
+	$pstr = "";
+	$cstr = "";
+
+	if (($url) = m/\<\!\-\- $paper:[\s\n]+(\S+)[\s\n]+\-\-\>/) {
+
+	    # If $url looks like a file (doesn't begin with http://, ftp://, 
+	    # etc.), get more info.
+	    if ($url !~ m/^[^\:\/]+\:\//) {
+		local($file) = $url;
+		local($path);
+		local($dir);
+		foreach $dir (@filedir) {
+		    $path = join('/', $dir, $file);
+		    if ( -f $path) {
+			if (defined $dirmap{$dir}) {
+			    $url = join('/', $dirmap{$dir}, $file);
+			} else {
+			    $url = $path;
+			}
+			last;
+		    }
+		}
+
+		if (! -f $path) {
+		    print STDERR "couldn't find $file\n";
+		    next papertype;
+		}
+
+		local($opencmd);
+		local($size);
+		local($pageCountRoutine);
+		local($pageCount) = 0;
+
+		($opencmd, $cstr) = &openCommand($path);
+
+		# Get size.
+		$size = -s _;
+		$sstr = ", $size bytes";
+
+		# Get page count.
+		$pageCountRoutine = $paper . "PageCount";
+		$pageCount = &$pageCountRoutine($opencmd);
+		$pstr = ", $pageCount pages" if (defined $pageCount);
+
+		# Get compression type.
+		$cstr = "$cstr " if ($cstr ne "");
+	    }
+
+	    #print STDERR "found $paper $file$pstr$sstr\n";
+
+	    s/\<\!\-\- $paper:[\s\n]+\S+[\s\n]+\-\-\>/(<A HREF=\"$url\">${cstr}$paper<\/A>$pstr$sstr)/;
+	}
+    }
+}
+
+# html_encode(string)
+#   Protect character entities in string.
+sub html_encode {
+    local($_) = @_;
+ 
+    s/&/&amp;/g;        # Must be first.
+    s/</&lt;/g;
+    s/>/&gt;/g;
+    s/"/&quot;/g;
+ 
+    $_;
+}
+
+# Prevent "identifier used only once" warnings.
+$opt_a = $opt_b = $opt_c = $opt_D = $opt_d = $opt_h = $opt_r = undef;
+$opt_s = $opt_t = $opt_v = $opt_3 = undef;
+
+$command_line = &html_encode(join(' ', $0, @ARGV));
+
+&Getopts("ab:cD:d:h:rs:tv3") || &usage;
+
+print STDERR "$version\n" if (defined($opt_v));
+
+&usage if (($#ARGV < 0) || ($#ARGV > 1));
+
+if ($ARGV[0] =~ m/\.bib$/) {
+    $bibfile = $ARGV[0];
+    $bibfile =~ s/\.bib$//;
+    $delimiter = $bibfile;
+} elsif ($ARGV[0] =~ m/\.aux$/) {
+    $citefile = $ARGV[0];
+    $citefile =~ s/\.aux$//;
+    $delimiter = $citefile;
+} else {
+    print STDERR "Unknown file extension on $ARGV[0]\n";
+    &usage;
+}
+
+
+$htmlfile = $ARGV[1] if ($#ARGV == 1);
+
+$delimiter = $opt_d if (defined($opt_d));
+$title = (defined($opt_h) ? $opt_h : "Bibliography generated from $ARGV[0]");
+
+$opt_s = 'empty' if (! defined $opt_s);
+style: {
+    ($opt_s eq 'empty') &&
+	($bstfile = "html-n",
+	 $label_style = $LABEL_PLAIN,
+	 last style);
+    ($opt_s eq 'plain') &&
+	($bstfile = "html-n",
+	 $label_style = $LABEL_NUMBERED,
+	 last style);
+    ($opt_s eq 'alpha') &&
+	($bstfile = "html-a",
+	 $label_style = $LABEL_DEFAULT,
+	 last style);
+    ($opt_s eq 'named') &&
+	($bstfile = "html-n",
+	 $label_style = $LABEL_DEFAULT,
+	 last style);
+    ($opt_s eq 'unsort') &&
+	($bstfile = "html-u",
+	 $label_style = $LABEL_NUMBERED,
+	 last style);
+    ($opt_s =~ s/\.bst$//) &&
+	($bstfile = $opt_s,
+	 # label-style will be defined in .bst file.
+	 last style);
+    print STDERR "Unknown style: $_\n";
+    &usage;
+}
+
+$bstfile .= "c" if (defined ($opt_c));
+$bstfile .= "r" if (defined ($opt_r));
+$bstfile .= "a" if (defined ($opt_a));
+
+
+# PostScript and PDF files are assumed to be in same directory
+# as the target HTML file.
+if (defined($htmlfile) && ($htmlfile =~ m+(^.*)/+)) {
+    push @filedir, $1;
+} else {
+    push @filedir, "."
+}
+if (defined $opt_D) {
+    local($dir, $url);
+    foreach $dir (split(/\,/, $opt_D)) {
+	$url = $dir;
+	if ($dir =~ s/\@(.*)$//) { $url = $1; }
+	push @filedir, $dir;
+	$dirmap{$dir} = $url;
+    }
+}
+
+umask(077);
+
+$beginstring = "<!-- BEGIN BIBLIOGRAPHY $delimiter -->";
+$endstring = "<!-- END BIBLIOGRAPHY $delimiter -->";
+
+
+# Create an .aux file for bibtex to read.
+
+$auxfile = "bib$$";
+push(@tmpfiles, "$auxfile.aux");
+
+open(AUXFILE, ">$auxfile" . ".aux");
+
+print AUXFILE "\\relax\n\\bibstyle{$bstfile}\n";
+
+if (defined($citefile)) {
+    $citefile .= ".aux";
+    open(CITEFILE, "<$citefile") || die "error opening $citefile: $!\n";
+    while (<CITEFILE>) {
+	print AUXFILE $_ if (m/^\\(citation|bibdata){/);
+    }
+    close(CITEFILE);
+} else {
+    print AUXFILE "\\citation{*}\n\\bibdata{$bibfile}\n";
+}
+
+close(AUXFILE);
+
+
+# run bibtex, redirecting bibtex's output from STDOUT to STDERR.
+
+push(@tmpfiles, "$auxfile.blg");
+push(@tmpfiles, "$auxfile.bbl");
+# fork is not implemented on some non-Unix platforms.
+# fork || (open(STDOUT, ">&STDERR"), exec("bibtex $opt_b $auxfile"));
+# wait;
+eval { fork || (open(STDOUT, ">&STDERR"), exec("bibtex $opt_b $auxfile")); wait; };
+if ($@) {
+    # The fork failed (perhaps not implemented on this system).
+    system("bibtex $opt_b $auxfile 1>&2");
+}
+
+
+open(HTMLFILE, (defined($htmlfile) ? ">$htmlfile$$" : ">&STDOUT"));
+if (defined($htmlfile) && open(OHTMLFILE, "<$htmlfile")) {
+    $mode = (stat OHTMLFILE)[2] & 0xfff;
+    $updating = 1;
+} else {
+    $mode = 0644;
+    $updating = 0;
+
+    # An existing HTML file does not exist, so output some boilerplate.
+    print HTMLFILE <<_EOF_;
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN//2.0">
+<HTML><HEAD>
+<TITLE>$title</TITLE>
+</HEAD>
+<BODY>
+_EOF_
+}
+
+if ($updating) {
+loop:
+    while (<OHTMLFILE>) {
+	last loop if m/^$beginstring$/;
+	print HTMLFILE;
+    }
+loop:
+    while (<OHTMLFILE>) {
+	last loop if m/^$endstring$/;
+    }
+}
+
+print HTMLFILE "$beginstring\n";
+print HTMLFILE <<EOF;
+<!--
+    DO NOT MODIFY THIS BIBLIOGRAPHY BY HAND!  IT IS MAINTAINED AUTOMATICALLY!
+    YOUR CHANGES WILL BE LOST THE NEXT TIME IT IS UPDATED!
+--> 
+<!-- Generated by: $command_line -->
+EOF
+# Now we make two passes over the .bbl file.  In the first pass, we
+# just collect the {cite, label} pairs, which we will use later for
+# crossrefs.
+
+$t = $auxfile . ".bbl";
+
+$/ = "";
+
+# Make a first pass through the .bbl file, collecting citation/label pairs.
+open(BBLFILE, "<$t") || die "error opening $t: $!\n";
+$nentry = 0;
+loop:
+while (<BBLFILE>) {
+    # Check for definitions at start of .bbl file.
+    if (($nentry == 0) && (m/^#/)) {
+	if ((m/#\s*label-style:\s*(\S+)/) && (! defined $label_style)) {
+	    $label_style = $label_styles{$1};
+	    if (! defined $label_style) {
+		print STDERR "label style unknown: \n";
+		next loop;
+	    }
+	}
+	next loop;
+    }
+    $nentry++;
+    ($bcite, $blabel) = m+<DT><A NAME=\"([^\"]*)\">\[([^\]]*)\]</A><DD>+;
+    $blabel = "$nentry" if ($label_style == $LABEL_NUMBERED);
+    $bibcite{$bcite} = $blabel;
+}
+close(BBLFILE);
+
+$label_style = $LABEL_DEFAULT if (! defined $label_style);
+$list_start = $list_start[$label_style];
+$list_end = $list_end[$label_style];
+
+if (defined($opt_t)) {
+    print HTMLFILE "$nentry references, last updated " . &ctime(time) . "<P>\n";
+}
+
+print HTMLFILE "<$list_start>\n\n";
+
+#foreach $key (sort (keys(%bibcite))) {
+#    print "$key : $bibcite{$key}\n";
+#}
+
+open(BBLFILE, "<$t") || die "error opening $t: $!\n";
+$nentry = 0;
+loop:
+while (<BBLFILE>) {
+    # Skip definitions at start of .bbl file.
+    next loop if (($nentry == 0) && (m/^#/));
+
+    $nentry++;
+
+    # Protect \{, \}, and \$, and then assign matching {} pairs a unique ID.
+    s/\\\{/\002/g;
+    s/\\\}/\003/g;
+    s/\\\$/\004/g;
+    {
+	local ($c, $l, $z) = (0, 0, ());
+	s/([\{\}])/join("","\001",($1 eq "\{" ? $z[$l++]=$c++ : $z[--$l]),$1)/ge;
+    }
+
+    # bibtex sometimes breaks long lines by inserting "%\n".  We remove
+    # that because it might accidently break the line in the middle
+    # of a URL.  We don't need to deal with TeX comments in general
+    # because bibtex seems to munge them up anyway, so there shouldn't
+    # be any in the bibliography file.
+    s/\%\n//g;
+
+    # bibtex's add.period$ knows how to avoid adding extra periods
+    # when a block already ends in a period.  bib2html's modifications
+    # of bibtex's style files break that.  We fix it here.
+    s/(\.(<\/CITE>|<\/A>|\')+)\./$1/g;
+
+    # Adjust beginning of entry based on bibliography style.
+    if ($label_style == $LABEL_PLAIN) {
+	s:<DT>(<A NAME=\"[^\"]*\">)\[[^\]]*\](</A>)<DD>:<LI>$1$2:;
+
+	# Attempt to fix up empty <A NAME=...></A> tag, which some browsers
+	# don't handle properly (even though it *is* legal HTML).
+	# First try to combine a <A NAME=...></A> with a following <A ".
+	s:(<A NAME=\"[^\"]*\")></A><A\b:$1:
+	# If that doesn't work, try to swallow following word.
+	or s:(<A NAME=\"[^\"]*\">)</A>([\w]+):$1$2<\/A>:;
+    } elsif ($label_style == $LABEL_NUMBERED) {
+	s:(<DT><A NAME=\"[^\"]*\">\[)[^\]]*(\]</A><DD>):$1$nentry$2:;
+    }
+
+    # Attempt to fix up crossrefs.
+    while (m/(\\(cite(label)?)(\001\d+)\{([^\001]+)\4\})/) {
+	$old = $1;
+	$cmd = $2;
+	$doxref = defined($3);
+	$bcite = $5;
+	if (! defined $bibcite{$bcite}) {
+	    $blabel = " [" . $bcite . "]";
+	} elsif ($doxref) {
+	    $blabel = " <A HREF=\"#$bcite\">[" . $bibcite{$bcite} . "]<\/A>";
+	} else {
+	    $blabel = " [" . $bibcite{$bcite} . "]";
+	}
+	$old =~ s/(\W)/\\$1/g;
+	s/\s*$old/$blabel/g;
+    }
+    # In some styles crossrefs become something like 
+    # "In Doe and Roe [Doe and Roe, 1995]."  Change this to
+    # "In [Doe and Roe, 1995]." to remove the redundancy.
+    s/In (<A HREF=\"[^\"]*\">)([^\[]+) \[(\2)/In $1\[$2/;
+
+    # Handle the latex2html commands \htmladdnormallink{text}{url}
+    # and \htmladdnormallinkfoot{text}{url}.
+    s/\\htmladdnormallink(foot)?(\001\d+)\{([^\001]+)\2\}(\001\d+)\{([^\001]+)\4\}/<A HREF="$5">$3<\/A>/g;
+
+    s/\\&/&amp;/g;			# \& -> &amp;
+
+    # Accents.
+    s/\\i\b/i/g;					# dotless i.
+    s/\\\'(\001\d+)\{([AEIOUaeiou])\1\}/&$2acute;/g;	# acute accent \'{x}
+    s/\\\'([AEIOUaeiou])/&$1acute;/g;			# acute accent \'x
+    s/\\\`(\001\d+)\{([AEIOUaeiou])\1\}/&$2grave;/g;	# grave accent \`{x}
+    s/\\\`([AEIOUaeiou])/&$1grave;/g;			# grave accent \`x
+    s/\\\"(\001\d+)\{([AEIOUaeiouy])\1\}/&$2uml;/g;	# umlaut \"{x}
+    s/\\\"([AEIOUaeiouy])/&$1uml;/g;			# umlaut \"x
+    s/\\\~(\001\d+)\{([ANOano])\1\}/&$2tilde;/g;	# tilde \~{x}
+    s/\\\~([ANOano])/&$1tilde;/g;			# tilde \~x
+    s/\\\^(\001\d+)\{([AEIOUaeiou])\1\}/&$2circ;/g;	# circumflex \^{x}
+    s/\\\^(AEIOUaeiou])/&$1circ;/g;			# circumflex \^x
+    s/\\c(\001\d+)\{([Cc])\1\}/&$2cedil;/g;		# cedilla \c{x}
+    # The following accents have no HTML equivalent.
+    # (This list is still not complete.)
+    s/\\u(\001\d+)\{(.)\1\}/$2/g;			# breve accent \u{x}
+    s/\\v(\001\d+)\{(.)\1\}/$2/g;			# hacek accent \v{x}
+    s/\\([lL])\b/$1/g;					# slashed l
+    s/\\\=(\001\d+)\{(.)\1\}/$2/g;			# macron \={x}
+    s/\\\=(.)/$1/g;					# macron accent \=x
+    s/\\\.(\001\d+)\{(.)\1\}/$2/g;			# dot \.{x}
+    s/\\\.(.)/$1/g;					# dot accent \.x
+
+    # Other special characters.
+    s/\\([Oo])\b\s*/&$1slash;/g;	# \[Oo] -> &[Oo]slash;
+    s/\\AA\b\s*/&Aring;/g;		# \AA -> &Aring;
+    s/\\aa\b\s*/&aring;/g;		# \aa -> &aring;
+    s/\\AE\b\s*/&AElig;/g;		# \AE -> &AElig;
+    s/\\ae\b\s*/&aelig;/g;		# \ae -> &aelig;
+    s/\\ss\b\s*/&szlig;/g;		# \ss -> &szlig;
+    s/\\S\b\s*/&#167;/g;		# \S -> &sect;
+    s/\\P\b\s*/&#182;/g;		# \P -> &para;
+    s/\\pounds\b\s*/&163;/g;		# \pounds -> &pound;
+    s/\?\`/&191;/g;			# ?` -> &iquest;
+    s/\!\`/&161;/g;			# !` -> &iexcl;
+
+    # Other special characters.
+    if (defined($opt_3)) {
+	# Try to be careful to not change the dashes in HTML comments
+	# (<!-- comment -->) to &ndash;s.
+	#s/\-\-\-/&mdash;/g;		# --- -> &mdash;
+	#s/([^\!])\-\-([^\>])/$1&ndash;$2/g;	# -- -> &ndash;
+	s/\-\-\-/\227/g;		# --- -> &mdash;
+	s/([^\!])\-\-([^\>])/$1\226$2/g;	# -- -> &ndash;
+
+	# lower case greek
+	s/\\alpha\b/&agr;/g;		# \alpha -> &agr;
+	s/\\beta\b/&bgr;/g;		# \beta -> &bgr;
+	s/\\gamma\b/&ggr;/g;		# \gamma -> &ggr;
+	s/\\delta\b/&dgr;/g;		# \delta -> &dgr;
+	s/\\varepsilon\b/&egr;/g;	# \varepsilon -> &Egr;
+	s/\\epsilon\b/&egr;/g;		# \epsilon -> &egr;
+	s/\\zeta\b/&zgr;/g;		# \zeta -> &zgr;
+	s/\\eta\b/&eegr;/g;		# \eta -> &eegr;
+	s/\\theta\b/&thgr;/g;		# \theta -> &thgr;
+	s/\\vartheta\b/&thgr;/g;	# \vartheta -> &thgr;
+	s/\\iota\b/&igr;/g;		# \iota -> &igr;
+	s/\\kappa\b/&kgr;/g;		# \kappa -> &kgr;
+	s/\\lambda\b/&lgr;/g;		# \lambda -> &lgr;
+	s/\\mu\b/&mgr;/g;		# \mu -> &mgr;
+	s/\\nu\b/&ngr;/g;		# \nu -> &ngr;
+	s/\\xi\b/&xgr;/g;		# \xi -> &xgr;
+	s/\\pi\b/&pgr;/g;		# \pi -> &pgr;
+	s/\\varpi\b/&pgr;/g;		# \varpi -> &pgr;
+	s/\\rho\b/&rgr;/g;		# \rho -> &rgr;
+	s/\\varrho\b/&rgr;/g;		# \varrho -> &rgr;
+	s/\\sigma\b/&sgr;/g;		# \sigma -> &sgr;
+	s/\\varsigma\b/&sfgr;/g;	# \varsigma -> &sfgr; ???
+	s/\\tau\b/&tgr;/g;		# \tau -> &tgr;
+	s/\\upsilon\b/&ugr;/g;		# \upsilon -> &ugr;
+	s/\\phi\b/&phgr;/g;		# \phi -> &phgr;
+	s/\\varphi\b/&phgr;/g;		# \varphi -> &phgr;
+	s/\\chi\b/&khgr;/g;		# \chi -> &khgr;
+	s/\\psi\b/&psgr;/g;		# \psi -> &psgr;
+	s/\\omega\b/&ohgr;/g;		# \omega -> &ohgr;
+
+	# upper case greek
+	s/\\Gamma\b/&Ggr;/g;		# \Gamma -> &Ggr;
+	s/\\Delta\b/&Dgr;/g;		# \Delta -> &Dgr;
+	s/\\Zeta\b/&Zgr;/g;		# \Zeta -> &Zgr;
+	s/\\Lambda\b/&Lgr;/g;		# \Lambda -> &Lgr;
+	s/\\Xi\b/&Xgr;/g;		# \Xi -> &Xgr;
+	s/\\Pi\b/&Pgr;/g;		# \Pi -> &Pgr;
+	s/\\Sigma\b/&Sgr;/g;		# \Sigma -> &Sgr;
+	s/\\Upsilon\b/&Ugr;/g;		# \Upsilon -> &Ugr;
+	s/\\Phi\b/&PHgr;/g;		# \Phi -> &PHgr;
+	s/\\Psi\b/&PSgr;/g;		# \Psi -> &PSgr;
+	s/\\Omega\b/&OHgr;/g;		# \Omega -> &OHgr;
+    } else {
+	s/\b--\b/-/g;			# -- -> -
+	s/\b---\b/--/g;			# --- -> --
+    }
+
+    # Handle \char123 -> &123;.
+    while (m/\\char([\'\"]?[0-9a-fA-F]+)/) {
+	$o = $r = $1;
+	if ($r =~ s/^\'//) {
+	    $r = oct($r);
+	} elsif ($r =~ s/^\"//) {
+	    $r = hex($r);
+	}
+	s/\\char$o\s*/&#$r;/g;
+    }
+
+    s/{\\etalchar\001(\d+)\{(.)}\001\1\}/$2/g;	# {\etalchar{x}} -> x
+
+    s/\\par\b/<P>/g;
+
+    # There's no way to easily handle \rm and \textrm because
+    # HTML has no tag to convert back to plain text.  Since it's very
+    # difficult to do the right thing, we do the wrong thing, and just
+    # remove them.
+    s/(\001\d+)\{\\rm\s+([^\001]*)\1\}/$2/g;		# {\rm text} -> text
+    s/\\textrm(\001\d+)\{([^\001]*)\1\}/$2/g;		# \textrm{text} -> text
+
+    # This doesn't create correct HTML, because HTML doesn't allow nested
+    # character style tags.  Oh well.
+    s/(\001\d+)\{\\em\s+([^\001]*)\1\}/<EM>$2<\/EM>/g; # {\em text} -> <EM>text</EM>
+    s/(\001\d+)\{\\it\s+([^\001]*)\1\}/<I>$2<\/I>/g;   # {\it text} -> <I>text</I>
+    s/(\001\d+)\{\\bf\s+([^\001]*)\1\}/<B>$2<\/B>/g;   # {\bf text} -> <B>text</B>
+    s/(\001\d+)\{\\tt\s+([^\001]*)\1\}/<TT>$2<\/TT>/g; # {\tt text} -> <TT>text</TT>
+
+    s/\\emph(\001\d+)\{([^\001]*)\1\}/<EM>$2<\/EM>/g;  # \emph{text} -> <EM>text</EM>
+    s/\\textit(\001\d+)\{([^\001]*)\1\}/<I>$2<\/I>/g;  # \textit{text} -> <I>text</I>
+    s/\\textbf(\001\d+)\{([^\001]*)\1\}/<B>$2<\/B>/g;  # \textbf{text} -> <B>text</B>
+    s/\\texttt(\001\d+)\{([^\001]*)\1\}/<TT>$2<\/TT>/g;# \textit{text} -> <TT>text</TT>
+
+    s/\\mathrm(\001\d+)\{([^\001]*)\1\}/$2/g;		# \mathrm{text} -> text
+    s/\\mathnormal(\001\d+)\{([^\001]*)\1\}/$2/g;	# \mathnormal{text} -> text
+    s/\\mathsf(\001\d+)\{([^\001]*)\1\}/$2/g;		# \mathsf{text} -> text
+    s/\\mathbf(\001\d+)\{([^\001]*)\1\}/<B>$2<\/B>/g;	# \mathbf{text} -> <B>text</B>
+    s/\\mathcal(\001\d+)\{([^\001]*)\1\}/<I>$2<\/I>/g;# \mathcal{text} -> <I>text</I>
+    s/\\mathit(\001\d+)\{([^\001]*)\1\}/<I>$2<\/I>/g;	# \mathit{text} -> <I>text</I>
+    s/\\mathtt(\001\d+)\{([^\001]*)\1\}/<TT>$2<\/TT>/g;# \mathtt{text} -> <TT>text</TT>
+
+    # {\boldmath $mathstuff$} -> <B>mathstuff</B>
+#    s/(\001\d+)\{\s*\\boldmath ?([^A-Za-z\{\}][^\{\}]*)\}/<B>$1<\/B>/g;
+
+
+sub domath {
+    local($t) = @_;
+    $t =~ s/\^(\001\d+)\{\\circ\1\}/\&\#176/g;		# ^{\circ}->degree
+    $t =~ s/\^\\circ/\&\#176/g;				# ^\circ->degree
+#   $t =~ s/\^(\001\d+)\{([^\001]*)\1\}/<SUP>$2<\/SUP>/g;	# ^{x}
+    $t =~ s/\^(\001\d+)\{(.*)\1\}/<SUP>$2<\/SUP>/g;	# ^{x}
+    $t =~ s/\^(\w)/<SUP>$1<\/SUP>/g;			# ^x
+#   $t =~ s/\_(\001\d+)\{([^\001]*)\1\}/<SUB>$2<\/SUB>/g;	# _{x}
+    $t =~ s/\_(\001\d+)\{(.*)\1\}/<SUB>$2<\/SUB>/g;	# _{x}
+    $t =~ s/\_(\w)/<SUB>$1<\/SUB>/g;			# _x
+    $t;
+}
+
+    # Handle superscripts and subscripts in inline math mode.
+    s/(\$([^\$]+)\$)/&domath($2)/ge;			# $ ... $
+    s/(\\\((([^\\]|\\[^\(\)])+)\\\))/&domath($2)/ge;	# \( ... \)
+
+    # Remove \mbox.
+    s/\\mbox(\001\d+)\{([^\001]*)\1\}/$2/g;		# \mbox{x}
+
+    s/([^\\])~/$1&nbsp;/g;			# ~ -> non-breaking space
+    s/\\\,/ /g;					# \, (thin space)
+    s/\\ / /g;					# \  (normal space)
+    s/\\ldots\b\s*/.../g;			# \ldots
+    s/\\textasciitilde\b\s*/~/g;		# \textasciitilde -> ~
+
+    # Non-alphabetic macros that we keep.
+    s/\\([\#\&\%\~\_\^\|])/$1/g;
+
+    # Non-alphabetic macros that we remove.
+    #   (discretionary hyphen)
+    #   (italic correction)
+    s/\\\W//g;
+
+    # Clean up things we don't handle.
+#    s/\\//g;
+
+    # The format {\Xyz{Abc}} is interpreted by BibTeX as a single letter
+    # whose text is given by "Abc".  If we see this pattern, it is
+    # likely that discarding the \Xyz will do the right thing.
+    s/\001(\d+)\{\\[A-Za-z]+\001(\d+)\{([^\001]*)\001\2\}\001\1\}/$3/g;
+
+    # Macro names may be meaningful, so keep them and don't run them together.
+    s/\\([A-Za-z]+)/ $1 /g;
+
+    # Remove an empty <A HREF=...></A> tag that bad cross-referencing
+    # in the BibTeX file may have left us with.
+    s+In <A HREF=\"[^\"]*\"></A>++;
+
+    &doPaperLinks;
+
+    # Get rid of { } ids, and put protected { } back.
+    s/\001\d+[\{\}]//g;
+    tr/\002\003\004/{}$/;
+
+    print HTMLFILE $_;
+}
+
+close(BBLFILE);
+
+print HTMLFILE "<$list_end>\n\n$endstring\n";
+
+if ($updating) {
+    while (<OHTMLFILE>) {
+	print HTMLFILE;
+    }
+    close (OHTMLFILE);
+} else {
+    print HTMLFILE "</BODY></HTML>\n";
+}
+
+close(HTMLFILE);
+
+if (defined ($htmlfile)) {
+    #$mode &= 0777;
+    #print "setting $htmlfile$$ to $mode\n";
+    #printf("mode = %lo\n", $mode);
+
+    chmod($mode, "$htmlfile$$");
+    rename("$htmlfile$$", $htmlfile);
+}
+
+unlink(@tmpfiles);
+
+exit(0);

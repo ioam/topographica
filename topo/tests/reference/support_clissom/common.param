@@ -1,0 +1,18 @@
+## params that currently have to be overridden to 
+## allow topographica to be able to match
+
+# Make sure all input patterns are evaluated fully
+set bound_multiplier=BaseRN*area_scale*10 
+
+set input_default_position="Uncorrelate &uncorrelation 0 RN  Random RN/2 RN/2 Precision 1"
+set input_default_angle="Random PI/2 PI/2 Precision 1"
+
+
+set randomness=0 lat_exc_randomness=0 lat_inh_randomness=0
+set preset_aff_wts=True preset_sigma_aff=0
+set preset_lat_wts=True preset_sigma_exc=0 preset_sigma_inh=0
+set circular_aff_wts=True  circular_lat_wts=True
+set smooth_circular_outlines=False smooth_circular_radius_trim=-0.25
+
+
+set inh_death=0.0

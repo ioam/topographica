@@ -1,0 +1,27 @@
+#!./lissom
+#
+# RF-LISSOM parameter file for an orientation-map simulation with
+# ellipsoidal Gaussian inputs.
+#
+# $Header: /u/nn/cvsroot/lissom/samples/or_map.param,v 1.60 2001/05/22 20:10:04 jbednar Exp $
+
+
+### Will be overwritten
+# CB: each 'set' must be on a line of its own for clunky auto-filling to work.
+set BaseN=24 
+set BaseRN=24 
+set rf_radius=BaseRN/4+0.5       
+set inh_rad=BaseN/4-1+0.5 
+set exc_rad=2.5>?(BaseN/10)
+###
+
+set area_scale=1.0
+
+set num_eyes=1 layers_pereye=0 inputs_pereye=1
+
+call or_defs ids=1.0
+
+call common.param
+
+
+

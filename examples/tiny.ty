@@ -1,0 +1,92 @@
+"""
+Tiny example network useful for testing components.
+
+$Id$
+"""
+__version__='$Revision$'
+
+
+from math import pi, sqrt
+
+import numpy
+import param
+
+from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
+
+import topo.learningfn.projfn 
+import topo.transferfn.projfn
+import topo.pattern.random
+import topo.responsefn.optimized 
+import topo.sheet.lissom
+
+from topo.base.functionfamily import LearningFn
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+    retina_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    cortex_density=param.Number(default=5.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""))
+
+
+# Same as topo.base.connectionfield.Hebbian; copied here as a template
+# for writing other LearningFns
+class SampleHebbian(LearningFn):
+    """
+    Basic Hebbian rule; Dayan and Abbott, 2001, equation 8.3.
+
+    Increases each weight in proportion to the product of this
+    neuron's activity and the input activity.
+    
+    Requires some form of output_fn normalization for stability.
+    """
+    sample_param=param.Number(default=0.1,bounds=(0,None),doc="Example positive-valued numeric parameter")
+    value_0=param.Number(default=0.8,bounds=(0,None),doc="Example initial value parameter.")
+
+    def __init__(self,**params):
+        super(SampleHebbian,self).__init__(**params)
+        self.value=self.value_0
+        
+    def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
+        """
+        Update the value of the given weights matrix based on the
+        input_activity matrix (of the same size as the weights matrix)
+        and the response of this unit (the unit_activity), governed by
+        a per-connection learning rate.
+        """
+        weights += single_connection_learning_rate * unit_activity * input_activity
+        dummy_value = self.sample_param*self.value*unit_activity
+        self.value = self.value*0.9
+
+# Input pattern
+gaussian_generator = pattern.Gaussian(
+    x=numbergen.UniformRandom(lbound=-0.8,ubound=0.8,seed=12),
+    y=numbergen.UniformRandom(lbound=-0.8,ubound=0.8,seed=34),
+    orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56),
+    size = 2*0.3*1.5/7.0,
+    aspect_ratio = 7.0/1.5,
+    bounds = sheet.BoundingBox(radius=0.8))
+
+# Sheets, connections, and their parameters
+topo.sim['Retina'] = sheet.GeneratorSheet(input_generator=gaussian_generator,
+    nominal_bounds=sheet.BoundingBox(radius=0.6),
+    period=1.0,phase=0.05,nominal_density=p.retina_density)
+
+topo.sim['V1'] = sheet.CFSheet(nominal_density=p.cortex_density,
+    nominal_bounds=sheet.BoundingBox(radius=0.5),
+    output_fns=[transferfn.PiecewiseLinear(lower_bound=0,upper_bound=1.0)])
+
+topo.sim.connect(
+    'Retina','V1',name='Afferent',delay=0.05,
+    connection_type=projection.CFProjection, 
+    weights_generator=pattern.random.UniformRandom(),
+    nominal_bounds_template=sheet.BoundingBox(radius=0.2),
+    response_fn=responsefn.optimized.CFPRF_DotProduct_opt(),
+    learning_fn=learningfn.projfn.CFPLF_Plugin(single_cf_fn=SampleHebbian(sample_param=0.5)),
+    weights_output_fns=[transferfn.projfn.CFPOF_Plugin(single_cf_fn=transferfn.DivisiveNormalizeL1())],
+    learning_rate=200.0)

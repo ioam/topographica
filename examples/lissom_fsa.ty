@@ -1,0 +1,162 @@
+"""
+Example of a LISSOM-based face-selective-area simulation.
+
+Intended to be an approximate match to the default FSA
+simulation (such as figure 10.12) of Miikkulainen, Bednar, Choe, and
+Sirosh (2005), Computational Maps in the Visual Cortex, Springer.
+At present, only some of the parameters have been matched, such
+as the input patterns.
+
+$Id$
+"""
+__version__='$Revision$'
+
+
+from math import pi, sqrt
+
+import numpy
+import param
+
+from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet 
+
+import topo.learningfn.optimized
+import topo.learningfn.projfn 
+import topo.transferfn.optimized 
+import topo.pattern.random
+import topo.responsefn.optimized 
+import topo.sheet.lissom
+import topo.sheet.optimized
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+
+    retina_density=param.Number(default=48.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    lgn_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the LGN."""),
+
+    cortex_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""))
+
+
+### Specify weight initialization, response function, and learning function
+projection.CFProjection.cf_shape=pattern.Disk(smoothing=0.0)
+projection.CFProjection.weights_generator=pattern.Constant()
+projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
+projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
+projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+
+
+### Input patterns
+num_inputs=3
+lefteye =  pattern.Gaussian(aspect_ratio = 1.0, x = 1/24.0, y = 2.5/24.0,
+                            size = 2.0 * 1.21/24.0 / 1.7, scale = 0.5, offset = 0.5059)
+righteye = pattern.Gaussian(aspect_ratio = 1.0, x = 1/24.0, y = -2.5/24.0,
+                            size = 2.0 * 1.21/24.0 / 1.7, scale = 0.5, offset = 0.5059)
+mouth   =  pattern.Gaussian(aspect_ratio = 1.0, x = -5/24.0, y = 0.0/24.0,
+                            size = 2.0 * 1.21/24.0 / 1.7, scale = 0.5, offset = 0.5059)
+
+inputs=[pattern.Composite(generators = [lefteye, righteye, mouth],
+                  operator = numpy.maximum, size = 1.7,
+                  orientation=numbergen.UniformRandom(lbound=17.0/36.0*pi,ubound=19.0/36.0*pi,seed=56+i),
+                  x=numbergen.UniformRandom(lbound=-85.0/48.0,ubound=85.0/48.0, seed=12+i),
+                  y=numbergen.UniformRandom(lbound=-85.0/48.0,ubound=85.0/48.0, seed=34+i))
+        for i in xrange(num_inputs)]
+
+combined_inputs = pattern.SeparatedComposite(min_separation=1.722972972972973,generators=inputs)
+
+
+
+### Sheets
+topo.sim['Retina']=sheet.GeneratorSheet(
+    nominal_density=p.retina_density,
+    nominal_bounds=sheet.BoundingBox(radius=1.77),
+    input_generator=combined_inputs,period=1.0,phase=0.05)
+
+topo.sim['LGNOn']=sheet.CFSheet(
+    nominal_density=p.lgn_density,    
+    nominal_bounds=sheet.BoundingBox(radius=1.542),
+    output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)])
+
+topo.sim['LGNOff']=sheet.CFSheet(
+    nominal_density=p.lgn_density,    
+    nominal_bounds=sheet.BoundingBox(radius=1.542),
+    output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)])
+
+topo.sim['FSA'] = sheet.lissom.LISSOM(
+    nominal_density=p.cortex_density,tsettle=9,
+    nominal_bounds=sheet.BoundingBox(radius=0.5),
+    output_fns=[transferfn.PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
+
+
+
+### Connections
+
+# DoG weights for the LGN
+centerg   = pattern.Gaussian(size=0.11079,aspect_ratio=1.0,
+                             output_fns=[transferfn.DivisiveNormalizeL1(norm_value=2.33)])
+surroundg = pattern.Gaussian(size=0.17725,aspect_ratio=1.0,
+                             output_fns=[transferfn.DivisiveNormalizeL1(norm_value=2.33)])
+
+on_weights = pattern.Composite(
+    generators=[centerg,surroundg],operator=numpy.subtract)
+
+off_weights = pattern.Composite(
+    generators=[surroundg,centerg],operator=numpy.subtract)
+
+
+topo.sim.connect('Retina','LGNOn',delay=0.05,
+                 connection_type=projection.SharedWeightCFProjection,strength=10.199999999999999,
+                 nominal_bounds_template=sheet.BoundingBox(radius=0.235),name='RetinaToLGNOn',
+                 weights_generator=on_weights)
+
+topo.sim.connect('Retina','LGNOff',delay=0.05,
+                 connection_type=projection.SharedWeightCFProjection,strength=10.199999999999999,
+                 nominal_bounds_template=sheet.BoundingBox(radius=0.235),name='RetinaToLGNOff',
+                 weights_generator=off_weights)
+
+topo.sim.connect('LGNOn','FSA',delay=0.05, dest_port=('Activity','JointNormalize', 'Afferent'),
+                 connection_type=projection.CFProjection,strength=1.0700000000000001,name='LGNOnAfferent',
+                 weights_generator=pattern.Gaussian(aspect_ratio=1.0, size=0.4167),
+                 nominal_bounds_template=sheet.BoundingBox(radius=1.0625),learning_rate=5.0)
+
+topo.sim.connect('LGNOff','FSA',delay=0.05, dest_port=('Activity','JointNormalize', 'Afferent'),
+                 connection_type=projection.CFProjection,strength=1.07,name='LGNOffAfferent',
+                 weights_generator=pattern.Gaussian(aspect_ratio=1.0, size=0.4167),
+                 nominal_bounds_template=sheet.BoundingBox(radius=1.0625),learning_rate=5.0,)
+
+topo.sim.connect('FSA','FSA',delay=0.05,name='LateralExcitatory',
+                 connection_type=projection.ResizableCFProjection,strength=0.9,
+                 weights_generator=pattern.Gaussian(aspect_ratio=1.0, size=0.4167),
+                 nominal_bounds_template=sheet.BoundingBox(radius=0.166666666667),learning_rate=3.1856)
+
+topo.sim.connect('FSA','FSA',delay=0.05,name='LateralInhibitory',
+                 connection_type=projection.CFProjection,strength=-0.9,
+                 weights_generator=pattern.Gaussian(aspect_ratio=1.0, size=0.4167),
+                 nominal_bounds_template=sheet.BoundingBox(radius=0.416666666667),learning_rate=2.3627)
+
+
+
+### Actions scheduled to occur as the simulation proceeds.
+### These have not been matched to the published simulation.
+sheet.lissom.schedule_events("topo.sim['FSA']",st=1.0/num_inputs,aff_name="Afferent",ars=100)
+
+# default locations for model editor
+topo.sim['FSA'   ].layout_location=(306,225)
+topo.sim['LGNOn' ].layout_location=(432,345)
+topo.sim['LGNOff'].layout_location=(150,345)
+topo.sim['Retina'].layout_location=(279,500)
+
+
+# Measure feature maps based on unthresholded initial response for
+# speed and reliability
+from topo.analysis.featureresponses import MeasureResponseCommand
+MeasureResponseCommand.duration=0.175
+MeasureResponseCommand.apply_output_fns=False

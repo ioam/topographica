@@ -1,0 +1,147 @@
+/*
+   Originally based on http://www.w3.org/StyleSheets/TR/W3C-REC.css
+
+
+   Acknowledgments:
+
+   - 'background-color' doesn't work on Mac IE 3, but 'background'
+     does (Susan Lesch)
+
+   - 'smaller' leads to illegible text in both Mac IE and Mac NS,
+     'small' is better: works in Mac NS, but is always 12pt in Mac IE
+     3 (Susan Lesch)
+
+   jbednar.css,v 1.1 2002/01/10 04:40:32 jbednar Exp
+*/
+
+body {
+  margin: 1em 1em 1em 1em;
+  font-family: serif;
+  color: black;
+  background: #ffffff;
+  background-position: top left;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+/* background should be transparent, but WebTV has a bug */
+/* h1, h2, h3 { color: #913; background: #f2f2e4 } */
+h1, h2, h3 { color: #913; }
+
+/*
+:link { color: #c77d3d; background: transparent }
+:visited { color: #601c33; background: transparent }
+:active { color: #C00; background: transparent }
+*/
+
+:link    { color: #227700; background: transparent }
+:visited { color: #005599; background: transparent }
+:active  { color: #ff0000; background: transparent }
+
+a:link.button { color: #000000; background: transparent; font-size: 12; text-decoration: none; text-weight: bold}
+a:visited.button { color: #000000; background: transparent; font-size: 12; text-decoration: none; text-weight: bold}
+a:active.button { color: #770000; background: transparent; font-size: 12; text-decoration: none; text-weight: bold}
+a:hover.button { color: #227700; background: transparent; font-size: 12; text-decoration: none; text-weight: bold}
+
+th, td { /* ns 4 */
+  font-family: serif;
+}
+
+h1, h2, h3, h4, h5, h6 { text-align: center }
+h2, h3, h4, h5, h6 { text-align: left }
+h1 { font: 170% serif }
+h2 { font: 140% serif }
+h3 { font: 120% serif }
+h4 { font: bold 100% serif }
+h5 { font: italic 100% serif }
+h6 { font: small-caps 100% serif }
+
+.hide { display: none }
+
+div.head { margin-bottom: 1em }
+div.head h1 { margin-top: 2em; clear: both }
+div.head table { margin-left: 2em; margin-top: 2em }
+div.head img { color: white; border: none } /* remove border from top image */
+
+p.copyright { font-size: small }
+p.copyright small { font-size: small }
+
+@media screen {  /* hide from IE3 */
+a:hover { background: #ffa } 
+}
+
+pre { margin-left: 2em }
+/*
+p {
+  margin-top: 0.6em;
+  margin-bottom: 0.6em;
+}
+*/
+dt, dd { margin-top: 0; margin-bottom: 0 } /* opera 3.50 */
+dt { font-weight: bold }
+
+pre, code { font-family: monospace } /* navigator 4 requires this */
+
+ul.toc {
+  list-style: disc;		/* Mac NS has problem with 'none' */
+  list-style: none;
+}
+
+body {
+/*  background-image: url(http://www.w3.org/StyleSheets/TR/logo-REC); */
+}
+
+/* jbednar: Custom */
+
+
+/* command to be typed */
+
+.to_type {
+	 background: #d8d0b2;
+}
+
+
+
+/* button to be pressed */
+
+.b_press {
+	  background: #d8d8d8;
+          border-style: outset;
+	  font-weight: bold;
+	  font-size: small;
+}
+
+
+/* topo item */
+
+.t_item {
+	  background: #d8d8d8;
+	  font-weight: bold;
+	  font-size: small;
+}
+
+
+
+/* window title to look for */
+
+.w_title {
+	  background: #cb863e; 
+          color: #ffffff;
+	  font-size: small;
+	  font-weight: bold;
+}
+
+
+.center {
+	text-align: center;
+}
+
+
+/* */
+
+
+/* indent after line 1 */
+.i2 {
+	padding-left: 1em;
+	text-indent: -1em;
+}
+

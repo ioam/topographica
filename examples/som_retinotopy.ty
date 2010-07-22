@@ -1,0 +1,95 @@
+"""
+Basic example of a fully connected SOM retinotopic map with ConnectionFields.
+
+Contains a Retina (2D Gaussian generator) fully connected to a V1
+(SOM) sheet, with no initial ordering for topography.
+
+Constructed to match the retinotopic simulation from page 53-59 of
+Miikkulainen, Bednar, Choe, and Sirosh (2005), Computational Maps in
+the Visual Cortex, Springer.  Known differences include:
+
+ - The cortex_density and retina_density are smaller for
+   speed (compared to 40 and 24 in the book).
+ - The original simulation used a radius_0 of 13.3/40, which does work
+   for some random seeds, but a much larger radius is used here so that
+   it converges more reliably.
+
+$Id$
+"""
+__version__='$Revision$'
+
+
+from math import exp, sqrt
+
+import param
+
+from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
+
+import topo.learningfn.projfn 
+import topo.pattern.random
+import topo.responsefn.optimized 
+import topo.transferfn.misc
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+
+    retina_density=param.Number(default=10.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    cortex_density=param.Number(default=10.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""),
+
+    input_seed=param.Number(default=0,bounds=(0,None),doc="""
+        Seed for the pseudorandom number generator controlling the
+        input patterns."""),
+
+    weight_seed=param.Number(default=0,bounds=(0,None),doc="""
+        Seed for the pseudorandom number generator controlling the
+        initial weight values."""),
+
+    radius_0=param.Number(default=1.0,bounds=(0,None),doc="""
+        Starting radius for the neighborhood function."""),
+
+    alpha_0=param.Number(default=0.42,bounds=(0,None),doc="""
+        Starting value for the learning rate."""))
+
+
+# input pattern
+sheet.GeneratorSheet.period = 1.0
+sheet.GeneratorSheet.phase = 0.05
+sheet.GeneratorSheet.nominal_density = p.retina_density
+
+input_pattern = pattern.Gaussian(scale=1.0,size=2*sqrt(2.0*0.1*24.0)/24.0,
+    aspect_ratio=1.0,orientation=0,
+    x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=p.input_seed+12),
+    y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=p.input_seed+56))
+
+
+# Local variable to allow weights to be controlled easily
+pattern.random.seed((p.weight_seed+67,p.weight_seed+89))
+
+topo.sim['Retina'] = sheet.GeneratorSheet(input_generator=input_pattern)
+
+topo.sim['V1'] = sheet.CFSheet(
+    nominal_density = p.cortex_density,
+    # Original CMVC simulation used an initial radius of 13.3/40.0 (~0.33)
+    output_fns=[transferfn.misc.KernelMax(density=p.cortex_density,
+        kernel_radius=numbergen.BoundedNumber(
+            bounds=(0.5/40,None),
+            generator=numbergen.ExponentialDecay(
+                starting_value=p.radius_0,
+                time_constant=40000/5.0)))])
+
+topo.sim.connect('Retina','V1',name='Afferent',delay=0.05,
+    connection_type=projection.CFProjection,
+    weights_generator = pattern.random.UniformRandom(),
+    nominal_bounds_template=sheet.BoundingBox(radius=1.0), # fully connected network.
+    learning_rate=numbergen.ExponentialDecay(
+        starting_value = p.alpha_0,
+        time_constant=40000/6.0),
+    response_fn = responsefn.optimized.CFPRF_EuclideanDistance_opt(),
+    learning_fn = learningfn.projfn.CFPLF_EuclideanHebbian())
+

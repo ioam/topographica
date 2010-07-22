@@ -1,0 +1,278 @@
+#!./lissom
+# 
+# $Header: /u/nn/cvsroot/lissom/command/or_defs,v 1.25 2001/09/02 23:19:41 jbednar Exp $
+#
+#
+# Common definitions and parameter settings for orientation map simulations
+#
+# Assumes these parameters have already been set to their desired values, and
+# that none will be changed before the simulation begins:
+#
+#   BaseN BaseRN area_scale
+#   rf_radius exc_rad inh_rad
+#   num_eyes layers_pereye
+
+
+
+set Region::num_aff_inputs=(num_eyes*(layers_pereye>?1))
+
+# Expand retina to provide full receptive fields to all neurons
+set retina_edge_buffer=rf_radius-0.5+(randomness*BaseRN*area_scale/2) RN=BaseRN*area_scale+2*retina_edge_buffer
+
+
+
+###############################################################################
+# Arguments and their default values, which can be overridden when calling.
+# Some whose default values depend on arguments are set in the next section.
+
+define_param_set or_defs
+
+define_param or_defs::region Param_String  0 Uninitialized \
+ "Name of the cortical region for which to set parameters" "Primary"
+
+define_param or_defs::rregionset Param_String  0 Uninitialized \
+ "Name of the parameter set in Region:: in which to set region parameters" ""
+
+define_param or_defs::oregionset Param_String  0 Uninitialized \
+ "Name of the parameter set in which to set region parameters" "Region::"
+
+define_param or_defs::trainstart Param_Integer 0 Uninitialized \
+ "Iteration at which to start training; usually 0 but can be higher, e.g. to train\n\
+one network after another." "0"
+
+define_param or_defs::hooks      Param_Boolean False True \
+ "Whether to define hooks when or_defs is called.  Usually true, but\n\
+can be useful to make it false to set or reset parameters only, without\n\
+defining any new hooks." True
+
+# The above parameters are useful to change for multi-level networks, e.g.:
+#   call or_defs
+#   set or_defs::region="Secondary" or_defs::rregionset="Region::${or_defs::region}::"
+#   set or_defs::oregionset="Region::${or_defs::region}::" or_defs::trainstart="${tend}-10"
+#   call or_defs
+
+
+define_param Region::ids Param_Float  0 Uninitialized \
+ "Input density scale.  If you wish to use multiple inputs or inputs\n\
+significantly differing in size from the original ones, change\n\
+this parameter to the ratio between the new pattern's activity levels\n\
+and the old one's.  For instance, if you want to use a set of patterns which\n\
+(on average) cause 4 times as much activation, set this parameter to 4.0." 2.0
+
+
+define_param Region::ts Param_Float  0 Uninitialized \
+ "Time scale.  Determines how much time is actually spent at each iteration\n\
+range specified in these parameter files.  Varying it independently does not\n\
+generally work well; single presentations cannot usually be replaced with\n\
+more or fewer presentations even if learning rates are adjusted to compensate.\n\
+Generally used only to compensate for changes in the ids parameter, i.e.\n\
+set it to 1.0/(Region::Primary::ids), since e.g. presenting twice as many\n\
+patterns at each iteration has the effect of dividing the time needed in\n\
+half.  When there are multiple regions each should presumably share the same\n\
+time scale unless their training phases are offset using the trainstart\n\
+parameter." 1.0
+
+
+define_param Region::rf_radius_scale Param_Float   0 Uninitialized \
+ "Scale of RF radius relative to an arbitrary base case." 1.0
+
+
+define_param Region::input_area_scale Param_Float 0 Uninitialized \
+ "Scale of the region over which input patterns are drawn, relative to an\n\
+arbitrary base case.  This region is usually the retina, but particular\n\
+simulations may place input centers within any arbitrary region, so\n\
+this area does not necessarily correspond to the size of the retina.\n\
+Note that it is an area scale, not a width scale, unlike some other\n\
+scale parameters also called area_scale." 1.0
+
+
+define_param Region::acs Param_Float  0 Uninitialized \
+ "Afferent connection scale.  Used to keep the total unnormalized weight\n\
+change per iteration the same as in an arbitrary canonical case." 1.0
+
+
+define_param Region::ecs Param_Float  0 Uninitialized \
+ "Lateral excitatory connection scale.  Used to keep the total unnormalized\n\
+weight change per iteration the same as in an arbitrary canonical case." 1.0
+
+
+define_param Region::ics Param_Float  0 Uninitialized \
+ "Lateral inhibitory connection scale.  Used to keep the total unnormalized\n\
+weight change per iteration the same as in an arbitrary canonical case." 1.0
+
+
+define_param Region::min_exc_rad Param_Float   0  exc_rad \
+ "Minimum exc_rad value allowed.  This value sets a lower bound on the range of\n\
+network sizes whose maps have similar global arrangements of features.  Once \n\
+this bound is reached (as network size is decreased), the spatial frequency of\n\
+the map features will begin to increase relative to larger maps.  However,\n\
+smaller values provide more finely-detailed lateral weight patterns for large\n\
+networks, so the value set here is a tradeoff; decrease it if working only\n\
+with large maps." 1.5
+
+
+define_param Region::s_delta     Param_Float   0  Uninitialized \
+ "Starting value for the delta parameter of the sigmoid function." 0.10
+
+
+define_param Region::s_beta      Param_Float   0  Uninitialized \
+ "Starting value for the beta parameter of the sigmoid function." 0.65
+
+
+# Not meaningful to set per region, so if set per region is moved down to the global Region set
+define_param Region::onoff       Param_Boolean False True \
+ "Whether to define ON and OFF layers between the Retina and region Primary." False
+
+
+# Not meaningful to set per region, so if set per region is moved down to the global Region set
+define_param Region::num_cortex_layers  Param_Integer 1 2 \
+ "The number of cortical layers to use.  When the number is greater than one, the map\n\
+name is added to filenames of generated files to keep them from overwriting each other." 1
+
+
+# The double call to read_args ensures that any parameters used in
+# these expressions have the caller's values, if any, before the
+# expressions are evaluated.
+#
+define_param_set Region::${or_defs::region}
+read_args Region::${or_defs::region}
+set ${or_defs::oregionset}::rf_radius_scale=6.5/Region::${or_defs::region}::rf_radius
+set ${or_defs::oregionset}::acs=6.5*6.5*1/Region::${or_defs::region}::rf_radius/Region::${or_defs::region}::rf_radius/Region::${or_defs::region}::num_aff_inputs
+set ${or_defs::oregionset}::ecs=19.5*19.5/Region::${or_defs::region}::exc_rad/Region::${or_defs::region}::exc_rad
+set ${or_defs::oregionset}::ics=47.5*47.5/Region::${or_defs::region}::inh_rad/Region::${or_defs::region}::inh_rad
+set ${or_defs::oregionset}::min_exc_rad=1.5>?BaseN/44
+set ${or_defs::oregionset}::s_delta=0.10
+set ${or_defs::oregionset}::s_beta=Region::${or_defs::region}::s_delta+0.55
+
+# Assumes patterns drawn on area of size RN*RN, relative to a base case
+# of BaseRN+2*rf_radius, where rf_radius was 0.25*BaseRN
+set ${or_defs::oregionset}::input_area_scale=(RN*RN)/(1.5*BaseRN*1.5*BaseRN) 
+
+set ${or_defs::oregionset}::ts=1.0/Region::${or_defs::region}::ids
+set ${or_defs::oregionset}::onoff=False
+read_args Region::${or_defs::region}
+
+# Some parameters are used only at the all-region level, so we need to bring
+# their values down if the user has set them at the individual region level.
+set Region::onoff=Region::${or_defs::region}::onoff
+set Region::num_cortex_layers=Region::${or_defs::region}::num_cortex_layers
+
+
+
+###############################################################################
+# Declarations and shortcuts; not intended to be changed often
+
+
+define_param or_defs::rs     Param_String   0  Uninitialized \
+ "Learning rate scale.  Computed from Region::$${or_defs::region}::ts and\n\
+or_defs::$${or_defs::region}::ids to determine the the scale to use for learning\n\
+rates." ""
+set or_defs::rs="(1.0/Region::${or_defs::region}::ts/Region::${or_defs::region}::ids)"
+
+
+define_param or_defs::dinc   Param_String   0  Uninitialized \
+ "Abbreviation for incrementing delta relative to s_delta" ""
+set or_defs::dinc="${or_defs::rregionset}::delta=Region::${or_defs::region}::s_delta+"
+
+
+define_param or_defs::binc   Param_String   0  Uninitialized \
+ "Abbreviation for incrementing beta relative to s_beta" ""
+set or_defs::binc="${or_defs::rregionset}::beta=Region::${or_defs::region}::s_beta+"
+
+
+define_param or_defs::aimul  Param_String   0  Uninitialized \
+ "Abbreviation for multiplying alpha_input by its scaling factors" ""
+set or_defs::aimul="${or_defs::rregionset}::alpha_input=Region::${or_defs::region}::acs*${or_defs::rs}*"
+
+
+define_param or_defs::erad   Param_String   0  Uninitialized \
+ "Abbreviation for reducing the excitatory_radius, limited by min_exc_rad.\n\
+Notice that a trailing parenthesis must be supplied." ""
+set or_defs::erad="Region::${or_defs::region}::exc_rad=Region::${or_defs::region}::min_exc_rad>?(Region::${or_defs::region}::exc_rad*"
+
+
+define_param tscale          Param_String   0 Uninitialized \
+ "Expression to scale and offset an iteration number as appropriate for ts and trainstart."
+set tscale="*Region::${or_defs::region}::ts+${or_defs::trainstart}"
+
+
+
+###############################################################################
+# Training
+
+# Network architecture
+# 
+# Usually these parameters are set in the .lissomrc file instead:
+#
+#   set  BaseN=xx  BaseRN=xx  area_scale=xx
+#
+# Increase BaseN to use more neurons to represent a given area of the retina.
+# Increase BaseRN to use more retinal ganglia to represent a given area of the
+# visual field.  Increase area_scale to increase the total area of the visual
+# field represented in the retina and the cortex.
+#
+set default_afferent_size_scale=BaseN/BaseRN
+set gammaexc=0.9 gammainh=0.9
+set noise=0
+
+# Initial order
+set randomness=0 lat_exc_randomness=1 lat_inh_randomness=1
+set preset_aff_wts=False preset_lat_wts=True  
+set ${or_defs::rregionset}::preset_sigma_aff=Region::${or_defs::region}::rf_radius/1.3
+set ${or_defs::rregionset}::preset_sigma_exc=0.78*Region::${or_defs::region}::exc_rad
+set ${or_defs::rregionset}::preset_sigma_inh=2.08*Region::${or_defs::region}::inh_rad
+set circular_aff_wts=True  circular_lat_wts=True
+set smooth_circular_outlines=True smooth_circular_radius_trim=-0.25
+
+
+# Inputs
+#
+# Based on the defaults set in or_defs, not any particular region
+set input_default_type=Input_Gaussian
+set inputs_pereye=(Region::${or_defs::region}::ids*Region::${or_defs::region}::input_area_scale)>?1 uncorrelation=0.0 
+set xsigma=7.0/Region::${or_defs::region}::rf_radius_scale ysigma=1.5/Region::${or_defs::region}::rf_radius_scale
+set scale_input=1.0 normalize_aff=False
+set blur_radius=0
+set input_separation_min_enforce=True
+
+# Support for ON and OFF cell layers
+# The input can be any value, but is expected to have a typical contrast of 0.5.
+# The ON and OFF cell layers are cropped to the range 0.0..1.0 so that areas
+# of peak contrast will not overwhelm later regions.
+if (Region::onoff) \
+ set blur_type=Blur_DoGGoD blur_radius=0.5/Region::${or_defs::region}::rf_radius_scale \
+     blur_radius_surround_multiplier=4.0 blur_scale=2*2.33 \
+     Region::.defaults::Retina::activity_threshold=Uninitialized scale_input=0.5 input_offset=0.5 input_accum_type=Accum_Add \
+     Region::.defaults::Convolution::activity_lbound=0.0 Region::.defaults::Convolution::activity_ubound=1.0
+
+# Misc
+set dynamics=0
+set tend=20000*Region::${or_defs::region}::ts+10
+
+
+# The 'exec's below are to force immediate string substitution in case
+# the strings are later redefined for other networks.
+#0.0003*Region::${or_defs::region}::ics"
+# Pruning
+if (or_defs::hooks) exec 'hook before_input (20000${tscale}) exec "set ${or_defs::rregionset}::inh_death=0.0"  "kill_connections regions=${or_defs::region}"'
+
+# Saving (only enable if desired; the weight file can be as large as
+# the RAM needed, though it is usually half that)
+if (or_defs::hooks) exec 'hook after_learning (tend-10+${or_defs::trainstart}) save_snapshot regions=${or_defs::region}'
+set cmd::load_snapshot::tend=tend-10
+
+# Training phases
+
+exec 'set                                                        ${or_defs::rregionset}::tsettle=09                      ${or_defs::dinc}0.00 ${or_defs::binc}0.00 ${or_defs::aimul}0.0070  ${or_defs::rregionset}::alpha_exc=0.002*Region::${or_defs::region}::ecs*${or_defs::rs} ${or_defs::rregionset}::alpha_inh=0.00025*Region::${or_defs::region}::ics*${or_defs::rs}'
+if (or_defs::hooks) exec 'hook before_input   (200${tscale}) set ${or_defs::rregionset}::tsettle=09 ${or_defs::erad}0.6) ${or_defs::dinc}0.01 ${or_defs::binc}0.01 ${or_defs::aimul}0.0070  ${or_defs::rregionset}::alpha_exc=0.002*Region::${or_defs::region}::ecs*${or_defs::rs}'
+if (or_defs::hooks) exec 'hook before_input   (500${tscale}) set ${or_defs::rregionset}::tsettle=09 ${or_defs::erad}0.7) ${or_defs::dinc}0.02 ${or_defs::binc}0.02 ${or_defs::aimul}0.0050  ${or_defs::rregionset}::alpha_exc=0.001*Region::${or_defs::region}::ecs*${or_defs::rs}'
+if (or_defs::hooks) exec 'hook before_input  (1000${tscale}) set ${or_defs::rregionset}::tsettle=09 ${or_defs::erad}0.8) ${or_defs::dinc}0.05 ${or_defs::binc}0.03 ${or_defs::aimul}0.0050'
+if (or_defs::hooks) exec 'hook before_input  (2000${tscale}) set ${or_defs::rregionset}::tsettle=10 ${or_defs::erad}0.8) ${or_defs::dinc}0.08 ${or_defs::binc}0.05 ${or_defs::aimul}0.0040'
+if (or_defs::hooks) exec 'hook before_input  (3000${tscale}) set ${or_defs::rregionset}::tsettle=10 ${or_defs::erad}0.8) ${or_defs::dinc}0.10 ${or_defs::binc}0.08 ${or_defs::aimul}0.0040'
+if (or_defs::hooks) exec 'hook before_input  (4000${tscale}) set ${or_defs::rregionset}::tsettle=10 ${or_defs::erad}0.6) ${or_defs::dinc}0.10 ${or_defs::binc}0.11 ${or_defs::aimul}0.0030'
+if (or_defs::hooks) exec 'hook before_input  (5000${tscale}) set ${or_defs::rregionset}::tsettle=11 ${or_defs::erad}0.6) ${or_defs::dinc}0.11 ${or_defs::binc}0.14 ${or_defs::aimul}0.0030'
+if (or_defs::hooks) exec 'hook before_input  (6500${tscale}) set ${or_defs::rregionset}::tsettle=12 ${or_defs::erad}0.6) ${or_defs::dinc}0.12 ${or_defs::binc}0.17 ${or_defs::aimul}0.0030'
+if (or_defs::hooks) exec 'hook before_input  (8000${tscale}) set ${or_defs::rregionset}::tsettle=13 ${or_defs::erad}0.6) ${or_defs::dinc}0.13 ${or_defs::binc}0.20 ${or_defs::aimul}0.0030'
+if (or_defs::hooks) exec 'hook before_input (20000${tscale}) set ${or_defs::rregionset}::tsettle=13 ${or_defs::erad}0.6) ${or_defs::dinc}0.14 ${or_defs::binc}0.23 ${or_defs::aimul}0.0015'
+
+#

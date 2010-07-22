@@ -1,0 +1,265 @@
+.\" bib2html
+.TH BIB2HTML L "14 August 1995"
+.SH NAME
+bib2html \- BibTeX bibliography to HTML converter
+.SH SYNOPSIS
+.B bib2html
+[
+.B \-a
+] [
+.B \-c
+] [
+.B \-d
+.I delimiter
+] [
+.B \-h
+.I heading
+] [
+.B \-r
+]
+.B \-s
+.I style
+] [
+.B \-t
+] [
+.B \-v
+] [
+.B \-3
+]
+.I sourcefile
+[
+.I htmlfile
+]
+.SH DESCRIPTION
+.LP
+.B bib2html
+converts a bibtex-format bibliography file to HTML.  
+.I sourcefile
+may be either a BibTeX-format bibliography
+.RB ( .bib )
+file or a LaTeX-format
+.RB ( .aux )
+file.
+.P
+Since the
+HTML-formatted bibliography will often be just part of a larger
+HTML file,
+.B bib2html
+attempts to update the HTML file in place.  It does this
+by searching
+.I htmlfile
+for two special strings, which delimit
+the bibliography part of the file.
+These strings are the HTML comments
+.IP
+<!-- BEGIN BIBLIOGRAPHY
+.I delimiter
+-->
+.IP
+<!-- END BIBLIOGRAPHY
+.I delimiter
+-->
+.P
+If these delimiters are found, the old bibliography between them is
+replaced with the new bibliography.
+Otherwise the new bibliography, with the appropriate delimiters,
+is appended to the end of
+.IR htmlfile ,
+and it will be necessary to move it to the proper location by hand.
+Note that it is possible for
+.I htmlfile
+to contain any number of bibliographies, and they may be updated
+independently.
+If no
+.I htmlfile
+is specified, the bibliography is written to standard output.
+.P
+The tag of each BibTeX bibliography entry is converted into a name
+anchor (<A NAME="tag">) in
+.IR htmlfile ,
+and may be used to construct a link to this particular entry.
+.SS Special Field Processing
+.P
+Several BibTeX fields are treated specially.  The filenames specified
+in the
+.BR postscript ,
+.BR pdf ,
+and
+.B dvi
+fields are relative to the
+.I htmlfile
+directory.  In addition,
+.B bib2html
+recognizes compressed or gzipped files
+(those with filenames ending in
+.BR .Z ,
+.BR .gz ,
+or
+.BR .z ).
+.TP
+.B url
+If the
+.B url
+field exists, a link (``A'' tag) is created.  The destination
+of the link is the
+.B url
+tag's value.
+The bibliography entry's title is the source of the link.
+This can be used to create a link to a HTML version of the paper,
+or to a version that is available by ftp.
+.TP
+.B postscript
+If the
+.B postscript
+field exists, its value is used as the name of a PostScript file.
+.B bib2html
+creates a link to the file.
+, and updates
+.I htmlfile
+with the number of pages and size of the PostScript file.
+.TP
+.B pdf
+If the
+.B pdf
+field exists, its value is used as the name of a PDF (portable document
+format) file.
+.B bib2html
+creates a link to the file and updates
+.I htmlfile
+with the size of the PDF file.
+.TP
+.B dvi
+If the
+.B dvi
+field exists, its value is used as the name of a TeX DVI file.
+.B bib2html
+creates a link to the file and updates
+.I htmlfile
+with the number of pages and size of the DVI file.
+.TP
+.BR author , " keywords"
+The full
+.B author
+and
+.B keywords
+fields of each BibTeX entry are included in
+.I htmlfile
+as HTML comments, and may be used by CGI scripts (such as
+.BR bibsearch ,
+which is supplied) to select only certain entries.
+.SS Hints
+.BR bib2html 's
+LaTeX to HTML conversion is not very smart.
+If something isn't being converted correctly, try doing it in a different way.
+.P
+.B bib2html
+does not currently understand \fI\\verb\fR.
+To get a tilde into a filename or URL, use \fI\\~{}\fR.
+.SH OPTIONS
+.TP
+.B \-a
+Include the BibTeX file's abstract field in the bibliography.
+.TP
+.B \-c
+Sort chronologically.  Normally, the bibliography is ordered first by
+author and then by year.  With this option, the bibliography is
+ordered by year and then author.
+.TP
+.BI \-d " delimiter"
+Specify the delimiter that sets the bibliography off from the rest
+of the HTML file.  The default delimiter is the name of the bibliography
+file with the
+.B .bib
+extension stripped.
+.TP
+.BI \-h " heading"
+Use the string
+.I heading
+instead of the default title when creating a new
+.IR htmlfile .
+If updating an existing
+.IR htmlfile ,
+this option is ignored.
+.TP
+.B -r
+Reverse the chronological sorting order.  Normally, the bibliography
+is sorted from the earliest entry to the latest entry.  With this
+option, the order is reversed.
+.TP
+.BI \-s " style"
+Create a
+.IR style \-style
+bibliography.  Supported styles are
+.B empty
+(the default),
+.BR plain ,
+.BR unsort ,
+.BR alpha ,
+and
+.BR named .
+An
+.B empty
+bibliography is a bulleted list.  A
+.B plain
+bibliography is a numbered list.
+.B unsort
+is like
+.B plain
+except that the entries in the HTML file are in the same order as
+as they are in the source file.  An
+.B alpha
+bibliography has labels that are in the BibTeX alpha style.  A
+.B named
+bibliography has labels of the form [name, year].
+.TP 
+.B \-t
+Write a timestamp with the date at which the bibliography was
+updated to 
+.IR htmlfile .
+.TP
+.B \-v
+Report version number on stderr.
+.TP
+.B \-3
+Perform some HTML 3.0 mappings.
+.SH FILES
+.PD 0
+.TP 14
+.B html-a.bst
+alpha HTML BibTeX style file
+.TP
+.B html-n.bst
+named HTML BibTeX style file
+.TP
+.B html-u.bst
+unsort HTML BibTeX style file
+.TP
+.BR html-aa.bst ", " html-na.bst ", " html-ua.bst
+versions of the above style files with abstracts
+.TP
+.B bibsearch
+a CGI script for performing bibliography searches
+.PD
+.SH SEE ALSO
+.BR perl (L),
+.BR bibtex (L).
+.br
+.ne 8
+.SH BUGS
+.LP
+The LaTeX to HTML translation, while decent, is not perfect.
+.LP
+Requires bibtex and perl.  However, I think that most
+sites that would want to convert BibTeX to HTML will already
+have both programs installed.
+.LP
+Relies on dviselect to count the number of pages in a DVI file.
+.SH AUTHOR
+David Hull
+.RI ( hull@cs.uiuc.edu ),
+University of Illinois at Urbana-Champaign.
+See
+.I http://pertsserver.cs.uiuc.edu/~hull/bib2html/
+for the latest version.
+This is free software, and may be modified or redistributed under
+the terms of the GNU Public License.

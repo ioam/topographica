@@ -1,0 +1,193 @@
+from __future__ import division
+"""
+A LISSOM-based orientation map, designed to match the equivalent
+C++ simulation.
+
+This file is much more complex than necessary, because it is set up to
+match the C++ version of the LISSOM simulator as closely as possible.
+Most of the variables below are just temporary ones designed to match
+those in the other simulator. In addition, some of the techniques for
+setting up the network are out of date. Please do not use this file as
+an example of how to use Topographica.
+
+
+To have automatic comparisons made between the Topographica results
+and c++ ones, set comparisons=True before running:
+./topographica -c "comparisons=True" topo/tests/reference/lissom_or_reference.ty
+
+See also 'make compare_or' and 'make or_comparisons'.
+
+Note that all comparison commands currently only work on platforms
+where the lissom5 binary can run (e.g. linux).
+
+
+
+Notes
+=====
+
+Matches the orientation map simulation from figure 6.4 (Reduced) of
+Miikkulainen, Bednar, Choe, and Sirosh (2005), Computational Maps in
+the Visual Cortex, Springer, except:
+
+ - The default_density is smaller for practicality (142 in the book)
+ - The lateral inhibitory radius is 0.5 matrix units greater than in the 
+   book, becauseTopographica enforces good circular-shaped CF outlines.
+ - Input patterns are evaluated on the entire retina, instead of only up
+   to bounds_multiplier=2.5 times the gaussian sigma in the book
+ - Input pattern parameters are cropped to a precision of 1 decimal
+   place so that they can be exchanged losslessly between simulators
+ - Weight patterns are not smoothed around the edges, unlike
+   smooth_circular_outlines=True and smooth_circular_radius_trim=-0.25
+   used in the book
+ - Initial weight patterns were all Constant rather than random afferent
+   and Gaussian sigma preset_sigma_exc=11.076 preset_sigma_inh=71.76
+   lateral weights used in the book.
+ - Inhibitory weight pruning is disabled (not pruning all weights below
+   1e-5 as in the book)
+ - Only one input pattern is used per iteration, instead of two patterns
+   with input_separation_min=14.3 LGN units in the book
+
+All but the first two of these need to be fixed eventually.
+
+$Id$
+"""
+__version__='$Revision$'
+
+
+
+# Notes for developers:
+# 
+# This simulation will not pickle, but that is only because it defines
+# functions in __main__ (and uses lambda functions). Many variables are
+# also defined in __main__; some these would have to be made available
+# again for the simulation to work.
+
+# If you get a StopIteration error related to dynamic number, be sure
+# that the log file or_map_topo.log contains at least as many iterations
+# as you are trying to perform in this simulation.
+
+
+import fixedpoint
+import numpy.oldnumeric as Numeric
+
+from math import pi, sqrt
+
+from topo.base.boundingregion import BoundingBox
+from topo.sheet.lissom import LISSOM
+from topo.sheet import GeneratorSheet
+from topo.projection.basic import CFProjection,ResizableCFProjection
+from topo.transferfn.basic import PiecewiseLinear
+from topo.responsefn.optimized import CFPRF_DotProduct_opt
+from topo.learningfn.optimized import CFPLF_Hebbian_opt
+from topo.transferfn.optimized import CFPOF_DivisiveNormalizeL1_opt
+import topo.pattern.basic
+
+
+### Name of the basis simulation (set this)
+name = "010910_or_map_512MB"
+
+
+##### comparisons #####
+from topo.tests.reference.lissom_log_parser import get_input_params,\
+     initialize_clissom_data
+from common_control import run_comparisons
+from topo_or_defs import *
+
+BaseN=locals().get("BaseN",24)
+BaseRN=locals().get("BaseRN",24)
+
+# import variables designed to match 010910_or_map_512MB.param and or_defs
+locals().update(initialize_variables(BaseRN,BaseN))
+
+initialize_clissom_data(name,inh_rad=inh_rad,rf_radius=rf_radius,
+                        exc_rad=exc_rad,BaseRN=BaseRN,BaseN=BaseN)
+#######################
+
+
+
+### create Topographica simulation
+
+print "Running topographica simulation..."
+
+# Number of decimal places for simulator time
+from fixedpoint import FixedPoint
+topo.sim.set_time_type(FixedPoint,3)
+
+input_bounds = BoundingBox(radius=RN/(BaseRN*area_scale)/2.0)
+gaussian_width = xsigma/BaseRN/sqrt(2.0)
+gaussian_height = ysigma/BaseRN/sqrt(2.0)
+
+# get input pattern position parameters from the log file output of
+# the equivalent c++ simulation
+n_inputs,input_params = get_input_params()
+
+input_pattern = topo.pattern.basic.Gaussian(
+    scale=scale_input,
+    #bounds=input_bounds,
+    size = 2*gaussian_height,
+    aspect_ratio= gaussian_width/gaussian_height,
+    # c++ positions and angle need to be converted to match Topographica
+    x=lambda : input_params[0]['cx'].next()/BaseRN - 0.5*RN/BaseRN,
+    y=lambda : input_params[0]['cy'].next()/BaseRN - 0.5*RN/BaseRN,
+    orientation=lambda : round(2*pi*input_params[0]['theta'].next()/360.0,1))
+
+
+CFProjection.cf_shape = topo.pattern.basic.Disk(smoothing=0.0)
+CFProjection.weights_generator = topo.pattern.basic.Constant()
+CFProjection.response_fn=CFPRF_DotProduct_opt()
+CFProjection.learning_fn=CFPLF_Hebbian_opt()
+CFProjection.weights_output_fns=[CFPOF_DivisiveNormalizeL1_opt()]
+
+
+topo.sim['Eye0'] = GeneratorSheet(input_generator=input_pattern,
+                                  nominal_bounds=input_bounds,
+                                  nominal_density=BaseRN*area_scale,
+                                  period=1,
+                                  phase=0.05,
+                                  precedence=0)
+
+topo.sim['Primary'] = LISSOM(output_fns=[PiecewiseLinear(lower_bound=delta_i,
+                                                         upper_bound=beta_i)],
+                             nominal_density = BaseN,
+                             tsettle=tsettle,
+                             precedence=1)
+
+Af = topo.sim.connect('Eye0','Primary', delay = fixedpoint.FixedPoint("0.05"),
+                 connection_type=CFProjection,strength = 1.0, name='Afferent0',
+                 nominal_bounds_template=BoundingBox(radius=rf_radius/BaseRN))
+
+LE = topo.sim.connect('Primary','Primary', delay = fixedpoint.FixedPoint("0.05"),
+                 connection_type=ResizableCFProjection,strength=gammaexc,
+                 name='LateralExcitatory',
+                 nominal_bounds_template=BoundingBox(radius=exc_rad/BaseN,
+                                                     min_radius=min_exc_rad/BaseN))
+
+LI = topo.sim.connect('Primary','Primary', delay = fixedpoint.FixedPoint("0.05"),
+                 connection_type=CFProjection,strength=-gammainh,
+                 name='LateralInhibitory',
+                 nominal_bounds_template=BoundingBox(radius=inh_rad/BaseN) )
+
+
+
+
+# Topographica learning rate is independent of density
+Af.learning_rate=alpha_input*Af.n_units
+LE.learning_rate=alpha_exc*LE.n_units
+LI.learning_rate=alpha_inh*LI.n_units
+
+# Scheduled actions
+add_scheduled_outputfn_changes(topo.sim)
+add_scheduled_tsettle_changes(topo.sim)
+add_scheduled_exc_bounds_changes(topo.sim)
+add_scheduled_exc_Lrate_changes(topo.sim)
+add_scheduled_aff_Lrate_changes(topo.sim)
+
+
+
+
+##### comparisons #####
+if locals().get('comparisons',False):
+    verbose = locals().get("verbose",False)
+    stop_at_1000=locals().get("stop_at_1000",False)
+    run_comparisons(locals())
+#######################

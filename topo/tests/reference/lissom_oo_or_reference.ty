@@ -1,0 +1,246 @@
+from __future__ import division
+
+"""
+LISSOM simulation designed to match C++ LISSOM's oo_or_map_topo
+simulation.
+
+Please see the comments for lissom_or_reference.
+
+$Id$
+"""
+__version__='$Revision$'
+
+
+# CB: the plan is to make this file more and more general while
+# keeping it matching the equivalent c++ lissom simulation (i.e. do to
+# this what was done to lissom_or_reference/or_map_topo.param).
+
+
+import numpy.oldnumeric as Numeric
+from math import pi, sqrt
+
+import topo.pattern.basic
+
+from topo.sheet.lissom import LISSOM
+from topo.sheet import GeneratorSheet
+from topo.projection.basic import CFProjection,SharedWeightCFProjection,ResizableCFProjection
+from topo.responsefn.optimized import CFPRF_DotProduct_opt
+from topo.base.sheet import BoundingBox
+from topo.base.cf import CFSheet
+from topo.base.boundingregion import BoundingBox
+from topo.learningfn.optimized import CFPLF_Hebbian_opt
+from topo.transferfn.optimized import CFPOF_DivisiveNormalizeL1_opt
+from topo.transferfn.basic import DivisiveNormalizeL1,PiecewiseLinear
+
+
+### Name of the basis simulation (set this)
+name = "010910_oo_or_map_512MB" 
+
+##### comparisons #####
+from topo.tests.reference.lissom_log_parser import get_input_params,\
+     initialize_clissom_data
+from common_control import run_comparisons
+from topo_or_defs import *
+
+BaseN=locals().get("BaseN",24)
+# CB: something's not matching for 48, but this simulation can
+# definitely match at that density (so just a parameter mismatch -
+# will be fixed as generalization progresses...)
+BaseRN=locals().get("BaseRN",24)
+
+locals().update(initialize_variables(BaseRN,BaseN))
+
+# ********************************************************************
+
+BaseLN = BaseRN
+
+# radius of LGN DoG center Gaussian
+sigma_c = 0.5/rf_radius_scale
+
+# radius of LGN DoG surround Gaussian
+sigma_s = 4*sigma_c 
+
+# radius of LGN afferent connections
+r_L = 4.7*sigma_s
+
+blur_scale=2*2.33
+
+## CEBALERT
+from math import ceil
+LN=ceil(BaseLN*area_scale+2*(rf_radius-0.5))
+if LN%2==1: LN+=1
+RN = ceil(area_scale*BaseLN+2*(BaseRN/BaseLN)*(rf_radius-0.5)+2*(r_L-0.5))
+if RN%2==1:RN+=1
+##
+
+# CB: need to deal with this more cleanly
+acs/=2.0 # divided by n_aff_inputs
+alpha_input=0.007*acs
+# ********************************************************************
+
+initialize_clissom_data(name,inh_rad=inh_rad,rf_radius=rf_radius,
+                        BaseRN=BaseRN,BaseN=BaseN,exc_rad=exc_rad)
+
+#######################
+
+
+
+
+
+# Topographica simualtion...
+
+# Number of decimal places for simulator time
+from fixedpoint import FixedPoint
+topo.sim.set_time_type(FixedPoint,3)
+
+# input generation params
+GeneratorSheet.nominal_density = BaseRN*area_scale
+GeneratorSheet.period = 1.0
+GeneratorSheet.phase=0.05
+
+# take the input pattern position parameters from the log file output
+# of the equivalent c++ simulation
+n_inputs,input_params = get_input_params()
+
+print "Number of patterns available for learning iterations:",n_inputs
+
+gaussian_width = xsigma/BaseRN/sqrt(2.0)
+gaussian_height = ysigma/BaseRN/sqrt(2.0)
+
+input_pattern = topo.pattern.basic.Gaussian(
+    scale=scale_input,
+    size = 2*gaussian_height,
+    aspect_ratio= gaussian_width/gaussian_height,
+    x=lambda : input_params[0]['cx'].next()/BaseRN - 0.5*LN/BaseRN,
+    y=lambda : input_params[0]['cy'].next()/BaseRN - 0.5*LN/BaseRN,
+    orientation=lambda : input_params[0]['theta'].next())
+
+retina_bounds = BoundingBox(radius=0.5*RN/(BaseRN*area_scale))
+lgn_bounds = BoundingBox(radius=0.5*LN/(BaseLN*area_scale))
+
+# Connection parameters
+lgn_weight_bounds = BoundingBox(radius=r_L/BaseRN)
+afferent_weight_bounds   = BoundingBox(radius=rf_radius/BaseLN)               
+excitatory_weight_bounds = BoundingBox(radius=exc_rad/BaseN,
+                                       min_radius=min_exc_rad/BaseN)  
+inhibitory_weight_bounds = BoundingBox(radius=inh_rad/BaseN)                  
+
+
+# Circular ConnectionFields
+CFProjection.cf_shape = topo.pattern.basic.Disk(smoothing=0.0)
+CFProjection.weights_generator = topo.pattern.basic.Constant()
+CFProjection.response_fn=CFPRF_DotProduct_opt()
+CFProjection.learning_fn=CFPLF_Hebbian_opt()
+CFProjection.weights_output_fns=[CFPOF_DivisiveNormalizeL1_opt()]
+
+SharedWeightCFProjection.response_fn=CFPRF_DotProduct_opt()
+
+# CB: examples/ files should not copy this, because we prefer the way
+# topographica sizes the mask (c++ lissom and topographica are the
+# same for certain values of r_L, but topographica makes the mask size
+# match the actual connectionfield in general).
+SharedWeightCFProjection.autosize_mask=False
+SharedWeightCFProjection.cf_shape=topo.pattern.basic.Disk(smoothing=0.0,
+                                                           size=2.0*r_L/BaseLN)
+
+
+
+topo.sim['Eye0'] = GeneratorSheet(nominal_bounds=retina_bounds,
+                                  input_generator=input_pattern,
+                                  precedence=0)
+
+topo.sim['Ganglia00'] = CFSheet(nominal_bounds=lgn_bounds,nominal_density=BaseLN,
+                                output_fns=[PiecewiseLinear(lower_bound=0.0,
+                                                            upper_bound=1.0)],
+                                precedence=1)
+
+topo.sim['Ganglia01'] = CFSheet(nominal_bounds=lgn_bounds,nominal_density=BaseLN,
+                                output_fns=[PiecewiseLinear(lower_bound=0.0,
+                                                            upper_bound=1.0)],
+                                precedence=1)
+
+topo.sim['Primary'] = LISSOM(nominal_density=BaseN,
+                             tsettle=tsettle,
+                             output_fns=[PiecewiseLinear(lower_bound=delta_i,
+                                                         upper_bound=beta_i)],
+                             precedence=2)
+
+
+# C++ LISSOM divides by pi in RadialFunction::Gaussian but not for
+# Gaussian in retinalobjs (and elsewhere)
+centerg = topo.pattern.basic.Gaussian(
+    size=2*sigma_c*sqrt(pi)/BaseRN,aspect_ratio=1.0,
+    output_fns=[DivisiveNormalizeL1(norm_value=blur_scale)])
+
+surroundg = topo.pattern.basic.Gaussian(
+    size=2*sigma_s*sqrt(pi)/BaseRN,aspect_ratio=1.0,
+    output_fns=[DivisiveNormalizeL1(norm_value=blur_scale)])
+
+
+on_weights = topo.pattern.basic.Composite(
+    generators=[centerg,surroundg],operator=Numeric.subtract)
+
+off_weights = topo.pattern.basic.Composite(
+    generators=[surroundg,centerg],operator=Numeric.subtract)
+
+
+topo.sim.connect('Eye0','Ganglia00',delay=FixedPoint("0.05"),
+                 connection_type=SharedWeightCFProjection,strength=1.0,
+                 nominal_bounds_template=lgn_weight_bounds,
+                 weights_generator=on_weights,name="Afferent0")
+
+topo.sim.connect('Eye0','Ganglia01',delay = FixedPoint("0.05"),
+                 connection_type=SharedWeightCFProjection,strength=1.0,
+                 nominal_bounds_template=lgn_weight_bounds,
+                 weights_generator=off_weights,name="Afferent0")
+
+
+Af00 = topo.sim.connect('Ganglia00','Primary',delay=FixedPoint("0.05"),
+                dest_port=('Activity','JointNormalize', 'Afferent'),
+                connection_type=CFProjection,strength=1.0,name='Afferent00',
+                nominal_bounds_template=afferent_weight_bounds)
+
+Af01 = topo.sim.connect('Ganglia01','Primary',delay=FixedPoint("0.05"),
+                 dest_port=('Activity','JointNormalize', 'Afferent'),
+                 connection_type=CFProjection,strength=1.0,name='Afferent01',
+                 nominal_bounds_template=afferent_weight_bounds)
+
+
+LE = topo.sim.connect('Primary','Primary',delay=FixedPoint("0.05"),
+                 connection_type=ResizableCFProjection,strength=0.9,
+                 name='LateralExcitatory',
+                 nominal_bounds_template=excitatory_weight_bounds)
+            
+LI = topo.sim.connect('Primary','Primary',delay=FixedPoint("0.05"),
+                 connection_type=CFProjection,strength=-0.9,
+                 name='LateralInhibitory',
+                 nominal_bounds_template=inhibitory_weight_bounds)
+
+
+
+topo.sim.run(0) # topog doesn't jointly normalize weights on creation
+
+
+# Topographica learning rate is independent of density
+Af00.learning_rate=alpha_input*Af00.n_units
+Af01.learning_rate=alpha_input*Af01.n_units
+LE.learning_rate=alpha_exc*LE.n_units
+LI.learning_rate=alpha_inh*LI.n_units
+
+
+# Scheduled actions
+add_scheduled_outputfn_changes(topo.sim)
+add_scheduled_tsettle_changes(topo.sim)
+add_scheduled_exc_bounds_changes(topo.sim)
+add_scheduled_exc_Lrate_changes(topo.sim)
+add_scheduled_aff_Lrate_changes(topo.sim,"Af01")
+add_scheduled_aff_Lrate_changes(topo.sim,"Af00")
+
+
+##### comparisons #####
+if locals().get('comparisons',False):
+    verbose = locals().get("verbose",False)
+    stop_at_1000=locals().get("stop_at_1000",False)
+    run_comparisons(locals())
+#######################
+

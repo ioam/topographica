@@ -1,0 +1,30 @@
+>>> import param
+>>> from gmpy import mpq
+
+>>> class TestPO1(param.Parameterized):
+...    z = param.Number(default=mpq(1),bounds=(-1,1))
+
+>>> t1 = TestPO1()
+
+### Check Number accepts gmpy.mpq
+>>> t1.z
+mpq(1)
+
+>>> t1.z = mpq(0.999)
+>>> t1.z-=0.0004
+>>> t1.z
+mpq(4993,5000)
+
+>>> try:
+...    t1.z+=1
+... except ValueError:
+...    pass
+... else:
+...    raise AssertionError("Number's bounds were not respected.")
+
+
+
+
+
+
+

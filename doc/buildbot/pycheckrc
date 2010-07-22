@@ -1,0 +1,24 @@
+# (convert commandline options to options in here using external/{pychecker}/pychecker/Config.py)
+
+limit = 100
+
+# dict: suppress warnings, key is module.class.method or module.function
+#	value is a string of command line arguments (can omit -- for long args)
+#       { 'module1': 'no-namedargs maxlines=0',
+#	  'module2.my_func': 'argsused',
+#	  'module3.my_class': 'no-initreturn', }
+suppressions = {'topo.base.CFProjection.initialize_bounds': 'no-unpack'}
+# topo.base.simulation.Event.__call__ for various subclasses: Parameter (sim) not used
+
+ 
+# suppress warnings where keys can be regular expressions
+suppressionRegexs = {}
+
+
+ignoreStandardLibrary = 1
+
+# we use __slots__ for optimization; I think there is nothing wrong
+# with us having empty __slots__ in subclasses of Parameter. Maybe 
+# empty __slots__ are often (mistakenly) used for some other purpose?
+emptySlots = 0
+

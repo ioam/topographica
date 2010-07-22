@@ -1,0 +1,109 @@
+#!./lissom
+#
+# RF-LISSOM parameter file for a combined orientation and direction
+# map simulation with ON/OFF channels and Gaussian inputs.
+# 
+# $Header: /disk/cvs/jbcvsglobal/lissom/samples/oo_dir_map.param,v 1.6 2003/04/23 20:37:41 jbednar Exp $
+
+
+### Will be overwritten
+# CB: each 'set' must be on a line of its own for clunky auto-filling to work.
+set BaseN=8  
+set BaseRN=8  
+set rf_radius=BaseRN/4+0.5 
+set inh_rad=2.5>?(BaseN/4-1)+0.5
+set exc_rad=2.5>?(BaseN/10)
+###
+
+set area_scale=1
+
+set num_eyes=4 layers_pereye=2 inputs_pereye=1
+
+
+
+######################################################################
+
+# Definitions were copied here so that RN will be defined
+set retina_edge_buffer=rf_radius+randomness*BaseRN/2
+set RN=BaseRN*area_scale+2*retina_edge_buffer
+
+
+# Define random generators to link all the eyes, and a sign term for the direction
+for i=0  i<inputs_pereye i=i+1  input_define_generator ix${i} "Random RN/2 RN/2 Precision 1" \
+"Master cx for all eyes"
+
+for i=0  i<inputs_pereye i=i+1  input_define_generator iy${i} "Random RN/2 RN/2 Precision 1" \
+"Master cy for all eyes"
+
+for i=0  i<inputs_pereye i=i+1  input_define_generator it${i} "Random PI/2 PI/2 Precision 1" \
+"Master theta for all eyes"
+
+input_define_generator sgn "Random 0.0 1.0"  \
+"Value to use for the sign of the speed, after thresholding to -1 or +1.\
+Use the expression (1-2*(sgn<0)) for the sign."
+
+define_param variable_speed Param_Boolean  False True \
+ "Whether to use variable speeds or only one fixed speed, with random direction \
+(plus or minus)." False
+#variable_speed=True
+
+
+define_param plus_minus Param_Boolean  False True \
+ "Whether to use both positive and negative input patterns." False
+#plus_minus=True
+
+if (plus_minus) for i=0  i<inputs_pereye i=i+1  input_define_generator scale_sgn${i} "Random 0.0 1.0"  \
+"Value to use for the sign of scale of input ${i}, after thresholding to -1 or +1"
+
+define_param scale_str Param_String  Uninitialized Uninitialized \
+ "String used by plus_minus" ""
+if (plus_minus) set scale_str="scale='Expression -2*(scale_sgn$$$$$$$$$$$$$$$${i}<0)+1'"
+
+
+# Define inputs slightly offset in each eye, moving perpendicular to the 
+# orientation with a fixed speed and a random direction (forward or back)
+# The bizarre a@;b operator represents a*sin(b), and a@:b represents a*cos(b).
+set    ::input_default_command="for i=0 i<inputs_pereye i=i+1 exec $$$${input_default_subcommand}"
+set ::input_default_subcommand="for f=0 f<num_eyes      f=f+1 \
+input_define Obj$$$$i Eye$$$$f Input_Gaussian theta=&::it$$$${i} ${scale_str} \
+cx='Expression ::ix$$$${i}+(((-2*(sgn<0)+1)*$$$${speed}*$$$${f})@:(::it$$$${i}-PI/2))' \
+cy='Expression ::iy$$$${i}+(((-2*(sgn<0)+1)*$$$${speed}*$$$${f})@;(::it$$$${i}-PI/2))' "
+
+if (variable_speed) \
+set ::input_default_subcommand="for f=0 f<num_eyes      f=f+1 \
+input_define Obj$$$$i Eye$$$$f Input_Gaussian theta=&::it$$$${i} ${scale_str} \
+cx='Expression ::ix$$$${i}+((sgn*$$$${speed}*$$$${f})@:(::it$$$${i}-PI/2))' \
+cy='Expression ::iy$$$${i}+((sgn*$$$${speed}*$$$${f})@;(::it$$$${i}-PI/2))' "
+
+######################################################################
+
+
+call or_defs onoff=True ids=1.0
+
+
+############
+set input_separation_min_enforce=True
+set input_offset=0.0
+set scale_input=1.0
+############
+
+call common.param
+
+
+
+######################################################################
+
+define_param speed Param_String  0 Uninitialized \
+ "Retinal distance to travel between centers of objects in each 'eye', i.e. time \
+delay step. Use zero for static inputs.  When changed, blur_scale will have to \
+be changed to compensate.  Such compensation should keep the cortical activation \
+the same even though there is now less overlap between the eyes." 0
+
+# For each speed, the blur_scale was set so that the average of the
+# unsettled InputResponse for 100 random inputs matches that of speed 0.
+
+#set speed=0 blur_scale=2*2.33
+set speed=1 blur_scale=2*2.38
+#set speed=2 blur_scale=2*2.53
+#set speed=3 blur_scale=2*2.80
+

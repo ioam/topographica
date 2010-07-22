@@ -1,0 +1,34 @@
+#! /bin/csh -f
+#
+# $Id$
+#
+# Overwrite specified file only if stdin is above a threshold.
+# (Useful for the end of a pipeline so that the original file
+# can be saved if there is a problem.)
+
+set tmpfile="PipeCap$$"
+
+# Use the current directory for temps, if writable, to avoid filling up /tmp
+# Falls back to /tmp if file creation in this directory fails
+touch ${tmpfile:q} >& /dev/null
+if ("${status}" != "0") set tmpfile="/tmp/${tmpfile}"
+
+
+cat > ${tmpfile:q}
+set size=`ls -l ${tmpfile} | tr -s " " " " | cut -d " " -f 5`
+set min=2
+
+# Changed as a workaround for the Sun version of bc
+# if (`echo "${size}>${min}" | bc`) then
+#
+if (`echo "if (${size}>${min}) 1 ; if (${size}<=${min}) 0" | bc`) then
+    mv ${tmpfile:q} ${*:q}
+    set status=0
+else
+    echo "File too small - not renamed."
+    rm -f ${tmpfile:q}
+    set status=1
+endif
+exit ${status}
+
+#

@@ -1,0 +1,80 @@
+#!bin/python
+#
+# Script to change the name of an element of the Topographica code relatively safely.
+# First shows the existing uses, then changes it, then prompts for CVS checkin.
+#
+# Examples: cd .. ; etc/toporename CFPHebbian CFPLF_Hebbian
+#           cd .. ; etc/toporename '\bCFPHebbian\b' 'CFPLF_Hebbian'
+
+# (Note: because \b is printed as a backspace, the print-out will be incorrect:
+# 'Replacing CFPHebbia> with <CFPLF_Hebbian> in file examples/cfsom_or.ty.'
+# but the operation itself will be unaffected.)
+
+from os import system
+from sys import argv,exit
+
+default_files="examples/*.ty doc/*/*.php topo/*.py topo/*/*.py"
+
+separator = "_______________________________________________________________________________\n"
+
+def usage():
+    print """
+Usage: toporename <from-regexp> <to-regexp> [file]*
+E.g.:   toporename '\\cite\(.*\){\(.*\)}' '\\makecitation\1{\2}' file1 file2
+"""
+
+def quotedlist(l):
+    s=""
+    for e in l:
+        s+= '"' + e + '" '
+    return s
+
+
+# Parse arguments
+if len(argv)<3:
+    usage()
+    exit(-1)
+
+fromregexp=argv[1]
+toregexp=argv[2]
+
+if len(argv)<=3:
+    files=default_files
+else:    
+    files=quotedlist(argv[3:])
+
+checkcvs=True
+
+# Main script
+if checkcvs:
+    differences=system("cvs diff --brief")
+    if differences:
+        cont = raw_input("CVS error or differences already present; continue with toporename (Y/N)?")
+        if not (cont[0] == 'y' or cont[0] == 'Y'):
+            exit(-1)
+
+print separator
+print "Existing instances of " + toregexp + ":"
+system("grep -n -H '" + toregexp + "' " + files)
+print
+cont=raw_input("Anything listed above might represent a clash; continue with toporename (Y/N)?")
+
+if not (cont[0] == 'y' or cont[0] == 'Y'):
+    exit(-1)
+
+
+print separator
+system("etc/replaceall '" + fromregexp + "' '" + toregexp + "' " + files)
+
+
+print separator
+print "New CVS differences:"
+system("cvs diff")
+
+print separator
+print
+print "If these differences are ok, check them in with:"
+print "cvs commit -m 'Changed " + fromregexp + " to " + toregexp + "' " + files
+
+#if __name__ == '__main__':
+

@@ -1,0 +1,86 @@
+[topographica-unstable-force-lucid]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~ceball/ppa/ubuntu/lucid
+login = anonymous
+allow_unsigned_uploads = 0
+
+[topographica-unstable-force-karmic]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~ceball/ppa/ubuntu/karmic
+login = anonymous
+allow_unsigned_uploads = 0
+
+[topographica-unstable-force-jaunty]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~ceball/ppa/ubuntu/jaunty
+login = anonymous
+allow_unsigned_uploads = 0
+
+[topographica-unstable-force-hardy]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~ceball/ppa/ubuntu/hardy
+login = anonymous
+allow_unsigned_uploads = 0
+
+
+[topographica-force-lucid]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~topographica-developers/topographica/ubuntu/lucid
+login = anonymous
+allow_unsigned_uploads = 0
+
+[topographica-force-karmic]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~topographica-developers/topographica/ubuntu/karmic
+login = anonymous
+allow_unsigned_uploads = 0
+
+[topographica-force-jaunty]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~topographica-developers/topographica/ubuntu/jaunty
+login = anonymous
+allow_unsigned_uploads = 0
+
+[topographica-force-hardy]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~topographica-developers/topographica/ubuntu/hardy
+login = anonymous
+allow_unsigned_uploads = 0
+
+
+## for 9.10 upward...
+## http://blog.launchpad.net/ppa/simplifying-dputcf-for-multiple-ppas
+##[my-ppa]
+##fqdn = upload.launchpad.net
+##method = ftp
+##incoming = ~cody-somerville/ppa/ubuntu
+##login = anonymous
+##
+##[xubuntu-ppa]
+##fqdn = upload.launchpad.net
+##method = ftp
+##incoming = ~xubuntu-dev/ppa/ubuntu
+##login = anonymous
+##
+##..
+##
+##I can simply have the following:
+##
+##
+##[ppa]
+##fqdn = upload.launchpad.net
+##method = ftp
+##incoming = ~%(ppa)s/ubuntu
+##login = anonymous
+##
+##To upload to my PPA now, I.d type: dput ppa:cody-somerville/ppa <changesfile>
+##
+##To upload to the Xubuntu Developers. ppa, I.d type: dput ppa:xubuntu-dev/ppa <changesfile>
