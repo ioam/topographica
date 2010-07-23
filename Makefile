@@ -310,8 +310,10 @@ tag-release:
 	svn copy ${TOPOROOT}/trunk ${TOPOROOT}/releases/${RELEASE} -m "Create release ${RELEASE}"
 
 # Update Topographica.org web site
+# (use "make SFUSER=yoursfname sf-web-site" if your sf.net username is not jbednar)
+SFUSER=jbednar
 sf-web-site: reference-manual doc
-	rsync -v -arHz --rsh=ssh doc/. web.sf.net:/home/groups/t/to/topographica/htdocs/.
+	rsync -airHvz doc/. ${SFUSER},topographica@web.sf.net:htdocs/.
 
 
 SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_or.ty ^lissom_fsa.ty ^lissom_oo_or.ty ^lissom_or_movie.ty ^lissom_or.ty ^lissom.ty ^lissom_whisker_barrels.ty ^obermayer_pnas90.ty ^som_retinotopy.ty ^sullivan_neurocomputing04.ty ^tiny.ty ^gcal.ty
