@@ -196,8 +196,8 @@ class HomeostaticResponse(TransferFnWithState):
         if self.first_call:
             self.first_call = False
             if self.randomized_init:
-                # CEBALERT: Jan's version fixes the UniformRandom's
-                # seed. Does it need to be available as a parameter?
+                # CEBALERT: UniformRandom's seed should be available
+                # as a parameter.
                 self.t = ones(x.shape, x.dtype.char) * self.t_init + \
                          (topo.pattern.random.UniformRandom() \
                           (xdensity=x.shape[0],ydensity=x.shape[1]) \
