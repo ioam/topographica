@@ -375,7 +375,7 @@ def _clissomcmd(name):
 
 
 import os.path
-from topo.misc.filepath import normalize_path
+from param import normalize_path
 import glob
 
 def initialize_clissom_data(name,**kw):
