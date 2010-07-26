@@ -162,17 +162,16 @@ def array_argmax(arr):
     return unravel_index(arr.argmax(),arr.shape)
 
 
-# CEBALERT: this function still needs to be cleaned up, or at least
-# documented better (e.g. the clipping).
-class DivideWithConstant(param.Parameterized):
-    """
-    Divide two scalars or arrays with a constant (c) offset on the
-    denominator to allow setting the gain or to avoid divide-by-zero
-    issues.
-    """    
-    c = param.Number(default=1.0)
 
-    def __call__(self, x, y):
-        y = clip(y, 0, 10000)
-        x = clip(x, 0, 10000)
-        return divide(x, y+self.c)
+# CB: Is this of general interest? Used in gcal.ty.
+class DivideWithConstant(param.Parameterized):
+   """
+   Divide two scalars or arrays with a constant (c) offset on the
+   denominator to allow setting the gain or to avoid divide-by-zero
+   issues.  The non-constant part of the denominator (y) is clipped
+   to ensure that it has only positive values.
+   """
+   c = param.Number(default=1.0)
+
+   def __call__(self, x, y):
+       return divide(x,maximum(y,0)+self.c)
