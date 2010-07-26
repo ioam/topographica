@@ -96,17 +96,10 @@ p.add(
 
 ### Specify weight initialization, response function, and learning function
 projection.CFProjection.cf_shape=pattern.Disk(smoothing=0.0)
-projection.CFProjection.weights_generator=pattern.Constant()
 projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
 projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
 projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
-
-
-### Default for tutorial
-pattern.Line.scale=0.9
-pattern.Gaussian.size=0.08333
-pattern.Gaussian.aspect_ratio=4.0
 
 
 ### Input patterns
@@ -203,7 +196,7 @@ topo.sim.connect(
     connection_type=projection.CFProjection,learning_rate=p.aff_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
     weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083),
-    learning_fn=learningfn.optimized.CFPLF_Scaled_opt())
+    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
                      
 topo.sim.connect(
     'LGNOff','V1',delay=0.05,strength=p.aff_strength,name='LGNOffAfferent',
@@ -211,7 +204,7 @@ topo.sim.connect(
     connection_type=projection.CFProjection,learning_rate=p.aff_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
     weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083),
-    learning_fn=learningfn.optimized.CFPLF_Scaled_opt())
+    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
 
 topo.sim.connect(
     'V1','V1',delay=0.05,strength=p.exc_strength,name='LateralExcitatory',
