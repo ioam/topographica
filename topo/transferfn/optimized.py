@@ -5,12 +5,9 @@ Output functions (see basic.py) and projection-level output functions
 Requires the weave package; without it unoptimized versions are used.
 """
 
-from numpy.oldnumeric import sum
-import numpy
-
 import param
 
-from topo.base.cf import CFPOutputFn,CFPOF_Plugin
+from topo.base.cf import CFPOutputFn
 from topo.base.functionfamily import TransferFn, IdentityTF
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
 

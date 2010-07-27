@@ -6,16 +6,15 @@ $Id$
 __version__='$Revision$'
 
 
-import palette
 import copy
 
-from numpy.oldnumeric import zeros, ones, Float, divide,ravel,clip,array
+from numpy.oldnumeric import zeros, ones, Float, divide
 
 import param
 
 from topo.base.sheetcoords import SheetCoordinateSystem,Slice
 
-from bitmap import HSVBitmap, RGBBitmap, PaletteBitmap, Bitmap
+from bitmap import HSVBitmap, RGBBitmap, Bitmap
 
 
 ### JCALERT!

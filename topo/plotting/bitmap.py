@@ -22,7 +22,6 @@ $Id$
 __version__='$Revision$'
 
 import os
-from copy import copy
 import Image
 import ImageDraw
 import ImageFont

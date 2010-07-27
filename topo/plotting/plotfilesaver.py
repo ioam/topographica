@@ -9,7 +9,6 @@ $Id$
 __version__='$Revision$'
 
 import Image
-import ImageOps
 import numpy
 
 import param
