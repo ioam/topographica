@@ -25,35 +25,28 @@ $Id$
 __version__='$Revision$'
 
 
-# JABALERT: Need to go through and eliminate unused imports.
 from math import pi, sin, cos
 from PIL import Image, ImageDraw
 import copy
 
-from colorsys import hsv_to_rgb
 from numpy.oldnumeric import array, maximum
 
 import param
-from param.parameterized import PicklableClassAttributes, ParameterizedFunction
+from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
 
 import topo
-from topo.base.cf import CFSheet, CFProjection, Projection
-from topo.base.projection import ProjectionSheet
+from topo.base.cf import Projection
 from topo.base.simulation import EPConnectionEvent
 from topo.base.sheet import Sheet
 from topo.base.sheetview import SheetView
-from topo.command.basic import pattern_present, wipe_out_activity
-from topo.misc.util import frange
 from topo.misc.distribution import Distribution
-from topo.pattern.basic import Gaussian, GaussiansCorner, RawRectangle, Line
-from topo.pattern.random import GaussianRandom
-from topo.sheet import GeneratorSheet
-from topo.analysis.featureresponses import ReverseCorrelation, FeatureMaps
-from topo.plotting.plotgroup import create_plotgroup, plotgroups, ConnectionFieldsPlotGroup
+from topo.pattern.basic import GaussiansCorner, RawRectangle, Line
+from topo.analysis.featureresponses import ReverseCorrelation
+from topo.plotting.plotgroup import create_plotgroup, plotgroups
 
-from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand,default_input_sheet
-from topo.analysis.featureresponses import Feature, PatternPresenter, Subplotting
+from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
+from topo.analysis.featureresponses import Feature, PatternPresenter
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
 
 

@@ -16,8 +16,8 @@ __version__='$Revision$'
 
 from math import atan,pi,atan2
 
-from numpy import exp,log,sqrt,sin,cos,zeros,ones,dot,array
-from numpy.matlib import matrix, zeros as mzeros
+from numpy import exp,log,sqrt,sin,cos,ones,dot
+from numpy.matlib import matrix
 
 import param
 

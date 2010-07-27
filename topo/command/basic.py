@@ -25,9 +25,8 @@ from param.external import OrderedDict
 from param import normalize_path
 
 import topo
-from topo.base.functionfamily import TransferFn
 from topo.base.sheet import Sheet
-from topo.base.projection import Projection, ProjectionSheet
+from topo.base.projection import ProjectionSheet
 from topo.sheet import GeneratorSheet
 from topo.misc.util import MultiFile
 from topo.misc.picklemain import PickleMain
@@ -562,6 +561,7 @@ def default_analysis_function():
     Basic example of an analysis command for run_batch; users are
     likely to need something similar but highly customized.
     """
+    # CEBALERT: why are these imports here rather than at the top?
     import topo
     from topo.command.analysis import save_plotgroup
     from topo.base.projection import ProjectionSheet

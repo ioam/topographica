@@ -15,12 +15,6 @@ $Id$
 """
 __version__='$Revision$'
 
-# CEBALERT: these aren't being used
-import re
-import os
-import copy
-import errno
-
 import param
     
 try:
@@ -35,7 +29,7 @@ except ImportError:
 import numpy
 from math import pi
 # JABALERT: Import all of these from numpy instead?
-from numpy.oldnumeric import arange, sqrt, array, floor, transpose, argmax, argmin, cos, sin, log10, Float
+from numpy.oldnumeric import sqrt, array, transpose, argmin, cos, sin, log10, Float
 from numpy import outer,arange,ones,zeros
 
 from numpy.fft.fftpack import fft2
@@ -44,21 +38,20 @@ from numpy import abs
 
 import topo
 from topo.base.sheetview import SheetView
-from topo.base.arrayutil import octave_output, centroid, wrap
+from topo.base.arrayutil import centroid, wrap
 from topo.base.sheet import Sheet
-from topo.base.arrayutil import wrap
 from topo.misc.util import frange
 import topo.analysis.vision
-from topo.plotting.plot import make_template_plot, Plot
+from topo.plotting.plot import make_template_plot
 import param
 from param import ParameterizedFunction,normalize_path
 from param.parameterized import ParamOverrides
-from topo.pattern.basic import SineGrating, RawRectangle, OrientationContrast
-from topo.plotting.plotgroup import create_plotgroup, plotgroups
+from topo.pattern.basic import SineGrating, OrientationContrast
+from topo.plotting.plotgroup import create_plotgroup
 from topo.base.cf import CFSheet
 
-from topo.analysis.featureresponses import Feature, PatternPresenter, FeatureCurves
-from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand, FeatureCurveCommand, UnitCurveCommand
+from topo.analysis.featureresponses import Feature, PatternPresenter
+from topo.analysis.featureresponses import PositionMeasurementCommand, FeatureCurveCommand, UnitCurveCommand
 
 
 from basic import Command
@@ -273,7 +266,6 @@ def matrixplot3d_gnuplot(mat,title=None,outputfilename="tmp.ps"):
     prompt is not available until this command finishes.
     """
     import Gnuplot
-    import Numeric # ERRORALERT
     from os import system
     
     psviewer="gv" # Should be a parameter, or handled better somehow
