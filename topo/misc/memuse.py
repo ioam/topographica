@@ -120,8 +120,8 @@ def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**
     with the script file, time, and parameters so that results from
     different runs can be compared.
     """
-    
-    import os,sys,re,__main__,topo
+    # CEBALERT: why are these imports here rather than at the top?
+    import os,re,__main__,topo
     from topo.misc.commandline import global_params
 
     # Construct simulation name, etc.
