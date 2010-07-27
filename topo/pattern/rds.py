@@ -5,7 +5,7 @@ $Id$
 """
 __version__='$Revision$'
 
-from numpy.oldnumeric import zeros,ones,floor,where,choose,less,greater,Int
+from numpy.oldnumeric import zeros,floor,where,choose,less,greater,Int
 from numpy.oldnumeric.random_array import random,seed
 
 import param
@@ -13,7 +13,6 @@ from param.parameterized import ParamOverrides
 
 from topo.base.patterngenerator import PatternGenerator
 from topo.base.sheetcoords import SheetCoordinateSystem
-from topo.base.functionfamily import IdentityTF
 
 
 ### JABHACKALERT: This code seems to work fine when the input regions

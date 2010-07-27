@@ -7,12 +7,11 @@ $Id$
 import Image
 import ImageOps
 import numpy
-import copy
 
 from numpy.oldnumeric import array, Float, sum, ravel, ones
 
 import param
-from param.parameterized import ParamOverrides,overridable_property
+from param.parameterized import overridable_property
 
 from topo.base.boundingregion import BoundingBox
 from topo.base.patterngenerator import PatternGenerator
@@ -191,7 +190,6 @@ class PatternSampler(ImageSampler):
 
 
 
-from numpy.oldnumeric import sum,ravel
 def edge_average(a):
     "Return the mean value around the edge of an array."
     

@@ -13,7 +13,6 @@ from param.parameterized import ParamOverrides
 from topo.base.patterngenerator import PatternGenerator
 from topo.pattern import Composite, Gaussian
 from topo.base.sheetcoords import SheetCoordinateSystem
-from topo.transferfn.basic import IdentityTF
 
 
 def seed(seed=None):
