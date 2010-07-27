@@ -132,6 +132,7 @@ check:
 check-base:
 	${PYCHECKER} topo/base/*.py 
 
+# CEBALERT: should add param, but apparently doesn't work. Update pylint?
 lint:
 	${PYLINT} topo
 
@@ -139,7 +140,7 @@ lint-base:
 	${PYLINT} topo.base | cat
 
 pyflakes:
-	${PYFLAKES} topo | grep -v topo/tests
+	${PYFLAKES} topo param | grep -v topo/tests
 
 pyflakes-base:
 	${PYFLAKES} topo/base | cat
