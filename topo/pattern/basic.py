@@ -12,6 +12,8 @@ import numpy
 from numpy.oldnumeric import around,bitwise_and,sin,add,Float,bitwise_or
 from numpy import alltrue
 
+# CEBALERT: many of these are unused, and appeared for the Audio pattern
+# generator. Can we remove the unused ones?
 from numpy import asarray, float32, nonzero, zeros, ones, shape, hstack 
 from numpy import linspace, logspace, log10, abs, round, multiply
 from numpy import fft, bartlett, blackman, hamming, hanning, kaiser
