@@ -8,10 +8,9 @@ __version__='$Revision$'
 import param
 
 from topo.base.cf import MaskedCFIter
-from topo.base.functionfamily import TransferFn, IdentityTF
-from topo.base.projection import Projection, NeighborhoodMask
+from topo.base.projection import NeighborhoodMask
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
-from topo.sheet.lissom import LISSOM, JointScaling
+from topo.sheet.lissom import LISSOM
 from topo.sheet.basic import compute_joint_norm_totals
 
 def compute_joint_norm_totals_opt(projlist,active_units_mask):

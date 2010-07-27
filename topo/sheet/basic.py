@@ -11,23 +11,19 @@ from topo.base.projection import ProjectionSheet
 from topo.base.cf import CFSheet
 from topo.misc.generatorsheet import GeneratorSheet
 
-import copy
+# Imported here for ease of access by users
+from topo.base.boundingregion import BoundingBox
+from topo.base.sheet import activity_type # CEBALERT: ...is it?
+
 import numpy
 
 import topo
 
 import param
 
-from topo.base.cf import CFSheet, CFPOutputFn, MaskedCFIter
-from topo.base.functionfamily import TransferFn
+from topo.base.cf import MaskedCFIter
 from topo.base.projection import Projection
-from topo.base.sheet import activity_type, BoundingBox
-from topo.base.simulation import EPConnectionEvent
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
-from topo.misc.keyedlist import KeyedList
-from topo.misc.util import NxN
-from topo.transferfn.basic import PiecewiseLinear
-
 
 
 class ActivityCopy(Sheet):

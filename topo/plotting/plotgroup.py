@@ -18,7 +18,7 @@ from param import resolve_path
 
 import topo
 
-from topo.base.cf import CFSheet,CFProjection,Projection
+from topo.base.cf import CFSheet,CFProjection
 from topo.base.projection import ProjectionSheet
 from topo.sheet import GeneratorSheet,Sheet
 from topo.misc.keyedlist import KeyedList
