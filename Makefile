@@ -1,6 +1,7 @@
 # $Id$
 PREFIX =  ${CURDIR}/
 PYLINT = bin/pylint --rcfile=doc/buildbot/pylintrc
+PYFLAKES = bin/pyflakes
 
 PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
@@ -136,6 +137,9 @@ lint:
 
 lint-base:
 	${PYLINT} topo.base | cat
+
+pyflakes:
+	${PYFLAKES} topo/base | cat
 
 
 # Compare topographica and C++ lissom output
