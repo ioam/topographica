@@ -198,7 +198,7 @@ def _stuff(specified_targets):
     examples = find_examples(specified_examples=command_labels)
 
     if not examples:
-        raise IOError("Could not find examples in %s"%candidate_example_dirs)
+        raise IOError("Could not find examples.")
     else:
         print "Found examples in %s"%examples
 
