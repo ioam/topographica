@@ -139,7 +139,7 @@ lint-base:
 	${PYLINT} topo.base | cat
 
 pyflakes:
-	${PYFLAKES} topo
+	${PYFLAKES} topo | grep -v topo/tests
 
 pyflakes-base:
 	${PYFLAKES} topo/base | cat
