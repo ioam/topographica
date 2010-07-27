@@ -544,7 +544,7 @@ class TemplatePlotGroup(SheetPlotGroup):
         self.plot_templates = KeyedList(plot_templates or [])
         # Add plots for the static images, if any
         for image_name,file_path in static_images or []:
-            add_static_image(image_name,file_path)
+            self.add_static_image(image_name,file_path)
 
 
     #########################
