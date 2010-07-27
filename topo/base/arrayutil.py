@@ -8,8 +8,7 @@ __version__ = "$Revision$"
 import re
 
 from numpy import sqrt,dot,arctan2,array2string,fmod,floor,array, \
-     unravel_index,concatenate,set_printoptions,divide,maximum,minimum, \
-     clip
+     unravel_index,concatenate,set_printoptions,divide,maximum,minimum
 from numpy import abs # pylint: disable-msg=W0622
 from numpy import ufunc
 
@@ -165,13 +164,13 @@ def array_argmax(arr):
 
 # CB: Is this of general interest? Used in gcal.ty.
 class DivideWithConstant(param.Parameterized):
-   """
-   Divide two scalars or arrays with a constant (c) offset on the
-   denominator to allow setting the gain or to avoid divide-by-zero
-   issues.  The non-constant part of the denominator (y) is clipped
-   to ensure that it has only positive values.
-   """
-   c = param.Number(default=1.0)
-
-   def __call__(self, x, y):
-       return divide(x,maximum(y,0)+self.c)
+    """
+    Divide two scalars or arrays with a constant (c) offset on the
+    denominator to allow setting the gain or to avoid divide-by-zero
+    issues.  The non-constant part of the denominator (y) is clipped
+    to ensure that it has only positive values.
+    """
+    c = param.Number(default=1.0)
+    
+    def __call__(self, x, y):
+        return divide(x,maximum(y,0)+self.c)
