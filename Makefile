@@ -65,7 +65,7 @@ DIST_ZIP                   = ${DIST_DIRNAME}.zip
 
 
 # Default does not include doc, in case user lacks PHP
-default: ext-packages topographica clean-pyc
+default: ext-packages topographica
 
 all: default reference-manual doc tests examples 
 
@@ -90,6 +90,9 @@ FORCE:
 # make TEST_VERBOSITY=2 tests
 tests: FORCE
 	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run(verbosity=${TEST_VERBOSITY}); import sys; sys.exit(len(t.failures+t.errors))"
+
+tests-coverage: FORCE
+	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run_coverage(produce_html=1)"
 
 examples: FORCE
 	make -C examples
@@ -310,10 +313,8 @@ tag-release:
 	svn copy ${TOPOROOT}/trunk ${TOPOROOT}/releases/${RELEASE} -m "Create release ${RELEASE}"
 
 # Update Topographica.org web site
-# (use "make SFUSER=yoursfname sf-web-site" if your sf.net username is not jbednar)
-SFUSER=jbednar
 sf-web-site: reference-manual doc
-	rsync -airHvz doc/. ${SFUSER},topographica@web.sf.net:htdocs/.
+	rsync -v -arHz --rsh=ssh doc/. web.sf.net:/home/groups/t/to/topographica/htdocs/.
 
 
 SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_or.ty ^lissom_fsa.ty ^lissom_oo_or.ty ^lissom_or_movie.ty ^lissom_or.ty ^lissom.ty ^lissom_whisker_barrels.ty ^obermayer_pnas90.ty ^som_retinotopy.ty ^sullivan_neurocomputing04.ty ^tiny.ty ^gcal.ty

@@ -319,5 +319,34 @@ def run_named(name,verbosity=2):
         test_module = name
     
     run(verbosity,test_modules=[test_module])
+
+def run_coverage(produce_html=1):
+    from coverage import coverage
+    #initialize coverage module
+    cov = coverage(timid=True,cover_pylib=False,branch=True,config_file=False)
+
+    #start code coverage analysis
+    cov.start()
+
+    #code to be analyzed
+    run(verbosity=1)
+
+    #stop
+    cov.stop()
+    cov.save()
+    #lines to be excluded from the report (regexp) 
+    cov.exclude('except')  
+    
+    #generate the html report
+    print "Code coverage: GENERATING"
+    if produce_html == 1:
+        #exclude tests directory from the report using omit_prefixes
+        cov.html_report(directory='./topo/tests/coverage_html', ignore_errors=True, omit_prefixes=[os.getcwd()+'/topo/tests'])
+        print "Report generated: "+os.getcwd()+'/topo/tests/coverage_html/index.html'
+    #print to terminal
+    else:
+        cov.report(directory='./topo/tests/coverage_html', ignore_errors=True, omit_prefixes=[os.getcwd()+'/topo/tests'])
+    cov.erase()
+    print "Code coverage: DONE"
         
 

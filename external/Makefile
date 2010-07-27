@@ -645,7 +645,6 @@ pyaudiolab-uninstall:
 
 
 
-
 ##############################################################
 # mlabwrap (high level python to matlab bridge)
 #
@@ -1269,6 +1268,23 @@ pyopenssl-uninstall:
 
 parallel_ipython: zope_interface twisted foolscap ipython
 
+
+
+##############################################################
+# coverage (code coverage analysis)
+#
+COVERAGE = coverage-3.3.1
+COVERAGE_UNINSTALL = ${PYTHON_LIB}/site-packages/coverage*egg
+
+coverage: ${COVERAGE}.tar.gz python
+	tar -xzf ${COVERAGE}.tar.gz
+	cd ${COVERAGE}; ${PREFIX}bin/python setup.py install
+	touch coverage
+
+coverage-clean:
+	rm -rf ${COVERAGE} 
+coverage-uninstall:
+	rm -rf pyaudiolab ${COVERAGE} $(foreach f, ${COVERAGE_UNINSTALL}, ${PREFIX}/${f})
 
 
 
