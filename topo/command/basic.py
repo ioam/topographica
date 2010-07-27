@@ -696,7 +696,6 @@ class run_batch(ParameterizedFunction):
     def __call__(self,script_file,**params_to_override):
         p=ParamOverrides(self,params_to_override,allow_extra_keywords=True)
 
-        import sys # CEBALERT: why do I have to import this again? (Also done elsewhere below.)
         import os
         import shutil
     
@@ -732,7 +731,6 @@ class run_batch(ParameterizedFunction):
             print "Run aborted; wait one minute before trying again, or else rename existing directory: \n" + \
                   normalize_path.prefix
     
-            import sys
             sys.exit(-1)
         else:
             os.mkdir(normalize_path.prefix)
