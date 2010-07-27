@@ -33,13 +33,10 @@ __version__='$Revision$'
 # Note: has none of the Makefile's dependency processing, so just does
 # what you tell it (i.e. over-writes existing files).
 
-import platform 
 import sys
 import os.path
 
 from os import system
-from os.path import join
-
 
 import param
 from param import ParamOverrides
