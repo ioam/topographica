@@ -107,7 +107,7 @@ def line(y, thickness, gaussian_width):
     sigmasq = gaussian_width*gaussian_width
 
     if sigmasq==0.0:
-        falloff = x*0.0
+        falloff = y*0.0
     else:
         with float_error_ignore():
             falloff = exp(divide(-gaussian_y_coord*gaussian_y_coord,2*sigmasq))
