@@ -18,7 +18,7 @@ __version__='$Revision$'
 import param
     
 try:
-    import matplotlib
+    import matplotlib.ticker
     import pylab
 except ImportError:
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
@@ -800,24 +800,23 @@ class plot_modulation_ratio(PylabPlotCommand):
         if (topo.sim.objects().has_key(simple_sheet_name) and topo.sim.objects().has_key(complex_sheet_name)):
             v1s = complexity(fullmatrix[topo.sim[simple_sheet_name]]).flatten()
             v1c = complexity(fullmatrix[topo.sim[complex_sheet_name]]).flatten()
-            import matplotlib.ticker as mticker
             #double the number of complex cells to reflect large width of layer 2/3
             v1c = numpy.concatenate((array(v1c),array(v1c)),axis=1)
             pylab.figure()
             n = pylab.subplot(311)
             pylab.hist(v1s,bins)
             pylab.axis([0,2.0,0,4100])
-	    n.yaxis.set_major_locator(mticker.MaxNLocator(3))
+	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
             
 	    n = pylab.subplot(312)
             pylab.hist(v1c,bins)
             pylab.axis([0,2.0,0,4100])
-	    n.yaxis.set_major_locator(mticker.MaxNLocator(3))
+	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
             
 	    n = pylab.subplot(313)
             pylab.hist(numpy.concatenate((array(v1s),array(v1c)),axis=1),bins)
             pylab.axis([0,2.0,0,4100])
-	    n.yaxis.set_major_locator(mticker.MaxNLocator(3))
+	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
 
         self._generate_figure(p)
 
