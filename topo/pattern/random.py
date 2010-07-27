@@ -116,7 +116,10 @@ class GaussianRandom(RandomGenerator):
 # be confusing. The Constant pattern has no effect because the
 # generators list is overridden in __call__. Shouldn't the generators
 # parameter be hidden for this class (and possibly for others based on
-# pattern.Composite)?
+# pattern.Composite)? For that to be safe, we'd at least have to have
+# a warning if someone ever sets a hidden parameter, so that having it
+# revert to the default value would always be ok.
+
 class GaussianCloud(Composite):
     """Uniform random noise masked by a circular Gaussian."""
 
