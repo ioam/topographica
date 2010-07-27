@@ -19,7 +19,6 @@ from param.parameterized import Parameterized,OptionalSingleton
 
 try:
     # By default, use a non-GUI backend for matplotlib.
-    import matplotlib
     from matplotlib import rcParams
     rcParams['backend']='Agg'
     matplotlib_imported=True
@@ -333,7 +332,6 @@ launch Topographica with legacy support enabled.""")
 def gui(start=True):
     """Start the GUI as if -g were supplied in the command used to launch Topographica."""
     if matplotlib_imported: 
-        from matplotlib import rcParams
         rcParams['backend']='TkAgg'
     auto_import_commands()
     if start:
