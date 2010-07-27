@@ -139,6 +139,9 @@ lint-base:
 	${PYLINT} topo.base | cat
 
 pyflakes:
+	${PYFLAKES} topo
+
+pyflakes-base:
 	${PYFLAKES} topo/base | cat
 
 
