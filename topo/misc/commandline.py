@@ -28,7 +28,7 @@ except ImportError:
 
 
 try:
-    import IPython
+    import IPython.Shell
     ipython_imported=True
 except ImportError:
     ipython_imported=False
@@ -508,13 +508,12 @@ def process_argv(argv):
             # http://www.nabble.com/__main__-vs-__main__-td14606612.html
             __main__.__name__="__mynamespace__"
 
-            from IPython.Shell import IPShell
-
-            IPShell(['-noconfirm_exit','-nobanner',
-                     '-pi1',CommandPrompt.get_format(),
-                     '-pi2',CommandPrompt2.get_format(),
-                     '-po',OutputPrompt.get_format()],
-                    user_ns=__main__.__dict__).mainloop(sys_exit=1)            
+            IPython.Shell.IPShell(
+                ['-noconfirm_exit','-nobanner',
+                 '-pi1',CommandPrompt.get_format(),
+                 '-pi2',CommandPrompt2.get_format(),
+                 '-po',OutputPrompt.get_format()],
+                user_ns=__main__.__dict__).mainloop(sys_exit=1)            
 
         
 
