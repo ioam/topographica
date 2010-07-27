@@ -5,24 +5,18 @@ $Id$
 """
 __version__='$Revision$'
 
-import numpy.oldnumeric as Numeric
-import numpy
-from numpy import abs,zeros,ones
+from numpy import zeros,ones
 import copy
 
 import param
 
 import topo
-from topo.base.boundingregion import BoundingBox
-from topo.base.functionfamily import TransferFn
-from topo.base.cf import CFSheet, CFPOutputFn
+
 from topo.base.projection import Projection
 from topo.base.sheet import activity_type
 from topo.base.simulation import EPConnectionEvent
-from topo.misc.keyedlist import KeyedList
 from topo.transferfn.basic import PiecewiseLinear
-from topo.sheet import JointNormalizingCFSheet, JointNormalizingCFSheet_Continuous
-from topo.pattern.basic import Gaussian
+from topo.sheet import JointNormalizingCFSheet
 
 
 class LISSOM(JointNormalizingCFSheet):

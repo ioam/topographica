@@ -5,11 +5,11 @@ $Id: featureresponses.py 7714 2008-01-24 16:42:21Z antolikjan $
 """
 __version__='$Revision: 7714 $'
 
-from math import fmod,floor,pi,sin,cos,sqrt
+from math import pi,sin,cos
 
 import numpy
 from numpy.oldnumeric import Float
-from numpy import zeros, array, size, empty, object_
+from numpy import zeros, array, size, object_
 #import scipy
 
 import param
@@ -29,7 +29,7 @@ except ImportError:
 import topo
 from topo.base.cf import CFSheet
 from topo.base.sheetview import SheetView
-from topo.plotting.plotgroup import create_plotgroup, plotgroups
+from topo.plotting.plotgroup import create_plotgroup
 from topo.command.analysis import measure_sine_pref
 
 from topo import numbergen

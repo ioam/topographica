@@ -9,14 +9,13 @@ $Id$
 __version__='$Revision$'
 
 
-import time
 import copy
 
-from math import fmod,floor,pi
+from math import pi
 from colorsys import hsv_to_rgb
 
 import numpy
-from numpy import zeros, array, empty, object_, size, vectorize, fromfunction
+from numpy import zeros, empty, object_, size, vectorize, fromfunction
 from numpy.oldnumeric import Float
 
 import param
@@ -28,14 +27,12 @@ from topo.base.arrayutil import wrap
 from topo.base.cf import CFSheet
 from topo.base.functionfamily import PatternDrivenAnalysis 
 from topo.base.sheet import Sheet, activity_type
-from topo.base.sheetcoords import SheetCoordinateSystem
 from topo.base.sheetview import SheetView
 from topo.command.basic import pattern_present,restore_input_generators, save_input_generators
-from topo.command.basic import wipe_out_activity, clear_event_queue
 from topo.misc.distribution import Distribution
 from topo.misc.util import cross_product, frange
 from topo import pattern
-from topo.pattern.basic import SineGrating, Gaussian, RawRectangle, Disk, OrientationContrast
+from topo.pattern.basic import SineGrating, Gaussian, RawRectangle, Disk
 from topo.plotting.plotgroup import plotgroups
 from topo.sheet import GeneratorSheet
 

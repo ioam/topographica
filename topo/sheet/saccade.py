@@ -21,8 +21,8 @@ $Id$
 """
 __version__ = '$Revision$'
 
-from numpy import dot,sin,cos,pi,array,asarray,argmax,zeros,\
-     nonzero,take,random,alltrue,sometrue
+from numpy import sin,cos,pi,array,asarray,argmax,zeros,\
+     nonzero,take,random
 
 import param
 

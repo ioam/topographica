@@ -37,7 +37,6 @@ from param.parameterized import ParamOverrides
 
 import topo
 from topo.base.cf import Projection
-from topo.base.simulation import EPConnectionEvent
 from topo.base.sheet import Sheet
 from topo.base.sheetview import SheetView
 from topo.misc.distribution import Distribution
