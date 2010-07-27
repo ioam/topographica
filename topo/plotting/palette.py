@@ -9,6 +9,19 @@ import param
 
 import plot
 
+# CEBALERT: is this file usable?
+#
+# topo/plotting/palette.py:10: 'plot' imported but unused
+# topo/plotting/palette.py:177: undefined name 'array'
+# topo/plotting/palette.py:185: undefined name 'interpolate'
+# topo/plotting/palette.py:185: undefined name 'color'
+# topo/plotting/palette.py:185: undefined name 'color'
+# topo/plotting/palette.py:188: undefined name 'interpolate'
+# topo/plotting/palette.py:188: undefined name 'color'
+# topo/plotting/palette.py:188: undefined name 'color'
+
+
+
 ### JABALERT: Should be able to construct a Palette automatically by
 ### accepting a string specification whose characters each stand for
 ### colors between which to interpolate.
