@@ -5,13 +5,9 @@ $Id$
 """
 __version__='$Revision$'
 
-import __main__
-import math
 import re
-import string
 import random
 import numpy
-import sys
 import functools
 
 

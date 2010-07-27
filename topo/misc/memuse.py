@@ -121,7 +121,7 @@ def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**
     different runs can be compared.
     """
     
-    import os,sys,re,time,__main__,topo
+    import os,sys,re,__main__,topo
     from topo.misc.commandline import global_params
 
     # Construct simulation name, etc.
@@ -139,7 +139,6 @@ def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**
         prefix += "," + a + "=" + valstr
 
     # Set provided parameter values in main namespace
-    from topo.misc.commandline import global_params
     global_params.set_in_context(**params)
     
     # Run script in main

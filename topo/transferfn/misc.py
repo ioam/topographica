@@ -8,7 +8,7 @@ __version__='$Revision: 10790 $'
 import copy
 
 import numpy, numpy.random
-from numpy import zeros,ones
+from numpy import ones
 
 import param
 

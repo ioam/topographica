@@ -15,7 +15,7 @@ import os
 import bisect
 from itertools import izip
 
-from numpy import array,asarray
+from numpy import asarray
 import ImageDraw
 
 import param
