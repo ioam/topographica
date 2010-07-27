@@ -9,17 +9,12 @@ __version__='$Revision$'
 
 import copy
 
-from inspect import getdoc
-from math import floor
-
 import ImageTk
 
 import Tkinter
-from Tkinter import  Frame, TOP, YES, BOTH, BOTTOM, X, Button, LEFT, \
-     RIGHT, DISABLED, Checkbutton, NORMAL, Canvas, Label, NSEW, IntVar, \
-     BooleanVar, StringVar, FLAT, SUNKEN, RAISED, GROOVE, RIDGE, \
-     Scrollbar, Y, VERTICAL, HORIZONTAL, END, NO, NONE,Scrollbar,Canvas, \
-     TclError
+from Tkinter import  Frame, TOP, YES, BOTH, X, LEFT, \
+     RIGHT, DISABLED, NORMAL, Canvas, Label, NSEW, \
+     NO, NONE,TclError
 
 import param
 # CEB: maybe bad, since people reading code will probably assume tk is Tkinter
@@ -27,8 +22,6 @@ from param import tk
 
 from topo.base.sheet import Sheet
 from topo.base.cf import CFSheet
-
-from topo.plotting.plotgroup import PlotGroup,SheetPlotGroup
 
 from topo.command.pylabplot import matrixplot
 

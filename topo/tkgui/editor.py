@@ -13,10 +13,8 @@ __version__='$Revision: 8989 $'
 
 from inspect import getdoc
 import math
-from random import Random, random
 
-
-from Tkinter import Button, Label, Frame, TOP, LEFT, RIGHT, BOTTOM, E, LAST, FIRST, OptionMenu, StringVar,Canvas,X,GROOVE,RAISED,Checkbutton,Menu,Scrollbar, SUNKEN,YES,Y,END,BOTH
+from Tkinter import Button, Label, Frame, TOP, LEFT, RIGHT, BOTTOM, E, LAST, FIRST, OptionMenu, StringVar,Canvas,X,GROOVE,RAISED,Checkbutton,Menu,Scrollbar, YES,Y,END,BOTH
 from tkFileDialog import asksaveasfilename
 
 

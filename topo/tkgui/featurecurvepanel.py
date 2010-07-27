@@ -8,13 +8,9 @@ $Id$
 """
 __version__='$Revision$'
 
-from Tkinter import Label
-
 import topo
 
 from topo.base.projection import ProjectionSheet
-
-from topo.plotting.plotgroup import FeatureCurvePlotGroup
 
 from plotgrouppanel import PlotGroupPanel
 

@@ -9,7 +9,7 @@ __version__='$Revision$'
 import ImageTk
 ### JCALERT! Try not to have to use chain and delete this import.
 from itertools import chain
-from Tkinter import Canvas, Label
+from Tkinter import Canvas
 from numpy import sometrue
 
 import param

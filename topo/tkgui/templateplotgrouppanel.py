@@ -7,12 +7,9 @@ $Id$
 __version__='$Revision$'
 
 
-from inspect import getdoc
-from math import pi
 import copy
 
-from Tkinter import StringVar, Frame, YES, LEFT, TOP, RIGHT, X, Message, \
-     Entry, Canvas, Checkbutton, BooleanVar, DISABLED, NORMAL,NO
+from Tkinter import DISABLED, NORMAL
 from tkFileDialog import asksaveasfilename
 
 import param

@@ -31,11 +31,9 @@ from topo.base.functionfamily import PatternDrivenAnalysis
 from topo.base.sheetview import SheetView
 from topo.base.patterngenerator import PatternGenerator, Constant
 from topo.misc.generatorsheet import GeneratorSheet
-from topo.command.basic import pattern_present, wipe_out_activity
+from topo.command.basic import pattern_present
 from topo.plotting.plot import make_template_plot
 from topo.plotting.plotgroup import SheetPlotGroup
-from topo.base.simulation import EPConnectionEvent
-from topo.base.sheet import Sheet
 
 from plotgrouppanel import SheetPanel
 

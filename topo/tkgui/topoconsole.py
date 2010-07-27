@@ -18,11 +18,9 @@ import __main__
 import webbrowser
 import string
 
-from inspect import getdoc
-
-from Tkinter import Frame, StringVar, X, BOTTOM, TOP, Button, \
-     LEFT, RIGHT, YES, NO, BOTH, Label, Text, END, DISABLED, \
-     NORMAL, Scrollbar, Y, DoubleVar, Widget
+from Tkinter import Frame, Button, \
+     LEFT, YES, Label, DISABLED, \
+     NORMAL, DoubleVar
 from tkFileDialog import asksaveasfilename,askopenfilename
 
 import param
@@ -243,7 +241,6 @@ except ImportError:
 # find an example of tkinter software displaying a gui exception on
 # the originating window.)
 def _tkinter_report_exception(widget):
-    import sys
     exc, val, tb = sys.exc_type, sys.exc_value, sys.exc_traceback
     msg = "(%s) %s"%(exc.__name__,val)
     # If the supplied widget has no master, it's probably the Tk
@@ -764,7 +761,6 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         # Hack to find appropriate status bar: Go back through frames
         # until a widget with a status bar is found, and return it.
         try:
-            import sys
             while True:
                 f = sys._getframe(i)
                 if hasattr(f,'f_locals'):
