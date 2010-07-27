@@ -320,33 +320,62 @@ def run_named(name,verbosity=2):
     
     run(verbosity,test_modules=[test_module])
 
-def run_coverage(produce_html=1):
+
+def run_coverage(runner_fn=run,runner_args=None,runner_kw=None,targets=None,produce_html=0,html_dir=param.normalize_path('tests/coverage_html')):
+    """
+    runner_fn : function from topo.tests to be used for coverage analysis
+    runner_args : arguments for runner_fn
+    runner_kw : kwargs for runner_fn
+    targets : if not None, is a list of filenames that will be tested for coverage (all others will be omitted). 
+        Example: ['topo/pattern/image.py']
+    produce_html : 0 for terminal output; 1 for html output to html_dir (default: ~/topographica/tests/coverage_html)
+    """
+
     from coverage import coverage
+
     #initialize coverage module
     cov = coverage(timid=True,cover_pylib=False,branch=True,config_file=False)
+    if runner_args is None:
+        runner_args=tuple()
+    if runner_kw is None:
+        runner_kw={}
 
     #start code coverage analysis
     cov.start()
 
     #code to be analyzed
-    run(verbosity=1)
+    runner_fn(*runner_args,**runner_kw)
 
     #stop
     cov.stop()
     cov.save()
     #lines to be excluded from the report (regexp) 
-    cov.exclude('except')  
-    
+    cov.exclude('except | raise')
+
+    #report scope
+    CWD = os.path.dirname(__file__)[0:-11] #drop '/topo/tests' from the string
+    omit_list = [CWD+'/topo/tests']
+
+    if targets != None:
+        for i in range(len(targets)):
+            targets[i] = os.path.join(CWD, targets[i])
+        omit_list = []
+        for root, dirs, files in os.walk(CWD):
+            for f in files:
+                f=os.path.join(root, f)
+                if f.endswith('.py') and not f in targets:
+                    omit_list.append(f) 
+
     #generate the html report
     print "Code coverage: GENERATING"
     if produce_html == 1:
         #exclude tests directory from the report using omit_prefixes
-        cov.html_report(directory='./topo/tests/coverage_html', ignore_errors=True, omit_prefixes=[os.getcwd()+'/topo/tests'])
-        print "Report generated: "+os.getcwd()+'/topo/tests/coverage_html/index.html'
+        cov.html_report(directory=html_dir,  ignore_errors=True, omit_prefixes=omit_list)
+        print "Report generated: "+html_dir+'/index.html'
     #print to terminal
     else:
-        cov.report(directory='./topo/tests/coverage_html', ignore_errors=True, omit_prefixes=[os.getcwd()+'/topo/tests'])
+        cov.report(ignore_errors=True, show_missing=False, omit_prefixes=omit_list)
     cov.erase()
     print "Code coverage: DONE"
-        
+    
 

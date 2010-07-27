@@ -93,6 +93,9 @@ tests: FORCE
 	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run(verbosity=${TEST_VERBOSITY}); import sys; sys.exit(len(t.failures+t.errors))"
 
 tests-coverage: FORCE
+	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run_coverage(produce_html=0)"
+
+tests-coverage-html: FORCE
 	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run_coverage(produce_html=1)"
 
 examples: FORCE
