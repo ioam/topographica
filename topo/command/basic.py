@@ -295,6 +295,10 @@ def save_snapshot(snapshot_name=None,xml=False):
         snapshot_name = topo.sim.basename() + ".typ"
 
     # For now we just search topo, but could do same for other packages.
+
+    # CEBALERT: shouldn't it be topo and param? I guess we already get
+    # many classes defined in param because they are imported into
+    # topo at some point anyway.
     topoPOclassattrs = PicklableClassAttributes(topo,exclusions=('plotting','tests','tkgui'),
                                                 startup_commands=topo.sim.startup_commands)
 
