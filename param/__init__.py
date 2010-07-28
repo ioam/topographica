@@ -827,7 +827,7 @@ class resolve_path(ParameterizedFunction):
     than just os.getcwd() can be used, and the file must exist.
     """
 
-    search_paths = List(default=[os.getcwd()],doc="""
+    search_paths = List(default=[os.getcwd()],pickle_default_value=False,doc="""
         Prepended to a non-relative path, in order, until a file is
         found.""")
 
@@ -865,7 +865,7 @@ class normalize_path(ParameterizedFunction):
     prefix rather than os.getcwd).
     """
 
-    prefix = String(default=os.getcwd(),doc="""
+    prefix = String(default=os.getcwd(),pickle_default_value=False,doc="""
         Prepended to the specified path, if that path is not
         absolute.""")
 
@@ -876,6 +876,7 @@ class normalize_path(ParameterizedFunction):
             path = os.path.join(os.path.normpath(p.prefix),path)
 
         return os.path.normpath(path)
+
 
 
 class Filename(Parameter):
