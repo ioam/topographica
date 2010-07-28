@@ -329,6 +329,10 @@ def run_coverage(runner_fn=run,runner_args=None,runner_kw=None,targets=None,prod
     targets : if not None, is a list of filenames that will be tested for coverage (all others will be omitted). 
         Example: ['topo/pattern/image.py']
     produce_html : 0 for terminal output; 1 for html output to html_dir (default: ~/topographica/tests/coverage_html)
+
+    See tests-coverage target in Makefile for example usage, or you
+    can get coverage of an individual file by a test:
+      ./topographica -c "import topo.tests;t=topo.tests.run_coverage(runner_fn=topo.tests.run_named,runner_args=('testimage.py',),produce_html=0,targets=['topo/pattern/image.py'])"
     """
 
     from coverage import coverage
