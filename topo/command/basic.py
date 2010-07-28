@@ -360,6 +360,8 @@ def load_snapshot(snapshot_name):
     # unpickling the PicklableClassAttributes() executes startup_commands and
     # sets PO class parameters.
 
+    snapshot_name = param.resolve_path(snapshot_name)
+
     # If it's not gzipped, open as a normal file.
     try:
         snapshot = gzip.open(snapshot_name,'r')
