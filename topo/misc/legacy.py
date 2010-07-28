@@ -241,6 +241,14 @@ S=supporters=DuplicateCheckingList()
 # in general, newest changes should go at the start of the list.
 
 
+# do not restore search_paths,prefix for resolve_path,normalize_path
+# hack
+import param.parameterized
+param.parameterized.PicklableClassAttributes.do_not_restore+=[
+    'param.normalize_path',
+    'param.resolve_path']
+
+
 # fixedpoint available as topo.misc.fixedpoint, not fixedpoint
 import topo.misc.fixedpoint as fixedpoint
 from topo.misc.util import ModuleImporter,ModuleFaker
