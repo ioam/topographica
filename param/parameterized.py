@@ -291,7 +291,8 @@ class Parameter(object):
     # operations to copy and restore Parameters (e.g. for Python
     # persistent storage pickling); see __getstate__ and __setstate__.
     __slots__ = ['_attrib_name','_internal_name','default','doc',
-                 'precedence','instantiate','constant','readonly']
+                 'precedence','instantiate','constant','readonly',
+                 'pickle_default_value']
 
     # When created, a Parameter does not know which
     # Parameterized class owns it. If a Parameter subclass needs
@@ -299,7 +300,8 @@ class Parameter(object):
     # (which will be filled in by ParameterizedMetaclass)
                                                    
     def __init__(self,default=None,doc=None,precedence=None,  # pylint: disable-msg=R0913
-                 instantiate=False,constant=False,readonly=False): 
+                 instantiate=False,constant=False,readonly=False,
+                 pickle_default_value=True): 
         """
         Initialize a new Parameter object: store the supplied attributes.
 
@@ -314,6 +316,9 @@ class Parameter(object):
         default, doc, and precedence default to None. This is to allow
         inheritance of Parameter slots (attributes) from the owning-class'
         class hierarchy (see ParameterizedMetaclass).
+
+        In rare cases where the default value should not be pickled,
+        set pickle_default_value=False (e.g. for file search paths).
         """
         self._attrib_name = None  
         self._internal_name = None
@@ -323,6 +328,7 @@ class Parameter(object):
         self.constant = constant or readonly # readonly => constant
         self.readonly = readonly
         self._set_instantiate(instantiate)
+        self.pickle_default_value = pickle_default_value
 
         
     def _set_instantiate(self,instantiate):
@@ -1619,7 +1625,7 @@ class PicklableClassAttributes(object):
                     # Parameterized classes always have parameters in
                     # __dict__, never in __slots__
                     for (name,obj) in v.__dict__.items():
-                        if isinstance(obj,Parameter):
+                        if isinstance(obj,Parameter) and obj.pickle_default_value:
                             class_attributes[full_class_path][name] = obj
 
 
