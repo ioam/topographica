@@ -26,7 +26,18 @@ existing file has a corresponding test file already.  Moreover,
 existing test files should <i>not</i> be assumed to be exhaustive or
 even particularly useful; they vary a lot in how comprehensive they
 are.  So please always check the test file when coding, especially
-when debugging, because it probably needs work too.
+when debugging, because it probably needs work too. You can check how
+well a particular test file covers a particular file by running
+coverage. Here is an example of checking to see how well
+topo/tests/testimage.py covers topo/pattern/image.py:
+
+<blockquote>
+<code>
+./topographica -c "import topo.tests;t=topo.tests.run_coverage( \
+  runner_fn=topo.tests.run_named,runner_args=('testimage.py',), \
+  targets=['topo/pattern/image.py'])"
+</code>
+</blockquote>
 
 <h2>Unittests and Doctests</h2>
 
