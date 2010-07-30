@@ -21,8 +21,15 @@ $Id$
 """
 __version__='$Revision: 10367 $'
 
+# If functions in this file need anything other than the very basic
+# imports declared here at the top, they must do so using import
+# statements *within* the function definition to avoid polluting
+# memory.  Otherwise, the simplest functions in this file would end up
+# measuring memory taken by unused and irrelevant imports like 'topo',
+# which doesn't ever need to be loaded for the 'execfile' example
+# shown above.
 
-import os,sys,subprocess
+import subprocess
 
 
 def cmd_to_string(cmd):
@@ -33,6 +40,7 @@ def cmd_to_string(cmd):
 
 def topsize():
     """Return the RES size of this process as reported by the top(1) command."""
+    import os
     top_line=cmd_to_string("top -n 1 -b -p %d | grep '^[ ]*%d '" % (os.getpid(),os.getpid()))
     return top_line.split()[5]
 
@@ -120,7 +128,6 @@ def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**
     with the script file, time, and parameters so that results from
     different runs can be compared.
     """
-    # CEBALERT: why are these imports here rather than at the top?
     import os,re,__main__,topo
     from topo.misc.commandline import global_params
 
@@ -153,6 +160,6 @@ def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**
             analysis_fn(prefix=prefix+": ")
 
     except:
-        import traceback
+        import traceback,sys
         traceback.print_exc(file=sys.stdout)
         sys.stderr.write("Warning -- Error detected: execution halted.\n")
