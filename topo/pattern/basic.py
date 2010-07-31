@@ -6,29 +6,24 @@ $Id$
 """
 __version__='$Revision$'
 
-from math import pi, sin, cos, sqrt
+from math import pi, sqrt
 
 import numpy
-from numpy.oldnumeric import around,bitwise_and,sin,add,Float,bitwise_or
-from numpy import alltrue
-
-# CEBALERT: many of these are unused, and appeared for the Audio pattern
-# generator. Can we remove the unused ones?
-from numpy import asarray, float32, nonzero, zeros, ones, shape, hstack 
-from numpy import linspace, logspace, log10, abs, round, multiply
-from numpy import fft, bartlett, blackman, hamming, hanning, kaiser
+from numpy.oldnumeric import around,bitwise_and,sin,cos,bitwise_or
+from numpy import asarray, float32, nonzero, zeros, shape, hstack,\
+    linspace, abs, round, fft, alltrue
 
 import param
 from param.parameterized import ParamOverrides,as_uninitialized
 
 import topo
 # Imported here so that all PatternGenerators will be in the same package
-from topo.base.patterngenerator import Constant
-from topo.base.patterngenerator import PatternGenerator
+from topo.base.patterngenerator import Constant, PatternGenerator
+
 from topo.base.arrayutil import wrap
 from topo.base.sheetcoords import SheetCoordinateSystem
-from topo.misc.patternfn import gaussian,exponential,gabor,line,disk,ring,sigmoid
-from topo.misc.patternfn import arc_by_radian,arc_by_center,smooth_rectangle,float_error_ignore
+from topo.misc.patternfn import gaussian,exponential,gabor,line,disk,ring,\
+    sigmoid,arc_by_radian,arc_by_center,smooth_rectangle,float_error_ignore
 
 from topo import numbergen
 
