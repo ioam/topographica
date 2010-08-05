@@ -107,31 +107,13 @@ current revision is broken for some reason), just add <code>-r
 revision r7472 (which ChangeLog.txt shows is the SVN revision number
 of release 0.9.4), you can do <code>svn update -r 7472</code>.
 
-<P>There are also various alternative copies of the code for
-special purposes, stored in the tags/ and branches/ sections of the
-SVN repository.  For instance, if you currently have the 
-trunk version as described above, you can switch to the version tagged
-LATEST_STABLE (usually the latest release) by typing:
-<pre>
-svn switch $TOPOROOT/tags/LATEST_STABLE/topographica
-</pre>
-
-<P>To switch from the LATEST_STABLE version back to the trunk version,
-replace <code>tags/LATEST_STABLE</code> with <code>trunk</code> and
-run the command again.  The currently available tags are listed on the 
-<a href="http://topographica.svn.sourceforge.net/viewvc/topographica/tags/">tags
-page</a>, or you can run the command <code>svn ls --verbose
-$TOPOROOT/tags/</code>.
-
-<P>Similarly, to switch to a separate branch named 'some-branch',
-replace <code>tags/LATEST_STABLE</code> with
-<code>branches/some-branch</code>.  Branches are listed on the 
-<a href="http://topographica.svn.sourceforge.net/viewvc/topographica/branches/">branches
-page</a>, or you can run the command <code>svn ls --verbose
-$TOPOROOT/branches/</code>.
-
-<P>You can discover if your copy is from the trunk or a particular
-branch or tag by typing <code>svn info | grep URL</code>.  Again, note
-that tags and branches are usually only for very specific purposes;
-most people will want the trunk or else some specific recent revision.
+<P>There are also various alternative copies of the code for special
+purposes, stored in the tags/ and branches/ sections of the SVN
+repository. Currently available tags and branches are listed on the
+<a
+href="http://topographica.svn.sourceforge.net/viewvc/topographica/tags/">tags</a>
+and <a
+href="http://topographica.svn.sourceforge.net/viewvc/topographica/branches/">branches</a>
+pages, or you can run e.g. <code>svn ls --verbose
+$TOPOROOT/tags/</code>. 
 
