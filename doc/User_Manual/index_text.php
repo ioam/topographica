@@ -20,7 +20,6 @@ step-by-step explanations in the tutorials.
 <A HREF="noise.html">Adding noise</A><BR>
 <A HREF="interfacing.html">Interfacing to external simulators</A><BR>
 <A HREF="publishing.html">Publishing results from Topographica</A><BR>
-<A HREF="about.html">About Topographica</A><BR>
 
 <P>Please note that the user manual is not a complete reference to all
 available functionality, so that we can focus on the main ideas.  If
