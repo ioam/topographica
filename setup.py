@@ -71,13 +71,15 @@ neural maps. The goal is to help researchers understand brain function
 at the level of the topographic maps that make up sensory and motor
 systems.
 
-**Please see http://topographica.org/ for more information.**
+Please see http://topographica.org/ for more information.
 
 Installation
 ============
 
-Here we give a brief summary; please see
-http://topographica.org/Downloads for full details.
+Topographica is already packaged for a number of platforms, including
+Linux, Mac, and Windows. Please see http://topographica.org/Downloads
+for links to packages. Below is a brief summary for installation into
+an existing Python environment.
 
 If you have `easy_install`_ or `pip`_ (or similar), you can use one of
 those to install Topographica and its dependencies automatically
