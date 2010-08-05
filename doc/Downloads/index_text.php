@@ -28,7 +28,7 @@ HREF="http://code.google.com/p/pythonxy/wiki/Downloads">Python(x,y)</A>
 scientific Python environment, which by default includes all the tools
 needed by Topographica. Following this, run the self-installing
 Topographica <a
-href="http://pypi.python.org/packages/any/t/topographica/topographica-0.9.7.win.exe">exe</a>
+href="https://sourceforge.net/projects/topographica/files/topographica/0.9.7/topographica-0.9.7.win.exe/download">exe</a>
 for Windows. Once complete, proceed to the <A
 HREF="#postinstall">After Installation</A> section below.
 
@@ -64,15 +64,15 @@ its dependencies to be updated automatically for future releases.
 
 <P>Alternatively, download the appropriate deb or rpm for your
 platform (currently available: <a
-href="http://download.opensuse.org/repositories/home:/ceball:/topographica/Fedora_13/noarch/topographica-0.9.7-9.1.noarch.rpm">Fedora
+href="https://sourceforge.net/projects/topographica/files/topographica/0.9.7/topographica-0.9.7-9.1.noarch.rpm/download">Fedora
 Core 13</a>; Ubuntu <A
-HREF="https://launchpad.net/~topographica-developers/+archive/topographica/+files/topographica_0.9.7-0ubuntu3~lucid_all.deb">Lucid</A>
+HREF="https://sourceforge.net/projects/topographica/files/topographica/0.9.7/topographica_0.9.7-0ubuntu3~lucid_all.deb/download">Lucid</A>
 <A
-HREF="https://launchpad.net/~topographica-developers/+archive/topographica/+files/topographica_0.9.7-0ubuntu3~karmic_all.deb">Karmic</A>
+HREF="https://sourceforge.net/projects/topographica/files/topographica/0.9.7/topographica_0.9.7-0ubuntu3~karmic_all.deb/download">Karmic</A>
 <A
-HREF="https://launchpad.net/~topographica-developers/+archive/topographica/+files/topographica_0.9.7-0ubuntu3~jaunty_all.deb">Jaunty</A>
+HREF="https://sourceforge.net/projects/topographica/files/topographica/0.9.7/topographica_0.9.7-0ubuntu3~jaunty_all.deb/download">Jaunty</A>
 <A
-HREF="https://launchpad.net/~topographica-developers/+archive/topographica/+files/topographica_0.9.7-0ubuntu3~hardy_all.deb">Hardy</A>)
+HREF="https://sourceforge.net/projects/topographica/files/topographica/0.9.7/topographica_0.9.7-0ubuntu3~hardy_all.deb/download">Hardy</A>)
 and install using your graphical software manager (usually launched by
 double clicking on the downloaded package). We also recommend that RPM
 users install the "Development Tools" package collection from their
