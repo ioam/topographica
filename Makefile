@@ -390,6 +390,7 @@ ChangeLog.txt: FORCE
 dist-setup.py: doc distdir reference-manual
 # clean dir but keep setup.py-related files
 	${CD} ${DIST_DIR}; ${PREFIX}/bin/python create_topographica_script.py None ${RELEASE} ${SVNVERSION} 1
+	${CD} ${DIST_DIR}; ${MV} README.setup.txt README.txt
 	${CD} ${DIST_DIR}; ${MV} setup.py TMPsetup.py; mv MANIFEST.in tmpMANIFEST.in; mv topographica TMPtopographica; mv topographica.ico TMPtopographica.ico; mv windows_postinstall.py TMPwindows_postinstall.py
 	${CD} ${DIST_DIR}; make distclean
 	${CD} ${DIST_DIR}; ${MV} TMPsetup.py setup.py; mv tmpMANIFEST.in MANIFEST.in; mv TMPtopographica topographica; mv TMPtopographica.ico topographica.ico; mv TMPwindows_postinstall.py windows_postinstall.py

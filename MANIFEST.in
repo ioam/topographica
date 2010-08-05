@@ -1,5 +1,5 @@
 include COPYING.txt
-include ChangeLog.txt
+include LICENSE.txt
 #recursive-include doc *.html *.png *.gif
 recursive-include param/externaltk *.tcl
 recursive-include examples *.ty
