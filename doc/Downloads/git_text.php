@@ -35,12 +35,14 @@ above.
 <P>Although git is not typically installed in most Linux
 distributions, it is usually easy to add it.  E.g. for Debian or
 Ubuntu Linux, just do 'apt-get install git git-svn git-doc'; for
-others you can get installation packages from
-<a href="http://git.or.cz/">git.or.cz</a>.  The git-svn package allows
+others you can get installation packages from <a
+href="http://git.or.cz/">git.or.cz</a>.  The git-svn package allows
 git to connect to Topographica's SVN repository. Note that you should
-try to get Git version 1.6.5.3 (used while writing this document) or
-later. If you are building from source, you can skip git-doc, which
-can be difficult to compile, and is anyway <a href="http://www.kernel.org/pub/software/scm/git/docs/">available online</a>.
+try to get a Git version of at least 1.6.5.3. If you are building from
+source, you can skip git-doc, which can be difficult to compile, and
+is anyway <a
+href="http://www.kernel.org/pub/software/scm/git/docs/">available
+online</a>.
 
 
 <H3>Getting the Topographica code</H3>
@@ -71,26 +73,9 @@ recent revision of the <code>topographica</code> code (and not
 <code>facespace</code>), the new directory will occupy about 124
 megabytes (as of February 2008).
 
-<P>If you wished, you <i>could</i> get the complete history of the
-Topographica project, using:
-<pre>
- git svn clone $TOPOROOT/trunk/topographica topographica
-</pre>
-instead of all of the above commands after <code>export</code>, to
-make a new directory <code>topographica/</code> with a copy of the
-entire repository (620MB as of 2/2008) plus a working copy.  This will
-usually take 2-3 hours to run, although you would only need to do it
-once (because after that you could use branches to create different
-versions).  Note that this only gets the trunk; if you want all tags
-and branches as well (which seems unlikely), you can use the -T and -B
-options described in the git manual.  In any case, this method is not
-usually necessary, unless you want to do some comparison across a wide
-range of historical versions of Topographica.
+<P>After you have the source code, you probably want to instruct git
+to ignore the same files as SVN ignores:
 
-<P>After you have the source code, you probably want to
-<A HREF="index.html#building-topographica">build Topographica</A>. You
-probably also want to instruct git to ignore the same files as SVN
-ignores:
 <pre>
 (echo; git svn show-ignore) >> .git/info/exclude
 </pre>
@@ -104,178 +89,108 @@ information.
 <P>Now that you have the Topographica source code in your own Git
 repository, you are free to work on it as you wish. You can commit
 files, add files, delete files, and so on. All operations that you
-perform with <code>git</code> (such as <code>diff</code>
-and <code>commit</code>) are local; only operations
-with <code>git svn</code> have the potential to modify the SVN
-repository.
+perform with <code>git</code> (such as <code>diff</code> and
+<code>commit</code>) are local; only operations with <code>git
+svn</code> have the potential to modify the SVN repository. If you are
+new to Git, <A HREF="http://git-scm.com/documentation">Git's
+documentation page</A> has various tutorials for people with different
+backgrounds (including those coming from Subversion).
 
-<P>If you are new to Git, you might find
-the <A HREF="http://www.kernel.org/pub/software/scm/git/docs/tutorial.html">Git
-tutorial</A> useful. We recommend that you read through the 
-<A HREF="http://git.or.cz/course/svn.html">crash course for SVN
-users</A>, which will help you to avoid being surprised by differences
-between similarly named git and svn commands. If you are still puzzled
-by a particular operation in Git,
-the <A HREF="http://git.or.cz/gitwiki/GitFaq">Git FAQ</A> is often
-helpful.
-
-<!--
-<P>Note that for subversion users, <code>git revert</code> the behavior of <code>git
-commit</code> in particular might be surprising when adding new files,
-so be sure to take a look at
-the <A HREF="http://www.kernel.org/pub/software/scm/git/docs/git-commit.html">git-commit
-man page</A> or see the FAQ
-entry <A HREF="http://git.or.cz/gitwiki/GitFaq#head-3aa45c7d75d40068e07231a5bf8a1a0db9a8b717">Why
-is "git commit -a" not the default?</A>.
--->
-
-<P>Before committing to your repository for the first time, you should
-identify yourself to git:
+<P>Note that before committing to your repository for the first time,
+you should identify yourself to git:
 <pre>
-ceball@doozy:~/g$ git config --global user.email user@address.ext
-ceball@doozy:~/g$ git config --global user.name "User Name"
+$ git config --global user.email user@address.ext
+$ git config --global user.name "User Name"
 </pre>
 
 You should also check that your machine has the correct time and date,
-otherwise your history can become confusing. Other configuration
-options are available by reading <code>man git-config</code>.
-
-<P>After working on your own repository, there are a couple of
-operations that you will probably want to perform at some stage:
-tracking other peoples' changes to the Topographica SVN repository,
-adding your changes to the Topographica SVN repository, and sharing
-your Git repository. These are discussed in the following sections.
+otherwise your history can become confusing. 
 
 
-<H4>Tracking Topographica's SVN repository</H4>
+<H3>Interacting with Topographica's SVN repository</H3>
 
-<P>To get updates from the Topographica SVN repository, your own copy
-should have no uncommitted changes. (If you do have uncommitted
-changes,
-the <A HREF="http://www.kernel.org/pub/software/scm/git/docs/git-stash.html">git
-stash</A> command allows you to store those changes for later
-retrieval.)
+<P>To interact with our SVN repository, there are several possible
+workflows you could adopt. Please search the web for "git svn
+workflow" and choose one that suits how you want to work. Here is one
+possible git/svn workflow:
 
-<pre>
-# (git stash if required)
-$ git svn rebase
-# (git stash apply; git stash clear if required)
-</pre>
+<ol>
 
-<code>rebase</code> moves a whole branch to a newer "base" commit;
-see <A HREF="http://www.kernel.org/pub/software/scm/git/docs/user-manual.html#using-git-rebase">Keeping
-a patch series up to date using git-rebase</A> from the Git user
-manual for further explanation.
+<li>Create <code>feature</code> branch from <code>master</code> (the
+SVN branch): <code>git checkout -b feature</code></li>
 
+<li>Make your changes, commit them, and test them (probably multiple
+iterations).</li>
 
-<H4>Sending your changes to Topographica's SVN trunk</H4>
+<li><i>(Optional)</i> If you have made a lot of commits that do not
+form a reasonable story, collapse them using git's <a
+href="http://book.git-scm.com/4_rebasing.html">rebase</a>. The safest
+way to do this is to first create a new branch of <code>feature</code>
+(<code>git checkout -b feature_clean</code>); this way, what you
+actually did is preserved in the <code>feature</code> branch. In the
+new branch, run <code>git rebase --interactive HEAD~i</code>, where
+<code>i</code> is the number of commits back from the current position
+that you want to sort out. This will open an editor (as specified by
+the <code>GIT_EDITOR</code> environment variable) where you can
+rearrange, squash, or remove individual commits. The end result should
+be a single commit with a log message describing the new feature.
 
-<P>Changes that you have committed in your local git repository are
-not automatically exported to the main SVN repository for
-Topographica, letting you use version control even for things that are
-not meant to be part of the main Topographica distribution.  If you do
-want your changes to be made public, then run:
+<li>Update your SVN branch to get changes made by others while you
+were working on your feature: <code>git checkout master; git svn
+rebase</code>.</li>
 
-<pre>
-git svn dcommit
-</pre>
+<li>Merge your changes back into the SVN branch: <code>git merge
+feature</code> (or <code>git merge feature_clean</code> if you
+followed step 3).</li>
 
-This will send each of your git commits, in order, to the SVN
-repository, preserving their log messages, so that to an SVN user it
-appears you made each of those changes one after the other in a
-batch. 
+<li>Test your changes and commit fixes if necessary. Other people
+might have introduced incompatibilities into SVN while you were doing
+step 2, so it is important to check your changes are still valid (and
+not just that they merge without conflict). If you followed optional
+step 3, you probably now want to rebase again at this stage to
+incorporate any new commits into the one you created earlier.</li>
 
-<P>If you want to see exactly what is going to happen without making
-any actual changes, you might wish to try a 'dry run' first by
-specifying <code>-n</code>:
+<li>Commit your changes to SVN: <code>git svn dcommit</code>.</li>
 
-<P>As with SVN, before committing to the central repository you should
-first check that you have updated and tested your code with changes
-from others (<code>git svn rebase; make tests</code>) to ensure that
-your changes are compatible (and not just that they apply
-cleanly). Any actual conflict encountered by <code>git svn</code>
-(e.g.  you try to commit a file which has been updated by someone else
-while you were working on it) will stop the <code>dcommit</code>
-process, and the SVN error will be reported. At this point, you can
-use the usual git commands to deal with such merge conflicts.
-
-<P>Finally, note that it is possible to rewrite your history before
-sending your changes to SVN. This can be very useful to turn a large
-number of small changes into a few coherent ones. See the
-documentation of <code>git rebase</code> for more information.
+</ol>
 
 
-<H3>Taking advantage of more of Git's capabilities</H3>
+<H3>Repository backup and sharing work in progress</H3>
 
-<P>Git is very flexible, and provides far more than is mentioned
-above.  There are many useful git tutorials on the web explaining more
-advanced git usage (e.g. <a
-href="http://www-cs-students.stanford.edu/~blynn/gitmagic/">Git
-Magic</a>). Below, we describe a few particular features. 
-
-
-<H4>Working on multiple independent features</H4>
-
-One thing that you will probably want to do as soon as you are
-familiar with basic git-svn operation is to use one branch to track
-the svn repository, and then use a new branch for each independent set
-of changes:
+<P>With git, you are usually working locally. Therefore, it is a good
+idea to back up your repository. You could simply copy the repository
+elsewhere to do this, but this does not make your work visible to
+others (until you dcommit back to SVN). Alternatively, you could use
+one of the free online git hosting services, or request a remote
+repository on SF.net from the Topographica admins. With a repository
+<code>NAME</code> on SourceForge.net, you can mirror your local
+repository like this:
 
 <pre>
-$ git checkout -b testing123
-Switched to a new branch 'testing123'
-# (edit code)
-$ git commit -m "Added x." somefile
-# (more editing)
-$ git commit -m "Added y." anotherfile
-</pre>
+$ git remote add NAME ssh://username@topographica.git.sourceforge.net/gitroot/topographica/NAME
+</pre> 
 
-At this point, your new changes exist only on the testing123
-branch. If you switch back to the master branch, the recent changes
-will not show up:
+You can then push your local repository to the remote one as often as
+you want:
 
 <pre>
-$ git checkout master
-Switched to branch 'master'
-$ git log
-# recent commits don't show
+$ git push NAME
 </pre>
 
-You could now work on another feature by creating a new branch. Or, if
-you have finished the work on the testing123 branch, you can merge the
-changes into your master branch, and then commit them to the central
-SVN repository:
+Note that you should read the documentation for <code>push</code> to
+ensure that you share the branch you are expecting to (you probably
+want to use the <code>--all</code> or <code>--mirror</code> options to
+share everything).  .
 
+<P>
+If your repository is on SourceForge, it will be visible on the web:
 <pre>
-$ git merge testing123
-# info about merge appears
-$ git svn dcommit
-# info about svn commit appears
-$ git branch -d testing123
-Deleted branch testing123 (was d8d6b8d).
+http://topographica.git.sourceforge.net/git/gitweb.cgi?p=topographica/NAME
 </pre>
 
-To keep a long-term branch up to date with svn:
-<pre>
-$ git checkout master
-$ git svn rebase
-$ git checkout testing123
-$ git rebase master 
-</pre>
-
-The procedures described above are only suggestions. The only requirement
-is that, at the point of interaction with our SVN repository, you
 
 
-<H4>Sharing your work</H4>
-
-<P>If you are working on a complex new feature over a long period of
-time, you might want to share your work before it is finished. To do
-this, ask one of the Topographica admins to create a git repository
-for the feature on SourceForge.net. The admin will give you a remote
-repository name (e.g. NAME), which you should tell git about:
-
-<!--
+<!-- ADMIN NOTE
 ssh -t ceball,topographica@shell.sourceforge.net create
 cd /home/scm_git/t/to/topographica
 git --git-dir=ceball_houzi2 init --shared=all --bare
@@ -309,158 +224,11 @@ in git config,
         showrev =
 -->
 
-<pre>
-$ git remote add NAME ssh://username@topographica.git.sourceforge.net/gitroot/topographica/NAME
-</pre> 
-
-Then, you can push your repository to the host:
-
-<pre>
-$ git push NAME
-</pre>
-
-Note that you should read the documentation for <code>push</code> to
-ensure that you share the branch you are expecting to (you might want
-to use the <code>--all</code> or <code>--mirror</code> options).
-
-<P>
-If your repository is on SourceForge, it will be visible on the web:
-<pre>
-http://topographica.git.sourceforge.net/git/gitweb.cgi?p=topographica/NAME
-</pre>
-
-Others can get a copy of your repository using the following command:
-
-<pre>
-$ git clone git://topographica.git.sourceforge.net/gitroot/topographica/NAME
-</pre>
-
-They can see your branches, and then change into your
-<code>newfeature</code> branch:
-
-<pre>
-$ git branch -r
-$ git checkout origin/newfeature
-</pre>
-
-In the future, they can get your latest changes with <code>git
-pull</code>, or by rebasing:
-
-<pre>
-$ git checkout master
-$ git fetch origin
-$ git rebase origin
-</pre>
-
-See e.g. the
-tutorial <A HREF="http://toroid.org/ams/git-central-repo-howto">Using
-Git with a central repository</A> for more information about working
-with a central, shared repository.
-
-<P>One thing to bear in mind is that if you are using git to
-collaborate with others on a feature, you will not easily be able to
-keep your repository up to date with SVN by using <code>rebase</code>,
-since that will change your history, making it difficult to share
-changes with others.  If, however, no other user will be making
-changes to your published repostitory, then there will not be a
-problem.
-
-<P> Finally, once your feature is complete, you can commit all your
-work to the central SVN repository using <code>git svn dcommit</code>
-as described earlier. After this point, it is highly unlikely that you
-will be able to continue using the remote repository (because svn does
-not have all the features of git, the "git svn dcommit" command
-necessarily alters the history of your local repository in a way that
-will likely leave it incompatible with that of the copy on the remote
-host). You will likely want to have the remote git repository archived
-at this point. Your local repository of course remains usable, and you
-can create a new remote copy if you begin working on another extended
-feature.
 
 
-<!-- based on http://sourceforge.net/apps/trac/sourceforge/wiki/Git, http://www.naildrivin5.com/daveblog5000/?p=102 and
-http://projects.scipy.org/numpy/wiki/GitMirror to some extent -->
+<!-- OTHER NOTES
 
+with all the manipulations git can do, "git reflog" comes in handy to
+tell you what you've been doing 
 
-<!-- with all the manipulations git can do, "git reflog" comes in handy
-to tell you what you've been doing -->
-
-<!--
-gitk readable fonts
-
-[ -r ~/.gitk ] || cat > ~/.gitk << EOF
-set mainfont {Arial 10}
-set textfont { Courier 10}
-set uifont {Arial 10 bold}
-EOF
 -->
-
-<H4>Sharing research code between machines</H4>
-
-<P>If you are doing modeling work and want to use your version of
-Topographica on multiple machines, you can use git to keep multiple
-copies of a repository in sync. Of course, you could just use svn to
-keep separate Topographica installations in sync, but this has the
-disadvantage that you will also get other people's changes (i.e. you
-will have to use the latest svn version of Topographica), and your
-code will be publicly visible. You could use an svn branch to solve
-the first problem (though not the second), but it can be difficult
-later on to merge svn branches (i.e. to recombine your work with other
-people's work in svn). You could also use e.g. rsync to maintain
-identical copies, but this does not have the flexibility of git
-(e.g. of allowing easy machine-specific modifications), and you would
-need to exclude built, binary files.
-
-<P>Assuming your work is already in a git repository (as described
-earlier), you can use <code>git clone</code> on any other machine
-where you'd like to get a copy of your repository. The git
-documentation covers cloning, but here is an example over ssh:
-<pre>
-git clone ssh://user@machine/path/to/repository
-</pre>
-
-<P>While working on your code on the 'master' copy, take advantage of
-git (as described earlier: git commits are local, not broadcast to
-others, and can easily be changed/undone later). When you have
-committed changes that you'd like to appear on the other machine, do
-the following on that machine's copy of the repository: 
-<pre>
-$ git fetch origin
-$ git rebase origin
-</pre>
-
-<P>
-If you only ever make changes to the master copy, =git rebase= will be
-a simple operation and will only ever need to happen 'one way' (from
-the master copy to the other machine). Note, however, that git is very
-flexible, and it is easy to make changes to multiple copies while
-keeping them all in sync (use branches and <code>pull</code>
-or <code>fetch</code>+<code>rebase</code>).
-
-<P>
-Additionally, you can use git to track modifications that should
-remain local to one machine. For instance, perhaps one copy is on a
-machine that needs special modifications to the code in order to run
-(e.g. a job submission command). You don't want to share such
-modifications, but it is still useful to have them under version
-control:
-
-<pre>
-[oddmachine]$ git checkout -b oddbranch
-[oddmachine]$ # make oddmachine-specific modifications
-[oddmachine]$ git commit -m "Special modifications for oddmachine." 
-
-[normalmachine]$ # make modifications to be shared
-[normalmachine]$ git commit -m "Did something." 
-
-# get changes made on normalmachine
-[oddmachine]$ git checkout master
-[oddmachine]$ git fetch origin
-[oddmachine]$ git rebase origin
-
-# get changes from master branch into oddbranch
-[oddmachine]$ git checkout oddbranch
-[oddmachine]$ git rebase master
-
-[oddmachine]$ # run simulations (from oddbranch)
-</pre>
