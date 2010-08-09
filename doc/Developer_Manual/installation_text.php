@@ -16,7 +16,7 @@ SVN as described in our <A HREF="../Downloads/cvs.html">SVN
 instructions</A>, or by using an alternative version control system
 that can interact with SVN. We ourselves also use and support the
 distributed version control system
-<A HREF="">Git</A>; developers who wish to use this should instead
+<A HREF="http://git-scm.com">Git</A>; developers who wish to use this should instead
 follow our <A HREF="../Downloads/git.html">git instructions</A>.
 
 <P>Once you have obtained the
