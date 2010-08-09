@@ -2,19 +2,18 @@
 
 <!-- CEBALERT: this page should be in Developer_Manual/ -->
 
-<P>The master repository for Topographica code is stored by
-<a href="cvs.html">Subversion</a> (SVN) at SourceForge.net.  It is
-often useful to work on separate copies of the code, either to develop
-a new, complicated feature, to make far-reaching changes that need
-extensive testing, or to keep track of changes useful only at your
-local site (such as private research code).  In such cases it can be
-useful to use the <a href="http://git.or.cz/">Git</a> version control
-tool to establish a local branch of Topographica, so that you can have
-the benefits of version control (keeping track of different revisions)
-without necessarily affecting the global repository.  If it does turn
-out that the local changes would be useful to other Topographica
-users, they can then be "pushed" onto the global repository for
-everyone to use once they are completed.
+<P>The master repository for Topographica code is stored by <a
+href="cvs.html">Subversion</a> (SVN) at SourceForge.net.  It is often
+useful to work on separate copies of the code, e.g. to develop a new,
+complicated feature, or to make far-reaching changes that need
+extensive testing.  In such cases it can be useful to use the <a
+href="http://git.or.cz/">Git</a> version control tool to establish a
+local branch of Topographica, so that you can have the benefits of
+version control (keeping track of different revisions) without
+necessarily affecting the global repository.  If it does turn out that
+the local changes would be useful to other Topographica users, they
+can then be "pushed" onto the global repository for everyone to use
+once they are completed.
 
 <P>SVN's own branching and merging facilities can be used in some
 cases, but (a) they are only available to Topographica developers, (b)
@@ -38,7 +37,8 @@ Ubuntu Linux, just do 'apt-get install git git-svn git-doc'; for
 others you can get installation packages from <a
 href="http://git.or.cz/">git.or.cz</a>.  The git-svn package allows
 git to connect to Topographica's SVN repository. Note that you should
-try to get a Git version of at least 1.6.5.3. If you are building from
+try to get a Git version of at least 1.7 so that all the features
+described on this page are available to you. If you are building from
 source, you can skip git-doc, which can be difficult to compile, and
 is anyway <a
 href="http://www.kernel.org/pub/software/scm/git/docs/">available
@@ -64,14 +64,13 @@ $ git svn init $TOPOROOT/trunk/topographica
 
 # retrieve the SVN files and history
 # (you can choose a value for r - choose a recent svn revision)
-$ git svn fetch -r10782; git svn rebase
+$ git svn fetch -r11340; git svn rebase
 </pre>
 
 (substituting values appropriate for what you wish to do; e.g. you can
-get more history by changing <code>-r</code>). If you're getting a
-recent revision of the <code>topographica</code> code (and not
-<code>facespace</code>), the new directory will occupy about 124
-megabytes (as of February 2008).
+get more or less history by changing <code>-r</code>). If you're
+getting a recent revision of the <code>topographica</code> code, the
+new directory will occupy about 426 megabytes (as of August 2010).
 
 <P>After you have the source code, you probably want to instruct git
 to ignore the same files as SVN ignores:
@@ -79,9 +78,6 @@ to ignore the same files as SVN ignores:
 <pre>
 (echo; git svn show-ignore) >> .git/info/exclude
 </pre>
-If <code>svn:ignore</code> properties are subsequently changed in the
-SVN repository, you will have to update your <code>exclude</code>
-information.
 
 
 <H3>Working with your Git repository</H3>
@@ -122,8 +118,8 @@ SVN branch): <code>git checkout -b feature</code></li>
 <li>Make your changes, commit them, and test them (probably multiple
 iterations).</li>
 
-<li><i>(Optional)</i> If you have made a lot of commits that do not
-form a reasonable story, collapse them using git's <a
+<li><i>(Optional)</i> If you have made a lot of commits and they do
+not form a coherent story, collapse them using git's <a
 href="http://book.git-scm.com/4_rebasing.html">rebase</a>. The safest
 way to do this is to first create a new branch of <code>feature</code>
 (<code>git checkout -b feature_clean</code>); this way, what you
@@ -140,15 +136,16 @@ were working on your feature: <code>git checkout master; git svn
 rebase</code>.</li>
 
 <li>Merge your changes back into the SVN branch: <code>git merge
-feature</code> (or <code>git merge feature_clean</code> if you
-followed step 3).</li>
+feature</code> (or <code>feature_clean</code> if you followed step
+3).</li>
 
 <li>Test your changes and commit fixes if necessary. Other people
 might have introduced incompatibilities into SVN while you were doing
 step 2, so it is important to check your changes are still valid (and
 not just that they merge without conflict). If you followed optional
-step 3, you probably now want to rebase again at this stage to
-incorporate any new commits into the one you created earlier.</li>
+step 3, you probably now want to rebase interactively again at this
+stage to incorporate any new commits into the one you created
+earlier.</li>
 
 <li>Commit your changes to SVN: <code>git svn dcommit</code>.</li>
 
