@@ -49,7 +49,6 @@ class ActivityCopy(Sheet):
             del self.input_data
 
 
-        
 
 class SequenceGeneratorSheet(GeneratorSheet):
     """

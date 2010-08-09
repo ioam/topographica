@@ -58,7 +58,7 @@ import param
 from param.parameterized import as_uninitialized,OptionalSingleton
 
 from copy import copy, deepcopy
-
+import time
 import bisect
 
 # JABALERT: Are these used for anything?
@@ -689,6 +689,12 @@ class SomeTimer(param.Parameterized):
                                  name=self.func.__name__,
                                  duration=fduration,
                                  remaining=estimate)
+            
+            ## HACK refresh windows for camera in simulation time
+            import topo 
+            if hasattr(topo, 'guimain'):
+                topo.guimain.refresh_activity_windows()
+            ##
 
             if self.stop: break
 
@@ -1456,6 +1462,78 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
 
 
+class RealTimeSimulation(Simulation):
+    """
+    A (quasi) real-time simulation object.
+
+    This subclass of Simulation attempts to maintain a correspondence
+    between simulation time and real time, as defined by the timescale
+    parameter.  Real time simulation instances still maintain a
+    nominal, discrete simulation time that determines the order of
+    event delivery.
+
+    At the beginning of each simulation time epoch, the simulation
+    marks the actual wall clock time.  After event delivery for that
+    epoch has ended, the simulation calculates the amount of
+    computation time used for event processing, and executes a real
+    sleep for the remainder of the epoch.  If the computation time for
+    the epoch exceeded the real time, a warning is issued and
+    processing proceeds immediately to the next simulation time epoch.
+
+
+    RUN HOOKS
+
+    The simulation includes as parameters two lists of functions/callables,
+    run_start_hooks and run_stop_hooks, that will be called
+    immediately before and after event processing during a call to
+    .run().  This allows, for example, starting and stopping of
+    real-time devices that might use resources while the simulation is
+    not running.
+    """
+    
+    timescale = param.Number(default=1.0,bounds=(0,None),doc="""
+       The desired real length of one simulation time unit, in milliseconds.""")
+
+    run_start_hooks = param.HookList(default=[],doc="""
+       A list of callable objects to be called on entry to .run(),
+       before any events are processed.""")
+    
+    
+    run_stop_hooks = param.HookList(default=[],doc="""
+       A list of callable objects to be called on exit from .run()
+       after all events are processed.""") 
+
+    def __init__(self,**params):
+        super(RealTimeSimulation,self).__init__(**params)
+        self._real_timestamp = 0.0
+        
+    def run(self,*args,**kw):
+        for h in self.run_start_hooks:
+            h()
+        self._real_timestamp = self.real_time()
+        super(RealTimeSimulation,self).run(*args,**kw)
+        for h in self.run_stop_hooks:
+            h()
+
+    def real_time(self):
+        return time.time() * 1000
+    
+    def sleep(self,delay):
+        """
+        Sleep for the number of real milliseconds seconds corresponding to the
+        given delay, subtracting off the amount of time elapsed since the
+        last sleep.
+        """
+        sleep_ms = delay*self.timescale-(self.real_time()-self._real_timestamp)
+
+        if sleep_ms < 0:
+            self.warning("Realtime fault. Sleep delay of %f requires realtime sleep of %.2f ms."
+                         %(delay,sleep_ms))
+        else:
+            self.debug("sleeping. delay =",delay,"real delay =",sleep_ms,"ms.")
+            time.sleep(sleep_ms/1000.0)
+        self._real_timestamp = self.real_time()
+        self._time += delay
 
 
         

@@ -1,0 +1,64 @@
+"""
+An example of using a pan/tilt/zoom camera to do simple visual tracking.
+
+$Id: tiny.ty 10778 2009-11-17 23:33:16Z KKudryavtsev $
+"""
+__version__='$Revision: 10778 $'
+
+
+from math import pi, sqrt
+
+import numpy
+import param
+
+from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
+
+import topo.learningfn.projfn 
+import topo.transferfn.projfn
+import topo.pattern.random
+import topo.responsefn.optimized 
+import topo.sheet.lissom
+
+from topo.base.functionfamily import LearningFn
+
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+p.add(
+    retina_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    cortex_density=param.Number(default=5.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""))
+
+
+#Realtime
+from topo.base.simulation import RealTimeSimulation
+topo.sim=RealTimeSimulation(register=True)
+topo.sim.timescale=1000
+
+
+# Input pattern
+import topo.pattern.opencvcamera
+camera_generator = pattern.opencvcamera.CameraImage()
+# can set pattern_sampler.size_normalization here if you want
+#camera_generator.pattern_sampler.size_normalization="original"
+
+# Sheets, connections, and their parameters
+topo.sim['Retina'] = sheet.GeneratorSheet(input_generator=camera_generator,
+# top left and bottom right
+    #nominal_bounds=sheet.BoundingBox(points=((-320,-240),(320,240))),
+    nominal_bounds=sheet.BoundingBox(radius=0.6),
+    period=1.0,phase=0.05,nominal_density=p.retina_density)
+
+import topo.sheet.ptztracker
+##for tracking the brightest pixel, copies image of the camera
+topo.sim['BrightPixel'] = sheet.ptztracker.BrightPixelTracker(nominal_density=p.retina_density,
+    nominal_bounds=sheet.BoundingBox(radius=0.6))
+
+topo.sim.connect('Retina','BrightPixel',connection_type=projection.CFProjection,)
+##
+
+
