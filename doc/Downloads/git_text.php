@@ -135,21 +135,32 @@ be a single commit with a log message describing the new feature.
 were working on your feature: <code>git checkout master; git svn
 rebase</code>.</li>
 
-<li>Merge your changes back into the SVN branch: <code>git merge
-feature</code> (or <code>feature_clean</code> if you followed step
-3).</li>
+<li>Copy your changes from the <code>feature</code> branch (or
+<code>feature_clean</code> branch if you followed step 3) to the tip
+of the SVN branch: <code>git rebase feature master</code>. Your
+changes need to appear at the tip in this way (i.e. they need to be
+'fast forwarded'), since that is the point at which they will actually
+be committed to SVN.
 
 <li>Test your changes and commit fixes if necessary. Other people
-might have introduced incompatibilities into SVN while you were doing
-step 2, so it is important to check your changes are still valid (and
-not just that they merge without conflict). If you followed optional
-step 3, you probably now want to rebase interactively again at this
-stage to incorporate any new commits into the one you created
-earlier.</li>
+might have introduced incompatibilities with your code into SVN while
+you were working on step 2, so it is important to check your changes
+are still valid (and not just that they merge without conflict). If
+you followed optional step 3, you probably now want to run <code>git
+rebase --interactive HEAD~i</code> again to incorporate any new
+commits into the one you created earlier.</li>
 
-<li>Commit your changes to SVN: <code>git svn dcommit</code>.</li>
+<li>Commit your changes to SVN: <code>git svn dcommit</code>. If you
+want to see what would happen, first do a dry run: <code>git svn
+dcommit -n</code>.</li>
 
 </ol>
+
+Branching in git is fast, so if you are ever unsure what effect an
+operation will have on the <code>master</code> or <code>feature</code>
+branches, create new branches from them and test out the command using
+the copies. An unwanted <code>test</code> branch can be deleted with
+<code>git branch -d test</code>.
 
 
 <H3>Repository backup and sharing work in progress</H3>
