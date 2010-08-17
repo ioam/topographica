@@ -147,12 +147,14 @@ might have introduced incompatibilities with your code into SVN while
 you were working on step 2, so it is important to check your changes
 are still valid (and not just that they merge without conflict). If
 you followed optional step 3, you probably now want to run <code>git
-rebase --interactive HEAD~i</code> again to incorporate any new
+rebase --interactive HEAD~j</code> again to incorporate any new
 commits into the one you created earlier.</li>
 
-<li>Commit your changes to SVN: <code>git svn dcommit</code>. If you
-want to see what would happen, first do a dry run: <code>git svn
-dcommit -n</code>.</li>
+<li>Commit your changes to SVN: <code>git svn dcommit</code>. (If you
+first want to see what would happen, you can do a dry run: <code>git
+svn dcommit -n</code>.) Now that your feature is complete and in SVN,
+you can branch <code>master</code> again to start on the next
+feature!</li>
 
 </ol>
 
