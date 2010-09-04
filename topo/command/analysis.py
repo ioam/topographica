@@ -26,7 +26,20 @@ __version__='$Revision$'
 
 
 from math import pi, sin, cos
-from PIL import Image, ImageDraw
+
+# CEBALERT: should be able to change to just "import Image,ImageDraw".
+# topo/__init__.py includes code to make sure Image etc are always
+# available, because on some systems it's "from PIL import Image" but
+# on others it's "import Image". That code means Image etc are always
+# imported, but then the rest of topographica can consistently use
+# Image (rather than a try/except, such as the one below). An
+# alternative would be an import hook, which would only run on
+# attempting to import Image etc.
+try: 
+    from PIL import Image, ImageDraw
+except ImportError:
+    import Image,ImageDraw
+    
 import copy
 
 from numpy.oldnumeric import array, maximum
