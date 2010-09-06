@@ -132,6 +132,10 @@ class Bitmap(param.Parameterized):
         return zoomed
 
 
+    # CEBALERT: Might be worthwhile simplifying this
+    # method. E.g. Image.fromarray() now exists (PIL>=1.1.6), and
+    # probably various numpy operations can now be written more
+    # clearly, too.
     def _arrayToImage(self, inArray):
         """
         Generate a 1-channel PIL Image from an array of values from 0 to 1.0.
@@ -149,6 +153,8 @@ class Bitmap(param.Parameterized):
         # Clip any values that are still larger than max_pixel_value
         to_clip = (Numeric.greater(inArray.ravel(),max_pixel_value)).sum()
         if (to_clip>0):
+            # CEBALERT: no explanation of why clipped pixel count is
+            # being accumulated.
             self.clipped_pixels = self.clipped_pixels + to_clip
             inArray.clip(0,max_pixel_value,out=inArray)
             self.verbose("Bitmap: clipped",to_clip,"image pixels that were out of range")
