@@ -55,10 +55,10 @@ topo.sim['Retina'] = sheet.GeneratorSheet(input_generator=camera_generator,
 
 import topo.sheet.ptztracker
 ##for tracking the brightest pixel, copies image of the camera
-topo.sim['BrightPixel'] = sheet.ptztracker.BrightPixelTracker(nominal_density=p.retina_density,
+topo.sim['Face'] = sheet.ptztracker.FaceTracker(nominal_density=p.retina_density,
     nominal_bounds=sheet.BoundingBox(radius=0.6))
 
-topo.sim.connect('Retina','BrightPixel',connection_type=projection.CFProjection,)
+topo.sim.connect('Retina','Face',connection_type=projection.CFProjection,)
 ##
 
 

@@ -35,8 +35,7 @@ class CameraImage(GenericImage):
         ###
 
         im = highgui.cvQueryFrame(self._camera)
-
-            #im = opencv.cvGetMat(im)
+        #im = opencv.cvGetMat(im)
         im = opencv.adaptors.Ipl2PIL(im)
             # Figure out what is happening!
         #im = copy.copy(im)
