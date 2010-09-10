@@ -18,3 +18,7 @@ del f,os,fnmatch
 
 # Not a sheet, but needed for using Sheets
 from topo.base.sheet import BoundingBox
+
+# By default, avoid loading modules that rely on external libraries
+# that might not be present on this system.
+__all__.remove('ptztracker')

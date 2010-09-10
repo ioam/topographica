@@ -16,6 +16,7 @@ from basic import *
 __all__ = basic.__all__ + [f.split('.py')[0] for f in os.listdir(__path__[0]) if fnmatch.fnmatch(f,'[!._]*.py')]
 del f,os,fnmatch
 
-# CB: temporarily hide the audio module until it works and is properly
-# supported by the GUI etc.
+# By default, avoid loading modules that rely on external libraries
+# that might not be present on this system.
 __all__.remove('audio')
+__all__.remove('opencvcamera')
