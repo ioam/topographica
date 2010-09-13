@@ -14,11 +14,16 @@ from topo.base.sheet import Sheet
 from topo.misc.ptz import PTZ
 from topo.base.arrayutil import array_argmax
 
-import opencv
-from opencv.cv import *
-from opencv.highgui import *
 import numpy as np
 from PIL import  Image
+
+try:
+    import opencv
+    from opencv.cv import *
+    from opencv.highgui import *
+
+except ImportError:
+    param.Parameterized().warning("ptztracker.py classes will not be usable; python-opencv is not available.")
 
 
 class PtzTracker(Sheet):
@@ -47,7 +52,7 @@ class PtzTracker(Sheet):
         The original calculation is fov_y=fov_x*0.5*2/ratio.
         """)
 
-    ptz = param.ClassSelector(PTZ,default=PTZ(),doc="""
+    ptz = param.ClassSelector(PTZ,default=None,doc="""
         An instance of ptzcamera.PTZ to be controlled.""")
 
     # Max Ranges (determined with uvcdynctrl -v -c)
@@ -68,6 +73,10 @@ class PtzTracker(Sheet):
     #Current postitions along x and y
     curr_y=0
     curr_x=0
+ 
+    def __init__(self, **params):
+        # Set here to avoid having it one instantiated by default
+        if self.ptz==None: self.ptz=PTZ()
 
     def input_event(self,conn,data):
         self.input_data=data

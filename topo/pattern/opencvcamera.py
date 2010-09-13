@@ -12,10 +12,16 @@ __version__ = "$Revision$"
 
 
 import Image,ImageOps
-import opencv
-from opencv import highgui
 from topo.pattern.image import GenericImage
+import param
 import copy
+
+try:
+    import opencv
+    from opencv import highgui
+
+except ImportError:
+    param.Parameterized().warning("opencvcamera.py classes will not be usable; python-opencv is not available.")
 
 
 class CameraImage(GenericImage):
