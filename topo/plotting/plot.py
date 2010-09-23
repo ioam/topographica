@@ -7,14 +7,18 @@ __version__='$Revision$'
 
 
 import copy
+import numpy
+
+import numpy
 
 from numpy.oldnumeric import zeros, ones, Float, divide
+from math import pi, sin, cos
 
 import param
 
 from topo.base.sheetcoords import SheetCoordinateSystem,Slice
 
-from bitmap import HSVBitmap, RGBBitmap, Bitmap
+from bitmap import HSVBitmap, RGBBitmap, Bitmap, DrawBitmap
 
 
 ### JCALERT!
@@ -130,7 +134,7 @@ def make_template_plot(channels,sheet_views,density=None,
      a description of the arguments.
      """
      if _sane_plot_data(channels,sheet_views):
-          plot_types=[SHCPlot,RGBPlot,PalettePlot]
+          plot_types=[SHCPlot,RGBPlot,PalettePlot,MultiOrPlot]
           for pt in plot_types:
                plot = pt(channels,sheet_views,density,plot_bounding_box,normalize,
                          name=name,range_=range_)
@@ -538,6 +542,116 @@ class PalettePlot(TemplatePlot):
           ### JABHACKALERT: To implement the class: If Strength is present,
           ### ask for Palette if it's there, and make a PaletteBitmap.
 
+
+
+             
+
+
+class MultiOrPlot(TemplatePlot):
+    """
+    Bitmap plot with oriented lines draws for every units, representing
+    the most preferred orientations.
+    Constructs a matrix of drawing directives displaying oriented lines
+    in each unit, colored according to the order or preference, and selectivity
+    This plot expects channels named "OrX" "SelX", with "X" the number
+    ranking the preferred orientations.
+    """
+    unit_size       = param.Number(default=25,bounds=(9,None),doc="box size of a single unit")
+    min_brightness  = param.Number(default=30,bounds=(0,50),doc="min brightness of lines")
+    max_brightness  = param.Number(default=90,bounds=(50,100),doc="max brightness of lines")
+
+    def __init__(self,channels,sheet_views,density,
+                 plot_bounding_box,normalize,
+                 range_=False,**params):
+        super(MultiOrPlot,self).__init__(channels,sheet_views,density, 
+                                   plot_bounding_box,normalize,**params)
+        
+        n       = len( channels.keys() )
+	if density > 10:
+	    self.unit_size	= int( density )
+
+        # there should be an even number of channels
+        if n % 2:
+            self.debug('Empty plot.')
+            return
+
+        if ( self.unit_size % 2 ) == 0:
+            self.unit_size	= self.unit_size + 1
+        
+        n       = n / 2
+        m       = []
+        for i in range( n ):
+            o           = self._get_matrix( "Or%d" % (i+1) )
+            s           = self._get_matrix( "Sel%d" % (i+1) )
+            if ( o==None or s==None ):
+                self.debug('Empty plot.')
+                return
+            m.append( ( o, s ) )
+                
+        shape,box         = self._get_shape_and_box()                                 
+        dm                = self.__make_lines_from_or_matrix( m, shape )
+        box_size          = self.unit_size
+        self.bitmap       = DrawBitmap( dm, box_size )
+        self._orig_bitmap = self.bitmap
+        
+
+    def __vertices_from_or( self, o ):
+        """
+        help function for generating coordinates of line vertices
+        from normalized orientation value.
+        Return a list with two tuples, the coordinates of the segment with the
+        given orientation, in the normalized range [ 0...1 ]. Space
+	representation is in ordinary image convention: first coordinate is X,
+	from left to right, second coordinate Y, from top to bottom.
+        """
+
+        s       = 0.5 * sin( pi * o )
+        c       = 0.5 * cos( pi * o )
+        return [ ( 0.5 - c, 0.5 + s ), ( 0.5 + c, 0.5 - s ) ]
+        
+
+    def __make_line_directive( self, os_list ):
+        """
+        help function for composing the list of line directives
+        for a single unit.
+        """
+
+        d_hue   = 360 / len( os_list )
+        hue     = 0
+        p       = []
+	n	= self.max_brightness - self.min_brightness
+        for o,s in os_list:
+            if s > 0.:
+                f       = "hsl(%d,100%%,%2d%%)" % ( hue, max( self.min_brightness, n * ( 1. - s ) ) )
+                p.append( { "line": [ o, { "fill": f } ] } )
+            hue         = hue + d_hue
+        
+        return p
+
+
+    def __make_lines_from_or_matrix( self, matrices, shape ):
+        """ 
+	return a matrix of line drawing directives for each unit, derived from
+	the given list of tuples ( o, s ), where o is the orientation view and s
+	is the selectivity. The list is ordered by the orientation preference.
+        """
+
+        vertices_from_or        = numpy.vectorize( self.__vertices_from_or, otypes=[numpy.object_] )
+        mat_list                = []
+        for o, s in matrices:
+            a   = s.mean()
+            d   = s.std()
+            mat_list.append( ( vertices_from_or( o ), ( s - d ) / ( a + d ) ) )
+
+        lines   = numpy.empty( shape, numpy.object_ )
+        for x in range( shape[ 0 ] ):
+            for y in range( shape[ 1 ] ):
+                os_list = []
+                for o, s in mat_list:
+                    os_list.append( ( o[ x, y ], s[ x, y ] ) )
+                lines[ x, y ]   = self.__make_line_directive( os_list )
+
+        return lines
 
 
 

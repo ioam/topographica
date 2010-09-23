@@ -622,6 +622,45 @@ gaussian_corner = topo.pattern.basic.Composite(
         topo.pattern.basic.Gaussian(size = 0.06,orientation=pi/2,aspect_ratio=7,y=0.3)])
 
 
+class measure_second_or_pref(SinusoidalMeasureResponseCommand):
+    """Measure the secondary  orientation preference maps."""
+
+    weighted_average	= param.Boolean( False ) 
+    num_orientation	= param.Integer( default=16, bounds=(1,None), softbounds=(1,64),
+                                    doc="Number of orientations to test.")
+
+    subplot = param.String("Second Orientation")
+    
+    def _feature_list(self,p):
+        return [Feature(name="frequency",values=p.frequencies),
+                Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True,second_response=True),
+                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
+
+
+pg= create_plotgroup(name='Second Orientation Preference',category="Preference Maps",
+             doc='Measure the second preference for sine grating orientation.',
+             pre_plot_hooks=[measure_second_or_pref.instance()])
+pg.add_plot('Second Orientation Preference',[('Hue','SecondOrientationPreference')])
+pg.add_plot('Second Orientation Preference&Selectivity',
+            [('Hue','SecondOrientationPreference'), ('Confidence','SecondOrientationSelectivity')])
+pg.add_plot('Second Orientation Selectivity',[('Strength','SecondOrientationSelectivity')])
+pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
+
+        
+pg = create_plotgroup(name='Two Orientation Preferences',category='Preference Maps',
+    doc='Display the two most preferred orientations for each units.',
+    pre_plot_hooks=[
+		measure_sine_pref.instance(num_orientation=16,weighted_average=False),
+    		measure_second_or_pref.instance(num_orientation=16,weighted_average=False)
+])
+pg.add_plot( 'Two Orientation Preferences', [
+		( 'Or1',	'OrientationPreference' ),
+		( 'Sel1',	'OrientationSelectivity' ),
+		( 'Or2',	'SecondOrientationPreference' ),
+		( 'Sel2',	'SecondOrientationSelectivity' )
+])
+pg.add_static_image('Color Key','command/two_or_key_vert.png')
+
 class measure_corner_or_pref(PositionMeasurementCommand):
     """Measure a corner preference map by collating the response to patterns."""
     

@@ -206,6 +206,25 @@ class Distribution(object):
         return self._data.keys()[argmax(self._data.values())]
 
 
+    def second_max_value_bin(self):
+        """
+	Return the bin with the second largest value.
+	If there is one bin only, return it. This is not a correct result,
+	however it is practical for plotting compatibility, and it will not
+	mistakenly be claimed as secondary maximum, by forcing its selectivity
+	to 0.0
+	"""
+        if len(self._data) <= 1: 
+            return self._data.keys()[ 0 ]
+
+	k		= self.max_value_bin()
+	v		= self._data.pop(k)
+	m		= self.max_value_bin()
+	self._data[k]	= v
+
+        return m
+
+
     def weighted_average(self):
         """
         Return a continuous, interpolated equivalent of the max_value_bin().
@@ -352,6 +371,54 @@ class Distribution(object):
         calls to this function.
         """
         return self._safe_divide(self.vector_sum()[0], sum(self._data.values()))
+
+
+    def second_selectivity(self):
+        """
+	Return the selectivity of the second largest value in the distribution.
+	If there is one bin only, the selectivity is 0, since there is no second
+	peack at all, and this value is also used to discriminate the validity
+	of second_max_value_bin()
+	Selectivity is computed in two ways depending on whether the variable is
+	a cyclic, as in selectivity()
+	"""
+        if len(self._data) <= 1: 
+            return 0.0
+        if self.cyclic == True:
+            return self._vector_second_selectivity()
+        else:
+            return self._relative_second_selectivity()
+
+
+    def _relative_second_selectivity(self):
+        """
+        Return the value of the second maximum as a proportion of the sum_value()
+	see _relative_selectivity() for further details
+        """
+	k		= self.max_value_bin()
+	v		= self._data.pop(k)
+	m		= max( self._data.values() )
+	self._data[k]	= v
+
+        proportion	= self._safe_divide( m, sum(self._data.values()) )
+        offset		= 1.0/len(self._data)
+        scaled		= (proportion-offset)/(1.0-offset)
+
+	return max( scaled, 0.0 )
+
+
+    def _vector_second_selectivity(self):
+        """
+        Return the magnitude of the vector_sum() of all bins excluding the
+	maximum one, divided by the sum_value().
+	see _vector_selectivity() for further details
+        """
+	k		= self.max_value_bin()
+	v		= self._data.pop(k)
+	s		= self.vector_sum()[0]
+	self._data[k]	= v
+
+        return self._safe_divide( s, sum(self._data.values()) )
 
 
     def value_mag(self, bin):

@@ -362,3 +362,60 @@ class MontageBitmap(Bitmap):
                         
                 else:
                     break
+
+
+class DrawBitmap(Bitmap):
+    """
+    Bitmap with primitives drawn for each unit
+    The input matrix has a list of primitives and relative arguments
+    for each unit.
+    """
+
+    draw_options	= {
+    		"fill":		"DarkGray",	# note that is lighter than Gray!
+		"width":	1
+    }
+
+    def __init__(self, primitive_matrix, box_size ):
+        """The overall shape is derived by the sheet shape and the desired
+	magnification"""
+
+	border		= 1
+        shape		= primitive_matrix.shape
+	width		= box_size * shape[ 0 ]
+	height		= box_size * shape[ 1 ]
+#	seg_len		= int( ( box_size - border ) / 2 ) - 1
+
+        self.image	= Image.new( 'RGB', ( width, height ), 'white' )
+        dr_img		= ImageDraw.Draw( self.image )
+
+        for x in range( shape[ 0 ] ):
+	    bx		= x * box_size
+            for y in range( shape[ 1 ] ):
+                by		= y * box_size
+		b0		= ( bx + border, by + border )
+		b1		= ( bx + box_size - border, by + box_size - border )
+                dr_img.rectangle( [ b0, b1 ], fill = self.draw_options[ 'fill' ] )
+		for p in primitive_matrix[ y, x ]:
+		    p_name	=  p.keys()[ 0 ]
+		    if not p_name in dir( dr_img ):
+		        raise NotImplementedError( p_name + ' is not a valid draw directive' )
+		    val		= p[ p_name ]
+		    arg		= self.__in_box( val[ 0 ], b0, box_size - 2 * border )
+		    opts	= val[ 1 ]
+		    getattr( dr_img, p_name )( arg, **opts )
+
+        
+
+    def __in_box( self, coordinates, box_corner, seg_len ):
+        """convert normalized coordinates into image coordinates in the given
+	unit box"""
+
+	in_box_coords	= []
+	for xy in coordinates:
+	    in_box_coords.append( (
+	    		box_corner[ 0 ] + seg_len * xy[ 0 ],
+			box_corner[ 1 ] + seg_len * xy[ 1 ]
+	    ) )
+	return in_box_coords
+

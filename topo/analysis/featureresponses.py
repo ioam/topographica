@@ -63,7 +63,6 @@ class DistributionMatrix(param.Parameterized):
                                      doc="Return a Distribution instance for each element of x.")
         self.distribution_matrix = new_distribution(empty(matrix_shape))
 
-  
 
     def update(self, new_values, bin):
         """Add a new matrix of histogram values for a given bin value."""
@@ -94,7 +93,7 @@ class DistributionMatrix(param.Parameterized):
         """Return the bin with the max value of each Distribution as a matrix."""
 
         max_value_bin_matrix=zeros(self.distribution_matrix.shape,Float)
-            
+
         for i in range(len(max_value_bin_matrix)):
             for j in range(len(max_value_bin_matrix[i])):           
                 max_value_bin_matrix[i,j]=self.distribution_matrix[i,j].max_value_bin()                             
@@ -102,7 +101,18 @@ class DistributionMatrix(param.Parameterized):
         return max_value_bin_matrix
         
         
+    def second_max_value_bin(self):
+        """Return the bin with the second max value of each Distribution as a matrix."""
 
+        m	= zeros(self.distribution_matrix.shape,Float)
+            
+        for i in range( len(m) ):
+            for j in range( len(m[i]) ):           
+                m[i,j]	= self.distribution_matrix[i,j].second_max_value_bin()                             
+
+        return m
+        
+        
     def selectivity(self):
         """Return the selectivity of each Distribution as a matrix."""
 
@@ -113,6 +123,19 @@ class DistributionMatrix(param.Parameterized):
                 selectivity_matrix[i,j]=self.distribution_matrix[i,j].selectivity()
 
         return selectivity_matrix
+        
+        
+    def second_selectivity(self):
+        """
+	Return the selectivity for the second maximum response of each Distribution as a matrix.
+	"""
+        s	= zeros(self.distribution_matrix.shape,Float) 
+
+        for i in range( len(s) ):
+            for j in range( len(s[i]) ):
+                s[i,j]	= self.distribution_matrix[i,j].second_selectivity()
+
+        return s
 
 
 
@@ -443,7 +466,7 @@ class FeatureMaps(FeatureResponses):
         to be increased instead.
         """
         self.measure_responses(pattern_presenter,param_dict,self.features,display)    
-        
+
         for sheet in self.sheets_to_measure():
             bounding_box = sheet.bounds
             
@@ -464,30 +487,31 @@ class FeatureMaps(FeatureResponses):
                 else:
                     norm_factor = 1.0
 
-              
-                value_offset = [f.value_offset for f in self.features if f.name==feature]
-                value_multiplier = [f.value_multiplier for f in self.features if f.name==feature]
+                value_offset		= [f.value_offset for f in self.features if f.name==feature]
+                value_multiplier	= [f.value_multiplier for f in self.features if f.name==feature]
+                second_response		= [f.second_response for f in self.features if f.name==feature][ 0 ]
+		fr			= self._featureresponses[sheet][feature]
 
-             
-                if weighted_average:
-                    
-                    preference_map = SheetView((((self._featureresponses[sheet][feature].weighted_average())+value_offset)*value_multiplier/norm_factor,
-                                                bounding_box), sheet.name, sheet.precedence, topo.sim.time())
-
+                if second_response:
+                    response	= ( fr.second_max_value_bin() + value_offset ) * value_multiplier / norm_factor
+		    selectivity	= self.selectivity_multiplier * fr.second_selectivity()
+		    view_name	= self.sheet_views_prefix + "Second" + feature.capitalize()
+                elif weighted_average:
+                    response	= ( fr.weighted_average() + value_offset ) * value_multiplier / norm_factor
+		    selectivity	= self.selectivity_multiplier * fr.selectivity()
+		    view_name	= self.sheet_views_prefix + feature.capitalize()
                 else:
-                    preference_map = SheetView((((self._featureresponses[sheet][feature].max_value_bin())+value_offset)*value_multiplier/norm_factor,
-                                                bounding_box), sheet.name, sheet.precedence, topo.sim.time())    
-               
+                    response	= ( fr.max_value_bin() + value_offset ) * value_multiplier / norm_factor
+		    selectivity	= self.selectivity_multiplier * fr.selectivity()
+		    view_name	= self.sheet_views_prefix + feature.capitalize()
+
+	        preference_map = SheetView( (response, bounding_box), sheet.name, sheet.precedence, topo.sim.time() )
                 preference_map.cyclic = cyclic
                 preference_map.norm_factor = norm_factor
-                    
+                sheet.sheet_views[view_name+'Preference']=preference_map
                 
-                sheet.sheet_views[self.sheet_views_prefix+feature.capitalize()+'Preference']=preference_map
-                
-                selectivity_map = SheetView((self.selectivity_multiplier*
-                                             self._featureresponses[sheet][feature].selectivity(),
-                                             bounding_box), sheet.name , sheet.precedence, topo.sim.time(),sheet.row_precedence)
-                sheet.sheet_views[self.sheet_views_prefix+feature.capitalize()+'Selectivity']=selectivity_map
+                selectivity_map = SheetView( (selectivity, bounding_box), sheet.name, sheet.precedence, topo.sim.time(), sheet.row_precedence)
+                sheet.sheet_views[view_name+'Selectivity']=selectivity_map
 
                 
 class FeatureCurves(FeatureResponses):
@@ -552,7 +576,7 @@ class Feature(object):
     Stores the parameters required for generating a map of one input feature.
     """
 
-    def __init__(self, name, range=None, step=0.0, values=None, cyclic=False, value_offset=0.0, value_multiplier=1.0, compute_fn=None, offset=0, keep_peak=True):
+    def __init__(self, name, range=None, step=0.0, values=None, cyclic=False, value_offset=0.0, value_multiplier=1.0, compute_fn=None, offset=0, keep_peak=True, second_response=False):
          """
          Users can provide either a range and a step size, or a list of values.
          If a list of values is supplied, the range can be omitted unless the
@@ -563,12 +587,16 @@ class Feature(object):
 
          If supplied, the offset is added to the given or computed values to allow
          the starting value to be specified.
+
+	 If second_response is set, additional analysis is performed on values
+	 of this feature, that elicit the second maximum response in units.
          """
          self.name=name
          self.cyclic=cyclic
          self.compute_fn=compute_fn
          self.range=range
          self.keep_peak=keep_peak
+         self.second_response=second_response
          self.value_offset=value_offset
          self.value_multiplier=value_multiplier
                  

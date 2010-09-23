@@ -987,6 +987,28 @@ class RFProjectionPlotGroup(GridPlotGroup):
         super(RFProjectionPlotGroup,self)._exec_pre_plot_hooks(input_sheet=self.input_sheet,**kw)
 
 
+class TwoOrientationsPlotGroup( TemplatePlotGroup ):
+    """Display with small segments the two most preferred orientations for each
+    units in the sheet. Only orientation with significative selectivity are
+    shown. Darker segments correspond to orientations with more selective
+    response."""
+
+    unit_size       = param.Number(default=25,bounds=(9,None),doc="box size of a single unit")
+
+    # Overrides:
+    # _make_template_plot	- use density argument slot to parse unit_size
+
+    def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        return make_template_plot(plot_template,
+                                  kw['sheet'].sheet_views,
+                                  self.unit_size,
+                                  kw['sheet'].bounds,
+                                  self.normalize,
+                                  name=plot_template_name,
+                                  range_=kw['range_'])
+
+
+
 
 # CEBALERT: haven't modified; might need updating. Doesn't seem to be
 # a way to call it from the GUI - is it known to be broken?
@@ -1261,6 +1283,7 @@ plotgroup_types = {'Connection Fields': ConnectionFieldsPlotGroup,
                    'Projection': CFProjectionPlotGroup,
                    'RF Projection': RFProjectionPlotGroup,
                    'Retinotopy': RetinotopyPlotGroup,
+                   'Two Orientation Preferences': TwoOrientationsPlotGroup,
                    'Projection Activity': ProjectionActivityPlotGroup}
 
 
