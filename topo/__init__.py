@@ -74,9 +74,14 @@ param.resolve_path.search_paths+=([_default_output_path] + [_package_path])
 
 
 
-# CEBALERT: (about PIL)
-# PIL (i.e. the Imaging package) can be installed so that it's
-# e.g. "from PIL import Image" or just "import Image".
+# CEBALERT (about PIL):
+# PIL can be installed so that it's e.g. "from PIL import Image" or
+# just "import Image".  The code below means Image etc are always
+# imported, but then the rest of topographica can consistently use
+# Image (rather than a try/except, such as the one below). An
+# alternative would be an import hook, which would only run on
+# attempting to import Image etc.
+
 try:
     import Image
 except ImportError:
