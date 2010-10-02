@@ -23,11 +23,13 @@ follow our <A HREF="../Downloads/git.html">git instructions</A>.
 version-controlled <code>topographica</code> directory, you need to
 install Topographica's dependencies. There are two options for
 this. The first is to install the required dependencies yourself
-(e.g. using your system's package manager).  The second is to use the
-Makefile to build all Topographica's dependencies. If your system has
-a good package manager, you may wish to use the first option, but the
-second option is frequently tested and uses versions of external
-packages that we know to work well together.
+(e.g. using your system's package manager, or by installing a
+scientific Python package).  The second is to use the Makefile to
+build all Topographica's dependencies. If your system has a good
+package manager, or a good scientific Python package is available, you
+may wish to use the first option, but the second option is frequently
+tested and uses versions of external packages that we know to work
+well together.
 
 <!-- CEBALERT: put this somewhere:
 Note that most development of Topographica is done under Linux.
@@ -47,12 +49,20 @@ least <A HREF="http://www.python.org/download/releases/2.6.5/">Python</A>,
 <A HREF="http://sourceforge.net/projects/matplotlib/files/">MatPlotLib</A>, 
 <A HREF="http://code.google.com/p/gmpy/">gmpy</A>, 
 <A HREF="http://www.scipy.org/Download">SciPy</A>, and 
-<A HREF="http://ipython.scipy.org/moin/">IPython</A> as well.
+ <A HREF="http://ipython.scipy.org/moin/">IPython</A> as
+ well. Alternatively, all Topographica's dependencies (and more!) are
+ available for many platforms in scientific Python distributions such
+ as <A HREF="http://www.enthought.com/products/epd.php">EPD</A> (free
+ for academic use).
 
 
 <P>Once you have installed those on your system, you can
-type <code>make OTHER_PYTHON=/path/to/python
-topographica-other-python</code>, where <code>/path/to/python</code>
+type 
+
+<blockquote><code>make OTHER_PYTHON=/path/to/python
+topographica-other-python</code></blockquote>
+
+where <code>/path/to/python</code>
 is the location of the copy of Python for which you have installed
 Topographica's dependencies (and defaults to <code>/usr/bin/env
 python</code> if not specified). This will create
