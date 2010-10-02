@@ -3,7 +3,7 @@ code for the Topographica simulator. Users will not usually need to
 refer to this material, unless they plan to submit significant blocks
 of code to the project (which is, of course, strongly <a href="#joining">encouraged</a>!).
 
-<P>Before starting, you will need to install a version-constrolled
+<P>Before starting, you will need to install a version-controlled
 copy of Topographica. Please see our
 developer <A HREF="installation.html">installation instructions</A>
 for how to do this.
