@@ -1284,6 +1284,7 @@ plotgroup_types = {'Connection Fields': ConnectionFieldsPlotGroup,
                    'RF Projection': RFProjectionPlotGroup,
                    'Retinotopy': RetinotopyPlotGroup,
                    'Two Orientation Preferences': TwoOrientationsPlotGroup,
+                   'Two Peaks Orientation Preferences': TwoOrientationsPlotGroup,
                    'Projection Activity': ProjectionActivityPlotGroup}
 
 

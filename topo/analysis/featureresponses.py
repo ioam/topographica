@@ -113,6 +113,18 @@ class DistributionMatrix(param.Parameterized):
         return m
         
         
+    def second_peak_bin(self):
+        """Return the bin with the second peak of each Distribution as a matrix."""
+
+        m	= zeros(self.distribution_matrix.shape,Float)
+            
+        for i in range( len(m) ):
+            for j in range( len(m[i]) ):           
+                m[i,j]	= self.distribution_matrix[i,j].second_peak_bin()                             
+
+        return m
+        
+        
     def selectivity(self):
         """Return the selectivity of each Distribution as a matrix."""
 
@@ -134,6 +146,19 @@ class DistributionMatrix(param.Parameterized):
         for i in range( len(s) ):
             for j in range( len(s[i]) ):
                 s[i,j]	= self.distribution_matrix[i,j].second_selectivity()
+
+        return s
+
+        
+    def second_peak_selectivity(self):
+        """
+	Return the selectivity for the second peak response of each Distribution as a matrix.
+	"""
+        s	= zeros(self.distribution_matrix.shape,Float) 
+
+        for i in range( len(s) ):
+            for j in range( len(s[i]) ):
+                s[i,j]	= self.distribution_matrix[i,j].second_peak_selectivity()
 
         return s
 
@@ -490,12 +515,17 @@ class FeatureMaps(FeatureResponses):
                 value_offset		= [f.value_offset for f in self.features if f.name==feature]
                 value_multiplier	= [f.value_multiplier for f in self.features if f.name==feature]
                 second_response		= [f.second_response for f in self.features if f.name==feature][ 0 ]
+                second_peak		= [f.second_peak for f in self.features if f.name==feature][ 0 ]
 		fr			= self._featureresponses[sheet][feature]
 
                 if second_response:
                     response	= ( fr.second_max_value_bin() + value_offset ) * value_multiplier / norm_factor
 		    selectivity	= self.selectivity_multiplier * fr.second_selectivity()
 		    view_name	= self.sheet_views_prefix + "Second" + feature.capitalize()
+                elif second_peak:
+                    response	= ( fr.second_peak_bin() + value_offset ) * value_multiplier / norm_factor
+		    selectivity	= self.selectivity_multiplier * fr.second_peak_selectivity()
+		    view_name	= self.sheet_views_prefix + "SecondPeak" + feature.capitalize()
                 elif weighted_average:
                     response	= ( fr.weighted_average() + value_offset ) * value_multiplier / norm_factor
 		    selectivity	= self.selectivity_multiplier * fr.selectivity()
@@ -576,7 +606,7 @@ class Feature(object):
     Stores the parameters required for generating a map of one input feature.
     """
 
-    def __init__(self, name, range=None, step=0.0, values=None, cyclic=False, value_offset=0.0, value_multiplier=1.0, compute_fn=None, offset=0, keep_peak=True, second_response=False):
+    def __init__(self, name, range=None, step=0.0, values=None, cyclic=False, value_offset=0.0, value_multiplier=1.0, compute_fn=None, offset=0, keep_peak=True, second_response=False, second_peak=False):
          """
          Users can provide either a range and a step size, or a list of values.
          If a list of values is supplied, the range can be omitted unless the
@@ -590,6 +620,9 @@ class Feature(object):
 
 	 If second_response is set, additional analysis is performed on values
 	 of this feature, that elicit the second maximum response in units.
+
+	 If second_peak is set, additional analysis is performed on values
+	 of this feature, that elicit the second peak response in units.
          """
          self.name=name
          self.cyclic=cyclic
@@ -597,6 +630,7 @@ class Feature(object):
          self.range=range
          self.keep_peak=keep_peak
          self.second_response=second_response
+         self.second_peak=second_peak
          self.value_offset=value_offset
          self.value_multiplier=value_multiplier
                  

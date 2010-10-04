@@ -225,6 +225,69 @@ class Distribution(object):
         return m
 
 
+    def second_peak_bin(self):
+        """
+	Return the bin with the second peak in the distribution.
+	Unlike second_max_value_bin(), it does not return a bin which is the
+	second largest value, if laying on a wing of the first peak, the second
+	peak is returned only if the distribution is truly multimodal. If it isn't,
+	return the first peak (for compatibility with numpy array type, and
+	plotting compatibility), however the correspondong selectivity will be
+	forced to 0.0
+	"""
+	l	= len( self._data )
+        if l <= 1: 
+            return self._data.keys()[ 0 ]
+
+	ks	= self._data.keys()
+	ks.sort()
+	ik0	= ks.index( self._data.keys()[ argmax( self._data.values() ) ] )
+	k0	= ks[ ik0 ]
+	v0	= self._data[ k0 ]
+
+	v	= v0
+	k	= k0
+	ik	= ik0
+	while self._data[ k ] <= v:
+		ik	+= 1
+		if ik >= l:
+			ik	= 0
+		if ik == ik0:
+			return k0
+		v	= self._data[ k ]
+		k	= ks[ ik ]
+	ik1	= ik
+
+	v	= v0
+	k	= k0
+	ik	= ik0
+	while self._data[ k ] <= v:
+		ik	-= 1
+		if ik < 0:
+			ik	= l - 1
+		if ik == ik0:
+			return k0
+		v	= self._data[ k ]
+		k	= ks[ ik ]
+	ik2	= ik
+
+	if ik1 == ik2:
+		return ks[ ik1 ]
+
+	ik	= ik1
+	m	= 0
+	while ik != ik2:
+		k	= ks[ ik ]
+		if self._data[ k ] > m:
+			m	= self._data[ k ]
+			im	= ik
+		ik	+= 1
+		if ik >= l:
+			ik	= 0
+	
+	return ks[ im ]
+
+
     def weighted_average(self):
         """
         Return a continuous, interpolated equivalent of the max_value_bin().
@@ -419,6 +482,28 @@ class Distribution(object):
 	self._data[k]	= v
 
         return self._safe_divide( s, sum(self._data.values()) )
+
+
+    def second_peak_selectivity(self):
+        """
+	Return the selectivity of the second peak in the distribution.
+	If the distribution has only one peak, return 0.0, and this value is
+	also usefl to discriminate the validity of second_peak_bin()
+	"""
+        if len(self._data) <= 1: 
+            return 0.0
+
+	p1	= self.max_value_bin()
+	p2	= self.second_peak_bin()
+	if p1 == p2:
+            return 0.0
+
+	m		= self._data[ p2 ]
+        proportion	= self._safe_divide( m, sum(self._data.values()) )
+        offset		= 1.0/len(self._data)
+        scaled		= (proportion-offset)/(1.0-offset)
+
+	return max( scaled, 0.0 )
 
 
     def value_mag(self, bin):

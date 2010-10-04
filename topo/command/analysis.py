@@ -615,7 +615,6 @@ pg.add_plot('Hue Selectivity',[('Strength','HueSelectivity')])
 
 
 
-
 gaussian_corner = topo.pattern.basic.Composite(
     operator = maximum, generators = [
         topo.pattern.basic.Gaussian(size = 0.06,orientation=0,aspect_ratio=7,x=0.3),
@@ -628,22 +627,42 @@ class measure_second_or_pref(SinusoidalMeasureResponseCommand):
     weighted_average	= param.Boolean( False ) 
     num_orientation	= param.Integer( default=16, bounds=(1,None), softbounds=(1,64),
                                     doc="Number of orientations to test.")
+    true_peak 	 	= param.Boolean( default=True, doc="""If set the second
+	    orientation response is computed on the true second mode of the
+	    orientation distribution, otherwise is just the second maximum response""" ) 
 
-    subplot = param.String("Second Orientation")
+    subplot		= param.String("Second Orientation")
     
     def _feature_list(self,p):
-        return [Feature(name="frequency",values=p.frequencies),
-                Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True,second_response=True),
-                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
+    	fs	= [ Feature(name="frequency",values=p.frequencies) ]
+    	if p.true_peak:
+	    fs.append(
+		Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True,second_peak=True,second_response=False) )
+	else:
+	    fs.append(
+		Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True,second_peak=False,second_response=True) )
+	fs.append( Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True) )
+
+	return fs
 
 
 pg= create_plotgroup(name='Second Orientation Preference',category="Preference Maps",
              doc='Measure the second preference for sine grating orientation.',
-             pre_plot_hooks=[measure_second_or_pref.instance()])
+             pre_plot_hooks=[measure_second_or_pref.instance( true_peak=False )])
 pg.add_plot('Second Orientation Preference',[('Hue','SecondOrientationPreference')])
 pg.add_plot('Second Orientation Preference&Selectivity',
             [('Hue','SecondOrientationPreference'), ('Confidence','SecondOrientationSelectivity')])
 pg.add_plot('Second Orientation Selectivity',[('Strength','SecondOrientationSelectivity')])
+pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
+
+
+pg= create_plotgroup(name='Second Peak Orientation Preference',category="Preference Maps",
+             doc='Measure the second peak preference for sine grating orientation.',
+             pre_plot_hooks=[measure_second_or_pref.instance( true_peak=True )])
+pg.add_plot('Second Peak Orientation Preference',[('Hue','SecondPeakOrientationPreference')])
+pg.add_plot('Second Peak Orientation Preference&Selectivity',
+            [('Hue','SecondPeakOrientationPreference'), ('Confidence','SecondPeakOrientationSelectivity')])
+pg.add_plot('Second Peak Orientation Selectivity',[('Strength','SecondPeakOrientationSelectivity')])
 pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
 
         
@@ -651,13 +670,29 @@ pg = create_plotgroup(name='Two Orientation Preferences',category='Preference Ma
     doc='Display the two most preferred orientations for each units.',
     pre_plot_hooks=[
 		measure_sine_pref.instance(num_orientation=16,weighted_average=False),
-    		measure_second_or_pref.instance(num_orientation=16,weighted_average=False)
+    		measure_second_or_pref.instance(num_orientation=16,weighted_average=False,true_peak=False)
 ])
 pg.add_plot( 'Two Orientation Preferences', [
 		( 'Or1',	'OrientationPreference' ),
 		( 'Sel1',	'OrientationSelectivity' ),
 		( 'Or2',	'SecondOrientationPreference' ),
 		( 'Sel2',	'SecondOrientationSelectivity' )
+])
+pg.add_static_image('Color Key','command/two_or_key_vert.png')
+
+        
+pg = create_plotgroup(name='Two Peaks Orientation Preferences',category='Preference Maps',
+    doc="""Display the two most preferred orientations for all units with a
+    multimodal orientation preference distribution.""",
+    pre_plot_hooks=[
+		measure_sine_pref.instance(num_orientation=16,weighted_average=False),
+    		measure_second_or_pref.instance(num_orientation=16,weighted_average=False,true_peak=True)
+])
+pg.add_plot( 'Two Peaks Orientation Preferences', [
+		( 'Or1',	'OrientationPreference' ),
+		( 'Sel1',	'OrientationSelectivity' ),
+		( 'Or2',	'SecondPeakOrientationPreference' ),
+		( 'Sel2',	'SecondPeakOrientationSelectivity' )
 ])
 pg.add_static_image('Color Key','command/two_or_key_vert.png')
 
