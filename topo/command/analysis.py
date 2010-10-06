@@ -786,7 +786,7 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
             Feature( name = "y",           range = p.y_range, step = y_step ),
             Feature( name = "orientation", range = (0, 2*pi), step = o_step, cyclic = True ),
             Feature( name = "angle",       range = a_range,   step = a_step,
-                     value_offset     = - angle_0,
+                     value_offset     =  - angle_0,
                      value_multiplier = 1. / ( angle_1 - angle_0 ) )
 	]
 
@@ -812,7 +812,7 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
 	y_0	= border + y_d
 	l	= 15
 
-	hues	= [ "hsl(%2d,100%%,50%%)" % h		for h in range( 0, 255, 255 / n_a) ]
+	hues	= [ "hsl(%2d,100%%,50%%)" % h		for h in range( 0, 360, 360 / n_a ) ]
 	angles	= [ 0.5*angle_0 + a_step * a		for a in range( n_a ) ]
 	y_pos	= [ int( round( y_0 + y * y_step ) )	for y in range( n_a ) ]
 	deltas	= [ ( int( round( l * cos( a ) ) ), int( round( l * sin( a ) ) ) )
