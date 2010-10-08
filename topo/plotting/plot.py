@@ -641,7 +641,9 @@ class MultiOrPlot(TemplatePlot):
         for o, s in matrices:
             a   = s.mean()
             d   = s.std()
-            mat_list.append( ( vertices_from_or( o ), ( s - d ) / ( a + d ) ) )
+	    ad	= a + d
+	    if isinstance( ad, numpy.number ) and ad > 0:
+	        mat_list.append( ( vertices_from_or( o ), ( s - d ) / ad ) )
 
         lines   = numpy.empty( shape, numpy.object_ )
         for x in range( shape[ 0 ] ):
