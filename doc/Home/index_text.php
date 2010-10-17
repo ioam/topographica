@@ -50,9 +50,11 @@ organized into topographic maps, such as touch and hearing, as well as
 motor areas.
 
 <P>Topographica is freely available for downloading, and is an open
-source project whose capabilities can be extended and modified by any
+source project
+(<A HREF="http://www.opensource.org/licenses/bsd-license.php">BSD
+license</A>) whose capabilities can be extended and modified by any
 user.  We welcome contributions from users, and invite interested
-people to join our globally distributed development team.  
+people to join our globally distributed development team.
 
 <P>Also see our <A target="_top"
 HREF="http://homepages.inf.ed.ac.uk/jbednar/research.html">

@@ -15,6 +15,10 @@ changes or edit the version-controlled source code, should instead
 follow the <A HREF="../Developer_Manual/installation.html">developers'
 installation guide</A>.
 
+<P>Topographica is free, open-source software, available under the 
+<A HREF="http://www.opensource.org/licenses/bsd-license.php">BSD
+license</A>.
+
 <!-- CEBALERT: put this somewhere
 <P>Before starting, note that if you want to run large simulations
 (requiring more than about 3 GB of memory), you should install
