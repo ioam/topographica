@@ -1,59 +1,83 @@
-<!-- CEBALERT: The names below were removed from the copyright notice
-but are not yet present on this page. Also, some other names might be
-missing.
-
-James Adwick, Andy Cameron, John Jacob, Chris Jeffery, Veldri
-Kurniawan, Lewis Ng, Ruaidhri Primrose, Tikesh Ramtohul, Stuart Wilson
--->
-
 <P>Topographica is developed by a distributed team of researchers in
-the United Kingdom and the United States.  The principal developers are:
+the United Kingdom, the United States, and Europe.  The principal
+developers are:
 
 <dl>
   <p><dt><a target="_top" href="http://homepages.inf.ed.ac.uk/jbednar">James
       A. Bednar</a>, Lead author and project manager, 2002 - </dt>
-  <dd>Jim is a Lecturer at the University of Edinburgh.  Topographica
-      was inspired by Jim's C++ 
+  <dd>Jim is a Lecturer at the University of Edinburgh.  Parts of
+      Topographica were inspired by Jim's C++
       <a target="_top" href="http://nn.cs.utexas.edu/keyword?lissomsw">LISSOM</a>
-      simulator in use from 1995-2004, but has been entirely reimplemented in
-      Python for extensibility and generality.  Jim reviews all code
-      and is the last word on the design and features.  <br> <br>
+      simulator in use from 1995-2004, but Topographica was entirely
+      reimplemented in Python for extensibility and generality.  Jim
+      reviews all code and is the last word on the design and
+      features.
 
-  <p><dt>Jan Antolik, September 2006 - </dt>
-  <dd>Jan is working on his PhD thesis about feedback from V2 to V1 at the
-      University of Edinburgh, but also contributes optimizations and
-      other code to Topographica.
-
-  <p><dt>Chris Ball, September 2005 - </dt>
+  <p><dt>Chris Ball, 2005 - </dt>
   <dd>Chris has worked on nearly every part of Topographica.  Since
       September 2008 he has been a PhD student in Edinburgh, working on
-      modeling the development of color and motion preference maps.
+      modeling the development of circuitry for color vision.
 
-  <p><dt>Judith Law, September 2005 - </dt>
-  <dd>Judith is working on her PhD thesis about V1 surround modulation
-      and species differences at the University of Edinburgh, but also
-      contributed tuning curve support and various GUI improvements.
+</dl>
 
-  <p><dt>Chris Palmer, September 2005 - </dt>
-  <dd>Chris is working on his PhD thesis about spatial frequency
-      representations in V1 at the University of Edinburgh, but also
-      maintains receptive field plotting support and other analysis code.
+<P><BR><BR>
+Other current developers are:
 
-  <p><dt>Roger Zhao, September 2006 - </dt>
-  <dd>Roger is working on his PhD thesis about face aftereffects at the
+<dl>
+  <p><dt>Jan Antolik, 2006 - </dt>
+  <dd>Jan completed his University of Edinburgh PhD thesis in Autumn
+      2010, focusing on the complex cells and surround modulation in
+      V1, and also contributes optimizations and other code to
+      Topographica.
+
+  <p><dt>Marco Elver, 2010 - 2011 </dt>
+  <dd>As part of his undergraduate degree at the 
+      University of Edinburgh, Marco is working on analyzing and
+      optimizing for single-processor and multi-core operation.
+
+  <p><dt>Bilal Khan, 2009 - 2011 </dt>
+  <dd>Bilal has been working on audio file support for Topographica
+      and on auditory system modelling, first as part of his
+      undergraduate project and now as part of his MSc project at the
+      University of Edinburgh.
+    
+  <p><dt>Konstantin Kudryavtsev, 2009 - 2011 </dt>
+  <dd>Konstantin has been working on MPI support for Topographica,
+      first as part of his undergraduate project and now as part of
+      his MSc project at the University of Edinburgh EPCC.
+
+  <p><dt>Judith Law, 2005 - </dt>
+  <dd>Judith completed her University of Edinburgh PhD thesis in Autumn
+      2009, focusing on homeostasis and species differences in V1.
+      Judith also contributed tuning curve support and various GUI
+      improvements.
+
+  <p><dt>Alessio Plebe, 2010 -</dt>
+  <dd>Alessio teaches at the University of Messina, Italy,
+      and contributes code for analyzing higher-order
+      feature maps.
+    
+  <p><dt>Roger Zhao, 2006 - </dt>
+  <dd>Roger is completing his PhD thesis about face aftereffects at the
       University of Edinburgh, and contributes face-related code to
       Topographica. He also helps out with Mac OS X support.
 
 </dl>
 
 <P><BR><BR>
-Other significant contributors include:
+Previous significant contributors include:
 
 <dl>
-  <p><dt><a target="_top" href="http://www.cs.utexas.edu/users/risto">Risto 
-      Miikkulainen</a>, Principal investigator, 2002 - 2005</dt>
-  <dd>Risto is a Professor of Computer Science at the University of
-      Texas at Austin.
+  <p><dt>James Adwick, 2008 - 2009 </dt>
+  <dd>James completed his undergraduate degree at the
+      University of Edinburgh, including a project of
+      building Unreal and Blender 3D-world interfaces for
+      Topographica. 
+
+  <p><dt>Andy Cameron, 2008 - 2009 </dt>
+  <dd>Andy completed his undergraduate degree at the
+      University of Edinburgh, including a project of
+      building Matlab interfaces for Topographica.
 
   <p><dt><a target="_top" href="http://faculty.cs.tamu.edu/choe/">Yoonsuck Choe</a>, 2002 - </dt>
   <dd>Yoonsuck is an Assistant Professor at Texas A&amp;M University.
@@ -61,21 +85,15 @@ Other significant contributors include:
       primarily for integrate-and-fire neurons, and also contributed
       significantly to the web site and other graphical design.
 
-  <p><dt>Julien Ciroux, October 2005 - April 2006</dt>
+  <p><dt>Julien Ciroux, 2005 - 2006</dt>
   <dd>Julien received an MSc from the University of Edinburgh
       (topic: modeling the McCollough effect in LISSOM).  He implemented the
       plotting subsystem in 0.8.2 and other GUI-related functions.
 
-  <p><dt>Foivos Demertzis, September 2006 - May 2007</dt>
+  <p><dt>Foivos Demertzis, 2006 - 2007</dt>
   <dd>Foivos completed his undergraduate degree at the
       University of Edinburgh, including a project of developing
       more sample models for Topographica.
-
-  <p><dt>Kateryna Gerasymova, May 2008 - September 2008</dt>
-  <dd>In a MSc-level project in collaboration with Humboldt University
-      (Berlin), Kateryna implemented numerous separate and joint maps
-      and analysis routines, e.g. for direction, ocular dominance, and
-      color.
 
   <p><dt><a target="_top" href="http://porter.csres.utexas.edu/judah/">Judah De Paula</a>, 2004 - 2006</dt>
   <dd>Judah completed his PhD at the University of Texas (topic:
@@ -83,16 +101,48 @@ Other significant contributors include:
       responsible for the initial Windows support, and implemented the
       first complete plotting and related GUI code.
 
-  <p><dt>Alan Lindsay, September 2005 - May 2006</dt>
-  <dd>Alan finished his undergraduate degree at the
-      University of Edinburgh in summer 2006.  Alan developed the 
-      Model Editor, a graphical interface for specifying Topographica
-      models by selecting and connecting pre-defined components.
+  <p><dt>C&eacute;lia Fillion, May - September 2010</dt>
+  <dd>In an undergraduate project in collaboration with ISEN Brest
+      (France), C&eacute;lia implemented real-time web camera support.
 
-  <p><dt>Louise Mathews, September 2005 - May 2006</dt>
-  <dd>Louise finished her undergraduate degree at the
-      University of Edinburgh in summer 2006.  She implemented sample
-      models of visual cortex maps published by other research groups.
+  <p><dt>Kateryna Gerasymova, May - September 2008</dt>
+  <dd>In a MSc-level project in collaboration with Humboldt University
+      (Berlin), Kateryna implemented numerous separate and joint maps
+      and analysis routines, e.g. for direction, ocular dominance, and
+      color.
+
+  <p><dt>John Jacob, Jan - Aug 2009 </dt>
+  <dd>John completed his MSc degree at the
+      University of Edinburgh, including a project of implementing the
+      compute-intensive portions of Topographica on a GP-GPU.
+
+  <p><dt>Veldri Kurniawan, Jan - Aug 2006</dt>
+  <dd>Veldri completed his MSc degree at the
+      University of Edinburgh, including a project of
+      evaluating models for homeostatic plasticity,
+      and contributing code for homeostatic rules.
+
+  <p><dt>Alan Lindsay, 2005 - 2006</dt>
+  <dd>As part of his undergraduate degree at the
+      University of Edinburgh, Alan developed the Model Editor, a
+      graphical interface for specifying Topographica models by
+      selecting and connecting pre-defined components.
+
+  <p><dt>Louise Mathews, 2005 - 2006</dt>
+  <dd>As part of her undergraduate degree at the University of
+      Edinburgh, Louise implemented sample models of visual cortex
+      maps published by other research groups.
+
+  <p><dt><a target="_top" href="http://www.cs.utexas.edu/users/risto">Risto 
+      Miikkulainen</a>, Principal investigator, 2002 - 2005</dt>
+  <dd>Risto is a Professor of Computer Science at the University of
+      Texas at Austin, and worked with Jim on the original NIH
+      proposal. 
+
+  <p><dt>Chris Palmer, 2005 - 2009 </dt>
+  <dd>Chris completed his University of Edinburgh PhD thesis about
+      spatial frequency representations in V1 in 2009, contributing
+      receptive field plotting support and other analysis code.
 
   <p><dt>Ruaidhri Primrose, September 2006 - May 2007</dt>
   <dd>Ruaidrhi completed his undergraduate degree at the
@@ -109,12 +159,48 @@ Other significant contributors include:
       CFSheet, CFSOM, Parameterized, LISSOM, etc.), plus support
       for robotics interfacing and for non-uniform projection mappings.
 
+  <p><dt>Tikesh Ramtohul, Jan - Aug 2006</dt>
+  <dd>Tikesh completed his MSc degree at the
+      University of Edinburgh, including a project of
+      building a model of disparity selectivity in V1,
+      and contributed code for measuring disparity maps.
+
   <p><dt><a target="_top"
       href="http://www.cs.utexas.edu/users/yfsit/">Yiu Fai Sit</a>,
       May 2005 - 2006</dt>
-  <dd>Sit is a PhD student at the University of Texas (topic:
-      the role of feedback in a hierarchical LISSOM model of V1 and
-      V2).  He was responsible for making the first Topographica
-      implementation of LISSOM match the C++ version, and for
-      writing C code to optimize key Topographica functions.
+  <dd>Sit was a PhD student at the University of Texas,
+      focusing on hierarchical visual cortex models and characterizing
+      the V1 optical imaging response to visual patterns.  He was
+      responsible for making the first Topographica implementation of
+      LISSOM match the previous C++ version, and for writing C code to
+      optimize key Topographica functions.
+
+  <p><dt>Aistis Stankevicius, May - September 2010</dt>
+  <dd>While at the University of Edinburgh for his undergraduate
+      degree, Aistis contributed optimizations and code coverage
+      support, and implemented code for GP-GPUs.
+
+  <p><dt>Stuart Wilson, 2007 - 2010</dt>
+  <dd>Stuart completed his MSc degree at the
+      University of Edinburgh in 2007, and is now doing
+      a joint PhD project with the University of Sheffield
+      on rodent barrel cortex maps.  He contributed
+      barrel cortex modelling examples and analysis code.
+
 </dl>
+
+
+<!--
+Other people who did work that isn't currently distributed:
+
+  <p><dt>Chris Jeffery, 2008 - 2009</dt>
+  <dd>Chris worked on a project for his undergraduate
+      program at the University of Edinburgh, focusing on
+      modelling multiple maps.
+
+  <p><dt>Lewis Ng, Jan - Aug 2006</dt>
+  <dd>Lewis completed his MSc degree at the
+      University of Edinburgh, including a project of
+      building a model of somatosensory cortex.
+
+-->
