@@ -32,7 +32,6 @@ from topo.base.functionfamily import IdentityTF
 
 # CEBHACKALERT: these need to respect the mask - which will be passed in.
 
-# CEBALERT: copy.copy(x) where x is a numpy array should probably be x.copy()
 
 class PiecewiseLinear(TransferFn):
     """ 
