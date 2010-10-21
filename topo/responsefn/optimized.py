@@ -13,6 +13,7 @@ import param
 from topo.base.functionfamily import ResponseFn,DotProduct
 from topo.base.cf import CFPResponseFn, CFPRF_Plugin
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
+from topo.misc.pyxhandler import provide_unoptimized_equivalent_cy
 from topo.responsefn.projfn import CFPRF_EuclideanDistance
 
 
@@ -21,6 +22,9 @@ from topo.responsefn.projfn import CFPRF_EuclideanDistance
 # CEBALERT: the "only works for 1D array" doc is out of date, right?
 # Should remove from here and other optimized fns that have been
 # flattened.
+
+# CEB: why the double loop for the dot product?
+
 class CFPRF_DotProduct_opt(CFPResponseFn):
     """
     Dot-product response function.
@@ -95,6 +99,15 @@ class CFPRF_DotProduct(CFPRF_Plugin):
         super(CFPRF_DotProduct,self).__init__(single_cf_fn=DotProduct(),**params)
 
 provide_unoptimized_equivalent("CFPRF_DotProduct_opt","CFPRF_DotProduct",locals())
+
+
+try:
+    from optimized_cy import CFPRF_DotProduct_cyopt
+except:
+    pass
+
+provide_unoptimized_equivalent_cy("CFPRF_DotProduct_cyopt","CFPRF_DotProduct",locals())
+
 
 
 # CEBERRORALERT: ignores the sheet mask!
