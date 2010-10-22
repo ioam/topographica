@@ -122,6 +122,9 @@ optimized = weave_imported and compiled
 warn_for_each_unoptimized_component = False
 
 
+# JABALERT: I can't see any reason why this function accepts names rather
+# than the more pythonic option of accepting objects, from which names
+# can be extracted if necessary.
 def provide_unoptimized_equivalent(optimized_name, unoptimized_name, local_dict):
     """
     If not using optimization, replace the optimized component with its unoptimized equivalent.

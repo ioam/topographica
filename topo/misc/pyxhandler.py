@@ -22,6 +22,9 @@ if import_pyx:
         pass
 
 
+# JABALERT: As for the version in inlinec, I can't see any reason why
+# this function accepts names rather than the more pythonic option of
+# accepting objects, from which names can be extracted if necessary.
 def provide_unoptimized_equivalent_cy(optimized_name, unoptimized_name, local_dict):
     """
     Replace the optimized Cython component with its unoptimized
