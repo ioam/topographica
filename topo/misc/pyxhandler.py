@@ -16,7 +16,6 @@ pyximported = False
 if import_pyx:
     try:
         import pyximport
-        raise
         pyximport.install()
         pyximported = True
     except:
