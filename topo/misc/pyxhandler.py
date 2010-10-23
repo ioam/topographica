@@ -1,5 +1,5 @@
 """
-Interface class Cython pyx files.
+Support for optional Cython .pyx files.
 
 $Id$
 """
@@ -7,6 +7,11 @@ $Id$
 # CEBENHANCEMENT: If we begin using Cython components, consider adding
 # more features of inlinec.py (ie: test of Cython compilation, control
 # over warnings).
+
+# CEBALERT: currently, need to do something like
+# "export C_INCLUDE_PATH=lib/python2.6/site-packages/numpy/core/include/"
+# for cython to find numpy headers. Might need to fix pyximport to look
+# in the right place (it's possible to ask numpy for the location).
 
 import __main__
 import_pyx = __main__.__dict__.get('import_pyx',False)
