@@ -306,7 +306,7 @@ class TemplatePlot(Plot):
                        resu = zeros(a.shape)
              else:
                   a_offset = a - range_min
-                  resu = a_offset/range_max  
+                  resu = a_offset/(range_max-range_min)
             
              return resu
         else:
