@@ -9,7 +9,7 @@ import types
 import __main__
 from StringIO import StringIO
 
-
+import copy
 
 class PickleMain(object):
     """
@@ -32,6 +32,12 @@ class PickleMain(object):
         self.pickled_bytecode = StringIO()
         self.pickler = pickle.Pickler(self.pickled_bytecode,-1)
 
+        # CB: pickle.Pickler's dispatch attribute is a class
+        # attribute (I don't know why, but it is...), so before
+        # modifying this instance's dispatch attribute we make sure
+        # modifications will affect only this instance.
+        self.pickler.__dict__['dispatch'] = copy.copy(self.pickler.dispatch)
+
         self.pickler.dispatch[new.code] = save_code
         self.pickler.dispatch[new.function] = save_function
         self.pickler.dispatch[dict] = save_module_dict
@@ -39,6 +45,7 @@ class PickleMain(object):
         self.pickler.dispatch[new.instancemethod] = save_instancemethod
         self.pickler.dispatch[new.module] = save_module
         self.pickler.dispatch[type] = save_type
+
         # CB: maybe this should be registered from elsewhere
         import param
         self.pickler.dispatch[param.parameterized.ParameterizedMetaclass] = save_type
@@ -103,7 +110,8 @@ def save_function(self, obj):
         args = (obj.func_code, obj.func_globals, obj.func_name, obj.func_defaults, obj.func_closure)
         self.save_reduce(new.function, args, obj=obj)
     else:
-        pickle.Pickler.save_global(self, obj)
+        self.save_global(obj)
+        #pickle.Pickler.save_global(self, obj)
 
 def save_global_byname(self, obj, modname, objname):
     """ Save obj as a global reference. Used for objects that pickle does not find correctly. """
@@ -115,16 +123,18 @@ def save_module_dict(self, obj, main_dict=vars(__import__('__main__'))):
     if obj is main_dict:
         save_global_byname(self, obj, '__main__', '__dict__')
     else:
-        return pickle.Pickler.save_dict(self, obj)      # fallback to original 
+        return self.save_dict(obj)
+        #return pickle.Pickler.save_dict(self, obj)      # fallback to original 
 
 def save_classobj(self, obj):
     """ Save an interactively defined classic class object by value """
     if obj.__module__ == '__main__':
         args = (obj.__name__, obj.__bases__, obj.__dict__)
         self.save_reduce(new.classobj, args, obj=obj)
-    else:  # CEBALERT: clearly wrong ('name' not defined). This code
-           # never activated?
-        pickle.Pickler.save_global(self, obj, name)
+    else:  
+        name = str(obj).split('.')[-1]  # CEB: hack to find classic class name
+        self.save_global(obj,name)
+        #pickle.Pickler.save_global(self, obj, name)
 
 def save_instancemethod(self, obj):
     """ Save an instancemethod object """
@@ -163,5 +173,6 @@ def save_type(self, obj):
         self.save_reduce(type.__new__, args, obj=obj)
     else:
         # Fallback to default behavior: save by reference
-        pickle.Pickler.save_global(self, obj)
+        self.save_global(obj)
+        #pickle.Pickler.save_global(self, obj)
 ###############################################################        
