@@ -36,7 +36,7 @@ class PickleMain(object):
         # attribute (I don't know why, but it is...), so before
         # modifying this instance's dispatch attribute we make sure
         # modifications will affect only this instance.
-        self.pickler.__dict__['dispatch'] = copy.copy(self.pickler.dispatch)
+        self.pickler.dispatch = copy.copy(self.pickler.dispatch)
 
         self.pickler.dispatch[new.code] = save_code
         self.pickler.dispatch[new.function] = save_function
