@@ -251,7 +251,10 @@ class FeatureResponses(PatternDrivenAnalysis):
             self._featureresponses[sheet] = {}
             self._activities[sheet]=zeros(sheet.shape)
             for f in features:
-                self._featureresponses[sheet][f.name]=DistributionMatrix(sheet.shape,axis_range=f.range,cyclic=f.cyclic)
+                # CEBERRORALERT: line below is missing at least
+                # "keep_peak=f.keep_peak". Couldn't these things be
+                # passed around in a less fragile way?
+                self._featureresponses[sheet][f.name]=DistributionMatrix(sheet.shape,axis_range=f.range,cyclic=f.cyclic) 
             FeatureResponses._fullmatrix[sheet] = FullMatrix(sheet.shape,features)
 
     def sheets_to_measure(self):
