@@ -104,6 +104,8 @@ class LISSOM(JointNormalizingCFSheet):
     ### settle at all after the first iteration?), but of course that
     ### is arguably an error condition anyway (and should thus be
     ### flagged).
+    # CEBALERT: there is at least one bug in here for tsettle==0: see
+    # CB/JAB email "LISSOM tsettle question", 2010/03/22.
     def process_current_time(self):
         """
         Pass the accumulated stimulation through self.output_fns and
