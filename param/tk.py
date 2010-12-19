@@ -187,33 +187,32 @@ from . import Boolean,String,Number,Selector,ClassSelector,\
      Filename,resolve_path
 
 
+# (part of an existing ALERT - search this file)
 _last_one_set = None
 
 
-
-# Until tklib, tcllib, and scrodget become more commonly
-# available, we include them in tkgui.
-externaltk_path = os.path.join(os.path.split(param.__file__)[0],"externaltk")
-
-# CEBALERT: need to document this; allows param.tk to be used with
-# existing Tk instance. (And allows param.tk to be imported
-# even if there is no DISPLAY.)
 root = None
-def initialize(external_root=None):
+def initialize():
+    """
+    Add extension Tcl/Tk code to the Tk instance at
+    Tkinter._default_root (creating the Tk instance first if
+    necessary).
+    """
     global root
 
     if root is not None:
         print "param.tk already initialized; ignorning call to param.tk.initialize()"
         return
-    
-    # Creating an initial Tk() instance and then withdrawing the
-    # window is a common technique. 
-    if external_root is None:
+
+    if T._default_root is not None:
+        root = T._default_root
+    else:
         root = T.Tk()
         root.withdraw()
-    else:
-        root = external_root
-    
+
+    # Until tklib, tcllib, and scrodget become more commonly
+    # available, we include them in tkgui.
+    externaltk_path = os.path.join(os.path.split(param.__file__)[0],"externaltk")
     root.tk.call("lappend","auto_path",externaltk_path)
 
 
