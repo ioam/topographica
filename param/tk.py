@@ -201,7 +201,7 @@ def initialize():
     global root
 
     if root is not None:
-        print "param.tk already initialized; ignorning call to param.tk.initialize()"
+        print "param.tk already initialized; ignoring call to param.tk.initialize()"
         return
 
     if T._default_root is not None:
