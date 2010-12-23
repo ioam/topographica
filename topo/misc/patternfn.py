@@ -16,7 +16,7 @@ from math import pi
 
 from numpy.oldnumeric import where,maximum,cos,sqrt,divide,greater_equal,bitwise_xor,exp
 from numpy.oldnumeric import arcsin,logical_and,logical_or,less,minimum
-from numpy import seterr
+from numpy import seterr, log
 
 from contextlib import contextmanager
 
@@ -54,6 +54,23 @@ def gaussian(x, y, xsigma, ysigma):
         y_h = divide(y,ysigma)
         return exp(-0.5*x_w*x_w + -0.5*y_h*y_h)
     
+
+def log_gaussian(x, y, x_sigma, y_sigma, x_mean, y_mean):
+    """
+    Two-dimensional oriented Log Gaussian pattern (i.e., 2D version of a
+    bell curve with an independent, movable peak). Much like a normal 
+    distribution, but not necessarily placing the peak above the center,
+    and not necessarily summing to 1.0).
+    """
+    if x_sigma==0.0 or y_sigma==0.0:
+        return x*0.0
+
+    with float_error_ignore():
+        x_w = divide(log(x)-x_mean, x_sigma*x_sigma)
+        y_h = divide(log(y)-y_mean, y_sigma*y_sigma)
+		
+        return exp(-0.5*x_w*x_w + -0.5*y_h*y_h)
+
 
 def sigmoid(axis, slope):     
     """
