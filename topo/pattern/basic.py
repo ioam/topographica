@@ -10,8 +10,8 @@ from math import pi, sqrt
 
 import numpy
 from numpy.oldnumeric import around,bitwise_and,sin,cos,bitwise_or
-from numpy import asarray, float32, nonzero, zeros, shape, hstack,\
-    linspace, abs, round, fft, alltrue
+from numpy import asarray, float32, nonzero, zeros, shape, hstack, \
+    linspace, abs, round, fft, alltrue, add, subtract, clip, Infinity
 
 import param
 from param.parameterized import ParamOverrides,as_uninitialized
@@ -23,7 +23,8 @@ from topo.base.patterngenerator import Constant, PatternGenerator
 from topo.base.arrayutil import wrap
 from topo.base.sheetcoords import SheetCoordinateSystem
 from topo.misc.patternfn import gaussian,exponential,gabor,line,disk,ring,\
-    sigmoid,arc_by_radian,arc_by_center,smooth_rectangle,float_error_ignore
+    sigmoid,arc_by_radian,arc_by_center,smooth_rectangle,float_error_ignore, \
+    log_gaussian
 
 from topo import numbergen
 
@@ -874,40 +875,40 @@ class DifferenceOfGaussians(PatternGenerator):
     """
 
     positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(1), doc="""size parameter for the center Gaussian.""")
+        precedence=(1), doc="""Size parameter for the positive Gaussian.""")
     
     positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(2), doc="""aspect_ratio parameter for the center Gaussian.""")
+        precedence=(2), doc="""Aspect_ratio parameter for the positive Gaussian.""")
     
     positive_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(3), doc="""x position for the central peak of the positive gaussian.""")
+        precedence=(3), doc="""X position for the central peak of the positive gaussian.""")
     
     positive_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(4), doc="""y position for the central peak of the positive gaussian.""")
+        precedence=(4), doc="""Y position for the central peak of the positive gaussian.""")
 
     negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(5), doc="""size parameter for the surround Gaussian.""")
+        precedence=(5), doc="""Size parameter for the negative Gaussian.""")
     
     negative_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(6), doc="""aspect_ratio parameter for the surround Gaussian.""")
+        precedence=(6), doc="""Aspect_ratio parameter for the negative Gaussian.""")
     
     negative_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(7), doc="""x position for the central peak of the negative gaussian.""")
+        precedence=(7), doc="""X position for the central peak of the negative gaussian.""")
     
     negative_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(8), doc="""y position for the central peak of the negative gaussian.""")
+        precedence=(8), doc="""Y position for the central peak of the negative gaussian.""")
     
     def function(self, p):
-        center   = Gaussian(size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio,
-                            orientation=p.orientation, x=p.positive_x+p.x, y=p.positive_y+p.y,
-                            output_fns=[topo.transferfn.DivisiveNormalizeL1()])
+        positive = Gaussian(x=p.positive_x+p.x, y=p.positive_y+p.y,
+            size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio,
+            orientation=p.orientation, output_fns=[topo.transferfn.DivisiveNormalizeL1()])
                                     
-        surround = Gaussian(size=p.negative_size*p.size, aspect_ratio=p.negative_aspect_ratio,
-                            orientation=p.orientation, x=p.negative_x+p.x, y=p.negative_y+p.y,
-                            output_fns=[topo.transferfn.DivisiveNormalizeL1()])
+        negative = Gaussian(x=p.negative_x+p.x, y=p.negative_y+p.y,
+            size=p.negative_size*p.size, aspect_ratio=p.negative_aspect_ratio,
+            orientation=p.orientation, output_fns=[topo.transferfn.DivisiveNormalizeL1()])
         
-        return Composite(generators=[center,surround], operator=numpy.subtract,
-                         xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)()
+        return Composite(generators=[positive,negative], operator=numpy.subtract,
+            xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)()
                         
                         
 class Sigmoid(PatternGenerator):
@@ -930,47 +931,45 @@ class SigmoidedDoG(PatternGenerator):
     such that one part of the plane can be the mirror image of the other.
     """
         
-    center_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(1), doc="""size parameter for the center Gaussian.""")
+    positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0),
+        precedence=(1), doc="""Size parameter for the positive Gaussian.""")
     
-    center_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(2), doc="""aspect_ratio parameter for the center Gaussian.""")
+    positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0),
+        precedence=(2), doc="""Aspect_ratio parameter for the positive Gaussian.""")
     
-    surround_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(3), doc="""size parameter for the surround Gaussian.""")
+    negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
+        precedence=(3), doc="""Size parameter for the negative Gaussian.""")
     
-    surround_aspect_ratio = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(4), doc="""aspect_ratio parameter for the surround Gaussian.""")
+    negative_aspect_ratio = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
+        precedence=(4), doc="""Aspect_ratio parameter for the negative Gaussian.""")
     
     sigmoid_slope = param.Number(default=10.0, bounds=(None,None), softbounds=(-100.0,100.0),
-        precedence=(5), doc="""slope parameter for the Sigmoid.""")
+        precedence=(5), doc="""Slope parameter for the Sigmoid.""")
     
     sigmoid_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-1.0,1.0),
-        precedence=(6), doc="""x parameter for the Sigmoid.""")
+        precedence=(6), doc="""X parameter for the Sigmoid.""")
 
     sigmoid_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-1.0,1.0),
-        precedence=(7), doc="""y parameter for the Sigmoid.""")
-
+        precedence=(7), doc="""Y parameter for the Sigmoid.""")
                                                                                        
     def function(self, p):
-        dog = DifferenceOfGaussians(positive_size=p.center_size*p.size, positive_aspect_ratio=p.center_aspect_ratio,
-                                    negative_size=p.surround_size*p.size, negative_aspect_ratio=p.surround_aspect_ratio,
-                                    positive_x=p.x, positive_y=p.y, negative_x=p.x, negative_y=p.y)
+        diff_of_gaussians = DifferenceOfGaussians(positive_x=p.x, positive_y=p.y, 
+            negative_x=p.x, negative_y=p.y,
+            positive_size=p.positive_size*p.size, positive_aspect_ratio=p.positive_aspect_ratio,
+            negative_size=p.negative_size*p.size, negative_aspect_ratio=p.negative_aspect_ratio)
 
         sigmoid = Sigmoid(slope=p.sigmoid_slope, orientation=p.orientation+pi/2,
-                          x=p.sigmoid_x+p.x, y=p.sigmoid_y+p.y)
+            x=p.sigmoid_x+p.x, y=p.sigmoid_y+p.y)
 
-        return Composite(generators=[dog, sigmoid], operator=numpy.multiply,
-                         xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)()
-   
+        return Composite(generators=[diff_of_gaussians, sigmoid], bounds=p.bounds,
+            operator=numpy.multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
 
-                             
+
 def rectangular(signal_size):
     """
     Generates a Rectangular signal smoothing window,
     """
     return [1.0]*int(signal_size)
-    
 
     
 class PowerSpectrum(PatternGenerator):
@@ -1022,16 +1021,13 @@ class PowerSpectrum(PatternGenerator):
 
     max_frequency = param.Number(default=20000,doc="""
         Largest frequency for which to return an amplitude.""")
-
                 
     def __init__(self, signal, **params):
         super(PowerSpectrum, self).__init__(**params)
         self._initialize_window_parameters(signal, **params)
 
     @as_uninitialized
-    def _initialize_window_parameters(self, signal, **params):
-        # BKALERT: how much preprocessing to offer? E.g. Offer to remove DC? Etc.
-                
+    def _initialize_window_parameters(self, signal, **params):                
         # For subclasses: to specify the values of parameters on this, the parent class,
         # subclasses might first need access to their own parameter values. 
         # Having the window initialization in this separate method allows subclasses
@@ -1042,52 +1038,54 @@ class PowerSpectrum(PatternGenerator):
         self.signal = asarray(signal, dtype=float32)        
         assert len(self.signal) > 0
         
-        self._window_start = 0
+        self._next_window_start = 0
         self._samples_per_window = int(self.window_length*self.sample_rate)
+        assert self._samples_per_window > 0
         self._smoothing_window = self.windowing_function(self._samples_per_window)  
 
-        assert self._samples_per_window > 0
-        
-        # calculate the discrete frequency bins possible for the given sample rate.
-        # (discarding the negative frequencies)
+        # calculate the discrete frequencies possible through decomposition, for the given sample rate & window size.
         self._all_frequencies = fft.fftfreq(self._samples_per_window, d=1.0/self.sample_rate)[0:self._samples_per_window/2]
         assert self._all_frequencies.min() >= 0
-     
-    def _create_spacing(self, mini, maxi): 
+      
+    def _map_frequencies_to_rows(self, index_min_freq, index_max_freq): 
         """
-        Overload if custom frequency spacing is required.
+        Frequency spacing to use, i.e. how to map the available frequency range
+        to the discrete sheet rows.
+        
+        NOTE: We're actually spacing a range between the *indicies* of the highest and lowest
+        frequencies, the actual frequency spacing occurs at a later stage.
+        
+        This method is here solely to provide a minimal overload if custom spacing is required.
         """
-        # frequency spacing to use, i.e. mapping of frequencies to sheet rows, 
-        self._frequency_indices = round(linspace(maxi, mini, num=(maxi-mini), endpoint=True)).astype(int)
-              
+        self._frequency_spacing_indices = round(linspace(index_max_freq, index_min_freq, 
+            num=(index_max_freq-index_min_freq), endpoint=True)).astype(int)
+    
     # CEBALERT: given all the constant params, could do some caching
-    def _create_indices(self, p):
+    def _create_frequency_indices(self, p):
         if not self._all_frequencies.min() <= p.min_frequency \
             or not self._all_frequencies.max() >= p.max_frequency:
             raise ValueError("Specified frequency interval [%s,%s] is unavailable \
-                            (actual interval is [%s,%s]. Adjust sample_rate and/or window_length."
-                             %( p.min_frequency, p.max_frequency, \
-                             self._all_frequencies.min(), self._all_frequencies.max() ))
+                (actual interval is [%s,%s]. Adjust sample_rate and/or window_length."
+                %( p.min_frequency, p.max_frequency, self._all_frequencies.min(), \
+                self._all_frequencies.max()))
+                
+        min_freq_index = nonzero(self._all_frequencies >= p.min_frequency)[0][0]
+        max_freq_index = nonzero(self._all_frequencies <= p.max_frequency)[0][-1]
         
-        # index of first nonzero element whose value is above or equal to the min frequency.
-        mini = nonzero(self._all_frequencies >= p.min_frequency)[0][0]
-        # index of first nonzero element whose value is above or equal to the max frequency.
-        maxi = nonzero(self._all_frequencies <= p.max_frequency)[0][-1]
-        self._create_spacing(mini, maxi)
-        
+        self._map_frequencies_to_rows(min_freq_index, max_freq_index)
+    
     def _extract_sample_window(self, p):
         """
         Overload if special behaviour is required when a signal ends.
         """
-        start = self._window_start
-        end = start+self._samples_per_window
+        window_start = self._next_window_start
+        window_end = window_start+self._samples_per_window
         
-        # move window forward for next cycle
-        self._window_start += int(self.window_increment * self.sample_rate) 
-        
-        if end > self.signal.size:
+        if window_end > self.signal.size:
             raise ValueError("Reached the end of the signal.")
-        return self.signal[start:end]
+        
+        self._next_window_start += int(self.window_increment * self.sample_rate) 
+        return self.signal[window_start:window_end]
             
     def _get_amplitudes(self, p):
         """
@@ -1097,49 +1095,29 @@ class PowerSpectrum(PatternGenerator):
 
         See numpy.rfft for information about the Fourier transform.
         """
-        # perform a fft on it for amplitudes, discarding the negative frequency values.
         signal_sample = self._extract_sample_window(p)
         assert shape(signal_sample)[0] == shape(self._smoothing_window)[0]
-        all_amplitudes = abs(fft.rfft(signal_sample * self._smoothing_window))[0 : len(signal_sample)/2]
-                      
-        # number of discrete units defined by our sheet size, into which we need to 
-        # partition our frequency index space (and thereby frequency space).
-        indices_per_unit = len(self._frequency_indices)/self._sheet_dimensions[0]
         
-        # list to store summed amplitudes per unit
-        amplitudes = [0.0]*self._sheet_dimensions[0]
+        amplitudes_by_frequency = abs(fft.rfft(signal_sample * self._smoothing_window))[0 : len(signal_sample)/2]
+        amplitudes_by_row = [0.0]*self._sheet_dimensions[0]
+        
+        indices_per_row = len(self._frequency_spacing_indices)/self._sheet_dimensions[0]
+        
+        for row in range(0, self._sheet_dimensions[0]):
+            freq_end_index = self._frequency_spacing_indices[row*indices_per_row]+1
+            freq_start_index = self._frequency_spacing_indices[(row*indices_per_row)+indices_per_row]
 
-        # for each unit in the total number of sheet units
-        for unit in range(0, self._sheet_dimensions[0]):
-        
-            # find the largest frequency that falls in it       
-            frequency_end_index = self._frequency_indices[unit*indices_per_unit] 
-            # and the smallest frequency that falls in it
-            frequency_start_index = self._frequency_indices[(unit*indices_per_unit)+indices_per_unit]
+            amplitudes_by_row[row] = sum(amplitudes_by_frequency[freq_start_index:freq_end_index])/indices_per_row
             
-            # Useful when calibrating: prints out frequencies that fall each unit
-            #print (self._all_frequencies[frequency_start_index], self._all_frequencies[frequency_end_index])
-            
-            # store the sum of the amplitudes for each of those frequencies
-            for frequency in range(frequency_start_index, frequency_end_index+1):
-                # normalise amplitudes: divide by number of unique frequencies per unit (partition)
-                amplitudes[unit] += all_amplitudes[frequency]/indices_per_unit
-        
-        return (asarray(amplitudes, float32).reshape(len(amplitudes),1))        
+        return (asarray(amplitudes_by_row, float32).reshape(-1,1))        
         
     def __call__(self, **params_to_override):
-        # override defaults with user defined parameters
         p = ParamOverrides(self, params_to_override)
         
-        # get the dimensions of the generator sheet.
         self._sheet_dimensions = SheetCoordinateSystem(p.bounds, p.xdensity, p.ydensity).shape
-        
-        # calculate frequency bin divisions.
         self._create_indices(p)
         
-        # perform a fft to get amplitudes of the composite frequencies.
         return self._get_amplitudes(p)
-    
     
 
 class Spectrogram(PowerSpectrum):
@@ -1168,11 +1146,9 @@ class Spectrogram(PowerSpectrum):
         numpy.fft.""")
      
     def __init__(self, signal, **params):
-        # this is used by _create_indices when initialising the spectrogram array.
-        self._first_run = True
- 
-        # overload default sample_window and seconds_per_timestep,
-        # if a new ones are supplied.
+        # will resize as soon as sheet dimensions are available.
+        self._spectrogram = zeros(1, dtype=float32)
+            
         for parameter,value in params.items():
             if parameter == "sample_window" or \
                parameter == "seconds_per_timestep":
@@ -1182,46 +1158,27 @@ class Spectrogram(PowerSpectrum):
             self.warning("sample_window < seconds_per_timestep; some signal will be skipped.")
         
         super(Spectrogram, self).__init__(signal, window_increment=self.seconds_per_timestep,
-                                           window_length=self.sample_window, **params)
+            window_length=self.sample_window, **params)
         
-    def _create_indices(self, p):
-        super(Spectrogram, self)._create_indices(p)
-
-        # initalise a new, empty, spectrogram of the size of the generator sheet
-        # i.e. allow user to implicitly control spectrogram time history through 
-        # sheet size.
-        if self._first_run:
+    def _create_frequency_indices(self, p):
+        super(Spectrogram, self)._create_frequency_indices(p)
+        
+        if self._spectrogram.size == 1:
             self._spectrogram = zeros(self._sheet_dimensions, dtype=float32)
-            self._first_run = False
-            
+        
     def __call__(self, **params_to_override):
-        # override defaults with user defined parameters.
         p = ParamOverrides(self, params_to_override)
         
-        # get the dimensions of the generator sheet.
         self._sheet_dimensions = SheetCoordinateSystem(p.bounds, p.xdensity, p.ydensity).shape
+        self._create_frequency_indices(p)
         
-        # calculate frequency bin divisions.
-        self._create_indices(p)
-                
-        # perform a fft to get amplitudes of the composite frequencies.
         amplitudes = self._get_amplitudes(p)
-        
-        # first make sure arrays are of compatible size, then add on 
-        # latest spectral information to the spectrograms leftmost edge.
         assert shape(amplitudes)[0] == shape(self._spectrogram)[0]
         self._spectrogram = hstack((amplitudes, self._spectrogram))
-                
-        # knock off the column on the spectrograms right-most edge,
-        # i.e. the oldest spectral information.
+        
+        # knock off oldest spectral information, i.e. right-most column.
         self._spectrogram = self._spectrogram[0:, 0:self._spectrogram.shape[1]-1]
-        
-        # the following print statements are very useful when calibrating sheets,
-        # allowing you to calculate how much time history a particular generator
-        # sheets x dimension corresponds to.
-        #print shape(amplitudes); print shape(self._spectrogram)
-        
         return self._spectrogram
         
-                      
+        
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,PatternGenerator)]))
