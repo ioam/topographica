@@ -106,14 +106,16 @@ otherwise your history can become confusing.
 <H3>Interacting with Topographica's SVN repository</H3>
 
 <P>To interact with our SVN repository, there are several possible
-workflows you could adopt. Please search the web for "git svn
-workflow" and choose one that suits how you want to work. Here is one
-possible git/svn workflow:
+workflows you could adopt. We recommend the following workflow:
+
+
+
 
 <ol>
 
-<li>Create <code>feature</code> branch from <code>master</code> (the
-SVN branch): <code>git checkout -b feature</code></li>
+<li>To start work on some new feature, create a new branch
+called <code>feature</code> from <code>master</code> (the SVN
+branch): <code>git checkout -b feature</code></li>
 
 <li>Make your changes, commit them, and test them (probably multiple
 iterations).</li>
@@ -170,9 +172,8 @@ the copies. An unwanted <code>test</code> branch can be deleted with
 <P>With git, you are usually working locally. Therefore, it is a good
 idea to back up your repository. You could simply copy the repository
 elsewhere to do this, but this does not make your work visible to
-others (until you dcommit back to SVN). Alternatively, you could use
-one of the free online git hosting services, or request a remote
-repository on SF.net from the Topographica admins. With a repository
+others (until you dcommit back to SVN). Please request a remote
+git repository on SourceForge.net from the Topographica admins. Then, with your repository
 <code>NAME</code> on SourceForge.net, you can mirror your local
 repository like this:
 
@@ -188,12 +189,12 @@ $ git push NAME
 </pre>
 
 Note that you should read the documentation for <code>push</code> to
-ensure that you share the branch you are expecting to (you probably
+ensure that you share the branch(es) you are expecting to. You probably
 want to use the <code>--all</code> or <code>--mirror</code> options to
-share everything).  .
+share everything.
 
 <P>
-If your repository is on SourceForge, it will be visible on the web:
+Your repository on SourceForge will be visible on the web:
 <pre>
 http://topographica.git.sourceforge.net/git/gitweb.cgi?p=topographica/NAME
 </pre>
