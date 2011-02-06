@@ -20,7 +20,7 @@ from numpy import array, float32, multiply, round, shape, hstack, hanning, fft, 
 try:
     import scikits.audiolab as pyaudiolab
 except ImportError:
-    param.Parameterized().warning("audio.py classes will not be usable;" & 
+    param.Parameterized().warning("audio.py classes will not be usable;" \
         "scikits.audiolab (pyaudiolab) is not available.")
         
         
