@@ -7,7 +7,6 @@ default: gui-skip platform-skip python jpeg pil numpy matplotlib weave pychecker
 # uses touch -a to avoid changing modification dates
 platform-skip:
 ifeq ("$(shell uname -s)","Darwin")
-	touch -a blt
 	touch -a tcl
 	touch -a tk
 # CEBALERT: doesn't stop readline building on mac!
@@ -16,7 +15,6 @@ endif
 
 gui-skip:
 ifeq (${GUI},0)
-	touch -a blt
 	touch -a tcl
 	touch -a tk
 endif
@@ -49,29 +47,6 @@ uninstall: python-uninstall jpeg-uninstall pil-uninstall numpy-uninstall tk-unin
 
 
 ##############################################################
-# libblt: already available on nearly all systems, but some systems
-# have a version incompatible with tkinter (and Tcl/Tk?), so we build
-# our own version. If there are any problems building this, just do
-# 'make blt-uninstall' followed by 'touch blt' (or remove python's blt
-# dependency below), and it should still nearly always be fine.
-#
-BLT = blt2.4z
-BLT_UNINSTALL += lib/libBLT24.so
-
-blt: ${BLT}.tar.gz
-	tar xzf ${BLT}.tar.gz
-	cd ${BLT}; ./configure --prefix=${PREFIX}
-	make -i -C ${BLT} install
-	touch blt
-
-blt-clean:
-	rm -rf ${BLT}
-blt-uninstall:
-	rm -rf blt ${foreach f,${BLT_UNINSTALL}, ${PREFIX}/${f}}
-
-
-
-##############################################################
 # Python (interpreted language)
 #
 PYTHON = Python-2.6.4
@@ -86,7 +61,7 @@ PYTHON_UNINSTALL += ${PYTHON_LIB} man/man1/python.1 include/python2.6
 
 # LDFLAGS sets ${PREFIX}/lib as the LD_LIBRARY in the binary
 # CB: rpath is ignored on OS X (so where are the library files taken from?). 
-python: ${PYTHON}.tgz tk blt readline zlib
+python: ${PYTHON}.tgz tk readline zlib
 	echo ${PREFIX}
 	tar -xzf ${PYTHON}.tgz
 
@@ -112,10 +87,10 @@ endif
 	cd ${PYTHON}; env PREFIX=${PREFIX} make install
 	touch python
 
-python-clean: blt-clean
+python-clean:
 	rm -rf ${PYTHON} Python-2.4*/ Python-2.5*/
 
-python-uninstall: blt-uninstall
+python-uninstall:
 	rm -rf python ${foreach f,${PYTHON_UNINSTALL}, ${PREFIX}/${f}} Python-2.4*/ Python-2.5*/
 
 ##############################################################
