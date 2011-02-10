@@ -155,8 +155,8 @@ for s in ['LGNOn','LGNOff']:
                      nominal_bounds_template=sheet.BoundingBox(radius=0.25))
 
 
-topo.sim['V1'] = sheet.lissom.JointScaling(nominal_density=p.cortex_density,
-    tsettle=16, plastic=True, apply_scaling=False, 
+topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
+    tsettle=16, plastic=True, 
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),
     output_fns=[transferfn.misc.HomeostaticResponse()])
 
