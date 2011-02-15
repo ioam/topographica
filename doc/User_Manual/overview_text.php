@@ -322,7 +322,25 @@ at once is also available (CFPLearningFn).  These functions can be
 optimized heavily, and can do such things as basing the activity
 on the single best-responding unit in a Sheet (as in a Kohonen SOM).
 
+<H2><a name="audience">Who should use Topographica?</a></H2>
 
+<P>Topographica's main target audience is computational
+neuroscientists who want to simulate large, topographically mapped
+brain regions.  Many such researchers initially start coding with
+general-purpose languages like Matlab or bare Python, because it is
+relatively straightforward to specify an initial fully-connected model
+with square connections and hard-coded sizes from scratch.  However,
+as soon as the model becomes more complex, the code quickly becomes
+unwieldy.  Supporting local rather than full connectivity, circular or
+arbitrary connection patterns rather than rectangular arrays, variable
+densities of neurons per region rather than hard-coded ones, arbitrary
+patterns of connectivity (including feedforward and feedback
+connections) between sheets rather than feedforward connections only,
+--- all of these will quickly make code be unreadable and
+unmaintainable without a clear, clean overall design.  Topographica's
+developers have dealt with these cases already, and the result is
+highly robust and reliable, making it very straightforward to run
+a large class of models without complicated coding or debugging.
 
 
 <H2><a name="implementation-levels">How much of Topographica to use</a></H2>
@@ -354,7 +372,7 @@ developer.
 <P>Topographica levels:
 
 <ol>
-<p><li>Python with C interface (ignoring <i>everything</i> in topo/): 
+<p><li>Python with C interface (ignoring <i>everything</i> in topo/ and param/): 
 <dl><dt>Supports:</dt><dd>Anything is possible, with no performance or 
 	programming limitations (since anything can be written
 	efficiently in C, and the rest can be written in Python).
@@ -365,7 +383,7 @@ developer.
 </dl>    
 <p><li>Everything in 1., plus event-driven simulator with parameterizable objects, debugging 
        output, etc. (using just simulation.py from topo/base/ in addition to Parameter 
-       support from topo/param/):
+       support from param/):
 
 <dl><dt>Supports:</dt><dd>Running simulations of any physical system, with 
 	good semantics for object parameter specification with inheritance.
@@ -373,7 +391,8 @@ developer.
 	good for generality but means that performance will be good
         only if the computation in the individual events is big
         compared to the number of events.  This assumption is true for
-        existing Topographica simulations, but may not always apply.
+        existing Topographica simulations, but may not apply to all
+	systems being modelled.
 </dl>    
 <p><li>Everything in 1.-2., plus Sheets (adding topo/base/sheet.py and its dependencies)
 <dl><dt>Supports:</dt><dd>Uniform interface for a wide variety of brain 
@@ -385,9 +404,9 @@ developer.
         curvature, sulci, gyrii; has hard boundaries between regions,
         uses Cartesian, not hexagonal grid.  For instance, Sheets are
         not a good way to model how the entire brain is parcellated
-        into brain areas during development, because that arguably
-        happens in 3D and does not start out with very strict
-        boundaries between regions.
+        into brain areas during development, because that happens in
+        3D and does not start out with very strict boundaries between
+        regions.
 </dl>    
 <p><li>Everything in 1.-3., plus Projections and ConnectionFields (adding the rest 
 	of topo/base/)

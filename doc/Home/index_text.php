@@ -41,6 +41,12 @@ Topographica makes it simple to use an appropriate level of detail and
 complexity, as determined by the available computing power, phenomena
 of interest, and amount of biological data available for validation.
 
+<P>Compared to writing code for such models from scratch, Topographica
+makes it simple to define multiple interconnected sheets, to use
+localized patches of connections, to control the inputs to each sheet
+and analyze the outputs, and to manage results from models
+and simulations as they are developed and improved over time.
+
 <P>The figure at top right shows an example Topographica model of the
 early stages in the visual system, modeling how retinal input is
 transformed by the thalamus, primary visual cortex, and higher
