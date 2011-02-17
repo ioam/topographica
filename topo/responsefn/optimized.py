@@ -51,11 +51,9 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
             DECLARE_SLOT_OFFSET(weights,cf_type);
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
 
-            npfloat *tact = temp_act;
-
             for (int r=0; r<num_cfs; ++r) {
-                if((*mask++) == 0.0)
-                    *tact = 0;
+                if(mask[r] == 0.0)
+                    temp_act[r] = 0;
                 else {
                     PyObject *cf = PyList_GetItem(cfs,r);
 
@@ -79,11 +77,10 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
                         xj += icols;
                         weights += cc2-cc1;
                     }  
-                    *tact = tot*strength;
+                    temp_act[r] = tot*strength;
 
                     DECREF_CONTIGUOUS_ARRAY(weights);
                 }
-                ++tact;    
             }
         """
         inline(code, ['mask','X', 'strength', 'icols', 'temp_act','cfs','num_cfs','cf_type'], 
