@@ -17,13 +17,9 @@ from topo.misc.pyxhandler import provide_unoptimized_equivalent_cy
 from topo.responsefn.projfn import CFPRF_EuclideanDistance
 
 
-    
-
-# CEBALERT: the "only works for 1D array" doc is out of date, right?
-# Should remove from here and other optimized fns that have been
-# flattened.
-
-# CEB: why the double loop for the dot product?
+# CEBALERT: this function works for 1D arrays; the docstring below is
+# out of date. Need to update for this and other optimized fns that
+# have been flattened.
 
 class CFPRF_DotProduct_opt(CFPResponseFn):
     """
@@ -46,7 +42,9 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
         mask = iterator.mask.data
 
         cf_type = iterator.cf_type
-    
+
+        # Note: no performance hit from array indexing of mask and
+        # temp_act (r11447).
         code = c_header + """
             DECLARE_SLOT_OFFSET(weights,cf_type);
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
