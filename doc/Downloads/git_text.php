@@ -201,38 +201,44 @@ http://topographica.git.sourceforge.net/git/gitweb.cgi?p=topographica/NAME
 
 
 
-<!-- ADMIN NOTE
-ssh -t ceball,topographica@shell.sourceforge.net create
-cd /home/scm_git/t/to/topographica
-git --git-dir=ceball_houzi2 init --shared=all --bare
-emacs -nw ceball_houzi2/description
-emacs -nw ceball_houzi2/config # allow fastforwards - see above
+<!-- ADMIN NOTE: to create ceball_houzi2 repository
 
+$ ssh -t ceball,topographica@shell.sourceforge.net create
+[sf.net]$ cd /home/scm_git/t/to/topographica
+[sf.net]$ git --git-dir=ceball_houzi2 init --shared=all --bare
+[sf.net]$ emacs -nw ceball_houzi2/description
+[sf.net]$ emacs -nw ceball_houzi2/config # allow fastforwards
+                                         # deny deletes
+		                 	 # emails
+---config---
 [receive]
         denyNonFastforwards = false
+	denyDeletes = true
+---config---
 
-You should NOT do this if others are also actively developing on the
-remote, because the remote's history will be rewritten and they will
-get very confused.
+(You should NOT do "denyNonFastforwards = false" if others are also
+actively developing on the remote, because the remote's history will
+be rewritten and they will get very confused. But this should not
+apply to the usage described in this document.)
 
-# Backups:
-rsync -av topographica.git.sourceforge.net::gitroot/topographica/* date-topographica-git
- 
-
-# emails:
-
-create hook email file in hooks directory (copy from another repo on there
-or get ://git.kernel.org/?p=git/git.git;a=blob_plain;f=contrib/hooks/post-receive-email
-chmod a+x post-receive
-
-in git config,
-
+---config---
 [hooks]
         mailinglist = "name@address"
         announcelist =
         envelopesender =
         emailprefix = "SF.net Git: "
         showrev =
+---config---
+
+Then, edit ceball_houzi2/hooks/post-receive.sample so that the line in
+there calling "post-receive-email" is uncommented (it's the only line
+in there at the moment) and save it as post-receive. Also, chmod +x
+post-receive.
+
+
+# Backups (currently no rsync access? docs on sf.net out of date?)
+$ rsync -av topographica.git.sourceforge.net::gitroot/topographica/* date-topographica-git
+
 -->
 
 
