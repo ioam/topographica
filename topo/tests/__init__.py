@@ -132,7 +132,7 @@ __version__='$Revision$'
 
 
 
-import unittest,doctest,os,re,fnmatch
+import unittest,doctest,os,re,fnmatch,socket
 import param
 
 # Automatically discover all test*.py files in this directory
@@ -143,10 +143,10 @@ all_doctest = sorted(fnmatch.filter(os.listdir(__path__[0]),'test*.txt'))
 
 # location in which to create semi-permanent test data
 output_path = param.normalize_path.prefix
-tests_output_path = os.path.join(output_path,'tests')
+tests_output_path = os.path.join(output_path,'tests',socket.gethostname())
 if not os.path.exists(tests_output_path):
     print "Creating %s"%tests_output_path
-    os.mkdir(tests_output_path)
+    os.makedirs(tests_output_path)
 
 
 
