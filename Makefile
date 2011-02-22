@@ -428,17 +428,37 @@ dist-setup.py-bdist_wininst:
 dist-pypi-upload:
 	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py register sdist ${BDIST_WININST} upload
 
+# CEBALERT: I seem to need these for this 'if' section to be seen by
+# make - is that right?
+RPM_RELEASE = 
+UBUNTU_RELEASE =
+LOG_TEXT =
+
+# CEBALERT: applies to DEB and RPM; rename
+ifeq (${DEBSTATUS},-unstable)
+	RPM_RELEASE = r${SVNVERSION}
+	UBUNTU_RELEASE = ${RELEASE}~r${SVNVERSION}-0ubuntu0
+	LOG_TEXT = "  * Pre-release version ${RELEASE} from SVN; see Changelog.txt for details."
+else
+# If you want to re-release, need to increment the last digit to
+# upload to launchpad. E.g. 0.9.7-0ubuntu0~lucid is first release of
+# 0.9.7 on lucid, 0.9.7-0ubuntu1~lucid is second, and so
+# on. Presumably there would usually be just one release.
+# (Same applies to RPM.)
+	RPM_RELEASE = 0 
+	UBUNTU_RELEASE = ${RELEASE}-0ubuntu0
+	LOG_TEXT = "  * Version ${RELEASE}; see Changelog.txt for details."
+endif
 
 
 # Or, remove --spec-only to build rpm on your system (but make sure
 # you have python 2.6...I don't).
-dist-rpm:
-	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py bdist_rpm --release=${RELEASE} --requires "python,python-devel,tkinter,numpy,scipy,python-imaging-tk,python-matplotlib,python-matplotlib-tk,ipython" --group="Productivity/Scientific/Other"  --spec-only
+rpm:
+	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py bdist_rpm --release=${RPM_RELEASE} --requires "python,python-devel,tkinter,numpy,scipy,python-imaging-tk,python-matplotlib,python-matplotlib-tk,ipython" --group="Productivity/Scientific/Other"  --spec-only
 
-# CEBALERT: can't seem to specify python 2.6!
-# CEBALERT: no gmpy on FC13? 
-
-# CB: will use osc from buildbot at some point to update these, as for launchpad.
+# CEBALERTs about RPM: (1) can't seem to specify python 2.6! so only
+# works where python 2.6 (or 2.5) is the default on a system. (2)
+# where is gmpy on FC?
 
 
 ######################################################################
@@ -477,18 +497,6 @@ UBUNTU_ENV = env DEBFULLNAME='C. E. Ball' DEBEMAIL='ceball@gmail.com' GPGKEY=427
 DEBUILD = ${UBUNTU_ENV} debuild
 UBUNTU_TARGET = lucid
 UBUNTU_BACKPORTS = karmic^ jaunty^ hardy^ 
-
-ifeq (${DEBSTATUS},-unstable)
-	UBUNTU_RELEASE = ${RELEASE}~r${SVNVERSION}-0ubuntu0
-	LOG_TEXT = "  * Pre-release version ${RELEASE} from SVN; see Changelog.txt for details."
-else
-# If you want to re-release, need to increment the last digit to
-# upload to launchpad. E.g. 0.9.7-0ubuntu0~lucid is first release of
-# 0.9.7 on lucid, 0.9.7-0ubuntu1~lucid is second, and so
-# on. Presumably there would usually be just one release.
-	UBUNTU_RELEASE = ${RELEASE}-0ubuntu0
-	LOG_TEXT = "  * Version ${RELEASE}; see Changelog.txt for details."
-endif
 
 UBUNTU_DIR = ${DIST_TMPDIR}/topographica-${UBUNTU_RELEASE}
 UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
