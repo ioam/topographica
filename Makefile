@@ -28,6 +28,14 @@ GUI = 1
 DEBSTATUS = -unstable
 
 
+# COVERAGE_CMD: used by buildbot to generate various coverage data
+COVERAGE = 0
+COVERAGE_CMD = 
+
+ifeq ("${COVERAGE}","1")
+	COVERAGE_CMD = bin/coverage run --rcfile=doc/buildbot/coveragerc -a -p
+endif
+
 # CEBALERT: tied to exact windows version!
 ifeq ("$(shell uname -s)","MINGW32_NT-5.1")
 	TIMER = 
@@ -90,13 +98,7 @@ FORCE:
 # To get more information about which tests are being run, do:
 # make TEST_VERBOSITY=2 tests
 tests: FORCE
-	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run(verbosity=${TEST_VERBOSITY}); import sys; sys.exit(len(t.failures+t.errors))"
-
-tests-coverage: FORCE
-	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run_coverage(produce_html=0)"
-
-tests-coverage-html: FORCE
-	${XVFBRUN} ./topographica -c "import topo.tests; t=topo.tests.run_coverage(produce_html=1)"
+	${XVFBRUN} ${COVERAGE_CMD} ./topographica -c "import topo.tests; t=topo.tests.run(verbosity=${TEST_VERBOSITY}); import sys; sys.exit(len(t.failures+t.errors))"
 
 examples: FORCE
 	make -C examples
@@ -203,9 +205,9 @@ snapshot-compatibility-tests:
 # point.
 # CEBALERT: please make this work for som_retinotopy as well as lissom_oo_or
 simulation-snapshot-tests:
-	./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_NoSnapshot as A; A(script="examples/lissom_oo_or.ty")'
-	./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_CreateSnapshot as B; B(script="examples/lissom_oo_or.ty")'
-	./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C(script="examples/lissom_oo_or.ty")'
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_NoSnapshot as A; A(script="examples/lissom_oo_or.ty")'
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_CreateSnapshot as B; B(script="examples/lissom_oo_or.ty")'
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C(script="examples/lissom_oo_or.ty")'
 	rm -f examples/lissom_oo_or.ty_PICKLETEST*
 
 
@@ -232,7 +234,7 @@ slow-tests: print-info train-tests all-speed-tests map-tests batch-tests
 	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/${notdir $*}",data_filename="tests/${notdir $*}_DATA",run_for=[1,99,150],look_at="V1",cortex_density=8,retina_density=24,lgn_density=24)'
 
 %_TEST: %_DATA
-	${TIMER}./topographica -c 'import_weave=${IMPORT_WEAVE}' -c 'from topo.tests.test_script import TestScript; TestScript(script="examples/${notdir $*}",data_filename="tests/${notdir $*}_DATA",decimal=${TESTDP})'
+	${TIMER}${COVERAGE_CMD} ./topographica -c 'import_weave=${IMPORT_WEAVE}' -c 'from topo.tests.test_script import TestScript; TestScript(script="examples/${notdir $*}",data_filename="tests/${notdir $*}_DATA",decimal=${TESTDP})'
 # CB: Beyond 14 dp, the results of the current tests do not match on
 # ppc64 and i686 (using linux).  In the future, decimal=14 might have
 # to be reduced (if the tests change, or to accommodate other
@@ -276,24 +278,24 @@ topo/tests/lissom_whisker_barrels.ty_DATA:
 
 # pass a list of plotgroup names to test() instead of plotgroups_to_test to restrict the tests
 map-tests:
-	./topographica -c "cortex_density=8" examples/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)" 
+	${COVERAGE_CMD} ./topographica -c "cortex_density=8" examples/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)" 
 
 generate-map-tests-data:
 	./topographica -c "cortex_density=8" examples/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; generate(plotgroups_to_test)" 
 
 TESTTMPDIR := $(shell mktemp -d /tmp/topotests.XXXX)
 script-repr-tests:
-	./topographica examples/hierarchical.ty -a -c "import param;param.normalize_path.prefix='${TESTTMPDIR}'" -c "save_script_repr('script_repr_test.ty')"
-	./topographica ${TESTTMPDIR}/script_repr_test.ty
+	${COVERAGE_CMD} ./topographica examples/hierarchical.ty -a -c "import param;param.normalize_path.prefix='${TESTTMPDIR}'" -c "save_script_repr('script_repr_test.ty')"
+	${COVERAGE_CMD} ./topographica ${TESTTMPDIR}/script_repr_test.ty
 	rm -rf ${TESTTMPDIR}
 
 gui-tests: basic-gui-tests detailed-gui-tests
 
 basic-gui-tests:
-	${XVFBRUN} ./topographica -g -c "from topo.tests.gui_tests import run_basic; nerr=run_basic(); topo.guimain.quit_topographica(check=False,exit_status=nerr)"
+	${XVFBRUN} ${COVERAGE_CMD} ./topographica -g -c "from topo.tests.gui_tests import run_basic; nerr=run_basic();topo.guimain.quit_topographica(check=False,exit_status=nerr)"
 
 detailed-gui-tests:
-	${XVFBRUN} ./topographica -g -c "from topo.tests.gui_tests import run_detailed; nerr=run_detailed(); topo.guimain.quit_topographica(check=False,exit_status=nerr)"
+	${XVFBRUN} ${COVERAGE_CMD} ./topographica -g -c "from topo.tests.gui_tests import run_detailed; nerr=run_detailed(); topo.guimain.quit_topographica(check=False,exit_status=nerr)"
 
 
 clean-compiled: clean-weave clean-pyc

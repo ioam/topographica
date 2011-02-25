@@ -1,0 +1,10 @@
+# .coveragerc to control coverage.py
+
+[run]
+cover_pylib = False
+source = topo , param
+branch = True
+omit = topo/tests/*
+
+[report]
+omit = topo/tests/* 

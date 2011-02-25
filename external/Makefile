@@ -1248,7 +1248,7 @@ parallel_ipython: zope_interface twisted foolscap ipython
 ##############################################################
 # coverage (code coverage analysis)
 #
-COVERAGE = coverage-3.3.1
+COVERAGE = coverage-3.4
 COVERAGE_UNINSTALL += ${PYTHON_LIB}/site-packages/coverage*egg 
 COVERAGE_UNINSTALL += ${PREFIX}/bin/coverage
 
