@@ -80,10 +80,26 @@ all: default reference-manual doc tests examples
 
 # CEBALERT: should be able to remove topo/tests/testsnapshot.typ,
 # topo/tests/testplotfilesaver*.png
-clean: clean-doc clean-ext-packages clean-compiled 
+clean: clean-doc clean-ext-packages clean-compiled clean-coverage-output
 	${RM} .??*~ *~ */*~ */.??*~ */*/*~ */*/.??*~ */*/*/*~ */*/*/.??*~ *.bak
 	${RM} .#??*.* */.#??*.* */*/.#??*.* */*/*/.#??*.* current_profile ./topo/tests/testsnapshot.typ ./topo/tests/testplotfilesaver*.png
 	${RM} -r bin include share lib man topographica ImageSaver*.jpeg python_topo
+
+
+# Coverage targets are used by buildbot
+clean-coverage-output: clean-coverage-results clean-coverage-html
+
+clean-coverage-results:
+	${RM} -r .coverage*
+
+# CBALERT: guess at output directory. Needs to be cleaned up (see ALERT by speed-tests)
+clean-coverage-html:
+	${RM} -r ~/topographica/tests/coverage_html
+
+coverage-html:
+	bin/coverage combine 
+	bin/coverage html --rcfile=doc/buildbot/coveragerc -d ~/topographica/tests/coverage_html
+
 
 uninstall:
 	make -C external uninstall
