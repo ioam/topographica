@@ -137,12 +137,14 @@ be a single commit with a log message describing the new feature.
 were working on your feature: <code>git checkout master; git svn
 rebase</code>.</li>
 
-<li>Copy your changes from the <code>feature</code> branch (or
-<code>feature_clean</code> branch if you followed step 3) to the tip
-of the SVN branch: <code>git rebase feature master</code>. Your
-changes need to appear at the tip in this way (i.e. they need to be
-'fast forwarded'), since that is the point at which they will actually
-be committed to SVN.
+<li>Rebase your changes onto the tip of the SVN branch. First, change
+to the feature branch: <code>git checkout feature</code> (or <code>git
+checkout feature_clean</code> if you followed step 3). Then, perform
+the rebase (moving your "feature" commits to appear after the latest
+SVN changes): <code>git rebase master</code>. Your changes need to
+appear at the tip in this way (i.e. they need to be 'fast forwarded'),
+since that is the point at which they will actually be committed to
+SVN.</li>
 
 <li>Test your changes and commit fixes if necessary. Other people
 might have introduced incompatibilities with your code into SVN while
@@ -152,9 +154,14 @@ you followed optional step 3, you probably now want to run <code>git
 rebase --interactive HEAD~j</code> again to incorporate any new
 commits into the one you created earlier.</li>
 
-<li>Commit your changes to SVN: <code>git svn dcommit</code>. (If you
-first want to see what would happen, you can do a dry run: <code>git
-svn dcommit -n</code>.) Now that your feature is complete and in SVN,
+<li>Merge your feature branch back into the main branch, then commit
+to SVN: <code>git checkout master; git merge feature</code> (or
+<code>feature_clean</code> if you followed step 3), then <code>git svn
+dcommit</code>. (If you first want to see what will happen when you
+commit to svn, you can do a dry run by passing <code>-n</code> to
+<code>dcommit</code>.</li>
+
+<li>Now that your feature is complete and in SVN,
 you can branch <code>master</code> again to start on the next
 feature!</li>
 
