@@ -29,6 +29,14 @@ inlinec.optimized is False.
 For more information on weave, see:
 http://old.scipy.org/documentation/weave/weaveusersguide.html
 
+Some of the C functions also support OpenMP, which allows them to use
+multiple threads automatically on multi-core machines to give better
+performance.  To enable OpenMP support for those functions, set
+openmp=True in the main namespace before importing this file, and
+(optionally) set openmp_threads to the number of threads desired.  If
+openmp_threads is not set, then a thread will be allocated for each
+available core by default.
+
 $Id$
 """
 
@@ -109,10 +117,11 @@ try:
         c_decorators['cfs_loop_pragma']="#pragma omp parallel for schedule(guided, 8)"
         inline_named_params['extra_compile_args'].append('-fopenmp')
         inline_named_params['extra_link_args'].append('-fopenmp')        
-        # CBNOTE: I think we shouldn't override the default number of
-        # threads (i.e. the case when OMP_NUM_THREADS has not been set
-        # at all) unless we are sure that there is no significant
-        # extra benefit from having as many threads as possible.
+        # JABNOTE: By default, when OMP_NUM_THREADS has not been set,
+        # requests as many threads as there are cores.  We could
+        # instead put a limit on the default number of threads, if we
+        # find that there is little extra benefit from each additional
+        # thread.
         openmp_threads = __main__.__dict__.get('openmp_threads') 
         if openmp_threads is not None:
             print "Setting OMP_NUM_THREADS=%s"%openmp_threads
