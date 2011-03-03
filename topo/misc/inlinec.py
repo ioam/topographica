@@ -40,7 +40,7 @@ available core by default.
 $Id$
 """
 
-
+import collections
 import os
 from copy import copy
 
@@ -52,8 +52,14 @@ import_weave = __main__.__dict__.get('import_weave',True)
 
 # Dictionary of strings used to allow optional substituions
 # (e.g. pragmas) into inline C code.
-# CEBALERT: maybe c_directives?  c_pragmas?
-c_decorators = {}
+#
+# CB: default value is empty string for convenience of not
+# having to do e.g.
+# if openmp:
+#     c_decorators['xyz']='abc'
+# else:
+#     c_decorators['xyz']=''
+c_decorators = collections.defaultdict(lambda:'')
 
 # Setting to true will cause OpenMP to be used while compiling some C
 # code (search for cfs_loop_pragma to see which routines use
