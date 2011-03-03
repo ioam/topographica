@@ -42,7 +42,18 @@ from copy import copy
 import __main__
 import_weave = __main__.__dict__.get('import_weave',True)
 
+# Dictionary of strings used to allow optional substituions
+# (e.g. pragmas) into inline C code.
+# CEBALERT: maybe c_directives?  c_pragmas?
+c_decorators = {}
 
+# Setting to true will cause OpenMP to be used while compiling some C
+# code (search for cfs_loop_pragma to see which routines use
+# OpenMP). Good multi-threaded performance requires a machine with
+# separate memory subsystems for each core, such as a Xeon. See Marco
+# Elver's report at XXX.
+openmp = __main__.__dict__.get('openmp',False)
+    
 # Variable that will be used to report whether weave was successfully
 # imported (below).
 weave_imported = False
@@ -92,6 +103,21 @@ try:
         'extra_link_args':['-lstdc++'],
         'compiler':'gcc',
         'verbose':0}
+
+    if openmp:
+        print "Using OpenMP"
+        c_decorators['cfs_loop_pragma']="#pragma omp parallel for schedule(guided, 8)"
+        inline_named_params['extra_compile_args'].append('-fopenmp')
+        inline_named_params['extra_link_args'].append('-fopenmp')        
+        # CBNOTE: I think we shouldn't override the default number of
+        # threads (i.e. the case when OMP_NUM_THREADS has not been set
+        # at all) unless we are sure that there is no significant
+        # extra benefit from having as many threads as possible.
+        openmp_threads = __main__.__dict__.get('openmp_threads') 
+        if openmp_threads is not None:
+            print "Setting OMP_NUM_THREADS=%s"%openmp_threads
+            os.environ['OMP_NUM_THREADS']=str(openmp_threads)
+
 
     def inline_weave(*params,**nparams):
         named_params = copy(inline_named_params) # Make copy of defaults.

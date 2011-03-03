@@ -12,7 +12,8 @@ import param
 
 from topo.base.functionfamily import ResponseFn,DotProduct
 from topo.base.cf import CFPResponseFn, CFPRF_Plugin
-from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
+from topo.misc.inlinec import inline,provide_unoptimized_equivalent,\
+     c_header,c_decorators
 from topo.misc.pyxhandler import provide_unoptimized_equivalent_cy
 from topo.responsefn.projfn import CFPRF_EuclideanDistance
 
@@ -49,6 +50,7 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
             DECLARE_SLOT_OFFSET(weights,cf_type);
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
 
+            %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
                 if(mask[r] == 0.0)
                     temp_act[r] = 0;
@@ -80,7 +82,7 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
                     DECREF_CONTIGUOUS_ARRAY(weights);
                 }
             }
-        """
+        """%c_decorators
         inline(code, ['mask','X', 'strength', 'icols', 'temp_act','cfs','num_cfs','cf_type'], 
                local_dict=locals(), headers=['<structmember.h>'])
 
