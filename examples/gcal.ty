@@ -1,7 +1,7 @@
 #JABALERT: Should update the docstring once the GCA paper has been
 # accepted or at least submitted.
 """
-GCA-LISSOM
+GCAL
 
 Work in progress on an improved version of the LISSOM orientation map
 simulation from figure 5.9 of Miikkulainen, Bednar, Choe, and Sirosh
@@ -20,7 +20,7 @@ $Id$
 __version__='$Revision$'
 
 
-from math import pi, sqrt
+from math import pi
 
 import numpy
 import param

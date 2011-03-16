@@ -30,7 +30,7 @@ $Id$
 __version__='$Revision$'
 
 
-from math import pi, sqrt
+from math import pi
 
 import numpy
 import param
