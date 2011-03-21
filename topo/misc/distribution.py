@@ -201,6 +201,22 @@ class Distribution(object):
                 self._data[new_bin] += new_value
                
 
+    def sub_distr( self, distr ):
+        """
+	Subtract the given distribution from the current one.
+	Only existing bins are modified, new bins in the given
+	distribution are discarded without raising errors.
+
+        Note that total_value and total_count are not affected, and
+	keep_peak is ignored, therefore analysis relying on these
+	values should not call this method.
+        """
+        for b in distr.bins():
+            if b in self.bins():
+		v	= distr._data.get( b )
+                if v is not None:	self._data[ b ] -= v
+               
+
     def max_value_bin(self):
         """Return the bin with the largest value."""
         return self._data.keys()[argmax(self._data.values())]
