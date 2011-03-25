@@ -76,10 +76,21 @@ class EditorCanvas(Canvas):
 
         self.normalize_checkbutton = Checkbutton(self.panel, text="Normalize",
                                                     command=self.toggle_normalize)
-
         self.normalize_checkbutton.pack(side=LEFT)
         if EditorSheet.normalize == True:
             self.normalize_checkbutton.select()
+
+        self.node_labels_checkbutton = Checkbutton(self.panel, text="Node labels",
+                                                    command=self.toggle_node_labels)
+        self.node_labels_checkbutton.pack(side=LEFT)
+        if EditorNode.show_label == True:
+            self.node_labels_checkbutton.select()
+
+        self.connection_labels_checkbutton = Checkbutton(self.panel, text="Connection labels",
+                                                    command=self.toggle_connection_labels)
+        self.connection_labels_checkbutton.pack(side=LEFT)
+        if EditorConnection.show_label == True:
+            self.connection_labels_checkbutton.select()
 
         # retain the current focus in the canvas
         self.scaling_factor = topo.sim.item_scale#scaling_factor
@@ -266,6 +277,14 @@ class EditorCanvas(Canvas):
 
     def toggle_normalize(self):
         EditorSheet.normalize = not EditorSheet.normalize
+        self.refresh()
+
+    def toggle_node_labels(self):
+        EditorNode.show_label = not EditorNode.show_label
+        self.refresh()
+
+    def toggle_connection_labels(self):
+        EditorConnection.show_label = not EditorConnection.show_label
         self.refresh()
 
 
@@ -997,6 +1016,7 @@ class EditorObject(object):
         self.name = name # set the name of the sheet
         self.focus = False # this does not have the focus
         self.viewing_choices = []
+        self.label=None
 
     def draw(self):
         "Draw the object at the current x, y position."
@@ -1062,6 +1082,8 @@ class EditorNode(EditorObject):
     in a EditorCanvas. Extending classes will supply a draw method and other type specific 
     attributes. 
     """
+    show_label= param.Boolean(default=True,
+        doc="Whether to show a textual label for this object")
 
     def __init__(self, canvas, simobj, pos, name):
         EditorObject.__init__(self, name, canvas)
@@ -1138,7 +1160,7 @@ class EditorEP(EditorNode):
     """
     Represents any topo EventProcessor as a small, fixed-size oval by default.
     """
-    
+
     def __init__(self, canvas, simobj, pos, name):
         EditorNode.__init__(self, canvas, simobj, pos, name)
         simobj.layout_location = (self.x,self.y) # store the ed coords in the topo sheet
@@ -1149,7 +1171,6 @@ class EditorEP(EditorNode):
         self.init_draw(col, False) # create a new parallelogram
         self.currentCol = col
         self.gradient = 1
-
 
     #   Draw methods
 
@@ -1185,7 +1206,8 @@ class EditorEP(EditorNode):
 
         self.id = [self.canvas.create_oval(x1,y1,x2,y2,fill=colour,outline="black")]
         dX = w + 5
-        self.label = self.canvas.create_text(x - dX, y, anchor = E, fill = label_colour, text = self.name)
+        if (self.show_label):
+            self.label = self.canvas.create_text(x - dX, y, anchor = E, fill = label_colour, text = self.name)
 
     def dec_to_hex_str(self, val, length):
         # expects a normalised value and maps it to a hex value of the given length
@@ -1198,10 +1220,12 @@ class EditorEP(EditorNode):
         if not(x == y == 0):
             for id in self.id:
                 self.canvas.move(id, x, y)
-            self.canvas.move(self.label, x, y)
+            if (self.show_label):
+                self.canvas.move(self.label, x, y)
         for id in self.id:
             self.canvas.tag_raise(id)
-        self.canvas.tag_raise(self.label)
+        if (self.show_label):
+            self.canvas.tag_raise(self.label)
         # redraw the connections
         for con in self.to_connections : 
             if (con.from_node == con.to_node):
@@ -1376,7 +1400,8 @@ class EditorSheet(EditorEP):
         self.id = self.id + [self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, 
             fill = colour , outline = "black")]
         dX = w + 5
-        self.label = self.canvas.create_text(x - dX, y, anchor = E, fill = label_colour, text = self.name)
+        if (self.show_label):
+            self.label = self.canvas.create_text(x - dX, y, anchor = E, fill = label_colour, text = self.name)
         # adds a density grid over the sheet
         if self.show_density:
             x, y = self.x - w + h, self.y - h
@@ -1467,6 +1492,10 @@ class EditorConnection(EditorObject):
     to cover any topographica connection (connection / projection), and extending 
     classes will supply a draw method and other type specific attributes.
     """
+
+    show_label= param.Boolean(default=True,
+        doc="Whether to show a textual label for this object")
+
     def __init__(self, name, canvas, from_node):
         EditorObject.__init__(self, name, canvas)
         self.from_node = from_node # initial node selected
@@ -1524,6 +1553,7 @@ class EditorEPConnection(EditorConnection):
     """
     Represents any topo EPConnection using a line with an arrow head in the middle.
     """ 
+
     def __init__(self, name, canvas, from_node):
         EditorConnection.__init__(self, name, canvas, from_node)
         # if more than one connection between nodes, 
@@ -1532,14 +1562,12 @@ class EditorEPConnection(EditorConnection):
         self.deviation = 0
         self.gradient = (1,1)
         self.id = (None,None)
-        self.label = None
         self.balloon = tk.Balloon(canvas)
         self.set_colours()
         self.view = 'line'
         self.draw_fn = self.draw_line
         self.viewing_choices = [('Line', lambda: self.select_view('line'))]
         self.update_factor()
-
 
     #   Draw methods
     
@@ -1589,8 +1617,9 @@ class EditorEPConnection(EditorConnection):
             self.id = (self.canvas.create_oval(x1, y1, x2, y2, outline = col), 
             self.canvas.create_line(midX, y1, midX+1, y1, arrow = FIRST, fill = col))
             # draw name label beside arrow head
-            self.label = self.canvas.create_text(middle[0] - 
-            (20 + len(self.name)*3), middle[1] - (30 + deviation) , text = self.name)
+            if (self.show_label):
+                self.label = self.canvas.create_text(middle[0] - 
+                    (20 + len(self.name)*3), middle[1] - (30 + deviation) , text = self.name)
         else :    
             # create a line between the nodes - use 2 to make arrow in center.
             dev = self.deviation
@@ -1601,8 +1630,9 @@ class EditorEPConnection(EditorConnection):
             # draw name label
             dX = 20 * factor
             dY = self.draw_index * 20 * factor
-            self.label = self.canvas.create_text(middle[0] - dX,
-                middle[1] - dY, fill = text_col, text = self.name, anchor = E)
+            if (self.show_label):
+                self.label = self.canvas.create_text(middle[0] - dX,
+                    middle[1] - dY, fill = text_col, text = self.name, anchor = E)
 
 
     #   Update methods
@@ -1758,8 +1788,9 @@ class EditorProjection(EditorEPConnection):
             # draw name label
             dX = 20
             dY = self.draw_index * 20
-            self.label = self.canvas.create_text(middle[0] - dX,
-                middle[1] - dY, fill = text_col, text = self.name, anchor = E)
+            if (self.show_label):
+                self.label = self.canvas.create_text(middle[0] - dX,
+                    middle[1] - dY, fill = text_col, text = self.name, anchor = E)
 
 
     def draw_normal(self, from_position, to_position):
@@ -1796,8 +1827,9 @@ class EditorProjection(EditorEPConnection):
             # draw name label
             dX = 20
             dY = self.draw_index * 20
-            self.label = self.canvas.create_text(middle[0] - dX,
-                middle[1] - dY, fill = text_col, text = self.name, anchor = E)
+            if (self.show_label):
+                self.label = self.canvas.create_text(middle[0] - dX,
+                    middle[1] - dY, fill = text_col, text = self.name, anchor = E)
         
 
     #   Util methods
