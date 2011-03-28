@@ -533,25 +533,34 @@ topo.sim.schedule_command(150*st,'pass')
 
 
 ### Default locations for model editor
-vs=[None]*(num_aff-1) + ['V1'] + [None]*(num_aff)
+vs=[None]*(1+len(center_polarities))*len(lags) + ['V1']
 
-ls=[]
+ss=[None]
 for e in eyes:
     for n in lags:
-        for l in center_polarities:
-            for opponent in opponent_types: 
-                ls += [e+opponent+'LGN'+l+n]+[None]
-            for channel in xrange(2,sf_channels+1):
-                ls += [e+'LGN'+l+n+'SF'+str(channel)]+[None]
+        for channel in xrange(2,sf_channels+1):
+            for l in center_polarities:
+                ss += [e+'LGN'+l+n+'SF'+str(channel)]
+    ss += [None]
+
+lslist=[]
+for opponent in opponent_types: 
+    ls=[None]
+    for n in lags:
+        for e in eyes:
+            ls+=[e+opponent+'LGN'+l+n for l in center_polarities]+[None]
+    lslist+=[ls]
 
 es=[]
 for e in eyes:
     for n in lags:
         for cone in cone_types:
-            es += [None]*(len(center_polarities)/2) + [e+cone+'Retina'+n,None] + \
-                  [None]*(len(center_polarities)/2)
- 
-topo.sim.grid_layout([vs,ls,es], xstep=70/len(eyes), ystep=200, item_scale=0.75/len(eyes))
+            es += [e+cone+'Retina'+n]
+        es += [None]
+
+grid=[x for x in [vs]+lslist+[ss,es] if len(x)>0]
+overall_width=(1.0+len(eyes)*len(center_polarities)*len(lags))
+topo.sim.grid_layout(grid, xstep=75*5/overall_width, ystep=50, item_scale=1.5/overall_width+0.1)
 
 ### Vertical grouping of sheets for GUI
 for e in eyes:
@@ -564,6 +573,7 @@ for e in eyes:
             for channel in xrange(2,sf_channels+1):
                 topo.sim[e+'LGN'+l+n+'SF'+str(channel)].row_predecence=0.35+0.01*pol_precedence
 topo.sim['V1'].row_precedence=0.9    
+
 
 ### Set up appropriate defaults for analysis
 import topo.command
