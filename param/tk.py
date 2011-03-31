@@ -171,6 +171,7 @@ import os.path
 import ImageTk, Image, ImageOps
 import Tkinter as T
 
+
 from inspect import getdoc
 
 from tkMessageBox import _show,QUESTION,YESNO
@@ -189,6 +190,16 @@ from . import Boolean,String,Number,Selector,ClassSelector,\
 
 # (part of an existing ALERT - search this file)
 _last_one_set = None
+
+
+# CEBALERT: Tkinter.BooleanVar.get() doesn't support None. This is a
+# hack because there's no way in the GUI to visually distinguish a
+# "None" from a "False".
+def _BooleanVar_get(instance):
+    try:
+        return instance._tk.getboolean(instance._tk.globalgetvar(instance._name)) # i.e. BooleanVar.get()
+    except T.TclError:
+        return instance._tk.globalgetvar(instance._name) # i.e. Variable.get()
 
 
 root = None
@@ -214,6 +225,8 @@ def initialize():
     # available, we include them in tkgui.
     externaltk_path = os.path.join(os.path.split(param.__file__)[0],"externaltk")
     root.tk.call("lappend","auto_path",externaltk_path)
+
+    T.BooleanVar.get = _BooleanVar_get
 
 
 

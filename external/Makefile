@@ -65,8 +65,6 @@ python: ${PYTHON}.tgz tk readline zlib
 	echo ${PREFIX}
 	tar -xzf ${PYTHON}.tgz
 
-# Tkinter: support None in BooleanVar
-	patch -p0 < Tkinter_bool_none.diff
 # Configure for specific operating system versions
 ifeq ("$(shell uname -s)","Darwin")
 ifeq ("$(shell uname -r | cut -d . -f 1)","9") # Darwin 9.x == Mac OS X 10.5 (Leopard)
