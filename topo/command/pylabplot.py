@@ -413,6 +413,12 @@ class topographic_grid(PylabPlotCommand):
     axis = param.Parameter(default=[-0.5,0.5,-0.5,0.5],doc="""
         Four-element list of the plot bounds, i.e. [xmin, xmax, ymin, ymax].""")
     
+    skip = param.Integer(default=1,bounds=[1,None],softbounds=[1,10],doc="""
+        Plot every skipth line in each direction.  
+        E.g. skip=4 means to keep only every fourth horizontal line
+        and every fourth vertical line, except that the first and last
+        are always included. The default is to include all data points.""")
+    
     def __call__(self,**params):
         p=ParamOverrides(self,params)
 
@@ -422,7 +428,7 @@ class topographic_grid(PylabPlotCommand):
     
                 x = sheet.sheet_views[p.xsheet_view_name].view()[0]
                 y = sheet.sheet_views[p.ysheet_view_name].view()[0]
-    
+                
                 pylab.figure(figsize=(5,5))
     
                 # This one-liner works in Octave, but in matplotlib it
@@ -433,10 +439,15 @@ class topographic_grid(PylabPlotCommand):
                 # see matplotlib for more info.
                 isint=pylab.isinteractive() # Temporarily make non-interactive for plotting
                 pylab.ioff()
-                for r,c in zip(y,x):
+                for r,c in zip(y[::p.skip],x[::p.skip]):
                     pylab.plot(c,r,"k-")
-                for r,c in zip(transpose(y),transpose(x)):
+                for r,c in zip(transpose(y)[::p.skip],transpose(x)[::p.skip]):
                     pylab.plot(c,r,"k-")
+
+                # Force last line avoid leaving cells open
+                if p.skip != 1:
+                    pylab.plot(x[-1],y[-1],"k-")
+                    pylab.plot(transpose(x)[-1],transpose(y)[-1],"k-")
                 
                 pylab.xlabel('x')
                 pylab.ylabel('y')
