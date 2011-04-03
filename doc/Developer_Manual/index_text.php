@@ -3,17 +3,16 @@ code for the Topographica simulator. Users will not usually need to
 refer to this material, unless they plan to submit significant blocks
 of code to the project (which is, of course, strongly <a href="#joining">encouraged</a>!).
 
-<P>Before starting, you will need to install a version-controlled
-copy of Topographica. Please see our
-developer <A HREF="installation.html">installation instructions</A>
-for how to do this.
-
 <P>By default, all the text in this manual refers to program code
 written in the Python language. There are also some bits of C/C++ code
 in the simulator, which use different conventions.
 
 
 <P><DL COMPACT>
+
+<P><DT><A href="installation.html"><strong>Installation instructions</strong></A></DT>
+<DD>Before starting, you will need a version-controlled copy of Topographica.
+
 <P><DT><A href="coding.html"><strong>General guidelines</strong></A></DT>
 <DD>General info on writing Python, plus Topographica-specific
 conventions such as guidelines for naming, comments, documentation,
