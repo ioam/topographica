@@ -42,32 +42,33 @@ Note that most development of Topographica is done under Linux.
 elsewhere. Or at least have links in one place only. -->
 
 <P>Binaries of Topographica's dependencies are available for many
-platforms, and many package managers (e.g. apt-get on Ubuntu or
-Macports/Fink on Mac) also include them. You will need to install at
+platforms, and many package managers also include them. Alternatively,
+all Topographica's dependencies (and more!) are available for many
+platforms in scientific Python distributions such as <A
+HREF="http://www.enthought.com/products/epd.php">EPD</A> (free for
+academic use).
+
+<P>If installing the dependencies yourself, you will need at
 least <A HREF="http://www.python.org/download/releases/2.6.5/">Python</A>, 
 <A HREF="http://www.scipy.org/Download">NumPy</A> and <A HREF="http://www.pythonware.com/products/pil/">PIL</A>, and preferably
 <A HREF="http://sourceforge.net/projects/matplotlib/files/">MatPlotLib</A>, 
 <A HREF="http://code.google.com/p/gmpy/">gmpy</A>, 
 <A HREF="http://www.scipy.org/Download">SciPy</A>, and 
  <A HREF="http://ipython.scipy.org/moin/">IPython</A> as
- well. Alternatively, all Topographica's dependencies (and more!) are
- available for many platforms in scientific Python distributions such
- as <A HREF="http://www.enthought.com/products/epd.php">EPD</A> (free
- for academic use).
+ well. 
 
+<P>Step-by-step instructions: <a href="macinstall.html">Mac OSX</a>;
+<a href="aptinstall.html">Ubuntu</a> (and other apt-based systems).
 
-<P>Once you have installed those on your system, you can
-type 
+<P>Once you have installed those on your system, you can create a <code>topographica</code>
+script that uses your copy of Python:
 
-<blockquote><code>make OTHER_PYTHON=/path/to/python
-topographica-other-python</code></blockquote>
+<blockquote><code>make topographica-other-python</code></blockquote>
 
-where <code>/path/to/python</code>
-is the location of the copy of Python for which you have installed
-Topographica's dependencies (and defaults to <code>/usr/bin/env
-python</code> if not specified). This will create
-a <code>topographica</code> script that uses the specified copy of
-Python.
+(If the copy of Python you want to use is not the one specified as
+<code>/usr/bin/env python</code>, you can pass
+<code>OTHER_PYTHON=/path/to/python</code> between 
+<code>make</code> and <code>topographica-other-python</code> above.) 
 
 <P>Note that you should not run setup.py, since that would install
 Topographica into your system's Python directory, whereas we want to
