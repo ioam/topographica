@@ -42,3 +42,6 @@ cd topographica<br />
 svn update<br />
 make topographica-other-python<br />
 </code></blockquote>
+
+<h3>Notes/Issues</h3>
+<p>If you have any issues launching the GUI simply reinstall XQuartz and reboot.</p>
