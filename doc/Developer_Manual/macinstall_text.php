@@ -1,11 +1,11 @@
 <h3>MacPorts Python</h3>
 
 <p>This is a complete guide on how to set up Topographica on Mac OS X 10.6.* using a MacPorts Python 2.7/2.6 and extensions.<br /><br />
-The EPD (Enthought Python Distribution) is preferable to those who wish to simply install a fully functional python distribution with minimum hassle.</p>
+The EPD (Enthought Python Distribution) is preferable to those who wish to install a basic Python distribution with minimum hassle.</p>
 
-<p>That said, there are several advantages to building your own dependancies for Topographica. Firstly Topographica will not currently run on the 64bit EPD 7.0 distribution due to various missing dependancies, to run Topographica in 64bit on OS X you must build according to the instructions below. Luckily those missing dependancies are present on the 32bit EPD 7.0, though it has it's own set of disadvantages - namely it ues Tk/TCL 8.4 as opposed to 8.5, and must use the slower FixedPoint for simulation time (vs. the faster gmpy). The are also currently issues with audiolab on the EPD, there is luckily a workaround, see the Optional Installs section if you need audiolab.</p>
+<p>Compared to the EPD there are several major advantages to building your own dependancies. Firstly Topographica will not currently run on the 64bit EPD 7.0 distribution due to various missing dependancies, to run Topographica in 64bit on OS X you must build according to the instructions below. Luckily those missing dependancies are present on the 32bit EPD 7.0, though it has it's own set of disadvantages - namely it ues Tk/Tcl 8.4 as opposed to 8.5, and also it uses the older FixedPoint for simulation time (vs. the faster gmpy). There are also currently issues with audiolab on the EPD, though there is now a workaround, see the Optional Installs section if you need audiolab.</p>
 
-<p>Thus the method outlined below provides greater speed and compatibility than the EPD, especially when using Topographica's GUI. If none of these issues are important to you we advise using the 32bit EPD.</p>
+<p>In summary the method outlined below provides greater speed and compatibility than the EPD, especially when using Topographica's GUI. If none of these issues are important to you we advise using the 32bit EPD for simplicity.</p>
 
 
 <h3>Development Environment</h3>
@@ -22,10 +22,12 @@ Paid Option: <a href="http://itunes.apple.com/app/xcode/id422352214?mt=12">[Mac 
 <p><a href="http://www.macports.org/">[MacPorts Website]</a> install MacPorts<br />
 <a href="http://xquartz.macosforge.org/trac/wiki">[XQuartz Website]</a> install XQuartz<br /></p>
 
+<p>Restart!</p>
+
 
 <h3>Topographica Requirements</h3>
 
-<p>Run the following in a shell to install everything needed for Topographica, if you want to run Python 2.6 instead of 2.7 simply replace any instances of 27 with 26 and 2.7 with 2.6</p>
+<p>Run the following in a shell to install everything needed for Topographica, if you want to run Python 2.6 instead of 2.7 simply replace any instances of 27 with 26, and 2.7 with 2.6</p>
 
 <blockquote><code>
 sudo port selfupdate<br />
@@ -64,6 +66,8 @@ rm -rf external<br />
 
 <h3>Optional Installs</h3>
 
+<h4>AudioLab with Python 2.7</h4>
+
 <p>The audiolab package must be installed to use any of Topographica's auditory system models, however at the time of writing this guide no native Python 2.7 version exists so one must install the Python 2.6 version and manually copy it into the 2.7 directory. You can check if a 2.7 version of audiolab has been released by running:</p>
 
 <blockquote><code>
@@ -86,6 +90,16 @@ sudo port install py26-scikits-audiolab
 
 <blockquote><code>
 sudo cp -r /opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/scikits* /opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/
+</code></blockquote>
+
+<h4>AudioLab with 32bit EPD 7.0</h4>
+
+<p>The same principle applies to using audiolab with a 32bit EPD, except one must run the following commands:"</p>
+
+<blockquote><code>
+sudo port install py26-scikits-audiolab +universal<br />
+<br />
+sudo cp -r /opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/scikits/audiolab /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/scikits/
 </code></blockquote>
 
 
