@@ -396,12 +396,12 @@ that do not support them will display them as unrecognizable symbols.
 <P>If you have any commands that you want to be executed whenever you
 start Topographica, you can put them into a user configuration file.
 Topographica will run the following files in order:
-<code>~/.topographicarc</code> (typically for UNIX/Linux systems),
-<code>~/Library/Application Support/Topographica/topographica.config</code>
-(typically for Mac OS X systems), and
-<code>%APPDATA%\Topographica\topographica.ini</code> (on Windows, where
-<code>%APPDATA%</code> is typically 
-<code>C:\Documents and Settings\username\Application Data</code>).
+<blockquote>
+<code>~/.topographicarc</code> (typically for UNIX/Linux/Mac OS X systems) <br />
+<code>%USERPROFILE%\topographica.ini</code> (on Windows, where
+<code>%USERPROFILE%</code> is typically 
+<code>C:\Users\username</code> on Vista/7 or <code>c:\Documents and Settings\username</code> on XP).
+</blockquote>
 
 <P>For instance, to use the ANSI colors every time, just create
 one of the files above and add these lines to it:

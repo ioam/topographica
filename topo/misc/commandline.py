@@ -407,46 +407,39 @@ equivalent to -c 'from topo.misc.commandline import auto_import_commands ; auto_
 
 def exec_startup_files():
     """
-    Execute startup files, looking at appropriate locations for many different platforms.
+    Execute startup files.
+
+    Linux/UNIX/OS X: ~/.topographicarc
+    Windows: %USERPROFILE%\topographica.ini
     """
-    home = os.path.expanduser("~")  # dotfiles on unix
-    appdata = os.path.expandvars("$APPDATA") # application data on windows
-    appsupport = os.path.join(home,"Library","Application Support") # application support on OS X  
+    # From Bilal: On OS X, ~/Library/Preferences/ is the standard path
+    # for user-defined params. The filename format (corresponding to
+    # .ini on windows) is org.topographica.plist, where a plist is an
+    # XML file. But, many shell-based programs follow the Unix
+    # convention, so we should be fine doing that.
 
-    rcpath = os.path.join(home,'.topographicarc')
-    inipath = os.path.join(appdata,'Topographica','topographica.ini')
-    configpath = os.path.join(appsupport,'Topographica','topographica.config')
+    # Linux/UNIX/OS X:
+    rcpath = os.path.join(os.path.expanduser("~"),'.topographicarc')
+    # Windows (ini is convention, and can be double clicked to edit):
+    inipath = os.path.join(os.path.expandvars("$USERPROFILE"),'topographica.ini')
 
-    for startup_file in (rcpath,configpath,inipath):
+    for startup_file in (rcpath,inipath):
         if os.path.exists(startup_file):
             print "Executing user startup file %s" % (startup_file)
             execfile(startup_file,__main__.__dict__)
-                
-
-    ### Notes about choices for topographica.rc equivalents on different platforms
-    #
-    ## Windows:
-    # Location --  Most programs use the registry or a folder in %appdata% (which is typically
-    #  ~\Application Data). The registry is not easily accessible for users, and %appdata% is
-    # a hidden folder, which means it doesn't appear in Explorer (or file-open dialogs).
-    # Most programs do not have any user-editable configuration files, so this does not matter
-    # to them. Maybe we should just use ~\topographica.ini?
-    # 
-    # Name -- Considered topographica.rc, topographica.dat, topographica.cfg, topographica.ini.
-    #  Of those, only .ini is registered as standard in Windows. According to Winows Explorer:
-    #  "Files with extension 'INI' are of type 'Configuration Settings'"
-    #  Importantly, this means they are already setup to be editable by notepad by default, so
-    #  they can be double clicked.
-    #
-    # http://mail.python.org/pipermail/python-list/2005-September/341702.html
-    #
-    ## Mac OS:
-    # Location -- Seems like programs use either ~/Library/AppName or (more commonly)
-    # ~/Library/Application Support/AppName (CEBALERT: is there a var. for that on OS X?).
-    # 
-    # Name -- there are many different extensions (e.g. dat, config, cfg, ini), none of which
-    # opens with any application by default. Some applications use xml.
-
+    
+    #####
+    # CEBALERT: locations we used to use on Windows and OS X. Should
+    # remove after 0.9.8.
+    import param
+    # application data on windows
+    inipath = os.path.join(os.path.expandvars("$APPDATA"),'Topographica','topographica.ini')
+    # application support on OS X  
+    configpath = os.path.join(os.path.expanduser("~"),"Library","Application Support",'Topographica','topographica.config')
+    for startup_file in (configpath,inipath):
+        if os.path.exists(startup_file):
+            param.Parameterized().warning("Ignoring %s; location for startup file is %s (UNIX/Linux/Mac OS X) or %s (Windows)."%(startup_file,rcpath,inipath)) 
+    #####
 
 
 
