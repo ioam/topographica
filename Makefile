@@ -434,7 +434,7 @@ dist-setup.py: doc distdir reference-manual
 # These commands assume you have run "make dist-setup.py".
 # (Archives don't include doc/ because of its size.)
 
-BDIST_WININST = bdist_wininst --install-script windows_postinstall.py --plat-name=win
+BDIST_WININST = bdist_msi --install-script windows_postinstall.py --plat-name=win
 
 dist-setup.py-sdist: 
 	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py sdist
