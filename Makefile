@@ -434,7 +434,11 @@ dist-setup.py: doc distdir reference-manual
 # These commands assume you have run "make dist-setup.py".
 # (Archives don't include doc/ because of its size.)
 
-BDIST_WININST = bdist_msi --install-script windows_postinstall.py --plat-name=win
+# buildbot can set BDIST_WIN_CMD to bdist_msi when we upgrade to
+# Python 2.7 (to get msi file, which can be installed from the
+# commandline)
+BDIST_WIN_CMD = bdist_wininst
+BDIST_WININST = ${BDIST_WIN_CMD} --install-script windows_postinstall.py --plat-name=win
 
 dist-setup.py-sdist: 
 	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py sdist
