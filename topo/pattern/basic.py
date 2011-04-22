@@ -902,11 +902,11 @@ class DifferenceOfGaussians(PatternGenerator):
     def function(self, p):
         positive = Gaussian(x=p.positive_x+p.x, y=p.positive_y+p.y,
             size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio,
-            orientation=p.orientation, output_fns=[topo.transferfn.DivisiveNormalizeL1()])
+            orientation=p.orientation)
                                     
         negative = Gaussian(x=p.negative_x+p.x, y=p.negative_y+p.y,
             size=p.negative_size*p.size, aspect_ratio=p.negative_aspect_ratio,
-            orientation=p.orientation, output_fns=[topo.transferfn.DivisiveNormalizeL1()])
+            orientation=p.orientation)
         
         return Composite(generators=[positive,negative], operator=numpy.subtract,
             xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)()
@@ -980,13 +980,8 @@ class LogGaussian(PatternGenerator):
         
     size = param.Number(default=0.0)
         
-    x_tail = param.Number(default=0.9,bounds=(0.0,10.0),
-        doc="""Parameter controlling decay rate and distance from the peak of 
-            the Gaussian in the x direction.""")
-    
-    y_tail = param.Number(default=0.5,bounds=(0.0,10.0),
-        doc="""Parameter controlling decay rate and distance from the peak of 
-            the Gaussian in the y direction.""")
+    tail = param.Number(default=0.9,bounds=(0.0,10.0),
+        doc="""Parameter controlling decay rate and distance from the peak of the Gaussian.""")
                                 
     def _create_and_rotate_coordinate_arrays(self, x, y, orientation):
         """
@@ -1014,7 +1009,7 @@ class LogGaussian(PatternGenerator):
     
     def function(self, p):
         self.size = p.size
-        return log_gaussian(self.pattern_x, self.pattern_y, p.x_tail, p.y_tail, p.size)
+        return log_gaussian(self.pattern_x, self.pattern_y, p.tail, 0.4, p.size)
 
         
 class SigmoidedDoLG(PatternGenerator):
@@ -1023,112 +1018,45 @@ class SigmoidedDoLG(PatternGenerator):
     such that one part of the plane can be the mirror image of the other,
     and the peaks of the gaussians are movable.
     """
+    size = param.Number(default=0.0)
     
-    # center gaussian parameters
-    positive_size = param.Number(default=0.4,bounds=(0.0,None),softbounds=(0.0,5.0),
-        doc="""Parameter controlling the size of the positive Gaussian, independant of
-            the negative Gaussian size.""")
-                
-    positive_x = param.Number(default=0.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the x position of the positive Gaussian, independant of
-            the negative Gaussian x position.""")
-
-    positive_y = param.Number(default=0.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the y position of the positive Gaussian, independant of
-            the negative Gaussian y position.""")
+    positive_size = param.Number(default=0.0, bounds=(0.0,None), softbounds=(0.0,5.0),
+        doc="""Size parameter for the positive Gaussian.""")
+    
+    positive_tail = param.Number(default=0.8,bounds=(0.0,10.0),softbounds=(0.001,2.000),
+        doc="""Parameter controlling decay rate and distance from the peak of the positive Gaussian.""")
+    
+    negative_size = param.Number(default=0.0, bounds=(0.0,None), softbounds=(0.0,5.0),
+        doc="""Size parameter for the negative Gaussian.""")
         
-    positive_x_spread = param.Number(default=1.0,bounds=(0.0,2.0),softbounds=(0.0,1.5),
-        doc="""Parameter controlling decay rate and distance from the peak of the 
-            positive Gaussian in the x direction.""")    
-
-    positive_y_spread = param.Number(default=0.6,bounds=(0.0,2.0),softbounds=(0.0,1.5),
-        doc="""Parameter controlling decay rate and distance from the peak of the 
-            positive Gaussian in the y direction.""")     
-
-    positive_x_center = param.Number(default=1.93,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the peak position of the positive Gaussian, 
-            in the x direction.""")
+    negative_tail = param.Number(default=0.8,bounds=(0.0,10.0),softbounds=(0.001,2.000),
+        doc="""Parameter controlling decay rate and distance from the peak of the negative Gaussian.""")
                 
-    positive_y_center = param.Number(default=2.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the peak position of the positive Gaussian, 
-            in the y direction.""")
+    sigmoid_slope = param.Number(default=50.0, bounds=(None,None), softbounds=(-100.0,100.0),
+        doc="""Slope parameter for the Sigmoid.""")
+
+    sigmoid_orientation = param.Number(default=pi/2.0, bounds=(None,None), softbounds=(0.0,2*pi),
+        doc="""Orientation parameter for the Sigmoid.""")
             
-    positive_orientation = param.Number(default=0.0,softbounds=(0.0,2*pi),
-        doc="""Parameter controlling the rotation of the positive Gaussian, independant of
-            the negative Gaussian orientation.""")
+    sigmoid_position = param.Number(default=0.02, bounds=(None,None), softbounds=(-1.0,1.0),
+        doc="""Position parameter for the Sigmoid.""")
 
-    # surround gaussian parameters
-    negative_size = param.Number(default=0.6,bounds=(0.0,None),softbounds=(0.1,5.0),
-        doc="""Parameter controlling the size of the negative Gaussian, independant of
-            the positive Gaussian size.""")
-             
-    negative_x = param.Number(default=0.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the x position of the negative Gaussian, independant of
-            the positive Gaussian x position.""")
-
-    negative_y = param.Number(default=0.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the y position of the negative Gaussian, independant of
-            the positive Gaussian y position.""")
-        
-    negative_x_spread = param.Number(default=0.6,bounds=(0.0,2.0),softbounds=(0.0,1.5),
-        doc="""Parameter controlling decay rate and distance from the peak of the 
-            negative Gaussian in the x direction.""")    
-                
-    negative_y_spread = param.Number(default=0.6, bounds=(0.0,2.0),softbounds=(0.0,1.5),
-        doc="""Parameter controlling decay rate and distance from the peak of the 
-            negative Gaussian in the y direction.""")   
-                 
-    negative_x_center = param.Number(default=2.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the peak position of the negative Gaussian, 
-            in the x direction.""")
-                
-    negative_y_center = param.Number(default=2.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the peak position of the negative Gaussian, 
-            in the y direction.""")
-                
-    negative_orientation = param.Number(default=0.0,softbounds=(0.0,2*pi),
-        doc="""Parameter controlling the rotaion of the negative Gaussian, independant of
-            the positive Gaussian orientation.""")
-    
-    # sigmoid parameters
-    sigmoid_slope = param.Number(default=3.0,
-        doc="""Parameter controlling the degree of slope (sharpness) of the Sigmoid.""")
-    
-    sigmoid_x = param.Number(default=0.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the x position of the Sigmoid, independant of
-            the Difference of Gaussians.""")
-                
-    sigmoid_y = param.Number(default=0.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the y position of the Sigmoid, independant of
-            the Difference of Gaussians.""")
-                
-    sigmoid_orientation = param.Number(default=pi/2,softbounds=(0.0,2*pi),
-        doc="""Parameter controlling the rotation of the Sigmoid, independant of
-            the Difference of Gaussians.""")
 
     def function(self, p):
-        positive = LogGaussian(size=p.positive_size*p.size, 
-            orientation=p.positive_orientation+p.orientation, 
-            x_spread=p.positive_x_spread, y_spread=p.positive_y_spread,
-            x_center=p.positive_x_center, y_center=p.positive_y_center,
-            x=p.positive_x+p.x, y=p.positive_y+p.y,
-            output_fns=[topo.transferfn.DivisiveNormalizeL1()])
-                                
-        negative = LogGaussian(size=p.negative_size*p.size, 
-            orientation=p.negative_orientation+p.orientation, 
-            x_spread=p.negative_x_spread, y_spread=p.negative_y_spread,
-            x_center=p.negative_x_center, y_center=p.negative_y_center,
-            x=p.negative_x+p.x, y=p.negative_y+p.y,
-            output_fns=[topo.transferfn.DivisiveNormalizeL1()])
-
-        diff_of_log_gaussians = pattern.Composite(generators=[positive, negative], 
+        positive = LogGaussian(size=p.positive_size+p.size, orientation=p.orientation, 
+            tail=p.positive_tail, x=p.x, y=p.y)
+                
+        negative = LogGaussian(size=p.negative_size+p.size, orientation=p.orientation, 
+            tail=p.negative_tail, x=p.x, y=p.y)
+                
+        diff_of_log_gaussians = Composite(generators=[positive, negative], 
             operator=subtract, xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)
         
-        sigmoid = pattern.Sigmoid(x=p.sigmoid_x+p.x, y=p.sigmoid_y+p.y,
-            slope=p.sigmoid_slope, orientation=p.sigmoid_orientation+p.orientation)
-                
-        return pattern.Composite(generators=[diff_of_log_gaussians, sigmoid], bounds=p.bounds,
-            operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()   
+        sigmoid = Sigmoid(x=p.sigmoid_position+p.x, slope=p.sigmoid_slope, 
+            orientation=p.sigmoid_orientation+p.orientation)
+        
+        return Composite(generators=[diff_of_log_gaussians, sigmoid], bounds=p.bounds,
+            operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
 
 
 def rectangular(signal_size):
