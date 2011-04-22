@@ -324,7 +324,7 @@ class LyonsCochlearModel(PatternGenerator):
     Apple Technical Report #13", 1988.
     """
     
-    signal = param.Parameter(default=TimeSeries(time_series=zeros(10)),doc="""
+    signal = param.Parameter(default=TimeSeries(),doc="""
         A TimeSeries object to be fed to the model.
         
         This can be any kind of signal, be it from audio files or live
