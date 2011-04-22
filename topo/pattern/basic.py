@@ -1266,9 +1266,9 @@ class PowerSpectrum(PatternGenerator):
         self.smoothing_window = self.windowing_function(samples_per_interval)  
         
         # calculate the discrete frequencies possible for the given sample rate.
-        self.all_frequencies = arange(0, sample_rate/2.0, 1.0/sample_rate)
+        self.all_frequencies = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
 
-    def _mapFrequenciesToRows(self, index_of_min_freq, index_of_max_freq): 
+    def _setFrequencySpacing(self, index_of_min_freq, index_of_max_freq): 
         """
         Frequency spacing to use, i.e. how to map the available frequency range to 
         the discrete sheet rows.
@@ -1295,7 +1295,7 @@ class PowerSpectrum(PatternGenerator):
         index_of_min_freq = nonzero(self.all_frequencies >= overrides.min_frequency)[0][0]
         index_of_max_freq = nonzero(self.all_frequencies <= overrides.max_frequency)[0][-1]
         
-        self._mapFrequenciesToRows(index_of_min_freq, index_of_max_freq)
+        self._setFrequencySpacing(index_of_min_freq, index_of_max_freq)
             
     def _getAmplitudes(self):
         """
@@ -1306,22 +1306,31 @@ class PowerSpectrum(PatternGenerator):
         See numpy.rfft for information about the Fourier transform.
         """
         
-        sample_rate = self.signal.sample_rate
+        # It is necessary to get these values again as they may changed since
+        # the first run (the TimeSeries class allows live updating of it's series
+        # and related parameters).
+        sample_rate = self.signal.sampling_rate        
         samples_per_interval = self.signal.samples_per_interval
-        
+
         smoothed_samples = self.signal()*self.smoothing_window
         samples = hstack((smoothed_samples, zeros(sample_rate-samples_per_interval)))
         
         amplitudes_by_frequency = abs(fft.rfft(samples))[0:sample_rate/2]
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
         
-        indices_per_row = len(self.frequency_index_spacing)/self._sheet_dimensions[0]
+        indices_per_row = len(self.frequency_index_spacing)/(self._sheet_dimensions[0])
                 
         for row in range(0, self._sheet_dimensions[0]):
-            index_of_start_freq = self.frequency_index_spacing[row*indices_per_row+indices_per_row-1]
-            index_of_end_freq = self.frequency_index_spacing[row*indices_per_row]
             
-            amplitudes_by_row[row] = sum(amplitudes_by_frequency[index_of_start_freq:index_of_end_freq])/indices_per_row
+            if row == (self._sheet_dimensions[0]-1):
+                index_of_start_freq = self.frequency_index_spacing[-1]
+            else:
+                index_of_start_freq = self.frequency_index_spacing[row*indices_per_row+indices_per_row]
+
+            index_of_end_freq = self.frequency_index_spacing[row*indices_per_row]
+
+            total_amplitude = sum(amplitudes_by_frequency[index_of_start_freq:index_of_end_freq])
+            amplitudes_by_row[row] = total_amplitude / (index_of_end_freq-index_of_start_freq)
             
         return (asarray(amplitudes_by_row).reshape(-1,1))
     
