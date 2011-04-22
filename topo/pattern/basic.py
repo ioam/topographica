@@ -10,9 +10,9 @@ from math import pi, sqrt
 
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or, cos, sin
-from numpy import abs, add, alltrue, array, asarray, ceil, clip, fft, float32, float64, \
-    equal, exp, floor, hstack, Infinity, linspace, multiply, nonzero, ones, repeat, \
-    round, shape, subtract, zeros
+from numpy import abs, add, alltrue, array, arange, asarray, ceil, clip, fft, \
+    float32, float64, equal, exp, floor, hstack, Infinity, linspace, multiply, \
+    nonzero, ones, repeat, round, shape, subtract, zeros
 
 import param
 from param.parameterized import ParamOverrides,as_uninitialized
@@ -1260,14 +1260,13 @@ class PowerSpectrum(PatternGenerator):
         for parameter,value in params.items():
             setattr(self,parameter,value)
         
-        sample_rate = self.signal.sampling_rate
+        sample_rate = self.signal.sampling_rate        
         samples_per_interval = self.signal.samples_per_interval
         
         self.smoothing_window = self.windowing_function(samples_per_interval)  
-
-        # calculate the discrete frequencies possible for the given sample rate & window size.
-        self.all_frequencies = fft.fftfreq(samples_per_interval, d=1.0/sample_rate)[0:samples_per_interval/2]
-        assert self.all_frequencies.min() >= 0
+        
+        # calculate the discrete frequencies possible for the given sample rate.
+        self.all_frequencies = arange(0, sample_rate/2.0, 1.0/sample_rate)
 
     def _mapFrequenciesToRows(self, index_of_min_freq, index_of_max_freq): 
         """
@@ -1290,9 +1289,9 @@ class PowerSpectrum(PatternGenerator):
             or not self.all_frequencies.max() >= overrides.max_frequency:
             
             raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. " +\
-                "Adjust to these frequencies or modify the sample rate/interval length of the TimeSeries object." \
+                "Adjust to these frequencies or modify the sample rate of the TimeSeries object." \
                 %(overrides.min_frequency,overrides.max_frequency,self.all_frequencies.min(),self.all_frequencies.max()))
-                
+
         index_of_min_freq = nonzero(self.all_frequencies >= overrides.min_frequency)[0][0]
         index_of_max_freq = nonzero(self.all_frequencies <= overrides.max_frequency)[0][-1]
         
@@ -1306,10 +1305,14 @@ class PowerSpectrum(PatternGenerator):
 
         See numpy.rfft for information about the Fourier transform.
         """
-        interval_samples = self.signal()
-        assert shape(interval_samples)[0] == shape(self.smoothing_window)[0]
-                
-        amplitudes_by_frequency = abs(fft.rfft(interval_samples*self.smoothing_window))[0:len(interval_samples)/2]
+        
+        sample_rate = self.signal.sample_rate
+        samples_per_interval = self.signal.samples_per_interval
+        
+        smoothed_samples = self.signal()*self.smoothing_window
+        samples = hstack((smoothed_samples, zeros(sample_rate-samples_per_interval)))
+        
+        amplitudes_by_frequency = abs(fft.rfft(samples))[0:sample_rate/2]
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
         
         indices_per_row = len(self.frequency_index_spacing)/self._sheet_dimensions[0]
