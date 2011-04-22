@@ -12,10 +12,20 @@ import os
 
 from param.parameterized import ParamOverrides
 from topo.base.sheetcoords import SheetCoordinateSystem
-from topo.pattern.basic import Spectrogram
+from topo.pattern.basic import TimeSeries, PowerSpectrum, Spectrogram
+from topo.base.patterngenerator import PatternGenerator
 
 from numpy import array, float32, multiply, round, shape, hstack, hanning, fft, log10, logspace, where, \
-    concatenate, reshape
+    concatenate, reshape, random, float128, sqrt, log, floor, zeros, arange, ones, exp, pi, size, complex256, \
+    sum, cos, vstack, float64, ceil, fliplr, poly1d
+
+try:
+    import matplotlib.ticker
+    import pylab
+except ImportError:
+    param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
+    from basic import ImportErrorRaisingFakeModule
+    pylab = ImportErrorRaisingFakeModule("matplotlib")
 
 try:
     import scikits.audiolab as pyaudiolab
@@ -24,96 +34,56 @@ except ImportError:
         "scikits.audiolab (pyaudiolab) is not available.")
         
         
-class AudioFile(Spectrogram):
+class AudioFile(TimeSeries):
     """
-    Returns a spectrogram, i.e. the spectral density over time 
-    of a rolling window of the input audio signal.
+    Requires an audio file in any format accepted by pyaudiolab (wav, aiff,
+    flac).
     """
     
-    window_increment = param.Number(precedence=(-1))
-    window_length = param.Number(precedence=(-1))
-    sample_rate = param.Number(precedence=(-1))
-    windowing_function = param.Parameter(precedence=(-1))
+    # See TimeSeries itself for a detailed description of abstract status
+    _abstract = True
+        
+    time_series = param.Parameter(precedence=(-1))
+    sampling_rate = param.Number(precedence=(-1))
     
-    filename=param.Filename(default='sounds/complex/daisy.wav', doc="""
+    filename = param.Filename(default='sounds/complex/daisy.wav', doc="""
         File path (can be relative to Topographica's base path) to an
         audio file. The audio can be in any format accepted by pyaudiolab, 
-        e.g. WAV, AIFF, or FLAC.""")
-        
-    amplify_from_frequency=param.Number(default=1500.0, doc="""
-        The lower bound of the frequency range to be amplified.""")
-
-    amplify_till_frequency=param.Number(default=7000.0, doc="""
-        The upper bound of the frequency range to be amplified.""")
-    
-    amplify_by_percentage=param.Number(default=5.0, doc="""
-        The percentage by which to amplify the signal between the specified
-        frequency range.""")
+        e.g. WAV, AIFF, or FLAC.
+        """)
             
     def __init__(self, **params):
+        super(AudioFile, self).__init__(**params)
+        self.initialiseParams(**params)
+        
+        self._loadAudioFile()
+
+    def initialiseParams(self, **params):
+        """
+        For subclasses: to specify the values of parameters on this, 
+        the parent class, subclasses might first need access to their 
+        own parameter values. Having the initialization in this separate 
+        method allows subclasses to make parameter changes after their 
+        usual super().__init__ call.
+        """
         for parameter,value in params.items():
-            if parameter == "filename" or ("amplify" in parameter):
-                setattr(self, parameter, value)
-                
-        self._source = pyaudiolab.Sndfile(self.filename, 'r')
-        super(AudioFile, self).__init__(signal=self._source.read_frames(self._source.nframes, dtype=float32), 
-            sample_rate=self._source.samplerate, **params)
-
-    def _map_frequencies_to_rows(self, index_min_freq, index_max_freq): 
-        """
-        Frequency spacing to use, i.e. how to map the available frequency range
-        to the discrete sheet rows.
-
-        Overload if custom frequency spacing is required.
-        """
-        self._frequency_spacing_indices = round(logspace(log10(index_max_freq), log10(index_min_freq), 
-            num=(index_max_freq-index_min_freq), endpoint=True, base=10)).astype(int)
-            
-    def __call__(self, **params_to_override):
-        p = ParamOverrides(self, params_to_override)
-         
-        self._sheet_dimensions = SheetCoordinateSystem(p.bounds, p.xdensity, p.ydensity).shape
-
-        self._create_frequency_indices(p)
-                
-        amplitudes = self._get_amplitudes(p)
-                
-        if self.amplify_by_percentage > 0.0:
-            if (self.amplify_from_frequency < self.min_frequency) or \
-               (self.amplify_from_frequency > self.max_frequency):
-                raise ValueError("Lower bound of frequency to amplify is outside the global frequency range.")
- 
-            elif (self.amplify_till_frequency < self.min_frequency) or \
-                    (self.amplify_till_frequency > self.max_frequency):
-                raise ValueError("Upper bound of frequency to amplify is outside the global frequency range.")
-            
-            else:
-                frequency_bins = logspace(log10(self.max_frequency), log10(self.min_frequency), 
-                    num=shape(amplitudes)[0], endpoint=True, base=10)
-                                                    
-                amplify_between = [frequency for frequency in frequency_bins \
-                    if frequency <= self.amplify_till_frequency and frequency >= self.amplify_from_frequency]
-                                
-                # the larger the index, the lower the frequency.
-                amplify_start = where(frequency_bins == max(amplify_between))[0][0]
-                amplify_end = where(frequency_bins == min(amplify_between))[0][0]
-                
-                # build an array, of equal length to amplitude array, containing percentage amplifications.
-                amplify_by = 1.0 + hanning(amplify_end-amplify_start+1)*self.amplify_by_percentage/100                
-                amplify_by = concatenate((array([1.0]*amplify_start, dtype=float32), amplify_by, \
-                    array([1.0]*(len(frequency_bins)-amplify_end-1), dtype=float32))).reshape((-1, 1))
-
-                amplitudes = multiply(amplitudes, amplify_by)
+            # Trying to combine the following into one line fails, python 
+            # will try to evaluate both logical statements at once and 
+            # since 'value' could be of any type the result is often a 
+            # type mismatch on comparison. 
+            if parameter == "filename":
+                if self.filename != value:
+                    setattr(self,parameter,value)
+                    self._loadAudioFile()
         
-        # convert amplitudes to decibels
-        amplitudes = array(map(lambda amplitude: 20.0*log10(amplitude) if amplitude > 0.0 else 0.0, amplitudes))
-                
-        assert shape(amplitudes)[0] == shape(self._spectrogram)[0]
-        self._spectrogram = hstack((amplitudes, self._spectrogram))
+    def _loadAudioFile(self):
+        self.source = pyaudiolab.Sndfile(self.filename, 'r')
         
-        # knock off old spectral information, right-most column.
-        self._spectrogram = self._spectrogram[0:, 0:self._spectrogram.shape[1]-1]
-        return self._spectrogram
+        self.time_series = self.source.read_frames(self.source.nframes, dtype=float64)
+        self._checkTimeSeries()
+                        
+        self.sampling_rate = self.source.samplerate
+        self._checkSamplingRate()
 
 
 class AudioFolder(AudioFile):
