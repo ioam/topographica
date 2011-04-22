@@ -44,7 +44,7 @@ class AudioFile(TimeSeries):
     _abstract = True
         
     time_series = param.Parameter(precedence=(-1))
-    sampling_rate = param.Number(precedence=(-1))
+    sample_rate = param.Number(precedence=(-1))
     
     filename = param.Filename(default='sounds/complex/daisy.wav', doc="""
         File path (can be relative to Topographica's base path) to an
@@ -54,11 +54,11 @@ class AudioFile(TimeSeries):
             
     def __init__(self, **params):
         super(AudioFile, self).__init__(**params)
-        self.initialiseParams(**params)
+        self.setParams(**params)
         
         self._loadAudioFile()
 
-    def initialiseParams(self, **params):
+    def setParams(self, **params):
         """
         For subclasses: to specify the values of parameters on this, 
         the parent class, subclasses might first need access to their 
@@ -82,7 +82,7 @@ class AudioFile(TimeSeries):
         self.time_series = self.source.read_frames(self.source.nframes, dtype=float64)
         self._checkTimeSeries()
                         
-        self.sampling_rate = self.source.samplerate
+        self.sample_rate = self.source.samplerate
         self._checkSamplingRate()
 
 
@@ -98,6 +98,7 @@ class AudioFolder(AudioFile):
     
     filename = param.Filename(precedence=(-1))
 
+    # BK-TODO: change to param.Foldername once it becomes availible.
     folderpath=param.String(default='sounds/complex/', doc="""
         Folder path (can be relative to Topographica's base path) to a
         folder containing audio files. The audio can be in any format 
@@ -110,14 +111,12 @@ class AudioFolder(AudioFile):
                  
     def __init__(self, **params):
         super(AudioFolder, self).__init__(**params)
+        self.setParams(**params)
         
-        for parameter,value in params.items():
-            setattr(self,parameter,value)
-
         self._loadAudioFolder()
         self._initialiseInterSignalGap()
     
-    def initialiseParams(self, **params):
+    def setParams(self, **params):
         """
         For subclasses: to specify the values of parameters on this, 
         the parent class, subclasses might first need access to their 
@@ -148,11 +147,11 @@ class AudioFolder(AudioFile):
                file[-5:]==".flac":
                 self.sound_files.append(self.folderpath+file) 
 
-        super(AudioFolder, self).initialiseParams(filename=self.sound_files[0])
+        super(AudioFolder, self).setParams(filename=self.sound_files[0])
         self.next_file = 1
         
     def _initialiseInterSignalGap(self):
-        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sampling_rate), dtype=float64)
+        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=float64)
         
     def _extractNextInterval(self):
         interval_start = self._next_interval_start
@@ -164,7 +163,7 @@ class AudioFolder(AudioFile):
                 next_source = pyaudiolab.Sndfile(self.sound_files[self.next_file], 'r')
                 self.next_file += 1
      
-                if next_source.samplerate != self.sampling_rate:
+                if next_source.samplerate != self.sample_rate:
                     raise ValueError("All sound files must be of the same sample rate")
             
                 next_time_series = hstack((self.time_series[interval_start:self.time_series.size], self.inter_signal_gap))
@@ -185,9 +184,9 @@ class AudioFolder(AudioFile):
                 else:
                     raise ValueError("Reached the end of the time series.")
         
-        self._next_interval_start += int(self.seconds_per_iteration*self.sampling_rate)
+        self._next_interval_start += int(self.seconds_per_iteration*self.sample_rate)
         return self.time_series[interval_start:interval_end]
-
+        
 
 if __name__=='__main__' or __name__=='__mynamespace__':
 
@@ -195,7 +194,7 @@ if __name__=='__main__' or __name__=='__mynamespace__':
     import topo
 
     topo.sim['C']=sheet.GeneratorSheet(
-        input_generator=AudioFile(filename='sounds/sine_waves/20000.wav',sample_window=0.3,
-            seconds_per_timestep=0.1,min_frequency=20,max_frequency=20000),
+        input_generator=AudioFile(filename='sounds/complex/daisy.wav',sample_window=0.3,
+            seconds_per_timestep=0.3,min_frequency=20,max_frequency=20000),
             nominal_bounds=sheet.BoundingBox(points=((-0.1,-0.5),(0.0,0.5))),
             nominal_density=10,period=1.0,phase=0.05)

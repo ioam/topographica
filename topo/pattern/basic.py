@@ -9,10 +9,10 @@ __version__='$Revision$'
 from math import pi, sqrt
 
 import numpy
-from numpy.oldnumeric import around, bitwise_and, bitwise_or, cos, sin
-from numpy import abs, add, alltrue, array, arange, asarray, ceil, clip, fft, \
-    float32, float64, equal, exp, floor, hstack, Infinity, linspace, multiply, \
-    nonzero, ones, pi, repeat, round, shape, subtract, zeros
+from numpy.oldnumeric import around, bitwise_and, bitwise_or#, cos, sin
+from numpy import abs, add, alltrue, array, arange, asarray, ceil, clip, cos, \
+    fft, float32, float64, equal, exp, floor, hstack, Infinity, linspace, multiply, \
+    nonzero, ones, pi, repeat, round, shape, sin, subtract, zeros
 
 import param
 from param.parameterized import ParamOverrides,as_uninitialized
@@ -1059,12 +1059,17 @@ class SigmoidedDoLG(PatternGenerator):
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
 
 
+def generateSineWave(duration, frequency, sample_rate):
+    time_axis = linspace(0.0, duration*sample_rate, duration*sample_rate)
+    return sin(frequency * 2.0*pi*time_axis)
+     
+           
 class TimeSeries(param.Parameterized):
     """
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Parameter(default=None,doc="""
+    time_series = param.Parameter(default=generateSineWave(10.0, 5000.0, 1000.0),doc="""
         An array of numbers in a series.
         """)
     
@@ -1086,11 +1091,12 @@ class TimeSeries(param.Parameterized):
     _abstract = True
     
     def __init__(self, **params):        
-        self._initialiseParams(**params)
+        self.setParams(**params)
+        
         self.samples_per_interval = int(self.interval_length*self.sample_rate)
         self._next_interval_start = 0
     
-    def _initialiseParams(self, **params):
+    def setParams(self, **params):
         """
         For subclasses: to specify the values of parameters on this, 
         the parent class, subclasses might first need access to their 
@@ -1123,10 +1129,6 @@ class TimeSeries(param.Parameterized):
                 if self.seconds_per_iteration != value:
                     setattr(self,parameter,value)
                     self._checkSecondsPerIteration()
-            
-        if self.time_series == None:
-            self.warning("No time series specified, generating a 30s, 1KHz sine wave.")
-            self._generateTimeSeriesSineWave(30.0)
                                                                                                                                
     def _checkSecondsPerIteration(self):
         if self.seconds_per_iteration <= 0:
@@ -1146,20 +1148,11 @@ class TimeSeries(param.Parameterized):
             self.samples_per_interval = int(self.interval_length*self.sample_rate)
             
     def _checkTimeSeries(self):
-        if self.time_series == None:
-            self.warning("No time series specified, generating a 30s, 1KHz sine wave.")
-            self._generateTimeSeriesSineWave(30.0)
-            
-        elif type(self.time_series) != numpy.ndarray:
+        if type(self.time_series) != numpy.ndarray:
             raise ValueError("A time series must be a numpy array.")
         
         elif self.time_series.size == 0:
             raise ValueError("A time series must have a length > 0.")            
-    
-    def _generateTimeSeriesSineWave(self, length):
-        time_axis = linspace(0.0, length*self.sample_rate, length*self.sample_rate)
-        self.time_series = sin(1000.0 * 2.0 * pi * time_axis)
-
             
     def extractSpecificInterval(self, interval_start, interval_end):
         """
@@ -1201,10 +1194,10 @@ class TimeSeries(param.Parameterized):
         can vary interval_length, seconds_per_iteration, or indeed the time 
         series on each call (for variable/mic input etc).
         """    
-        self._initialiseParams(**params_to_override)
+        self.setParams(**params_to_override)
                 
         return self._extractNextInterval()
-        
+                
         
 def rectangular(signal_size):
     """
@@ -1220,7 +1213,7 @@ class PowerSpectrum(PatternGenerator):
     arranged into a spectrogram, e.g. for an audio signal.
     """
     
-    signal = param.Parameter(default=None, doc="""
+    signal = param.Parameter(default=TimeSeries(), doc="""
         A TimeSeries object on which to perfom the Fourier Transform.
         """)
     
@@ -1265,9 +1258,6 @@ class PowerSpectrum(PatternGenerator):
         """
         for parameter,value in params.items():
             setattr(self,parameter,value)
-        
-        if self.signal == None:
-            self.signal = TimeSeries()
             
         sample_rate = self.signal.sample_rate        
         samples_per_interval = self.signal.samples_per_interval
