@@ -191,6 +191,42 @@ class AudioFolder(AudioFile):
         return self.time_series[interval_start:interval_end]
         
 
+class AuditorySpectrogram(Spectrogram):
+    """
+    Extends Spectrogram to provide a response in decibels over an octave scale.
+    """
+     
+    def __init__(self, **params):
+        super(AuditorySpectrogram, self).__init__(**params)
+    
+    def _mapFrequenciesToRows(self, index_of_min_freq, index_of_max_freq):
+        """
+        Frequency spacing to use, i.e. how to map the available frequency range to 
+        the discrete sheet rows.
+        
+        NOTE: We're calculating the spacing of a range between the *indicies* of the 
+        highest and lowest frequencies, the actual segmentation and averaging of the 
+        frequencies to fit this spacing occurs in _getAmplitudes().
+        
+        This method is here solely to provide a minimal overload if custom spacing is 
+        required.
+        """
+        # octave scale
+        self.frequency_index_spacing = ceil(logspace(log10(index_of_max_freq), log10(index_of_min_freq), 
+            num=(index_of_max_freq-index_of_min_freq), endpoint=True, base=10))
+                
+    def _convertToDecibels(self, amplitudes):
+        amplitudes[amplitudes==0] = 1.0
+        return (20.0 * log10(abs(amplitudes)))
+    
+    def __call__(self, **params_to_override):        
+        if self._first_run:
+            self._initializeWindowParams(**params_to_override)
+            self._onFirstRun(ParamOverrides(self, params_to_override))
+            
+        return self._updateSpectrogram(self._convertToDecibels(self._getAmplitudes()))
+
+
 if __name__=='__main__' or __name__=='__mynamespace__':
 
     from topo import sheet
