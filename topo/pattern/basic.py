@@ -1209,120 +1209,96 @@ def rectangular(signal_size):
     
 class PowerSpectrum(PatternGenerator):
     """
-    Outputs the spectral density of a rolling window of the input
+    Outputs the spectral density of a rolling interval of the input
     signal each time it is called. Over time, the results could be
     arranged into a spectrogram, e.g. for an audio signal.
     """
-    # Can be instantiated by hand, but it makes little sense to do so
-    # in e.g. a GUI, since it requires a "signal" array parameter to
-    # do anything useful.  Alternatively, could provide a useful
-    # default for "signal" (and presumably make it a parameter), so
-    # that it could be instantiated at least as an example.
-    __abstract=True 
     
-    window_increment = param.Number(default=1,constant=True,doc="""
-        The most recent portion of the signal on which to perform the Fourier
-        transform, in units of 1/sample_rate, i.e., the length of a
-        sliding window on which to operate.
-
-        Note that the Fourier transform algorithm is most efficient
-        for matrix sizes that are powers of 2, or that can be
-        decomposed into small prime factors; see numpy.fft.rfft.""" )
-        
-    window_length = param.Number(default=0.0001,constant=True,doc="""
-        The amount of overlap between each window, in units of 1/sample_rate.""")
-
-    sample_rate = param.Number(default=44100,constant=True,doc="""
-        Number of samples per second, which defines the range for frequency.""")
-
-    windowing_function = param.Parameter(default=rectangular,constant=True,doc="""
-        This function is multiplied with the current window, i.e. the
-        most recent portion of the waveform interval of a signal, before
-        performing the Fourier transform.  It thus shapes the
+    signal = param.Parameter(default=TimeSeries(time_series=zeros(5)), doc="""
+        A TimeSeries object on which to perfom the Fourier Transform.
+        """)
+    
+    windowing_function = param.Parameter(default=rectangular, doc="""
+        This function is multiplied with the current interval, i.e. the
+        most recent portion of the waveform interval of a signal, 
+        before performing the Fourier transform.  It thus shapes the
         interval, which would otherwise always be rectangular.
 
         The function chosen here dictates the tradeoff between
-        resolving comparable signal strengths with similar
-        frequencies, and resolving disparate signal strengths with
-        dissimilar frequencies.
+        resolving comparable signal strengths with similar frequencies, 
+        and resolving disparate signal strengths with dissimilar 
+        frequencies.
 
         numpy provides a number of options, e.g. bartlett, blackman,
         hamming, hanning, kaiser; see
         http://docs.scipy.org/doc/numpy/reference/routines.window.html
-        You can also supply your own.""")
+        You can also supply your own.
+        """)
 
-    min_frequency = param.Number(default=1,doc="""
-        Smallest frequency for which to return an amplitude.""")
+    min_frequency = param.Number(default=0, doc="""
+        Smallest frequency for which to return an amplitude.
+        """)
 
-    max_frequency = param.Number(default=20000,doc="""
-        Largest frequency for which to return an amplitude.""")
+    max_frequency = param.Number(default=1000, doc="""
+        Largest frequency for which to return an amplitude.
+        """)
                 
-    def __init__(self, signal, **params):
+    def __init__(self, **params):
         super(PowerSpectrum, self).__init__(**params)
-        self._initialize_window_parameters(signal, **params)
+                
+        self._initializeWindowParams(**params)
+        self._first_run = True
 
-    @as_uninitialized
-    def _initialize_window_parameters(self, signal, **params):                
-        # For subclasses: to specify the values of parameters on this, the parent class,
-        # subclasses might first need access to their own parameter values. 
-        # Having the window initialization in this separate method allows subclasses
-        # to make the usual super.__init__(**params) call.
+    def _initializeWindowParams(self, **params):
+        """
+        For subclasses: to specify the values of parameters on this, 
+        the parent class, subclasses might first need access to their 
+        own parameter values. Having the initialization in this 
+        separate method allows subclasses to make the usual call to 
+        super.__init__(**params)
+        """
         for parameter,value in params.items():
             setattr(self,parameter,value)
         
-        self.signal = asarray(signal, dtype=float32)        
-        assert len(self.signal) > 0
+        sample_rate = self.signal.sampling_rate
+        samples_per_interval = self.signal.samples_per_interval
         
-        self._next_window_start = 0
-        self._samples_per_window = int(self.window_length*self.sample_rate)
-        assert self._samples_per_window > 0
-        self._smoothing_window = self.windowing_function(self._samples_per_window)  
+        self.smoothing_window = self.windowing_function(samples_per_interval)  
 
-        # calculate the discrete frequencies possible through decomposition, for the given sample rate & window size.
-        self._all_frequencies = fft.fftfreq(self._samples_per_window, d=1.0/self.sample_rate)[0:self._samples_per_window/2]
-        assert self._all_frequencies.min() >= 0
-      
-    def _map_frequencies_to_rows(self, index_min_freq, index_max_freq): 
+        # calculate the discrete frequencies possible for the given sample rate & window size.
+        self.all_frequencies = fft.fftfreq(samples_per_interval, d=1.0/sample_rate)[0:samples_per_interval/2]
+        assert self.all_frequencies.min() >= 0
+
+    def _mapFrequenciesToRows(self, index_of_min_freq, index_of_max_freq): 
         """
-        Frequency spacing to use, i.e. how to map the available frequency range
-        to the discrete sheet rows.
+        Frequency spacing to use, i.e. how to map the available frequency range to 
+        the discrete sheet rows.
         
-        NOTE: We're actually spacing a range between the *indicies* of the highest and lowest
-        frequencies, the actual frequency spacing occurs at a later stage.
+        NOTE: We're calculating the spacing of a range between the *indicies* of the 
+        highest and lowest frequencies, the actual segmentation and averaging of the 
+        frequencies to fit this spacing occurs in _getAmplitudes().
         
-        This method is here solely to provide a minimal overload if custom spacing is required.
+        This method is here solely to provide a minimal overload if custom spacing is 
+        required.
         """
-        self._frequency_spacing_indices = round(linspace(index_max_freq, index_min_freq, 
-            num=(index_max_freq-index_min_freq), endpoint=True)).astype(int)
-    
-    # CEBALERT: given all the constant params, could do some caching
-    def _create_frequency_indices(self, p):
-        if not self._all_frequencies.min() <= p.min_frequency \
-            or not self._all_frequencies.max() >= p.max_frequency:
-            raise ValueError("Specified frequency interval [%s,%s] is unavailable \
-                (actual interval is [%s,%s]. Adjust sample_rate and/or window_length."
-                %( p.min_frequency, p.max_frequency, self._all_frequencies.min(), \
-                self._all_frequencies.max()))
+        self.frequency_index_spacing = ceil(linspace(index_of_max_freq, index_of_min_freq, 
+            num=(index_of_max_freq-index_of_min_freq), endpoint=True))
                 
-        min_freq_index = nonzero(self._all_frequencies >= p.min_frequency)[0][0]
-        max_freq_index = nonzero(self._all_frequencies <= p.max_frequency)[0][-1]
+    def _createFrequencyIndices(self, overrides):
         
-        self._map_frequencies_to_rows(min_freq_index, max_freq_index)
-    
-    def _extract_sample_window(self, p):
-        """
-        Overload if special behaviour is required when a signal ends.
-        """
-        window_start = self._next_window_start
-        window_end = window_start+self._samples_per_window
-        
-        if window_end > self.signal.size:
-            raise ValueError("Reached the end of the signal.")
-        
-        self._next_window_start += int(self.window_increment * self.sample_rate) 
-        return self.signal[window_start:window_end]
+        if not self.all_frequencies.min() <= overrides.min_frequency \
+            or not self.all_frequencies.max() >= overrides.max_frequency:
             
-    def _get_amplitudes(self, p):
+            raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. " +\
+                "Adjust to these frequencies or modify the sample rate/interval length of the TimeSeries object." \
+                %(overrides.min_frequency,overrides.max_frequency,self.all_frequencies.min(),self.all_frequencies.max()))
+                
+        index_of_min_freq = nonzero(self.all_frequencies >= overrides.min_frequency)[0][0]
+        index_of_max_freq = nonzero(self.all_frequencies <= overrides.max_frequency)[0][-1]
+        
+        self._mapFrequenciesToRows(index_of_min_freq, index_of_max_freq)
+            
+    def _getAmplitudes(self):
         """
         Perform a real Discrete Fourier Transform (DFT; implemented
         using a Fast Fourier Transform algorithm, FFT) of the current
@@ -1330,30 +1306,47 @@ class PowerSpectrum(PatternGenerator):
 
         See numpy.rfft for information about the Fourier transform.
         """
-        signal_sample = self._extract_sample_window(p)
-        assert shape(signal_sample)[0] == shape(self._smoothing_window)[0]
+        interval_samples = self.signal()
+        assert shape(interval_samples)[0] == shape(self.smoothing_window)[0]
+                
+        amplitudes_by_frequency = abs(fft.rfft(interval_samples*self.smoothing_window))[0:len(interval_samples)/2]
+        amplitudes_by_row = zeros(self._sheet_dimensions[0])
         
-        amplitudes_by_frequency = abs(fft.rfft(signal_sample * self._smoothing_window))[0 : len(signal_sample)/2]
-        amplitudes_by_row = [0.0]*self._sheet_dimensions[0]
-        
-        indices_per_row = len(self._frequency_spacing_indices)/self._sheet_dimensions[0]
-        
+        indices_per_row = len(self.frequency_index_spacing)/self._sheet_dimensions[0]
+                
         for row in range(0, self._sheet_dimensions[0]):
-            freq_end_index = self._frequency_spacing_indices[row*indices_per_row]+1
-            freq_start_index = self._frequency_spacing_indices[(row*indices_per_row)+indices_per_row]
-
-            amplitudes_by_row[row] = sum(amplitudes_by_frequency[freq_start_index:freq_end_index])/indices_per_row
+            index_of_start_freq = self.frequency_index_spacing[row*indices_per_row+indices_per_row-1]
+            index_of_end_freq = self.frequency_index_spacing[row*indices_per_row]
             
-        return (asarray(amplitudes_by_row, float32).reshape(-1,1))        
-        
-    def __call__(self, **params_to_override):
-        p = ParamOverrides(self, params_to_override)
-        
-        self._sheet_dimensions = SheetCoordinateSystem(p.bounds, p.xdensity, p.ydensity).shape
-        self._create_indices(p)
-        
-        return self._get_amplitudes(p)
+            amplitudes_by_row[row] = sum(amplitudes_by_frequency[index_of_start_freq:index_of_end_freq])/indices_per_row
+            
+        return (asarray(amplitudes_by_row).reshape(-1,1))
     
+    def _onFirstRun(self, overrides):
+        """
+        We won't get sheet dimensions until __call__, though once we 
+        have sheet dimensions we don't want to keep recalculating any 
+        of the following.
+        """
+        self._first_run = False    
+
+        self._sheet_dimensions = SheetCoordinateSystem(overrides.bounds,\
+            overrides.xdensity,overrides.ydensity).shape
+        
+        self._createFrequencyIndices(overrides)
+                            
+    def __call__(self, **params_to_override):
+        if self._first_run:
+            self._initializeWindowParams(**params_to_override)
+            self._onFirstRun(ParamOverrides(self, params_to_override))
+            
+        amplitudes = self._getAmplitudes()
+        
+        if self._sheet_dimensions[1] > 1:
+            amplitudes = repeat(amplitudes, self._sheet_dimensions[1], axis=1)
+
+        return amplitudes
+            
 
 class Spectrogram(PowerSpectrum):
     """
