@@ -9,9 +9,10 @@ __version__='$Revision$'
 from math import pi, sqrt
 
 import numpy
-from numpy.oldnumeric import around,bitwise_and,sin,cos,bitwise_or
-from numpy import asarray, float32, nonzero, zeros, shape, hstack, \
-    linspace, abs, round, fft, alltrue, add, subtract, clip, Infinity
+from numpy.oldnumeric import around, bitwise_and, bitwise_or, cos, sin
+from numpy import abs, add, alltrue, array, asarray, ceil, clip, fft, float32, float64, \
+    equal, exp, floor, hstack, Infinity, linspace, multiply, nonzero, ones, repeat, \
+    round, shape, subtract, zeros
 
 import param
 from param.parameterized import ParamOverrides,as_uninitialized
@@ -977,26 +978,16 @@ class LogGaussian(PatternGenerator):
     mathematically this is the mean term.
     """
         
-    size = param.Number(default=0.5)
-    x = param.Number(default=0.0)
-    y = param.Number(default=0.0)
-    
-    x_spread = param.Number(default=0.6,bounds=(0.0,2.0),softbounds=(0.0,1.5),
+    size = param.Number(default=0.0)
+        
+    x_tail = param.Number(default=0.9,bounds=(0.0,10.0),
         doc="""Parameter controlling decay rate and distance from the peak of 
             the Gaussian in the x direction.""")
     
-    y_spread = param.Number(default=0.6,bounds=(0.0,2.0),softbounds=(0.0,1.5),
+    y_tail = param.Number(default=0.5,bounds=(0.0,10.0),
         doc="""Parameter controlling decay rate and distance from the peak of 
             the Gaussian in the y direction.""")
-                 
-    x_center = param.Number(default=2.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the peak position of the Gaussian, in the 
-            x direction.""")
-                
-    y_center = param.Number(default=2.0,softbounds=(-10.0,10.0),
-        doc="""Parameter controlling the peak position of the Gaussian, in the 
-            y direction.""")
-                    
+                                
     def _create_and_rotate_coordinate_arrays(self, x, y, orientation):
         """
         Create pattern matrices from x and y vectors, and rotate
@@ -1007,10 +998,14 @@ class LogGaussian(PatternGenerator):
         # can be rewritten in so little code otherwise - but please
         # prove me wrong.
         
-        # Offset by 7.35 to make sure intial pattern is centred and all rotaions
-        # occur about that point.
-        pattern_x = add.outer(sin(orientation)*y, cos(orientation)*x) + 7.35
-        pattern_y = subtract.outer(cos(orientation)*y, sin(orientation)*x) + 7.35
+        # Offset by exponent to make sure intial pattern is centred and all rotaions
+        # occur about that centre point.
+        
+        x = x * 10
+        y = y * 10
+        
+        pattern_x = add.outer(sin(orientation)*y, cos(orientation)*x) + exp(self.size)
+        pattern_y = subtract.outer(cos(orientation)*y, sin(orientation)*x) + exp(self.size)
         
         clip(pattern_x, 0, Infinity, out=pattern_x)
         clip(pattern_y, 0, Infinity, out=pattern_y)
@@ -1018,10 +1013,8 @@ class LogGaussian(PatternGenerator):
         return pattern_x, pattern_y
     
     def function(self, p):
-        x_sigma = p.x_spread * self.size
-        y_sigma = p.y_spread * self.size
-
-        return log_gaussian(self.pattern_x, self.pattern_y, x_sigma, y_sigma, p.x_center, p.y_center)
+        self.size = p.size
+        return log_gaussian(self.pattern_x, self.pattern_y, p.x_tail, p.y_tail, p.size)
 
         
 class SigmoidedDoLG(PatternGenerator):
