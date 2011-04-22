@@ -227,6 +227,88 @@ class AuditorySpectrogram(Spectrogram):
         return self._updateSpectrogram(self._convertToDecibels(self._getAmplitudes()))
 
 
+class AuditorySpectrogramWithSimpleOuterEar(AuditorySpectrogram):
+    """
+    Extends Spectrogram with a simple model of outer ear amplification. 
+    One can set both the range to amplify and the amount.
+    """
+        
+    amplify_from_frequency=param.Number(default=1500.0, doc="""
+        The lower bound of the frequency range to be amplified.
+        """)
+
+    amplify_till_frequency=param.Number(default=7000.0, doc="""
+        The upper bound of the frequency range to be amplified.
+        """)
+    
+    amplify_by_percentage=param.Number(default=5.0, doc="""
+        The percentage by which to amplify the signal between 
+        the specified frequency range.
+        """)
+
+    def __init__(self, **params):
+        super(AuditorySpectrogramWithSimpleOuterEar, self).__init__(**params)
+        self._initializeAmplifyParameters(**params)
+
+    def _initializeAmplifyParameters(self, **params):
+        """
+        For subclasses: to specify the values of parameters on this, 
+        the parent class, subclasses might first need access to their 
+        own parameter values. Having the initialization in this 
+        separate method allows subclasses to make the usual call to 
+        super.__init__(**params)
+        """
+        for parameter,value in params.items():
+            # Trying to combine the following into one line fails, python 
+            # will try to evaluate both logical statements at once and 
+            # since 'value' could be of any type the result is often a 
+            # type mismatch on comparison. 
+            if parameter == "amplify_from_frequency" or \
+                parameter == "amplify_till_frequency" or \
+                parameter == "amplify_by_percentage":
+                if value < 0:
+                    raise ValueError("Cannot have a negative value for amplify_from_frequency, " +\
+                        "amplify_till_frequency, or amplify_by_percentage.")
+            
+        if self.amplify_from_frequency > self.amplify_till_frequency:
+            raise ValueError("Amplify from must be less than amplify till.")
+
+    def __call__(self, **params_to_override):
+        if self._first_run:
+            self._initializeWindowParams(**params_to_override)
+            self._initializeAmplifyParameters(**params_to_override)
+            self._onFirstRun(ParamOverrides(self, params_to_override))
+                
+        amplitudes = self._getAmplitudes()
+        self.frequency_divisions = logspace(log10(self.max_frequency), log10(self.min_frequency), 
+            num=self._sheet_dimensions[0], endpoint=True, base=10)
+            
+        if self.amplify_by_percentage > 0:
+            if (self.amplify_from_frequency < self.min_frequency) or \
+               (self.amplify_from_frequency > self.max_frequency):
+                raise ValueError("Lower bound of frequency to amplify is outside the global frequency range.")
+ 
+            elif (self.amplify_till_frequency < self.min_frequency) or \
+                (self.amplify_till_frequency > self.max_frequency):
+                raise ValueError("Upper bound of frequency to amplify is outside the global frequency range.")
+            
+            else:
+                amplify_between = [frequency for frequency in self.frequency_divisions \
+                    if frequency <= self.amplify_till_frequency and frequency >= self.amplify_from_frequency]
+                                
+                # the larger the index, the lower the frequency.
+                amplify_start = where(self.frequency_divisions == max(amplify_between))[0][0]
+                amplify_end = where(self.frequency_divisions == min(amplify_between))[0][0]
+                
+                # build an array of equal length to amplitude array, containing percentage amplifications.
+                amplified_range = 1.0 + hanning(amplify_end-amplify_start+1) * self.amplify_by_percentage/100.0                
+                amplify_by = concatenate((ones(amplify_start), amplified_range, ones(len(self.frequency_divisions)-amplify_end-1))).reshape((-1, 1))
+
+                amplitudes = multiply(amplitudes, amplify_by)
+        
+        return self._updateSpectrogram(self._convertToDecibels(amplitudes))
+        
+
 if __name__=='__main__' or __name__=='__mynamespace__':
 
     from topo import sheet
