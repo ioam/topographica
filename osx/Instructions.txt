@@ -1,0 +1,48 @@
+
+Build Environment
+------------------------------------
+
+A valid development environment is required before proceeding, as of OS X 10.6.7 there are 2 ways to achieve this. One is paid, the other free. It is unknown how long the free option will continue to exist, the paid option is currently £2.99 ($4.99).
+
+The 2 versions are currently equivalent for the purposes of building Topographica, unless you want the new Xcode Code Editor we advise the free Xcode 3.2.6. Only the Xcode Essentials and UNIX development tools are required for building Topographica, the remaining Xcode install options can safely be omitted.
+
+Free Option: [Apple Developer Website] install Xcode 3.2.6 from the link in the lower bottom right of the page.
+Paid Option: [Mac AppStore] install Xcode 4.*
+
+
+Building Application
+------------------------------------
+
+Open 'Launch Topographica.scpt' using 'AppleScript Editor.app' (located in /Applications/Utilities on OS X 10.6).
+
+Select 'Save As' from the 'File' menu.
+
+	Set the name to 'Topographica'.
+
+	Choose to save in the main applications folder (/Applications/).
+
+	Set the 'File Format' to 'Application'.
+
+	Make sure the 'Run-Only' option is checked (and all others are unchecked).
+
+Once the file is saved, navigate to /Applications/ and right click (or hold the ctrl key & click) on Topographica.app, select 'Show Package Contents'.
+
+	Navigate through to Contents/Resources.
+	
+	Replace applet.icns with the applet.icns provided.
+
+	Replace description.rtfd with the description.rtfd provided.
+
+Check out whichever release of Topographica is required into this folder (/Applications/Topographica.app/Contents/Resources/)
+
+Set the path to "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin" (i.e. export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin")
+
+Build it as normal (i.e. make all).
+
+Move the examples & documentation directories, as well as the changelog & license, out of the application. Please capitalise the first letter (and only the first letter) of each file/folder - this is the convention on OS X.
+
+Delete all the remaining redundant files (README.txt, create_topographica_script.py, M.out, Makefile, etc).
+
+Package up Topographica.app, Examples, Documentation, ChangeLog.txt, and License.txt into a folder.
+
+Zip the folder for online distribution.
