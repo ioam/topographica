@@ -1063,7 +1063,7 @@ def rectangular(signal_size):
     """
     Generates a Rectangular signal smoothing window,
     """
-    return [1.0]*int(signal_size)
+    return ones(int(signal_size))
 
     
 class PowerSpectrum(PatternGenerator):
