@@ -1318,19 +1318,19 @@ class PowerSpectrum(PatternGenerator):
         amplitudes_by_frequency = abs(fft.rfft(samples))[0:sample_rate/2]
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
         
-        indices_per_row = len(self.frequency_index_spacing)/(self._sheet_dimensions[0])
-                
+        indices_per_row = float(len(self.frequency_index_spacing))/(self._sheet_dimensions[0])
+        
         for row in range(0, self._sheet_dimensions[0]):
             
             if row == (self._sheet_dimensions[0]-1):
-                index_of_start_freq = self.frequency_index_spacing[-1]
+                start_freq = self.frequency_index_spacing[-1]
             else:
-                index_of_start_freq = self.frequency_index_spacing[row*indices_per_row+indices_per_row]
+                start_freq = self.frequency_index_spacing[row*indices_per_row+indices_per_row]
 
-            index_of_end_freq = self.frequency_index_spacing[row*indices_per_row]
-
-            total_amplitude = sum(amplitudes_by_frequency[index_of_start_freq:index_of_end_freq])
-            amplitudes_by_row[row] = total_amplitude / (index_of_end_freq-index_of_start_freq)
+            end_freq = self.frequency_index_spacing[row*indices_per_row]
+            
+            total_amplitude = sum(amplitudes_by_frequency[start_freq:end_freq])
+            amplitudes_by_row[row] = total_amplitude / (end_freq-start_freq)
             
         return (asarray(amplitudes_by_row).reshape(-1,1))
     
