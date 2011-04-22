@@ -1069,15 +1069,15 @@ class TimeSeries(param.Parameterized):
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Parameter(default=generateSineWave(10.0, 5000.0, 1000.0),doc="""
+    time_series = param.Parameter(default=generateSineWave(10.0, 3000.0, 44000.0),doc="""
         An array of numbers in a series.
         """)
     
-    sample_rate = param.Number(default=1000,doc="""
+    sample_rate = param.Number(default=44000,doc="""
         The number of samples taken per second to form the series.
         """)
      
-    seconds_per_iteration=param.Number(default=1.0,doc="""
+    seconds_per_iteration=param.Number(default=0.1, doc="""
         Number of seconds advanced along the time series on each iteration.
         """)
 
@@ -1095,6 +1095,8 @@ class TimeSeries(param.Parameterized):
         
         self.samples_per_interval = int(self.interval_length*self.sample_rate)
         self._next_interval_start = 0
+        
+        #print self.time_series
     
     def setParams(self, **params):
         """
@@ -1284,12 +1286,16 @@ class PowerSpectrum(PatternGenerator):
                 
     def _createFrequencyIndices(self, overrides):
         
+        print overrides.min_frequency
+        print overrides.max_frequency
+        
+        print self.all_frequencies.min()
+        print self.all_frequencies.max()
+        
         if not self.all_frequencies.min() <= overrides.min_frequency \
             or not self.all_frequencies.max() >= overrides.max_frequency:
             
-            raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. " +\
-                "Adjust to these frequencies or modify the sample rate of the TimeSeries object." \
-                %(overrides.min_frequency,overrides.max_frequency,self.all_frequencies.min(),self.all_frequencies.max()))
+            raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(overrides.min_frequency,overrides.max_frequency,self.all_frequencies.min(),self.all_frequencies.max()))
 
         index_of_min_freq = nonzero(self.all_frequencies >= overrides.min_frequency)[0][0]
         index_of_max_freq = nonzero(self.all_frequencies <= overrides.max_frequency)[0][-1]
