@@ -88,61 +88,105 @@ class AudioFile(TimeSeries):
 
 class AudioFolder(AudioFile):
     """
-    Returns a spectrogram, i.e. the spectral density over time 
-    of a rolling window of the input audio signal, for all files 
-    in the specified folder.
+    Returns a rolling spectrogram, i.e. the spectral density over time 
+    of a rolling window of the input audio signal, for all files in the 
+    specified folder.
     """
-       
+    
+    # See AudioFile itself for a detailed description of abstract status
+    _abstract = True
+    
+    filename = param.Filename(precedence=(-1))
+
     folderpath=param.String(default='sounds/complex/', doc="""
         Folder path (can be relative to Topographica's base path) to a
         folder containing audio files. The audio can be in any format 
-        accepted by pyaudiolab, e.g. WAV, AIFF, or FLAC.""")
+        accepted by pyaudiolab, i.e. WAV, AIFF, or FLAC.
+        """)
          
     gap_between_sounds=param.Number(default=0.0, doc="""
-        The gap in seconds to insert between consecutive soundfiles.""")
+        The gap in seconds to insert between consecutive soundfiles.
+        """)
                  
     def __init__(self, **params):
+        super(AudioFolder, self).__init__(**params)
+        
         for parameter,value in params.items():
-            if parameter == "folderpath" or \
-               parameter == "gap_between_sounds":
-                setattr(self,parameter,value)
-                 
-        self.inter_signal_gap = [0.0]*int(self.gap_between_sounds*self.sample_rate)
+            setattr(self,parameter,value)
 
-        all_files = os.listdir(self.folderpath)
-        self._sound_files = []
-        for file in all_files:
+        self._loadAudioFolder()
+        self._initialiseInterSignalGap()
+    
+    def initialiseParams(self, **params):
+        """
+        For subclasses: to specify the values of parameters on this, 
+        the parent class, subclasses might first need access to their 
+        own parameter values. Having the initialization in this separate 
+        method allows subclasses to make parameter changes after their 
+        usual super().__init__ call.
+        """
+        for parameter,value in params.items():
+                
+            if parameter == "folderpath" and self.folderpath != value:
+                setattr(self,parameter,value)
+                self._loadAudioFolder()
+                
+            elif parameter == "gap_between_sounds" and self.gap_between_sounds != value:
+                setattr(self,parameter,value)
+                self._initialiseInterSignalGap()
+                          
+    def _loadAudioFolder(self):
+        if self.folderpath[-1] != "/":
+            self.folderpath = self.folderpath+"/"
+            
+        folder_contents = os.listdir(self.folderpath)
+        self.sound_files = []
+        
+        for file in folder_contents:
             if file[-4:]==".wav" or file[-3:]==".wv" or \
                file[-5:]==".aiff" or file[-4:]==".aif" or \
                file[-5:]==".flac":
-                self._sound_files.append(self.folderpath+file) 
+                self.sound_files.append(self.folderpath+file) 
 
-        super(AudioFolder, self).__init__(filename=self._sound_files[0], **params)
-        self._next_file = 1
+        super(AudioFolder, self).initialiseParams(filename=self.sound_files[0])
+        self.next_file = 1
         
-    def _extract_sample_window(self, p):
-        window_start = self._next_window_start
-        window_end = window_start+self._samples_per_window
+    def _initialiseInterSignalGap(self):
+        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sampling_rate), dtype=float64)
+        
+    def _extractNextInterval(self):
+        interval_start = self._next_interval_start
+        interval_end = interval_start + self.samples_per_interval
 
-        if window_end > self.signal.size and self._next_file < len(self._sound_files):
-            next_source = pyaudiolab.Sndfile(self._sound_files[self._next_file], 'r')
-            self._next_file += 1
- 
-            if next_source.samplerate != self.sample_rate:
-                raise ValueError("All sound files must be of the same sample rate")
+        if interval_end > self.time_series.size:
         
-            self.signal = hstack((self.signal[window_start:self.signal.size], self.inter_signal_gap))
-            self.signal = hstack((self.signal, next_source.read_frames(next_source.nframes, dtype=float32)))
+            if self.next_file < len(self.sound_files):
+                next_source = pyaudiolab.Sndfile(self.sound_files[self.next_file], 'r')
+                self.next_file += 1
+     
+                if next_source.samplerate != self.sampling_rate:
+                    raise ValueError("All sound files must be of the same sample rate")
             
-            self._next_window_start = int(self.window_increment * self.sample_rate) 
-            return self.signal[0:self._samples_per_window]
+                next_time_series = hstack((self.time_series[interval_start:self.time_series.size], self.inter_signal_gap))
+                next_time_series = hstack((next_time_series, next_source.read_frames(next_source.nframes, dtype=float64)))
+                self.time_series = next_time_series
+                
+                self._next_interval_start = interval_start = 0   
+                interval_end = self.samples_per_interval
         
-        elif window_end > self.signal.size:
-            raise ValueError("Reached the end of the signal.")
-            self.signal = hstack((self.signal[window_start:self.signal.size], [0.0]*(window_end-self.signal.size))) 
+            else:
+                if interval_start < self.time_series.size:
+                    self.warning("Returning last interval of the time series.")
+                    
+                    remaining_signal = self.time_series[interval_start:self.time_series.size]
+                    self._next_interval_start = self.time_series.size
+                    return hstack((remaining_signal, zeros(self.samples_per_interval-remaining_signal.size)))
+                
+                else:
+                    raise ValueError("Reached the end of the time series.")
         
-        self._next_window_start += int(self.window_increment * self.sample_rate) 
-        return self.signal[window_start:window_end]
+        self._next_interval_start += int(self.seconds_per_iteration*self.sampling_rate)
+        return self.time_series[interval_start:interval_end]
 
 
 if __name__=='__main__' or __name__=='__mynamespace__':
