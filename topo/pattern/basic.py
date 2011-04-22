@@ -1353,60 +1353,28 @@ class Spectrogram(PowerSpectrum):
     Extends PowerSpectrum to provide a temporal buffer, yielding
     a 2D representation of a fixed-width spectrogram.
     """
-    # See comments on PowerSpectrum; this could be instantiated by
-    # hand, but in a GUI it would not be useful at present due to the
-    # signal parameter.
-    __abstract=True
-    
-    seconds_per_timestep=param.Number(default=1.0,doc="""
-        Number of seconds represented by 1 simulation time step.""")
-
-    sample_window=param.Number(default=1.0,doc="""
-        The length of interval of the signal (in seconds) on which to
-        perform the Fourier transform.
-
-        How much history of the signal to include in the window.
-        sample_window > seconds_per_timestep -> window overlap
-                                         
-        The Fourier transform algorithm is most efficient if the
-        resulting window_length(sample_window * sample_rate) is a
-        power of 2, or can be decomposed into small prime factors; see
-        numpy.fft.""")
      
-    def __init__(self, signal, **params):
-        # will resize as soon as sheet dimensions are available.
-        self._spectrogram = zeros(1, dtype=float32)
-            
-        for parameter,value in params.items():
-            if parameter == "sample_window" or \
-               parameter == "seconds_per_timestep":
-                setattr(self,parameter,value)
-        
-        if self.sample_window < self.seconds_per_timestep:
-            self.warning("sample_window < seconds_per_timestep; some signal will be skipped.")
-        
-        super(Spectrogram, self).__init__(signal, window_increment=self.seconds_per_timestep,
-            window_length=self.sample_window, **params)
-        
-    def _create_frequency_indices(self, p):
-        super(Spectrogram, self)._create_frequency_indices(p)
-        
-        if self._spectrogram.size == 1:
-            self._spectrogram = zeros(self._sheet_dimensions, dtype=float32)
-        
-    def __call__(self, **params_to_override):
-        p = ParamOverrides(self, params_to_override)
-        
-        self._sheet_dimensions = SheetCoordinateSystem(p.bounds, p.xdensity, p.ydensity).shape
-        self._create_frequency_indices(p)
-        
-        amplitudes = self._get_amplitudes(p)
+    def __init__(self, **params):
+        super(Spectrogram, self).__init__(**params)
+    
+    def _onFirstRun(self, overrides):
+        super(Spectrogram, self)._onFirstRun(overrides)
+        self._spectrogram = zeros(self._sheet_dimensions)
+
+    def _updateSpectrogram(self, amplitudes):
         assert shape(amplitudes)[0] == shape(self._spectrogram)[0]
         self._spectrogram = hstack((amplitudes, self._spectrogram))
         
-        # knock off oldest spectral information, i.e. right-most column.
+        # knock off eldest spectral information, i.e. right-most column.
         self._spectrogram = self._spectrogram[0:, 0:self._spectrogram.shape[1]-1]
-        return self._spectrogram
+        return self._spectrogram   
+    
+    def __call__(self, **params_to_override):        
+        if self._first_run:
+            self._initializeWindowParams(**params_to_override)
+            self._onFirstRun(ParamOverrides(self, params_to_override))
+            
+        return self._updateSpectrogram(self._getAmplitudes())
         
         
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,PatternGenerator)]))
