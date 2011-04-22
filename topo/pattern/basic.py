@@ -1068,7 +1068,7 @@ class TimeSeries(param.Parameterized):
         An array of numbers in a series.
         """)
     
-    sampling_rate = param.Number(default=1000,doc="""
+    sample_rate = param.Number(default=1000,doc="""
         The number of samples taken per second to form the series.
         """)
      
@@ -1087,7 +1087,7 @@ class TimeSeries(param.Parameterized):
     
     def __init__(self, **params):        
         self._initialiseParams(**params)
-        self.samples_per_interval = int(self.interval_length*self.sampling_rate)
+        self.samples_per_interval = int(self.interval_length*self.sample_rate)
         self._next_interval_start = 0
     
     def _initialiseParams(self, **params):
@@ -1108,8 +1108,8 @@ class TimeSeries(param.Parameterized):
                     setattr(self,parameter,value)
                     self._checkIntervalLength()
                 
-            elif parameter == "sampling_rate":
-                if self.sampling_rate != value:
+            elif parameter == "sample_rate":
+                if self.sample_rate != value:
                     setattr(self,parameter,value)
                     self._checkSamplingRate()
                 
@@ -1122,7 +1122,11 @@ class TimeSeries(param.Parameterized):
             elif parameter == "seconds_per_iteration":
                 if self.seconds_per_iteration != value:
                     setattr(self,parameter,value)
-                    self._checkSecondsPerIteration()                
+                    self._checkSecondsPerIteration()
+            
+        if self.time_series == None:
+            self.warning("No time series specified, generating a 30s, 1KHz sine wave.")
+            self._generateTimeSeriesSineWave(30.0)
                                                                                                                                
     def _checkSecondsPerIteration(self):
         if self.seconds_per_iteration <= 0:
@@ -1136,26 +1140,27 @@ class TimeSeries(param.Parameterized):
             raise ValueError("The interval length must be > 0.")
                 
     def _checkSamplingRate(self):
-        if self.sampling_rate == 0:
+        if self.sample_rate == 0:
             raise ValueError("The sampling rate cannot be set to 0.")
         else:
-            self.samples_per_interval = int(self.interval_length*self.sampling_rate)
+            self.samples_per_interval = int(self.interval_length*self.sample_rate)
             
     def _checkTimeSeries(self):
         if self.time_series == None:
-            self.warning("No time series specified, generating a 10s sine wave.")
-              
-            time_axis = linspace(0, 10*self.sample_rate, 10*self.sample_rate)
-            self.time_series = sin(2*pi*time_axis)
-            
-            self._checkTimeSeries()
+            self.warning("No time series specified, generating a 30s, 1KHz sine wave.")
+            self._generateTimeSeriesSineWave(30.0)
             
         elif type(self.time_series) != numpy.ndarray:
             raise ValueError("A time series must be a numpy array.")
         
         elif self.time_series.size == 0:
             raise ValueError("A time series must have a length > 0.")            
-        
+    
+    def _generateTimeSeriesSineWave(self, length):
+        time_axis = linspace(0.0, length*self.sample_rate, length*self.sample_rate)
+        self.time_series = sin(1000.0 * 2.0 * pi * time_axis)
+
+            
     def extractSpecificInterval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
@@ -1186,7 +1191,7 @@ class TimeSeries(param.Parameterized):
         interval_start = self._next_interval_start
         interval_end = interval_start + self.samples_per_interval
         
-        self._next_interval_start += int(self.seconds_per_iteration*self.sampling_rate)            
+        self._next_interval_start += int(self.seconds_per_iteration*self.sample_rate)            
 
         return self.extractSpecificInterval(interval_start, interval_end)
         
@@ -1215,7 +1220,7 @@ class PowerSpectrum(PatternGenerator):
     arranged into a spectrogram, e.g. for an audio signal.
     """
     
-    signal = param.Parameter(default=TimeSeries(time_series=zeros(5)), doc="""
+    signal = param.Parameter(default=None, doc="""
         A TimeSeries object on which to perfom the Fourier Transform.
         """)
     
@@ -1261,7 +1266,10 @@ class PowerSpectrum(PatternGenerator):
         for parameter,value in params.items():
             setattr(self,parameter,value)
         
-        sample_rate = self.signal.sampling_rate        
+        if self.signal == None:
+            self.signal = TimeSeries()
+            
+        sample_rate = self.signal.sample_rate        
         samples_per_interval = self.signal.samples_per_interval
         
         self.smoothing_window = self.windowing_function(samples_per_interval)  
@@ -1310,7 +1318,7 @@ class PowerSpectrum(PatternGenerator):
         # It is necessary to get these values again as they may changed since
         # the first run (the TimeSeries class allows live updating of it's series
         # and related parameters).
-        sample_rate = self.signal.sampling_rate        
+        sample_rate = self.signal.sample_rate        
         samples_per_interval = self.signal.samples_per_interval
 
         smoothed_samples = self.signal()*self.smoothing_window
