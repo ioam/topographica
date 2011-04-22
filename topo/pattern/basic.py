@@ -978,9 +978,9 @@ class LogGaussian(PatternGenerator):
     mathematically this is the mean term.
     """
         
-    size = param.Number(default=0.0)
+    size = param.Number(default=1.0)
         
-    tail = param.Number(default=0.9,bounds=(0.0,10.0),
+    tail = param.Number(default=0.8,bounds=(0.0,10.0),
         doc="""Parameter controlling decay rate and distance from the peak of the Gaussian.""")
                                 
     def _create_and_rotate_coordinate_arrays(self, x, y, orientation):
@@ -996,11 +996,11 @@ class LogGaussian(PatternGenerator):
         # Offset by exponent to make sure intial pattern is centred and all rotaions
         # occur about that centre point.
         
-        x = x * 10
-        y = y * 10
+        x = x * 10.0
+        y = y * 10.0
         
-        pattern_x = add.outer(sin(orientation)*y, cos(orientation)*x) + exp(self.size)
-        pattern_y = subtract.outer(cos(orientation)*y, sin(orientation)*x) + exp(self.size)
+        pattern_x = add.outer(sin(orientation)*y, cos(orientation)*x) + exp(self.size-1.0)
+        pattern_y = subtract.outer(cos(orientation)*y, sin(orientation)*x) + exp(self.size-1.0)
         
         clip(pattern_x, 0, Infinity, out=pattern_x)
         clip(pattern_y, 0, Infinity, out=pattern_y)
@@ -1009,7 +1009,7 @@ class LogGaussian(PatternGenerator):
     
     def function(self, p):
         self.size = p.size
-        return log_gaussian(self.pattern_x, self.pattern_y, p.tail, 0.4, p.size)
+        return log_gaussian(self.pattern_x, self.pattern_y, p.tail, 0.4, p.size-1.0)
 
         
 class SigmoidedDoLG(PatternGenerator):
@@ -1018,7 +1018,7 @@ class SigmoidedDoLG(PatternGenerator):
     such that one part of the plane can be the mirror image of the other,
     and the peaks of the gaussians are movable.
     """
-    size = param.Number(default=0.0)
+    size = param.Number(default=1.0)
     
     positive_size = param.Number(default=0.0, bounds=(0.0,None), softbounds=(0.0,5.0),
         doc="""Size parameter for the positive Gaussian.""")
@@ -1147,7 +1147,9 @@ class TimeSeries(param.Parameterized):
               
             time_axis = linspace(0, 10*self.sample_rate, 10*self.sample_rate)
             self.time_series = sin(2*pi*time_axis)
-                   
+            
+            self._checkTimeSeries()
+            
         elif type(self.time_series) != numpy.ndarray:
             raise ValueError("A time series must be a numpy array.")
         
