@@ -626,6 +626,36 @@ class LyonsCochlearModel(PatternGenerator):
         return self._all_filtered_samples
         
         
+class Cochleogram(LyonsCochlearModel):
+    """
+    Employs Lyons Cochlear Model to return a Cochleoogram, 
+    i.e. the response over time along the cochlea.
+    """
+            
+    def __init__(self, **params):
+        super(Cochleogram, self).__init__(**params)
+
+    def _onFirstRun(self, **overrides):
+        super(Cochleogram, self)._onFirstRun(**overrides)
+
+        self.cochleogram = zeros(self.sheet_dimensions)
+
+    def __call__(self, **params_to_override):
+        overrides = ParamOverrides(self, params_to_override)
+         
+        if self._first_run:
+            self._onFirstRun(overrides)
+            
+        amplitudes = self._getAmplitudes()
+        
+        assert shape(amplitudes)[0] == shape(self.cochleogram)[0]
+        self.cochleogram = hstack((amplitudes, self.cochleogram))
+        
+        # knock off eldest information, i.e. right-most column.
+        self.cochleogram = self.cochleogram[0:, 0:self.cochleogram.shape[1]-1]        
+        return self.cochleogram
+        
+        
 if __name__=='__main__' or __name__=='__mynamespace__':
 
     from topo import sheet
