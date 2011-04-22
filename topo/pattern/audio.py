@@ -22,13 +22,16 @@ from numpy import array, float32, multiply, round, shape, hstack, hanning, fft, 
 try:
     import matplotlib.ticker
     import pylab
+    
 except ImportError:
+    
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
     from basic import ImportErrorRaisingFakeModule
     pylab = ImportErrorRaisingFakeModule("matplotlib")
 
 try:
     import scikits.audiolab as pyaudiolab
+
 except ImportError:
     param.Parameterized().warning("audio.py classes will not be usable;" \
         "scikits.audiolab (pyaudiolab) is not available.")

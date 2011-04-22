@@ -9,7 +9,7 @@ __version__='$Revision$'
 from math import pi, sqrt
 
 import numpy
-from numpy.oldnumeric import around, bitwise_and, bitwise_or#, cos, sin
+from numpy.oldnumeric import around, bitwise_and, bitwise_or, cos, sin
 from numpy import abs, add, alltrue, array, arange, asarray, ceil, clip, cos, \
     fft, float32, float64, equal, exp, floor, hstack, Infinity, linspace, multiply, \
     nonzero, ones, pi, repeat, round, shape, sin, subtract, zeros
