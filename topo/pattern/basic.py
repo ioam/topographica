@@ -1059,6 +1059,147 @@ class SigmoidedDoLG(PatternGenerator):
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
 
 
+class TimeSeries(param.Parameterized):
+    """
+    Generic class to return intervals of a discretized time series.
+    """
+    
+    time_series = param.Parameter(default=None,doc="""
+        An array of numbers in a series.
+        """)
+    
+    sampling_rate = param.Number(default=1000,doc="""
+        The number of samples taken per second to form the series.
+        """)
+     
+    seconds_per_iteration=param.Number(default=1.0,doc="""
+        Number of seconds advanced along the time series on each iteration.
+        """)
+
+    interval_length=param.Number(default=1.0,doc="""
+        The length of time in seconds to be returned on each iteration.
+        """)
+    
+    # Instantiating a TimeSeries in the GUI is not very useful, 
+    # it exists to provide standardised methods to access and 
+    # manipulate a series of numbers for use by other classes.
+    _abstract = True
+    
+    def __init__(self, **params):        
+        self._initialiseParams(**params)
+        self.samples_per_interval = int(self.interval_length*self.sampling_rate)
+        self._next_interval_start = 0
+    
+    def _initialiseParams(self, **params):
+        """
+        For subclasses: to specify the values of parameters on this, 
+        the parent class, subclasses might first need access to their 
+        own parameter values. Having the initialization in this separate 
+        method allows subclasses to make parameter changes after their 
+        usual super().__init__ call.
+        """
+        for parameter,value in params.items():
+            # Trying to combine the following into one line fails, python 
+            # will try to evaluate both logical statements at once and 
+            # since 'value' could be of any type the result is often a 
+            # type mismatch on comparison. 
+            if parameter == "interval_length":
+                if self.interval_length != value:
+                    setattr(self,parameter,value)
+                    self._checkIntervalLength()
+                
+            elif parameter == "sampling_rate":
+                if self.sampling_rate != value:
+                    setattr(self,parameter,value)
+                    self._checkSamplingRate()
+                
+            elif parameter == "time_series":
+                if not equal(self.time_series,value).all():
+                    setattr(self,parameter,value)
+                    self._checkTimeSeries()                
+                    self._next_interval_start = 0   
+
+            elif parameter == "seconds_per_iteration":
+                if self.seconds_per_iteration != value:
+                    setattr(self,parameter,value)
+                    self._checkSecondsPerIteration()                
+                                                                                                                               
+    def _checkSecondsPerIteration(self):
+        if self.seconds_per_iteration <= 0:
+            raise ValueError("The seconds per iteration must be > 0.")
+
+        elif self.seconds_per_iteration > self.interval_length:
+            self.warning("Seconds per iteration > interval length, some signal will be skipped.")
+            
+    def _checkIntervalLength(self):
+        if self.interval_length <= 0:
+            raise ValueError("The interval length must be > 0.")
+                
+    def _checkSamplingRate(self):
+        if self.sampling_rate == 0:
+            raise ValueError("The sampling rate cannot be set to 0.")
+        else:
+            self.samples_per_interval = int(self.interval_length*self.sampling_rate)
+            
+    def _checkTimeSeries(self):
+        if self.time_series == None:
+            self.warning("No time series specified, generating a 10s sine wave.")
+
+            sine_wave = array([0,1,0,-1], dtype=float64)
+            for second in range(self.sampling_rate/4 * 10):
+                self.time_series = hstack((self.time_series,sine_wave))  
+                
+        elif type(self.time_series) != numpy.ndarray:
+            raise ValueError("A time series must be a numpy array.")
+        
+        elif self.time_series.size == 0:
+            raise ValueError("A time series must have a length > 0.")            
+        
+    def extractSpecificInterval(self, interval_start, interval_end):
+        """
+        Overload if special behaviour is required when a series ends.
+        """
+        
+        if interval_start > interval_end:
+            raise ValueError("Interval start point is past the interval end point.")
+        
+        elif interval_start > self.time_series.size:
+            raise ValueError("Interval start point is past the end of the series.")
+            
+        elif interval_end > self.time_series.size:
+            
+            if interval_start < self.time_series.size:
+                self.warning("Returning last interval of the time series.")
+                
+                remaining_signal = self.time_series[interval_start:self.time_series.size]
+                self._next_interval_start = self.time_series.size
+                return hstack((remaining_signal, zeros(self.samples_per_interval-remaining_signal.size)))
+            
+            else:
+                raise ValueError("Reached the end of the time series.")
+            
+        else:
+            return self.time_series[interval_start:interval_end]    
+    
+    def _extractNextInterval(self):
+        interval_start = self._next_interval_start
+        interval_end = interval_start + self.samples_per_interval
+        
+        self._next_interval_start += int(self.seconds_per_iteration*self.sampling_rate)            
+
+        return self.extractSpecificInterval(interval_start, interval_end)
+        
+    def __call__(self, **params_to_override):
+        """
+        We reinitialise all params except next_interval_start so that users
+        can vary interval_length, seconds_per_iteration, or indeed the time 
+        series on each call (for variable/mic input etc).
+        """    
+        self._initialiseParams(**params_to_override)
+                
+        return self._extractNextInterval()
+        
+        
 def rectangular(signal_size):
     """
     Generates a Rectangular signal smoothing window,
