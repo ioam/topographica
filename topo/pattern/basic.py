@@ -12,7 +12,7 @@ import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or, cos, sin
 from numpy import abs, add, alltrue, array, arange, asarray, ceil, clip, fft, \
     float32, float64, equal, exp, floor, hstack, Infinity, linspace, multiply, \
-    nonzero, ones, repeat, round, shape, subtract, zeros
+    nonzero, ones, pi, repeat, round, shape, subtract, zeros
 
 import param
 from param.parameterized import ParamOverrides,as_uninitialized
@@ -1144,11 +1144,10 @@ class TimeSeries(param.Parameterized):
     def _checkTimeSeries(self):
         if self.time_series == None:
             self.warning("No time series specified, generating a 10s sine wave.")
-
-            sine_wave = array([0,1,0,-1], dtype=float64)
-            for second in range(self.sampling_rate/4 * 10):
-                self.time_series = hstack((self.time_series,sine_wave))  
-                
+              
+            time_axis = linspace(0, 10*self.sample_rate, 10*self.sample_rate)
+            self.time_series = sin(2*pi*time_axis)
+                   
         elif type(self.time_series) != numpy.ndarray:
             raise ValueError("A time series must be a numpy array.")
         
