@@ -6,8 +6,6 @@ __version__='$Revision$'
 
 import cPickle as pickle
 
-from xml.parsers.expat import ExpatError
-
 import os,sys,re,string,time,platform
 
 import __main__
@@ -274,14 +272,11 @@ class _VersionPrinter(object):
         param.Parameterized(name="load_snapshot").debug("Snapshot is from release '%s' (version '%s')."%(release,version))
         
 
-def save_snapshot(snapshot_name=None,xml=False):
+def save_snapshot(snapshot_name=None):
     """
     Save a snapshot of the network's current state.
 
     The snapshot is saved as a gzip-compressed Python binary pickle.
-
-    (xml snapshots are currently experimental, and will not be useful
-    for most users.)
 
     As this function uses Python's 'pickle' module, it is subject to
     the same limitations (see the pickle module's documentation) -
@@ -319,39 +314,17 @@ def save_snapshot(snapshot_name=None,xml=False):
     
     to_save = (_VersionPrinter(topo.release,topo.version),PickleMain(),global_params,topoPOclassattrs,topo.sim)
 
-    if not xml:
-        try:
-            snapshot_file=gzip.open(normalize_path(snapshot_name),'wb',compresslevel=5)
-        except NameError:
-            snapshot_file=open(normalize_path(snapshot_name),'wb')
+    try:
+        snapshot_file=gzip.open(normalize_path(snapshot_name),'wb',compresslevel=5)
+    except NameError:
+        snapshot_file=open(normalize_path(snapshot_name),'wb')
 
-        pickle.dump(to_save,snapshot_file,2)
-    else:
-        snapshot_file=open(normalize_path(snapshot_name),'w')
-
-        try:
-            import gnosis.xml.pickle
-            gnosis.xml.pickle.dump(to_save,snapshot_file,2,allow_rawpickles=True)
-        except ImportError:
-            param.Parameterized().warning("Unable to import 'gnosis' module: no snapshot saved (xml snapshots unavailable).")
+    pickle.dump(to_save,snapshot_file,2)
 
     
     snapshot_file.close()
 
 
-
-def _load_pickle(snapshot):
-
-    try:
-        import gnosis.xml.pickle
-        gnosis.xml.pickle.load(snapshot,allow_rawpickles=True,class_search=gnosis.xml.pickle.SEARCH_ALL)
-    except ExpatError: # have gnosis.xml but snapshot is not xml
-        snapshot.seek(0) 
-        pickle.load(snapshot)
-    except ImportError: # no gnosis.xml; snapshot could still be xml but there's nothing we can do
-        pickle.load(snapshot) 
-
-    
 
 def load_snapshot(snapshot_name):
     """
@@ -370,16 +343,15 @@ def load_snapshot(snapshot_name):
     except (IOError,NameError):
         snapshot = open(snapshot_name,'r')
 
-        
     try:
-        _load_pickle(snapshot)
+        pickle.load(snapshot)
     except Exception, original_exception:
         p = param.Parameterized(name="load_snapshot")
         p.message("snapshot '%s' couldn't be loaded; installing legacy support"%snapshot_name)
         import topo.misc.legacy as L 
         L.SnapshotSupport.install()
         try:
-            _load_pickle(snapshot)
+            pickle.load(snapshot)
             p.message("snapshot loaded successfully with legacy support")
         except:
             import traceback

@@ -37,7 +37,7 @@ class TestSnapshots(unittest.TestCase):
         shutil.rmtree(normalize_path.prefix)
         normalize_path.prefix=self.original_output_path
         
-    def basic_save_load_snapshot(self,xml=False):
+    def basic_save_load_snapshot(self):
         """
         Very basic test to check the activity matrix of a GeneratorSheet
         comes back ok, and that class attributes are pickled.
@@ -52,7 +52,7 @@ class TestSnapshots(unittest.TestCase):
         Line.x = 12.0
         topo.sim.startup_commands.append("z=99")
 
-        save_snapshot(SNAPSHOT_NAME,xml)
+        save_snapshot(SNAPSHOT_NAME)
 
 
         Line.x = 9.0
@@ -76,10 +76,6 @@ class TestSnapshots(unittest.TestCase):
         self.basic_save_load_snapshot()
 
 
-# CB: all the subsequent tests fail if this runs!!
-# I'm working on it...
-#    def test_xml_basic_save_load_snapshot(self):
-#        self.basic_save_load_snapshot(xml=True)
 
 
     def test_new_simulation_still_works(self):
@@ -88,19 +84,6 @@ class TestSnapshots(unittest.TestCase):
         # the ability to construct new simulation objects
         topo.base.simulation.Simulation()
 
-
-
-
-
-
-        # CB: add xml pickling test. Certainly seems like
-        # gnosis.xml.pickle is not the drop-in replacement
-        # for pickle that it is supposed to be
-        # (e.g. on unpickling, startup commands are not
-        # executed: so gnosis.xml.pickle.load() does
-        # things differently from pickle.load() ).
-        # Need to investigate this.
-        
 
 # CB: longer to run test should additionally quit the simulation
 # and start again. Should also test scheduled actions.

@@ -1,7 +1,7 @@
 PREFIX = ${dir ${CURDIR}}
 CC = gcc
 
-default: gui-skip platform-skip python jpeg pil numpy matplotlib weave pychecker common pylint epydoc docutils gnosis ipython gmpy pyflakes
+default: gui-skip platform-skip python jpeg pil numpy matplotlib weave pychecker common pylint epydoc docutils ipython gmpy pyflakes
 
 # avoid building some things on some platforms
 # uses touch -a to avoid changing modification dates
@@ -24,9 +24,9 @@ all: default pyaudiolab mlabwrap scipy ipython pyrex pytables psyco gnuplotpy
 
 dist: bluesphere
 
-clean: python-clean jpeg-clean pil-clean numpy-clean tk-clean tcl-clean matplotlib-clean weave-clean pychecker-clean common-clean pylint-clean epydoc-clean docutils-clean gnosis-clean scipy-clean mlabwrap-clean ipython-clean libsndfile-clean pyaudiolab-clean psyco-clean pyrex-clean hdf5-clean pytables-clean gnuplotpy-clean bluesphere-clean player-clean progressbar-clean stage-clean gmp-clean mxnumber-clean gmpy-clean svn2cl-clean readline-clean termcap-clean guppy-clean pyopenssl-clean foolscap-clean zope_interface-clean twisted-clean mpi4py-clean openmpi-clean pyflakes-clean setuptools-clean freetype-clean libpng-clean zlib-clean m4-clean
+clean: python-clean jpeg-clean pil-clean numpy-clean tk-clean tcl-clean matplotlib-clean weave-clean pychecker-clean common-clean pylint-clean epydoc-clean docutils-clean scipy-clean mlabwrap-clean ipython-clean libsndfile-clean pyaudiolab-clean psyco-clean pyrex-clean hdf5-clean pytables-clean gnuplotpy-clean bluesphere-clean player-clean progressbar-clean stage-clean gmp-clean mxnumber-clean gmpy-clean svn2cl-clean readline-clean termcap-clean guppy-clean pyopenssl-clean foolscap-clean zope_interface-clean twisted-clean mpi4py-clean openmpi-clean pyflakes-clean setuptools-clean freetype-clean libpng-clean zlib-clean m4-clean
 
-uninstall: python-uninstall jpeg-uninstall pil-uninstall numpy-uninstall tk-uninstall tcl-uninstall matplotlib-uninstall weave-uninstall pychecker-uninstall common-uninstall pylint-uninstall epydoc-uninstall docutils-uninstall gnosis-uninstall scipy-uninstall mlabwrap-uninstall ipython-uninstall libsndfile-uninstall pyaudiolab-uninstall psyco-uninstall pyrex-uninstall hdf5-uninstall pytables-uninstall gnuplotpy-uninstall player-uninstall progressbar-uninstall stage-uninstall gmp-uninstall mxnumber-uninstall gmpy-uninstall svn2cl-uninstall readline-uninstall termcap-uninstall guppy-uninstall pyopenssl-uninstall foolscap-uninstall zope_interface-uninstall twisted-uninstall mpi4py-uninstall openmpi-uninstall pyflakes-clean setuptools-clean freetype-uninstall libpng-uninstall zlib-uninstall m4-uninstall
+uninstall: python-uninstall jpeg-uninstall pil-uninstall numpy-uninstall tk-uninstall tcl-uninstall matplotlib-uninstall weave-uninstall pychecker-uninstall common-uninstall pylint-uninstall epydoc-uninstall docutils-uninstall scipy-uninstall mlabwrap-uninstall ipython-uninstall libsndfile-uninstall pyaudiolab-uninstall psyco-uninstall pyrex-uninstall hdf5-uninstall pytables-uninstall gnuplotpy-uninstall player-uninstall progressbar-uninstall stage-uninstall gmp-uninstall mxnumber-uninstall gmpy-uninstall svn2cl-uninstall readline-uninstall termcap-uninstall guppy-uninstall pyopenssl-uninstall foolscap-uninstall zope_interface-uninstall twisted-uninstall mpi4py-uninstall openmpi-uninstall pyflakes-clean setuptools-clean freetype-uninstall libpng-uninstall zlib-uninstall m4-uninstall
 
 
 #####
@@ -536,27 +536,6 @@ docutils-clean:
 	rm -rf ${DOCUTILS} 
 docutils-uninstall:
 	rm -rf docutils ${DOCUTILS} $(foreach f, ${DOCUTILS_UNINSTALL}, ${PREFIX}/${f})
-
-
-
-##############################################################
-# gnosis (xml tools: we use for xml pickle)
-#
-GNOSIS = Gnosis_Utils-1.3.0-alpha-7
-GNOSIS_UNINSTALL =  ${PYTHON_LIB}/site-packages/gnosis
-
-# uninstalls previous version first (could i just call 'gnosis-uninstall'?)
-gnosis: ${GNOSIS}.tar.gz python
-	rm -rf $(foreach f, ${GNOSIS_UNINSTALL}, ${PREFIX}/${f})
-	tar -xzf ${GNOSIS}.tar.gz
-	cd ${GNOSIS}; patch -p0 < ../Gnosis_Utils.diff
-	cd ${GNOSIS}; ${PREFIX}/bin/python setup.py install
-	touch gnosis
-
-gnosis-clean:
-	rm -rf ${GNOSIS} 
-gnosis-uninstall:
-	rm -rf gnosis $(foreach f, ${GNOSIS_UNINSTALL}, ${PREFIX}/${f})
 
 
 
