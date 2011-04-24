@@ -563,7 +563,7 @@ gnosis-uninstall:
 ##############################################################
 # libsndfile (used by pyaudiolab)
 #
-LIBSNDFILE = libsndfile-1.0.20
+LIBSNDFILE = libsndfile-1.0.24
 
 LIBSNDFILE_UNINSTALL += bin/sndfile-* 
 LIBSNDFILE_UNINSTALL += lib/libsndfile.*
@@ -603,7 +603,7 @@ setuptools-uninstall:
 #
 # optionally sudo apt-get install libasound2-dev
 # (or for Mac, get the CoreAudio framework from Apple)
-PYAUDIOLAB = scikits.audiolab-0.10.2
+PYAUDIOLAB = scikits.audiolab-0.11.0
 PYAUDIOLAB_UNINSTALL = ${PYTHON_LIB}/site-packages/scikits.audiolab*egg
 
 pyaudiolab: ${PYAUDIOLAB}.tar.gz python libsndfile setuptools 
