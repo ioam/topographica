@@ -1557,7 +1557,7 @@ class PicklableClassAttributes(object):
             try:
                 class_=getattr(module,class_name)
             except:
-                Parameterized().warning("Could not find class '%s' to restore its parameter values (class might have been removed or renamed; please file a support request via the website)."%class_path)
+                Parameterized().warning("Could not find class '%s' to restore its parameter values (class might have been removed or renamed; please file a support request via topographica.org)."%class_path)
                 break
 
             # now restore class Parameter values
@@ -1576,13 +1576,9 @@ class PicklableClassAttributes(object):
                     # individual classes to customize Parameter
                     # restoration.
                     if class_.__name__!='GlobalParams':
-                        Parameterized(name='load_snapshot').warning("Restored %s.%s from the snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. Please file a support request via the website." % (class_.__name__, p_name,p_name,class_.__name__))
+                        Parameterized(name='load_snapshot').warning("Restored %s.%s from the snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. Please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
                 else:
-                    try:
-                        setattr(class_,p_name,p_obj)
-                    except:
-                        # CEBALERT: how would this happen?
-                        Parameterized(name='load_snapshot').warning('Problem restoring Parameter "%s.%s". Please file a support request via the website to have legacy support added.'% (class_.__name__,p_name)) 
+                    setattr(class_,p_name,p_obj)
                                         
 
 
