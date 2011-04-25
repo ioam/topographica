@@ -1224,6 +1224,10 @@ class Parameterized(object):
         If onlychanged is True, will only return values that are not
         equal to the default value.
         """
+        # CEB: we'd actually like to know whether a value has been
+        # explicitly set on the instance, but I'm not sure that's easy
+        # (would need to distinguish instantiation of default from
+        # user setting of value).
         vals = []
         for name,val in self.params().items():
             value = self.get_value_generator(name)
