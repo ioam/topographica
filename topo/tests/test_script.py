@@ -532,3 +532,45 @@ def test_runbatch():
     shutil.rmtree(param.normalize_path.prefix)
     param.normalize_path.prefix=original_output_path
 
+
+
+def instantiate_everything(
+    classes_to_exclude=("topo.base.simulation.Simulation","topo.base.simulation.Simulation"),
+    modules_to_exclude=('plotting','tests','tkgui','command')):
+
+    # default excludes currently set up for pickle tests
+
+    import param
+    
+    # CEBALERT: this is basically get_PO_class_attributes from param.parameterized
+    import inspect
+    def get_classes(module,classes,processed_modules,module_excludes=()):
+        exec "from %s import *"%module.__name__ in locals()
+        dict_ = module.__dict__
+        for (k,v) in dict_.items():
+            if '__all__' in dict_ and inspect.ismodule(v) and k not in module_excludes:
+                if k in dict_['__all__'] and v not in processed_modules:
+                    get_classes(v,classes,processed_modules,module_excludes)
+                processed_modules.append(v)
+            else:
+                if isinstance(v,type) and not isinstance(v,param.ParameterizedFunction):
+                    full_class_path = v.__module__+'.'+v.__name__
+                    if (not full_class_path in classes_to_exclude) and full_class_path.startswith("topo") or full_class_path.startswith("param"):
+                        classes.append(full_class_path)
+
+    classes = []
+    processed_modules = []
+     
+    import topo
+    get_classes(topo,classes,processed_modules,module_excludes=modules_to_exclude)
+    get_classes(param,classes,processed_modules,module_excludes=modules_to_exclude)
+
+    instantiated_classes = []
+
+    for class_name in classes:
+        try:
+            instantiated_classes.append(eval(class_name+"()"))
+        except:
+            print "Could not instantiate %s"%class_name
+
+    return instantiated_classes
