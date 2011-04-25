@@ -222,6 +222,15 @@ class BoundingEllipse(BoundingBox):
 
         return (xd**2/xr**2 + yd**2/yr**2) <= 1
 
+# CEBALERT: various subclasses of BoundingRegion, such as
+# BoundingCircle, do not set _aarect during __init__. Should
+# BoundingRegion have an __init__ that includes setting _aarect?
+# Currently, BoundingRegion only sets _aarect when certain methods are
+# called, such as translate(). Other subclasses (such as BoundingBox)
+# set _aarect during __init__. I'm a bit confused about the point.
+# Anyway, the situation as it is now means BoundingCircle and other
+# such classes can't be pickled.
+
 class BoundingCircle(BoundingRegion):
     """
     A circular BoundingRegion.
