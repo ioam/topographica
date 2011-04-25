@@ -350,6 +350,7 @@ def load_snapshot(snapshot_name):
         p.message("snapshot '%s' couldn't be loaded; installing legacy support"%snapshot_name)
         import topo.misc.legacy as L 
         L.SnapshotSupport.install()
+        snapshot.seek(0)
         try:
             pickle.load(snapshot)
             p.message("snapshot loaded successfully with legacy support")
@@ -362,12 +363,12 @@ def load_snapshot(snapshot_name):
             Topographica's developers, support for it can be added to
             Topographica; please file a bug report via the website.
 
-Original error:
+Error after loading legacy support:
 
 %s
             """%traceback.format_exc()
             p.warning(m)
-            print "Error after loading legacy support:\n"
+            print "Original error:\n"
             raise original_exception
 
     snapshot.close()
