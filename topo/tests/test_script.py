@@ -536,7 +536,7 @@ def test_runbatch():
 
 def instantiate_everything(
     classes_to_exclude=("topo.base.simulation.Simulation","topo.base.simulation.Simulation"),
-    modules_to_exclude=('plotting','tests','tkgui','command')):
+    modules_to_exclude=('plotting','tests','tkgui','command','util')):
 
     # default excludes currently set up for pickle tests
 
@@ -553,7 +553,8 @@ def instantiate_everything(
                     get_classes(v,classes,processed_modules,module_excludes)
                 processed_modules.append(v)
             else:
-                if isinstance(v,type) and not isinstance(v,param.ParameterizedFunction):
+                # class & not parameterizedfunction & not __abstract & not excluded & starts with topo. or param.
+                if isinstance(v,type) and not isinstance(v,param.ParameterizedFunction) and not (hasattr(v,"_%s__abstract"%v.__name__) and getattr(v,"_%s__abstract"%v.__name__) is True):
                     full_class_path = v.__module__+'.'+v.__name__
                     if (not full_class_path in classes_to_exclude) and full_class_path.startswith("topo") or full_class_path.startswith("param"):
                         classes.append(full_class_path)
@@ -565,12 +566,61 @@ def instantiate_everything(
     get_classes(topo,classes,processed_modules,module_excludes=modules_to_exclude)
     get_classes(param,classes,processed_modules,module_excludes=modules_to_exclude)
 
-    instantiated_classes = []
+    instances = []
 
+    instantiated_names = []
+    uninstantiated_names = []
+     
     for class_name in classes:
         try:
-            instantiated_classes.append(eval(class_name+"()"))
+            instances.append(eval(class_name+"()"))
+            instantiated_names.append(class_name)
         except:
-            print "Could not instantiate %s"%class_name
+            #print "Could not instantiate %s"%class_name
+            uninstantiated_names.append(class_name)
 
-    return instantiated_classes
+    print "\n ** Instantiated %s classes:"%len(instantiated_names)
+    print "\n".join(instantiated_names)
+
+    print "\n ** Could not instantiate %s classes:"%len(uninstantiated_names)
+    print "\n".join(uninstantiated_names)
+    
+    return instances
+
+
+def pickle_unpickle_everything():
+
+    instances = instantiate_everything()
+    pickles = {}
+
+    pickle_errors = 0
+
+    import pickle
+    for instance in instances:
+        try:
+            pickles[str(instance)]=pickle.dumps(instance)
+        except:
+            print "Error pickling %s:"%instance
+            pickle_errors+=1
+            import traceback
+            traceback.print_exc()
+
+    unpickle_errors = 0
+    
+    for instance_name,pickled_instance in pickles.items():
+        try:
+            pickle.loads(pickled_instance)
+        except:
+            print "Error unpickling %s"%instance_name
+            unpickle_errors+=1
+            import traceback
+            traceback.print_exc()
+
+    print "Instances that failed to pickle: %s"%pickle_errors
+    print "Pickled instances that failed to unpickle: %s"%unpickle_errors
+
+    return pickle_errors+unpickle_errors
+
+
+
+# CEB: still need to add "unpickle_everything" for pickle from 0.9.7

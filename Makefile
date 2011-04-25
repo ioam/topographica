@@ -225,8 +225,10 @@ simulation-snapshot-tests:
 	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C()'
 	rm -f examples/lissom_oo_or.ty_PICKLETEST*
 
+pickle-all-classes:
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(); import sys; sys.exit(errs)'
 
-snapshot-tests: simulation-snapshot-tests snapshot-compatibility-tests script-repr-tests
+snapshot-tests: simulation-snapshot-tests snapshot-compatibility-tests script-repr-tests pickle-all-classes
 
 print-info:
 	@echo Running at ${shell date +%s}
