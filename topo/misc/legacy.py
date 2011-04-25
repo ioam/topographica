@@ -134,6 +134,13 @@ S.append(param_add_pickle_default_value)
 # audio-related code is changing fast and isn't in general
 # use. Support could be added if necessary.
 
+# CEBALERT: the code below will only run if legacy support is
+# installed for some other reason (i.e. if the snapshot contains
+# stored defaults for param.normalize_path and param.resolve_path but
+# has no other problems, this code won't be run). Either need to
+# install legacy support according to version (rather than installing
+# if snapshot fails to load), or handle this in the classes
+# themselves.
 
 # Avoid restoring search_paths,prefix for resolve_path,normalize_path
 # (For snapshots before r11323, these were included.)
