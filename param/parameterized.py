@@ -78,6 +78,16 @@ def get_all_slots(class_):
     return all_slots
     
 
+def all_equal(arg1,arg2):
+    """
+    Return a single boolean for arg1==arg2, even for numpy arrays.
+
+    Uses all(arg1==arg2) for sequences, and arg1==arg2 otherwise.
+    """
+    try:
+        return all(arg1==arg2)
+    except TypeError:
+        return arg1==arg2
 
 
 # CEBALERT: decorators hide the docstring when using help().  Consider
@@ -1207,11 +1217,17 @@ class Parameterized(object):
 
 
     def get_param_values(self,onlychanged=False):
-        """Return a list of name,value pairs for all Parameters of this object"""
+        """
+        Return a list of name,value pairs for all Parameters of this
+        object.
+
+        If onlychanged is True, will only return values that are not
+        equal to the default value.
+        """
         vals = []
         for name,val in self.params().items():
             value = self.get_value_generator(name)
-            if (not onlychanged or value != val.default):
+            if not onlychanged or not all_equal(value,val.default):
                 vals.append((name,value))
 
         vals.sort(key=itemgetter(0))
