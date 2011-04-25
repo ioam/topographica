@@ -122,13 +122,27 @@ def test(plotgroup_names):
 
         try:
             topo_version,previous_views = pickle.load(f)
+        ########################################
         except AttributeError:
-            import topo.misc.legacy
-            param.Parameterized().debug("Loading legacy bounding region support.")
-            topo.misc.legacy.boundingregion_not_parameterized()
+            # CEBALERT: code here just to support old data file. Should
+            # generate a new one so it's no longer necessary.
+            
+            from topo.misc.legacy import preprocess_state
+
+            import topo.base.boundingregion
+
+            def _boundingregion_not_parameterized(instance,state):
+                for a in ['initialized', '_name_param_value', 'nopickle']:
+                    if a in state:
+                        del state[a]
+
+            preprocess_state(topo.base.boundingregion.BoundingRegion,
+                             _boundingregion_not_parameterized)
+    
             f.seek(0)
             topo_version,previous_views = pickle.load(f)
-
+        ########################################
+            
         f.close()
 
         if 'sheet_views' in previous_views[sheet.name]:
