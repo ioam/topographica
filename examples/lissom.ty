@@ -263,6 +263,9 @@ elif p.dataset in natural_image_sets:
 
 # CEBALERT: generating r,g,b from h,1,v means one of r,g,b will always
 # be 0 (s should also be varied).
+# CEBALERT: not currently supported in snapshots: would need "from
+# colorsys import hsv_to_rgb" to be inside the functions. Or would
+# require a change to picklemain.
 def h_to_r(h): return hsv_to_rgb(h,1.0,1.0)[0]
 def h_to_g(h): return hsv_to_rgb(h,1.0,1.0)[1]
 def h_to_b(h): return hsv_to_rgb(h,1.0,1.0)[2]
