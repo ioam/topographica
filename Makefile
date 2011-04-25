@@ -213,17 +213,16 @@ startup-speed-tests: ${STARTUPSPEEDTESTS}
 all-speed-tests: speed-tests startup-speed-tests
 
 snapshot-compatibility-tests: 
-	./topographica -c "from topo.command.basic import load_snapshot; load_snapshot('topo/tests/lissom_oo_or.ty_pickle_test.typ')" -c "topo.sim.run(1)"
+	./topographica -c "from topo.command.basic import load_snapshot; load_snapshot('topo/tests/lissom_oo_or_od_dr_cr_dy_sf_000010.00.typ')" -c "topo.sim.run(1)"
 
 
 # Test that simulations give the same results whether run straight
 # through or run part way, saved, reloaded, and run on to the same
 # point.
-# CEBALERT: please make this work for som_retinotopy as well as lissom_oo_or
 simulation-snapshot-tests:
-	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_NoSnapshot as A; A(script="examples/lissom_oo_or.ty")'
-	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_CreateSnapshot as B; B(script="examples/lissom_oo_or.ty")'
-	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C(script="examples/lissom_oo_or.ty")'
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_NoSnapshot as A; A()'
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_CreateSnapshot as B; B()'
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C()'
 	rm -f examples/lissom_oo_or.ty_PICKLETEST*
 
 
@@ -291,7 +290,7 @@ topo/tests/lissom_whisker_barrels.ty_DATA:
 	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom_whisker_barrels.ty",data_filename="tests/lissom_whisker_barrels.ty_DATA",run_for=[1,99,150],look_at="S1")'
 
 
-
+# CEBALERT: should use lissom.ty and test more map types
 # pass a list of plotgroup names to test() instead of plotgroups_to_test to restrict the tests
 map-tests:
 	${COVERAGE_CMD} ./topographica -c "cortex_density=8" examples/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)" 

@@ -287,14 +287,20 @@ def compare_startup_speed_data(script="examples/lissom_oo_or.ty",data_filename=N
 # This is clumsy. We could control topographica subprocesses, but I
 # can't remember how to do it
 
-def compare_with_and_without_snapshot_NoSnapshot(script="examples/lissom_oo_or.ty",look_at='V1',density=4,run_for=10,break_at=5):
+def compare_with_and_without_snapshot_NoSnapshot(script="examples/lissom.ty",look_at='V1',cortex_density=8,lgn_density=4,retina_density=4,dims=['or','od','dr','cr','dy','sf'],dataset="Nature",run_for=10,break_at=5):
+
     data_filename=os.path.split(script)[1]+"_PICKLETEST"
     
     # we must execute in main because e.g. scheduled events are run in __main__
-    __main__.__dict__['cortex_density']=density
+    # CEBALERT: should set global params
+    __main__.__dict__['cortex_density']=cortex_density
+    __main__.__dict__['lgn_density']=lgn_density
+    __main__.__dict__['retina_density']=retina_density
+    __main__.__dict__['dims']=dims
+    __main__.__dict__['dataset']=dataset
+    
     execfile(script,__main__.__dict__)
     
-
     data = {}
     topo.sim.run(break_at)
     data[topo.sim.time()]= copy.deepcopy(topo.sim[look_at].activity)
@@ -303,15 +309,20 @@ def compare_with_and_without_snapshot_NoSnapshot(script="examples/lissom_oo_or.t
         
     data['run_for']=run_for
     data['break_at']=break_at
-    data['density']=density
     data['look_at']=look_at
+
+    data['cortex_density']=cortex_density
+    data['lgn_density']=lgn_density
+    data['retina_density']=retina_density
+    data['dims']=dims
+    data['dataset']=dataset
     
     locn = normalize_path(os.path.join("tests",data_filename))
     print "Writing pickle to %s"%locn
     pickle.dump(data,open(locn,'wb'),2)
 
 
-def compare_with_and_without_snapshot_CreateSnapshot(script="examples/lissom_oo_or.ty"):
+def compare_with_and_without_snapshot_CreateSnapshot(script="examples/lissom.ty"):
     data_filename=os.path.split(script)[1]+"_PICKLETEST"
 
     locn = resolve_path(os.path.join('tests',data_filename))
@@ -327,9 +338,19 @@ def compare_with_and_without_snapshot_CreateSnapshot(script="examples/lissom_oo_
     run_for=data['run_for']
     break_at=data['break_at']
     look_at=data['look_at']
-    density=data['density']
-    
-    __main__.__dict__['cortex_density']=density
+
+    # CEBALERT: shouldn't need to re-list - should be able to read from data!
+    cortex_density=data['cortex_density']
+    lgn_density=data['lgn_density']
+    retina_density=data['retina_density']
+    dims=data['dims']
+    dataset=data['dataset']
+
+    __main__.__dict__['cortex_density']=cortex_density
+    __main__.__dict__['lgn_density']=lgn_density
+    __main__.__dict__['retina_density']=retina_density
+    __main__.__dict__['dims']=dims
+    __main__.__dict__['dataset']=dataset
     execfile(script,__main__.__dict__)        
 
     # check we have the same before any pickling
@@ -343,7 +364,7 @@ def compare_with_and_without_snapshot_CreateSnapshot(script="examples/lissom_oo_
     save_snapshot(locn)
 
 
-def compare_with_and_without_snapshot_LoadSnapshot(script="examples/lissom_oo_or.ty"):
+def compare_with_and_without_snapshot_LoadSnapshot(script="examples/lissom.ty"):
     data_filename=os.path.split(script)[1]+"_PICKLETEST"
     snapshot_filename=os.path.split(script)[1]+"_PICKLETEST.typ_"
 
@@ -359,7 +380,13 @@ def compare_with_and_without_snapshot_LoadSnapshot(script="examples/lissom_oo_or
     run_for=data['run_for']
     break_at=data['break_at']
     look_at=data['look_at']
-    density=data['density']
+
+#    # CEBALERT: shouldn't need to re-list - should be able to read from data!
+#    cortex_density=data['cortex_density']
+#    lgn_density=data['lgn_density']
+#    retina_density=data['retina_density']
+#    dims=data['dims']
+#    dataset=data['dataset']
     
     from topo.command.basic import load_snapshot
 
