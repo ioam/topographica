@@ -21,6 +21,31 @@ OTHER_PYTHON = /usr/bin/env python
 
 SVNVERSION = ${shell svnversion}
 
+# If SVNVERSION is "exported", form a new SVNVERSION xyz:abc where xyz
+# is the svn version from git svn, and abc is the git id of the HEAD
+# commit.
+
+# CEBALERT: originally had $ at end of each regular expression below,
+# but not sure how to do that in makefile.  Also, could it be one grep
+# command? Needs to work for this kind of thing:
+# $ git svn info
+# Path: .
+# URL: https://topographica.svn.sourceforge.net/svnroot/topographica/trunk/topographica
+# Repository Root: https://topographica.svn.sourceforge.net/svnroot/topographica
+# Repository UUID: 0ce056cd-c842-0410-9ff1-d0633a95805a
+# Revision: 11384
+# Node Kind: directory
+# Schedule: normal
+# Last Changed Author: ceball
+# Last Changed Rev: 11384
+# Last Changed Date: 2010-10-02 11:58:56 +0100 (Sat, 02 Oct 2010)
+ifeq ("${SVNVERSION}","exported")
+# CEBALERT: svnversion is probably 'exported' in other situations, too. How to make the command
+# below fail gracefully if "git svn" not available?
+	SVNVERSION = ${shell git svn info | grep -e "^Revision.*[0-9]*" | grep -o -e "[0-9]*"}:${shell git rev-parse HEAD}
+endif
+
+
 # if 0, skips building tk and related external packages
 GUI = 1
 
