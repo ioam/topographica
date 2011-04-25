@@ -255,9 +255,18 @@ def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=Fals
         restore_input_generators()
 
 
-
+# This class is left around to support older snapshots: All snapshots
+# since 0.9.7 up until r11545 (addition of UnpickleEnvironmentCreator)
+# have a pickled instance of this class. We maintain the same behavior
+# as before for them: install all legacy support.
 class _VersionPrinter(object):
-    """When unpickled, prints version & release information about snapshot."""
+    def __setstate__(self,state):
+        import topo.misc.legacy as L
+        L.SnapshotSupport.install("0.9.7")
+
+
+class UnpickleEnvironmentCreator(object):
+    """When unpickled, installs any necessary legacy support."""
     def __init__(self,release,version):
         self.release = release
         self.version = version
@@ -265,11 +274,12 @@ class _VersionPrinter(object):
         return {'release':self.release,
                 'version':self.version}
     def __setstate__(self,state):
-        release = state['release']
-        version = state['version']
-        self.release=release
-        self.version=version
-        param.Parameterized(name="load_snapshot").debug("Snapshot is from release '%s' (version '%s')."%(release,version))
+        self.release = state['release']
+        self.version = state['version']
+        import topo.misc.legacy as L
+        L.SnapshotSupport.install(self.release,self.version)
+        
+
         
 
 def save_snapshot(snapshot_name=None):
@@ -302,17 +312,11 @@ def save_snapshot(snapshot_name=None):
     topo.sim.RELEASE=topo.release
     topo.sim.VERSION=topo.version
 
-    # CEBHACKALERT: is a tuple guaranteed to be unpacked in order?
-    # If not, then startup commands are not necessarily executed before
-    # the simulation is unpickled
-    #
-    # CB: if we first pickle.dumps() each of these things, then
-    # pickle.dump() a dictionary (probably), we'll have more control
-    # over unpickling. E.g. we could in the future choose not to
-    # unpickle something. And we can certainly control the unpickling
-    # order this way.
-    
-    to_save = (_VersionPrinter(topo.release,topo.version),PickleMain(),global_params,topoPOclassattrs,topo.sim)
+    to_save = (UnpickleEnvironmentCreator(topo.release,topo.version),
+               PickleMain(),
+               global_params,
+               topoPOclassattrs,
+               topo.sim)
 
     try:
         snapshot_file=gzip.open(normalize_path(snapshot_name),'wb',compresslevel=5)
@@ -345,31 +349,24 @@ def load_snapshot(snapshot_name):
 
     try:
         pickle.load(snapshot)
-    except Exception, original_exception:
-        p = param.Parameterized(name="load_snapshot")
-        p.message("snapshot '%s' couldn't be loaded; installing legacy support"%snapshot_name)
-        import topo.misc.legacy as L 
-        L.SnapshotSupport.install()
-        snapshot.seek(0)
-        try:
-            pickle.load(snapshot)
-            p.message("snapshot loaded successfully with legacy support")
-        except:
-            import traceback
-            m = """
-            Snapshot could not be loaded.
+    except:
+        import traceback
 
-            If you make a copy of the snapshot available to
-            Topographica's developers, support for it can be added to
-            Topographica; please file a bug report via the website.
+        m = """
+        Snapshot could not be loaded.
 
-Error after loading legacy support:
+        For a snapshot created using release 0.9.7 or later, please
+        file a bug report via topographica.org.
 
+        For a snapshot created using release 0.9.6 or earlier, please
+        file a feature request via topographica.org.
+
+Loading error:
 %s
-            """%traceback.format_exc()
-            p.warning(m)
-            print "Original error:\n"
-            raise original_exception
+        """%traceback.format_exc()
+
+        param.Parameterized(name="load_snapshot").warning(m)
+
 
     snapshot.close()
 

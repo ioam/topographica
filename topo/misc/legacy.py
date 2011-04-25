@@ -9,25 +9,14 @@ __version__='$Revision: 8021 $'
 import imp
 import sys
 
+# CEB: Add note that snapshot can be re-saved, making updates
+# permanent. All functions in here should be written to support that.
+
 
 # CEB: code to support older snapshots is available in earlier
 # versions of this file (e.g. r11323). I consider that version of the
 # file to be a "proof of concept"; techniques from it will be used to
 # support changes made from 0.9.7 onwards.
-
-
-# CEBNOTE: If we were using pickle rather than cpickle, could subclass
-# the unpickler to look for module Xs as module X if Xs can't be
-# found, and probably simplify quite a lot of the legacy code
-# installation.
-#
-# Maybe we could do that by trying to use cpickle initially, then
-# falling back to pickle when we do a 'legacy load' of the snapshot.
-
-
-# CEBNOTE: To avoid restoring parameters of classes that are changed
-# from from Parameterized to something else:
-# param.parameterized.PicklableClassAttributes.do_not_restore+=...
 
 
 # CEBNOTE: could also support running old scripts without modifying
@@ -46,30 +35,61 @@ import sys
 #    type.__setattr__(cfp,'weights_shape',cfp.__dict__['cf_shape'])
 
 
+# CEBALERT: should probably restructure this file so that as little as
+# possible happens on import. Should be easy to do.
+
+releases = {"0.9.7": 11275}
+
+
+def get_version(snapshot_release,snapshot_version):
+
+    found_version = False
+    
+    try:
+        snapshot_version = snapshot_version.split(":")[0]
+        snapshot_version = snapshot_version.split("M")[0]
+        
+        if len(snapshot_version)>0:
+            try:
+                snapshot_version = int(snapshot_version)
+                found_version = True
+            except ValueError:
+                pass
+        
+    except AttributeError:
+        pass
+
+    if not found_version:
+        snapshot_version = releases[snapshot_release]
+
+    return snapshot_version
+
+
+        
 class SnapshotSupport(object):
 
     @staticmethod
-    def install(svn=None):
+    def install(snapshot_release,snapshot_version=None):
 
-        # CEBALERT: I think there's no reliable way to tell what
-        # "version" of Topographica a snapshot comes from. When you're
-        # running Topographica from svn, you can try topo.version, but
-        # you'll get things like 11499:11503 or 11499M. If you use
-        # git, you'll see "exported". Therefore, we can't have
+        # CEB: I think there's no simple way to tell what "version" of
+        # Topographica a snapshot comes from. When you're running
+        # Topographica from svn, you can try topo.version, but you'll
+        # get things like 11499:11503 or 11499M. If you use git,
+        # you'll see "exported". Therefore, we can't always have
         # fine-grained control over what's loaded. We can at least use
-        # the release number for coarse-grained control, though. Need
-        # to add that (depends on change to way snapshots are saved
-        # and loaded).
+        # the release number for coarse-grained control, though.
 
-        import param
-        global supporters
-        for f in supporters:
-            param.Parameterized(name='SnapshotSupport').debug("calling %s"%f.__name__)
-            f()
+        snapshot_version = get_version(snapshot_release,snapshot_version)
 
+        print "Snapshot is from release %s (r%s)"%(snapshot_release,snapshot_version)
 
-def install_legacy_support():
-    SnapshotSupport.install()
+        global support
+
+        # apply oldest to newest
+        for version in sorted(support.keys())[::-1]:
+            if snapshot_version < version:
+                print "Applying legacy support for change r%s"%version
+                support[version]()
 
 
 ######################################################################
@@ -100,25 +120,29 @@ def preprocess_state(class_,state_mod_fn):
     class_.__setstate__ = new_setstate
 
 
-
-class _DuplicateCheckingList(list):
-    def append(self,item):
-        assert item not in self, "%s already added"%item
-        list.append(self,item)
-
-
-
-
 ######################################################################
 ######################################################################
 
-# Specification of changes to support
+# Functions to update old snapshots
 
+# support[v]=fn : for snapshots saved before v, call fn
 
-S=supporters=_DuplicateCheckingList()
+support = {}
 
+def do_not_restore_paths():
+    # For snapshots saved before 11323
+    # Avoid restoring search_paths,prefix for resolve_path,normalize_path
+    # (For snapshots before r11323, these were included.)
+    import param.parameterized
+    param.parameterized.PicklableClassAttributes.do_not_restore+=[
+        'param.normalize_path',
+        'param.resolve_path']
 
+support[11323] = do_not_restore_paths
+
+    
 def param_add_pickle_default_value():
+    # For snapshots saved before 11321
     # pickle_default_value attribute added to Parameter in r11321
 
     from topo import param
@@ -127,24 +151,10 @@ def param_add_pickle_default_value():
             state['pickle_default_value']=True
     preprocess_state(param.Parameter,_param_add_pickle_default_value)
 
-S.append(param_add_pickle_default_value)
+support[11321] = param_add_pickle_default_value
 
 
 # CEB: deliberately no support for audio-related changes, since
 # audio-related code is changing fast and isn't in general
 # use. Support could be added if necessary.
 
-# CEBALERT: the code below will only run if legacy support is
-# installed for some other reason (i.e. if the snapshot contains
-# stored defaults for param.normalize_path and param.resolve_path but
-# has no other problems, this code won't be run). Either need to
-# install legacy support according to version (rather than installing
-# if snapshot fails to load), or handle this in the classes
-# themselves.
-
-# Avoid restoring search_paths,prefix for resolve_path,normalize_path
-# (For snapshots before r11323, these were included.)
-import param.parameterized
-param.parameterized.PicklableClassAttributes.do_not_restore+=[
-    'param.normalize_path',
-    'param.resolve_path']
