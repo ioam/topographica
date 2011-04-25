@@ -1576,7 +1576,7 @@ class PicklableClassAttributes(object):
                     # individual classes to customize Parameter
                     # restoration.
                     if class_.__name__!='GlobalParams':
-                        Parameterized(name='load_snapshot').warning("Restored %s.%s from the snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. Please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
+                        Parameterized(name='load_snapshot').warning("%s.%s found in snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. Please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
                 else:
                     setattr(class_,p_name,p_obj)
                                         
