@@ -23,6 +23,7 @@
 >>> param.resolve_path.search_paths = [tmp2]
 
 >>> command.load_snapshot(os.path.join(tmp1,'test.typ'))
+Snapshot is from release 0.9.7 (r11544)
 >>> assert param.normalize_path.prefix==tmp2
 >>> assert param.resolve_path.search_paths==[tmp2], "%s %s %s"%(tmp1,tmp2,param.resolve_path.search_paths)
 
