@@ -355,12 +355,8 @@ def load_snapshot(snapshot_name):
         m = """
         Snapshot could not be loaded.
 
-        For a snapshot created using release 0.9.7 or later, please
-        file a bug report via topographica.org.
-
-        For a snapshot created using release 0.9.6 or earlier, please
-        file a feature request via topographica.org.
-
+        Please file a support request via topographica.org.
+    
 Loading error:
 %s
         """%traceback.format_exc()

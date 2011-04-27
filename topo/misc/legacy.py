@@ -9,6 +9,8 @@ __version__='$Revision: 8021 $'
 import imp
 import sys
 
+import param
+
 # CEB: Add note that snapshot can be re-saved, making updates
 # permanent. All functions in here should be written to support that.
 
@@ -81,14 +83,16 @@ class SnapshotSupport(object):
 
         snapshot_version = get_version(snapshot_release,snapshot_version)
 
-        print "Snapshot is from release %s (r%s)"%(snapshot_release,snapshot_version)
+        msgr = param.Parameterized()
+
+        msgr.debug("Snapshot is from release %s (r%s)"%(snapshot_release,snapshot_version))
 
         global support
 
         # apply oldest to newest
         for version in sorted(support.keys())[::-1]:
             if snapshot_version < version:
-                print "Applying legacy support for change r%s"%version
+                msgr.debug("Applying legacy support for change r%s"%version)
                 support[version]()
 
 
