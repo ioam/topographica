@@ -83,16 +83,19 @@ class SnapshotSupport(object):
 
         snapshot_version = get_version(snapshot_release,snapshot_version)
 
-        msgr = param.Parameterized()
+        param.Parameterized().debug("Snapshot is from release %s (r%s)"%(snapshot_release,snapshot_version))
 
-        msgr.debug("Snapshot is from release %s (r%s)"%(snapshot_release,snapshot_version))
+        SnapshotSupport.apply_support(snapshot_version)
 
+
+    @staticmethod
+    def apply_support(version_to_support):
         global support
-
+        
         # apply oldest to newest
         for version in sorted(support.keys())[::-1]:
-            if snapshot_version < version:
-                msgr.debug("Applying legacy support for change r%s"%version)
+            if version_to_support < version:
+                param.Parameterized().debug("Applying legacy support for change r%s"%version)
                 support[version]()
 
 
@@ -162,3 +165,17 @@ support[11321] = param_add_pickle_default_value
 # audio-related code is changing fast and isn't in general
 # use. Support could be added if necessary.
 
+
+# CEBALERT: not sure whether to keep the "-l" option to Topographica.
+# The idea is that we could start old scripts by loading legacy
+# support, and then save a script_repr, thus allowing the script to be
+# updated automatically. Not sure script_repr works well enough
+# yet. (Should alter the -l option to take an optional release and svn
+# version number.)
+def install_legacy_support(release="0.9.7",version=None):
+    if version is None:
+        version = releases[release]
+
+    assert version>=releases[release], "Release/version mismatch."
+    
+    SnapshotSupport.apply_support(version)
