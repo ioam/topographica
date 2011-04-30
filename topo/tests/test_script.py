@@ -556,7 +556,7 @@ def instantiate_everything(
                 # class & not parameterizedfunction & not __abstract & not excluded & starts with topo. or param.
                 if isinstance(v,type) and not isinstance(v,param.ParameterizedFunction) and not (hasattr(v,"_%s__abstract"%v.__name__) and getattr(v,"_%s__abstract"%v.__name__) is True):
                     full_class_path = v.__module__+'.'+v.__name__
-                    if (not full_class_path in classes_to_exclude) and full_class_path.startswith("topo") or full_class_path.startswith("param"):
+                    if (not full_class_path in classes) and (not full_class_path in classes_to_exclude) and (full_class_path.startswith("topo") or full_class_path.startswith("param")):
                         classes.append(full_class_path)
 
     classes = []
@@ -616,6 +616,7 @@ def pickle_unpickle_everything():
             import traceback
             traceback.print_exc()
 
+    print
     print "Instances that failed to pickle: %s"%pickle_errors
     print "Pickled instances that failed to unpickle: %s"%unpickle_errors
 
