@@ -157,12 +157,11 @@ performance.
               'topo.tkgui'],
 
     package_data={
-        # CEBALERT: These things are not data, but I don't see how
-        # else to make sure they are included
+        # CB: These things are not data, but there's currently no
+        # other mechanism in distutils/setuptools.
         'param': ['externaltk/snit-2.2.1/*.tcl',
                   'externaltk/scrodget-2.1/*.tcl',
                   'externaltk/tooltip-1.4/*.tcl'],
-
         'topo.tkgui': ['icons/*.*'],
         'topo.command':['*.png','*.pdf'],
         'topo.tests':['*.txt','*.jpg','*.pgm']},
