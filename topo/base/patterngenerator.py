@@ -124,10 +124,12 @@ class PatternGenerator(param.Parameterized):
         """
         p=ParamOverrides(self,params_to_override)
 
-        # ALERT: position parameter is not currently supported:
-        # position=params_to_override.get('position',None)
-        # if position is not None:
-        #   x,y = position
+        # CEBERRORALERT: position parameter is not currently
+        # supported. We should delete the position parameter or fix
+        # this.
+        #
+        # position=params_to_override.get('position',None) if position
+        # is not None: x,y = position
 
         self._setup_xy(p.bounds,p.xdensity,p.ydensity,p.x,p.y,p.orientation)
         fn_result = self.function(p)
