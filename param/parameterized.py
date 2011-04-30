@@ -61,11 +61,10 @@ def descendents(class_):
     return out[::-1]
 
 
-
 def get_all_slots(class_):
     """
-    Return a list of slot names for slots defined in this class and
-    its superclasses.
+    Return a list of slot names for slots defined in class_ and its
+    superclasses.
     """
     # A subclass's __slots__ attribute does not contain slots defined
     # in its superclass (the superclass' __slots__ end up as
@@ -76,6 +75,18 @@ def get_all_slots(class_):
         if hasattr(class_,'__slots__'):
             all_slots+=class_.__slots__
     return all_slots
+
+
+def get_occupied_slots(instance):
+    """
+    Return a list of slots for which values have been set.
+    
+    (While a slot might be defined, if a value for that slot hasn't
+    been set, then it's an AttributeError to request the slot's
+    value.)
+    """
+    return [slot for slot in get_all_slots(type(instance))
+            if hasattr(instance,slot)]
     
 
 def all_equal(arg1,arg2):
@@ -434,9 +445,8 @@ class Parameter(object):
         pickle and deepcopy ourselves.
         """
         state = {}
-        for slot in get_all_slots(type(self)):
+        for slot in get_occupied_slots(self):
             state[slot] = getattr(self,slot)
-
         return state
 
     def __setstate__(self,state):
@@ -1348,7 +1358,7 @@ class Parameterized(object):
         # remind me, why is it a copy? why not just state.update(self.__dict__)?        
         state = self.__dict__.copy()
 
-        for slot in get_all_slots(type(self)):
+        for slot in get_occupied_slots(self):
             state[slot] = getattr(self,slot)
 
         # Note that Parameterized object pickling assumes that

@@ -13,7 +13,7 @@ from numpy import inf
 ### translated, etc. easily.
 ###
 import param
-from param.parameterized import get_all_slots
+from param.parameterized import get_occupied_slots
 
 class BoundingRegion(object):
     """
@@ -50,7 +50,7 @@ class BoundingRegion(object):
         # BoundingRegions have slots, not a dict, so we have to
         # support pickle and deepcopy ourselves.
         state = {}
-        for slot in get_all_slots(type(self)):
+        for slot in get_occupied_slots(self):
             state[slot] = getattr(self,slot)
         return state
 
