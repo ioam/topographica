@@ -542,7 +542,9 @@ class Composite(Parameter):
     """
     __slots__=['attribs','objtype']
 
-    def __init__(self,attribs=[],**kw):
+    def __init__(self,attribs=None,**kw):
+        if attribs is None:
+            attribs = []
         super(Composite,self).__init__(default=None,**kw)
         self.attribs = attribs
 
