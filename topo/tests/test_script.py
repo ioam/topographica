@@ -588,22 +588,25 @@ def instantiate_everything(
     return instances
 
 
-def pickle_unpickle_everything():
-
-    instances = instantiate_everything()
-    pickles = {}
+def pickle_unpickle_everything(existing_pickles=None):
 
     pickle_errors = 0
 
-    import pickle
-    for instance in instances:
-        try:
-            pickles[str(instance)]=pickle.dumps(instance)
-        except:
-            print "Error pickling %s:"%instance
-            pickle_errors+=1
-            import traceback
-            traceback.print_exc()
+    if existing_pickles is None:
+
+        instances = instantiate_everything()
+        pickles = {}
+
+        for instance in instances:
+            try:
+                pickles[str(instance)]=pickle.dumps(instance)
+            except:
+                print "Error pickling %s:"%instance
+                pickle_errors+=1
+                import traceback
+                traceback.print_exc()
+    else:
+        pickles = pickle.load(open(existing_pickles))
 
     unpickle_errors = 0
     
@@ -617,11 +620,12 @@ def pickle_unpickle_everything():
             traceback.print_exc()
 
     print
-    print "Instances that failed to pickle: %s"%pickle_errors
+
+    if existing_pickles is None:
+        print "Instances that failed to pickle: %s"%pickle_errors
+        
     print "Pickled instances that failed to unpickle: %s"%unpickle_errors
 
     return pickle_errors+unpickle_errors
 
 
-
-# CEB: still need to add "unpickle_everything" for pickle from 0.9.7

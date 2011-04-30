@@ -253,7 +253,10 @@ simulation-snapshot-tests:
 pickle-all-classes:
 	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(); import sys; sys.exit(errs)'
 
-snapshot-tests: simulation-snapshot-tests snapshot-compatibility-tests script-repr-tests pickle-all-classes
+unpickle-compatibility-tests:
+	${COVERAGE_CMD} ./topographica -c 'from topo.tests.test_script import pickle_unpickle_everything; pickle_unpickle_everything(existing_pickles="topo/tests/instances-r11275.pickle")'
+
+snapshot-tests: simulation-snapshot-tests snapshot-compatibility-tests script-repr-tests pickle-all-classes unpickle-compatibility-tests
 
 print-info:
 	@echo Running at ${shell date +%s}
