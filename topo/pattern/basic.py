@@ -1391,27 +1391,19 @@ class Spectrogram(PowerSpectrum):
     Extends PowerSpectrum to provide a temporal buffer, yielding
     a 2D representation of a fixed-width spectrogram.
     """
-     
-    #def __init__(self, **params):
-    #    super(Spectrogram, self).__init__(**params)
     
-    def _onFirstRun(self, overrides):
-        super(Spectrogram, self)._onFirstRun(overrides)
-        self._spectrogram = zeros(self._sheet_dimensions)
-
     def _updateSpectrogram(self, amplitudes):
         self._spectrogram = hstack((amplitudes, self._spectrogram))
-        
-        # knock off eldest spectral information, i.e. right-most column.
         self._spectrogram = self._spectrogram[0:, 0:self._spectrogram.shape[1]-1]
+                
+    def __firstCall__(self, **params):
+        super(Spectrogram, self).__firstCall__(**params)
+        self._spectrogram = zeros(self._sheet_dimensions)
+
+    def __everyCall__(self, **params):
+        self._updateSpectrogram(self._getAmplitudes())
+        
         return self._spectrogram   
-    
-    #def __call__(self, **params_to_override):        
-    #    if self._first_run:
-    #        self._initializeWindowParams(**params_to_override)
-    #        self._onFirstRun(ParamOverrides(self, params_to_override))
-    #        
-    #    return self._updateSpectrogram(self._getAmplitudes())
         
         
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,PatternGenerator)]))
