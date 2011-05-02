@@ -809,7 +809,8 @@ class Dict(ClassSelector):
 
 # For portable code:
 #   - specify paths in unix (rather than Windows) style;
-#   - use resolve_path() for paths to existing files to be read, 
+#   - use resolve_file_path() for paths to existing files to be read, 
+#   - use resolve_folder_path() for paths to existing folders to be read, 
 #     and normalize_path() for paths to new files to be written.
 
 class resolve_path(ParameterizedFunction):
@@ -852,9 +853,69 @@ class resolve_path(ParameterizedFunction):
                 paths_tried.append(try_path)
 
             raise IOError('File "'+os.path.split(path)[1]+'" was not found in the following place(s): '+str(paths_tried)+'.')
+            
+            
+class resolve_path2(ParameterizedFunction):
+    """
+    Find the path to an existing directory, searching the paths specified
+    in the search_paths parameter if the folder name is not absolute, and
+    converting a UNIX-style path to the current OS' format if necessary.
 
+    To turn a supplied relative path into an absolute one, the path is
+    appended to paths in the search_paths parameter, in order, until the 
+    file is found.
 
+    An IOError is raised if the file is not found.
 
+    Similar to Python's os.path.abspath(), except more search paths than 
+    just os.getcwd() can be used, and the folder must exist.
+    """
+
+    search_paths = List(default=[os.getcwd()],pickle_default_value=False,doc="""
+        Prepended to a non-relative path, in order, until a folder is
+        found.""")
+
+    def __call__(self,path,**params):
+        p = ParamOverrides(self,params)
+
+        path = os.path.normpath(path)
+        
+        if os.path.isabs(path):
+            if os.path.exists(path):
+                return path
+            else:
+                return ('"%s" not found.' %path)
+        else:
+            paths_tried = []
+            for prefix in p.search_paths:
+                try_path = os.path.join(os.path.normpath(prefix),path)
+                if os.path.exists(try_path): 
+                    return try_path
+                paths_tried.append(try_path)
+
+            return ('"'+os.path.split(path)[1]+'" was not found in the following place(s): '+str(paths_tried)+'.') 
+         
+
+class resolve_file_path(ParameterizedFunction):        
+    def __call__(self,path,**params):
+        resolved_path = resolve_path2(path,**params)
+        
+        if os.path.isfile(resolved_path):
+            return resolved_path
+        else:
+            raise IOError('File '+resolved_path)
+
+    
+class resolve_folder_path(ParameterizedFunction):
+    def __call__(self,path,**params):
+        resolved_path = resolve_path2(path,**params)
+        
+        if os.path.isdir(resolved_path):
+            return resolved_path
+        else:
+            raise IOError('Folder '+resolved_path)
+
+            
 class normalize_path(ParameterizedFunction):
     """
     Convert a UNIX-style path to the current OS's format,
@@ -880,12 +941,12 @@ class normalize_path(ParameterizedFunction):
         return os.path.normpath(path)
 
 
-
-class Filename(Parameter):
+class Path(Parameter):
     """
-    Parameter that can be set to a string specifying the
-    path of a file (in unix style); returns it in the format of
-    the user's operating system.  
+    Parameter that can be set to a string specifying the path of a 
+    file or folder (in unix style); returns it in the format of the 
+    user's operating system. Please use the Filename or Foldername
+    classes if you require discrimination between the two.
 
     The specified path can be absolute, or relative to either:
 
@@ -902,7 +963,7 @@ class Filename(Parameter):
         if search_paths is None:
             search_paths = []
         self.search_paths = search_paths
-        super(Filename,self).__init__(default,**params)
+        super(Path,self).__init__(default,**params)
 
     def _resolve(self,pth):
         if self.search_paths:
@@ -919,21 +980,71 @@ class Filename(Parameter):
         except IOError, e:
             Parameterized(name="%s.%s"%(obj.name,self._attrib_name)).warning('%s'%(e.args[0]))
 
-        super(Filename,self).__set__(obj,val)
+        super(Path,self).__set__(obj,val)
         
     def __get__(self,obj,objtype):
         """
         Return an absolute, normalized path (see resolve_path).
         """
-        raw_path = super(Filename,self).__get__(obj,objtype)
+        raw_path = super(Path,self).__get__(obj,objtype)
         return self._resolve(raw_path)
 
     def __getstate__(self):
         # don't want to pickle the search_paths        
-        state = super(Filename,self).__getstate__()
+        state = super(Path,self).__getstate__()
         if 'search_paths' in state:
             state['search_paths'] = []
         return state
 
 
+class Filename(Path):
+    """
+    Parameter that can be set to a string specifying the path of a 
+    file (in unix style); returns it in the format of the user's 
+    operating system.  
+
+    The specified path can be absolute, or relative to either:
+
+    * any of the paths specified in the search_paths attribute (if
+      search_paths is not None); 
+    or
+    
+    * any of the paths searched by resolve_path() (if search_paths
+      is None).
+    """
+    
+    def __init__(self,default=None,search_paths=None,**params):
+        super(Filename,self).__init__(default,**params)
+
+    def _resolve(self,pth):
+        if self.search_paths:
+            return resolve_file_path(pth,search_paths=self.search_paths)
+        else:
+            return resolve_file_path(pth)                               
+
+
+class Foldername(Path):
+    """
+    Parameter that can be set to a string specifying the
+    path of a folder (in unix style); returns it in the format of
+    the user's operating system.  
+
+    The specified path can be absolute, or relative to either:
+
+    * any of the paths specified in the search_paths attribute (if
+      search_paths is not None); 
+    or
+    
+    * any of the paths searched by resolve_dir_path() (if search_paths
+      is None).
+    """
+
+    def __init__(self,default=None,search_paths=None,**params):
+        super(Foldername,self).__init__(default,**params)
+
+    def _resolve(self,pth):
+        if self.search_paths:
+            return resolve_folder_path(pth,search_paths=self.search_paths)
+        else:
+            return resolve_folder_path(pth)
 
