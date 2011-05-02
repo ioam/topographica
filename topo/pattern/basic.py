@@ -9,10 +9,10 @@ __version__='$Revision$'
 from math import pi, sqrt
 
 import numpy
-from numpy.oldnumeric import around, bitwise_and, bitwise_or, cos, sin
+from numpy.oldnumeric import around, bitwise_and, bitwise_or#, cos, sin
 from numpy import abs, add, alltrue, array, arange, asarray, ceil, clip, cos, \
     fft, float32, float64, equal, exp, floor, hstack, Infinity, linspace, multiply, \
-    nonzero, ones, pi, repeat, round, shape, sin, subtract, zeros
+    nonzero, ones, pi, repeat, round, shape, sin, subtract, tile, zeros
 
 import param
 from param.parameterized import ParamOverrides,as_uninitialized
@@ -1086,15 +1086,12 @@ class TimeSeries(param.Parameterized):
     _abstract = True
     
     def __init__(self, **params):
+        self._first_run = True
         self.setParams(**params)
-
-        if self.time_series == None:
-            self.warning("No time series specified, generating a 30s, %sHz sine wave." %(self.sample_rate*0.25))
-            self.time_series = self._generateSineWave(30.0, self.sample_rate*0.25, self.sample_rate)
-        
+            
         self.samples_per_interval = int(self.interval_length*self.sample_rate)
         self._next_interval_start = 0
-    
+        
     def setParams(self, **params):
         """
         For subclasses: to specify the values of parameters on this, 
@@ -1127,8 +1124,8 @@ class TimeSeries(param.Parameterized):
             elif parameter == "seconds_per_iteration":
                 if self.seconds_per_iteration != value:
                     setattr(self,parameter,value)
-                    self._checkSecondsPerIteration()
-                                                                                                                               
+                    self._checkSecondsPerIteration()     
+                                                                                                                                       
     def _checkSecondsPerIteration(self):
         if self.seconds_per_iteration <= 0:
             raise ValueError("The seconds per iteration must be > 0.")
@@ -1147,7 +1144,11 @@ class TimeSeries(param.Parameterized):
             self.samples_per_interval = int(self.interval_length*self.sample_rate)
             
     def _checkTimeSeries(self):
-        if type(self.time_series) != numpy.ndarray:
+        if self.time_series == None:
+            self.warning("No time series specified, generating a 30s, %sHz sine wave." %(self.sample_rate*0.25))
+            self.time_series = self._generateSineWave(30.0, self.sample_rate*0.25, self.sample_rate)        
+        
+        elif type(self.time_series) != numpy.ndarray:
             raise ValueError("A time series must be a numpy array.")
         
         elif self.time_series.size == 0:
@@ -1199,12 +1200,19 @@ class TimeSeries(param.Parameterized):
         """    
         self.setParams(**params_to_override)
         
+        if self._first_run:
+            self._first_run = False
+            
+            if self.time_series == None and "time_series" not in params_to_override.items():
+                self.warning("No time series specified, generating a 30s, %sHz sine wave." %(self.sample_rate*0.25))
+                self.time_series = self._generateSineWave(30.0, self.sample_rate*0.25, self.sample_rate)   
+        
         print self.seconds_per_iteration
         print self.interval_length
         print self.sample_rate
         
         return self._extractNextInterval()
-        
+
     
 class PowerSpectrum(PatternGenerator):
     """
@@ -1217,7 +1225,7 @@ class PowerSpectrum(PatternGenerator):
         A TimeSeries object on which to perfom the Fourier Transform.
         """)
     
-    windowing_function = param.Parameter(default=numpy.hanning, doc="""
+    windowing_function = param.Parameter(default=None, doc="""
         This function is multiplied with the current interval, i.e. the
         most recent portion of the waveform interval of a signal, 
         before performing the Fourier transform.  It thus shapes the
@@ -1244,9 +1252,10 @@ class PowerSpectrum(PatternGenerator):
                 
     def __init__(self, **params):
         super(PowerSpectrum, self).__init__(**params)        
-        self._initializeWindowParams(**params)
-        
         self._first_run = True
+
+        self.windowing_function = self.rectangularWindow
+        self._initializeWindowParams(**params)
 
     def _initializeWindowParams(self, **params):
         """
@@ -1260,9 +1269,6 @@ class PowerSpectrum(PatternGenerator):
             setattr(self,parameter,value)
             
         sample_rate = self.signal.sample_rate        
-        samples_per_interval = self.signal.samples_per_interval
-        
-        self.smoothing_window = self.windowing_function(samples_per_interval)  
         
         # calculate the discrete frequencies possible for the given sample rate.
         self.all_frequencies = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
@@ -1309,16 +1315,12 @@ class PowerSpectrum(PatternGenerator):
         See numpy.rfft for information about the Fourier transform.
         """
         
-        # It is necessary to get these values again as they may changed since
-        # the first run (the TimeSeries class allows live updating of it's series
-        # and related parameters).
         sample_rate = self.signal.sample_rate        
-        samples_per_interval = self.signal.samples_per_interval
 
-        smoothed_samples = self.signal()*self.smoothing_window
-        samples = hstack((smoothed_samples, zeros(sample_rate-samples_per_interval)))
+        signal_window = tile(self.signal(), ceil(sample_rate/self.signal.samples_per_interval))
+        smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
         
-        amplitudes_by_frequency = abs(fft.rfft(samples))[0:sample_rate/2]
+        amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2]
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
         
         indices_per_row = float(len(self.frequency_index_spacing))/(self._sheet_dimensions[0])
