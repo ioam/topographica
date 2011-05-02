@@ -1394,6 +1394,9 @@ class Spectrogram(PowerSpectrum):
     a 2D representation of a fixed-width spectrogram.
     """
     
+    def __init__(self, **params):
+        super(Spectrogram, self).__init__(**params) 
+        
     def _updateSpectrogram(self, amplitudes):
         self._spectrogram = hstack((amplitudes, self._spectrogram))
         self._spectrogram = self._spectrogram[0:, 0:self._spectrogram.shape[1]-1]
