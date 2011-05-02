@@ -5,8 +5,8 @@ Example of a simplified auditory pathway incorporating the cochlea, MGBv, and AI
 
 The cochlea comprises a rolling FFT spectrogram, passing its output to an MGBv
 sheet where responses are categorised by typical MGBv neuron responses. The final
-auditory station in this example is an AI sheet, calibrated to the parameters for
-V1 used in examples/lissom_oo_or.ty
+auditory station in this example is an lissom AI sheet, calibrated to the parameters 
+for V1 used in examples/lissom_oo_or.ty
 
 $Id: lissom_audio.ty 11027 2010-04-10 01:17:05Z bilalkhancnsg $
 """
@@ -20,8 +20,8 @@ from numpy import log, max, subtract, add, divide, power, exp, pi
 from topo import learningfn, transferfn, pattern, projection, responsefn, sheet
 from topo.misc.commandline import global_params as p
 
-from topo.pattern.audio import AudioFile, AudioFolder
-from topo.pattern.basic import rectangular
+from topo.pattern.audio import AudioFile, AudioFolder, AuditorySpectrogram, AuditorySpectrogramWithSimpleOuterEar
+from topo.pattern.basic import rectangular, Spectrogram, PowerSpectrum
 from numpy import bartlett, blackman, hamming, hanning, kaiser
 
 
@@ -51,29 +51,33 @@ projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
 
 
-###   Audio pattern generator
+### Audio pattern generator
 """
 All STRFs employed come from the domestic cat. Audible frequency range of the  cat is in fact 48-85,000Hz. 
 (Hearing range of the domestic cat, Hearing Research 19, p85-88, 1985, R.Heffner, H.Heffner)
 
 We can't get anywhere near this with the ubiquitous audio sample rate of 44,100Hz, which spans 
 the range 0-22,050Hz, so we confine to the human audible range 20-20,000Hz.
-
-Sample window of 0.05 is the smallest we can use to get a decent frequency resolution from the fft.
 """
 
-# Guitar rendition of Daisy Bell, in tribute to the IBM 704, which in 1962 became the first computer
-# ever to 'sing'.
-input_pattern=AudioFile(filename="sounds/complex/daisy.wav", min_frequency=20, max_frequency=20000,
-    amplify_from_frequency=1500, amplify_till_frequency=7000, amplify_by_percentage=0.1, 
-    windowing_function=hanning, sample_window=0.05, seconds_per_timestep=0.001)
+# Guitar rendition of Daisy Bell, in tribute to the IBM 704, 
+# which in 1962 became the first computer ever to 'sing'.
+
+audio_data = AudioFile(filename="sounds/complex/daisy.wav", 
+    seconds_per_iteration=0.01, interval_length=1.0, gap_between_sounds=1.0)
+
+#audio_data = AudioFolder(folderpath="sounds/sine_waves/normalized/", 
+#    seconds_per_iteration=0.01, interval_length=1.0, gap_between_sounds=1.0)
+
+input_pattern=AuditorySpectrogramWithSimpleOuterEar(signal=audio_data, 
+    min_frequency=20, max_frequency=20000, windowing_function=hanning)
 
 
 ### Sheets
 cochlea_dimensions = (1.0,1.0) # 100 msecs, 10 frequency bins (10 octaves)
 
 topo.sim['Cochlea']=sheet.GeneratorSheet(
-    nominal_density=p.cochlea_density,
+    nominal_density=p.cochlea_density, output_fns=[transferfn.misc.HalfRectify()],
     nominal_bounds=sheet.BoundingBox(points=((-cochlea_dimensions[0]/2, -cochlea_dimensions[1]/2),
         (cochlea_dimensions[0]/2, cochlea_dimensions[1]/2) )),
     input_generator=input_pattern, period=1.0, phase=0.05)
@@ -83,7 +87,7 @@ mgbv_dimensions = (cochlea_dimensions[0]-mgbv_connection_dimensions[0],
     cochlea_dimensions[1])
                    
 topo.sim['MGBv']=sheet.CFSheet(
-    nominal_density=p.mgbv_density, output_fns=[transferfn.misc.HalfRectify()],
+    nominal_density=p.mgbv_density,
     nominal_bounds=sheet.BoundingBox(points=((-mgbv_dimensions[0]/2, -mgbv_dimensions[1]/2),
         (mgbv_dimensions[0]/2, mgbv_dimensions[1]/2))))
         
@@ -92,7 +96,7 @@ a1_dimensions = (mgbv_dimensions[0]-a1_connection_dimensions[0],
     mgbv_dimensions[1])
                                                   
 topo.sim['A1']=sheet.lissom.LISSOM(
-    nominal_density=p.cortex_density, tsettle=9,
+    nominal_density=p.cortex_density, tsettle=9, output_fns=[transferfn.misc.HalfRectify()],
     nominal_bounds=sheet.BoundingBox(points=((-a1_dimensions[0]/2, -a1_dimensions[1]/2),
         (a1_dimensions[0]/2, a1_dimensions[1]/2))),
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.083,upper_bound=0.633)],
