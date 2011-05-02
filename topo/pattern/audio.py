@@ -194,6 +194,9 @@ class AuditorySpectrogram(Spectrogram):
     Extends Spectrogram to provide a response in decibels over an octave scale.
     """
     
+    def __init__(self, **params):
+        super(AuditorySpectrogram, self).__init__(**params) 
+        
     def _setFrequencySpacing(self, index_of_min_freq, index_of_max_freq):
         self.frequency_index_spacing = ceil(logspace(log10(index_of_max_freq), log10(index_of_min_freq), 
             num=(index_of_max_freq-index_of_min_freq), endpoint=True, base=10))
@@ -202,6 +205,9 @@ class AuditorySpectrogram(Spectrogram):
         amplitudes[amplitudes==0] = 1.0
         return (20.0 * log10(abs(amplitudes)))
         
+    def __firstCall__(self, **params):
+        super(AuditorySpectrogram, self).__firstCall__(**params)
+    
     def __everyCall__(self, **params):
         self._updateSpectrogram(self._convertToDecibels(self._getAmplitudes()))
         
@@ -214,7 +220,7 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
     One can set both the range to amplify and the amount.
     """
         
-    amplify_from_frequency=param.Number(default=1500.0, doc="""
+    amplify_from_frequency=param.Number(default=1000.0, doc="""
         The lower bound of the frequency range to be amplified.
         """)
 
@@ -227,15 +233,14 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
         the specified frequency range.
         """)
 
+    def __init__(self, **params):
+        super(AuditorySpectrogramSimpleOuterEar, self).__init__(**params)
+        
     def _setParams(self, **params):
         super(AuditorySpectrogramSimpleOuterEar, self)._setParams(**params)
         
         for parameter,value in params.items():
-            # Trying to combine the following into one line fails, python 
-            # will try to evaluate both logical statements at once and 
-            # since 'value' could be of any type the result is often a 
-            # type mismatch on comparison. 
-            if parameter == "amplify_from_frequency" or parameter == "amplify_till_frequency" or parameter == "amplify_by_percentage":
+            if parameter=="amplify_from_frequency" or parameter=="amplify_till_frequency" or parameter=="amplify_by_percentage":
                 if value < 0:
                     raise ValueError("Cannot have a negative value for amplify_from_frequency, amplify_till_frequency, or amplify_by_percentage.")
                 else:
@@ -244,9 +249,13 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
         if self.amplify_from_frequency > self.amplify_till_frequency:
             raise ValueError("AuditorySpectrogramSimpleOuterEar's amplify from must be less than its amplify till.")
 
+    def __firstCall__(self, **params):
+        super(AuditorySpectrogramSimpleOuterEar, self).__firstCall__(**params)
+        
     def __everyCall__(self, **params):
         amplitudes = self._getAmplitudes()
-        self.frequency_divisions = logspace(log10(self.max_frequency), log10(self.min_frequency), 
+        
+        self.sheet_frequency_divisions = logspace(log10(self.max_frequency), log10(self.min_frequency), 
             num=self._sheet_dimensions[0], endpoint=True, base=10)
             
         if self.amplify_by_percentage > 0:
@@ -257,20 +266,21 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
                 raise ValueError("Upper bound of frequency to amplify is outside the global frequency range.")
             
             else:
-                amplify_between = [frequency for frequency in self.frequency_divisions \
-                    if frequency <= self.amplify_till_frequency and frequency >= self.amplify_from_frequency]
+                amplify_between = [ frequency for frequency in self.sheet_frequency_divisions \
+                    if frequency <= self.amplify_till_frequency and frequency >= self.amplify_from_frequency ]
                                 
                 # the larger the index, the lower the frequency.
-                amplify_start = where(self.frequency_divisions == max(amplify_between))[0][0]
-                amplify_end = where(self.frequency_divisions == min(amplify_between))[0][0]
+                amplify_start_index = where(self.sheet_frequency_divisions == max(amplify_between))[0][0]
+                amplify_end_index = where(self.sheet_frequency_divisions == min(amplify_between))[0][0]
                 
                 # build an array of equal length to amplitude array, containing percentage amplifications.
-                amplified_range = 1.0 + hanning(amplify_end-amplify_start+1) * self.amplify_by_percentage/100.0                
-                amplify_by = concatenate((ones(amplify_start), amplified_range, ones(len(self.frequency_divisions)-amplify_end-1))).reshape((-1, 1))
-
+                amplified_range = 1.0 + hanning(amplify_end_index-amplify_start_index+1) * self.amplify_by_percentage/100.0
+                amplify_by = concatenate((ones(amplify_start_index), amplified_range, ones(len(self.sheet_frequency_divisions)-amplify_end_index-1))).reshape((-1, 1))
+                
                 amplitudes = multiply(amplitudes, amplify_by)
         
-        return self._updateSpectrogram(self._convertToDecibels(amplitudes))
+        self._updateSpectrogram(self._convertToDecibels(amplitudes))
+        return self._spectrogram
         
 
 class LyonsCochlearModel(PatternGenerator):
