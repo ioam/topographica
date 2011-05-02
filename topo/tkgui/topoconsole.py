@@ -267,9 +267,11 @@ def _tkinter_report_exception(widget):
         stat.error('%s'%msg)
     else:
         topo.guimain.messageBar.error('%s'%msg)
-
+    
+    # BK-NOTE: Uncommented the import traceback below to get 
+    # full error messages/traces printed to the console.
     param.Parameterized().warning(msg)
-    #import traceback; traceback.print_exc()
+    import traceback; traceback.print_exc()
 
 
 import Tkinter
