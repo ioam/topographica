@@ -834,86 +834,42 @@ class resolve_path(ParameterizedFunction):
         Prepended to a non-relative path, in order, until a file is
         found.""")
 
-    def __call__(self,path,**params):
+    def __call__(self,path,type='File',**params):
         p = ParamOverrides(self,params)
 
         path = os.path.normpath(path)
 
         if os.path.isabs(path):
-            if os.path.isfile(path):
-                return path
+            if type == 'File':
+                if os.path.isfile(path):
+                    return path
+                else:
+                    raise IOError('File "%s" not found.'%path)
+            elif type == 'Folder':
+                if os.path.isdir(path):
+                    return path
+                else:
+                    raise IOError('Folder "%s" not found.'%path)
             else:
-                raise IOError('File "%s" not found.'%path)
+                raise Error('type "%s" not recognised.'%type)
+                
         else:
             paths_tried = []
             for prefix in p.search_paths:
                 try_path = os.path.join(os.path.normpath(prefix),path)
-                if os.path.isfile(try_path): 
-                    return try_path
+                
+                if type == 'File':
+                    if os.path.isfile(try_path):
+                        return try_path
+                elif type == 'Folder':
+                    if os.path.isdir(try_path):
+                        return try_path
+                else:
+                    raise Error('type "%s" not recognised.'%type)
+
                 paths_tried.append(try_path)
 
-            raise IOError('File "'+os.path.split(path)[1]+'" was not found in the following place(s): '+str(paths_tried)+'.')
-            
-            
-class resolve_path2(ParameterizedFunction):
-    """
-    Find the path to an existing directory, searching the paths specified
-    in the search_paths parameter if the folder name is not absolute, and
-    converting a UNIX-style path to the current OS' format if necessary.
-
-    To turn a supplied relative path into an absolute one, the path is
-    appended to paths in the search_paths parameter, in order, until the 
-    file is found.
-
-    An IOError is raised if the file is not found.
-
-    Similar to Python's os.path.abspath(), except more search paths than 
-    just os.getcwd() can be used, and the folder must exist.
-    """
-
-    search_paths = List(default=[os.getcwd()],pickle_default_value=False,doc="""
-        Prepended to a non-relative path, in order, until a folder is
-        found.""")
-
-    def __call__(self,path,**params):
-        p = ParamOverrides(self,params)
-
-        path = os.path.normpath(path)
-        
-        if os.path.isabs(path):
-            if os.path.exists(path):
-                return path
-            else:
-                return ('"%s" not found.' %path)
-        else:
-            paths_tried = []
-            for prefix in p.search_paths:
-                try_path = os.path.join(os.path.normpath(prefix),path)
-                if os.path.exists(try_path): 
-                    return try_path
-                paths_tried.append(try_path)
-
-            return ('"'+os.path.split(path)[1]+'" was not found in the following place(s): '+str(paths_tried)+'.') 
-         
-
-class resolve_file_path(ParameterizedFunction):        
-    def __call__(self,path,**params):
-        resolved_path = resolve_path2(path,**params)
-        
-        if os.path.isfile(resolved_path):
-            return resolved_path
-        else:
-            raise IOError('File '+resolved_path)
-
-    
-class resolve_folder_path(ParameterizedFunction):
-    def __call__(self,path,**params):
-        resolved_path = resolve_path2(path,**params)
-        
-        if os.path.isdir(resolved_path):
-            return resolved_path
-        else:
-            raise IOError('Folder '+resolved_path)
+            raise IOError(os.path.split(path)[1]+'" was not found in the following place(s): '+str(paths_tried)+'.')
 
             
 class normalize_path(ParameterizedFunction):
@@ -1018,9 +974,9 @@ class Filename(Path):
 
     def _resolve(self,pth):
         if self.search_paths:
-            return resolve_file_path(pth,search_paths=self.search_paths)
+            return resolve_path(pth,type='File', search_paths=self.search_paths)
         else:
-            return resolve_file_path(pth)                               
+            return resolve_path(pth,type='File')                               
 
 
 class Foldername(Path):
@@ -1044,7 +1000,7 @@ class Foldername(Path):
 
     def _resolve(self,pth):
         if self.search_paths:
-            return resolve_folder_path(pth,search_paths=self.search_paths)
+            return resolve_path(pth,type='Folder',search_paths=self.search_paths)
         else:
-            return resolve_folder_path(pth)
+            return resolve_path(pth,type='Folder')
 
