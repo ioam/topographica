@@ -1113,14 +1113,13 @@ class TimeSeries(param.Parameterized):
                         self.samples_per_interval = int(self.interval_length*self.sample_rate)
                 
             elif parameter == "time_series":
-                if not equal(self.time_series, value).all():
-                    if type(value) != numpy.ndarray:
-                        raise ValueError("A time series must be a numpy array.")                                                                  
+                if type(value) != numpy.ndarray:
+                    raise ValueError("A time series must be a numpy array.")                                                                  
+                else:
+                    if self.time_series == None:
+                        setattr(self, parameter, value)
                     else:
-                        if self.time_series == None:
-                            setattr(self, parameter, value)
-                        else:
-                            self.time_series = hstack((self.time_series, value))
+                        self.time_series = hstack((self.time_series, value))
 
             elif parameter == "seconds_per_iteration":
                 if self.seconds_per_iteration != value:

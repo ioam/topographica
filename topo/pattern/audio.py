@@ -114,9 +114,7 @@ class AudioFolder(AudioFile):
             if file[-4:]==".wav" or file[-3:]==".wv" or file[-5:]==".aiff" or file[-4:]==".aif" or file[-5:]==".flac":
                 self.sound_files.append(self.folderpath + "/" + file) 
 
-        self._setParams(filename=self.sound_files[0])
-        self._loadAudioFile()
-        
+        self._setParams(filename=self.sound_files[0])        
         self.next_file = 1
 
     def _extractNextInterval(self):
@@ -157,6 +155,7 @@ class AudioFolder(AudioFile):
         return self.time_series[interval_start:interval_end]
 
     def __firstCall__(self, **params):
+        self._setParams(**params)
         self._loadAudioFolder()
         
         super(AudioFile, self).__firstCall__(**params)
