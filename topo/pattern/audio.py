@@ -49,29 +49,26 @@ class AudioFile(TimeSeries):
         super(AudioFile, self).__init__(**params)
         self._setParams(**params)
         
+        self._loadAudioFile()
+        
     def _setParams(self, **params):
         super(AudioFile, self)._setParams(**params)
 
         for parameter,value in params.items():
-            if parameter == "filename":
-                if self.filename != value:
-                    setattr(self, parameter, value)
+            setattr(self, parameter, value)
             
-            else:
-                setattr(self, parameter, value)
-        
+            if parameter == "filename":
+                self._loadAudioFile()
+                
     def _loadAudioFile(self):
         self.source = audiolab.Sndfile(self.filename, 'r')
         
-        self.time_series = self.source.read_frames(self.source.nframes, dtype=float64)
-        self._checkTimeSeries()
-                        
-        self.sample_rate = self.source.samplerate
-        self._checkSamplingRate()
-
+        self._setParams(time_series=self.source.read_frames(self.source.nframes, dtype=float64)) 
+        self._setParams(sample_rate=self.source.samplerate)
+        
     def __firstCall__(self, **params):
-        self._loadAudioFile()
-        super(AudioFile, self).__firstCall__(**params)
+        self._setParams(**params)        
+        super(AudioFile, self).__firstCall__(**params)    
 
     def __everyCall__(self, **params):
         return self._extractNextInterval()
@@ -102,44 +99,26 @@ class AudioFolder(AudioFile):
     def __init__(self, **params):
         super(AudioFolder, self).__init__(**params)
         self._setParams(**params)
-        
-        self._loadAudioFolder()
-        self._initialiseInterSignalGap()
     
     def _setParams(self, **params):
-        """
-        For subclasses: to specify the values of parameters on this, 
-        the parent class, subclasses might first need access to their 
-        own parameter values. Having the initialization in this separate 
-        method allows subclasses to make parameter changes after their 
-        usual super().__init__ call.
-        """
+        super(AudioFolder, self)._setParams(**params)
+
         for parameter,value in params.items():
+            setattr(self, parameter, value)
                 
-            if parameter == "folderpath" and self.folderpath != value:
-                setattr(self,parameter,value)
-                self._loadAudioFolder()
-                
-            elif parameter == "gap_between_sounds" and self.gap_between_sounds != value:
-                setattr(self,parameter,value)
-                self._initialiseInterSignalGap()
-                          
     def _loadAudioFolder(self):
         folder_contents = os.listdir(self.folderpath)
         self.sound_files = []
         
         for file in folder_contents:
-            if file[-4:]==".wav" or file[-3:]==".wv" or \
-               file[-5:]==".aiff" or file[-4:]==".aif" or \
-               file[-5:]==".flac":
-                self.sound_files.append(self.folderpath+"/"+file) 
+            if file[-4:]==".wav" or file[-3:]==".wv" or file[-5:]==".aiff" or file[-4:]==".aif" or file[-5:]==".flac":
+                self.sound_files.append(self.folderpath + "/" + file) 
 
-        super(AudioFolder, self).setParams(filename=self.sound_files[0])
+        self._setParams(filename=self.sound_files[0])
+        self._loadAudioFile()
+        
         self.next_file = 1
-        
-    def _initialiseInterSignalGap(self):
-        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=float64)
-        
+
     def _extractNextInterval(self):
         interval_start = self._next_interval_start
         interval_end = interval_start + self.samples_per_interval
@@ -162,10 +141,13 @@ class AudioFolder(AudioFile):
         
             else:
                 if interval_start < self.time_series.size:
-                    self.warning("Returning last interval of the time series.")
+                    if self.repeat:
+                        self._next_interval_start = 0
+                    else:
+                        self.warning("Returning last interval of the time series.")
+                        self._next_interval_start = self.time_series.size
                     
                     remaining_signal = self.time_series[interval_start:self.time_series.size]
-                    self._next_interval_start = self.time_series.size
                     return hstack((remaining_signal, zeros(self.samples_per_interval-remaining_signal.size)))
                 
                 else:
@@ -173,7 +155,16 @@ class AudioFolder(AudioFile):
         
         self._next_interval_start += int(self.seconds_per_iteration*self.sample_rate)
         return self.time_series[interval_start:interval_end]
+
+    def __firstCall__(self, **params):
+        self._loadAudioFolder()
         
+        super(AudioFile, self).__firstCall__(**params)
+        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=float64)
+
+    def __everyCall__(self, **params):
+        return self._extractNextInterval()
+                
 
 class AuditorySpectrogram(Spectrogram):
     """
