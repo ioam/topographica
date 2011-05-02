@@ -1091,23 +1091,12 @@ class TimeSeries(param.Parameterized):
     
     def __init__(self, **params):
         super(TimeSeries, self).__init__(**params)
-        self.setParams(**params)
+        self._setParams(**params)
         
         self._first_call = True
         
-    def setParams(self, **params):
-        """
-        For subclasses: to specify the values of parameters on this, 
-        the parent class, subclasses might first need access to their 
-        own parameter values. Having the initialization in this separate 
-        method allows subclasses to make parameter changes after their 
-        usual super().__init__ call.
-        """
+    def _setParams(self, **params):
         for parameter,value in params.items():
-            # Trying to combine the following into one line fails, python 
-            # will try to evaluate both logical statements at once and 
-            # since 'value' could be of any type the result is often a 
-            # type mismatch on comparison. 
             if parameter == "interval_length":
                 if self.interval_length != value:
                     if self.interval_length <= 0:
@@ -1215,7 +1204,7 @@ class TimeSeries(param.Parameterized):
         not overwritten. If overwriting type behaviour is required then it is more 
         appropriate to create a new TimeSeries object.
         """    
-        self.setParams(**params)
+        self._setParams(**params)
         
         return self._extractNextInterval()
 
@@ -1269,13 +1258,6 @@ class PowerSpectrum(PatternGenerator):
         self._first_call = True        
 
     def _setParams(self, **params):
-        """
-        For subclasses: to specify the values of parameters on this, 
-        the parent class, subclasses might first need access to their 
-        own parameter values. Having the initialization in this 
-        separate method allows subclasses to make the usual call to 
-        super.__init__(**params)
-        """
         for parameter,value in params.items():
         
             if parameter == "signal":
