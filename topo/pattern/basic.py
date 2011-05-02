@@ -1217,43 +1217,42 @@ class PowerSpectrum(PatternGenerator):
     arranged into a spectrogram, e.g. for an audio signal.
     """
     
-    signal = param.Parameter(default=TimeSeries(), doc="""
+    signal = param.Parameter(default=None, doc="""
         A TimeSeries object on which to perfom the Fourier Transform.
         """)
     
     windowing_function = param.Parameter(default=None, doc="""
         This function is multiplied with the current interval, i.e. the
-        most recent portion of the waveform interval of a signal, 
-        before performing the Fourier transform.  It thus shapes the
-        interval, which would otherwise always be rectangular.
+        most recent portion of the waveform interval of a signal, before 
+        performing the Fourier transform.  It thus shapes the interval, 
+        which would otherwise always be rectangular.
 
-        The function chosen here dictates the tradeoff between
-        resolving comparable signal strengths with similar frequencies, 
-        and resolving disparate signal strengths with dissimilar 
-        frequencies.
+        The function chosen here dictates the tradeoff between resolving 
+        comparable signal strengths with similar frequencies, and resolving 
+        disparate signal strengths with dissimilar frequencies.
 
         numpy provides a number of options, e.g. bartlett, blackman,
         hamming, hanning, kaiser; see
         http://docs.scipy.org/doc/numpy/reference/routines.window.html
+        
         You can also supply your own.
         """)
 
-    min_frequency = param.Number(default=0, doc="""
+    min_frequency = param.Number(default=0, bounds=(0,None), doc="""
         Smallest frequency for which to return an amplitude.
         """)
 
-    max_frequency = param.Number(default=1000, doc="""
+    max_frequency = param.Number(default=1000, bounds=(0,None), doc="""
         Largest frequency for which to return an amplitude.
         """)
-                
+        
     def __init__(self, **params):
-        super(PowerSpectrum, self).__init__(**params)        
-        self._first_run = True
+        super(PowerSpectrum, self).__init__(**params) 
+        self._setParams(**params)
+        
+        self._first_call = True        
 
-        self.windowing_function = self.rectangularWindow
-        self._initializeWindowParams(**params)
-
-    def _initializeWindowParams(self, **params):
+    def _setParams(self, **params):
         """
         For subclasses: to specify the values of parameters on this, 
         the parent class, subclasses might first need access to their 
@@ -1262,45 +1261,55 @@ class PowerSpectrum(PatternGenerator):
         super.__init__(**params)
         """
         for parameter,value in params.items():
-            setattr(self,parameter,value)
-            
-        sample_rate = self.signal.sample_rate        
         
-        # calculate the discrete frequencies possible for the given sample rate.
-        self.all_frequencies = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
-    
-    def rectangularWindow(self, signal_size):
-        """
-        Generates a Rectangular signal smoothing window,
-        """
-        return ones(int(signal_size))
-    
+            if parameter == "signal":
+                if isinstance(value, TimeSeries):
+                    setattr(self, parameter, value)
+                else:
+                    raise ValueError("PowerSpectrum's signal parameter must be of type TimeSeries, or a subclass thereof.")
+
+            elif parameter == "windowing_function":
+                if str(type(value)) == "<type 'function'>":
+                    smoothing_window = value(10)
+                    if type(smoothing_window) == numpy.ndarray and smoothing_window.size == 10:
+                        setattr(self, parameter, value)
+                    else:
+                        raise ValueError("A windowing function must take at least one argument (the length), and return a numpy array of that length. The specified function does not do so.")
+                else:
+                    raise ValueError("A windowing function must be of the type function, the one provided is of type %s" %(type(value)))
+            
+            else:
+                setattr(self, parameter, value)
+                                
+    def _createFrequencyIndices(self):
+        
+        # calculate the discrete frequencies possible for the sample rate.
+        sample_rate = self.signal.sample_rate        
+        self._available_frequency_range = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
+
+        if not self._available_frequency_range.min() <= self.min_frequency \
+            or not self._available_frequency_range.max() >= self.max_frequency:
+            
+            raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(self.min_frequency, self.max_frequency, self._available_frequency_range.min(), self._available_frequency_range.max()))
+
+        index_of_min_freq = nonzero(self._available_frequency_range >= self.min_frequency)[0][0]
+        index_of_max_freq = nonzero(self._available_frequency_range <= self.max_frequency)[0][-1]
+        
+        self._setFrequencySpacing(index_of_min_freq, index_of_max_freq)
+            
     def _setFrequencySpacing(self, index_of_min_freq, index_of_max_freq): 
         """
         Frequency spacing to use, i.e. how to map the available frequency range to 
         the discrete sheet rows.
         
-        NOTE: We're calculating the spacing of a range between the *indicies* of the 
-        highest and lowest frequencies, the actual segmentation and averaging of the 
-        frequencies to fit this spacing occurs in _getAmplitudes().
+        NOTE: We're calculating the spacing of a range between the highest and lowest 
+        frequencies, the actual segmentation and averaging of the frequencies to fit 
+        this spacing occurs in _getAmplitudes().
         
         This method is here solely to provide a minimal overload if custom spacing is 
         required.
         """
-        self.frequency_index_spacing = ceil(linspace(index_of_max_freq, index_of_min_freq, 
-            num=(index_of_max_freq-index_of_min_freq), endpoint=True))
-                
-    def _createFrequencyIndices(self, overrides):
-        
-        if not self.all_frequencies.min() <= overrides.min_frequency \
-            or not self.all_frequencies.max() >= overrides.max_frequency:
-            
-            raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(overrides.min_frequency,overrides.max_frequency,self.all_frequencies.min(),self.all_frequencies.max()))
-
-        index_of_min_freq = nonzero(self.all_frequencies >= overrides.min_frequency)[0][0]
-        index_of_max_freq = nonzero(self.all_frequencies <= overrides.max_frequency)[0][-1]
-        
-        self._setFrequencySpacing(index_of_min_freq, index_of_max_freq)
+        self.frequency_index_spacing = ceil(linspace(index_of_max_freq, index_of_min_freq, num=(index_of_max_freq-index_of_min_freq), endpoint=True))            
             
     def _getAmplitudes(self):
         """
@@ -1312,9 +1321,14 @@ class PowerSpectrum(PatternGenerator):
         """
         
         sample_rate = self.signal.sample_rate        
-
+        
+        # A signal window must be the length of 1s worth of samples (the sample rate).
         signal_window = tile(self.signal(), ceil(sample_rate/self.signal.samples_per_interval))
-        smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
+        
+        if self.windowing_function == None:
+            smoothed_window = signal_window[0:sample_rate]
+        else:
+            smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
         
         amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2]
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
@@ -1335,31 +1349,42 @@ class PowerSpectrum(PatternGenerator):
             
         return (asarray(amplitudes_by_row).reshape(-1,1))
     
-    def _onFirstRun(self, overrides):
+    def __firstCall__(self, **params):
         """
-        We won't get sheet dimensions until __call__, though once we 
-        have sheet dimensions we don't want to keep recalculating any 
-        of the following.
-        """
-        self._first_run = False    
-
-        self._sheet_dimensions = SheetCoordinateSystem(overrides.bounds,\
-            overrides.xdensity,overrides.ydensity).shape
+        This is the place to add actions that must be performed once, and only once,
+        before running __call__ as normal. This is because there are a lot of params 
+        we won't get until __call__, e.g. the sheet dimensions.
         
-        self._createFrequencyIndices(overrides)
-                            
-    def __call__(self, **params_to_override):
-        if self._first_run:
-            self._initializeWindowParams(**params_to_override)
-            self._onFirstRun(ParamOverrides(self, params_to_override))
-            
+        We might also want to overload some of the default params of this, or it's
+        parent class, but wouldn't know what by until the first __call__. Thus this
+        method also allows the setting of information after the normal class __init__.
+        """
+        self._setParams(**params)
+        
+        if self.signal == None:
+            self.signal = TimeSeries()
+                
+        all_params = ParamOverrides(self, params)
+        self._sheet_dimensions = SheetCoordinateSystem(all_params['bounds'], all_params['xdensity'], all_params['ydensity']).shape
+        
+        self._createFrequencyIndices()
+        
+        self._first_call = False
+    
+    def __everyCall__(self, **params):
         amplitudes = self._getAmplitudes()
         
         if self._sheet_dimensions[1] > 1:
             amplitudes = repeat(amplitudes, self._sheet_dimensions[1], axis=1)
 
         return amplitudes
-            
+        
+    def __call__(self, **params_to_override): 
+        if self._first_call:
+            self.__firstCall__(**params_to_override)
+        
+        return self.__everyCall__(**params_to_override)
+
 
 class Spectrogram(PowerSpectrum):
     """
@@ -1367,27 +1392,26 @@ class Spectrogram(PowerSpectrum):
     a 2D representation of a fixed-width spectrogram.
     """
      
-    def __init__(self, **params):
-        super(Spectrogram, self).__init__(**params)
+    #def __init__(self, **params):
+    #    super(Spectrogram, self).__init__(**params)
     
     def _onFirstRun(self, overrides):
         super(Spectrogram, self)._onFirstRun(overrides)
         self._spectrogram = zeros(self._sheet_dimensions)
 
     def _updateSpectrogram(self, amplitudes):
-        assert shape(amplitudes)[0] == shape(self._spectrogram)[0]
         self._spectrogram = hstack((amplitudes, self._spectrogram))
         
         # knock off eldest spectral information, i.e. right-most column.
         self._spectrogram = self._spectrogram[0:, 0:self._spectrogram.shape[1]-1]
         return self._spectrogram   
     
-    def __call__(self, **params_to_override):        
-        if self._first_run:
-            self._initializeWindowParams(**params_to_override)
-            self._onFirstRun(ParamOverrides(self, params_to_override))
-            
-        return self._updateSpectrogram(self._getAmplitudes())
+    #def __call__(self, **params_to_override):        
+    #    if self._first_run:
+    #        self._initializeWindowParams(**params_to_override)
+    #        self._onFirstRun(ParamOverrides(self, params_to_override))
+    #        
+    #    return self._updateSpectrogram(self._getAmplitudes())
         
         
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,PatternGenerator)]))
