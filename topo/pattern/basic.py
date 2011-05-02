@@ -1207,10 +1207,6 @@ class TimeSeries(param.Parameterized):
                 self.warning("No time series specified, generating a 30s, %sHz sine wave." %(self.sample_rate*0.25))
                 self.time_series = self._generateSineWave(30.0, self.sample_rate*0.25, self.sample_rate)   
         
-        print self.seconds_per_iteration
-        print self.interval_length
-        print self.sample_rate
-        
         return self._extractNextInterval()
 
     

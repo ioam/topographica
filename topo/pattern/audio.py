@@ -103,8 +103,7 @@ class AudioFolder(AudioFile):
     
     filename = param.Filename(precedence=(-1))
 
-    # BK-TODO: change to param.Foldername once it becomes availible.
-    folderpath=param.String(default='sounds/complex/', doc="""
+    folderpath=param.Foldername(default='sounds/complex', doc="""
         Folder path (can be relative to Topographica's base path) to a
         folder containing audio files. The audio can be in any format 
         accepted by pyaudiolab, i.e. WAV, AIFF, or FLAC.
@@ -140,9 +139,6 @@ class AudioFolder(AudioFile):
                 self._initialiseInterSignalGap()
                           
     def _loadAudioFolder(self):
-        if self.folderpath[-1] != "/":
-            self.folderpath = self.folderpath+"/"
-            
         folder_contents = os.listdir(self.folderpath)
         self.sound_files = []
         
@@ -150,7 +146,7 @@ class AudioFolder(AudioFile):
             if file[-4:]==".wav" or file[-3:]==".wv" or \
                file[-5:]==".aiff" or file[-4:]==".aif" or \
                file[-5:]==".flac":
-                self.sound_files.append(self.folderpath+file) 
+                self.sound_files.append(self.folderpath+"/"+file) 
 
         super(AudioFolder, self).setParams(filename=self.sound_files[0])
         self.next_file = 1
