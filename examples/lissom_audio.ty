@@ -12,17 +12,21 @@ $Id: lissom_audio.ty 11027 2010-04-10 01:17:05Z bilalkhancnsg $
 """
 __version__='$Revision: 11027 $'
 
-import numpy
 import param
-
-from numpy import log, max, subtract, add, divide, power, exp, pi
 
 from topo import learningfn, transferfn, pattern, projection, responsefn, sheet
 from topo.misc.commandline import global_params as p
 
-from topo.pattern.audio import AudioFile, AudioFolder, AuditorySpectrogram, AuditorySpectrogramWithSimpleOuterEar
-from topo.pattern.basic import rectangular, Spectrogram, PowerSpectrum
-from numpy import bartlett, blackman, hamming, hanning, kaiser
+import topo.responsefn.optimized
+import topo.transferfn.optimized
+import topo.learningfn.optimized
+import topo.transferfn.misc
+import topo.sheet.lissom
+import topo.sheet.optimized
+import topo.pattern.random
+
+from topo.pattern.audio import AudioFile, AuditorySpectrogramSimpleOuterEar
+from numpy import hanning
 
 
 # Parameters that can be passed on the command line using -p  
@@ -63,14 +67,8 @@ the range 0-22,050Hz, so we confine to the human audible range 20-20,000Hz.
 # Guitar rendition of Daisy Bell, in tribute to the IBM 704, 
 # which in 1962 became the first computer ever to 'sing'.
 
-audio_data = AudioFile(filename="sounds/complex/daisy.wav", 
-    seconds_per_iteration=0.01, interval_length=1.0, gap_between_sounds=1.0)
-
-#audio_data = AudioFolder(folderpath="sounds/sine_waves/normalized/", 
-#    seconds_per_iteration=0.01, interval_length=1.0, gap_between_sounds=1.0)
-
-input_pattern=AuditorySpectrogramWithSimpleOuterEar(signal=audio_data, 
-    min_frequency=20, max_frequency=20000, windowing_function=hanning)
+audio_data = AudioFile(filename="sounds/complex/daisy.wav", seconds_per_iteration=0.001, interval_length=0.2)
+input_pattern=AuditorySpectrogramSimpleOuterEar(signal=audio_data, min_frequency=20, max_frequency=20000, windowing_function=hanning)
 
 
 ### Sheets
@@ -87,7 +85,7 @@ mgbv_dimensions = (cochlea_dimensions[0]-mgbv_connection_dimensions[0],
     cochlea_dimensions[1])
                    
 topo.sim['MGBv']=sheet.CFSheet(
-    nominal_density=p.mgbv_density,
+    nominal_density=p.mgbv_density, output_fns=[transferfn.misc.HalfRectify()],
     nominal_bounds=sheet.BoundingBox(points=((-mgbv_dimensions[0]/2, -mgbv_dimensions[1]/2),
         (mgbv_dimensions[0]/2, mgbv_dimensions[1]/2))))
         
@@ -96,7 +94,7 @@ a1_dimensions = (mgbv_dimensions[0]-a1_connection_dimensions[0],
     mgbv_dimensions[1])
                                                   
 topo.sim['A1']=sheet.lissom.LISSOM(
-    nominal_density=p.cortex_density, tsettle=9, output_fns=[transferfn.misc.HalfRectify()],
+    nominal_density=p.cortex_density, tsettle=9,
     nominal_bounds=sheet.BoundingBox(points=((-a1_dimensions[0]/2, -a1_dimensions[1]/2),
         (a1_dimensions[0]/2, a1_dimensions[1]/2))),
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.083,upper_bound=0.633)],
