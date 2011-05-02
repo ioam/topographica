@@ -10,15 +10,20 @@ import param
 import os
 
 from param.parameterized import ParamOverrides
-from topo.base.sheetcoords import SheetCoordinateSystem
-from topo.pattern.basic import TimeSeries, Spectrogram
+from topo.pattern.basic import TimeSeries, Spectrogram, PowerSpectrum
 from topo.base.patterngenerator import PatternGenerator
 
-from numpy import arange, array, ceil, complex256, concatenate, cos, exp, \
-    fliplr, float64, float128, floor, hanning, hstack, log, log10, logspace, \
-    multiply, ones, pi, poly1d, reshape, shape, size, sqrt,sum, where, zeros
+from numpy import arange, array, ceil, complex256, concatenate, cos, exp, fft, float64, float128, floor, hanning, hstack, log, log10, logspace, multiply, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
          
-
+try:
+    import matplotlib.ticker
+    import pylab
+    
+except ImportError:
+    param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
+    from basic import ImportErrorRaisingFakeModule
+    pylab = ImportErrorRaisingFakeModule("matplotlib")
+    
 try:
     import scikits.audiolab as audiolab
 
@@ -259,7 +264,7 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
         return self._spectrogram
         
 
-class LyonsCochlearModel(PatternGenerator):
+class LyonsCochlearModel(PowerSpectrum):
     """
     Outputs a cochlear decomposition as a set of frequency responses of linear 
     band-pass filters. Employs Lyons Cochlear Model to do so.
@@ -274,14 +279,14 @@ class LyonsCochlearModel(PatternGenerator):
     Apple Technical Report #13", 1988.
     """
     
-    signal = param.Parameter(default=TimeSeries(),doc="""
+    signal = param.Parameter(default=None, doc="""
         A TimeSeries object to be fed to the model.
         
         This can be any kind of signal, be it from audio files or live
         from a mic, as long as the values conform to a TimeSeries.
         """)
     
-    quality_factor = param.Number(default=8.0,doc="""
+    quality_factor = param.Number(default=8.0, doc="""
         Quality factor controls the bandwidth of each cochlear filter.
         
         The bandwidth of each cochlear filter is a function of its 
@@ -291,7 +296,7 @@ class LyonsCochlearModel(PatternGenerator):
         bandwidth approaches a constant given by: 1000/quality_factor.
         """)
     
-    stage_overlap_factor = param.Number(default=4.0,doc="""
+    stage_overlap_factor = param.Number(default=4.0, doc="""
         The degree of overlap between filters.
     
         Successive filter stages are overlapped by a fraction of their 
@@ -302,25 +307,11 @@ class LyonsCochlearModel(PatternGenerator):
                 
     def __init__(self, **params):
         super(LyonsCochlearModel, self).__init__(**params)
+        self._setParams(**params)
         
-        self._first_run = True    
-        self._initializeCochlearParameters(**params)
-        self._generateCochlearFilters()
-
-    def _initializeCochlearParameters(self, **params):
-        """
-        For subclasses: to specify the values of parameters on this, 
-        the parent class, subclasses might first need access to their 
-        own parameter values. Having the initialization in this separate 
-        method allows subclasses to make parameter changes after their 
-        usual super().__init__ call.
-        """
-        for parameter,value in params.items():
-            setattr(self,parameter,value)
-                                                  
         # Hardwired Parameters specific to model, which is to say changing
         # them without knowledge of the mathematics of the model is a bad idea.
-        self.sample_rate = self.signal.sampling_rate
+        self.sample_rate = self.signal.sample_rate
         self.half_sample_rate = float128(self.sample_rate/2.0)
         self.quart_sample_rate = float128(self.half_sample_rate/2.0)
  
@@ -333,6 +324,15 @@ class LyonsCochlearModel(PatternGenerator):
         self.ear_preemph_corner_f = float128(300.0)
         self.ear_zero_offset = float128(1.5)
         self.ear_sharpness = float128(5.0)
+        
+        self._generateCochlearFilters()
+        self._first_call = True
+        
+    def _setParams(self, **params):
+        super(LyonsCochlearModel, self)._setParams(**params)
+        
+        for parameter,value in params.items():
+            setattr(self,parameter,value)
     
     def _earBandwidth(self, cf):
         return sqrt(cf*cf + self.ear_break_squared) / self.ear_q
@@ -358,24 +358,6 @@ class LyonsCochlearModel(PatternGenerator):
             return channel_cf
 
     def _evaluateFiltersForFrequencies(self, filters, frequencies):
-        Zs = exp(2j*pi*frequencies/self.sample_rate)
-        Z_squareds = Zs * Zs
-        
-        zeros = ones((shape(frequencies)[0], shape(filters[0])[0], 3), dtype=complex256)
-        zeros[:,:,2] = filters[0][:,2] * Z_squareds
-        zeros[:,:,1] = filters[0][:,1] * Zs
-        zeros[:,:,0] = filters[0][:,0]
-        zeros = sum(zeros, axis=2)
-
-        poles = ones((shape(frequencies)[0], shape(filters[1])[0], 3), dtype=complex256)
-        poles[:,:,2] = filters[1][:,2] * Z_squareds
-        poles[:,:,1] = filters[1][:,1] * Zs
-        poles[:,:,0] = filters[1][:,0]
-        poles = sum(poles, axis=2)
-        
-        return zeros / poles
-
-    def _evaluateFiltersOverTime(self, filters, samples):
         Zs = exp(2j*pi*frequencies/self.sample_rate)
         Z_squareds = Zs * Zs
         
@@ -446,15 +428,6 @@ class LyonsCochlearModel(PatternGenerator):
             self._secondOrderFilterFromCenterQ(self.cascade_pole_cfs[0],self.cascade_pole_qs[0]), 
             array([self.quart_sample_rate]), 1.0)
         
-        top = poly1d(fliplr(high_freq_compensator[0])[0]) * poly1d(fliplr(pole_pair[0])[0]) \
-            * poly1d(fliplr(outer_middle_ear_filter[0])[0])
-        
-        bottom = poly1d(fliplr(high_freq_compensator[1])[0]) * poly1d(fliplr(pole_pair[1])[0]) \
-            * poly1d(fliplr(outer_middle_ear_filter[1])[0])
-        
-        print outer_middle_ear_filter
-        print [top, bottom]
-        
         outer_middle_ear_evaluations = self._evaluateFiltersForFrequencies(outer_middle_ear_filter, self.frequencies)
         high_freq_compensator_evaluations = self._evaluateFiltersForFrequencies(high_freq_compensator, self.frequencies)
         pole_pair_evaluations = self._evaluateFiltersForFrequencies(pole_pair, self.frequencies)
@@ -502,78 +475,55 @@ class LyonsCochlearModel(PatternGenerator):
         
         self.cochlear_channels = self._generateCascadeFilters()
         
-    def _onFirstRun(self, overrides):
-        self._first_run = False    
+    def _getAmplitudes(self):
+        """
+        Perform a real Discrete Fourier Transform (DFT; implemented
+        using a Fast Fourier Transform algorithm, FFT) of the current
+        sample from the signal multiplied by the smoothing window.
 
-        self._sheet_dimensions = SheetCoordinateSystem(overrides.bounds,\
-            overrides.xdensity,overrides.ydensity).shape
-    
-        if self._sheet_dimensions[0] != self.num_of_channels:
-            raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. " +\
-            "Adjust the number sheet rows from [%s] to [%s]."%(self._sheet_dimensions[0], self.num_of_channels))
+        See numpy.rfft for information about the Fourier transform.
+        """
         
-        self.previous_interval_samples = self.signal.extractSpecificInterval(0, 3)
-        self._next_start = 3
+        sample_rate = self.signal.sample_rate        
         
-        self._all_filtered_samples = zeros([self.num_of_channels,3], dtype=float128)
+        # A signal window *must* span one sample rate, irrespective of interval length.
+        signal_window = tile(self.signal(), ceil(sample_rate/self.signal.samples_per_interval))
         
-        #for channel in range(0,self.num_of_channels):
-        channel = 0
-        filter = self.cochlear_channels[channel]
-        
-        print filter
-        
-        a0 = filter[0][0]; a1 = filter[0][1]; a2 = filter[0][2]
-        b1 = filter[1][1]; b2 = filter[1][2]
-    
-        self._all_filtered_samples[channel][0] = a0*interval_samples[0]
-        
-        self._all_filtered_samples[channel][1] = a0*interval_samples[1] +\
-            a1*interval_samples[0] - b1*self._all_filtered_samples[channel][0]
-            
-        self._all_filtered_samples[channel][2] = a0*interval_samples[2] +\
-            a1*interval_samples[1] - b1*self._all_filtered_samples[channel][1] +\
-            a2*interval_samples[0] - b2*self._all_filtered_samples[channel][0]
-                                
-    def __call__(self, **params_to_override):
-        if self._first_run:
-            self._onFirstRun(ParamOverrides(self, params_to_override))
-        
+        if self.windowing_function == None:
+            smoothed_window = signal_window[0:sample_rate]
         else:
-            current_interval_samples = self.signal.extractSpecificInterval(self._next_start, self._next_start+3)
-            self._next_start = self._next_start + 3
-            
-            filtered_samples = zeros([self.num_of_channels,3], dtype=float128)            
-            
-            #for channel in range(0,self.num_of_channels):
-            channel = 0
-
-            filter = self.cochlear_channels[channel][0]
-            
-            a0 = filter[0][0]; a1 = filter[0][1]; a2 = filter[0][2]
-            b1 = filter[1][1]; b2 = filter[1][2]
-            
-            filtered_samples[channel][0] = a0*current_interval_samples[0] +\
-                a1*self.previous_interval_samples[-1] - b1*self._all_filtered_samples[channel][-1] +\
-                a2*self.previous_interval_samples[-2] - b2*self._all_filtered_samples[channel][-2]            
-            
-            filtered_samples[channel][1] = a0*current_interval_samples[1] +\
-                a1*current_interval_samples[0] - b1*filtered_samples[channel][0] +\
-                a2*self.previous_interval_samples[-1] - b2*self._all_filtered_samples[channel][-1]     
+            smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
+        
+        return abs(fft.rfft(smoothed_window))[0:sample_rate/2]
                 
-            filtered_samples[channel][2] = a0*current_interval_samples[2] +\
-                a1*current_interval_samples[1] - b1*filtered_samples[channel][1] +\
-                a2*current_interval_samples[0] - b2*filtered_samples[channel][0]     
-                                
-            self._all_filtered_samples = hstack((fliplr(filtered_samples), fliplr(self._all_filtered_samples)))
-
-        empty_columns = self.sheet_dimensions[1] - shape(self._all_filtered_samples)[1]
-        if empty_columns > 0:
-            self._all_filtered_samples = hstack((self._all_filtered_samples, zeros([self.num_of_channels,empty_columns])))
-        else:
-            self._all_filtered_samples = self._all_filtered_samples[0:, 0:self._all_filtered_samples.shape[1]-3]        
+    def __firstCall__(self, **params):
+        self._setParams(**params)
+        super(LyonsCochlearModel, self).__firstCall__(**params)
         
-        return self._all_filtered_samples
+        if self._sheet_dimensions[0] != self.num_of_channels:
+            raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." 
+                %(self._sheet_dimensions[0], self.num_of_channels))
+    
+    def __everyCall__(self, **params):
+        sample_rate = self.signal.sample_rate
+        amplitudes = self._getAmplitudes().reshape(1, sample_rate/2.0)
+        
+        filter_responses = multiply(self.cochlear_channels, amplitudes)
+        sheet_responses = zeros(self.num_of_channels)
+        
+        for channel in range(0, self.num_of_channels):
+            time_responses = abs(fft.ifft(filter_responses[channel]))
+            sheet_responses[channel] = sum(time_responses) / (sample_rate/2.0) 
+        
+        sheet_responses = sheet_responses.reshape(self.num_of_channels, 1)
+
+        #print sheet_responses
+        #print sheet_responses.shape
+        
+        if self._sheet_dimensions[1] > 1:
+            sheet_responses = repeat(sheet_responses, self._sheet_dimensions[1], axis=1)
+
+        return sheet_responses
         
         
 class Cochleogram(LyonsCochlearModel):
@@ -582,25 +532,33 @@ class Cochleogram(LyonsCochlearModel):
     i.e. the response over time along the cochlea.
     """
 
-    def _onFirstRun(self, **overrides):
-        super(Cochleogram, self)._onFirstRun(**overrides)
-
-        self.cochleogram = zeros(self.sheet_dimensions)
-
-    def __call__(self, **params_to_override):
-        overrides = ParamOverrides(self, params_to_override)
-         
-        if self._first_run:
-            self._onFirstRun(overrides)
-            
-        amplitudes = self._getAmplitudes()
+    def __init__(self, **params):
+        super(Cochleogram, self).__init__(**params) 
         
-        assert shape(amplitudes)[0] == shape(self.cochleogram)[0]
-        self.cochleogram = hstack((amplitudes, self.cochleogram))
+    def _updateCochleogram(self, amplitudes):
+        self._cochleogram = hstack((amplitudes, self._cochleogram))
+        self._cochleogram = self._cochleogram[0:, 0:self._cochleogram.shape[1]-1]
+                
+    def __firstCall__(self, **params):
+        super(Cochleogram, self).__firstCall__(**params)
+        self._cochleogram = zeros(self._sheet_dimensions)
+
+    def __everyCall__(self, **params):
+        sample_rate = self.signal.sample_rate
+        amplitudes = self._getAmplitudes().reshape(1, sample_rate/2.0)
         
-        # knock off eldest information, i.e. right-most column.
-        self.cochleogram = self.cochleogram[0:, 0:self.cochleogram.shape[1]-1]        
-        return self.cochleogram
+        filter_responses = multiply(self.cochlear_channels, amplitudes)
+        sheet_responses = zeros(self.num_of_channels)
+        
+        for channel in range(0, self.num_of_channels):
+            time_responses = abs(fft.ifft(filter_responses[channel]))
+            sheet_responses[channel] = sum(time_responses) / (sample_rate/2.0) 
+        
+        sheet_responses = sheet_responses.reshape(self.num_of_channels, 1)
+
+        self._updateCochleogram(sheet_responses)
+        return self._cochleogram
+        
         
         
 if __name__=='__main__' or __name__=='__mynamespace__':
