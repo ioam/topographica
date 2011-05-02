@@ -1099,14 +1099,14 @@ class TimeSeries(param.Parameterized):
         for parameter,value in params.items():
             if parameter == "interval_length":
                 if self.interval_length != value:
-                    if self.interval_length <= 0:
+                    if value <= 0:
                         raise ValueError("The interval length must be > 0.")                
                     else:
                         setattr(self, parameter, value)
                 
             elif parameter == "sample_rate":
                 if self.sample_rate != value:
-                    if self.sample_rate == 0:
+                    if value == 0:
                         raise ValueError("The sampling rate cannot be set to 0.")
                     else:
                         setattr(self, parameter, value)
@@ -1114,7 +1114,7 @@ class TimeSeries(param.Parameterized):
                 
             elif parameter == "time_series":
                 if not equal(self.time_series, value).all():
-                    if type(self.time_series) != numpy.ndarray:
+                    if type(value) != numpy.ndarray:
                         raise ValueError("A time series must be a numpy array.")                                                                  
                     else:
                         if self.time_series == None:
@@ -1124,7 +1124,7 @@ class TimeSeries(param.Parameterized):
 
             elif parameter == "seconds_per_iteration":
                 if self.seconds_per_iteration != value:
-                    if self.seconds_per_iteration <= 0:
+                    if value <= 0:
                         raise ValueError("The seconds per iteration must be > 0.")
                     else:
                         if self.seconds_per_iteration > self.interval_length:
