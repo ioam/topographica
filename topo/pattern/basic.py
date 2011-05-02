@@ -1154,7 +1154,7 @@ class TimeSeries(param.Parameterized):
             raise ValueError("A time series must have a length > 0.")            
     
     def _generateSineWave(self, duration, frequency, sample_rate):
-        time_axis = linspace(0.0, duration*sample_rate, duration*sample_rate)
+        time_axis = linspace(0.0, duration, duration*sample_rate)
         return sin(frequency * 2.0*pi*time_axis)
         
     def extractSpecificInterval(self, interval_start, interval_end):
