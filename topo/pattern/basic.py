@@ -1064,20 +1064,24 @@ class TimeSeries(param.Parameterized):
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Parameter(default=None,doc="""
+    time_series = param.Parameter(default=None, doc="""
         An array of numbers in a series.
         """)
     
-    sample_rate = param.Number(default=44000,doc="""
+    sample_rate = param.Number(default=44100, doc="""
         The number of samples taken per second to form the series.
         """)
      
-    seconds_per_iteration=param.Number(default=0.1, doc="""
+    seconds_per_iteration = param.Number(default=0.2, doc="""
         Number of seconds advanced along the time series on each iteration.
         """)
 
-    interval_length=param.Number(default=1.0,doc="""
+    interval_length = param.Number(default=0.2, doc="""
         The length of time in seconds to be returned on each iteration.
+        """)
+    
+    repeat = param.Boolean(default=True, doc="""
+        Whether the signal loops or terminates once it reaches its end.
         """)
     
     # Instantiating a TimeSeries in the GUI is not very useful, 
@@ -1086,11 +1090,10 @@ class TimeSeries(param.Parameterized):
     _abstract = True
     
     def __init__(self, **params):
-        self._first_run = True
+        super(TimeSeries, self).__init__(**params)
         self.setParams(**params)
-            
-        self.samples_per_interval = int(self.interval_length*self.sample_rate)
-        self._next_interval_start = 0
+        
+        self._first_call = True
         
     def setParams(self, **params):
         """
@@ -1107,54 +1110,41 @@ class TimeSeries(param.Parameterized):
             # type mismatch on comparison. 
             if parameter == "interval_length":
                 if self.interval_length != value:
-                    setattr(self,parameter,value)
-                    self._checkIntervalLength()
+                    if self.interval_length <= 0:
+                        raise ValueError("The interval length must be > 0.")                
+                    else:
+                        setattr(self, parameter, value)
                 
             elif parameter == "sample_rate":
                 if self.sample_rate != value:
-                    setattr(self,parameter,value)
-                    self._checkSamplingRate()
+                    if self.sample_rate == 0:
+                        raise ValueError("The sampling rate cannot be set to 0.")
+                    else:
+                        setattr(self, parameter, value)
+                        self.samples_per_interval = int(self.interval_length*self.sample_rate)
                 
             elif parameter == "time_series":
-                if not equal(self.time_series,value).all():
-                    setattr(self,parameter,value)
-                    self._checkTimeSeries()                
-                    self._next_interval_start = 0   
+                if not equal(self.time_series, value).all():
+                    if type(self.time_series) != numpy.ndarray:
+                        raise ValueError("A time series must be a numpy array.")                                                                  
+                    else:
+                        if self.time_series == None:
+                            setattr(self, parameter, value)
+                        else:
+                            self.time_series = hstack((self.time_series, value))
 
             elif parameter == "seconds_per_iteration":
                 if self.seconds_per_iteration != value:
-                    setattr(self,parameter,value)
-                    self._checkSecondsPerIteration()     
-                                                                                                                                       
-    def _checkSecondsPerIteration(self):
-        if self.seconds_per_iteration <= 0:
-            raise ValueError("The seconds per iteration must be > 0.")
-
-        elif self.seconds_per_iteration > self.interval_length:
-            self.warning("Seconds per iteration > interval length, some signal will be skipped.")
+                    if self.seconds_per_iteration <= 0:
+                        raise ValueError("The seconds per iteration must be > 0.")
+                    else:
+                        if self.seconds_per_iteration > self.interval_length:
+                            self.warning("Seconds per iteration > interval length, some signal will be skipped.")                    
+                        setattr(self, parameter, value)
             
-    def _checkIntervalLength(self):
-        if self.interval_length <= 0:
-            raise ValueError("The interval length must be > 0.")
-                
-    def _checkSamplingRate(self):
-        if self.sample_rate == 0:
-            raise ValueError("The sampling rate cannot be set to 0.")
-        else:
-            self.samples_per_interval = int(self.interval_length*self.sample_rate)
-            
-    def _checkTimeSeries(self):
-        if self.time_series == None:
-            self.warning("No time series specified, generating a 30s, %sHz sine wave." %(self.sample_rate*0.25))
-            self.time_series = self._generateSineWave(30.0, self.sample_rate*0.25, self.sample_rate)        
-        
-        elif type(self.time_series) != numpy.ndarray:
-            raise ValueError("A time series must be a numpy array.")
-        
-        elif self.time_series.size == 0:
-            raise ValueError("A time series must have a length > 0.")            
+            setattr(self, parameter, value)
     
-    def _generateSineWave(self, duration, frequency, sample_rate):
+    def generateSineWave(self, duration, frequency, sample_rate):
         time_axis = linspace(0.0, duration, duration*sample_rate)
         return sin(frequency * 2.0*pi*time_axis)
         
@@ -1172,10 +1162,13 @@ class TimeSeries(param.Parameterized):
         elif interval_end > self.time_series.size:
             
             if interval_start < self.time_series.size:
-                self.warning("Returning last interval of the time series.")
+                if self.repeat:
+                    self._next_interval_start = 0
+                else:
+                    self.warning("Returning last interval of the time series.")
+                    self._next_interval_start = self.time_series.size
                 
                 remaining_signal = self.time_series[interval_start:self.time_series.size]
-                self._next_interval_start = self.time_series.size
                 return hstack((remaining_signal, zeros(self.samples_per_interval-remaining_signal.size)))
             
             else:
@@ -1191,23 +1184,46 @@ class TimeSeries(param.Parameterized):
         self._next_interval_start += int(self.seconds_per_iteration*self.sample_rate)            
 
         return self.extractSpecificInterval(interval_start, interval_end)
-        
-    def __call__(self, **params_to_override):
+
+    def __firstCall__(self, **params):
         """
-        We reinitialise all params except next_interval_start so that users
-        can vary interval_length, seconds_per_iteration, or indeed the time 
-        series on each call (for variable/mic input etc).
-        """    
-        self.setParams(**params_to_override)
-        
-        if self._first_run:
-            self._first_run = False
+        This is the place to add actions that must be performed once, and only once,
+        before running __call__ as normal.
+        """
+
+        if self.time_series == None and "time_series" not in ParamOverrides(self, params):
+            sine_frequency = (self.sample_rate/2.0) / 2.0
+            self.warning("No time series specified, generating a %sHz sine wave." %(sine_frequency))
             
-            if self.time_series == None and "time_series" not in params_to_override.items():
-                self.warning("No time series specified, generating a 30s, %sHz sine wave." %(self.sample_rate*0.25))
-                self.time_series = self._generateSineWave(30.0, self.sample_rate*0.25, self.sample_rate)   
+            # want to generate at least one period of the specified frequency.
+            factor = ceil((1.0/sine_frequency) / self.interval_length)
+            sine_length = factor * self.interval_length
+            self.time_series = self.generateSineWave(sine_length, self.sample_rate*0.25, self.sample_rate)   
+        
+        self.samples_per_interval = int(self.interval_length*self.sample_rate)
+        self._next_interval_start = 0
+        
+        self._first_call = False
+    
+    def __everyCall__(self, **params):
+        """
+        We can modify all params on each call so that users can vary the interval_length, 
+        seconds_per_iteration, or indeed the time series itself on each call (for variable
+        input from mics etc).
+        
+        If a time series argument is passed then the existing time series is appended to, 
+        not overwritten. If overwriting type behaviour is required then it is more 
+        appropriate to create a new TimeSeries object.
+        """    
+        self.setParams(**params)
         
         return self._extractNextInterval()
+
+    def __call__(self, **params_to_override): 
+        if self._first_call:
+            self.__firstCall__(**params_to_override)
+        
+        return self.__everyCall__(**params_to_override)
 
     
 class PowerSpectrum(PatternGenerator):
@@ -1324,7 +1340,7 @@ class PowerSpectrum(PatternGenerator):
         
         sample_rate = self.signal.sample_rate        
         
-        # A signal window must be the length of 1s worth of samples (the sample rate).
+        # A signal window *must* span one sample rate, irrespective of interval length.
         signal_window = tile(self.signal(), ceil(sample_rate/self.signal.samples_per_interval))
         
         if self.windowing_function == None:
