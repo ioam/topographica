@@ -6,16 +6,16 @@ $Id$
 """
 __version__='$Revision$'
 
-from math import pi, sqrt
+#from math import pi, sqrt
 
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or#, cos, sin
-from numpy import abs, add, alltrue, array, arange, asarray, ceil, clip, cos, \
-    fft, float32, float64, equal, exp, floor, hstack, Infinity, linspace, multiply, \
-    nonzero, ones, pi, repeat, round, shape, sin, subtract, tile, zeros
+from numpy import abs, add, alltrue, asarray, ceil, clip, cos, \
+    fft, equal, exp, hstack, Infinity, linspace, multiply, \
+    nonzero, pi, repeat, sin, sqrt, subtract, tile, zeros
 
 import param
-from param.parameterized import ParamOverrides,as_uninitialized
+from param.parameterized import ParamOverrides
 
 import topo
 # Imported here so that all PatternGenerators will be in the same package
@@ -670,7 +670,7 @@ class SeparatedComposite(Composite):
                     valid_generators.append(g)
                     break
                 
-                vals = (g.force_new_dynamic_value('x'), g.force_new_dynamic_value('y'))
+                #vals = (g.force_new_dynamic_value('x'), g.force_new_dynamic_value('y'))
                 
             else:
                 self.warning("Unable to place pattern %s subject to given constraints" %
@@ -1280,15 +1280,17 @@ class PowerSpectrum(PatternGenerator):
             
             else:
                 setattr(self, parameter, value)
-                                
+        
+        if self.min_frequency > self.max_frequency:
+            raise ValueError("PowerSpectrum's min frequency must be lower than its max frequency.")
+        
     def _createFrequencyIndices(self):
         
         # calculate the discrete frequencies possible for the sample rate.
         sample_rate = self.signal.sample_rate        
         self._available_frequency_range = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
 
-        if not self._available_frequency_range.min() <= self.min_frequency \
-            or not self._available_frequency_range.max() >= self.max_frequency:
+        if not self._available_frequency_range.min() <= self.min_frequency or not self._available_frequency_range.max() >= self.max_frequency:
             
             raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(self.min_frequency, self.max_frequency, self._available_frequency_range.min(), self._available_frequency_range.max()))
 
