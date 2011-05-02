@@ -69,6 +69,8 @@ class AudioFile(TimeSeries):
         method allows subclasses to make parameter changes after their 
         usual super().__init__ call.
         """
+        super(AudioFile, self).setParams(**params)
+
         for parameter,value in params.items():
             # Trying to combine the following into one line fails, python 
             # will try to evaluate both logical statements at once and 
