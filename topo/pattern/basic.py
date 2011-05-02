@@ -1020,16 +1020,16 @@ class SigmoidedDoLG(PatternGenerator):
     """
     size = param.Number(default=1.0)
     
-    positive_size = param.Number(default=0.0, bounds=(0.0,None), softbounds=(0.0,5.0),
+    positive_size = param.Number(default=0.15, bounds=(0.0,None), softbounds=(0.0,5.0),
         doc="""Size parameter for the positive Gaussian.""")
     
-    positive_tail = param.Number(default=0.8,bounds=(0.0,10.0),softbounds=(0.001,2.000),
+    positive_tail = param.Number(default=0.6,bounds=(0.0,10.0),softbounds=(0.001,2.000),
         doc="""Parameter controlling decay rate and distance from the peak of the positive Gaussian.""")
     
-    negative_size = param.Number(default=0.0, bounds=(0.0,None), softbounds=(0.0,5.0),
+    negative_size = param.Number(default=0.35, bounds=(0.0,None), softbounds=(0.0,5.0),
         doc="""Size parameter for the negative Gaussian.""")
         
-    negative_tail = param.Number(default=0.8,bounds=(0.0,10.0),softbounds=(0.001,2.000),
+    negative_tail = param.Number(default=0.5,bounds=(0.0,10.0),softbounds=(0.001,2.000),
         doc="""Parameter controlling decay rate and distance from the peak of the negative Gaussian.""")
                 
     sigmoid_slope = param.Number(default=50.0, bounds=(None,None), softbounds=(-100.0,100.0),
@@ -1038,7 +1038,7 @@ class SigmoidedDoLG(PatternGenerator):
     sigmoid_orientation = param.Number(default=pi/2.0, bounds=(None,None), softbounds=(0.0,2*pi),
         doc="""Orientation parameter for the Sigmoid.""")
             
-    sigmoid_position = param.Number(default=0.02, bounds=(None,None), softbounds=(-1.0,1.0),
+    sigmoid_position = param.Number(default=0.015, bounds=(None,None), softbounds=(-1.0,1.0),
         doc="""Position parameter for the Sigmoid.""")
 
 
