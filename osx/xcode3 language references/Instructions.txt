@@ -1,0 +1,7 @@
+Copy Topographica.xcspec & Topographica.xcsynspec into the following folder to get .ty syntax colouring in Xcode 3. If the folder does not exist, create it.
+
+/Developer/Library/Xcode/Specifications/
+
+The only solution for syntax colouring in Xcode 4 currently is manually selecting python syntax colouring from the menu, or setting it as a keyboard shortcut. Hopefully this will change in the near future.
+
+

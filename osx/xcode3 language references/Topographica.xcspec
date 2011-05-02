@@ -1,0 +1,10 @@
+(
+	{
+		Type = FileType;
+		Identifier = sourcecode.topographica;
+		BasedOn = sourcecode;
+		Name = "Topographica";
+		Extensions = ( ty );
+		Language = "xcode.lang.python";
+	}
+)

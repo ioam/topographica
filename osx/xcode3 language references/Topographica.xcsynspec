@@ -1,0 +1,8 @@
+(
+	{
+		Identifier = "xcode.syntax.definition.python.class";
+		BasedOn = "xcode.syntax.definition.class";
+		IncludeInPrefs = NO;
+		NameFormat = "%@";
+	}
+)
