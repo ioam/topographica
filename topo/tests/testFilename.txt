@@ -33,3 +33,16 @@
 >>> shutil.rmtree(tmp2)
 
 ## end test of not pickling prefix, search_paths
+
+>>> tmp3 = tempfile.mkdtemp()
+>>> open("/%s/testing"%tmp3,'w').close()
+
+
+>>> class TestFileName(param.Parameterized):
+...    filename = param.Filename(default="testing",search_paths=[tmp3])
+
+>>> c = TestFileName()
+>>> c.filename=="%s/testing"%tmp3
+True
+
+>>> shutil.rmtree(tmp3)
