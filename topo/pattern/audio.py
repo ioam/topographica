@@ -6,40 +6,30 @@ $Id$
 __version__='$Revision$'
 
 
-import numpy
 import param
 import os
 
 from param.parameterized import ParamOverrides
 from topo.base.sheetcoords import SheetCoordinateSystem
-from topo.pattern.basic import TimeSeries, PowerSpectrum, Spectrogram
+from topo.pattern.basic import TimeSeries, Spectrogram
 from topo.base.patterngenerator import PatternGenerator
 
-from numpy import array, float32, multiply, round, shape, hstack, hanning, fft, log10, logspace, where, \
-    concatenate, reshape, random, float128, sqrt, log, floor, zeros, arange, ones, exp, pi, size, complex256, \
-    sum, cos, vstack, float64, ceil, fliplr, poly1d
+from numpy import arange, array, ceil, complex256, concatenate, cos, exp, \
+    fliplr, float64, float128, floor, hanning, hstack, log, log10, logspace, \
+    multiply, ones, pi, poly1d, reshape, shape, size, sqrt,sum, where, zeros
+         
 
 try:
-    import matplotlib.ticker
-    import pylab
-    
-except ImportError:
-    
-    param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
-    from basic import ImportErrorRaisingFakeModule
-    pylab = ImportErrorRaisingFakeModule("matplotlib")
-
-try:
-    import scikits.audiolab as pyaudiolab
+    import scikits.audiolab as audiolab
 
 except ImportError:
     param.Parameterized().warning("audio.py classes will not be usable;" \
-        "scikits.audiolab (pyaudiolab) is not available.")
+        "scikits.audiolab is not available.")
         
         
 class AudioFile(TimeSeries):
     """
-    Requires an audio file in any format accepted by pyaudiolab (wav, aiff,
+    Requires an audio file in any format accepted by audiolab (wav, aiff,
     flac).
     """
     
@@ -51,44 +41,40 @@ class AudioFile(TimeSeries):
     
     filename = param.Filename(default='sounds/complex/daisy.wav', doc="""
         File path (can be relative to Topographica's base path) to an
-        audio file. The audio can be in any format accepted by pyaudiolab, 
+        audio file. The audio can be in any format accepted by audiolab, 
         e.g. WAV, AIFF, or FLAC.
         """)
             
     def __init__(self, **params):
         super(AudioFile, self).__init__(**params)
-        self.setParams(**params)
+        self._setParams(**params)
         
-        self._loadAudioFile()
-
-    def setParams(self, **params):
-        """
-        For subclasses: to specify the values of parameters on this, 
-        the parent class, subclasses might first need access to their 
-        own parameter values. Having the initialization in this separate 
-        method allows subclasses to make parameter changes after their 
-        usual super().__init__ call.
-        """
-        super(AudioFile, self).setParams(**params)
+    def _setParams(self, **params):
+        super(AudioFile, self)._setParams(**params)
 
         for parameter,value in params.items():
-            # Trying to combine the following into one line fails, python 
-            # will try to evaluate both logical statements at once and 
-            # since 'value' could be of any type the result is often a 
-            # type mismatch on comparison. 
             if parameter == "filename":
                 if self.filename != value:
-                    setattr(self,parameter,value)
-                    self._loadAudioFile()
+                    setattr(self, parameter, value)
+            
+            else:
+                setattr(self, parameter, value)
         
     def _loadAudioFile(self):
-        self.source = pyaudiolab.Sndfile(self.filename, 'r')
+        self.source = audiolab.Sndfile(self.filename, 'r')
         
         self.time_series = self.source.read_frames(self.source.nframes, dtype=float64)
         self._checkTimeSeries()
                         
         self.sample_rate = self.source.samplerate
         self._checkSamplingRate()
+
+    def __firstCall__(self, **params):
+        self._loadAudioFile()
+        super(AudioFile, self).__firstCall__(**params)
+
+    def __everyCall__(self, **params):
+        return self._extractNextInterval()
 
 
 class AudioFolder(AudioFile):
@@ -106,7 +92,7 @@ class AudioFolder(AudioFile):
     folderpath=param.Foldername(default='sounds/complex', doc="""
         Folder path (can be relative to Topographica's base path) to a
         folder containing audio files. The audio can be in any format 
-        accepted by pyaudiolab, i.e. WAV, AIFF, or FLAC.
+        accepted by audiolab, i.e. WAV, AIFF, or FLAC.
         """)
          
     gap_between_sounds=param.Number(default=0.0, doc="""
@@ -115,12 +101,12 @@ class AudioFolder(AudioFile):
                  
     def __init__(self, **params):
         super(AudioFolder, self).__init__(**params)
-        self.setParams(**params)
+        self._setParams(**params)
         
         self._loadAudioFolder()
         self._initialiseInterSignalGap()
     
-    def setParams(self, **params):
+    def _setParams(self, **params):
         """
         For subclasses: to specify the values of parameters on this, 
         the parent class, subclasses might first need access to their 
@@ -161,7 +147,7 @@ class AudioFolder(AudioFile):
         if interval_end > self.time_series.size:
         
             if self.next_file < len(self.sound_files):
-                next_source = pyaudiolab.Sndfile(self.sound_files[self.next_file], 'r')
+                next_source = audiolab.Sndfile(self.sound_files[self.next_file], 'r')
                 self.next_file += 1
      
                 if next_source.samplerate != self.sample_rate:
