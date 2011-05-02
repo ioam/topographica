@@ -1057,11 +1057,6 @@ class SigmoidedDoLG(PatternGenerator):
         
         return Composite(generators=[diff_of_log_gaussians, sigmoid], bounds=p.bounds,
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
-
-
-def generateSineWave(duration, frequency, sample_rate):
-    time_axis = linspace(0.0, duration*sample_rate, duration*sample_rate)
-    return sin(frequency * 2.0*pi*time_axis)
      
            
 class TimeSeries(param.Parameterized):
@@ -1069,7 +1064,7 @@ class TimeSeries(param.Parameterized):
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Parameter(default=generateSineWave(10.0, 3000.0, 44000.0),doc="""
+    time_series = param.Parameter(default=None,doc="""
         An array of numbers in a series.
         """)
     
@@ -1090,13 +1085,15 @@ class TimeSeries(param.Parameterized):
     # manipulate a series of numbers for use by other classes.
     _abstract = True
     
-    def __init__(self, **params):        
+    def __init__(self, **params):
         self.setParams(**params)
+
+        if self.time_series == None:
+            self.warning("No time series specified, generating a 30s, %sHz sine wave." %(self.sample_rate*0.25))
+            self.time_series = self._generateSineWave(30.0, self.sample_rate*0.25, self.sample_rate)
         
         self.samples_per_interval = int(self.interval_length*self.sample_rate)
         self._next_interval_start = 0
-        
-        #print self.time_series
     
     def setParams(self, **params):
         """
@@ -1155,7 +1152,11 @@ class TimeSeries(param.Parameterized):
         
         elif self.time_series.size == 0:
             raise ValueError("A time series must have a length > 0.")            
-            
+    
+    def _generateSineWave(self, duration, frequency, sample_rate):
+        time_axis = linspace(0.0, duration*sample_rate, duration*sample_rate)
+        return sin(frequency * 2.0*pi*time_axis)
+        
     def extractSpecificInterval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
@@ -1197,16 +1198,13 @@ class TimeSeries(param.Parameterized):
         series on each call (for variable/mic input etc).
         """    
         self.setParams(**params_to_override)
-                
-        return self._extractNextInterval()
-                
         
-def rectangular(signal_size):
-    """
-    Generates a Rectangular signal smoothing window,
-    """
-    return ones(int(signal_size))
-
+        print self.seconds_per_iteration
+        print self.interval_length
+        print self.sample_rate
+        
+        return self._extractNextInterval()
+        
     
 class PowerSpectrum(PatternGenerator):
     """
@@ -1219,7 +1217,7 @@ class PowerSpectrum(PatternGenerator):
         A TimeSeries object on which to perfom the Fourier Transform.
         """)
     
-    windowing_function = param.Parameter(default=rectangular, doc="""
+    windowing_function = param.Parameter(default=numpy.hanning, doc="""
         This function is multiplied with the current interval, i.e. the
         most recent portion of the waveform interval of a signal, 
         before performing the Fourier transform.  It thus shapes the
@@ -1245,9 +1243,9 @@ class PowerSpectrum(PatternGenerator):
         """)
                 
     def __init__(self, **params):
-        super(PowerSpectrum, self).__init__(**params)
-                
+        super(PowerSpectrum, self).__init__(**params)        
         self._initializeWindowParams(**params)
+        
         self._first_run = True
 
     def _initializeWindowParams(self, **params):
@@ -1268,7 +1266,13 @@ class PowerSpectrum(PatternGenerator):
         
         # calculate the discrete frequencies possible for the given sample rate.
         self.all_frequencies = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
-
+    
+    def rectangularWindow(self, signal_size):
+        """
+        Generates a Rectangular signal smoothing window,
+        """
+        return ones(int(signal_size))
+    
     def _setFrequencySpacing(self, index_of_min_freq, index_of_max_freq): 
         """
         Frequency spacing to use, i.e. how to map the available frequency range to 
@@ -1285,12 +1289,6 @@ class PowerSpectrum(PatternGenerator):
             num=(index_of_max_freq-index_of_min_freq), endpoint=True))
                 
     def _createFrequencyIndices(self, overrides):
-        
-        print overrides.min_frequency
-        print overrides.max_frequency
-        
-        print self.all_frequencies.min()
-        print self.all_frequencies.max()
         
         if not self.all_frequencies.min() <= overrides.min_frequency \
             or not self.all_frequencies.max() >= overrides.max_frequency:
