@@ -321,7 +321,7 @@ class measure_rfs(SingleInputResponseCommand):
     """  
     static_parameters = param.List(default=["offset","size"])
     __abstract = True
-
+    
     def __call__(self,**params):
         p=ParamOverrides(self,params)
         self.params('input_sheet').compute_default()
@@ -336,15 +336,13 @@ class measure_rfs(SingleInputResponseCommand):
           
     def _feature_list(self,p):
     
-        # Obtain sheet dimensions and density.
         left, bottom, right, top = p.input_sheet.nominal_bounds.lbrt()
         sheet_density = float(p.input_sheet.nominal_density)
         
-        # Cannot assume square sheet so two independent values for axes divisions.
+        # Cannot assume square sheet.
         vertical_divisions = (sheet_density * (top - bottom)) - 1
         horizontal_divisions = (sheet_density * (right - left)) - 1
 
-        # Calculate size of a division.
         unit_size = 1.0 / sheet_density
         half_unit_size = unit_size / 2.0 # saves repeated calculation.
         p['size'] = unit_size
@@ -850,7 +848,7 @@ class measure_frequency_pref(PositionMeasurementCommand):
     """Measure a frequency preference and selectivity map"""
         
     display = param.Boolean(True) 
-    pattern_presenter = param.Callable(PatternPresenter(Line(smoothing=0.0001,thickness=0.05)))
+    pattern_presenter = param.Callable(PatternPresenter(Line(smoothing=0.001,thickness=0.01)))
     
     # BK-ALERT: These are hard coded to the lissom audio sheet dimensions.
     # i'm not sure how to avoid that, PositionMeasurementCommand isn't
