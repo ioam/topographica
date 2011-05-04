@@ -91,15 +91,13 @@ class AudioFolder(AudioFile):
     
     filename = param.Filename(precedence=(-1))
 
-    folderpath=param.Foldername(default='sounds/complex', doc="""
-        Folder path (can be relative to Topographica's base path) to a
-        folder containing audio files. The audio can be in any format 
-        accepted by audiolab, i.e. WAV, AIFF, or FLAC.
-        """)
+    folderpath=param.Foldername(default='sounds/complex', 
+        doc="""Folder path (can be relative to Topographica's base path) to a
+        folder containing audio files. The audio can be in any format accepted 
+        by audiolab, i.e. WAV, AIFF, or FLAC.""")
          
-    gap_between_sounds=param.Number(default=0.0, doc="""
-        The gap in seconds to insert between consecutive soundfiles.
-        """)
+    gap_between_sounds=param.Number(default=0.0, bounds=(0.0,None),
+        doc="""The gap in seconds to insert between consecutive soundfiles.""")
                  
     def __init__(self, **params):
         super(AudioFolder, self).__init__(**params)
@@ -198,18 +196,15 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
     One can set both the range to amplify and the amount.
     """
         
-    amplify_from_frequency=param.Number(default=1000.0, doc="""
-        The lower bound of the frequency range to be amplified.
-        """)
+    amplify_from_frequency=param.Number(default=1000.0, bounds=(0.0,None),
+        doc="""The lower bound of the frequency range to be amplified.""")
 
-    amplify_till_frequency=param.Number(default=7000.0, doc="""
-        The upper bound of the frequency range to be amplified.
-        """)
+    amplify_till_frequency=param.Number(default=7000.0, bounds=(0.0,None),
+        doc="""The upper bound of the frequency range to be amplified.""")
     
-    amplify_by_percentage=param.Number(default=3.0, doc="""
-        The percentage by which to amplify the signal between 
-        the specified frequency range.
-        """)
+    amplify_by_percentage=param.Number(default=3.0, bounds=(0.0,None),
+        doc="""The percentage by which to amplify the signal between the 
+        specified frequency range.""")
         
     def _setParams(self, **params):
         super(AuditorySpectrogramSimpleOuterEar, self)._setParams(**params)

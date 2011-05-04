@@ -1064,25 +1064,20 @@ class TimeSeries(param.Parameterized):
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Parameter(default=None, doc="""
-        An array of numbers in a series.
-        """)
+    time_series = param.Parameter(default=None, 
+        doc="""An numpy array of numbers in a series.""")
     
-    sample_rate = param.Number(default=44100, doc="""
-        The number of samples taken per second to form the series.
-        """)
+    sample_rate = param.Number(default=44100, bounds=(0,None),
+        doc="""The number of samples taken per second to form the series.""")
      
-    seconds_per_iteration = param.Number(default=0.2, doc="""
-        Number of seconds advanced along the time series on each iteration.
-        """)
+    seconds_per_iteration = param.Number(default=0.2, bounds=(0.0,None),
+        doc="""Number of seconds advanced along the time series on each iteration.""")
 
-    interval_length = param.Number(default=0.2, doc="""
-        The length of time in seconds to be returned on each iteration.
-        """)
+    interval_length = param.Number(default=0.2, bounds=(0.0,None),
+        doc="""The length of time in seconds to be returned on each iteration.""")
     
-    repeat = param.Boolean(default=True, doc="""
-        Whether the signal loops or terminates once it reaches its end.
-        """)
+    repeat = param.Boolean(default=True, 
+        doc="""Whether the signal loops or terminates once it reaches its end.""")
     
     # Instantiating a TimeSeries in the GUI is not very useful, 
     # it exists to provide standardised methods to access and 
@@ -1099,18 +1094,12 @@ class TimeSeries(param.Parameterized):
         for parameter,value in params.items():
             if parameter == "interval_length":
                 if self.interval_length != value:
-                    if value <= 0:
-                        raise ValueError("The interval length must be > 0.")                
-                    else:
-                        setattr(self, parameter, value)
+                    setattr(self, parameter, value)
                 
             elif parameter == "sample_rate":
                 if self.sample_rate != value:
-                    if value == 0:
-                        raise ValueError("The sampling rate cannot be set to 0.")
-                    else:
-                        setattr(self, parameter, value)
-                        self.samples_per_interval = int(self.interval_length*self.sample_rate)
+                    setattr(self, parameter, value)
+                    self.samples_per_interval = int(self.interval_length*self.sample_rate)
                 
             elif parameter == "time_series":
                 if type(value) != numpy.ndarray:
@@ -1123,14 +1112,12 @@ class TimeSeries(param.Parameterized):
 
             elif parameter == "seconds_per_iteration":
                 if self.seconds_per_iteration != value:
-                    if value <= 0:
-                        raise ValueError("The seconds per iteration must be > 0.")
-                    else:
-                        if self.seconds_per_iteration > self.interval_length:
-                            self.warning("Seconds per iteration > interval length, some signal will be skipped.")                    
-                        setattr(self, parameter, value)
+                    if self.seconds_per_iteration > self.interval_length:
+                        self.warning("Seconds per iteration > interval length, some signal will be skipped.")                    
+                    setattr(self, parameter, value)
             
-            setattr(self, parameter, value)
+            else:
+                setattr(self, parameter, value)
     
     def generateSineWave(self, duration, frequency, sample_rate):
         time_axis = linspace(0.0, duration, duration*sample_rate)
@@ -1271,7 +1258,7 @@ class PowerSpectrum(PatternGenerator):
                     if type(smoothing_window) == numpy.ndarray and smoothing_window.size == 10:
                         setattr(self, parameter, value)
                     else:
-                        raise ValueError("A windowing function must take at least one argument (the length), and return a numpy array of that length. The specified function does not do so.")
+                        raise ValueError("A windowing function must take at one argument (the length), and return a numpy array of that length. The specified function does not do so.")
                 else:
                     raise ValueError("A windowing function must be of the type function, the one provided is of type %s" %(type(value)))
             
