@@ -210,14 +210,10 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
         super(AuditorySpectrogramSimpleOuterEar, self)._setParams(**params)
         
         for parameter,value in params.items():
-            if parameter=="amplify_from_frequency" or parameter=="amplify_till_frequency" or parameter=="amplify_by_percentage":
-                if value < 0:
-                    raise ValueError("Cannot have a negative value for amplify_from_frequency, amplify_till_frequency, or amplify_by_percentage.")
-                else:
-                    setattr(self, parameter, value)
+            setattr(self, parameter, value)
             
         if self.amplify_from_frequency > self.amplify_till_frequency:
-            raise ValueError("AuditorySpectrogramSimpleOuterEar's amplify from must be less than its amplify till.")
+            raise ValueError("AuditorySpectrogramSimpleOuterEar's amplify from frequency must be less than its amplify till frequency.")
 
     def __firstCall__(self, **params):
         super(AuditorySpectrogramSimpleOuterEar, self).__firstCall__(**params)
