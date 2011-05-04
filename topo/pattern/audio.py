@@ -174,9 +174,6 @@ class AuditorySpectrogram(Spectrogram):
     """
     Extends Spectrogram to provide a response in decibels over an octave scale.
     """
-    
-    def __init__(self, **params):
-        super(AuditorySpectrogram, self).__init__(**params) 
         
     def _setFrequencySpacing(self, index_of_min_freq, index_of_max_freq):
         self.frequency_index_spacing = ceil(logspace(log10(index_of_max_freq), log10(index_of_min_freq), 
@@ -213,9 +210,6 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
         The percentage by which to amplify the signal between 
         the specified frequency range.
         """)
-
-    def __init__(self, **params):
-        super(AuditorySpectrogramSimpleOuterEar, self).__init__(**params)
         
     def _setParams(self, **params):
         super(AuditorySpectrogramSimpleOuterEar, self)._setParams(**params)
@@ -517,9 +511,6 @@ class LyonsCochlearModel(PowerSpectrum):
         
         sheet_responses = sheet_responses.reshape(self.num_of_channels, 1)
 
-        #print sheet_responses
-        #print sheet_responses.shape
-        
         if self._sheet_dimensions[1] > 1:
             sheet_responses = repeat(sheet_responses, self._sheet_dimensions[1], axis=1)
 
@@ -531,9 +522,6 @@ class Cochleogram(LyonsCochlearModel):
     Employs Lyons Cochlear Model to return a Cochleoogram, 
     i.e. the response over time along the cochlea.
     """
-
-    def __init__(self, **params):
-        super(Cochleogram, self).__init__(**params) 
         
     def _updateCochleogram(self, amplitudes):
         self._cochleogram = hstack((amplitudes, self._cochleogram))

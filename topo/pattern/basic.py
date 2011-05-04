@@ -1390,9 +1390,6 @@ class Spectrogram(PowerSpectrum):
     Extends PowerSpectrum to provide a temporal buffer, yielding
     a 2D representation of a fixed-width spectrogram.
     """
-    
-    def __init__(self, **params):
-        super(Spectrogram, self).__init__(**params) 
         
     def _updateSpectrogram(self, amplitudes):
         self._spectrogram = hstack((amplitudes, self._spectrogram))
