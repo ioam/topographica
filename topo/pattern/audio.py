@@ -13,7 +13,7 @@ from param.parameterized import ParamOverrides
 from topo.pattern.basic import TimeSeries, Spectrogram, PowerSpectrum
 from topo.base.patterngenerator import PatternGenerator
 
-from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, float32, floor, hanning, hstack, log, log10, logspace, multiply, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
+from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, float64, floor, hanning, hstack, log, log10, logspace, multiply, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
          
 try:
     import matplotlib.ticker
@@ -68,7 +68,7 @@ class AudioFile(TimeSeries):
     def _loadAudioFile(self):
         self.source = audiolab.Sndfile(self.filename, 'r')
         
-        self._setParams(time_series=self.source.read_frames(self.source.nframes, dtype=float32)) 
+        self._setParams(time_series=self.source.read_frames(self.source.nframes, dtype=float64)) 
         self._setParams(sample_rate=self.source.samplerate)
         
     def __firstCall__(self, **params):
@@ -134,7 +134,7 @@ class AudioFolder(AudioFile):
                     raise ValueError("All sound files must be of the same sample rate")
             
                 next_time_series = hstack((self.time_series[interval_start:self.time_series.size], self.inter_signal_gap))
-                next_time_series = hstack((next_time_series, next_source.read_frames(next_source.nframes, dtype=float32)))
+                next_time_series = hstack((next_time_series, next_source.read_frames(next_source.nframes, dtype=float64)))
                 self.time_series = next_time_series
                 
                 self._next_interval_start = interval_start = 0   
@@ -162,7 +162,7 @@ class AudioFolder(AudioFile):
         self._loadAudioFolder()
         
         super(AudioFile, self).__firstCall__(**params)
-        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=float32)
+        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=float64)
 
     def __everyCall__(self, **params):
         return self._extractNextInterval()
@@ -297,18 +297,18 @@ class LyonsCochlearModel(PowerSpectrum):
         # Hardwired Parameters specific to model, which is to say changing
         # them without knowledge of the mathematics of the model is a bad idea.
         self.sample_rate = self.signal.sample_rate
-        self.half_sample_rate = float32(self.sample_rate/2.0)
-        self.quart_sample_rate = float32(self.half_sample_rate/2.0)
+        self.half_sample_rate = float(self.sample_rate/2.0)
+        self.quart_sample_rate = float(self.half_sample_rate/2.0)
  
-        self.ear_q = float32(self.quality_factor)
-        self.ear_step_factor = float32(1.0/self.stage_overlap_factor)
+        self.ear_q = float(self.quality_factor)
+        self.ear_step_factor = float(1.0/self.stage_overlap_factor)
 
-        self.ear_break_f = float32(1000.0)
+        self.ear_break_f = float(1000.0)
         self.ear_break_squared = self.ear_break_f*self.ear_break_f
 
-        self.ear_preemph_corner_f = float32(300.0)
-        self.ear_zero_offset = float32(1.5)
-        self.ear_sharpness = float32(5.0)
+        self.ear_preemph_corner_f = float(300.0)
+        self.ear_zero_offset = float(1.5)
+        self.ear_sharpness = float(5.0)
         
         self._generateCochlearFilters()
         self._first_call = True
@@ -375,10 +375,10 @@ class LyonsCochlearModel(PowerSpectrum):
         return 20.0 * log10(abs(evaluated_filters))
 
     def _specificFilter(self, x2_coefficient, x_coefficient, constant):  
-        return array([[x2_coefficient,x_coefficient,constant], ], dtype=float32)
+        return array([[x2_coefficient,x_coefficient,constant], ], dtype=float64)
             
     def _firstOrderFilterFromCorner(self, corner_f):
-        polynomial = zeros((1,3), dtype=float32)
+        polynomial = zeros((1,3), dtype=float64)
         polynomial[:,0] = -exp(-2.0*pi*corner_f/self.sample_rate)
         polynomial[:,1] = 1.0
 
@@ -393,7 +393,7 @@ class LyonsCochlearModel(PowerSpectrum):
         theta = 2.0*pi*cf_as_ratio * sqrt(1.0-1.0/(4.0*quality*quality))
         theta_calc = -2.0*rho*cos(theta)
         
-        polynomial = ones((size(cf),3), dtype=float32)
+        polynomial = ones((size(cf),3), dtype=float64)
         polynomial[:,1] = theta_calc
         polynomial[:,2] = rho_squared
         
@@ -441,7 +441,7 @@ class LyonsCochlearModel(PowerSpectrum):
 
         self.num_of_channels = self._numOfChannels()
 
-        self.centre_frequencies = zeros(self.num_of_channels, dtype=float32)
+        self.centre_frequencies = zeros(self.num_of_channels, dtype=float64)
         self.centre_frequencies[0] = max_f
         self._calcCentreFrequenciesTill(self.num_of_channels-1)
 
