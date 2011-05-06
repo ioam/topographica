@@ -970,7 +970,7 @@ class Filename(Path):
     """
     
     def __init__(self,default=None,search_paths=None,**params):
-        super(Filename,self).__init__(default,**params)
+        super(Filename,self).__init__(default,search_paths,**params)
 
     def _resolve(self,pth):
         if self.search_paths:
@@ -996,7 +996,7 @@ class Foldername(Path):
     """
 
     def __init__(self,default=None,search_paths=None,**params):
-        super(Foldername,self).__init__(default,**params)
+        super(Foldername,self).__init__(default,search_paths,**params)
 
     def _resolve(self,pth):
         if self.search_paths:
