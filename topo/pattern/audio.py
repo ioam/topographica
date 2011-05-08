@@ -53,7 +53,7 @@ class AudioFile(TimeSeries):
         super(AudioFile, self)._setParams(**params)
 
         for parameter,value in params.items():                
-            if parameter == "precision"
+            if parameter == "precision":
                 if str(value)[0:18] == "<type 'numpy.float":
                     setattr(self, parameter, value)
                 else:
@@ -318,13 +318,13 @@ class LyonsCochlearModel(PowerSpectrum):
     def _setParams(self, **params):
         super(LyonsCochlearModel, self)._setParams(**params)
         
-            if parameter == "precision"
-                if str(value)[0:18] == "<type 'numpy.float":
-                    setattr(self, parameter, value)
-                else:
-                    raise ValueError("Precision must be a numpy float type.")
-            else:
+        if parameter == "precision":
+            if str(value)[0:18] == "<type 'numpy.float":
                 setattr(self, parameter, value)
+            else:
+                raise ValueError("Precision must be a numpy float type.")
+        else:
+            setattr(self, parameter, value)
     
     def _earBandwidth(self, cf):
         return sqrt(cf*cf + self.ear_break_squared) / self.ear_q
