@@ -1063,7 +1063,7 @@ class TimeSeries(param.Parameterized):
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Parameter(default=None, 
+    time_series = param.Array(default=None, 
         doc="""An numpy array of numbers in a series.""")
     
     sample_rate = param.Number(default=44100, bounds=(0,None),
@@ -1094,20 +1094,18 @@ class TimeSeries(param.Parameterized):
             if parameter == "interval_length":
                 if self.interval_length != value:
                     setattr(self, parameter, value)
-                
+                    self.samples_per_interval = int(self.interval_length*self.sample_rate)
+                    
             elif parameter == "sample_rate":
                 if self.sample_rate != value:
                     setattr(self, parameter, value)
                     self.samples_per_interval = int(self.interval_length*self.sample_rate)
                 
             elif parameter == "time_series":
-                if type(value) != numpy.ndarray:
-                    raise ValueError("A time series must be a numpy array.")                                                                  
+                if self.time_series == None:
+                    setattr(self, parameter, value)
                 else:
-                    if self.time_series == None:
-                        setattr(self, parameter, value)
-                    else:
-                        self.time_series = hstack((self.time_series, value))
+                    self.time_series = hstack((self.time_series, value))
 
             elif parameter == "seconds_per_iteration":
                 if self.seconds_per_iteration != value:
