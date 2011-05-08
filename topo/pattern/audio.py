@@ -39,6 +39,9 @@ class AudioFile(TimeSeries):
         audio file. The audio can be in any format accepted by audiolab, 
         e.g. WAV, AIFF, or FLAC.
         """)
+    
+    precision = param.Parameter(default=float64, doc="""
+        The float precision to use for loaded audio files.""")
             
     def __init__(self, **params):
         super(AudioFile, self).__init__(**params)
@@ -49,16 +52,19 @@ class AudioFile(TimeSeries):
     def _setParams(self, **params):
         super(AudioFile, self)._setParams(**params)
 
-        for parameter,value in params.items():
-            setattr(self, parameter, value)
-            
-            if parameter == "filename":
-                self._loadAudioFile()
+        for parameter,value in params.items():                
+            if parameter == "precision"
+                if str(value)[0:18] == "<type 'numpy.float":
+                    setattr(self, parameter, value)
+                else:
+                    raise ValueError("Precision must be a numpy float type.")
+            else:
+                setattr(self, parameter, value)
                 
     def _loadAudioFile(self):
         self.source = audiolab.Sndfile(self.filename, 'r')
         
-        self._setParams(time_series=self.source.read_frames(self.source.nframes, dtype=float64)) 
+        self._setParams(time_series=self.source.read_frames(self.source.nframes, dtype=self.precision)) 
         self._setParams(sample_rate=self.source.samplerate)
         
     def __firstCall__(self, **params):
@@ -124,7 +130,7 @@ class AudioFolder(AudioFile):
                     raise ValueError("All sound files must be of the same sample rate")
             
                 next_time_series = hstack((self.time_series[interval_start:self.time_series.size], self.inter_signal_gap))
-                next_time_series = hstack((next_time_series, next_source.read_frames(next_source.nframes, dtype=float64)))
+                next_time_series = hstack((next_time_series, next_source.read_frames(next_source.nframes, self.precision)))
                 self.time_series = next_time_series
                 
                 self._next_interval_start = interval_start = 0   
@@ -152,7 +158,7 @@ class AudioFolder(AudioFile):
         self._loadAudioFolder()
         
         super(AudioFile, self).__firstCall__(**params)
-        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=float64)
+        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=self.precision)
 
     def __everyCall__(self, **params):
         return self._extractNextInterval()
@@ -283,6 +289,9 @@ class LyonsCochlearModel(PowerSpectrum):
         bandpass region of any one filter.
         """)
                 
+    precision = param.Parameter(default=float64, doc="""
+        The float precision to use when calculating ear stage filters.""")
+    
     def __init__(self, **params):
         super(LyonsCochlearModel, self).__init__(**params)
         self._setParams(**params)
@@ -309,8 +318,13 @@ class LyonsCochlearModel(PowerSpectrum):
     def _setParams(self, **params):
         super(LyonsCochlearModel, self)._setParams(**params)
         
-        for parameter,value in params.items():
-            setattr(self,parameter,value)
+            if parameter == "precision"
+                if str(value)[0:18] == "<type 'numpy.float":
+                    setattr(self, parameter, value)
+                else:
+                    raise ValueError("Precision must be a numpy float type.")
+            else:
+                setattr(self, parameter, value)
     
     def _earBandwidth(self, cf):
         return sqrt(cf*cf + self.ear_break_squared) / self.ear_q
@@ -368,10 +382,10 @@ class LyonsCochlearModel(PowerSpectrum):
         return 20.0 * log10(abs(evaluated_filters))
 
     def _specificFilter(self, x2_coefficient, x_coefficient, constant):  
-        return array([[x2_coefficient,x_coefficient,constant], ], dtype=float64)
+        return array([[x2_coefficient,x_coefficient,constant], ], dtype=self.precision)
             
     def _firstOrderFilterFromCorner(self, corner_f):
-        polynomial = zeros((1,3), dtype=float64)
+        polynomial = zeros((1,3), dtype=self.precision)
         polynomial[:,0] = -exp(-2.0*pi*corner_f/self.sample_rate)
         polynomial[:,1] = 1.0
 
@@ -386,7 +400,7 @@ class LyonsCochlearModel(PowerSpectrum):
         theta = 2.0*pi*cf_as_ratio * sqrt(1.0-1.0/(4.0*quality*quality))
         theta_calc = -2.0*rho*cos(theta)
         
-        polynomial = ones((size(cf),3), dtype=float64)
+        polynomial = ones((size(cf),3), dtype=self.precision)
         polynomial[:,1] = theta_calc
         polynomial[:,2] = rho_squared
         
@@ -434,7 +448,7 @@ class LyonsCochlearModel(PowerSpectrum):
 
         self.num_of_channels = self._numOfChannels()
 
-        self.centre_frequencies = zeros(self.num_of_channels, dtype=float64)
+        self.centre_frequencies = zeros(self.num_of_channels, dtype=self.precision)
         self.centre_frequencies[0] = max_f
         self._calcCentreFrequenciesTill(self.num_of_channels-1)
 
