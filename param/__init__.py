@@ -21,6 +21,7 @@ __version__='$Revision$'
 
 import os.path
 
+from numpy import ndarray
 from parameterized import Parameterized, Parameter, String, \
      descendents, ParameterizedFunction, ParamOverrides
 
@@ -806,6 +807,13 @@ class Dict(ClassSelector):
         super(Dict,self).__init__(dict,**params)
 
 
+class Array(ClassSelector):
+    """
+    Parameter whose value is a numpy array.
+    """
+    def __init__(self,**params):
+        super(Array,self).__init__(ndarray,allow_None=True,**params)
+        
 
 # For portable code:
 #   - specify paths in unix (rather than Windows) style;
