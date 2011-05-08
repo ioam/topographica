@@ -9,9 +9,8 @@ __version__='$Revision$'
 #from math import pi, sqrt
 
 import numpy
-from numpy.oldnumeric import around, bitwise_and, bitwise_or#, cos, sin
-from numpy import abs, add, alltrue, asarray, ceil, clip, cos, \
-    fft, equal, exp, hstack, Infinity, linspace, multiply, \
+from numpy.oldnumeric import around, bitwise_and, bitwise_or
+from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, equal, exp, hstack, Infinity, linspace, multiply, \
     nonzero, pi, repeat, sin, sqrt, subtract, tile, zeros
 
 import param
@@ -1283,7 +1282,7 @@ class PowerSpectrum(PatternGenerator):
         
         self._setFrequencySpacing(index_of_min_freq, index_of_max_freq)
             
-    def _setFrequencySpacing(self, index_of_min_freq, index_of_max_freq): 
+    def _setFrequencySpacing(self, min_freq, max_freq): 
         """
         Frequency spacing to use, i.e. how to map the available frequency range to 
         the discrete sheet rows.
@@ -1295,7 +1294,7 @@ class PowerSpectrum(PatternGenerator):
         This method is here solely to provide a minimal overload if custom spacing is 
         required.
         """
-        self.frequency_index_spacing = ceil(linspace(index_of_max_freq, index_of_min_freq, num=(index_of_max_freq-index_of_min_freq), endpoint=True))            
+        self._frequency_index_spacing = ceil(linspace(max_freq, min_freq, num=self._sheet_dimensions[0]+1, endpoint=True))            
             
     def _getAmplitudes(self):
         """
@@ -1316,22 +1315,15 @@ class PowerSpectrum(PatternGenerator):
         else:
             smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
         
-        amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2]
+        amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2]        
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
         
-        indices_per_row = float(len(self.frequency_index_spacing))/(self._sheet_dimensions[0])
-        
-        for row in range(0, self._sheet_dimensions[0]):
+        for index in range(0, self._sheet_dimensions[0]):
+            start_freq = self._frequency_index_spacing[index]
+            end_freq = self._frequency_index_spacing[index+1]
             
-            if row == (self._sheet_dimensions[0]-1):
-                start_freq = self.frequency_index_spacing[-1]
-            else:
-                start_freq = self.frequency_index_spacing[row*indices_per_row+indices_per_row]
-
-            end_freq = self.frequency_index_spacing[row*indices_per_row]
-            
-            total_amplitude = sum(amplitudes_by_frequency[start_freq:end_freq])
-            amplitudes_by_row[row] = total_amplitude / (end_freq-start_freq)
+            total_amplitude = sum(amplitudes_by_frequency[end_freq:start_freq])
+            amplitudes_by_row[index] = total_amplitude / (start_freq-end_freq)
             
         return (asarray(amplitudes_by_row).reshape(-1,1))
     
