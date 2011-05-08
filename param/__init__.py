@@ -838,46 +838,49 @@ class resolve_path(ParameterizedFunction):
     than just os.getcwd() can be used, and the file must exist.
     """
 
-    search_paths = List(default=[os.getcwd()],pickle_default_value=False,doc="""
+    search_paths = List(default=[os.getcwd()], pickle_default_value=False, doc="""
         Prepended to a non-relative path, in order, until a file is
         found.""")
 
-    def __call__(self,path,type='File',**params):
-        p = ParamOverrides(self,params)
+    path_type = String(default="File", pickle_default_value=False, doc="""
+        String specifying whether the path refers to a 'File' or a 'Folder'.""")
+        
+    def __call__(self, path, **params):
+        p = ParamOverrides(self, params)
 
         path = os.path.normpath(path)
 
         if os.path.isabs(path):
-            if type == 'File':
+            if p.path_type == "File":
                 if os.path.isfile(path):
                     return path
                 else:
-                    raise IOError('File "%s" not found.'%path)
-            elif type == 'Folder':
+                    raise IOError("File '%s' not found." %path)
+            elif p.path_type == "Folder":
                 if os.path.isdir(path):
                     return path
                 else:
-                    raise IOError('Folder "%s" not found.'%path)
+                    raise IOError("Folder '%s' not found." %path)
             else:
-                raise Error('type "%s" not recognised.'%type)
+                raise IOError("Type '%s' not recognised." %p.path_type)
                 
         else:
             paths_tried = []
             for prefix in p.search_paths:
-                try_path = os.path.join(os.path.normpath(prefix),path)
+                try_path = os.path.join(os.path.normpath(prefix), path)
                 
-                if type == 'File':
+                if p.path_type == "File":
                     if os.path.isfile(try_path):
                         return try_path
-                elif type == 'Folder':
+                elif p.path_type == "Folder":
                     if os.path.isdir(try_path):
                         return try_path
                 else:
-                    raise Error('type "%s" not recognised.'%type)
+                    raise IOError("Type '%s' not recognised." %p.path_type)
 
                 paths_tried.append(try_path)
 
-            raise IOError(os.path.split(path)[1]+'" was not found in the following place(s): '+str(paths_tried)+'.')
+            raise IOError(os.path.split(path)[1] + " was not found in the following place(s): " + str(paths_tried) + ".")
 
             
 class normalize_path(ParameterizedFunction):
@@ -922,20 +925,21 @@ class Path(Parameter):
       is None).
     """
     __slots__ = ['search_paths'] 
-
-    def __init__(self,default=None,search_paths=None,**params):
+    
+    def __init__(self, default=None, search_paths=None, **params):
         if search_paths is None:
             search_paths = []
+        
         self.search_paths = search_paths
         super(Path,self).__init__(default,**params)
-
-    def _resolve(self,pth):
+            
+    def _resolve(self, path):
         if self.search_paths:
-            return resolve_path(pth,search_paths=self.search_paths)
+            return resolve_path(path, search_paths=self.search_paths)
         else:
-            return resolve_path(pth)                               
+            return resolve_path(path)                               
         
-    def __set__(self,obj,val):
+    def __set__(self, obj, val):
         """
         Call Parameter's __set__, but warn if the file cannot be found.
         """
@@ -946,7 +950,7 @@ class Path(Parameter):
 
         super(Path,self).__set__(obj,val)
         
-    def __get__(self,obj,objtype):
+    def __get__(self, obj, objtype):
         """
         Return an absolute, normalized path (see resolve_path).
         """
@@ -956,8 +960,10 @@ class Path(Parameter):
     def __getstate__(self):
         # don't want to pickle the search_paths        
         state = super(Path,self).__getstate__()
+        
         if 'search_paths' in state:
             state['search_paths'] = []
+        
         return state
 
 
@@ -977,16 +983,13 @@ class Filename(Path):
       is None).
     """
     
-    def __init__(self,default=None,search_paths=None,**params):
-        super(Filename,self).__init__(default,search_paths,**params)
-
-    def _resolve(self,pth):
+    def _resolve(self, path):
         if self.search_paths:
-            return resolve_path(pth,type='File', search_paths=self.search_paths)
+            return resolve_path(path, path_type="File", search_paths=self.search_paths)
         else:
-            return resolve_path(pth,type='File')                               
+            return resolve_path(path, path_type="File")       
 
-
+            
 class Foldername(Path):
     """
     Parameter that can be set to a string specifying the
@@ -1003,12 +1006,10 @@ class Foldername(Path):
       is None).
     """
 
-    def __init__(self,default=None,search_paths=None,**params):
-        super(Foldername,self).__init__(default,search_paths,**params)
-
-    def _resolve(self,pth):
+    def _resolve(self, path):
         if self.search_paths:
-            return resolve_path(pth,type='Folder',search_paths=self.search_paths)
+            return resolve_path(path, path_type="Folder", search_paths=self.search_paths)
         else:
-            return resolve_path(pth,type='Folder')
+            return resolve_path(path, path_type="Folder")       
+
 
