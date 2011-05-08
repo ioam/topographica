@@ -112,8 +112,8 @@ elif platform.system()=='Windows':
 
 if system_platform=='mac':
     # if it's on the mac, these are the context-menu events
-    right_click_events = ['<Button-3>','<Control-Button-1>']
-    right_click_release_events = ['ButtonRelease-3', 'Control-ButtonRelease-1']
+    right_click_events = ['<Button-2>','<Button-3>','<Control-Button-1>']
+    right_click_release_events = ['ButtonRelease-2','ButtonRelease-3','Control-ButtonRelease-1']
 else:
     # everywhere else (I think) it's Button-3
     right_click_events = ['<Button-3>']
