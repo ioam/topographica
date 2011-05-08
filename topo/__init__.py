@@ -57,13 +57,17 @@ version = ''
 
 import param 
 import os
-
+import platform
 
 # Default location in which to create files
-_default_output_path = os.path.join(os.path.expanduser("~"),'topographica')
-if not os.path.exists(_default_output_path):
-    print "Creating %s"%_default_output_path
-    os.mkdir(_default_output_path)
+if platform.system()=='Darwin' or platform.mac_ver()[0]:
+    _default_output_path = os.path.join(os.path.expanduser("~"),'Documents')
+
+else:
+    _default_output_path = os.path.join(os.path.expanduser("~"),'topographica')
+    if not os.path.exists(_default_output_path):
+        print "Creating %s"%_default_output_path
+        os.mkdir(_default_output_path)
 
 # Location of topo/ package. This kind of thing won't work with py2exe
 # etc. Need to see if we can get rid of it.
