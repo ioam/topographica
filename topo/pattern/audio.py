@@ -9,20 +9,10 @@ __version__='$Revision$'
 import param
 import os
 
-from param.parameterized import ParamOverrides
 from topo.pattern.basic import TimeSeries, Spectrogram, PowerSpectrum
-from topo.base.patterngenerator import PatternGenerator
+from topo import transferfn
 
-from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, float64, floor, hanning, hstack, log, log10, logspace, multiply, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
-         
-try:
-    import matplotlib.ticker
-    import pylab
-    
-except ImportError:
-    param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
-    from basic import ImportErrorRaisingFakeModule
-    pylab = ImportErrorRaisingFakeModule("matplotlib")
+from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, float64, floor, hanning, hstack, log, log2, log10, logspace, multiply, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
     
 try:
     import scikits.audiolab as audiolab
@@ -166,33 +156,39 @@ class AudioFolder(AudioFile):
 
     def __everyCall__(self, **params):
         return self._extractNextInterval()
-                
+
+
+class OctaveSpectrogram(Spectrogram):
+    """
+    Extends Spectrogram to provide a response over an octave scale.
+    """
+    
+    def _setFrequencySpacing(self, min_freq, max_freq):
+        self._frequency_index_spacing = logspace(log2(max_freq), log2(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
+    
+    #BK-ALERT: Need to do some rescaling of the amplitudes here, can't normalise the whole sheet, need to normalise on each iteraction. Do the override of __everyCall__, normalise the amplitudes before adding them to the spectrogram. Will need to update OctaveSpectrogramWithAmplification with the change.
+    
 
 class AuditorySpectrogram(Spectrogram):
     """
-    Extends Spectrogram to provide a response in decibels over an octave scale.
+    Extends Spectrogram to provide a response in decibels over a base 10 logarithmic scale.
     """
         
-    def _setFrequencySpacing(self, index_of_min_freq, index_of_max_freq):
-        self.frequency_index_spacing = ceil(logspace(log10(index_of_max_freq), log10(index_of_min_freq), 
-            num=(index_of_max_freq-index_of_min_freq), endpoint=True, base=10))
+    def _setFrequencySpacing(self, min_freq, max_freq):
+        self._frequency_index_spacing = logspace(log10(max_freq), log10(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
                 
     def _convertToDecibels(self, amplitudes):
         amplitudes[amplitudes==0] = 1.0
         return (20.0 * log10(abs(amplitudes)))
-        
-    def __firstCall__(self, **params):
-        super(AuditorySpectrogram, self).__firstCall__(**params)
     
     def __everyCall__(self, **params):
         self._updateSpectrogram(self._convertToDecibels(self._getAmplitudes()))
-        
         return self._spectrogram
 
 
-class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
+class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
     """
-    Extends Spectrogram with a simple model of outer ear amplification. 
+    Extends OctaveSpectrogram with a simple model of outer ear amplification. 
     One can set both the range to amplify and the amount.
     """
         
@@ -214,9 +210,6 @@ class AuditorySpectrogramSimpleOuterEar(AuditorySpectrogram):
             
         if self.amplify_from_frequency > self.amplify_till_frequency:
             raise ValueError("AuditorySpectrogramSimpleOuterEar's amplify from frequency must be less than its amplify till frequency.")
-
-    def __firstCall__(self, **params):
-        super(AuditorySpectrogramSimpleOuterEar, self).__firstCall__(**params)
         
     def __everyCall__(self, **params):
         amplitudes = self._getAmplitudes()
