@@ -15,6 +15,7 @@ from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, floor
 
 import param
 from param.parameterized import ParamOverrides
+from param import ClassSelector
 
 import topo
 # Imported here so that all PatternGenerators will be in the same package
@@ -869,6 +870,7 @@ class Translator(PatternGenerator):
             orientation=(direction-pi/2)+p.generator.orientation)
 
 
+
 class DifferenceOfGaussians(PatternGenerator):
     """
     Two-dimensional difference of gaussians pattern.
@@ -898,6 +900,7 @@ class DifferenceOfGaussians(PatternGenerator):
     negative_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
         precedence=(8), doc="""Y position for the central peak of the negative gaussian.""")
     
+    
     def function(self, p):
         positive = Gaussian(x=p.positive_x+p.x, y=p.positive_y+p.y,
             size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio,
@@ -909,7 +912,8 @@ class DifferenceOfGaussians(PatternGenerator):
         
         return Composite(generators=[positive,negative], operator=numpy.subtract,
             xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)()
-                        
+              
+                                  
                         
 class Sigmoid(PatternGenerator):
     """
@@ -921,8 +925,10 @@ class Sigmoid(PatternGenerator):
         Multiplicative parameter controlling the smoothness of the transition 
         between the two regions; high values give a sharp transition.""")
 
+
     def function(self, p):
         return sigmoid(self.pattern_y, p.slope)
+         
          
 
 class SigmoidedDoG(PatternGenerator):
@@ -951,7 +957,8 @@ class SigmoidedDoG(PatternGenerator):
 
     sigmoid_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-1.0,1.0),
         precedence=(7), doc="""Y parameter for the Sigmoid.""")
-                                                                                       
+                 
+                                                                                                                                                             
     def function(self, p):
         diff_of_gaussians = DifferenceOfGaussians(positive_x=p.x, positive_y=p.y, 
             negative_x=p.x, negative_y=p.y,
@@ -963,6 +970,7 @@ class SigmoidedDoG(PatternGenerator):
 
         return Composite(generators=[diff_of_gaussians, sigmoid], bounds=p.bounds,
             operator=numpy.multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
+
 
 
 class LogGaussian(PatternGenerator):
@@ -981,7 +989,8 @@ class LogGaussian(PatternGenerator):
         
     tail = param.Number(default=0.8,bounds=(0.0,10.0),
         doc="""Parameter controlling decay rate and distance from the peak of the Gaussian.""")
-                                
+        
+                                                        
     def _create_and_rotate_coordinate_arrays(self, x, y, orientation):
         """
         Create pattern matrices from x and y vectors, and rotate
@@ -1006,10 +1015,12 @@ class LogGaussian(PatternGenerator):
         
         return pattern_x, pattern_y
     
+    
     def function(self, p):
         self.size = p.size
         return log_gaussian(self.pattern_x, self.pattern_y, p.tail, 0.4, p.size-1.0)
 
+        
         
 class SigmoidedDoLG(PatternGenerator):
     """
@@ -1058,6 +1069,7 @@ class SigmoidedDoLG(PatternGenerator):
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
 
 
+
 class TimeSeries(param.Parameterized):
     """
     Generic class to return intervals of a discretized time series.
@@ -1066,7 +1078,7 @@ class TimeSeries(param.Parameterized):
     time_series = param.Array(default=None, 
         doc="""An array of numbers that form a series.""")
 
-    sample_rate = param.Number(default=None, bounds=(0,None), inclusive_bounds=(False,False),
+    sample_rate = param.Integer(default=None, allow_None=True, bounds=(0,None), inclusive_bounds=(False,False), 
         doc="""The number of samples taken per second to form the series.""")
     
     seconds_per_iteration = param.Number(default=0.1, bounds=(0.0,None), inclusive_bounds=(False,False),
@@ -1082,6 +1094,7 @@ class TimeSeries(param.Parameterized):
     # manipulate a series of numbers for use by other classes.
     _abstract = True
     
+    
     def __init__(self, **params):
         super(TimeSeries, self).__init__(**params)
         self._next_interval_start = 0
@@ -1092,14 +1105,19 @@ class TimeSeries(param.Parameterized):
         if self.seconds_per_iteration > self.interval_length:
             self.warning("Seconds per iteration > interval length, some signal will be skipped.")
     
+    
     def appendSignal(self, new_signal):
         self.time_series = hstack((self.time_series, new_signal))
+    
     
     def extractSpecificInterval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
         """
-                
+        
+        if not (isinstance(interval_start, int) and isinstance(interval_end, int)):
+            raise ValueError("Interval start & end must be integers.")
+            
         if not self.sample_rate:
             raise ValueError("TimeSeries object has no sample rate set.")
         
@@ -1108,14 +1126,14 @@ class TimeSeries(param.Parameterized):
         
         
         if interval_start >= interval_end:
-            raise ValueError("TimeSeries: Requested interval's start point is past the requested end point.")
+            raise ValueError("Requested interval's start point is past the requested end point.")
         
         elif interval_start > self.time_series.size:
             if self.repeat:
                 interval_end = interval_end - interval_start
                 interval_start = 0                
             else:
-                raise ValueError("TimeSeries: Requested interval's start point is past the end of the time series.")
+                raise ValueError("Requested interval's start point is past the end of the time series.")
             
             
         if interval_end < self.time_series.size:
@@ -1145,33 +1163,46 @@ class TimeSeries(param.Parameterized):
             
         return interval
     
+    
     def __call__(self, **params_to_override): 
         interval_start = self._next_interval_start
-        interval_end = interval_start + self.interval_length*self.sample_rate
+        interval_end = int(floor(interval_start + self.interval_length*self.sample_rate))
         
-        self._next_interval_start += self.seconds_per_iteration*self.sample_rate         
+        self._next_interval_start += int(floor(self.seconds_per_iteration*self.sample_rate))
         return self.extractSpecificInterval(interval_start, interval_end)
+
 
 
 def generateSineWave(duration, frequency, sample_rate):
     time_axis = linspace(0.0, duration, duration*sample_rate)
     return sin(2.0*pi*frequency * time_axis)
     
+
+
+class TimeSeriesParam(ClassSelector):
+    """
+    Parameter whose value is a TimeSeries object.
+    """
     
+    def __init__(self, **params):
+        super(TimeSeriesParam,self).__init__(TimeSeries, **params)
+            
+            
+            
 class PowerSpectrum(PatternGenerator):
     """
     Outputs the spectral density of a rolling interval of the input
     signal each time it is called. Over time, the results could be
     arranged into a spectrogram, e.g. for an audio signal.
     """
-    #signal = param.TimeSeries(default=TimeSeries(time_series=generateSineWave(0.001,1000,20000), sample_rate=20000), 
-    signal = param.Parameter(default=TimeSeries(time_series=generateSineWave(0.001,1000,20000), sample_rate=20000), 
+    
+    signal = TimeSeriesParam(default=TimeSeries(time_series=generateSineWave(0.001,1000,20000), sample_rate=20000), 
         doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
 
-    min_frequency = param.Number(default=0, bounds=(0,None), inclusive_bounds=(True,False),
+    min_frequency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False),
         doc="""Smallest frequency for which to return an amplitude.""")
 
-    max_frequency = param.Number(default=9999, bounds=(0,None), inclusive_bounds=(False,False), 
+    max_frequency = param.Integer(default=9999, bounds=(0,None), inclusive_bounds=(False,False), 
         doc="""Largest frequency for which to return an amplitude.""")
     
     windowing_function = param.Parameter(default=None, 
@@ -1188,6 +1219,7 @@ class PowerSpectrum(PatternGenerator):
         You may also supply your own.
         """)
         
+        
     def __init__(self, **params):
         super(PowerSpectrum, self).__init__(**params) 
         self._first_call = True
@@ -1197,6 +1229,7 @@ class PowerSpectrum(PatternGenerator):
         
         if self.min_frequency > self.max_frequency:
             raise ValueError("PowerSpectrum: min frequency must be lower than max frequency.")        
+        
         
     def _createFrequencyIndices(self):
         
@@ -1212,7 +1245,8 @@ class PowerSpectrum(PatternGenerator):
         index_of_max_freq = nonzero(self._available_frequency_range <= self.max_frequency)[0][-1]
         
         self._setFrequencySpacing(index_of_min_freq, index_of_max_freq)
-            
+          
+              
     def _setFrequencySpacing(self, min_freq, max_freq): 
         """
         Frequency spacing to use, i.e. how to map the available frequency range to the discrete sheet rows.
@@ -1222,7 +1256,9 @@ class PowerSpectrum(PatternGenerator):
         
         This method is here solely to provide a minimal overload if custom spacing is required.
         """
+        
         self._frequency_index_spacing = linspace(max_freq, min_freq, num=self._sheet_dimensions[0]+1, endpoint=True)
+            
             
     def _getRowAmplitudes(self):
         """
@@ -1237,17 +1273,6 @@ class PowerSpectrum(PatternGenerator):
 
         # A signal window *must* span one sample rate
         signal_window = tile(signal_interval, ceil(1.0/self.signal.interval_length))
-                
-        # BK-DEBUG
-        if signal_interval.size != self.signal.interval_length*sample_rate:
-            print "signal_interval_shape: " + str(signal_interval.shape)
-            print "signal_interval_length: " + str(self.signal.interval_length)
-        
-        # BK-DEBUG
-        if signal_window[0:sample_rate].size != sample_rate:
-            print "signal_interval_shape: " + str(signal_interval.shape)
-            print "signal_window: " + str(signal_window[0:sample_rate].size)
-            print "windowing_function: " + str(sample_rate)
 
         if self.windowing_function:
             smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
@@ -1266,11 +1291,13 @@ class PowerSpectrum(PatternGenerator):
             
         return (asarray(amplitudes_by_row).reshape(-1,1))
 
+
     def __firstCall__(self, **params_to_override):
         self._first_call = False
         
         self._sheet_dimensions = SheetCoordinateSystem(self.bounds, self.xdensity, self.ydensity).shape
         self._createFrequencyIndices()
+
 
     def __everyCall__(self, **params_to_override):
         row_amplitudes = self._getRowAmplitudes()
@@ -1280,11 +1307,13 @@ class PowerSpectrum(PatternGenerator):
 
         return row_amplitudes
         
+        
     def __call__(self, **params_to_override): 
         if self._first_call:
             self.__firstCall__(**params_to_override)
         
         return self.__everyCall__(**params_to_override)
+
 
 
 class Spectrogram(PowerSpectrum):
@@ -1296,13 +1325,16 @@ class Spectrogram(PowerSpectrum):
     normalization_function = param.Parameter(default=None,
         doc="""Provides the ability to normalise the spectrogram on a column by column basis.""")
     
+    
     def _updateSpectrogram(self, new_column):
         self._spectrogram = hstack((new_column, self._spectrogram))
         self._spectrogram = self._spectrogram[0:, 0:self._sheet_dimensions[1]]
-                
+               
+                 
     def __firstCall__(self, **params_to_override):
         super(Spectrogram, self).__firstCall__(**params_to_override)
         self._spectrogram = zeros(self._sheet_dimensions)
+    
     
     def __everyCall__(self, **params_to_override):
         row_amplitudes = self._getRowAmplitudes()
