@@ -1232,23 +1232,27 @@ class PowerSpectrum(PatternGenerator):
         See numpy.rfft for information about the Fourier transform.
         """
         
-        signal_window = self.signal()
+        signal_interval = self.signal()
         sample_rate = self.signal.sample_rate        
 
         # A signal window *must* span one sample rate
-        signal_window = tile(signal_window, ceil(1.0/self.signal.interval_length))
+        signal_window = tile(signal_interval, ceil(1.0/self.signal.interval_length))
                 
         # BK-DEBUG
+        if signal_interval.size != self.signal.interval_length:
+            print "signal_interval_shape: " + str(signal_interval.shape())
+            print "signal_interval_length: " + str(self.signal.interval_length)
+        
+        # BK-DEBUG
         if signal_window[0:sample_rate].size != sample_rate:
-            print "signal_shape: " + str(signal_window.shape())
+            print "signal_interval_shape: " + str(signal_interval.shape())
             print "signal_window: " + str(signal_window[0:sample_rate].size)
             print "windowing_function: " + str(sample_rate)
-        
 
-        if self.windowing_function == None:
-            smoothed_window = signal_window[0:sample_rate]
-        else:
+        if self.windowing_function:
             smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
+        else:
+            smoothed_window = signal_window[0:sample_rate]
         
         amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2]        
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
@@ -1288,7 +1292,10 @@ class Spectrogram(PowerSpectrum):
     Extends PowerSpectrum to provide a temporal buffer, yielding
     a 2D representation of a fixed-width spectrogram.
     """
-        
+    
+    normalization_function = param.Parameter(default=None,
+        doc="""Provides the ability to normalise the spectrogram on a column by column basis.""")
+    
     def _updateSpectrogram(self, new_column):
         self._spectrogram = hstack((new_column, self._spectrogram))
         self._spectrogram = self._spectrogram[0:, 0:self._sheet_dimensions[1]]
@@ -1298,7 +1305,15 @@ class Spectrogram(PowerSpectrum):
         self._spectrogram = zeros(self._sheet_dimensions)
     
     def __everyCall__(self, **params_to_override):
-        self._updateSpectrogram(self._getRowAmplitudes())
+        row_amplitudes = self._getRowAmplitudes()
+        
+        if self.normalization_function:
+            returned_array = self.normalization_function(row_amplitudes)
+            if returned_array != None:
+                row_amplitudes = returned_array
+            # otherwise the normalization function worked in place.
+            
+        self._updateSpectrogram(row_amplitudes)
         return self._spectrogram   
         
         
