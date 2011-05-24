@@ -19,7 +19,8 @@ try:
 
 except ImportError:
     param.Parameterized().warning("audio.py classes will not be usable because scikits.audiolab is not available.")
-        
+     
+
         
 class AudioFile(TimeSeries):
     """
@@ -38,16 +39,19 @@ class AudioFile(TimeSeries):
     
     precision = param.Parameter(default=float64, doc="""
         The float precision to use for loaded audio files.""")
-            
+         
+               
     def __init__(self, **params):
         super(AudioFile, self).__init__(**params)
         self._loadAudioFile()
+
 
     def _loadAudioFile(self):
         source = audiolab.Sndfile(self.filename, 'r')
         
         self.time_series = source.read_frames(source.nframes, dtype=self.precision) 
         self.sample_rate = source.samplerate
+
 
 
 class AudioFolder(AudioFile):
@@ -69,10 +73,12 @@ class AudioFolder(AudioFile):
          
     gap_between_sounds=param.Number(default=0.0, bounds=(0.0,None),
         doc="""The gap in seconds to insert between consecutive soundfiles.""")
-                 
+      
+                            
     def __init__(self, **params):
         super(AudioFolder, self).__init__(**params)
         self._loadAudioFolder()
+                
                 
     def _loadAudioFolder(self):
         folder_contents = os.listdir(self.folderpath)
@@ -85,21 +91,30 @@ class AudioFolder(AudioFile):
         self.filename=self.sound_files[0]
         self._loadAudioFile()
         self.next_file = 1
-        
+
+
     def extractSpecificInterval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
         """
         
         if interval_start >= interval_end:
-            raise ValueError("TimeSeries: Requested interval's start point is past the requested end point.")
+            raise ValueError("Requested interval's start point is past the requested end point.")
         
         elif interval_start > self.time_series.size:
-            raise ValueError("TimeSeries: Requested interval's start point is past the end of the time series.")
+            if self.repeat:
+                interval_end = interval_end - interval_start
+                interval_start = 0                
+            else:
+                raise ValueError("Requested interval's start point is past the end of the time series.")
             
-        elif interval_end > self.time_series.size:
-            remaining_signal = self.time_series[interval_start:self.time_series.size]
+            
+        if interval_end < self.time_series.size:
+            interval = self.time_series[interval_start:interval_end]
+            
+        else:
             requested_interval_size = interval_end - interval_start
+            remaining_signal = self.time_series[interval_start:self.time_series.size]
 
             if self.next_file == len(self.sound_files) and self.repeat:
                 self.next_file = 0
@@ -115,9 +130,9 @@ class AudioFolder(AudioFile):
                 if self.gap_between_sounds > 0:
                     remaining_signal = hstack((remaining_signal, zeros(int(self.gap_between_sounds*self.sample_rate), dtype=self.precision)))
                 
-                self.time_series = hstack((remaining_signal, next_source.read_frames(next_source.nframes, self.precision)))
-                
-                interval = self.time_series[interval_start:interval_end]
+                self.time_series = hstack((remaining_signal, next_source.read_frames(next_source.nframes, dtype=self.precision)))
+                                
+                interval = self.time_series[0:requested_interval_size]
                 self._next_interval_start = requested_interval_size
 
             else:
@@ -127,13 +142,9 @@ class AudioFolder(AudioFile):
 
                 samples_per_interval = self.interval_length*self.sample_rate
                 interval = hstack((remaining_signal, zeros(samples_per_interval-remaining_signal.size)))
-            
-            return interval
-            
-        else:
-            interval = self.time_series[interval_start:interval_end]
-        
+                    
         return interval
+
 
 
 class AuditorySpectrogram(Spectrogram):
@@ -143,14 +154,17 @@ class AuditorySpectrogram(Spectrogram):
         
     def _setFrequencySpacing(self, min_freq, max_freq):
         self._frequency_index_spacing = logspace(log10(max_freq), log10(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
-                
+        
+                        
     def _convertToDecibels(self, amplitudes):
         amplitudes[amplitudes==0] = 1.0
         return (20.0 * log10(abs(amplitudes)))
     
+    
     def __everyCall__(self, **params):
         self._updateSpectrogram(self._convertToDecibels(self._getRowAmplitudes()))
         return self._spectrogram
+
 
 
 class OctaveSpectrogram(Spectrogram):
@@ -160,6 +174,7 @@ class OctaveSpectrogram(Spectrogram):
     
     def _setFrequencySpacing(self, min_freq, max_freq):
         self._frequency_index_spacing = logspace(log2(max_freq), log2(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
+
 
 
 class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
@@ -178,11 +193,13 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
         doc="""The percentage by which to amplify the signal between the 
         specified frequency range.""")
         
+        
     def __init__(self, **params):
         super(OctaveSpectrogramWithAmplification, self).__init__(**params)
             
         if self.amplify_from_frequency > self.amplify_till_frequency:
             raise ValueError("OctaveSpectrogramWithAmplification: Amplify from frequency must be less than its amplify till frequency.")
+        
         
     def __everyCall__(self, **params):
         row_amplitudes = self._getRowAmplitudes()
@@ -219,6 +236,7 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
         self._updateSpectrogram(row_amplitudes)
         return self._spectrogram
         
+
 
 class LyonsCochlearModel(PowerSpectrum):
     """
@@ -264,6 +282,7 @@ class LyonsCochlearModel(PowerSpectrum):
     precision = param.Parameter(default=float64, doc="""
         The float precision to use when calculating ear stage filters.""")
     
+    
     def __init__(self, **params):
         super(LyonsCochlearModel, self).__init__(**params)
 
@@ -285,18 +304,22 @@ class LyonsCochlearModel(PowerSpectrum):
         
         self._generateCochlearFilters()
     
+    
     def _earBandwidth(self, cf):
         return sqrt(cf*cf + self.ear_break_squared) / self.ear_q
+        
         
     def _maxFrequency(self):
         bandwidth_step_max_f = self._earBandwidth(self.half_sample_rate) * self.ear_step_factor    
         return self.half_sample_rate + bandwidth_step_max_f - bandwidth_step_max_f*self.ear_zero_offset
+
 
     def _numOfChannels(self):
         min_f = self.ear_break_f / sqrt(4.0*self.ear_q*self.ear_q - 1.0)
         channels = log(self.max_f_calc) - log(min_f + sqrt(min_f*min_f + self.ear_break_squared))
         
         return int(floor(self.ear_q*channels/self.ear_step_factor))
+
 
     def _calcCentreFrequenciesTill(self, channel_index):
         if (self.centre_frequencies[channel_index] > 0):
@@ -307,6 +330,7 @@ class LyonsCochlearModel(PowerSpectrum):
             self.centre_frequencies[channel_index] = channel_cf
             
             return channel_cf
+
 
     def _evaluateFiltersForFrequencies(self, filters, frequencies):
         Zs = exp(2j*pi*frequencies/self.sample_rate)
@@ -326,6 +350,7 @@ class LyonsCochlearModel(PowerSpectrum):
         
         return zeros / poles
         
+        
     # a frequency and gain are specified so that the resulting filter can 
     # be normalized to have any desired gain at a specified frequency.
     def _makeFilters(self, zeros, poles, f, desired_gains):  
@@ -336,12 +361,15 @@ class LyonsCochlearModel(PowerSpectrum):
         
         return [zeros*desired_gains, poles*unit_gains]
         
+        
     def _frequencyResponses(self, evaluated_filters):
         evaluated_filters[evaluated_filters==0] = 1.0
         return 20.0 * log10(abs(evaluated_filters))
 
+
     def _specificFilter(self, x2_coefficient, x_coefficient, constant):  
         return array([[x2_coefficient,x_coefficient,constant], ], dtype=self.precision)
+            
             
     def _firstOrderFilterFromCorner(self, corner_f):
         polynomial = zeros((1,3), dtype=self.precision)
@@ -349,6 +377,7 @@ class LyonsCochlearModel(PowerSpectrum):
         polynomial[:,1] = 1.0
 
         return polynomial
+
 
     def _secondOrderFilterFromCenterQ(self, cf, quality):
         cf_as_ratio = cf/self.sample_rate
@@ -365,8 +394,10 @@ class LyonsCochlearModel(PowerSpectrum):
         
         return polynomial
      
+     
     def _earFilterGains(self):
         return self.centre_frequencies[:-1] / self.centre_frequencies[1:]
+
 
     def _earFirstStage(self):    
         outer_middle_ear_filter = self._makeFilters(self._firstOrderFilterFromCorner(self.ear_preemph_corner_f), 
@@ -385,12 +416,14 @@ class LyonsCochlearModel(PowerSpectrum):
         
         return outer_middle_ear_evaluations * high_freq_compensator_evaluations * pole_pair_evaluations
 
+
     def _earAllOtherStages(self):
         zeros = self._secondOrderFilterFromCenterQ(self.cascade_zero_cfs[1:], self.cascade_zero_qs[1:])
         poles = self._secondOrderFilterFromCenterQ(self.cascade_pole_cfs[1:], self.cascade_pole_qs[1:])
         
         stage_filters = self._makeFilters(zeros, poles, array([0.0]), self.ear_filter_gains)
         return self._evaluateFiltersForFrequencies(stage_filters, self.frequencies)
+
 
     def _generateCascadeFilters(self):
         
@@ -400,6 +433,7 @@ class LyonsCochlearModel(PowerSpectrum):
             cascade_filters[channel,:] = cascade_filters[channel,:] * cascade_filters[channel-1,:]
         
         return self._frequencyResponses(cascade_filters)
+        
         
     def _generateCochlearFilters(self):
         max_f = self._maxFrequency()
@@ -425,6 +459,7 @@ class LyonsCochlearModel(PowerSpectrum):
         self.ear_stages = hstack((self._earFirstStage(), self._earAllOtherStages())).transpose() 
         
         self.cochlear_channels = self._generateCascadeFilters()
+        
         
     def _getRowAmplitudes(self):
         """
@@ -456,12 +491,14 @@ class LyonsCochlearModel(PowerSpectrum):
             sheet_responses[channel] = sum(time_responses) / (sample_rate/2.0)
         
         return sheet_responses.reshape(self._num_of_channels, 1)
-            
+          
+              
     def __firstCall__(self, **params):
         super(LyonsCochlearModel, self).__firstCall__(**params)
         
         if self._sheet_dimensions[0] != self._num_of_channels:
             raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." %(self._sheet_dimensions[0], self._num_of_channels))
+        
         
         
 class Cochleogram(LyonsCochlearModel):
@@ -473,16 +510,19 @@ class Cochleogram(LyonsCochlearModel):
     def _updateCochleogram(self, new_column):
         self._cochleogram = hstack((new_column, self._cochleogram))
         self._cochleogram = self._cochleogram[0:, 0:self._sheet_dimensions[1]]
-                
+            
+                    
     def __firstCall__(self, **params):
         super(Cochleogram, self).__firstCall__(**params)
         self._cochleogram = zeros(self._sheet_dimensions)
+
 
     def __everyCall__(self, **params_to_override):
         self._updateCochleogram(self._getRowAmplitudes())
         return self._cochleogram           
 
 
+        
         
 if __name__=='__main__' or __name__=='__mynamespace__':
 
