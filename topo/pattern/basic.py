@@ -11,7 +11,7 @@ __version__='$Revision$'
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or
 from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, floor, equal, exp, hstack, Infinity, linspace, multiply, \
-    nonzero, pi, repeat, sin, sqrt, subtract, tile, zeros
+    nonzero, pi, repeat, sin, sqrt, subtract, tile, zeros, sum, max
 
 import param
 from param.parameterized import ParamOverrides
@@ -984,41 +984,78 @@ class LogGaussian(PatternGenerator):
     The center governs the peak position of the Gaussian,
     mathematically this is the mean term.
     """
+    
+    size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+    
+    aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+    
+    x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+
+    y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+    
+
+    def __call__(self, **params_to_override):
+        """
+        Call the subclass's 'function' method on a rotated and scaled coordinate system.
+
+        Creates and fills an array with the requested pattern.  If
+        called without any params, uses the values for the Parameters
+        as currently set on the object. Otherwise, any params
+        specified override those currently set on the object.
+        """
+        p = ParamOverrides(self, params_to_override)
+
+        self._setup_xy(p)
+        fn_result = self.function(p)
+        self._apply_mask(p, fn_result)
         
-    size = param.Number(default=1.0)
+        scale_factor = p.scale / max(fn_result)
+        result = scale_factor*fn_result + p.offset
+                    
+        for of in p.output_fns:
+            of(result)
+                               
+        return result
+                               
+
+    def _setup_xy(self, p):
+        """
+        Produce pattern coordinate matrices from the bounds and
+        density (or rows and cols), and transforms them according to
+        x, y, and orientation.
+        """
+        self.debug(lambda:"bounds=%s, xdensity=%s, ydensity=%s, x=%s, y=%s, orientation=%s"%(p.bounds, p.xdensity, p.ydensity, p.x, p.y, p.orientation))
+
+        x_points,y_points = SheetCoordinateSystem(p.bounds, p.xdensity, p.ydensity).sheetcoordinates_of_matrixidx()
+
+        self.pattern_x, self.pattern_y = self._create_and_rotate_coordinate_arrays(x_points-p.x, y_points-p.y, p)
         
-    tail = param.Number(default=0.8,bounds=(0.0,10.0),
-        doc="""Parameter controlling decay rate and distance from the peak of the Gaussian.""")
-        
-                                                        
-    def _create_and_rotate_coordinate_arrays(self, x, y, orientation):
+    
+    def _create_and_rotate_coordinate_arrays(self, x, y, p):
         """
         Create pattern matrices from x and y vectors, and rotate
         them to the specified orientation.
         """
-        # Using this two-liner requires that x increase from left to
-        # right and y decrease from left to right; I don't think it
-        # can be rewritten in so little code otherwise - but please
-        # prove me wrong.
         
-        # Offset by exponent to make sure intial pattern is centred and all rotaions
-        # occur about that centre point.
+        x = (x*10.0) / (p.size*p.aspect_ratio)
+        y = (y*10.0) / p.size
         
-        x = x * 10.0
-        y = y * 10.0
-        
-        pattern_x = add.outer(sin(orientation)*y, cos(orientation)*x) + exp(self.size-1.0)
-        pattern_y = subtract.outer(cos(orientation)*y, sin(orientation)*x) + exp(self.size-1.0)
+        offset = exp(p.size)
+        pattern_x = add.outer(sin(p.orientation)*y, cos(p.orientation)*x) + offset
+        pattern_y = subtract.outer(cos(p.orientation)*y, sin(p.orientation)*x) + offset
         
         clip(pattern_x, 0, Infinity, out=pattern_x)
         clip(pattern_y, 0, Infinity, out=pattern_y)
         
         return pattern_x, pattern_y
-    
-    
+
+
     def function(self, p):
-        self.size = p.size
-        return log_gaussian(self.pattern_x, self.pattern_y, p.tail, 0.4, p.size-1.0)
+        return log_gaussian(self.pattern_x, self.pattern_y, p.x_shape, p.y_shape, p.size)
 
         
         
@@ -1033,13 +1070,24 @@ class SigmoidedDoLG(PatternGenerator):
     positive_size = param.Number(default=0.15, bounds=(0.0,None), softbounds=(0.0,5.0),
         doc="""Size parameter for the positive Gaussian.""")
     
-    positive_tail = param.Number(default=0.6,bounds=(0.0,10.0),softbounds=(0.001,2.000),
+    positive_tail = param.Number(default=0.6, bounds=(0.0,10.0), softbounds=(0.001,2.000),
         doc="""Parameter controlling decay rate and distance from the peak of the positive Gaussian.""")
     
+    central_scale = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,10.0),
+        doc=""" """)
+
+
+
+    asp = param.Number(default=1.0, bounds=(None,None))
+    positive_peak_height = param.Number(default=1.0, bounds=(0.0,None))
+    
+            
+            
+            
     negative_size = param.Number(default=0.35, bounds=(0.0,None), softbounds=(0.0,5.0),
         doc="""Size parameter for the negative Gaussian.""")
         
-    negative_tail = param.Number(default=0.5,bounds=(0.0,10.0),softbounds=(0.001,2.000),
+    negative_tail = param.Number(default=0.5, bounds=(0.0,10.0), softbounds=(0.001,2.000),
         doc="""Parameter controlling decay rate and distance from the peak of the negative Gaussian.""")
                 
     sigmoid_slope = param.Number(default=50.0, bounds=(None,None), softbounds=(-100.0,100.0),
@@ -1054,8 +1102,16 @@ class SigmoidedDoLG(PatternGenerator):
 
     def function(self, p):
         positive = LogGaussian(size=p.positive_size+p.size, orientation=p.orientation, 
-            tail=p.positive_tail, x=p.x, y=p.y)
-                
+            tail=p.positive_tail, x=p.x, y=p.y, scale=p.central_scale)
+           
+           
+        positive_peak = Gaussian(aspect_ratio=p.asp, scale=p.positive_peak_height, size=p.size/10.0, orientation=pi/2.0)
+                          
+                          
+        positive = Composite(generators=[positive, positive_peak], bounds=p.bounds,
+            operator=numpy.add, xdensity=p.xdensity, ydensity=p.ydensity)
+                          
+                          
         negative = LogGaussian(size=p.negative_size+p.size, orientation=p.orientation, 
             tail=p.negative_tail, x=p.x, y=p.y)
                 
