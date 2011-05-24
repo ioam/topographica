@@ -40,8 +40,8 @@ class AudioFile(TimeSeries):
         The float precision to use for loaded audio files.""")
             
     def __init__(self, **params):
-        self._loadAudioFile()
         super(AudioFile, self).__init__(**params)
+        self._loadAudioFile()
 
     def _loadAudioFile(self):
         source = audiolab.Sndfile(self.filename, 'r')
@@ -85,7 +85,7 @@ class AudioFolder(AudioFile):
         self.filename=self.sound_files[0]
         self._loadAudioFile()
         self.next_file = 1
-
+        
     def extractSpecificInterval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
@@ -131,26 +131,10 @@ class AudioFolder(AudioFile):
             return interval
             
         else:
-            return self.time_series[interval_start:interval_end]    
-    
-    def _extractNextInterval(self):
-        interval_start = self._next_interval_start
-        interval_end = interval_start + self.interval_length*self.sample_rate
+            interval = self.time_series[interval_start:interval_end]
         
-        self._next_interval_start += int(self.seconds_per_iteration*self.sample_rate)            
-        return self.extractSpecificInterval(interval_start, interval_end)
+        return interval
 
-
-class OctaveSpectrogram(Spectrogram):
-    """
-    Extends Spectrogram to provide a response over an octave scale.
-    """
-    
-    def _setFrequencySpacing(self, min_freq, max_freq):
-        self._frequency_index_spacing = logspace(log2(max_freq), log2(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
-    
-    #BK-ALERT: Need to do some rescaling of the amplitudes here, can't normalise the whole sheet, need to normalise on each iteration. Do the override of __everyCall__, normalise the amplitudes before adding them to the spectrogram. Will need to update OctaveSpectrogramWithAmplification with the change.
-    
 
 class AuditorySpectrogram(Spectrogram):
     """
@@ -165,8 +149,17 @@ class AuditorySpectrogram(Spectrogram):
         return (20.0 * log10(abs(amplitudes)))
     
     def __everyCall__(self, **params):
-        self._updateSpectrogram(self._convertToDecibels(self._getAmplitudes()))
+        self._updateSpectrogram(self._convertToDecibels(self._getRowAmplitudes()))
         return self._spectrogram
+
+
+class OctaveSpectrogram(Spectrogram):
+    """
+    Extends Spectrogram to provide a response over an octave scale.
+    """
+    
+    def _setFrequencySpacing(self, min_freq, max_freq):
+        self._frequency_index_spacing = logspace(log2(max_freq), log2(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
 
 
 class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
@@ -185,17 +178,14 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
         doc="""The percentage by which to amplify the signal between the 
         specified frequency range.""")
         
-    def _setParams(self, **params):
-        super(AuditorySpectrogramSimpleOuterEar, self)._setParams(**params)
-        
-        for parameter,value in params.items():
-            setattr(self, parameter, value)
+    def __init__(self, **params):
+        super(OctaveSpectrogramWithAmplification, self).__init__(**params)
             
         if self.amplify_from_frequency > self.amplify_till_frequency:
-            raise ValueError("AuditorySpectrogramSimpleOuterEar's amplify from frequency must be less than its amplify till frequency.")
+            raise ValueError("OctaveSpectrogramWithAmplification: Amplify from frequency must be less than its amplify till frequency.")
         
     def __everyCall__(self, **params):
-        amplitudes = self._getAmplitudes()
+        row_amplitudes = self._getRowAmplitudes()
         
         self.sheet_frequency_divisions = logspace(log10(self.max_frequency), log10(self.min_frequency), 
             num=self._sheet_dimensions[0], endpoint=True, base=10)
@@ -208,20 +198,25 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
                 raise ValueError("Upper bound of frequency to amplify is outside the global frequency range.")
             
             else:
-                amplify_between = [ frequency for frequency in self.sheet_frequency_divisions \
-                    if frequency <= self.amplify_till_frequency and frequency >= self.amplify_from_frequency ]
+                amplify_between = [ frequency for frequency in self.sheet_frequency_divisions if frequency <= self.amplify_till_frequency and frequency >= self.amplify_from_frequency ]
                                 
                 # the larger the index, the lower the frequency.
                 amplify_start_index = where(self.sheet_frequency_divisions == max(amplify_between))[0][0]
                 amplify_end_index = where(self.sheet_frequency_divisions == min(amplify_between))[0][0]
                 
                 # build an array of equal length to amplitude array, containing percentage amplifications.
-                amplified_range = 1.0 + hanning(amplify_end_index-amplify_start_index+1) * self.amplify_by_percentage/100.0
-                amplify_by = concatenate((ones(amplify_start_index), amplified_range, ones(len(self.sheet_frequency_divisions)-amplify_end_index-1))).reshape((-1, 1))
+                amplified_range = 1.0 + hanning(amplify_end_index-amplify_start_index+1) * (self.amplify_by_percentage/100.0)
+                amplify_by = concatenate((ones(amplify_start_index), amplified_range, ones(len(self.sheet_frequency_divisions)-amplify_end_index-1)))
                 
-                amplitudes = multiply(amplitudes, amplify_by)
+                row_amplitudes = multiply(row_amplitudes, amplify_by.reshape((-1, 1)))
         
-        self._updateSpectrogram(self._convertToDecibels(amplitudes))
+        if self.normalization_function:
+            returned_array = self.normalization_function(row_amplitudes)
+            if returned_array:
+                row_amplitudes = returned_array
+            # otherwise the normalization function worked in place.
+            
+        self._updateSpectrogram(row_amplitudes)
         return self._spectrogram
         
 
@@ -271,8 +266,7 @@ class LyonsCochlearModel(PowerSpectrum):
     
     def __init__(self, **params):
         super(LyonsCochlearModel, self).__init__(**params)
-        self._setParams(**params)
-        
+
         # Hardwired Parameters specific to model, which is to say changing
         # them without knowledge of the mathematics of the model is a bad idea.
         self.sample_rate = self.signal.sample_rate
@@ -290,18 +284,6 @@ class LyonsCochlearModel(PowerSpectrum):
         self.ear_sharpness = float(5.0)
         
         self._generateCochlearFilters()
-        self._first_call = True
-        
-    def _setParams(self, **params):
-        super(LyonsCochlearModel, self)._setParams(**params)
-        
-        if parameter == "precision":
-            if str(value)[0:18] == "<type 'numpy.float":
-                setattr(self, parameter, value)
-            else:
-                raise ValueError("Precision must be a numpy float type.")
-        else:
-            setattr(self, parameter, value)
     
     def _earBandwidth(self, cf):
         return sqrt(cf*cf + self.ear_break_squared) / self.ear_q
@@ -414,7 +396,7 @@ class LyonsCochlearModel(PowerSpectrum):
         
         cascade_filters = self.ear_stages
         
-        for channel in range(1,self.num_of_channels):
+        for channel in range(1,self._num_of_channels):
             cascade_filters[channel,:] = cascade_filters[channel,:] * cascade_filters[channel-1,:]
         
         return self._frequencyResponses(cascade_filters)
@@ -423,11 +405,11 @@ class LyonsCochlearModel(PowerSpectrum):
         max_f = self._maxFrequency()
         self.max_f_calc = max_f + sqrt(max_f*max_f + self.ear_break_squared)
 
-        self.num_of_channels = self._numOfChannels()
+        self._num_of_channels = self._numOfChannels()
 
-        self.centre_frequencies = zeros(self.num_of_channels, dtype=self.precision)
+        self.centre_frequencies = zeros(self._num_of_channels, dtype=self.precision)
         self.centre_frequencies[0] = max_f
-        self._calcCentreFrequenciesTill(self.num_of_channels-1)
+        self._calcCentreFrequenciesTill(self._num_of_channels-1)
 
         bandwidths = self._earBandwidth(self.centre_frequencies)
         
@@ -444,7 +426,7 @@ class LyonsCochlearModel(PowerSpectrum):
         
         self.cochlear_channels = self._generateCascadeFilters()
         
-    def _getAmplitudes(self):
+    def _getRowAmplitudes(self):
         """
         Perform a real Discrete Fourier Transform (DFT; implemented
         using a Fast Fourier Transform algorithm, FFT) of the current
@@ -456,40 +438,30 @@ class LyonsCochlearModel(PowerSpectrum):
         sample_rate = self.signal.sample_rate        
         
         # A signal window *must* span one sample rate, irrespective of interval length.
-        signal_window = tile(self.signal(), ceil(sample_rate/self.signal.samples_per_interval))
+        signal_window = tile(self.signal(), ceil(1.0/self.signal.interval_length))
         
         if self.windowing_function == None:
             smoothed_window = signal_window[0:sample_rate]
         else:
             smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
         
-        return abs(fft.rfft(smoothed_window))[0:sample_rate/2]
-                
+        row_amplitudes = abs(fft.rfft(smoothed_window))[0:sample_rate/2]
+        row_amplitudes = row_amplitudes.reshape(1,sample_rate/2.0)
+        
+        filter_responses = multiply(self.cochlear_channels, row_amplitudes)
+        sheet_responses = zeros(self._num_of_channels)
+        
+        for channel in range(0,self._num_of_channels):
+            time_responses = abs(fft.ifft(filter_responses[channel]))
+            sheet_responses[channel] = sum(time_responses) / (sample_rate/2.0)
+        
+        return sheet_responses.reshape(self._num_of_channels, 1)
+            
     def __firstCall__(self, **params):
-        self._setParams(**params)
         super(LyonsCochlearModel, self).__firstCall__(**params)
         
-        if self._sheet_dimensions[0] != self.num_of_channels:
-            raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." 
-                %(self._sheet_dimensions[0], self.num_of_channels))
-    
-    def __everyCall__(self, **params):
-        sample_rate = self.signal.sample_rate
-        amplitudes = self._getAmplitudes().reshape(1, sample_rate/2.0)
-        
-        filter_responses = multiply(self.cochlear_channels, amplitudes)
-        sheet_responses = zeros(self.num_of_channels)
-        
-        for channel in range(0, self.num_of_channels):
-            time_responses = abs(fft.ifft(filter_responses[channel]))
-            sheet_responses[channel] = sum(time_responses) / (sample_rate/2.0) 
-        
-        sheet_responses = sheet_responses.reshape(self.num_of_channels, 1)
-
-        if self._sheet_dimensions[1] > 1:
-            sheet_responses = repeat(sheet_responses, self._sheet_dimensions[1], axis=1)
-
-        return sheet_responses
+        if self._sheet_dimensions[0] != self._num_of_channels:
+            raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." %(self._sheet_dimensions[0], self._num_of_channels))
         
         
 class Cochleogram(LyonsCochlearModel):
@@ -498,31 +470,19 @@ class Cochleogram(LyonsCochlearModel):
     i.e. the response over time along the cochlea.
     """
         
-    def _updateCochleogram(self, amplitudes):
-        self._cochleogram = hstack((amplitudes, self._cochleogram))
-        self._cochleogram = self._cochleogram[0:, 0:self._cochleogram.shape[1]-1]
+    def _updateCochleogram(self, new_column):
+        self._cochleogram = hstack((new_column, self._cochleogram))
+        self._cochleogram = self._cochleogram[0:, 0:self._sheet_dimensions[1]]
                 
     def __firstCall__(self, **params):
         super(Cochleogram, self).__firstCall__(**params)
         self._cochleogram = zeros(self._sheet_dimensions)
 
-    def __everyCall__(self, **params):
-        sample_rate = self.signal.sample_rate
-        amplitudes = self._getAmplitudes().reshape(1, sample_rate/2.0)
-        
-        filter_responses = multiply(self.cochlear_channels, amplitudes)
-        sheet_responses = zeros(self.num_of_channels)
-        
-        for channel in range(0, self.num_of_channels):
-            time_responses = abs(fft.ifft(filter_responses[channel]))
-            sheet_responses[channel] = sum(time_responses) / (sample_rate/2.0) 
-        
-        sheet_responses = sheet_responses.reshape(self.num_of_channels, 1)
+    def __everyCall__(self, **params_to_override):
+        self._updateCochleogram(self._getRowAmplitudes())
+        return self._cochleogram           
 
-        self._updateCochleogram(sheet_responses)
-        return self._cochleogram
-        
-        
+
         
 if __name__=='__main__' or __name__=='__mynamespace__':
 
