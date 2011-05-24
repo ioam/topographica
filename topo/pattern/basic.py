@@ -1239,13 +1239,13 @@ class PowerSpectrum(PatternGenerator):
         signal_window = tile(signal_interval, ceil(1.0/self.signal.interval_length))
                 
         # BK-DEBUG
-        if signal_interval.size != self.signal.interval_length:
-            print "signal_interval_shape: " + str(signal_interval.shape())
+        if signal_interval.size != self.signal.interval_length*sample_rate:
+            print "signal_interval_shape: " + str(signal_interval.shape)
             print "signal_interval_length: " + str(self.signal.interval_length)
         
         # BK-DEBUG
         if signal_window[0:sample_rate].size != sample_rate:
-            print "signal_interval_shape: " + str(signal_interval.shape())
+            print "signal_interval_shape: " + str(signal_interval.shape)
             print "signal_window: " + str(signal_window[0:sample_rate].size)
             print "windowing_function: " + str(sample_rate)
 
