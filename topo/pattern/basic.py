@@ -1058,26 +1058,21 @@ class SigmoidedDoLG(PatternGenerator):
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
 
 
-def generateSineWave(duration, frequency, sample_rate):
-    time_axis = linspace(0.0, duration, duration*sample_rate)
-    return sin(2.0*pi*frequency * time_axis)
-                   
-                   
 class TimeSeries(param.Parameterized):
     """
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Array(default=generateSineWave(0.001, 1000, 20000), 
-        doc="""An numpy array of numbers in a series.""")
-    
-    sample_rate = param.Number(default=20000, bounds=(0,None),
+    time_series = param.Array(default=None, 
+        doc="""An array of numbers that form a series.""")
+
+    sample_rate = param.Number(default=None, bounds=(0,None), inclusive_bounds=(False,False),
         doc="""The number of samples taken per second to form the series.""")
-     
-    seconds_per_iteration = param.Number(default=0.1, bounds=(0.0,None),
+    
+    seconds_per_iteration = param.Number(default=0.1, bounds=(0.0,None), inclusive_bounds=(False,False),
         doc="""Number of seconds advanced along the time series on each iteration.""")
 
-    interval_length = param.Number(default=0.1, bounds=(0.0,None),
+    interval_length = param.Number(default=0.1, bounds=(0.0,None), inclusive_bounds=(False,False),
         doc="""The length of time in seconds to be returned on each iteration.""")
     
     repeat = param.Boolean(default=True, 
@@ -1098,10 +1093,21 @@ class TimeSeries(param.Parameterized):
         if self.seconds_per_iteration > self.interval_length:
             self.warning("Seconds per iteration > interval length, some signal will be skipped.")
         
+    
+    def appendSignal(self, new_signal):
+        self.time_series = hstack((self.time_series, new_signal))
+    
     def extractSpecificInterval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
         """
+                
+        if not self.sample_rate:
+            raise ValueError("TimeSeries object has no sample rate set.")
+        
+        if self.time_series == None:
+            raise ValueError("TimeSeries object has no time series set.")
+        
         
         if interval_start >= interval_end:
             raise ValueError("TimeSeries: Requested interval's start point is past the requested end point.")
@@ -1151,6 +1157,11 @@ class TimeSeries(param.Parameterized):
     def __call__(self, **params_to_override): 
         return self._extractNextInterval()
 
+
+def generateSineWave(duration, frequency, sample_rate):
+    time_axis = linspace(0.0, duration, duration*sample_rate)
+    return sin(2.0*pi*frequency * time_axis)
+    
     
 class PowerSpectrum(PatternGenerator):
     """
@@ -1159,8 +1170,16 @@ class PowerSpectrum(PatternGenerator):
     arranged into a spectrogram, e.g. for an audio signal.
     """
     
-    signal = param.Parameter(default=None, doc="""
+    signal = param.Parameter(default=TimeSeries(time_series=generateSineWave(0.001,1000,20000), sample_rate=20000), doc="""
         A TimeSeries object on which to perfom the Fourier Transform.
+        """)
+
+    min_frequency = param.Number(default=0, bounds=(0,None), doc="""
+        Smallest frequency for which to return an amplitude.
+        """)
+
+    max_frequency = param.Number(default=22049, bounds=(0,None), doc="""
+        Largest frequency for which to return an amplitude.
         """)
     
     windowing_function = param.Parameter(default=None, doc="""
@@ -1178,14 +1197,6 @@ class PowerSpectrum(PatternGenerator):
         http://docs.scipy.org/doc/numpy/reference/routines.window.html
         
         You can also supply your own.
-        """)
-
-    min_frequency = param.Number(default=0, bounds=(0,None), doc="""
-        Smallest frequency for which to return an amplitude.
-        """)
-
-    max_frequency = param.Number(default=22049, bounds=(0,None), doc="""
-        Largest frequency for which to return an amplitude.
         """)
         
     def __init__(self, **params):
@@ -1301,8 +1312,8 @@ class PowerSpectrum(PatternGenerator):
         """
         self._setParams(**params)
         
-        if self.signal == None:
-            self.signal = TimeSeries()
+        #if self.signal == None:
+        #    self.signal = TimeSeries()
                 
         all_params = ParamOverrides(self, params)
         self._sheet_dimensions = SheetCoordinateSystem(all_params['bounds'], all_params['xdensity'], all_params['ydensity']).shape
@@ -1320,6 +1331,8 @@ class PowerSpectrum(PatternGenerator):
         return amplitudes
         
     def __call__(self, **params_to_override): 
+        #print self.bounds
+        
         if self._first_call:
             self.__firstCall__(**params_to_override)
         
