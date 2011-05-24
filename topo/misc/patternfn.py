@@ -53,9 +53,9 @@ def gaussian(x, y, xsigma, ysigma):
         x_w = divide(x,xsigma)
         y_h = divide(y,ysigma)
         return exp(-0.5*x_w*x_w + -0.5*y_h*y_h)
-    
 
-def log_gaussian(x, y, x_sigma, y_sigma, size):
+    
+def log_gaussian(x, y, x_sigma, y_sigma, mu):
     """
     Two-dimensional oriented Log Gaussian pattern (i.e., 2D version of a
     bell curve with an independent, movable peak). Much like a normal 
@@ -63,11 +63,11 @@ def log_gaussian(x, y, x_sigma, y_sigma, size):
     and not necessarily summing to 1.0).
     """
     if x_sigma==0.0 or y_sigma==0.0:
-        return x*0.0
+        return x * 0.0
 
     with float_error_ignore():
-        x_w = divide(log(x)-size, x_sigma*x_sigma)
-        y_h = divide(log(y)-size, y_sigma*y_sigma)
+        x_w = divide(log(x)-mu, x_sigma*x_sigma)
+        y_h = divide(log(y)-mu, y_sigma*y_sigma)
 		
         return exp(-0.5*x_w*x_w + -0.5*y_h*y_h)
 
