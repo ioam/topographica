@@ -843,7 +843,7 @@ pg.add_plot('Corner Orientation Selectivity',[('Strength','OrientationSelectivit
 pg.add_static_image( 'Hue Code', measure_corner_angle_pref.instance().key_img_fname )
 
 
-# Measure sound frequency preference maps
+# Measure audio frequency preference maps
 class measure_frequency_pref(PositionMeasurementCommand):
     """Measure a frequency preference and selectivity map"""
         
@@ -867,6 +867,33 @@ pg= create_plotgroup(name='Frequency Preference and Selectivity',category="Prefe
 
 pg.add_plot('[Frequency Preference]', [('Strength','YPreference')])
 pg.add_plot('[Frequency Selectivity]', [('Strength','YSelectivity')])
+
+
+# Measure audio latency preference maps
+class measure_latency_pref(PositionMeasurementCommand):
+    """Measure an onset latency preference and selectivity map"""
+        
+    display = param.Boolean(True) 
+    pattern_presenter = param.Callable(PatternPresenter(Line(smoothing=0.001, thickness=0.01, orientation=pi/2.0)))
+    
+    # BK-ALERT: These are hard coded to the lissom audio sheet dimensions.
+    # i'm not sure how to avoid that, PositionMeasurementCommand isn't
+    # actually able to access the sheet dimensions.
+    x_range = param.NumericTuple((-0.5,0.5))
+    divisions = param.Integer(100)
+    
+    def _feature_list(self,p):
+        return [Feature(name="y", values=[0.0]), 
+                Feature(name="x", range=p.x_range, step=(p.x_range[1]-p.x_range[0])/float(p.divisions))]
+
+
+pg= create_plotgroup(name='Onset Latency Preference and Selectivity',category="Preference Maps",
+                     pre_plot_hooks=[measure_latency_pref.instance()], normalize='Individually',
+                     doc='Measure best onset latency preference and selectivity for auditory neurons.')
+
+pg.add_plot('[Latency Preference]', [('Strength','XPreference')])
+pg.add_plot('[Latency Selectivity]', [('Strength','XSelectivity')])
+
 
 
 import types
