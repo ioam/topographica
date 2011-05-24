@@ -1065,61 +1065,59 @@ class SigmoidedDoLG(PatternGenerator):
     such that one part of the plane can be the mirror image of the other,
     and the peaks of the gaussians are movable.
     """
-    size = param.Number(default=1.0)
+    positive_size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
     
-    positive_size = param.Number(default=0.15, bounds=(0.0,None), softbounds=(0.0,5.0),
-        doc="""Size parameter for the positive Gaussian.""")
+    positive_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
     
-    positive_tail = param.Number(default=0.6, bounds=(0.0,10.0), softbounds=(0.001,2.000),
-        doc="""Parameter controlling decay rate and distance from the peak of the positive Gaussian.""")
-    
-    central_scale = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,10.0),
+    positive_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+
+    positive_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+
+    positive_scale = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,10.0),
         doc=""" """)
 
 
-
-    asp = param.Number(default=1.0, bounds=(None,None))
-    positive_peak_height = param.Number(default=1.0, bounds=(0.0,None))
+    negative_size = param.Number(default=3.0, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
     
-            
-            
-            
-    negative_size = param.Number(default=0.35, bounds=(0.0,None), softbounds=(0.0,5.0),
-        doc="""Size parameter for the negative Gaussian.""")
-        
-    negative_tail = param.Number(default=0.5, bounds=(0.0,10.0), softbounds=(0.001,2.000),
-        doc="""Parameter controlling decay rate and distance from the peak of the negative Gaussian.""")
+    negative_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+    
+    negative_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+
+    negative_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False),
+        doc=""" """)
+
+    negative_scale = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,10.0),
+        doc=""" """)
                 
+    
     sigmoid_slope = param.Number(default=50.0, bounds=(None,None), softbounds=(-100.0,100.0),
         doc="""Slope parameter for the Sigmoid.""")
 
     sigmoid_orientation = param.Number(default=pi/2.0, bounds=(None,None), softbounds=(0.0,2*pi),
         doc="""Orientation parameter for the Sigmoid.""")
             
-    sigmoid_position = param.Number(default=0.015, bounds=(None,None), softbounds=(-1.0,1.0),
+    sigmoid_position = param.Number(default=0.02, bounds=(None,None), softbounds=(-1.0,1.0),
         doc="""Position parameter for the Sigmoid.""")
 
 
     def function(self, p):
-        positive = LogGaussian(size=p.positive_size+p.size, orientation=p.orientation, 
-            tail=p.positive_tail, x=p.x, y=p.y, scale=p.central_scale)
-           
-           
-        positive_peak = Gaussian(aspect_ratio=p.asp, scale=p.positive_peak_height, size=p.size/10.0, orientation=pi/2.0)
-                          
-                          
-        positive = Composite(generators=[positive, positive_peak], bounds=p.bounds,
-            operator=numpy.add, xdensity=p.xdensity, ydensity=p.ydensity)
-                          
-                          
-        negative = LogGaussian(size=p.negative_size+p.size, orientation=p.orientation, 
-            tail=p.negative_tail, x=p.x, y=p.y)
-                
-        diff_of_log_gaussians = Composite(generators=[positive, negative], 
-            operator=subtract, xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)
+        positive = LogGaussian(size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio, x_shape=p.positive_x_shape, 
+            y_shape=p.positive_y_shape, scale=p.positive_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y)
         
-        sigmoid = Sigmoid(x=p.sigmoid_position+p.x, slope=p.sigmoid_slope, 
-            orientation=p.sigmoid_orientation+p.orientation)
+        negative = LogGaussian(size=p.negative_size*p.size, aspect_ratio=p.negative_aspect_ratio, x_shape=p.negative_x_shape, 
+            y_shape=p.negative_y_shape, scale=p.negative_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y)
+                          
+        diff_of_log_gaussians = Composite(generators=[positive, negative], operator=subtract, 
+            xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)
+        
+        sigmoid = Sigmoid(x=p.sigmoid_position+p.x, slope=p.sigmoid_slope, orientation=p.sigmoid_orientation+p.orientation)
         
         return Composite(generators=[diff_of_log_gaussians, sigmoid], bounds=p.bounds,
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
