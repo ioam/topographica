@@ -404,12 +404,6 @@ import everything from commands/*.py into the main namespace, for convenience; \
 equivalent to -c 'from topo.misc.commandline import auto_import_commands ; auto_import_commands()'.""")
 
 
-def enableFullTraceback(option,opt_str,value,parser):
-    """Callback function for the -t option."""
-    topo.tkgui.topoconsole.display_full_trace = True
-
-topo_parser.add_option("-t","--full-trace",action="callback",callback=enableFullTraceback,help="""Display the full trace when an error occurs.""")
-
 
 def exec_startup_files():
     """
