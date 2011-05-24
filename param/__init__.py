@@ -21,7 +21,7 @@ __version__='$Revision$'
 
 import os.path
 
-from numpy import ndarray
+from numpy import ndarray, float
 from parameterized import Parameterized, Parameter, String, \
      descendents, ParameterizedFunction, ParamOverrides
 
@@ -811,9 +811,9 @@ class Array(ClassSelector):
     """
     Parameter whose value is a numpy array.
     """
-    def __init__(self,**params):
-        super(Array,self).__init__(ndarray,allow_None=True,**params)
-        
+    def __init__(self, **params):
+        super(Array,self).__init__(ndarray, allow_None=True, **params)
+                
 
 # For portable code:
 #   - specify paths in unix (rather than Windows) style;
@@ -842,7 +842,7 @@ class resolve_path(ParameterizedFunction):
         Prepended to a non-relative path, in order, until a file is
         found.""")
 
-    path_type = String(default="File", pickle_default_value=False, doc="""
+    path_to_file = Boolean(default=True, pickle_default_value=False, doc="""
         String specifying whether the path refers to a 'File' or a 'Folder'.""")
         
     def __call__(self, path, **params):
@@ -851,12 +851,12 @@ class resolve_path(ParameterizedFunction):
         path = os.path.normpath(path)
 
         if os.path.isabs(path):
-            if p.path_type == "File":
+            if p.path_to_file:
                 if os.path.isfile(path):
                     return path
                 else:
                     raise IOError("File '%s' not found." %path)
-            elif p.path_type == "Folder":
+            elif not p.path_to_file:
                 if os.path.isdir(path):
                     return path
                 else:
@@ -869,10 +869,10 @@ class resolve_path(ParameterizedFunction):
             for prefix in p.search_paths:
                 try_path = os.path.join(os.path.normpath(prefix), path)
                 
-                if p.path_type == "File":
+                if p.path_to_file:
                     if os.path.isfile(try_path):
                         return try_path
-                elif p.path_type == "Folder":
+                elif not p.path_to_file:
                     if os.path.isdir(try_path):
                         return try_path
                 else:
@@ -985,9 +985,9 @@ class Filename(Path):
     
     def _resolve(self, path):
         if self.search_paths:
-            return resolve_path(path, path_type="File", search_paths=self.search_paths)
+            return resolve_path(path, path_to_file=True, search_paths=self.search_paths)
         else:
-            return resolve_path(path, path_type="File")       
+            return resolve_path(path, path_to_file=True)       
 
             
 class Foldername(Path):
@@ -1008,8 +1008,8 @@ class Foldername(Path):
 
     def _resolve(self, path):
         if self.search_paths:
-            return resolve_path(path, path_type="Folder", search_paths=self.search_paths)
+            return resolve_path(path, path_to_file=False, search_paths=self.search_paths)
         else:
-            return resolve_path(path, path_type="Folder")       
+            return resolve_path(path, path_to_file=False)       
 
 
