@@ -343,18 +343,8 @@ class Number(Dynamic):
         return val
 
 
-    def _check_value(self,val):
-        """
-        Checks that the value is numeric and that it is within the hard
-        bounds; if not, an exception is raised.
-        """
-        if self.allow_None and val==None:
-            return
-
-        if not (is_number(val)):
-            raise ValueError("Parameter '%s' only takes numeric values"%(self._attrib_name))
-
-
+    def _checkBounds(self, val):
+    
         if self.bounds!=None:
             vmin,vmax = self.bounds
             incmin,incmax = self.inclusive_bounds
@@ -387,9 +377,22 @@ class Number(Dynamic):
 ##              raise ValueError("Parameter '%s' must be in the range %s" % (self._attrib_name,self.rangestr()))
 
 ##         where self.rangestr() formats the range using the usual notation for
-##         indicating exclusivity, e.g. "[0,10)". 
+##         indicating exclusivity, e.g. "[0,10)".     
+    
+    
+    def _check_value(self,val):
+        """
+        Checks that the value is numeric and that it is within the hard
+        bounds; if not, an exception is raised.
+        """
+        if self.allow_None and val==None:
+            return
 
-                    
+        if not (is_number(val)):
+            raise ValueError("Parameter '%s' only takes numeric values"%(self._attrib_name))
+            
+        self._checkBounds(val)
+
 
     def get_soft_bounds(self):
         """
@@ -420,11 +423,15 @@ class Number(Dynamic):
 class Integer(Number):
 
     def _check_value(self,val):
+        if self.allow_None and val==None:
+            return
+
         if not isinstance(val,int):
             raise ValueError("Parameter '%s' must be an integer."%self._attrib_name)
-        super(Integer,self)._check_value(val)
+            
+        self._checkBounds(val)    
 
-
+            
 class Magnitude(Number):
 
     def __init__(self,default=1.0,softbounds=None,**params):
