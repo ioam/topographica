@@ -18,61 +18,36 @@ try:
     import scikits.audiolab as audiolab
 
 except ImportError:
-    param.Parameterized().warning("audio.py classes will not be usable;" \
-        "scikits.audiolab is not available.")
+    param.Parameterized().warning("audio.py classes will not be usable because scikits.audiolab is not available.")
         
         
 class AudioFile(TimeSeries):
     """
-    Requires an audio file in any format accepted by audiolab (wav, aiff,
-    flac).
+    Requires an audio file in any format accepted by audiolab (wav, aiff, flac).
     """
     
     # See TimeSeries itself for a detailed description of abstract status
     _abstract = True
         
-    time_series = param.Parameter(precedence=(-1))
+    time_series = param.Array(precedence=(-1))
     sample_rate = param.Number(precedence=(-1))
     
     filename = param.Filename(default='sounds/complex/daisy.wav', doc="""
-        File path (can be relative to Topographica's base path) to an
-        audio file. The audio can be in any format accepted by audiolab, 
-        e.g. WAV, AIFF, or FLAC.
-        """)
+        File path (can be relative to Topographica's base path) to an audio file. 
+        The audio can be in any format accepted by audiolab, e.g. WAV, AIFF, or FLAC.""")
     
     precision = param.Parameter(default=float64, doc="""
         The float precision to use for loaded audio files.""")
             
     def __init__(self, **params):
-        super(AudioFile, self).__init__(**params)
-        self._setParams(**params)
-        
         self._loadAudioFile()
-        
-    def _setParams(self, **params):
-        super(AudioFile, self)._setParams(**params)
+        super(AudioFile, self).__init__(**params)
 
-        for parameter,value in params.items():                
-            if parameter == "precision":
-                if str(value)[0:18] == "<type 'numpy.float":
-                    setattr(self, parameter, value)
-                else:
-                    raise ValueError("Precision must be a numpy float type.")
-            else:
-                setattr(self, parameter, value)
-                
     def _loadAudioFile(self):
-        self.source = audiolab.Sndfile(self.filename, 'r')
+        source = audiolab.Sndfile(self.filename, 'r')
         
-        self._setParams(time_series=self.source.read_frames(self.source.nframes, dtype=self.precision)) 
-        self._setParams(sample_rate=self.source.samplerate)
-        
-    def __firstCall__(self, **params):
-        self._setParams(**params)        
-        super(AudioFile, self).__firstCall__(**params)    
-
-    def __everyCall__(self, **params):
-        return self._extractNextInterval()
+        self.time_series = source.read_frames(source.nframes, dtype=self.precision) 
+        self.sample_rate = source.samplerate
 
 
 class AudioFolder(AudioFile):
@@ -97,13 +72,7 @@ class AudioFolder(AudioFile):
                  
     def __init__(self, **params):
         super(AudioFolder, self).__init__(**params)
-        self._setParams(**params)
-    
-    def _setParams(self, **params):
-        super(AudioFolder, self)._setParams(**params)
-
-        for parameter,value in params.items():
-            setattr(self, parameter, value)
+        self._loadAudioFolder()
                 
     def _loadAudioFolder(self):
         folder_contents = os.listdir(self.folderpath)
@@ -113,55 +82,63 @@ class AudioFolder(AudioFile):
             if file[-4:]==".wav" or file[-3:]==".wv" or file[-5:]==".aiff" or file[-4:]==".aif" or file[-5:]==".flac":
                 self.sound_files.append(self.folderpath + "/" + file) 
 
-        self._setParams(filename=self.sound_files[0])        
+        self.filename=self.sound_files[0]
+        self._loadAudioFile()
         self.next_file = 1
 
-    def _extractNextInterval(self):
-        interval_start = self._next_interval_start
-        interval_end = interval_start + self.samples_per_interval
-
-        if interval_end > self.time_series.size:
+    def extractSpecificInterval(self, interval_start, interval_end):
+        """
+        Overload if special behaviour is required when a series ends.
+        """
         
+        if interval_start >= interval_end:
+            raise ValueError("TimeSeries: Requested interval's start point is past the requested end point.")
+        
+        elif interval_start > self.time_series.size:
+            raise ValueError("TimeSeries: Requested interval's start point is past the end of the time series.")
+            
+        elif interval_end > self.time_series.size:
+            remaining_signal = self.time_series[interval_start:self.time_series.size]
+            requested_interval_size = interval_end - interval_start
+
+            if self.next_file == len(self.sound_files) and self.repeat:
+                self.next_file = 0
+            
             if self.next_file < len(self.sound_files):
+        
                 next_source = audiolab.Sndfile(self.sound_files[self.next_file], 'r')
                 self.next_file += 1
-     
+                   
                 if next_source.samplerate != self.sample_rate:
-                    raise ValueError("All sound files must be of the same sample rate")
-            
-                next_time_series = hstack((self.time_series[interval_start:self.time_series.size], self.inter_signal_gap))
-                next_time_series = hstack((next_time_series, next_source.read_frames(next_source.nframes, self.precision)))
-                self.time_series = next_time_series
+                    raise ValueError("All sound files must be of the same sample rate")        
                 
-                self._next_interval_start = interval_start = 0   
-                interval_end = self.samples_per_interval
-        
+                if self.gap_between_sounds > 0:
+                    remaining_signal = hstack((remaining_signal, zeros(int(self.gap_between_sounds*self.sample_rate), dtype=self.precision)))
+                
+                self.time_series = hstack((remaining_signal, next_source.read_frames(next_source.nframes, self.precision)))
+                
+                interval = self.time_series[interval_start:interval_end]
+                self._next_interval_start = requested_interval_size
+
             else:
-                if interval_start < self.time_series.size:
-                    if self.repeat:
-                        self._next_interval_start = 0
-                    else:
-                        self.warning("Returning last interval of the time series.")
-                        self._next_interval_start = self.time_series.size
-                    
-                    remaining_signal = self.time_series[interval_start:self.time_series.size]
-                    return hstack((remaining_signal, zeros(self.samples_per_interval-remaining_signal.size)))
-                
-                else:
-                    raise ValueError("Reached the end of the time series.")
-        
-        self._next_interval_start += int(self.seconds_per_iteration*self.sample_rate)
-        return self.time_series[interval_start:interval_end]
+            
+                self.warning("Returning last interval of the time series.")
+                self._next_interval_start = self.time_series.size + 1
 
-    def __firstCall__(self, **params):
-        self._setParams(**params)
-        self._loadAudioFolder()
+                samples_per_interval = self.interval_length*self.sample_rate
+                interval = hstack((remaining_signal, zeros(samples_per_interval-remaining_signal.size)))
+            
+            return interval
+            
+        else:
+            return self.time_series[interval_start:interval_end]    
+    
+    def _extractNextInterval(self):
+        interval_start = self._next_interval_start
+        interval_end = interval_start + self.interval_length*self.sample_rate
         
-        super(AudioFile, self).__firstCall__(**params)
-        self.inter_signal_gap = zeros(int(self.gap_between_sounds*self.sample_rate), dtype=self.precision)
-
-    def __everyCall__(self, **params):
-        return self._extractNextInterval()
+        self._next_interval_start += int(self.seconds_per_iteration*self.sample_rate)            
+        return self.extractSpecificInterval(interval_start, interval_end)
 
 
 class OctaveSpectrogram(Spectrogram):
@@ -172,7 +149,7 @@ class OctaveSpectrogram(Spectrogram):
     def _setFrequencySpacing(self, min_freq, max_freq):
         self._frequency_index_spacing = logspace(log2(max_freq), log2(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
     
-    #BK-ALERT: Need to do some rescaling of the amplitudes here, can't normalise the whole sheet, need to normalise on each iteraction. Do the override of __everyCall__, normalise the amplitudes before adding them to the spectrogram. Will need to update OctaveSpectrogramWithAmplification with the change.
+    #BK-ALERT: Need to do some rescaling of the amplitudes here, can't normalise the whole sheet, need to normalise on each iteration. Do the override of __everyCall__, normalise the amplitudes before adding them to the spectrogram. Will need to update OctaveSpectrogramWithAmplification with the change.
     
 
 class AuditorySpectrogram(Spectrogram):
