@@ -1174,6 +1174,8 @@ class MeasureResponseCommand(ParameterizedFunction):
 
     def __call__(self,**params):
         """Measure the response to the specified pattern and store the data in each sheet."""
+
+        raise CockSuckerError
         p=ParamOverrides(self,params)
         x=FeatureMaps(self._feature_list(p),name="FeatureMaps_for_"+self.name,
                       sheet_views_prefix=p.sheet_views_prefix)
