@@ -10,7 +10,7 @@ __version__='$Revision$'
 
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or
-from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, equal, exp, hstack, Infinity, linspace, multiply, \
+from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, floor, equal, exp, hstack, Infinity, linspace, multiply, \
     nonzero, pi, repeat, sin, sqrt, subtract, tile, zeros
 
 import param
@@ -1056,23 +1056,28 @@ class SigmoidedDoLG(PatternGenerator):
         
         return Composite(generators=[diff_of_log_gaussians, sigmoid], bounds=p.bounds,
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
-     
-           
+
+
+def generateSineWave(duration, frequency, sample_rate):
+    time_axis = linspace(0.0, duration, duration*sample_rate)
+    return sin(2.0*pi*frequency * time_axis)
+                   
+                   
 class TimeSeries(param.Parameterized):
     """
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Array(default=None, 
+    time_series = param.Array(default=generateSineWave(0.001, 1000, 20000), 
         doc="""An numpy array of numbers in a series.""")
     
-    sample_rate = param.Number(default=44100, bounds=(0,None),
+    sample_rate = param.Number(default=20000, bounds=(0,None),
         doc="""The number of samples taken per second to form the series.""")
      
-    seconds_per_iteration = param.Number(default=0.2, bounds=(0.0,None),
+    seconds_per_iteration = param.Number(default=0.1, bounds=(0.0,None),
         doc="""Number of seconds advanced along the time series on each iteration.""")
 
-    interval_length = param.Number(default=0.2, bounds=(0.0,None),
+    interval_length = param.Number(default=0.1, bounds=(0.0,None),
         doc="""The length of time in seconds to be returned on each iteration.""")
     
     repeat = param.Boolean(default=True, 
@@ -1092,13 +1097,6 @@ class TimeSeries(param.Parameterized):
 
         if self.seconds_per_iteration > self.interval_length:
             self.warning("Seconds per iteration > interval length, some signal will be skipped.")
-            
-        if self.time_series == None:
-            self.time_series = self.generateSineWave(self.interval_length, self.sample_rate*0.25, self.sample_rate)
-
-    def generateSineWave(self, duration, frequency, sample_rate):
-        time_axis = linspace(0.0, duration, duration*sample_rate)
-        return sin(frequency * 2.0*pi*time_axis)
         
     def extractSpecificInterval(self, interval_start, interval_end):
         """
@@ -1109,9 +1107,17 @@ class TimeSeries(param.Parameterized):
             raise ValueError("TimeSeries: Requested interval's start point is past the requested end point.")
         
         elif interval_start > self.time_series.size:
-            raise ValueError("TimeSeries: Requested interval's start point is past the end of the time series.")
+            if self.repeat:
+                interval_end = interval_end - interval_start
+                interval_start = 0                
+            else:
+                raise ValueError("TimeSeries: Requested interval's start point is past the end of the time series.")
             
-        elif interval_end > self.time_series.size:
+            
+        if interval_end < self.time_series.size:
+            interval = self.time_series[interval_start:interval_end]
+            
+        else:
             requested_interval_size = interval_end - interval_start
             remaining_signal = self.time_series[interval_start:self.time_series.size]
 
@@ -1119,26 +1125,12 @@ class TimeSeries(param.Parameterized):
                 if requested_interval_size < self.time_series.size:
                     self._next_interval_start = requested_interval_size-remaining_signal.size
                     interval = hstack((remaining_signal, self.time_series[0:self._next_interval_start]))
-                    
-                    if interval.size != self.sample_rate:
-                        print "a --------------------------"
-                        print interval.size
-                        print self.sample_rate
-                        print self._next_interval_start
-                        print "a --------------------------"   
-                                     
+                
                 else:
-                    repeated_signal = repeat(self.time_series, floor(requested_interval_size/self.time_series.size), axis=1)
+                    repeated_signal = repeat(self.time_series, floor(requested_interval_size/self.time_series.size))
                     self._next_interval_start = requested_interval_size % self.time_series.size
 
                     interval = (hstack((remaining_signal, repeated_signal)))[0:requested_interval_size]
-                        
-                    if interval.size != self.sample_rate:
-                        print "b --------------------------"
-                        print interval.size
-                        print self.sample_rate
-                        print self._next_interval_start
-                        print "b --------------------------"
                     
             else:
                 self.warning("Returning last interval of the time series.")
@@ -1147,10 +1139,7 @@ class TimeSeries(param.Parameterized):
                 samples_per_interval = self.interval_length*self.sample_rate
                 interval = hstack((remaining_signal, zeros(samples_per_interval-remaining_signal.size)))
             
-            return interval
-            
-        else:
-            return self.time_series[interval_start:interval_end]    
+        return interval
     
     def _extractNextInterval(self):
         interval_start = self._next_interval_start
@@ -1160,9 +1149,7 @@ class TimeSeries(param.Parameterized):
         return self.extractSpecificInterval(interval_start, interval_end)
 
     def __call__(self, **params_to_override): 
-        all_params = ParamOverrides(self, params_to_override)
         return self._extractNextInterval()
-
 
     
 class PowerSpectrum(PatternGenerator):
@@ -1197,7 +1184,7 @@ class PowerSpectrum(PatternGenerator):
         Smallest frequency for which to return an amplitude.
         """)
 
-    max_frequency = param.Number(default=1000, bounds=(0,None), doc="""
+    max_frequency = param.Number(default=22049, bounds=(0,None), doc="""
         Largest frequency for which to return an amplitude.
         """)
         
@@ -1275,13 +1262,19 @@ class PowerSpectrum(PatternGenerator):
         # A signal window *must* span one sample rate, irrespective of interval length.
         signal_window = tile(self.signal(), ceil(1.0/self.signal.interval_length))
         
+        
+        
+        # BK-DEBUG
+        if signal_window[0:sample_rate].size != self.signal.sample_rate:
+            print "signal_window: " + str(signal_window[0:sample_rate].size)
+            print "windowing_function: " + str(self.signal.sample_rate)
+            
+                        
+                        
+                        
         if self.windowing_function == None:
             smoothed_window = signal_window[0:sample_rate]
         else:
-            if signal_window[0:sample_rate].shape != self.windowing_function(sample_rate).shape:
-                print "signal_window: " + str(signal_window[0:sample_rate].shape)
-                print "windowing_function: " + str(self.windowing_function(sample_rate).shape)
-
             smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
         
         amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2]        
