@@ -236,8 +236,6 @@ except ImportError:
     DockManager = FakeDockManager
 
 
-display_full_trace = False
-
 # This is really a hack. There doesn't seem to be any easy way to tie
 # an exception to the window from which it originated. (I couldn't
 # find an example of tkinter software displaying a gui exception on
@@ -270,16 +268,11 @@ def _tkinter_report_exception(widget):
     else:
         topo.guimain.messageBar.error('%s'%msg)
     
-    # CEBALERT: need to implement gui debugging mode to have full
-    # traceback show up in a window.
-    # http://sourceforge.net/tracker/?func=detail&atid=470932&aid=3292417&group_id=53602
-    
-    # BKALERT: added a param above (display_full_trace) that can be set in the .topographicarc 
-    # to provide a short term solution to this issue by outputting a full trace to the console.
+    # BK-NOTE: Default is now to display full trace always. Any user
+    # errors should be caught as special exception cases 
     param.Parameterized().warning(msg)
-    if display_full_trace:
-        import traceback
-        traceback.print_exc()
+    import traceback
+    traceback.print_exc()
 
 
 import Tkinter
