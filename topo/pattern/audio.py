@@ -98,6 +98,9 @@ class AudioFolder(AudioFile):
         Overload if special behaviour is required when a series ends.
         """
         
+        interval_start = int(interval_start)
+        interval_end = int(interval_end)
+        
         if interval_start >= interval_end:
             raise ValueError("Requested interval's start point is past the requested end point.")
         
@@ -107,7 +110,6 @@ class AudioFolder(AudioFile):
                 interval_start = 0                
             else:
                 raise ValueError("Requested interval's start point is past the end of the time series.")
-            
             
         if interval_end < self.time_series.size:
             interval = self.time_series[interval_start:interval_end]
@@ -120,7 +122,6 @@ class AudioFolder(AudioFile):
                 self.next_file = 0
             
             if self.next_file < len(self.sound_files):
-        
                 next_source = audiolab.Sndfile(self.sound_files[self.next_file], 'r')
                 self.next_file += 1
                    
@@ -136,7 +137,6 @@ class AudioFolder(AudioFile):
                 self._next_interval_start = requested_interval_size
 
             else:
-            
                 self.warning("Returning last interval of the time series.")
                 self._next_interval_start = self.time_series.size + 1
 

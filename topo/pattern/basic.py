@@ -985,16 +985,16 @@ class LogGaussian(PatternGenerator):
     mathematically this is the mean term.
     """
     
-    size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(False,False),
+    size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc=""" """)
     
-    aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(False,False),
+    aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
         doc=""" """)
     
-    x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False),
+    x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
         doc=""" """)
 
-    y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False),
+    y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
         doc=""" """)
     
 
@@ -1041,8 +1041,12 @@ class LogGaussian(PatternGenerator):
         them to the specified orientation.
         """
         
-        x = (x*10.0) / (p.size*p.aspect_ratio)
-        y = (y*10.0) / p.size
+        if p.aspect_ratio == 0 or p.size == 0:
+            x = x * 0.0
+            y = y * 0.0
+        else:
+            x = (x*10.0) / (p.size*p.aspect_ratio)
+            y = (y*10.0) / p.size
         
         offset = exp(p.size)
         pattern_x = add.outer(sin(p.orientation)*y, cos(p.orientation)*x) + offset
@@ -1065,37 +1069,37 @@ class SigmoidedDoLG(PatternGenerator):
     such that one part of the plane can be the mirror image of the other,
     and the peaks of the gaussians are movable.
     """
-    positive_size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(False,False),
+    positive_size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc=""" """)
     
-    positive_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(False,False),
+    positive_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
         doc=""" """)
     
-    positive_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False),
+    positive_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
         doc=""" """)
 
-    positive_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False),
+    positive_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
         doc=""" """)
 
-    positive_scale = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,10.0),
+    positive_scale = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc=""" """)
 
 
-    negative_size = param.Number(default=3.0, bounds=(0.0,None), inclusive_bounds=(False,False),
+    negative_size = param.Number(default=3.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc=""" """)
     
-    negative_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(False,False),
+    negative_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
         doc=""" """)
     
-    negative_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False),
+    negative_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
         doc=""" """)
 
-    negative_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False),
+    negative_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
         doc=""" """)
 
-    negative_scale = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,10.0),
+    negative_scale = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc=""" """)
-                
+    
     
     sigmoid_slope = param.Number(default=50.0, bounds=(None,None), softbounds=(-100.0,100.0),
         doc="""Slope parameter for the Sigmoid.""")
@@ -1129,25 +1133,21 @@ class TimeSeries(param.Parameterized):
     Generic class to return intervals of a discretized time series.
     """
     
-    time_series = param.Array(default=None, 
+    time_series = param.Array(default=repeat(array([0,1]),50), 
         doc="""An array of numbers that form a series.""")
 
-    sample_rate = param.Integer(default=None, allow_None=True, bounds=(0,None), inclusive_bounds=(False,False), 
+    sample_rate = param.Integer(default=50, allow_None=True, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0,44100),
         doc="""The number of samples taken per second to form the series.""")
     
-    seconds_per_iteration = param.Number(default=0.1, bounds=(0.0,None), inclusive_bounds=(False,False),
+    seconds_per_iteration = param.Number(default=0.1, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,1.0),
         doc="""Number of seconds advanced along the time series on each iteration.""")
 
-    interval_length = param.Number(default=0.1, bounds=(0.0,None), inclusive_bounds=(False,False),
+    interval_length = param.Number(default=0.1, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,1.0),
         doc="""The length of time in seconds to be returned on each iteration.""")
     
     repeat = param.Boolean(default=True, 
         doc="""Whether the signal loops or terminates once it reaches its end.""")
-    
-    # Instantiating a TimeSeries in the GUI is not very useful, it exists to provide standardised methods to access and 
-    # manipulate a series of numbers for use by other classes.
-    _abstract = True
-    
+        
     
     def __init__(self, **params):
         super(TimeSeries, self).__init__(**params)
@@ -1169,15 +1169,8 @@ class TimeSeries(param.Parameterized):
         Overload if special behaviour is required when a series ends.
         """
         
-        if not (isinstance(interval_start, int) and isinstance(interval_end, int)):
-            raise ValueError("Interval start & end must be integers.")
-            
-        if not self.sample_rate:
-            raise ValueError("TimeSeries object has no sample rate set.")
-        
-        if self.time_series == None:
-            raise ValueError("TimeSeries object has no time series set.")
-        
+        interval_start = int(interval_start)
+        interval_end = int(interval_end)
         
         if interval_start >= interval_end:
             raise ValueError("Requested interval's start point is past the requested end point.")
@@ -1188,7 +1181,6 @@ class TimeSeries(param.Parameterized):
                 interval_start = 0                
             else:
                 raise ValueError("Requested interval's start point is past the end of the time series.")
-            
             
         if interval_end < self.time_series.size:
             interval = self.time_series[interval_start:interval_end]
@@ -1253,10 +1245,10 @@ class PowerSpectrum(PatternGenerator):
     signal = TimeSeriesParam(default=TimeSeries(time_series=generateSineWave(0.001,1000,20000), sample_rate=20000), 
         doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
 
-    min_frequency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False),
+    min_frequency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,10000),
         doc="""Smallest frequency for which to return an amplitude.""")
 
-    max_frequency = param.Integer(default=9999, bounds=(0,None), inclusive_bounds=(False,False), 
+    max_frequency = param.Integer(default=9999, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0,10000),
         doc="""Largest frequency for which to return an amplitude.""")
     
     windowing_function = param.Parameter(default=None, 
