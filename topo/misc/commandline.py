@@ -353,6 +353,9 @@ launch an interactive graphical user interface; \
 equivalent to -c 'from topo.misc.commandline import gui ; gui()'. \
 Implies -a.""")
 
+topo_parser.add_option("--pdb",action="store_true",dest="pdb",help="""\
+Automatically call the pdb debugger after every uncaught \
+exception. See IPython documentation for further details.""")
 
 # Keeps track of whether something has been performed, when deciding whether to assume -i
 something_executed=False
@@ -490,20 +493,26 @@ def process_argv(argv):
     ## some kind of cleanup code afterwards)
     if os.environ.get('PYTHONINSPECT'):
         print BANNER    
-        # CB: should probably allow a way for users to pass things to
-        # IPython? Or at least set up some kind of topographica ipython
-        # config file
+        # CBALERT: should probably allow a way for users to pass
+        # things to IPython? Or at least set up some kind of
+        # topographica ipython config file. Right now, an topo_parser
+        # option has to be added for every ipython option we want to
+        # support (e.g. see --pdb)
 
         if ipython_imported:
             # Stop IPython namespace hack?
             # http://www.nabble.com/__main__-vs-__main__-td14606612.html
             __main__.__name__="__mynamespace__"
 
+            ipython_args = ['-noconfirm_exit','-nobanner',
+                            '-pi1',CommandPrompt.get_format(),
+                            '-pi2',CommandPrompt2.get_format(),
+                            '-po',OutputPrompt.get_format()]
+            if option.pdb:
+                ipython_args.append('-pdb')
+
             IPython.Shell.IPShell(
-                ['-noconfirm_exit','-nobanner',
-                 '-pi1',CommandPrompt.get_format(),
-                 '-pi2',CommandPrompt2.get_format(),
-                 '-po',OutputPrompt.get_format()],
+                ipython_args,
                 user_ns=__main__.__dict__).mainloop(sys_exit=1)            
 
         
