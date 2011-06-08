@@ -495,7 +495,7 @@ def process_argv(argv):
         print BANNER    
         # CBALERT: should probably allow a way for users to pass
         # things to IPython? Or at least set up some kind of
-        # topographica ipython config file. Right now, an topo_parser
+        # topographica ipython config file. Right now, a topo_parser
         # option has to be added for every ipython option we want to
         # support (e.g. see --pdb)
 
