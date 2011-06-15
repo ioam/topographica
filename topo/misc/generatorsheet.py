@@ -74,6 +74,12 @@ class GeneratorSheet(Sheet):
         self.input_generator.xdensity = self.xdensity
         self.input_generator.ydensity = self.ydensity
         
+        # BK-NOTE: Some pattern generators (e.g. PowerSpectrum) need special
+        # behaviour if installed into a generator sheet. The following call
+        # lets them know.
+        if getattr(self.input_generator, "onInstall", None):
+            self.input_generator.onInstall()
+
 
     def push_input_generator(self):
         """Push the current input_generator onto a stack for future retrieval."""
