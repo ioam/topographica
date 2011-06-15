@@ -24,22 +24,21 @@ $Id$
 """
 __version__='$Revision$'
 
-
-from math import pi, sin, cos
-
 import Image,ImageDraw
     
 import copy
 
 from numpy.oldnumeric import array, maximum
+from numpy import where, pi, sin, cos, nonzero
 
 import param
 from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
 
 import topo
-from topo.base.cf import Projection
+from topo.base.cf import Projection, CFSheet
 from topo.base.sheet import Sheet
+from topo.sheet import GeneratorSheet
 from topo.base.sheetview import SheetView
 from topo.misc.distribution import Distribution
 from topo.pattern.basic import GaussiansCorner, RawRectangle, Line
@@ -49,6 +48,9 @@ from topo.plotting.plotgroup import create_plotgroup, plotgroups
 from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
 from topo.analysis.featureresponses import Feature, PatternPresenter
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
+from topo.base.patterngenerator import PatternGenerator
+
+from topo.misc.patternfn import line
 
 
 # Helper function for save_plotgroup
@@ -843,56 +845,158 @@ pg.add_plot('Corner Orientation Selectivity',[('Strength','OrientationSelectivit
 pg.add_static_image( 'Hue Code', measure_corner_angle_pref.instance().key_img_fname )
 
 
-# Measure audio frequency preference maps
-class measure_frequency_pref(PositionMeasurementCommand):
-    """Measure a frequency preference and selectivity map"""
+
+class frequencyPresenter(PatternGenerator):
+    """Activates a generator sheet at the specified frequency (for all latencies)."""
+    
+    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
+        doc="Thickness (width) of the frequency band for every presentation.")
+        
+    frequency_spacing = param.Array(default=None,
+        doc=""".""")
+        
+                        
+    def getFrequency(self): 
+        sheet_range = self.bounds.lbrt()
+        y_range = sheet_range[3] - sheet_range[1]
+        
+        index = ((self.y - sheet_range[1]) / y_range) * (len(self.frequency_spacing) - 1)
+
+        return self.frequency_spacing[index]
+        
+        
+    def setFrequency(self, new_frequency):    
+        index = nonzero(self.frequency_spacing >= new_frequency)[0][0]
+        
+        sheet_range = self.bounds.lbrt()
+        y_range = sheet_range[3] - sheet_range[1]
+        
+        ratio = (len(self.frequency_spacing) - 1) / y_range
+        
+        y = (index / ratio) + sheet_range[1]
+        setattr(self, 'y', y)
+       
+    
+    frequency = property(getFrequency, setFrequency, "The frequency at which to present.")
+
+    
+    def function(self, p):
+        return line(self.pattern_y, p.size, 0.0)
+
+
+
+class measureFrequencyPreference(PositionMeasurementCommand):
+    """Measure a best frequency preference and selectivity map for auditory neurons."""
         
     display = param.Boolean(True) 
-    pattern_presenter = param.Callable(PatternPresenter(Line(smoothing=0.001,thickness=0.01)))
+    static_parameters = param.List(default=["scale", "offset"])        
     
-    # BK-ALERT: These are hard coded to the lissom audio sheet dimensions.
-    # i'm not sure how to avoid that, PositionMeasurementCommand isn't
-    # actually able to access the sheet dimensions.
-    y_range = param.NumericTuple((-0.5,0.5))
-    divisions = param.Integer(100)
     
     def _feature_list(self,p):
-        return [Feature(name="x", values=[0.0]), 
-                Feature(name="y", range=p.y_range, step=(p.y_range[1]-p.y_range[0])/float(p.divisions))]
+        input_sheets = topo.sim.objects(GeneratorSheet).values()
+        
+        # BK-NOTE: if anyone wants to generalise this method for heterogeneous sheets, by all means do so,
+        # for my personal use the additional code required to generalise was overkill.
+        for sheet in range(1, len(input_sheets)-1):
+            assert input_sheets[sheet].bounds == input_sheets[sheet-1].bounds
+            assert input_sheets[sheet].xdensity == input_sheets[sheet-1].xdensity
+            assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
+        
+        divisions = float(input_sheets[0].ydensity)
+    
+        min_freq = input_sheets[0].input_generator.min_frequency
+        max_freq = input_sheets[0].input_generator.max_frequency
+        freq_spacing = input_sheets[0].input_generator.frequency_spacing
+
+        self.pattern_presenter = PatternPresenter(frequencyPresenter(size=1.0/divisions, frequency_spacing=freq_spacing))
+        
+        return [Feature(name="frequency", range=(min_freq,max_freq), step=1)]
 
 
-pg= create_plotgroup(name='Frequency Preference and Selectivity',category="Preference Maps",
-                     pre_plot_hooks=[measure_frequency_pref.instance()], normalize='Individually',
-                     doc='Measure best frequency preference and selectivity for auditory neurons.')
+pg= create_plotgroup(name='Frequency Preference and Selectivity', category="Preference Maps",
+    pre_plot_hooks=[measureFrequencyPreference.instance()], normalize='Individually',
+    doc='Measure a best frequency preference and selectivity map for auditory neurons.')
 
-pg.add_plot('[Frequency Preference]', [('Strength','YPreference')])
-pg.add_plot('[Frequency Selectivity]', [('Strength','YSelectivity')])
+pg.add_plot('[Frequency Preference]', [('Strength','FrequencyPreference')])
+pg.add_plot('[Frequency Selectivity]', [('Strength','FrequencySelectivity')])
 
 
-# Measure audio latency preference maps
-class measure_latency_pref(PositionMeasurementCommand):
-    """Measure an onset latency preference and selectivity map"""
+
+class latencyPresenter(PatternGenerator):
+    """Activates a generator sheet at the specified latency (for all frequencies)."""
+
+    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
+        doc="Thickness (width) of the latency band for every presentation.")
+        
+    min_latency = param.Integer(default=1, bounds=(0,None), inclusive_bounds=(True,False),
+        doc="""Smallest latency on the generator sheet.""")
+
+    max_latency = param.Integer(default=50, bounds=(0,None), inclusive_bounds=(False,False),
+        doc="""Largest latency on the generator sheet.""")
+        
+
+    def getLatency(self):    
+        latency_range = self.max_latency - self.min_latency
+        
+        sheet_range = self.bounds.lbrt()
+        x_range = sheet_range[2] - sheet_range[0]
+        
+        ratio = latency_range / x_range
+        
+        return (self.x - sheet_range[0]) * ratio
+        
+        
+    def setLatency(self, new_latency):
+        latency_range = self.max_latency - self.min_latency
+        
+        sheet_range = self.bounds.lbrt()
+        x_range = sheet_range[2] - sheet_range[0]
+        
+        ratio = latency_range / x_range
+        
+        x = (new_latency / ratio) + sheet_range[0]
+        setattr(self, 'x', x)
+           
+    latency = property(getLatency, setLatency, "The latency at which to present.")
+    
+    
+    def function(self, p):
+        return line(self.pattern_x, p.size, 0.001)
+        
+        
+        
+class measureLatencyPreference(PositionMeasurementCommand):
+    """Measure a best onset latency preference and selectivity map for auditory neurons."""
         
     display = param.Boolean(True) 
-    pattern_presenter = param.Callable(PatternPresenter(Line(smoothing=0.001, thickness=0.01, orientation=pi/2.0)))
-    
-    # BK-ALERT: These are hard coded to the lissom audio sheet dimensions.
-    # i'm not sure how to avoid that, PositionMeasurementCommand isn't
-    # actually able to access the sheet dimensions.
-    x_range = param.NumericTuple((-0.5,0.5))
-    divisions = param.Integer(100)
-    
+    static_parameters = param.List(default=["scale", "offset"])        
+
     def _feature_list(self,p):
-        return [Feature(name="y", values=[0.0]), 
-                Feature(name="x", range=p.x_range, step=(p.x_range[1]-p.x_range[0])/float(p.divisions))]
+        input_sheets = topo.sim.objects(GeneratorSheet).values()
+        
+        # BK-NOTE: if anyone wants to generalise this method for heterogeneous sheets, by all means do so,
+        # for my personal use the additional code required to generalise was overkill.
+        for sheet in range(1, len(input_sheets)-1):
+            assert input_sheets[sheet].bounds == input_sheets[sheet-1].bounds
+            assert input_sheets[sheet].xdensity == input_sheets[sheet-1].xdensity
+            assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
+        
+        divisions = float(input_sheets[0].xdensity)
+            
+        min_lat = input_sheets[0].input_generator.min_latency
+        max_lat = input_sheets[0].input_generator.max_latency
+        
+        self.pattern_presenter = PatternPresenter(latencyPresenter(size=1.0/divisions, min_latency=min_lat, max_latency=max_lat))
+        
+        return [Feature(name="latency", range=(min_lat,max_lat), step=1)]
 
 
-pg= create_plotgroup(name='Onset Latency Preference and Selectivity',category="Preference Maps",
-                     pre_plot_hooks=[measure_latency_pref.instance()], normalize='Individually',
-                     doc='Measure best onset latency preference and selectivity for auditory neurons.')
+pg= create_plotgroup(name='Latency Preference and Selectivity', category="Preference Maps",
+    pre_plot_hooks=[measureLatencyPreference.instance()], normalize='Individually',
+    doc='Measure a best onset latency preference and selectivity map for auditory neurons.')
 
-pg.add_plot('[Latency Preference]', [('Strength','XPreference')])
-pg.add_plot('[Latency Selectivity]', [('Strength','XSelectivity')])
+pg.add_plot('[Latency Preference]', [('Strength','LatencyPreference')])
+pg.add_plot('[Latency Selectivity]', [('Strength','LatencySelectivity')])
 
 
 
