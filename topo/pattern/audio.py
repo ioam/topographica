@@ -49,7 +49,9 @@ class AudioFile(TimeSeries):
     def _loadAudioFile(self):
         source = audiolab.Sndfile(self.filename, 'r')
         
-        self.time_series = source.read_frames(source.nframes, dtype=self.precision) 
+        # audiolab scales the range by the bit depth automatically so the dynamic range is now [-1.0, 1.0]
+        # we rescale it to the range [0.0, 1.0]
+        self.time_series = (source.read_frames(source.nframes, dtype=self.precision) + 1) / 2
         self.sample_rate = source.samplerate
 
 
@@ -153,12 +155,12 @@ class AuditorySpectrogram(Spectrogram):
     """
         
     def _setFrequencySpacing(self, min_freq, max_freq):
-        self._frequency_index_spacing = logspace(log10(max_freq), log10(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
+        self.frequency_spacing = logspace(log10(max_freq), log10(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
         
                         
     def _convertToDecibels(self, amplitudes):
         amplitudes[amplitudes==0] = 1.0
-        return (20.0 * log10(abs(amplitudes)))
+        return 20.0 * log10(abs(amplitudes))
     
     
     def __call__(self, **params):
@@ -173,7 +175,7 @@ class OctaveSpectrogram(Spectrogram):
     """
     
     def _setFrequencySpacing(self, min_freq, max_freq):
-        self._frequency_index_spacing = logspace(log2(max_freq), log2(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
+        self.frequency_spacing = logspace(log2(min_freq), log2(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
 
 
 
