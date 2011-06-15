@@ -511,9 +511,7 @@ def process_argv(argv):
             if option.pdb:
                 ipython_args.append('-pdb')
 
-            IPython.Shell.IPShell(
-                ipython_args,
-                user_ns=__main__.__dict__).mainloop(sys_exit=1)            
+            IPython.Shell.IPShell(ipython_args, user_ns=__main__.__dict__).mainloop(sys_exit=1)            
 
         
 
