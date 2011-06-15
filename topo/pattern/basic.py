@@ -1273,22 +1273,24 @@ class PowerSpectrum(PatternGenerator):
         for parameter,value in params.items():
             setattr(self, parameter, value)
         
-        if self.min_frequency > self.max_frequency:
-            raise ValueError("PowerSpectrum: min frequency must be lower than max frequency.")        
+        self._sheet_dimensions = SheetCoordinateSystem(self.bounds, self.xdensity, self.ydensity).shape
+        self._createFrequencyIndices()
         
-        
+    
     def _createFrequencyIndices(self):
-        
+        if self.min_frequency > self.max_frequency:
+            raise ValueError("PowerSpectrum: min frequency must be lower than max frequency.")     
+            
         # calculate the discrete frequencies possible for the given sample rate.
         sample_rate = self.signal.sample_rate        
-        self._available_frequency_range = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
+        available_frequency_range = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
 
-        if not self._available_frequency_range.min() <= self.min_frequency or not self._available_frequency_range.max() >= self.max_frequency:
+        if not available_frequency_range.min() <= self.min_frequency or not available_frequency_range.max() >= self.max_frequency:
             
-            raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(self.min_frequency, self.max_frequency, self._available_frequency_range.min(), self._available_frequency_range.max()))
+            raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(self.min_frequency, self.max_frequency, available_frequency_range.min(), available_frequency_range.max()))
 
-        index_of_min_freq = nonzero(self._available_frequency_range >= self.min_frequency)[0][0]
-        index_of_max_freq = nonzero(self._available_frequency_range <= self.max_frequency)[0][-1]
+        index_of_min_freq = nonzero(available_frequency_range >= self.min_frequency)[0][0]
+        index_of_max_freq = nonzero(available_frequency_range <= self.max_frequency)[0][-1]
         
         self._setFrequencySpacing(index_of_min_freq, index_of_max_freq)
           
@@ -1338,27 +1340,22 @@ class PowerSpectrum(PatternGenerator):
         return (asarray(amplitudes_by_row).reshape(-1,1))
 
 
-    def __firstCall__(self, **params_to_override):
-        self._first_call = False
-        
+    def onInstall(self):
+        """
+        This method is called if (and when) the pattern generator is installed into a generator sheet.
+        """
         self._sheet_dimensions = SheetCoordinateSystem(self.bounds, self.xdensity, self.ydensity).shape
         self._createFrequencyIndices()
 
 
-    def __everyCall__(self, **params_to_override):
+    def __call__(self, **params_to_override):        
+        self._createFrequencyIndices()
         row_amplitudes = self._getRowAmplitudes()
         
         if self._sheet_dimensions[1] > 1:
             row_amplitudes = repeat(row_amplitudes, self._sheet_dimensions[1], axis=1)
 
         return row_amplitudes
-        
-        
-    def __call__(self, **params_to_override): 
-        if self._first_call:
-            self.__firstCall__(**params_to_override)
-        
-        return self.__everyCall__(**params_to_override)
 
 
 
@@ -1368,30 +1365,21 @@ class Spectrogram(PowerSpectrum):
     a 2D representation of a fixed-width spectrogram.
     """
     
-    normalization_function = param.Parameter(default=None,
-        doc="""Provides the ability to normalise the spectrogram on a column by column basis.""")
-    
-    
     def _updateSpectrogram(self, new_column):
         self._spectrogram = hstack((new_column, self._spectrogram))
         self._spectrogram = self._spectrogram[0:, 0:self._sheet_dimensions[1]]
-               
+    
                  
-    def __firstCall__(self, **params_to_override):
-        super(Spectrogram, self).__firstCall__(**params_to_override)
+    def onInstall(self):
+        """
+        This method is called if (and when) the pattern generator is installed into a generator sheet.
+        """
+        super(Spectrogram, self).onInstall()
         self._spectrogram = zeros(self._sheet_dimensions)
     
     
-    def __everyCall__(self, **params_to_override):
-        row_amplitudes = self._getRowAmplitudes()
-        
-        if self.normalization_function:
-            returned_array = self.normalization_function(row_amplitudes)
-            if returned_array != None:
-                row_amplitudes = returned_array
-            # otherwise the normalization function worked in place.
-            
-        self._updateSpectrogram(row_amplitudes)
+    def __call__(self, **params_to_override):
+        self._updateSpectrogram(self._getRowAmplitudes())
         return self._spectrogram   
         
         

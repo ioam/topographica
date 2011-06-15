@@ -161,7 +161,7 @@ class AuditorySpectrogram(Spectrogram):
         return (20.0 * log10(abs(amplitudes)))
     
     
-    def __everyCall__(self, **params):
+    def __call__(self, **params):
         self._updateSpectrogram(self._convertToDecibels(self._getRowAmplitudes()))
         return self._spectrogram
 
@@ -201,7 +201,7 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
             raise ValueError("OctaveSpectrogramWithAmplification: Amplify from frequency must be less than its amplify till frequency.")
         
         
-    def __everyCall__(self, **params):
+    def __call__(self, **params):
         row_amplitudes = self._getRowAmplitudes()
         
         self.sheet_frequency_divisions = logspace(log10(self.max_frequency), log10(self.min_frequency), 
@@ -493,8 +493,8 @@ class LyonsCochlearModel(PowerSpectrum):
         return sheet_responses.reshape(self._num_of_channels, 1)
           
               
-    def __firstCall__(self, **params):
-        super(LyonsCochlearModel, self).__firstCall__(**params)
+    def onInstall(self):
+        super(LyonsCochlearModel, self).onInstall()
         
         if self._sheet_dimensions[0] != self._num_of_channels:
             raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." %(self._sheet_dimensions[0], self._num_of_channels))
@@ -512,12 +512,12 @@ class Cochleogram(LyonsCochlearModel):
         self._cochleogram = self._cochleogram[0:, 0:self._sheet_dimensions[1]]
             
                     
-    def __firstCall__(self, **params):
-        super(Cochleogram, self).__firstCall__(**params)
+    def onInstall(self):
+        super(Cochleogram, self).onInstall(**params)
         self._cochleogram = zeros(self._sheet_dimensions)
 
 
-    def __everyCall__(self, **params_to_override):
+    def __call__(self, **params_to_override):
         self._updateCochleogram(self._getRowAmplitudes())
         return self._cochleogram           
 
