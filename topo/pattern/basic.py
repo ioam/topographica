@@ -1242,15 +1242,20 @@ class PowerSpectrum(PatternGenerator):
     arranged into a spectrogram, e.g. for an audio signal.
     """
     
-    signal = TimeSeriesParam(default=TimeSeries(time_series=generate_sine_wave(0.001,1000,20000), sample_rate=20000), 
-        doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
+    x = param.Number(precedence=(-1))
+    y = param.Number(precedence=(-1))
+    size = param.Number(precedence=(-1))
+    orientation = param.Number(precedence=(-1))
 
-    normalization_factor = param.Number(default=20000, bounds=(1,None), inclusive_bounds=(True,False), softbounds=(1,50000),
-        doc="""The amount by which to scale (divide) amplitudes by. This is useful if we want to rescale to say a range [0:1].
+    scale = param.Number(default=0.00005, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0.001,1000),
+        doc="""The amount by which to scale amplitudes by. This is useful if we want to rescale to say a range [0:1].
             
         Note: Constant scaling is preferable to dynamic scaling so as not to artificially ramp down loud sounds while ramping
         up hiss and other background interference.""")
 
+    signal = TimeSeriesParam(default=TimeSeries(time_series=generate_sine_wave(0.001,1000,20000), sample_rate=20000), 
+        doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
+        
     min_frequency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,10000),
         doc="""Smallest frequency for which to return an amplitude.""")
 
@@ -1284,7 +1289,7 @@ class PowerSpectrum(PatternGenerator):
         
     
     def _create_frequency_indices(self):
-        if self.min_frequency > self.max_frequency:
+        if self.min_frequency >= self.max_frequency:
             raise ValueError("PowerSpectrum: min frequency must be lower than max frequency.")     
             
         # calculate the discrete frequencies possible for the given sample rate.
@@ -1333,7 +1338,7 @@ class PowerSpectrum(PatternGenerator):
         else:
             smoothed_window = signal_window[0:sample_rate]
         
-        amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2] / self.normalization_factor
+        amplitudes_by_frequency = (abs(fft.rfft(smoothed_window))[0:sample_rate/2] + self.offset) * self.scale
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
                         
         for index in range(0, self._sheet_dimensions[0]-2):
