@@ -63,13 +63,8 @@ class GeneratorSheet(Sheet):
         if push_existing:
             self.push_input_generator()
 
+        new_ig.update_matrix_dimensions(self.bounds, self.xdensity, self.ydensity)
         self.input_generator = new_ig
-
-        # CEBALERT: replaces any bounds specified for the
-        # PatternGenerator with this sheet's own bounds. When
-        # PatternGenerators can draw patterns into supplied
-        # boundingboxes, should remove this.
-        self.input_generator.update_matrix_dimensions(self.bounds, self.xdensity, self.ydensity)
 
 
     def push_input_generator(self):

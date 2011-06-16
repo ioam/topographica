@@ -203,9 +203,13 @@ class PatternGenerator(param.Parameterized):
     
     
     def update_matrix_dimensions(self, bounds, xdensity, ydensity):
-        """Some pattern generators need to recompute their parameters if the 
-        dimensions of their matrix changes. This method is called whenever these
-        dimesnions are changed."""
+        """
+        Change the dimensions of the matrix into which the pattern will be drawn.
+        Users of this class should call this method rather than changing
+        the bounds, xdensity, and ydensity parameters directly.  Subclasses
+        can override this method to update any internal data structures that
+        may depend on the matrix dimensions.
+        """
         self.bounds = bounds
         self.xdensity = xdensity
         self.ydensity = ydensity
