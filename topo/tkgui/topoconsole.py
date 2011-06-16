@@ -270,6 +270,10 @@ def _tkinter_report_exception(widget):
     
     # BK-NOTE: Default is now to display full trace always. Any user
     # errors should be caught as special exception cases 
+    
+    # BK-ALERT: Want to raise errors vs print, however this currently crashes ipython.
+    #raise
+    
     param.Parameterized().warning(msg)
     import traceback
     traceback.print_exc()
