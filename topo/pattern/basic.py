@@ -10,7 +10,7 @@ __version__='$Revision$'
 
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or
-from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, floor, equal, exp, hstack, Infinity, linspace, multiply, \
+from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, flipud, floor, equal, exp, hstack, Infinity, linspace, multiply, \
     nonzero, pi, repeat, sin, sqrt, subtract, tile, zeros, sum, max
 
 import param
@@ -1311,7 +1311,7 @@ class PowerSpectrum(PatternGenerator):
         This method is here solely to provide a minimal overload if custom spacing is required.
         """
         
-        self._frequency_index_spacing = linspace(max_freq, min_freq, num=self._sheet_dimensions[0]+1, endpoint=True)
+        self.frequency_spacing = linspace(min_freq, max_freq, num=self._sheet_dimensions[0]+1, endpoint=True)
             
             
     def _getRowAmplitudes(self):
@@ -1394,6 +1394,7 @@ class Spectrogram(PowerSpectrum):
     def __call__(self, **params_to_override):
         self._updateSpectrogram(self._getRowAmplitudes())
         return self._spectrogram   
-        
-        
+
+
+
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,PatternGenerator)]))
