@@ -43,10 +43,10 @@ class AudioFile(TimeSeries):
                
     def __init__(self, **params):
         super(AudioFile, self).__init__(**params)
-        self._loadAudioFile()
+        self._load_audio_file()
 
 
-    def _loadAudioFile(self):
+    def _load_audio_file(self):
         source = audiolab.Sndfile(self.filename, 'r')
         
         # audiolab scales the range by the bit depth automatically so the dynamic range is now [-1.0, 1.0]
@@ -68,21 +68,21 @@ class AudioFolder(AudioFile):
     
     filename = param.Filename(precedence=(-1))
 
-    folderpath=param.Foldername(default='sounds/complex', 
+    folderpath = param.Foldername(default='sounds/complex', 
         doc="""Folder path (can be relative to Topographica's base path) to a
         folder containing audio files. The audio can be in any format accepted 
         by audiolab, i.e. WAV, AIFF, or FLAC.""")
          
-    gap_between_sounds=param.Number(default=0.0, bounds=(0.0,None),
+    gap_between_sounds = param.Number(default=0.0, bounds=(0.0,None),
         doc="""The gap in seconds to insert between consecutive soundfiles.""")
       
                             
     def __init__(self, **params):
         super(AudioFolder, self).__init__(**params)
-        self._loadAudioFolder()
+        self._load_audio_folder()
                 
                 
-    def _loadAudioFolder(self):
+    def _load_audio_folder(self):
         folder_contents = os.listdir(self.folderpath)
         self.sound_files = []
         
@@ -91,11 +91,11 @@ class AudioFolder(AudioFile):
                 self.sound_files.append(self.folderpath + "/" + file) 
 
         self.filename=self.sound_files[0]
-        self._loadAudioFile()
+        self._load_audio_file()
         self.next_file = 1
 
 
-    def extractSpecificInterval(self, interval_start, interval_end):
+    def extract_specific_interval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
         """
@@ -154,17 +154,17 @@ class AuditorySpectrogram(Spectrogram):
     Extends Spectrogram to provide a response in decibels over a base 10 logarithmic scale.
     """
         
-    def _setFrequencySpacing(self, min_freq, max_freq):
+    def _set_frequency_spacing(self, min_freq, max_freq):
         self.frequency_spacing = logspace(log10(max_freq), log10(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
         
                         
-    def _convertToDecibels(self, amplitudes):
+    def _convert_to_decibels(self, amplitudes):
         amplitudes[amplitudes==0] = 1.0
         return 20.0 * log10(abs(amplitudes))
     
     
     def __call__(self, **params):
-        self._updateSpectrogram(self._convertToDecibels(self._getRowAmplitudes()))
+        self._update_spectrogram(self._convert_to_decibels(self._get_row_amplitudes()))
         return self._spectrogram
 
 
@@ -174,7 +174,7 @@ class OctaveSpectrogram(Spectrogram):
     Extends Spectrogram to provide a response over an octave scale.
     """
     
-    def _setFrequencySpacing(self, min_freq, max_freq):
+    def _set_frequency_spacing(self, min_freq, max_freq):
         self.frequency_spacing = logspace(log2(min_freq), log2(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
 
 
@@ -204,7 +204,7 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
         
         
     def __call__(self, **params):
-        row_amplitudes = self._getRowAmplitudes()
+        row_amplitudes = self._get_row_amplitudes()
         
         self.sheet_frequency_divisions = logspace(log10(self.max_frequency), log10(self.min_frequency), 
             num=self._sheet_dimensions[0], endpoint=True, base=10)
@@ -235,7 +235,7 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
                 row_amplitudes = returned_array
             # otherwise the normalization function worked in place.
             
-        self._updateSpectrogram(row_amplitudes)
+        self._update_spectrogram(row_amplitudes)
         return self._spectrogram
         
 
@@ -307,34 +307,34 @@ class LyonsCochlearModel(PowerSpectrum):
         self._generateCochlearFilters()
     
     
-    def _earBandwidth(self, cf):
+    def _ear_bandwidth(self, cf):
         return sqrt(cf*cf + self.ear_break_squared) / self.ear_q
         
         
-    def _maxFrequency(self):
-        bandwidth_step_max_f = self._earBandwidth(self.half_sample_rate) * self.ear_step_factor    
+    def _max_frequency(self):
+        bandwidth_step_max_f = self._ear_bandwidth(self.half_sample_rate) * self.ear_step_factor    
         return self.half_sample_rate + bandwidth_step_max_f - bandwidth_step_max_f*self.ear_zero_offset
 
 
-    def _numOfChannels(self):
+    def _num_of_channels(self):
         min_f = self.ear_break_f / sqrt(4.0*self.ear_q*self.ear_q - 1.0)
         channels = log(self.max_f_calc) - log(min_f + sqrt(min_f*min_f + self.ear_break_squared))
         
         return int(floor(self.ear_q*channels/self.ear_step_factor))
 
 
-    def _calcCentreFrequenciesTill(self, channel_index):
+    def _calc_centre_frequencies_till(self, channel_index):
         if (self.centre_frequencies[channel_index] > 0):
             return self.centre_frequencies[channel_index]
         else:
-            step = self._calcCentreFrequenciesTill(channel_index-1)
-            channel_cf = step - self.ear_step_factor*self._earBandwidth(step)
+            step = self._calc_centre_frequencies_till(channel_index-1)
+            channel_cf = step - self.ear_step_factor*self._ear_bandwidth(step)
             self.centre_frequencies[channel_index] = channel_cf
             
             return channel_cf
 
 
-    def _evaluateFiltersForFrequencies(self, filters, frequencies):
+    def _evaluate_filters_for_frequencies(self, filters, frequencies):
         Zs = exp(2j*pi*frequencies/self.sample_rate)
         Z_squareds = Zs * Zs
         
@@ -355,25 +355,25 @@ class LyonsCochlearModel(PowerSpectrum):
         
     # a frequency and gain are specified so that the resulting filter can 
     # be normalized to have any desired gain at a specified frequency.
-    def _makeFilters(self, zeros, poles, f, desired_gains):  
+    def _make_filters(self, zeros, poles, f, desired_gains):  
         desired_gains = reshape(desired_gains,[size(desired_gains),1])
         
-        unit_gains = self._evaluateFiltersForFrequencies([zeros,poles], f)
+        unit_gains = self._evaluate_filters_for_frequencies([zeros,poles], f)
         unit_gains = reshape(unit_gains,[size(unit_gains),1])
         
         return [zeros*desired_gains, poles*unit_gains]
         
         
-    def _frequencyResponses(self, evaluated_filters):
+    def _frequency_responses(self, evaluated_filters):
         evaluated_filters[evaluated_filters==0] = 1.0
         return 20.0 * log10(abs(evaluated_filters))
 
 
-    def _specificFilter(self, x2_coefficient, x_coefficient, constant):  
+    def _specific_filter(self, x2_coefficient, x_coefficient, constant):  
         return array([[x2_coefficient,x_coefficient,constant], ], dtype=self.precision)
             
             
-    def _firstOrderFilterFromCorner(self, corner_f):
+    def _first_order_filter_from_corner(self, corner_f):
         polynomial = zeros((1,3), dtype=self.precision)
         polynomial[:,0] = -exp(-2.0*pi*corner_f/self.sample_rate)
         polynomial[:,1] = 1.0
@@ -381,7 +381,7 @@ class LyonsCochlearModel(PowerSpectrum):
         return polynomial
 
 
-    def _secondOrderFilterFromCenterQ(self, cf, quality):
+    def _second_order_filter_from_center_q(self, cf, quality):
         cf_as_ratio = cf/self.sample_rate
         
         rho = exp(-pi*cf_as_ratio/quality)
@@ -397,73 +397,72 @@ class LyonsCochlearModel(PowerSpectrum):
         return polynomial
      
      
-    def _earFilterGains(self):
+    def _ear_filter_gains(self):
         return self.centre_frequencies[:-1] / self.centre_frequencies[1:]
 
 
-    def _earFirstStage(self):    
-        outer_middle_ear_filter = self._makeFilters(self._firstOrderFilterFromCorner(self.ear_preemph_corner_f), 
-            self._specificFilter(1.0,0.0,0.0), array([0.0]), 1.0)
+    def _ear_first_stage(self):    
+        outer_middle_ear_filter = self._make_filters(self._first_order_filter_from_corner(self.ear_preemph_corner_f), 
+            self._specific_filter(1.0,0.0,0.0), array([0.0]), 1.0)
 
-        high_freq_compensator = self._makeFilters(self._specificFilter(1.0,0.0,-1.0), self._specificFilter(0.0,0.0,1.0), 
+        high_freq_compensator = self._make_filters(self._specific_filter(1.0,0.0,-1.0), self._specific_filter(0.0,0.0,1.0), 
             array([self.quart_sample_rate]), 1.0)
         
-        pole_pair = self._makeFilters(self._specificFilter(0.0,0.0,1.0), 
-            self._secondOrderFilterFromCenterQ(self.cascade_pole_cfs[0],self.cascade_pole_qs[0]), 
+        pole_pair = self._make_filters(self._specific_filter(0.0,0.0,1.0), 
+            self._second_order_filter_from_center_q(self.cascade_pole_cfs[0],self.cascade_pole_qs[0]), 
             array([self.quart_sample_rate]), 1.0)
         
-        outer_middle_ear_evaluations = self._evaluateFiltersForFrequencies(outer_middle_ear_filter, self.frequencies)
-        high_freq_compensator_evaluations = self._evaluateFiltersForFrequencies(high_freq_compensator, self.frequencies)
-        pole_pair_evaluations = self._evaluateFiltersForFrequencies(pole_pair, self.frequencies)
+        outer_middle_ear_evaluations = self._evaluate_filters_for_frequencies(outer_middle_ear_filter, self.frequencies)
+        high_freq_compensator_evaluations = self._evaluate_filters_for_frequencies(high_freq_compensator, self.frequencies)
+        pole_pair_evaluations = self._evaluate_filters_for_frequencies(pole_pair, self.frequencies)
         
         return outer_middle_ear_evaluations * high_freq_compensator_evaluations * pole_pair_evaluations
 
 
-    def _earAllOtherStages(self):
-        zeros = self._secondOrderFilterFromCenterQ(self.cascade_zero_cfs[1:], self.cascade_zero_qs[1:])
-        poles = self._secondOrderFilterFromCenterQ(self.cascade_pole_cfs[1:], self.cascade_pole_qs[1:])
+    def _ear_all_other_stages(self):
+        zeros = self._second_order_filter_from_center_q(self.cascade_zero_cfs[1:], self.cascade_zero_qs[1:])
+        poles = self._second_order_filter_from_center_q(self.cascade_pole_cfs[1:], self.cascade_pole_qs[1:])
         
-        stage_filters = self._makeFilters(zeros, poles, array([0.0]), self.ear_filter_gains)
-        return self._evaluateFiltersForFrequencies(stage_filters, self.frequencies)
+        stage_filters = self._make_filters(zeros, poles, array([0.0]), self.ear_filter_gains)
+        return self._evaluate_filters_for_frequencies(stage_filters, self.frequencies)
 
 
-    def _generateCascadeFilters(self):
-        
+    def _generate_cascade_filters(self):
         cascade_filters = self.ear_stages
         
         for channel in range(1,self._num_of_channels):
             cascade_filters[channel,:] = cascade_filters[channel,:] * cascade_filters[channel-1,:]
         
-        return self._frequencyResponses(cascade_filters)
+        return self._frequency_responses(cascade_filters)
         
         
     def _generateCochlearFilters(self):
-        max_f = self._maxFrequency()
+        max_f = self._max_frequency()
         self.max_f_calc = max_f + sqrt(max_f*max_f + self.ear_break_squared)
 
-        self._num_of_channels = self._numOfChannels()
+        self._num_of_channels = self._num_of_channels()
 
         self.centre_frequencies = zeros(self._num_of_channels, dtype=self.precision)
         self.centre_frequencies[0] = max_f
-        self._calcCentreFrequenciesTill(self._num_of_channels-1)
+        self._calc_centre_frequencies_till(self._num_of_channels-1)
 
-        bandwidths = self._earBandwidth(self.centre_frequencies)
+        bandwidths = self._ear_bandwidth(self.centre_frequencies)
         
         self.cascade_zero_cfs = self.centre_frequencies + bandwidths*self.ear_step_factor*self.ear_zero_offset
         self.cascade_zero_qs = self.ear_sharpness * self.cascade_zero_cfs / bandwidths
         self.cascade_pole_cfs = self.centre_frequencies
         self.cascade_pole_qs = self.centre_frequencies / bandwidths
         
-        self.ear_filter_gains = self._earFilterGains()
+        self.ear_filter_gains = self._ear_filter_gains()
         
         self.frequencies = arange(self.half_sample_rate).reshape(self.half_sample_rate, 1)
         
-        self.ear_stages = hstack((self._earFirstStage(), self._earAllOtherStages())).transpose() 
+        self.ear_stages = hstack((self._ear_first_stage(), self._ear_all_other_stages())).transpose() 
         
-        self.cochlear_channels = self._generateCascadeFilters()
+        self.cochlear_channels = self._generate_cascade_filters()
         
         
-    def _getRowAmplitudes(self):
+    def _get_row_amplitudes(self):
         """
         Perform a real Discrete Fourier Transform (DFT; implemented
         using a Fast Fourier Transform algorithm, FFT) of the current
@@ -495,8 +494,8 @@ class LyonsCochlearModel(PowerSpectrum):
         return sheet_responses.reshape(self._num_of_channels, 1)
           
               
-    def onInstall(self):
-        super(LyonsCochlearModel, self).onInstall()
+    def on_install(self):
+        super(LyonsCochlearModel, self).on_install()
         
         if self._sheet_dimensions[0] != self._num_of_channels:
             raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." %(self._sheet_dimensions[0], self._num_of_channels))
@@ -509,18 +508,18 @@ class Cochleogram(LyonsCochlearModel):
     i.e. the response over time along the cochlea.
     """
         
-    def _updateCochleogram(self, new_column):
+    def _update_cochleogram(self, new_column):
         self._cochleogram = hstack((new_column, self._cochleogram))
         self._cochleogram = self._cochleogram[0:, 0:self._sheet_dimensions[1]]
             
                     
-    def onInstall(self):
-        super(Cochleogram, self).onInstall(**params)
+    def on_install(self):
+        super(Cochleogram, self).on_install(**params)
         self._cochleogram = zeros(self._sheet_dimensions)
 
 
     def __call__(self, **params_to_override):
-        self._updateCochleogram(self._getRowAmplitudes())
+        self._update_cochleogram(self._get_row_amplitudes())
         return self._cochleogram           
 
 

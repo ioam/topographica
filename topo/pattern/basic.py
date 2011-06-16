@@ -1160,11 +1160,11 @@ class TimeSeries(param.Parameterized):
             self.warning("Seconds per iteration > interval length, some signal will be skipped.")
     
     
-    def appendSignal(self, new_signal):
+    def append_signal(self, new_signal):
         self.time_series = hstack((self.time_series, new_signal))
     
     
-    def extractSpecificInterval(self, interval_start, interval_end):
+    def extract_specific_interval(self, interval_start, interval_end):
         """
         Overload if special behaviour is required when a series ends.
         """
@@ -1215,11 +1215,11 @@ class TimeSeries(param.Parameterized):
         interval_end = int(floor(interval_start + self.interval_length*self.sample_rate))
         
         self._next_interval_start += int(floor(self.seconds_per_iteration*self.sample_rate))
-        return self.extractSpecificInterval(interval_start, interval_end)
+        return self.extract_specific_interval(interval_start, interval_end)
 
 
 
-def generateSineWave(duration, frequency, sample_rate):
+def generate_sine_wave(duration, frequency, sample_rate):
     time_axis = linspace(0.0, duration, duration*sample_rate)
     return sin(2.0*pi*frequency * time_axis)
     
@@ -1242,7 +1242,7 @@ class PowerSpectrum(PatternGenerator):
     arranged into a spectrogram, e.g. for an audio signal.
     """
     
-    signal = TimeSeriesParam(default=TimeSeries(time_series=generateSineWave(0.001,1000,20000), sample_rate=20000), 
+    signal = TimeSeriesParam(default=TimeSeries(time_series=generate_sine_wave(0.001,1000,20000), sample_rate=20000), 
         doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
 
     normalization_factor = param.Number(default=20000, bounds=(1,None), inclusive_bounds=(True,False), softbounds=(1,50000),
@@ -1280,10 +1280,10 @@ class PowerSpectrum(PatternGenerator):
             setattr(self, parameter, value)
         
         self._sheet_dimensions = SheetCoordinateSystem(self.bounds, self.xdensity, self.ydensity).shape
-        self._createFrequencyIndices()
+        self._create_frequency_indices()
         
     
-    def _createFrequencyIndices(self):
+    def _create_frequency_indices(self):
         if self.min_frequency > self.max_frequency:
             raise ValueError("PowerSpectrum: min frequency must be lower than max frequency.")     
             
@@ -1298,10 +1298,10 @@ class PowerSpectrum(PatternGenerator):
         min_freq = nonzero(available_frequency_range >= self.min_frequency)[0][0]
         max_freq = nonzero(available_frequency_range <= self.max_frequency)[0][-1]
         
-        self._setFrequencySpacing(min_freq, max_freq)
+        self._set_frequency_spacing(min_freq, max_freq)
           
               
-    def _setFrequencySpacing(self, min_freq, max_freq): 
+    def _set_frequency_spacing(self, min_freq, max_freq): 
         """
         Frequency spacing to use, i.e. how to map the available frequency range to the discrete sheet rows.
         
@@ -1314,7 +1314,7 @@ class PowerSpectrum(PatternGenerator):
         self.frequency_spacing = linspace(min_freq, max_freq, num=self._sheet_dimensions[0]+1, endpoint=True)
             
             
-    def _getRowAmplitudes(self):
+    def _get_row_amplitudes(self):
         """
         Perform a real Discrete Fourier Transform (DFT; implemented using a Fast Fourier Transform algorithm, FFT) 
         of the current sample from the signal multiplied by the smoothing window.
@@ -1346,17 +1346,17 @@ class PowerSpectrum(PatternGenerator):
         return flipud(amplitudes_by_row.reshape(-1,1))
 
 
-    def onInstall(self):
+    def on_install(self):
         """
         This method is called if (and when) the pattern generator is installed into a generator sheet.
         """
         self._sheet_dimensions = SheetCoordinateSystem(self.bounds, self.xdensity, self.ydensity).shape
-        self._createFrequencyIndices()
+        self._create_frequency_indices()
 
 
     def __call__(self, **params_to_override):        
-        self._createFrequencyIndices()
-        row_amplitudes = self._getRowAmplitudes()
+        self._create_frequency_indices()
+        row_amplitudes = self._get_row_amplitudes()
         
         if self._sheet_dimensions[1] > 1:
             row_amplitudes = repeat(row_amplitudes, self._sheet_dimensions[1], axis=1)
@@ -1378,21 +1378,21 @@ class Spectrogram(PowerSpectrum):
         doc="""Largest frequency for which to return an amplitude.""")
         
     
-    def _updateSpectrogram(self, new_column):
+    def _update_spectrogram(self, new_column):
         self._spectrogram = hstack((new_column, self._spectrogram))
         self._spectrogram = self._spectrogram[0:, 0:self._sheet_dimensions[1]]
     
                  
-    def onInstall(self):
+    def on_install(self):
         """
         This method is called if (and when) the pattern generator is installed into a generator sheet.
         """
-        super(Spectrogram, self).onInstall()
+        super(Spectrogram, self).on_install()
         self._spectrogram = zeros(self._sheet_dimensions)
     
     
     def __call__(self, **params_to_override):
-        self._updateSpectrogram(self._getRowAmplitudes())
+        self._update_spectrogram(self._get_row_amplitudes())
         return self._spectrogram   
 
 

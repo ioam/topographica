@@ -77,8 +77,8 @@ class GeneratorSheet(Sheet):
         # BK-NOTE: Some pattern generators (e.g. PowerSpectrum) need special
         # behaviour if installed into a generator sheet. The following call
         # lets them know.
-        if getattr(self.input_generator, "onInstall", None):
-            self.input_generator.onInstall()
+        if getattr(self.input_generator, "on_install", None):
+            self.input_generator.on_install()
 
 
     def push_input_generator(self):
