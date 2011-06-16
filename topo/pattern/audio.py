@@ -494,9 +494,9 @@ class LyonsCochlearModel(PowerSpectrum):
         return sheet_responses.reshape(self._num_of_channels, 1)
           
               
-    def on_install(self):
-        super(LyonsCochlearModel, self).on_install()
-        
+    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
+        super(LyonsCochlearModel, self).update_matrix_dimensions(bounds, xdensity, ydensity)
+
         if self._sheet_dimensions[0] != self._num_of_channels:
             raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." %(self._sheet_dimensions[0], self._num_of_channels))
         
@@ -513,8 +513,8 @@ class Cochleogram(LyonsCochlearModel):
         self._cochleogram = self._cochleogram[0:, 0:self._sheet_dimensions[1]]
             
                     
-    def on_install(self):
-        super(Cochleogram, self).on_install(**params)
+    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
+        super(Cochleogram, self).update_matrix_dimensions(bounds, xdensity, ydensity)
         self._cochleogram = zeros(self._sheet_dimensions)
 
 

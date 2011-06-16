@@ -69,16 +69,7 @@ class GeneratorSheet(Sheet):
         # PatternGenerator with this sheet's own bounds. When
         # PatternGenerators can draw patterns into supplied
         # boundingboxes, should remove this.
-        self.input_generator.bounds = self.bounds
-        
-        self.input_generator.xdensity = self.xdensity
-        self.input_generator.ydensity = self.ydensity
-        
-        # BK-NOTE: Some pattern generators (e.g. PowerSpectrum) need special
-        # behaviour if installed into a generator sheet. The following call
-        # lets them know.
-        if getattr(self.input_generator, "on_install", None):
-            self.input_generator.on_install()
+        self.input_generator.update_matrix_dimensions(self.bounds, self.xdensity, self.ydensity)
 
 
     def push_input_generator(self):

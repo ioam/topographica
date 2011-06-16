@@ -1231,7 +1231,7 @@ class TimeSeriesParam(ClassSelector):
     """
     
     def __init__(self, **params):
-        super(TimeSeriesParam,self).__init__(TimeSeries, **params)
+        super(TimeSeriesParam, self).__init__(TimeSeries, **params)
             
             
             
@@ -1351,11 +1351,10 @@ class PowerSpectrum(PatternGenerator):
         return flipud(amplitudes_by_row.reshape(-1,1))
 
 
-    def on_install(self):
-        """
-        This method is called if (and when) the pattern generator is installed into a generator sheet.
-        """
-        self._sheet_dimensions = SheetCoordinateSystem(self.bounds, self.xdensity, self.ydensity).shape
+    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
+        super(PowerSpectrum, self).update_matrix_dimensions(bounds, xdensity, ydensity) 
+        
+        self._sheet_dimensions = SheetCoordinateSystem(bounds, xdensity, ydensity).shape
         self._create_frequency_indices()
 
 
@@ -1388,11 +1387,8 @@ class Spectrogram(PowerSpectrum):
         self._spectrogram = self._spectrogram[0:, 0:self._sheet_dimensions[1]]
     
                  
-    def on_install(self):
-        """
-        This method is called if (and when) the pattern generator is installed into a generator sheet.
-        """
-        super(Spectrogram, self).on_install()
+    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
+        super(Spectrogram, self).update_matrix_dimensions(bounds, xdensity, ydensity)
         self._spectrogram = zeros(self._sheet_dimensions)
     
     

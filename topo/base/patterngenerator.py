@@ -200,7 +200,17 @@ class PatternGenerator(param.Parameterized):
                       bounds=p.bounds,ydensity=p.ydensity,xdensity=p.xdensity)
         if mask is not None:
             mat*=mask
-
+    
+    
+    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
+        """Some pattern generators need to recompute their parameters if the 
+        dimensions of their matrix changes. This method is called whenever these
+        dimesnions are changed."""
+        self.bounds = bounds
+        self.xdensity = xdensity
+        self.ydensity = ydensity
+        
+        
 
 # Override class type; must be set here rather than when mask_shape is declared,
 # to avoid referring to class not yet constructed
