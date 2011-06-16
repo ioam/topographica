@@ -1245,6 +1245,12 @@ class PowerSpectrum(PatternGenerator):
     signal = TimeSeriesParam(default=TimeSeries(time_series=generateSineWave(0.001,1000,20000), sample_rate=20000), 
         doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
 
+    normalization_factor = param.Number(default=20000, bounds=(1,None), inclusive_bounds=(True,False), softbounds=(1,50000),
+        doc="""The amount by which to scale (divide) amplitudes by. This is useful if we want to rescale to say a range [0:1].
+            
+        Note: Constant scaling is preferable to dynamic scaling so as not to artificially ramp down loud sounds while ramping
+        up hiss and other background interference.""")
+
     min_frequency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,10000),
         doc="""Smallest frequency for which to return an amplitude.""")
 
@@ -1289,10 +1295,10 @@ class PowerSpectrum(PatternGenerator):
             
             raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(self.min_frequency, self.max_frequency, available_frequency_range.min(), available_frequency_range.max()))
 
-        index_of_min_freq = nonzero(available_frequency_range >= self.min_frequency)[0][0]
-        index_of_max_freq = nonzero(available_frequency_range <= self.max_frequency)[0][-1]
+        min_freq = nonzero(available_frequency_range >= self.min_frequency)[0][0]
+        max_freq = nonzero(available_frequency_range <= self.max_frequency)[0][-1]
         
-        self._setFrequencySpacing(index_of_min_freq, index_of_max_freq)
+        self._setFrequencySpacing(min_freq, max_freq)
           
               
     def _setFrequencySpacing(self, min_freq, max_freq): 
@@ -1327,17 +1333,17 @@ class PowerSpectrum(PatternGenerator):
         else:
             smoothed_window = signal_window[0:sample_rate]
         
-        amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2]        
+        amplitudes_by_frequency = abs(fft.rfft(smoothed_window))[0:sample_rate/2] / self.normalization_factor
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
+                        
+        for index in range(0, self._sheet_dimensions[0]-2):
+            start_freq = self.frequency_spacing[index]
+            end_freq = self.frequency_spacing[index+1]
+             
+            total_amplitude = sum(amplitudes_by_frequency[start_freq:end_freq])
+            amplitudes_by_row[index] = total_amplitude / (end_freq-start_freq)
         
-        for index in range(0, self._sheet_dimensions[0]):
-            start_freq = self._frequency_index_spacing[index]
-            end_freq = self._frequency_index_spacing[index+1]
-            
-            total_amplitude = sum(amplitudes_by_frequency[end_freq:start_freq])
-            amplitudes_by_row[index] = total_amplitude / (start_freq-end_freq)
-            
-        return (asarray(amplitudes_by_row).reshape(-1,1))
+        return flipud(amplitudes_by_row.reshape(-1,1))
 
 
     def onInstall(self):
@@ -1364,6 +1370,13 @@ class Spectrogram(PowerSpectrum):
     Extends PowerSpectrum to provide a temporal buffer, yielding
     a 2D representation of a fixed-width spectrogram.
     """
+    
+    min_latency = param.Integer(default=1, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,1000),
+        doc="""Smallest frequency for which to return an amplitude.""")
+
+    max_latency = param.Integer(default=50, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0,1000),
+        doc="""Largest frequency for which to return an amplitude.""")
+        
     
     def _updateSpectrogram(self, new_column):
         self._spectrogram = hstack((new_column, self._spectrogram))
