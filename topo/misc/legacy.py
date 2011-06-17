@@ -95,7 +95,7 @@ class SnapshotSupport(object):
         # apply oldest to newest
         for version in sorted(support.keys())[::-1]:
             if version_to_support < version:
-                param.Parameterized().debug("Applying legacy support for change r%s"%version)
+                param.Parameterized().message("Applying legacy support for change r%s"%version)
                 support[version]()
 
 
