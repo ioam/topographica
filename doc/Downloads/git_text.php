@@ -53,24 +53,21 @@ sure the path you want to get actually existed in that revision). Then,
 you can execute the following:
 
 <pre>
-# location of SVN repository
+# Location of SVN repository
 $ export TOPOROOT=https://topographica.svn.sourceforge.net/svnroot/topographica
 
-# create directory to hold new files
-$ mkdir topographica; cd topographica
+# Create a new Git repository in the current directory and retrieve
+# the SVN files and history
+# (you can choose a value for r to get more or less history)
+$ git svn clone -r11340 $TOPOROOT/trunk/topographica .
 
-# create a new Git repository
-$ git svn init $TOPOROOT/trunk/topographica
-
-# retrieve the SVN files and history
-# (you can choose a value for r - choose a recent svn revision)
-$ git svn fetch -r11340; git svn rebase
+# If you specified a value of r other than HEAD, you need to update
+$ git svn rebase
 </pre>
 
-(substituting values appropriate for what you wish to do; e.g. you can
-get more or less history by changing <code>-r</code>). If you're
-getting a recent revision of the <code>topographica</code> code, the
-new directory will occupy about 426 megabytes (as of August 2010).
+If you're getting a recent revision of the <code>topographica</code>
+code, the new directory will occupy about 426 megabytes (as of August
+2010).
 
 <P>After you have the source code, you probably want to instruct git
 to ignore the same files as SVN ignores:
