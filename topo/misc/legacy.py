@@ -47,7 +47,7 @@ def get_version(snapshot_release,snapshot_version):
 
     found_version = False
     
-    try:
+    if snapshot_version is not None:
         snapshot_version = snapshot_version.split(":")[0]
         snapshot_version = snapshot_version.split("M")[0]
         
@@ -58,11 +58,9 @@ def get_version(snapshot_release,snapshot_version):
             except ValueError:
                 pass
         
-    except AttributeError:
-        pass
-
     if not found_version:
         snapshot_version = releases[snapshot_release]
+        param.Parameterized().debug("No version could be detected for this snapshot; assuming version of release %s (i.e. %s)."%(snapshot_release,snapshot_version))
 
     return snapshot_version
 
