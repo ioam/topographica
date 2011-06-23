@@ -42,7 +42,7 @@ SVNVERSION = ${shell svnversion}
 ifeq ("${SVNVERSION}","exported")
 # CEBALERT: svnversion is probably 'exported' in other situations, too. How to make the command
 # below fail gracefully if "git svn" not available?
-	SVNVERSION = ${shell git svn info | grep -e "^Revision.*[0-9]*" | grep -o -e "[0-9]*"}:${shell git rev-parse HEAD}
+	SVNVERSION = ${shell git svn info | sed -n 's/^Revision: \([0-9]*\)/\1/p'}:${shell git rev-parse HEAD}
 endif
 
 
