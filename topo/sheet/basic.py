@@ -110,16 +110,15 @@ class JointNormalizingCFSheet(CFSheet):
     corresponding CFs in different Projections, rather than only
     considering weights in the same CF.
 
-    This class makes it possible for a model to use joint
-    normalization, by providing a mechanism for grouping Projections
-    (see _port_match), plus a learn() function that computes the joint
-    sums.  Joint normalization also requires having ConnectionField
-    store and return a norm_total for each neuron, and having an
-    TransferFn that will respect this norm_total rather than the strict
-    total of the ConnectionField's weights.  At present,
-    CFPOF_DivisiveNormalizeL1 and CFPOF_DivisiveNormalizeL1_opt do use
-    norm_total; others can be extended to do something similar if
-    necessary.
+    This class provides a mechanism for grouping Projections (see
+    _port_match and _grouped_in_projections) and a learn() function
+    that computes the joint sums.  Joint normalization also requires
+    having ConnectionField store and return a norm_total for each
+    neuron, and having an TransferFn that will respect this norm_total
+    rather than the strict total of the ConnectionField's weights.  At
+    present, CFPOF_DivisiveNormalizeL1 and
+    CFPOF_DivisiveNormalizeL1_opt do use norm_total; others can be
+    extended to do something similar if necessary.
 
     To enable joint normalization, you can declare that all the
     incoming connections that should be normalized together each
@@ -132,8 +131,8 @@ class JointNormalizingCFSheet(CFSheet):
     """
 
     joint_norm_fn = param.Callable(default=compute_joint_norm_totals,doc="""
-    Function to use to compute the norm_total for each CF in each
-    projection from a group to be normalized jointly.""")
+        Function to use to compute the norm_total for each CF in each
+        projection from a group to be normalized jointly.""")
 
     # JABALERT: Should check that whenever a connection is added to a
     # group, it has the same no of cfs as the existing connections.

@@ -130,7 +130,7 @@ class EventProcessor(param.Parameterized):
 
         In the default implementation, a port is considered a match if
         the port is == to the key, but subclasses of EventProcessor can
-        override this to provide weaker forms of matching.
+        override this to allow weaker forms of matching.
         """
         return key in portlist
 
