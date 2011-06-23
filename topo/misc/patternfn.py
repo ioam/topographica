@@ -20,6 +20,10 @@ from numpy import seterr, log
 
 from contextlib import contextmanager
 
+# CEBALERT: abs() is used in various places in this file, but I don't
+# see it on the list of numpy imports. I guess we're mistakenly not
+# using numpy's abs...
+
 @contextmanager
 def float_error_ignore():
     """
