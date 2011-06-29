@@ -202,7 +202,7 @@ class PatternGenerator(param.Parameterized):
             mat*=mask
     
     
-    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
+    def set_matrix_dimensions(self, bounds, xdensity, ydensity):
         """
         Change the dimensions of the matrix into which the pattern will be drawn.
         Users of this class should call this method rather than changing

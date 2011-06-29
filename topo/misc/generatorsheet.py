@@ -47,6 +47,12 @@ class GeneratorSheet(Sheet):
         self.input_generator_stack = []
         self.set_input_generator(self.input_generator)
 
+        # CEBALERT: replaces any bounds specified for the
+        # PatternGenerator with this sheet's own bounds. When
+        # PatternGenerators can draw patterns into supplied
+        # boundingboxes, should remove this.
+        self.input_generator.set_matrix_dimensions(self.bounds, self.xdensity, self.ydensity)
+
         # JABALERT: Should make period have an exclusive lower bound instead
         assert self.period!=0, "Period must be greater than zero."
 

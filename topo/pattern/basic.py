@@ -1247,7 +1247,7 @@ class PowerSpectrum(PatternGenerator):
     size = param.Number(precedence=(-1))
     orientation = param.Number(precedence=(-1))
 
-    scale = param.Number(default=0.00005, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0.001,1000),
+    scale = param.Number(default=0.001, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0.001,1000),
         doc="""The amount by which to scale amplitudes by. This is useful if we want to rescale to say a range [0:1].
             
         Note: Constant scaling is preferable to dynamic scaling so as not to artificially ramp down loud sounds while ramping
@@ -1340,19 +1340,20 @@ class PowerSpectrum(PatternGenerator):
         
         amplitudes_by_frequency = (abs(fft.rfft(smoothed_window))[0:sample_rate/2] + self.offset) * self.scale
         amplitudes_by_row = zeros(self._sheet_dimensions[0])
-                        
+        
         for index in range(0, self._sheet_dimensions[0]-2):
             start_freq = self.frequency_spacing[index]
             end_freq = self.frequency_spacing[index+1]
              
             total_amplitude = sum(amplitudes_by_frequency[start_freq:end_freq])
-            amplitudes_by_row[index] = total_amplitude / (end_freq-start_freq)
-        
+            normalisation_factor = numpy.count_nonzero(amplitudes_by_frequency[start_freq:end_freq])
+            amplitudes_by_row[index] = total_amplitude / normalisation_factor
+                    
         return flipud(amplitudes_by_row.reshape(-1,1))
 
 
-    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
-        super(PowerSpectrum, self).update_matrix_dimensions(bounds, xdensity, ydensity) 
+    def set_matrix_dimensions(self, bounds, xdensity, ydensity):
+        super(PowerSpectrum, self).set_matrix_dimensions(bounds, xdensity, ydensity) 
         
         self._sheet_dimensions = SheetCoordinateSystem(bounds, xdensity, ydensity).shape
         self._create_frequency_indices()
@@ -1387,8 +1388,8 @@ class Spectrogram(PowerSpectrum):
         self._spectrogram = self._spectrogram[0:, 0:self._sheet_dimensions[1]]
     
                  
-    def update_matrix_dimensions(self, bounds, xdensity, ydensity):
-        super(Spectrogram, self).update_matrix_dimensions(bounds, xdensity, ydensity)
+    def set_matrix_dimensions(self, bounds, xdensity, ydensity):
+        super(Spectrogram, self).set_matrix_dimensions(bounds, xdensity, ydensity)
         self._spectrogram = zeros(self._sheet_dimensions)
     
     
