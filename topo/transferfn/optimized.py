@@ -48,13 +48,8 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
             // CB: I doubt norm_total can be a property and a slot, but maybe
             // it could be, or maybe we could use the actual attribute...
             
-            npfloat *x = active_units_mask;
-            npfloat *m = sheet_mask;
-
             for (int r=0; r<num_cfs; ++r) {
-                double load = *x++;
-                double msk = *m++;
-                if (load != 0 && msk != 0) {
+                if (active_units_mask[r] != 0 && sheet_mask[r] != 0) {
                     PyObject *cf = PyList_GetItem(cfs,r);
 
                     LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
