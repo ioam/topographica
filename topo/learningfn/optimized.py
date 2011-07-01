@@ -66,13 +66,9 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
             DECLARE_SLOT_OFFSET(mask,cf_type);
 
-            npfloat *x = output_activity;
-            npfloat *m = sheet_mask;
-
             for (int r=0; r<num_cfs; ++r) {
-                double load = *x++;
-                double msk = *m++;
-                if (load != 0 && msk != 0) {
+                double load = output_activity[r];
+                if (load != 0 && sheet_mask[r] != 0) {
                     load *= single_connection_learning_rate;
 
                     PyObject *cf = PyList_GetItem(cfs,r);
