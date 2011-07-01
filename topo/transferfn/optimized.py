@@ -41,17 +41,9 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
         sheet_mask = iterator.get_sheet_mask()
 
         code = c_header + """
-            // CEBALERT: should provide a macro for getting offset
 
-            ///// GET WEIGHTS OFFSET
-            PyMemberDescrObject *weights_descr = (PyMemberDescrObject *)PyObject_GetAttrString(cf_type,"weights");
-            Py_ssize_t weights_offset = weights_descr->d_member->offset;
-            Py_DECREF(weights_descr);
-
-            ///// GET SLICE OFFSET
-            PyMemberDescrObject *slice_descr = (PyMemberDescrObject *)PyObject_GetAttrString(cf_type,"input_sheet_slice");
-            Py_ssize_t slice_offset = slice_descr->d_member->offset;
-            Py_DECREF(slice_descr);
+            DECLARE_SLOT_OFFSET(weights,cf_type);
+            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
 
             // CB: I doubt norm_total can be a property and a slot, but maybe
             // it could be, or maybe we could use the actual attribute...
@@ -65,28 +57,22 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
                 if (load != 0 && msk != 0) {
                     PyObject *cf = PyList_GetItem(cfs,r);
 
-                    PyArrayObject *weights_obj = *((PyArrayObject **)((char *)cf + weights_offset));
-                    PyArrayObject *slice_obj = *((PyArrayObject **)((char *)cf + slice_offset));
+                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
 
                     PyObject *sum_obj     = PyObject_GetAttrString(cf,"norm_total");
-
-                    float *wi = (float *)(weights_obj->data);
-                    int *slice = (int *)(slice_obj->data);
 
                     double total = PyFloat_AsDouble(sum_obj); // sum of the cf's weights
 
                     if( total > 0.0000000000001 ) {
 
-                        int rr1 = *slice++;
-                        int rr2 = *slice++;
-                        int cc1 = *slice++;
-                        int cc2 = *slice;
+                        UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
     
                         // normalize the weights
                         double factor = 1.0/total;
                         int rc = (rr2-rr1)*(cc2-cc1);
                         for (int i=0; i<rc; ++i) {
-                            *(wi++) *= factor;
+                            *(weights++) *= factor;
                         }
 
                     }
