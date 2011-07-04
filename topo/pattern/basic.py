@@ -985,17 +985,14 @@ class LogGaussian(PatternGenerator):
     mathematically this is the mean term.
     """
     
-    size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
-        doc=""" """)
-    
     aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
-        doc=""" """)
+        doc="""Ratio of the pattern's width to height.""")
     
     x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
-        doc=""" """)
+        doc="""The length of the tail along the x axis.""")
 
     y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
-        doc=""" """)
+        doc="""The length of the tail along the y axis.""")
     
 
     def __call__(self, **params_to_override):
@@ -1279,13 +1276,9 @@ class PowerSpectrum(PatternGenerator):
         
     def __init__(self, **params):
         super(PowerSpectrum, self).__init__(**params) 
-        self._first_call = True
         
         for parameter,value in params.items():
             setattr(self, parameter, value)
-        
-        self._sheet_dimensions = SheetCoordinateSystem(self.bounds, self.xdensity, self.ydensity).shape
-        self._create_frequency_indices()
         
     
     def _create_frequency_indices(self):
@@ -1339,7 +1332,6 @@ class PowerSpectrum(PatternGenerator):
             smoothed_window = signal_window[0:sample_rate]
         
         amplitudes_by_frequency = (abs(fft.rfft(smoothed_window))[0:sample_rate/2] + self.offset) * self.scale
-        amplitudes_by_row = zeros(self._sheet_dimensions[0])
         
         for index in range(0, self._sheet_dimensions[0]-2):
             start_freq = self.frequency_spacing[index]
@@ -1347,19 +1339,22 @@ class PowerSpectrum(PatternGenerator):
              
             total_amplitude = sum(amplitudes_by_frequency[start_freq:end_freq])
             normalisation_factor = numpy.count_nonzero(amplitudes_by_frequency[start_freq:end_freq])
-            amplitudes_by_row[index] = total_amplitude / normalisation_factor
-                    
-        return flipud(amplitudes_by_row.reshape(-1,1))
+            self._amplitudes[index] = total_amplitude / normalisation_factor
+        
+        #BK-ALERT: Can we avoid having to do this on every computation by being smarter with the indexing?
+        return flipud(self._amplitudes.reshape(-1,1))
 
 
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
         super(PowerSpectrum, self).set_matrix_dimensions(bounds, xdensity, ydensity) 
         
         self._sheet_dimensions = SheetCoordinateSystem(bounds, xdensity, ydensity).shape
+        self._amplitudes = zeros(self._sheet_dimensions[0])
         self._create_frequency_indices()
 
 
-    def __call__(self, **params_to_override):        
+    def __call__(self, **params_to_override):
+        #BK-ALERT: Check if user specified frequency range has actually changed before regenerating frequency indices?
         self._create_frequency_indices()
         row_amplitudes = self._get_row_amplitudes()
         
