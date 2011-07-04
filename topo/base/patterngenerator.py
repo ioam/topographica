@@ -113,6 +113,12 @@ class PatternGenerator(param.Parameterized):
         Optional function(s) to apply to the pattern array after it has been created.
         Can be used for normalization, thresholding, etc.""")
 
+
+    def __init__(self,**params):
+        super(PatternGenerator, self).__init__(**params) 
+        self.set_matrix_dimensions(self.bounds, self.xdensity, self.ydensity)
+        
+
     def __call__(self,**params_to_override):
         """
         Call the subclass's 'function' method on a rotated and scaled coordinate system.
