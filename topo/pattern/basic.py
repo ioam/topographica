@@ -1381,8 +1381,8 @@ class Spectrogram(PowerSpectrum):
         
     
     def _update_spectrogram(self, new_column):
-        self._spectrogram = hstack((new_column, self._spectrogram))
-        self._spectrogram = self._spectrogram[0:, 0:self._sheet_dimensions[1]]
+        self._spectrogram[0:, 1:] = self._spectrogram[0:, 0:self._sheet_dimensions[1]-1]
+        self._spectrogram[0:, 0:1] = new_column
     
                  
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
