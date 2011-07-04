@@ -1238,13 +1238,13 @@ class PowerSpectrum(PatternGenerator):
     size = param.Number(precedence=(-1))
     orientation = param.Number(precedence=(-1))
 
-    scale = param.Number(default=0.001, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0.001,1000),
+    scale = param.Number(default=0.01, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0.001,1000),
         doc="""The amount by which to scale amplitudes by. This is useful if we want to rescale to say a range [0:1].
             
         Note: Constant scaling is preferable to dynamic scaling so as not to artificially ramp down loud sounds while ramping
         up hiss and other background interference.""")
 
-    signal = TimeSeriesParam(default=TimeSeries(time_series=generate_sine_wave(0.001,1000,20000), sample_rate=20000), 
+    signal = TimeSeriesParam(default=TimeSeries(time_series=generate_sine_wave(0.001,5000,20000), sample_rate=20000), 
         doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
         
     min_frequency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,10000),
