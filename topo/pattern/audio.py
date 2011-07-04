@@ -298,6 +298,7 @@ class LyonsCochlearModel(PowerSpectrum):
         self.ear_zero_offset = float(1.5)
         self.ear_sharpness = float(5.0)
         
+        self._num_of_channels = self._num_of_channels()
         self._generateCochlearFilters()
     
     
@@ -434,8 +435,6 @@ class LyonsCochlearModel(PowerSpectrum):
         max_f = self._max_frequency()
         self.max_f_calc = max_f + sqrt(max_f*max_f + self.ear_break_squared)
 
-        self._num_of_channels = self._num_of_channels()
-
         self.centre_frequencies = zeros(self._num_of_channels, dtype=self.precision)
         self.centre_frequencies[0] = max_f
         self._calc_centre_frequencies_till(self._num_of_channels-1)
@@ -490,9 +489,13 @@ class LyonsCochlearModel(PowerSpectrum):
               
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
         super(LyonsCochlearModel, self).set_matrix_dimensions(bounds, xdensity, ydensity)
-
-        if self._sheet_dimensions[0] != self._num_of_channels:
+        
+        self._num_of_channels = self._num_of_channels()
+        if self._sheet_dimensions[0] == self._num_of_channels:
+            self._generateCochlearFilters()
+        else:
             raise ValueError("The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [%s] to [%s]." %(self._sheet_dimensions[0], self._num_of_channels))
+            
         
         
         
