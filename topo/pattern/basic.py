@@ -876,29 +876,30 @@ class DifferenceOfGaussians(PatternGenerator):
     Two-dimensional difference of gaussians pattern.
     """
 
-    positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(1), doc="""Size parameter for the positive Gaussian.""")
+    positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(1), 
+        doc="""Size of the positive region of the pattern.""")
     
-    positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(2), doc="""Aspect_ratio parameter for the positive Gaussian.""")
+    positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(2), 
+        doc="""Ratio of width to height for the positive region of the pattern.""")
     
-    positive_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(3), doc="""X position for the central peak of the positive gaussian.""")
+    positive_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0), precedence=(3), 
+        doc="""X position for the central peak of the positive region.""")
     
-    positive_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(4), doc="""Y position for the central peak of the positive gaussian.""")
+    positive_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0), precedence=(4), 
+        doc="""Y position for the central peak of the positive region.""")
 
-    negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(5), doc="""Size parameter for the negative Gaussian.""")
+
+    negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(5), 
+        doc="""Size of the negative region of the pattern.""")
     
-    negative_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(6), doc="""Aspect_ratio parameter for the negative Gaussian.""")
+    negative_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(6), 
+        doc="""Ratio of width to height for the negative region of the pattern.""")
     
-    negative_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(7), doc="""X position for the central peak of the negative gaussian.""")
+    negative_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0), precedence=(7), 
+        doc="""X position for the central peak of the negative region.""")
     
-    negative_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0),
-        precedence=(8), doc="""Y position for the central peak of the negative gaussian.""")
+    negative_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0), precedence=(8), 
+        doc="""Y position for the central peak of the negative region.""")
     
     
     def function(self, p):
@@ -921,8 +922,8 @@ class Sigmoid(PatternGenerator):
     and negative halves with a smoothly sloping transition between them.
     """
     
-    slope = param.Number(default=10.0, bounds=(None,None), softbounds=(-100.0,100.0),doc="""
-        Multiplicative parameter controlling the smoothness of the transition 
+    slope = param.Number(default=10.0, bounds=(None,None), softbounds=(-100.0,100.0),
+        doc="""Parameter controlling the smoothness of the transition 
         between the two regions; high values give a sharp transition.""")
 
 
@@ -937,36 +938,32 @@ class SigmoidedDoG(PatternGenerator):
     such that one part of the plane can be the mirror image of the other.
     """
         
-    positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(1), doc="""Size parameter for the positive Gaussian.""")
+    positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(1), 
+        doc="""Size of the positive Gaussian pattern.""")
     
-    positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(2), doc="""Aspect_ratio parameter for the positive Gaussian.""")
+    positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(2), 
+        doc="""Ratio of width to height for the positive Gaussian pattern.""")
     
-    negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(3), doc="""Size parameter for the negative Gaussian.""")
+    negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(3), 
+        doc="""Size of the negative Gaussian pattern.""")
     
-    negative_aspect_ratio = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0),
-        precedence=(4), doc="""Aspect_ratio parameter for the negative Gaussian.""")
+    negative_aspect_ratio = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(4), 
+        doc="""Ratio of width to height for the negative Gaussian pattern.""")
     
-    sigmoid_slope = param.Number(default=10.0, bounds=(None,None), softbounds=(-100.0,100.0),
-        precedence=(5), doc="""Slope parameter for the Sigmoid.""")
-    
-    sigmoid_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-1.0,1.0),
-        precedence=(6), doc="""X parameter for the Sigmoid.""")
-
-    sigmoid_y = param.Number(default=0.0, bounds=(None,None), softbounds=(-1.0,1.0),
-        precedence=(7), doc="""Y parameter for the Sigmoid.""")
+    sigmoid_slope = param.Number(default=10.0, bounds=(None,None), softbounds=(-100.0,100.0), precedence=(5), 
+        doc="""Parameter controlling the smoothness of the transition between the two regions; 
+            high values give a sharp transition.""")
+            
+    sigmoid_position = param.Number(default=0.0, bounds=(None,None), softbounds=(-1.0,1.0), precedence=(6), 
+        doc="""X position of the transition between the two regions.""")
                  
                                                                                                                                                              
     def function(self, p):
-        diff_of_gaussians = DifferenceOfGaussians(positive_x=p.x, positive_y=p.y, 
-            negative_x=p.x, negative_y=p.y,
+        diff_of_gaussians = DifferenceOfGaussians(positive_x=p.x, positive_y=p.y, negative_x=p.x, negative_y=p.y,
             positive_size=p.positive_size*p.size, positive_aspect_ratio=p.positive_aspect_ratio,
             negative_size=p.negative_size*p.size, negative_aspect_ratio=p.negative_aspect_ratio)
 
-        sigmoid = Sigmoid(slope=p.sigmoid_slope, orientation=p.orientation+pi/2,
-            x=p.sigmoid_x+p.x, y=p.sigmoid_y+p.y)
+        sigmoid = Sigmoid(slope=p.sigmoid_slope, orientation=p.orientation+pi/2, x=p.x+p.sigmoid_position)
 
         return Composite(generators=[diff_of_gaussians, sigmoid], bounds=p.bounds,
             operator=numpy.multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
@@ -1062,50 +1059,47 @@ class LogGaussian(PatternGenerator):
         
 class SigmoidedDoLG(PatternGenerator):
     """
-    Sigmoid multiplicatively combined with a difference of Log Gaussians,
-    such that one part of the plane can be the mirror image of the other,
-    and the peaks of the gaussians are movable.
+    Sigmoid multiplicatively combined with a difference of Log Gaussians, such that one part of the plane can be 
+    the mirror image of the other, and the peaks of the gaussians are movable.
     """
     positive_size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
-        doc=""" """)
+        doc="""Size of the positive LogGaussian pattern.""")
     
     positive_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
-        doc=""" """)
+        doc="""Ratio of width to height for the positive LogGaussian pattern.""")
     
     positive_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
-        doc=""" """)
+        doc="""The length of the tail along the x axis for the positive LogGaussian pattern.""")
 
     positive_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
-        doc=""" """)
+        doc="""The length of the tail along the y axis for the positive LogGaussian pattern.""")
 
     positive_scale = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
-        doc=""" """)
+        doc="""Multiplicative scale for the positive LogGaussian pattern.""")
 
 
     negative_size = param.Number(default=3.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
-        doc=""" """)
+        doc="""Size of the negative LogGaussian pattern.""")
     
     negative_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
-        doc=""" """)
+        doc="""Ratio of width to height for the negative LogGaussian pattern.""")
     
     negative_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
-        doc=""" """)
+        doc="""The length of the tail along the x axis for the negative LogGaussian pattern.""")
 
     negative_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
-        doc=""" """)
+        doc="""The length of the tail along the y axis for the negative LogGaussian pattern.""")
 
     negative_scale = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
-        doc=""" """)
+        doc="""Multiplicative scale for the negative LogGaussian pattern.""")
     
     
     sigmoid_slope = param.Number(default=50.0, bounds=(None,None), softbounds=(-100.0,100.0),
-        doc="""Slope parameter for the Sigmoid.""")
-
-    sigmoid_orientation = param.Number(default=pi/2.0, bounds=(None,None), softbounds=(0.0,2*pi),
-        doc="""Orientation parameter for the Sigmoid.""")
+        doc="""Parameter controlling the smoothness of the transition between the two regions; 
+            high values give a sharp transition.""")
             
     sigmoid_position = param.Number(default=0.02, bounds=(None,None), softbounds=(-1.0,1.0),
-        doc="""Position parameter for the Sigmoid.""")
+        doc="""X position of the transition between the two regions.""")
 
 
     def function(self, p):
@@ -1118,7 +1112,7 @@ class SigmoidedDoLG(PatternGenerator):
         diff_of_log_gaussians = Composite(generators=[positive, negative], operator=subtract, 
             xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)
         
-        sigmoid = Sigmoid(x=p.sigmoid_position+p.x, slope=p.sigmoid_slope, orientation=p.sigmoid_orientation+p.orientation)
+        sigmoid = Sigmoid(x=p.x+p.sigmoid_position, slope=p.sigmoid_slope, orientation=p.orientation+pi/2.0)
         
         return Composite(generators=[diff_of_log_gaussians, sigmoid], bounds=p.bounds,
             operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
@@ -1374,13 +1368,14 @@ class Spectrogram(PowerSpectrum):
     """
     
     min_latency = param.Integer(default=1, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,1000),
-        doc="""Smallest frequency for which to return an amplitude.""")
+        doc="""Smallest latency for which to return amplitudes.""")
 
     max_latency = param.Integer(default=50, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0,1000),
-        doc="""Largest frequency for which to return an amplitude.""")
+        doc="""Largest latency for which to return amplitudes.""")
         
     
     def _update_spectrogram(self, new_column):
+        # Slide old values along one column, add new column to left hand side.
         self._spectrogram[0:, 1:] = self._spectrogram[0:, 0:self._sheet_dimensions[1]-1]
         self._spectrogram[0:, 0:1] = new_column
     
