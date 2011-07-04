@@ -26,9 +26,6 @@ class AudioFile(TimeSeries):
     """
     Requires an audio file in any format accepted by audiolab (wav, aiff, flac).
     """
-    
-    # See TimeSeries itself for a detailed description of abstract status
-    _abstract = True
         
     time_series = param.Array(precedence=(-1))
     sample_rate = param.Number(precedence=(-1))
@@ -62,9 +59,6 @@ class AudioFolder(AudioFile):
     of a rolling window of the input audio signal, for all files in the 
     specified folder.
     """
-    
-    # See AudioFile itself for a detailed description of abstract status
-    _abstract = True
     
     filename = param.Filename(precedence=(-1))
 
