@@ -1276,11 +1276,14 @@ class PowerSpectrum(PatternGenerator):
         
     def __init__(self, **params):
         super(PowerSpectrum, self).__init__(**params) 
-        
+
         for parameter,value in params.items():
             setattr(self, parameter, value)
         
-    
+        self._previous_min_freq = self.min_frequency
+        self._previous_max_freq = self.max_frequency
+        
+            
     def _create_frequency_indices(self):
         if self.min_frequency >= self.max_frequency:
             raise ValueError("PowerSpectrum: min frequency must be lower than max frequency.")     
@@ -1290,7 +1293,6 @@ class PowerSpectrum(PatternGenerator):
         available_frequency_range = fft.fftfreq(sample_rate, d=1.0/sample_rate)[0:sample_rate/2]
 
         if not available_frequency_range.min() <= self.min_frequency or not available_frequency_range.max() >= self.max_frequency:
-            
             raise ValueError("Specified frequency interval [%s:%s] is unavailable, available range is [%s:%s]. Adjust to these frequencies or modify the sample rate of the TimeSeries object." %(self.min_frequency, self.max_frequency, available_frequency_range.min(), available_frequency_range.max()))
 
         min_freq = nonzero(available_frequency_range >= self.min_frequency)[0][0]
@@ -1331,33 +1333,33 @@ class PowerSpectrum(PatternGenerator):
         else:
             smoothed_window = signal_window[0:sample_rate]
         
-        amplitudes_by_frequency = (abs(fft.rfft(smoothed_window))[0:sample_rate/2] + self.offset) * self.scale
+        amplitudes = (abs(fft.rfft(smoothed_window))[0:sample_rate/2] + self.offset) * self.scale
         
         for index in range(0, self._sheet_dimensions[0]-2):
             start_freq = self.frequency_spacing[index]
             end_freq = self.frequency_spacing[index+1]
              
-            total_amplitude = sum(amplitudes_by_frequency[start_freq:end_freq])
-            normalisation_factor = numpy.count_nonzero(amplitudes_by_frequency[start_freq:end_freq])
-            self._amplitudes[index] = total_amplitude / normalisation_factor
+            total_amplitude = sum(amplitudes[start_freq:end_freq])
+            normalisation_factor = numpy.count_nonzero(amplitudes[start_freq:end_freq])
+            amplitudes[index] = total_amplitude / normalisation_factor
         
-        #BK-ALERT: Can we avoid having to do this on every computation by being smarter with the indexing?
-        return flipud(self._amplitudes.reshape(-1,1))
+        return flipud(amplitudes[0:self._sheet_dimensions[0]].reshape(-1,1))
 
 
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
         super(PowerSpectrum, self).set_matrix_dimensions(bounds, xdensity, ydensity) 
         
         self._sheet_dimensions = SheetCoordinateSystem(bounds, xdensity, ydensity).shape
-        self._amplitudes = zeros(self._sheet_dimensions[0])
         self._create_frequency_indices()
 
 
-    def __call__(self, **params_to_override):
-        #BK-ALERT: Check if user specified frequency range has actually changed before regenerating frequency indices?
-        self._create_frequency_indices()
-        row_amplitudes = self._get_row_amplitudes()
+    def __call__(self, **params_to_override):        
+        if self._previous_min_freq != self.min_frequency or self._previous_max_freq != self.max_frequency:
+            self._previous_min_freq = self.min_frequency
+            self._previous_max_frequency = self.max_frequency
+            self._create_frequency_indices()
         
+        row_amplitudes = self._get_row_amplitudes()
         if self._sheet_dimensions[1] > 1:
             row_amplitudes = repeat(row_amplitudes, self._sheet_dimensions[1], axis=1)
 
