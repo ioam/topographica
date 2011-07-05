@@ -1264,8 +1264,7 @@ class PowerSpectrum(PatternGenerator):
         numpy provides a number of options, e.g. bartlett, blackman, hamming, hanning, kaiser; see
         http://docs.scipy.org/doc/numpy/reference/routines.window.html
         
-        You may also supply your own.
-        """)
+        You may also supply your own.""")
         
         
     def __init__(self, **params):
