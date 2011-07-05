@@ -41,14 +41,15 @@ from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
 from topo.base.sheetview import SheetView
 from topo.misc.distribution import Distribution
-from topo.pattern.basic import GaussiansCorner, RawRectangle, Line
+from topo.pattern.basic import GaussiansCorner, RawRectangle, Line, Constant
 from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
 
 from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
-from topo.analysis.featureresponses import Feature, PatternPresenter
+from topo.analysis.featureresponses import Feature, PatternPresenter, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
 from topo.base.patterngenerator import PatternGenerator
+from topo.command.basic import pattern_present
 
 from topo.misc.patternfn import line
 
@@ -846,17 +847,93 @@ pg.add_static_image( 'Hue Code', measure_corner_angle_pref.instance().key_img_fn
 
 
 
-class frequencyPresenter(PatternGenerator):
-    """Activates a generator sheet at the specified frequency (for all latencies)."""
+class PatternPresenter2(param.Parameterized):
+
+    apply_output_fns = param.Boolean(default = True, 
+        doc = """When presenting a pattern, whether to apply each 
+        sheet's output function.  If False, for many networks the 
+        response will be linear, which requires fewer test patterns to 
+        measure a meaningful response, but it may not correspond to the 
+        actual preferences of each neuron under other conditions. If 
+        True, callers will need to ensure that the input patterns are 
+        in a suitable range to drive the neurons to generate meaningful
+        output, because e.g. a threshold-based output function might
+        result in no activity for inputs that are too weak..""")
+
+    duration = param.Number(default = 1.0,
+        doc = """Amount of simulation time for which to present each 
+        test pattern. By convention, most Topographica example files 
+        are 
+        designed to have a suitable activity pattern computed by the
+        default time, but the duration will need to be changed for
+        other models that do not follow that convention or if a
+        linear response is desired.""")
+
+    # CEBALERT: generator_sheets=[] is probably a surprising way of
+    # actually getting all the generator sheets.
+    generator_sheets = param.List(default = [], 
+        doc="""The set of GeneratorSheets onto which patterns will be 
+        drawn. By default (i.e. for an empty list), all GeneratorSheets 
+        in the simulation will be used.""")
+        
+    pattern_generator = param.Parameter(default=Constant(),
+        doc = """The PatternGenerator that will be drawn on the generator 
+        sheets (the parameters of the pattern_generator are specified 
+        during calls).""")
+
+
+    def __call__(self, features_values, param_dict):
+        
+        for param, value in param_dict.iteritems():
+            setattr(self.pattern_generator, param, value)                               
+                              
+        for feature, value in features_values.iteritems():
+            setattr(self.pattern_generator, feature, value)                               
+        
+        all_input_sheet_names = topo.sim.objects(GeneratorSheet).keys()
+
+        if len(self.generator_sheets) > 0:
+            input_sheet_names = [sheet.name for sheet in self.generator_sheets]
+        else:
+            input_sheet_names = all_input_sheet_names
+        
+        # Copy the given generator once for every GeneratorSheet
+        inputs = dict.fromkeys(input_sheet_names)
+        for key in inputs.keys():
+            inputs[key] = copy.deepcopy(self.pattern_generator)
+            
+        self._custom_presenter(inputs, input_sheet_names)
+        
+        # blank patterns for unused generator sheets
+        for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
+            inputs[sheet_name] = Constant(scale=0)
+                
+        pattern_present(inputs, self.duration, plastic=False, apply_output_fns=self.apply_output_fns)                
+                        
+
+    def _custom_presenter(self, inputs, input_sheet_names):
+        """This method provides a minimum overload for performing custom actions
+        with a pattern presenter."""
+
+
+
+class frequencyMapper(PatternGenerator):
+    """Activates a generator sheet at the specified frequency (for all latencies).
+    It does so by translating from a frequency to a y position and presenting a line
+    at that y position (of the specified size)."""
+    __abstract = True
     
+            
     size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
         doc="Thickness (width) of the frequency band for every presentation.")
         
     frequency_spacing = param.Array(default=None,
-        doc=""".""")
-        
-                        
-    def getFrequency(self): 
+        doc="""The spacing of the available frequency range, this allows us to define
+        (and hence map) a non linear spacing by specifying the frequency value at each
+        sheet unit.""")
+    
+
+    def getFrequency(self):
         sheet_range = self.bounds.lbrt()
         y_range = sheet_range[3] - sheet_range[1]
         
@@ -875,17 +952,17 @@ class frequencyPresenter(PatternGenerator):
         
         y = (index / ratio) + sheet_range[1]
         setattr(self, 'y', y)
-       
-    
-    frequency = property(getFrequency, setFrequency, "The frequency at which to present.")
 
+
+    frequency = property(getFrequency, setFrequency, "The frequency at which to present.")
+    
     
     def function(self, p):
-        return line(self.pattern_y, p.size, 0.0)
+        return line(self.pattern_y, p.size, 0.001)
 
 
 
-class measureFrequencyPreference(PositionMeasurementCommand):
+class measure_frequency_preference(MeasureResponseCommand):
     """Measure a best frequency preference and selectivity map for auditory neurons."""
         
     display = param.Boolean(True) 
@@ -908,13 +985,14 @@ class measureFrequencyPreference(PositionMeasurementCommand):
         max_freq = input_sheets[0].input_generator.max_frequency
         freq_spacing = input_sheets[0].input_generator.frequency_spacing
 
-        self.pattern_presenter = PatternPresenter(frequencyPresenter(size=1.0/divisions, frequency_spacing=freq_spacing))
+        generator = frequencyMapper(size=1.0/divisions, frequency_spacing=freq_spacing)
+        self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
         
         return [Feature(name="frequency", range=(min_freq,max_freq), step=1)]
 
 
 pg= create_plotgroup(name='Frequency Preference and Selectivity', category="Preference Maps",
-    pre_plot_hooks=[measureFrequencyPreference.instance()], normalize='Individually',
+    pre_plot_hooks=[measure_frequency_preference.instance()], normalize='Individually',
     doc='Measure a best frequency preference and selectivity map for auditory neurons.')
 
 pg.add_plot('[Frequency Preference]', [('Strength','FrequencyPreference')])
@@ -922,8 +1000,11 @@ pg.add_plot('[Frequency Selectivity]', [('Strength','FrequencySelectivity')])
 
 
 
-class latencyPresenter(PatternGenerator):
-    """Activates a generator sheet at the specified latency (for all frequencies)."""
+class latencyMapper(PatternGenerator):
+    """Activates a generator sheet at the specified latency (for all frequencies).
+    It does so by translating from a latency to an x position and presenting a line
+    st theat x position (of the specified size)."""
+    __abstract = True
 
     size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
         doc="Thickness (width) of the latency band for every presentation.")
@@ -933,7 +1014,7 @@ class latencyPresenter(PatternGenerator):
 
     max_latency = param.Integer(default=50, bounds=(0,None), inclusive_bounds=(False,False),
         doc="""Largest latency on the generator sheet.""")
-        
+
 
     def getLatency(self):    
         latency_range = self.max_latency - self.min_latency
@@ -943,7 +1024,7 @@ class latencyPresenter(PatternGenerator):
         
         ratio = latency_range / x_range
         
-        return (self.x - sheet_range[0]) * ratio
+        return ((self.x - sheet_range[0]) * ratio) + self.min_latency
         
         
     def setLatency(self, new_latency):
@@ -954,18 +1035,19 @@ class latencyPresenter(PatternGenerator):
         
         ratio = latency_range / x_range
         
-        x = (new_latency / ratio) + sheet_range[0]
+        x = ((new_latency-self.min_latency) / ratio) + sheet_range[0]
         setattr(self, 'x', x)
-           
-    latency = property(getLatency, setLatency, "The latency at which to present.")
+
+
+    latency = property(getLatency, setLatency, "The latency at which to present.")           
     
     
     def function(self, p):
         return line(self.pattern_x, p.size, 0.001)
-        
-        
-        
-class measureLatencyPreference(PositionMeasurementCommand):
+
+
+
+class measure_latency_preference(MeasureResponseCommand):
     """Measure a best onset latency preference and selectivity map for auditory neurons."""
         
     display = param.Boolean(True) 
@@ -986,13 +1068,14 @@ class measureLatencyPreference(PositionMeasurementCommand):
         min_lat = input_sheets[0].input_generator.min_latency
         max_lat = input_sheets[0].input_generator.max_latency
         
-        self.pattern_presenter = PatternPresenter(latencyPresenter(size=1.0/divisions, min_latency=min_lat, max_latency=max_lat))
+        generator = latencyMapper(size=1.0/divisions, min_latency=min_lat, max_latency=max_lat)
+        self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
         
         return [Feature(name="latency", range=(min_lat,max_lat), step=1)]
 
 
 pg= create_plotgroup(name='Latency Preference and Selectivity', category="Preference Maps",
-    pre_plot_hooks=[measureLatencyPreference.instance()], normalize='Individually',
+    pre_plot_hooks=[measure_latency_preference.instance()], normalize='Individually',
     doc='Measure a best onset latency preference and selectivity map for auditory neurons.')
 
 pg.add_plot('[Latency Preference]', [('Strength','LatencyPreference')])
