@@ -12,7 +12,8 @@ import os
 from topo.pattern.basic import TimeSeries, Spectrogram, PowerSpectrum
 from topo import transferfn
 
-from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, float64, floor, hanning, hstack, log, log2, log10, logspace, multiply, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
+from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, float64, floor, hanning, hstack, log, log2, log10, \
+    logspace, multiply, nonzero, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
     
 try:
     import scikits.audiolab as audiolab
@@ -143,23 +144,24 @@ class AudioFolder(AudioFile):
 
 
 
+def convert_to_decibels(amplitudes):
+    amplitudes[amplitudes==0] = 1.0
+    return 20.0 * log10(abs(amplitudes))
+
+
+        
 class AuditorySpectrogram(Spectrogram):
     """
     Extends Spectrogram to provide a response in decibels over a base 10 logarithmic scale.
     """
         
     def _set_frequency_spacing(self, min_freq, max_freq):
-        self.frequency_spacing = logspace(log10(max_freq), log10(min_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
+        self.frequency_spacing = logspace(log10(min_freq+1), log10(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
         
-                        
-    def _convert_to_decibels(self, amplitudes):
-        amplitudes[amplitudes==0] = 1.0
-        return 20.0 * log10(abs(amplitudes))
-    
-    
-    def __call__(self, **params):
-        self._update_spectrogram(self._convert_to_decibels(self._get_row_amplitudes()))
-        return self._spectrogram
+
+    def _shape_response(self, new_column):
+        new_column_in_db = convert_to_decibels(new_column)
+        return super(AuditorySpectrogram, self)._shape_response(new_column_in_db)
 
 
 
@@ -167,9 +169,9 @@ class OctaveSpectrogram(Spectrogram):
     """
     Extends Spectrogram to provide a response over an octave scale.
     """
-    
+
     def _set_frequency_spacing(self, min_freq, max_freq):
-        self.frequency_spacing = logspace(log2(min_freq), log2(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
+        self.frequency_spacing = logspace(log2(min_freq+1), log2(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
 
 
 
@@ -185,7 +187,7 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
     amplify_till_frequency=param.Number(default=7000.0, bounds=(0.0,None),
         doc="""The upper bound of the frequency range to be amplified.""")
     
-    amplify_by_percentage=param.Number(default=3.0, bounds=(0.0,None),
+    amplify_by_percentage=param.Number(default=15.0, bounds=(0.0,None),
         doc="""The percentage by which to amplify the signal between the 
         specified frequency range.""")
         
@@ -194,15 +196,20 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
         super(OctaveSpectrogramWithAmplification, self).__init__(**params)
             
         if self.amplify_from_frequency > self.amplify_till_frequency:
-            raise ValueError("OctaveSpectrogramWithAmplification: Amplify from frequency must be less than its amplify till frequency.")
+            raise ValueError("Amplify from frequency must be less than its amplify till frequency.")
         
+
+    def set_matrix_dimensions(self, bounds, xdensity, ydensity):
+        super(OctaveSpectrogramWithAmplification, self).set_matrix_dimensions(bounds, xdensity, ydensity)
+
+        self._amplify_start_index = nonzero(self.frequency_spacing >= self.amplify_from_frequency)[0][0]
+        self._amplify_end_index = nonzero(self.frequency_spacing >= self.amplify_till_frequency)[0][0]
         
-    def __call__(self, **params):
-        row_amplitudes = self._get_row_amplitudes()
-        
-        self.sheet_frequency_divisions = logspace(log10(self.max_frequency), log10(self.min_frequency), 
-            num=self._sheet_dimensions[0], endpoint=True, base=10)
-            
+        self._amplifications = (hanning(self._amplify_end_index-self._amplify_start_index) * (self.amplify_by_percentage/100.0)) + 1.0
+        self._amplifications = reshape(self._amplifications, [-1,1])
+
+
+    def _shape_response(self, new_column):
         if self.amplify_by_percentage > 0:
             if (self.amplify_from_frequency < self.min_frequency) or (self.amplify_from_frequency > self.max_frequency):
                 raise ValueError("Lower bound of frequency to amplify is outside the global frequency range.")
@@ -211,26 +218,9 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
                 raise ValueError("Upper bound of frequency to amplify is outside the global frequency range.")
             
             else:
-                amplify_between = [ frequency for frequency in self.sheet_frequency_divisions if frequency <= self.amplify_till_frequency and frequency >= self.amplify_from_frequency ]
-                                
-                # the larger the index, the lower the frequency.
-                amplify_start_index = where(self.sheet_frequency_divisions == max(amplify_between))[0][0]
-                amplify_end_index = where(self.sheet_frequency_divisions == min(amplify_between))[0][0]
-                
-                # build an array of equal length to amplitude array, containing percentage amplifications.
-                amplified_range = 1.0 + hanning(amplify_end_index-amplify_start_index+1) * (self.amplify_by_percentage/100.0)
-                amplify_by = concatenate((ones(amplify_start_index), amplified_range, ones(len(self.sheet_frequency_divisions)-amplify_end_index-1)))
-                
-                row_amplitudes = multiply(row_amplitudes, amplify_by.reshape((-1, 1)))
-        
-        if self.normalization_function:
-            returned_array = self.normalization_function(row_amplitudes)
-            if returned_array:
-                row_amplitudes = returned_array
-            # otherwise the normalization function worked in place.
-            
-        self._update_spectrogram(row_amplitudes)
-        return self._spectrogram
+                new_column[self._amplify_start_index:self._amplify_end_index] *= self._amplifications
+
+        return super(OctaveSpectrogramWithAmplification, self)._shape_response(new_column)
         
 
 
