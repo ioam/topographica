@@ -1143,9 +1143,6 @@ class TimeSeries(param.Parameterized):
     def __init__(self, **params):
         super(TimeSeries, self).__init__(**params)
         self._next_interval_start = 0
-        
-        for parameter,value in params.items():
-            setattr(self, parameter, value)
 
         if self.seconds_per_iteration > self.interval_length:
             self.warning("Seconds per iteration > interval length, some signal will be skipped.")
@@ -1269,9 +1266,6 @@ class PowerSpectrum(PatternGenerator):
         
     def __init__(self, **params):
         super(PowerSpectrum, self).__init__(**params) 
-
-        for parameter,value in params.items():
-            setattr(self, parameter, value)
         
         self._previous_min_freq = self.min_frequency
         self._previous_max_freq = self.max_frequency
@@ -1334,7 +1328,11 @@ class PowerSpectrum(PatternGenerator):
              
             total_amplitude = sum(amplitudes[start_freq:end_freq])
             normalisation_factor = numpy.count_nonzero(amplitudes[start_freq:end_freq])
-            amplitudes[index] = total_amplitude / normalisation_factor
+            
+            if normalisation_factor == 0:
+                amplitudes[index] = 0
+            else:
+                amplitudes[index] = total_amplitude / normalisation_factor
         
         return flipud(amplitudes[0:self._sheet_dimensions[0]].reshape(-1,1))
 
@@ -1346,17 +1344,20 @@ class PowerSpectrum(PatternGenerator):
         self._create_frequency_indices()
 
 
+    def _shape_response(self, row_amplitudes):
+        if self._sheet_dimensions[1] > 1:
+            row_amplitudes = repeat(row_amplitudes, self._sheet_dimensions[1], axis=1)
+        
+        return row_amplitudes
+
+    
     def __call__(self, **params_to_override):        
         if self._previous_min_freq != self.min_frequency or self._previous_max_freq != self.max_frequency:
             self._previous_min_freq = self.min_frequency
             self._previous_max_frequency = self.max_frequency
             self._create_frequency_indices()
         
-        row_amplitudes = self._get_row_amplitudes()
-        if self._sheet_dimensions[1] > 1:
-            row_amplitudes = repeat(row_amplitudes, self._sheet_dimensions[1], axis=1)
-
-        return row_amplitudes
+        return self._shape_response(self._get_row_amplitudes())
 
 
 
@@ -1366,27 +1367,26 @@ class Spectrogram(PowerSpectrum):
     a 2D representation of a fixed-width spectrogram.
     """
     
-    min_latency = param.Integer(default=1, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,1000),
+    min_latency = param.Integer(default=1, precedence=1,
+        bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,1000),
         doc="""Smallest latency for which to return amplitudes.""")
 
-    max_latency = param.Integer(default=50, bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0,1000),
+    max_latency = param.Integer(default=50, precedence=2,
+        bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0,1000),
         doc="""Largest latency for which to return amplitudes.""")
         
     
-    def _update_spectrogram(self, new_column):
+    def _shape_response(self, new_column):
         # Slide old values along one column, add new column to left hand side.
         self._spectrogram[0:, 1:] = self._spectrogram[0:, 0:self._sheet_dimensions[1]-1]
         self._spectrogram[0:, 0:1] = new_column
+        
+        return self._spectrogram
     
                  
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
         super(Spectrogram, self).set_matrix_dimensions(bounds, xdensity, ydensity)
         self._spectrogram = zeros(self._sheet_dimensions)
-    
-    
-    def __call__(self, **params_to_override):
-        self._update_spectrogram(self._get_row_amplitudes())
-        return self._spectrogram   
 
 
 
