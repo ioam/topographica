@@ -29,7 +29,7 @@ import Image,ImageDraw
 import copy
 
 from numpy.oldnumeric import array, maximum
-from numpy import where, pi, sin, cos, nonzero
+from numpy import where, pi, sin, cos, nonzero, max, round
 
 import param
 from param.parameterized import ParameterizedFunction
@@ -932,7 +932,11 @@ class frequencyMapper(PatternGenerator):
         (and hence map) a non linear spacing by specifying the frequency value at each
         sheet unit.""")
     
+    def __init__(self, **params):
+        super(frequencyMapper, self).__init__(**params) 
+        self.frequency_spacing = round(self.frequency_spacing)
 
+            
     def getFrequency(self):
         sheet_range = self.bounds.lbrt()
         y_range = sheet_range[3] - sheet_range[1]
@@ -942,7 +946,7 @@ class frequencyMapper(PatternGenerator):
         return self.frequency_spacing[index]
         
         
-    def setFrequency(self, new_frequency):    
+    def setFrequency(self, new_frequency):
         index = nonzero(self.frequency_spacing >= new_frequency)[0][0]
         
         sheet_range = self.bounds.lbrt()
