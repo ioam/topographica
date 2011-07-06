@@ -106,23 +106,24 @@ these are not already installed).
 <P>Most Linux systems will already have the required libraries
 installed, so usually no action will be required here.
 
-<!--CEBALERT: plus build-essential for ubuntu-->
-<P>On some Linux
-distributions that start with a minimal set of packages included, such
-as Ubuntu or the various "live CD" systems, you may need to specify
-explicitly that some standard libraries be installed in your system if you want to 
-use the GUI,
-including
-<code>libx11-dev</code> and
-<code>libxft-dev</code>. <!--for antialiased fonts-->
-Note that on some systems the
+<P>On some Linux distributions that start with a minimal set of
+packages included, such as Ubuntu or the various "live CD" systems,
+you may need to install "build tools".  On Ubuntu, for instance, these
+are installed via <code>sudo apt-get install build-essential</code>.
+
+<P>Also on these minimal linux distributions, if you want to build and
+use the GUI you may need to specify explicitly that some standard
+libraries be installed: <code>libx11-dev</code> and
+<code>libxft-dev</code>. Note that on some systems the
 <code>-dev</code> packages are called <code>-devel</code>, and
 sometimes specific versions must be specified. Example for Ubuntu
-9.10:
-<blockquote><code>sudo apt-get install libx11-dev libxft-dev</code></blockquote>
+9.10: 
+<blockquote>
+<code>sudo apt-get install libx11-dev libxft-dev</code>
+</blockquote>
 
-<P>Once these libraries are installed, you can proceed to
-the <A HREF="#building">Building</A> instructions below.
+<P>Once any necessary libraries are installed, you can proceed to the
+<A HREF="#building">Building</A> instructions below.
 
 
 <H4><A NAME="building">Building Topographica</A></H4>
