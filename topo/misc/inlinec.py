@@ -230,7 +230,10 @@ typedef double npfloat;
 // (p248 of numpybook), which only acts if necessary...
 // Do we have a case where we know this code is being
 // called, so that I can test it easily?
-   
+
+// CEBALERT: weights_obj appears below. Doesn't that mean this thing
+// will only work when attr is weights?
+
 #define CONTIGUOUS_ARRAY_FROM_SLOT_OFFSET(type,attr,obj) \
   PyArrayObject *attr ## _obj = *((PyArrayObject **)((char *)obj + attr ## _offset)); \
   type *attr = 0; \
