@@ -11,7 +11,7 @@ __version__='$Revision$'
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or
 from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, flipud, floor, equal, exp, hstack, Infinity, linspace, multiply, \
-    nonzero, pi, repeat, sin, sqrt, subtract, tile, zeros, sum, max
+    nonzero, pi, repeat, round, sin, sqrt, subtract, tile, zeros, sum, max
 
 import param
 from param.parameterized import ParamOverrides
@@ -876,10 +876,10 @@ class DifferenceOfGaussians(PatternGenerator):
     Two-dimensional difference of gaussians pattern.
     """
 
-    positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(1), 
+    positive_size = param.Number(default=0.1, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(1), 
         doc="""Size of the positive region of the pattern.""")
     
-    positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(2), 
+    positive_aspect_ratio = param.Number(default=1.5, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(2), 
         doc="""Ratio of width to height for the positive region of the pattern.""")
     
     positive_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0), precedence=(3), 
@@ -889,10 +889,10 @@ class DifferenceOfGaussians(PatternGenerator):
         doc="""Y position for the central peak of the positive region.""")
 
 
-    negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(5), 
+    negative_size = param.Number(default=0.3, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(5), 
         doc="""Size of the negative region of the pattern.""")
     
-    negative_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(6), 
+    negative_aspect_ratio = param.Number(default=1.5, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(6), 
         doc="""Ratio of width to height for the negative region of the pattern.""")
     
     negative_x = param.Number(default=0.0, bounds=(None,None), softbounds=(-2.0,2.0), precedence=(7), 
@@ -937,14 +937,16 @@ class SigmoidedDoG(PatternGenerator):
     Sigmoid multiplicatively combined with a difference of Gaussians,
     such that one part of the plane can be the mirror image of the other.
     """
-        
-    positive_size = param.Number(default=0.5, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(1), 
+    
+    size = param.Number(default=0.5)
+    
+    positive_size = param.Number(default=0.15, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(1), 
         doc="""Size of the positive Gaussian pattern.""")
     
     positive_aspect_ratio = param.Number(default=2.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(2), 
         doc="""Ratio of width to height for the positive Gaussian pattern.""")
     
-    negative_size = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(3), 
+    negative_size = param.Number(default=0.25, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(3), 
         doc="""Size of the negative Gaussian pattern.""")
     
     negative_aspect_ratio = param.Number(default=1.0, bounds=(0.0,None), softbounds=(0.0,5.0), precedence=(4), 
@@ -1055,14 +1057,18 @@ class LogGaussian(PatternGenerator):
     def function(self, p):
         return log_gaussian(self.pattern_x, self.pattern_y, p.x_shape, p.y_shape, p.size)
 
-        
+
         
 class SigmoidedDoLG(PatternGenerator):
     """
     Sigmoid multiplicatively combined with a difference of Log Gaussians, such that one part of the plane can be 
     the mirror image of the other, and the peaks of the gaussians are movable.
-    """
-    positive_size = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
+    """    
+    
+    size = param.Number(default=1.5)
+    
+    
+    positive_size = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc="""Size of the positive LogGaussian pattern.""")
     
     positive_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
@@ -1074,14 +1080,14 @@ class SigmoidedDoLG(PatternGenerator):
     positive_y_shape = param.Number(default=0.35, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
         doc="""The length of the tail along the y axis for the positive LogGaussian pattern.""")
 
-    positive_scale = param.Number(default=1.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
+    positive_scale = param.Number(default=1.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc="""Multiplicative scale for the positive LogGaussian pattern.""")
 
 
-    negative_size = param.Number(default=3.0, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
+    negative_size = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,10.0),
         doc="""Size of the negative LogGaussian pattern.""")
     
-    negative_aspect_ratio = param.Number(default=0.5, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
+    negative_aspect_ratio = param.Number(default=0.3, bounds=(0.0,None), inclusive_bounds=(True,False), softbounds=(0.0,1.0),
         doc="""Ratio of width to height for the negative LogGaussian pattern.""")
     
     negative_x_shape = param.Number(default=0.8, bounds=(0.0,None), inclusive_bounds=(False,False), softbounds=(0.0,5.0),
@@ -1098,7 +1104,7 @@ class SigmoidedDoLG(PatternGenerator):
         doc="""Parameter controlling the smoothness of the transition between the two regions; 
             high values give a sharp transition.""")
             
-    sigmoid_position = param.Number(default=0.02, bounds=(None,None), softbounds=(-1.0,1.0),
+    sigmoid_position = param.Number(default=0.05, bounds=(None,None), softbounds=(-1.0,1.0),
         doc="""X position of the transition between the two regions.""")
 
 
@@ -1198,7 +1204,7 @@ class TimeSeries(param.Parameterized):
         return interval
     
     
-    def __call__(self, **params_to_override): 
+    def __call__(self): 
         interval_start = self._next_interval_start
         interval_end = int(floor(interval_start + self.interval_length*self.sample_rate))
         
@@ -1241,7 +1247,7 @@ class PowerSpectrum(PatternGenerator):
         Note: Constant scaling is preferable to dynamic scaling so as not to artificially ramp down loud sounds while ramping
         up hiss and other background interference.""")
 
-    signal = TimeSeriesParam(default=TimeSeries(time_series=generate_sine_wave(0.001,5000,20000), sample_rate=20000), 
+    signal = TimeSeriesParam(default=TimeSeries(time_series=generate_sine_wave(0.1,5000,20000), sample_rate=20000), 
         doc="""A TimeSeries object on which to perfom the Fourier Transform.""")
         
     min_frequency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,10000),
@@ -1267,8 +1273,8 @@ class PowerSpectrum(PatternGenerator):
     def __init__(self, **params):
         super(PowerSpectrum, self).__init__(**params) 
         
-        self._previous_min_freq = self.min_frequency
-        self._previous_max_freq = self.max_frequency
+        self._previous_min_frequency = self.min_frequency
+        self._previous_max_frequency = self.max_frequency
         
             
     def _create_frequency_indices(self):
@@ -1323,16 +1329,14 @@ class PowerSpectrum(PatternGenerator):
         amplitudes = (abs(fft.rfft(smoothed_window))[0:sample_rate/2] + self.offset) * self.scale
         
         for index in range(0, self._sheet_dimensions[0]-2):
-            start_freq = self.frequency_spacing[index]
-            end_freq = self.frequency_spacing[index+1]
+            start_frequency = self.frequency_spacing[index]
+            end_frequency = self.frequency_spacing[index+1]
              
-            total_amplitude = sum(amplitudes[start_freq:end_freq])
-            normalisation_factor = nonzero(amplitudes[start_freq:end_freq])[0].size
-            
+            normalisation_factor =  end_frequency - start_frequency
             if normalisation_factor == 0:
-                amplitudes[index] = 0
+                amplitudes[index] = amplitudes[start_frequency]
             else:
-                amplitudes[index] = total_amplitude / normalisation_factor
+                amplitudes[index] = sum(amplitudes[start_frequency:end_frequency]) / normalisation_factor
         
         return flipud(amplitudes[0:self._sheet_dimensions[0]].reshape(-1,1))
 
@@ -1351,9 +1355,9 @@ class PowerSpectrum(PatternGenerator):
         return row_amplitudes
 
     
-    def __call__(self, **params_to_override):        
-        if self._previous_min_freq != self.min_frequency or self._previous_max_freq != self.max_frequency:
-            self._previous_min_freq = self.min_frequency
+    def __call__(self):        
+        if self._previous_min_frequency != self.min_frequency or self._previous_max_frequency != self.max_frequency:
+            self._previous_min_frequency = self.min_frequency
             self._previous_max_frequency = self.max_frequency
             self._create_frequency_indices()
         
@@ -1367,26 +1371,68 @@ class Spectrogram(PowerSpectrum):
     a 2D representation of a fixed-width spectrogram.
     """
     
-    min_latency = param.Integer(default=1, precedence=1,
+    min_latency = param.Integer(default=0, precedence=1,
         bounds=(0,None), inclusive_bounds=(True,False), softbounds=(0,1000),
-        doc="""Smallest latency for which to return amplitudes.""")
+        doc="""Smallest latency (in milliseconds) for which to return amplitudes.""")
 
-    max_latency = param.Integer(default=50, precedence=2,
+    max_latency = param.Integer(default=500, precedence=2,
         bounds=(0,None), inclusive_bounds=(False,False), softbounds=(0,1000),
-        doc="""Largest latency for which to return amplitudes.""")
+        doc="""Largest latency (in milliseconds) for which to return amplitudes.""")
+
+
+    def __init__(self, **params):
+        super(Spectrogram, self).__init__(**params) 
         
+        self._previous_min_latency = self.min_latency
+        self._previous_max_latency = self.max_latency
+                        
     
     def _shape_response(self, new_column):
-        # Slide old values along one column, add new column to left hand side.
-        self._spectrogram[0:, 1:] = self._spectrogram[0:, 0:self._sheet_dimensions[1]-1]
-        self._spectrogram[0:, 0:1] = new_column
         
-        return self._spectrogram
+        millisecs_per_iteration = self.signal.seconds_per_iteration * 1000
+    
+        if millisecs_per_iteration > self.max_latency:
+            self._spectrogram[0:,0:] = new_column
+        else:
+            # Slide old values along, add new data to left hand side.
+            self._spectrogram[0:, millisecs_per_iteration:] = self._spectrogram[0:, 0:self._spectrogram.shape[1]-millisecs_per_iteration]
+            self._spectrogram[0:, 0:millisecs_per_iteration] = new_column
+        
+        sheet_representation = zeros(self._sheet_dimensions)
+        
+        for column in range(0,self._sheet_dimensions[1]):
+            start_latency = self._latency_spacing[column]
+            end_latency = self._latency_spacing[column+1]
+                        
+            normalisation_factor = end_latency - start_latency
+            if normalisation_factor > 1:
+                sheet_representation[0:, column] = sum(self._spectrogram[0:, start_latency:end_latency], axis=1) / normalisation_factor
+            else:
+                sheet_representation[0:, column] = self._spectrogram[0:, start_latency]
+                        
+        return sheet_representation
     
                  
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
         super(Spectrogram, self).set_matrix_dimensions(bounds, xdensity, ydensity)
-        self._spectrogram = zeros(self._sheet_dimensions)
+        self._create_latency_indices()
+        
+    
+    def _create_latency_indices(self):
+        if self.min_latency >= self.max_latency:
+            raise ValueError("Spectrogram: min latency must be lower than max latency.")     
+
+        self._latency_spacing = floor(linspace(self.min_latency, self.max_latency, num=self._sheet_dimensions[1]+1, endpoint=True))
+        self._spectrogram = zeros([self._sheet_dimensions[0],self.max_latency])
+        
+
+    def __call__(self):        
+        if self._previous_min_latency != self.min_latency or self._previous_max_latency != self.max_latency:
+            self._previous_min_latency = self.min_latency
+            self._previous_max_latency = self.max_latency
+            self._create_latency_indices()
+        
+        return super(Spectrogram, self).__call__() 
 
 
 
