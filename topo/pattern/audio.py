@@ -12,7 +12,7 @@ import os
 from topo.pattern.basic import TimeSeries, Spectrogram, PowerSpectrum
 from topo import transferfn
 
-from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, float64, floor, hanning, hstack, log, log2, log10, \
+from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, flipud, float64, floor, hanning, hstack, log, log2, log10, \
     logspace, multiply, nonzero, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
     
 try:
@@ -63,7 +63,7 @@ class AudioFolder(AudioFile):
     
     filename = param.Filename(precedence=(-1))
 
-    folderpath = param.Foldername(default='sounds/complex', 
+    folderpath = param.Foldername(default='sounds/sine_waves/normalized', 
         doc="""Folder path (can be relative to Topographica's base path) to a
         folder containing audio files. The audio can be in any format accepted 
         by audiolab, i.e. WAV, AIFF, or FLAC.""")
@@ -150,7 +150,7 @@ def convert_to_decibels(amplitudes):
 
 
         
-class AuditorySpectrogram(Spectrogram):
+class DecibelSpectrogram(Spectrogram):
     """
     Extends Spectrogram to provide a response in decibels over a base 10 logarithmic scale.
     """
@@ -161,21 +161,48 @@ class AuditorySpectrogram(Spectrogram):
 
     def _shape_response(self, new_column):
         new_column_in_db = convert_to_decibels(new_column)
-        return super(AuditorySpectrogram, self)._shape_response(new_column_in_db)
+        return super(DecibelSpectrogram, self)._shape_response(new_column_in_db)
 
 
 
-class OctaveSpectrogram(Spectrogram):
+class CochlearSpectrogram(Spectrogram):
     """
     Extends Spectrogram to provide a response over an octave scale.
     """
 
+    def _get_row_amplitudes(self):
+        signal_interval = self.signal()
+        sample_rate = self.signal.sample_rate        
+
+        # A signal window *must* span one sample rate
+        signal_window = tile(signal_interval, ceil(1.0/self.signal.interval_length))
+
+        if self.windowing_function:
+            smoothed_window = signal_window[0:sample_rate] * self.windowing_function(sample_rate)  
+        else:
+            smoothed_window = signal_window[0:sample_rate]
+        
+        amplitudes = (abs(fft.rfft(smoothed_window))[0:sample_rate/2] + self.offset) * self.scale
+        
+        for index in range(0, self._sheet_dimensions[0]-2):
+            start_frequency = self.frequency_spacing[index]
+            end_frequency = self.frequency_spacing[index+1]
+             
+            normalisation_factor = nonzero(amplitudes[start_frequency:end_frequency])[0].size            
+            if normalisation_factor == 0:
+                amplitudes[index] = 0
+            else:
+                amplitudes[index] = sum(amplitudes[start_frequency:end_frequency]) / normalisation_factor
+        
+        return flipud(amplitudes[0:self._sheet_dimensions[0]].reshape(-1,1))
+        
+    
     def _set_frequency_spacing(self, min_freq, max_freq):
         self.frequency_spacing = logspace(log2(min_freq+1), log2(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
 
 
 
-class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
+class CochlearSpectrogramWithAmplification(CochlearSpectrogram):
     """
     Extends OctaveSpectrogram with a simple model of outer ear amplification. 
     One can set both the range to amplify and the amount.
@@ -193,14 +220,14 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
         
         
     def __init__(self, **params):
-        super(OctaveSpectrogramWithAmplification, self).__init__(**params)
+        super(CochlearSpectrogramWithAmplification, self).__init__(**params)
             
         if self.amplify_from_frequency > self.amplify_till_frequency:
             raise ValueError("Amplify from frequency must be less than its amplify till frequency.")
         
 
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
-        super(OctaveSpectrogramWithAmplification, self).set_matrix_dimensions(bounds, xdensity, ydensity)
+        super(CochlearSpectrogramWithAmplification, self).set_matrix_dimensions(bounds, xdensity, ydensity)
 
         self._amplify_start_index = nonzero(self.frequency_spacing >= self.amplify_from_frequency)[0][0]
         self._amplify_end_index = nonzero(self.frequency_spacing >= self.amplify_till_frequency)[0][0]
@@ -220,7 +247,7 @@ class OctaveSpectrogramWithAmplification(OctaveSpectrogram):
             else:
                 new_column[self._amplify_start_index:self._amplify_end_index] *= self._amplifications
 
-        return super(OctaveSpectrogramWithAmplification, self)._shape_response(new_column)
+        return super(CochlearSpectrogramWithAmplification, self)._shape_response(new_column)
         
 
 
@@ -489,7 +516,7 @@ class LyonsCochlearModel(PowerSpectrum):
         
         
         
-class Cochleogram(LyonsCochlearModel):
+class LyonsCochleogram(LyonsCochlearModel):
     """
     Employs Lyons Cochlear Model to return a Cochleoogram, 
     i.e. the response over time along the cochlea.
