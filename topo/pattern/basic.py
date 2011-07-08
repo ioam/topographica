@@ -1327,7 +1327,7 @@ class PowerSpectrum(PatternGenerator):
             end_freq = self.frequency_spacing[index+1]
              
             total_amplitude = sum(amplitudes[start_freq:end_freq])
-            normalisation_factor = numpy.count_nonzero(amplitudes[start_freq:end_freq])
+            normalisation_factor = nonzero(amplitudes[start_freq:end_freq])[0].size
             
             if normalisation_factor == 0:
                 amplitudes[index] = 0
