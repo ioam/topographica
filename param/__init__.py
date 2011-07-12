@@ -521,7 +521,16 @@ class Callable(Parameter):
         super(Callable,self).__set__(obj,val)
 
         
-
+# CBNOTE: python now has abstract base classes, so we could update
+# this. At least if the check is in a method, all such checks could be
+# changed at once.
+def is_abstract(class_):
+    try:
+        return class_.abstract
+    except AttributeError:
+        return False
+    
+    
 # CEBALERT: this should be a method of ClassSelector.
 def concrete_descendents(parentclass):
     """
@@ -531,11 +540,10 @@ def concrete_descendents(parentclass):
     imported are included, so the caller will usually first do ``from
     package import *``.
 
-    If the class has an attribute ``abstract``, and it is True, the
-    class will not be included.
+    Only non-abstract classes will be included.
     """
     return dict([(c.__name__,c) for c in descendents(parentclass)
-                 if not c.abstract])
+                 if not is_abstract(c)])
 
 
 class Composite(Parameter):
