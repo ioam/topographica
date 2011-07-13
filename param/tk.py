@@ -2043,36 +2043,45 @@ class Eval_ReprTranslator(Translator):
         return n
 
 
-
+# CEBALERT: I hacked on support for non-hashable types like array (now
+# have cache as {string: id(object)} and _cache_objects as
+# {id(object): object}). The whole concept of translators needs
+# revisiting anyway.
 class String_ObjectTranslator(Translator):
 
     cache = {}
+    _cache_objects = {}
     
     def __init__(self,param,initial_value=None):
         super(String_ObjectTranslator,self).__init__(param,initial_value)
         self.cache = {}
+        self._cache_objects = {}
         self.update()
         
     def string2object(self,string_):
         if string_ in self.cache:
-            return self.cache[string_]
+            return self._cache_objects[self.cache[string_]]
         else:
             return string_
         
     def object2string(self,object_):
         inverse_cache = inverse(self.cache)
-        if object_ in inverse_cache:
-            return inverse_cache[object_]
+        if id(object_) in inverse_cache:
+            return inverse_cache[id(object_)]
         else:
             return object_
 
 
     def update(self):
-        self.cache = self.param.get_range()
+        for nam,obj in self.param.get_range().items():
+            self.cache[nam] = id(obj)
+            self._cache_objects[id(obj)] = obj
+
 
     def __copy__(self):
         n = super(String_ObjectTranslator,self).__copy__()
-        n.cache = self.cache 
+        n.cache = self.cache
+        n._cache_objects = self._cache_objects
         return n
     
         
@@ -2084,15 +2093,18 @@ class CSPTranslator(String_ObjectTranslator):
         ## instantiate if it's just a class
         if isinstance(obj,type) and isinstance(string_,str):
             obj = obj()
-            self.cache[string_]=obj
+            self.cache[string_]=id(obj)
+            self._cache_objects[id(obj)]=obj
 
         return obj
         
     def object2string(self,object_):
         ## replace class if we already have object
-        for name,obj in self.cache.items():
-            if type(object_)==obj or type(object_)==type(obj):
-                self.cache[name]=object_
+        for name,objid in self.cache.items():
+            obj = self._cache_objects[objid]
+            if type(object_) is obj or type(object_) is type(obj):
+                self.cache[name]=id(object_)
+                self._cache_objects[id(object_)]= object_
         ##
         return super(CSPTranslator,self).object2string(object_)
 
@@ -2101,6 +2113,7 @@ class CSPTranslator(String_ObjectTranslator):
         # because this one's object2string can modify cache
         n = Translator.__copy__(self)
         n.cache = copy.copy(self.cache)
+        n._cache_objects = copy.copy(self._cache_objects)
         return n
 
 
