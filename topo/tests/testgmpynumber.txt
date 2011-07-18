@@ -6,14 +6,11 @@
 
 >>> t1 = TestPO1()
 
-### Check Number accepts gmpy.mpq
->>> t1.z
-mpq(1)
 
->>> t1.z = mpq(0.999)
->>> t1.z-=0.0004
->>> t1.z
-mpq(4993,5000)
+### Check Number accepts gmpy.mpq
+>>> isinstance(t1.z,type(mpq(1))) and t1.z==1
+True
+
 
 >>> try:
 ...    t1.z+=1
@@ -23,6 +20,20 @@ mpq(4993,5000)
 ...    raise AssertionError("Number's bounds were not respected.")
 
 
+### Check gmpy works for simulation time
+>>> import topo
+>>> original_type = topo.sim.time_type
+>>> original_args = topo.sim.time_type_args
+>>> topo.sim.initialized=False
+>>> topo.sim.time_type = mpq
+>>> topo.sim.time_type_args = ()
+>>> t1.z = mpq(0.999)
+>>> t1.z-=topo.sim._convert_to_time_type(0.0004)
+>>> t1.z
+mpq(4993,5000)
+>>> topo.sim.time_type = original_type
+>>> topo.sim.time_type_args = original_args
+>>> topo.sim.initialized=True
 
 
 

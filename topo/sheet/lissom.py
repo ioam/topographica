@@ -169,7 +169,7 @@ class LISSOM(JointNormalizingCFSheet):
                        continue
             self.verbose("Sending output on src_port %s via connection %s to %s" %
                          (str(src_port), conn.name, conn.dest.name))
-            e=EPConnectionEvent(conn.delay+self.simulation.time(),conn,data)
+            e=EPConnectionEvent(self.simulation._convert_to_time_type(conn.delay)+self.simulation.time(),conn,data)
             self.simulation.enqueue_event(e)
 
 

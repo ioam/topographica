@@ -108,17 +108,14 @@ except ImportError:
         pass
 
 
-# CEBALERT: can we move these pickle support functions elsewhere?
-# In fact, can we just gather all the non-legacy pickle garbage into one
-# place? I'd even like to get stuff out of classes, but I guess that
-# wouldn't always be desirable.
-# (What prompted this note is that, apart from the clutter the pickle
-# methods add to classes, I cannot remember all the ways one can
-# support pickling; the answer to any new pickle problem is often
-# spread throughout all the pickle methods I've ever added...)
-
+# CEBALERT: can we move these pickle support functions elsewhere?  In
+# fact, can we just gather all the non-legacy pickle garbage into one
+# place? Pickle clutter adds complexity, and having all the pickle
+# support in one places makes it easier for other developers to copy
+# in new situations.
 
 # (note that these _pickle_support functions also work for deep copying)
+
 def _numpy_ufunc_pickle_support():
     """
     Allow instances of numpy.ufunc to pickle.
@@ -138,14 +135,10 @@ def _numpy_ufunc_pickle_support():
 _numpy_ufunc_pickle_support()
 
 
-# CBENHANCEMENT: should investigate Python 2.6's fraction module (at
-# least to replace the FixedPoint fallback).
-# http://docs.python.org/whatsnew/2.6.html
-
 def _mpq_pickle_support():
     """Allow instances of gmpy.mpq to pickle."""
     from gmpy import mpq
-    mpq_type = type(mpq(1,10)) # CEBALERT: any idea how to get this properly?
+    mpq_type = type(mpq(1,10)) # gmpy doesn't appear to expose the type another way
     import copy_reg
     copy_reg.pickle(mpq_type,lambda q: (mpq,(q.digits(),)))
 
@@ -169,36 +162,33 @@ def _instance_method_pickle_support():
 _instance_method_pickle_support()
 
 
+from topo.base.simulation import Simulation
+
 # Set the default value of Simulation.time_type to gmpy.mpq. If gmpy
-# is unavailable, use the slower fixedpoint.FixedPoint. Also, in that
-# case, provide a fake gmpy.mpq (to allow e.g. pickled test data to be
-# loaded). If neither gmpy nor fixedpoint is available, the default
-# will be float. Python 2.7 has suitable fraction.Fraction()
-time_type = None
+# is unavailable, use the slower fixedpoint.FixedPoint.
 try:
     import gmpy
-    time_type = gmpy.mpq
-    time_type_args = ()
+    Simulation.time_type = gmpy.mpq
+    Simulation.time_type_args = ()
     _mpq_pickle_support()
 except ImportError:
     import topo.misc.fixedpoint as fixedpoint
     param.Parameterized().warning('gmpy.mpq not available; using slower fixedpoint.FixedPoint for simulation time.')
-    time_type = fixedpoint.FixedPoint
-    time_type_args = (4,)  # gives precision=4
+    Simulation.time_type = fixedpoint.FixedPoint
+    Simulation.time_type_args = (4,)  # gives precision=4
 
+    # Provide a fake gmpy.mpq (to allow e.g. pickled test data to be
+    # loaded).
+    # CEBALERT: can we move this into whatever test needs it? I guess
+    # it also has to be here to allow snapshots saved using gmpy time
+    # type to open on systems where gmpy is not available.
     from topo.misc.util import gmpyImporter
     import sys
     sys.meta_path.append(gmpyImporter())
         
-from topo.base.simulation import Simulation
 
-if time_type is not None:
-    Simulation.time_type = time_type
-    Simulation.time_type_args = time_type_args
 
 sim = Simulation() 
-
-
 
 
 

@@ -204,7 +204,7 @@ class EventProcessor(param.Parameterized):
         data=deepcopy(data)
         for conn in out_conns_on_src_port:
             #self.verbose("Sending output on src_port %s via connection %s to %s" % (str(src_port), conn.name, conn.dest.name))
-            e=EPConnectionEvent(conn.delay+self.simulation.time(),conn,data,deep_copy=False)
+            e=EPConnectionEvent(self.simulation._convert_to_time_type(conn.delay)+self.simulation.time(),conn,data,deep_copy=False)
             self.simulation.enqueue_event(e)
             
 
@@ -748,32 +748,53 @@ class Simulation(param.Parameterized,OptionalSingleton):
     Simulation is a singleton: there is only one instance of
     Simulation, no matter how many times it is instantiated.
     """
-    
+
+    # CEBALERT: Must use _convert_to_time_type() everywhere a time is
+    # specified to ensure all times are the appropriate type. Relying
+    # on everyone to convert times to the time type seems dangerous!
+
     time_type = param.Parameter(default=float,constant=True,doc="""
-        The numeric type to use for Simulation's time values.
+        Callable for converting user-specified times into the numeric
+        type to be used for Simulation's time values.
         
-        Simulation's time type can be set to any numeric type that
-        supports the usual Python numeric operations, including at
-        least multiplication, addition, and subtraction.  Most of the
-        code assumes that fractional values are supported, as they are
-        for floats, but it may be possible to use an integer type
-        instead if various default fractional values are overridden.
+        Simulation's time can be set to any numeric type that supports
+        the usual Python numeric operations, including at least
+        multiplication, addition, and subtraction.  Most of the code
+        assumes that fractional values are supported, as they are for
+        floats, but it may be possible to use an integer type instead
+        if various default fractional values are overridden.
         
         For instance, one might wish to use arbitrary precision
-        floating-point time to avoid accumulating rounding errors.
-        For instance, if stepping through a simulation every 0.05 time
-        units, after 20 such steps using floats the simulation will
-        not reach 1.0 exactly, but will instead be slightly higher or
-        lower.  With an arbitrary precision float type such a series
-        of steps can be guaranteed to reach 1.0 exactly.
-        Alternatively, one might wish to use a rational type so that
-        events can be guaranteed to happen a certain number of times
-        in a given interval, even if the ratio cannot be expressed as
-        an even decimal or binary fraction.
-        
+        floating-point time to avoid accumulating rounding errors.  If
+        stepping through a simulation every 0.05 time units, after 20
+        such steps using floats the simulation will not reach 1.0
+        exactly, but will instead be slightly higher or lower.  With
+        an arbitrary precision float type such a series of steps can
+        be guaranteed to reach 1.0 exactly.  Alternatively, one might
+        wish to use a rational type so that events can be guaranteed
+        to happen a certain number of times in a given interval, even
+        if the ratio cannot be expressed as an even decimal or binary
+        fraction.
+                
+        time_type determines how the user can specify times. For
+        instance, if the user specifies a time as 0.05 (a float), this
+        will be represented in floating point as something like
+        0.050000000000000003. gmpy.mpq will correctly convert that to
+        mpq(1,20). Other types might require times to be specified as
+        strings (e.g. decimal.Decimal('0.05') in Python 2.6); in this
+        case the user would need to use a string whenever specifying a
+        time (e.g. a connection delay or a call to run() ). Some other
+        types will only produce the expected result if they are first
+        configured appropriately (e.g. decimal.Decimal(0.05) in Python
+        2.7 will give something like
+        Decimal('0.05000000000000000277555756156289135105907917022705078125')
+        by default, but this can be controlled by using an appropriate
+        decimal.Context).
+
         Extra arguments can be passed to time_type when it is being used
         to create the Simulation's time: see time_type_args.
-        
+
+
         Some potentially useful number classes::
         
         - gmpy.mpq: gmpy provides Python with access to the fast GNU
@@ -783,13 +804,18 @@ class Simulation(param.Parameterized,OptionalSingleton):
         - fixedpoint.FixedPoint: pure Python fixed-point number, but
           quite slow.
         
-        - Python's Decimal class: in the standard library, but also quite
-          slow.""")
+        - Python's decimal.Decimal and fractions.Fraction classes.
+        """)
 
+    # CEBALERT: probably should remove this and allow people to deal
+    # with functions requiring arguments
+    # (e.g. fixedpoint.FixedPoint(time,precision=4)) by currying or
+    # creating their own wrapper function. We wouldn't then need
+    # _convert_to_time_type(), it would instead just be a call to
+    # time_type() (which should also be renamed).
     time_type_args = param.Parameter(default=(),constant=True,doc="""
-        Tuple of arguments to give to time_type whenever a new
-        instance of the time_type is being created (e.g. when a
-        Simulation is created).""")
+        Tuple of arguments passed to time_type after the first
+        argument (which is the time).""")
 
     register = param.Boolean(default=True,constant=True,doc="""
         Whether or not to register this Simulation. If True, this
@@ -826,7 +852,6 @@ class Simulation(param.Parameterized,OptionalSingleton):
         """)
     
     eps_to_start = []
-
 
     name = param.Parameter(constant=False)
 
@@ -919,26 +944,19 @@ class Simulation(param.Parameterized,OptionalSingleton):
                 # name x...)
                 
                 
-
-    def _set_time(self,time=0):
+    # CEBALERT: if we're keeping this, should have a better name,
+    # and probably shouldn't be private.
+    def _convert_to_time_type(self,time):
         """
-        Set this Simulation's _time to time, using the type specified
-        by the time_type parameter.
+        Convert the supplied time to the Simulation's time_type.
         """
         # pylint: disable-msg=W0201
         if self.time_type_args:
-            self._time = self.time_type(time,*self.time_type_args)
+            newtime = self.time_type(time,*self.time_type_args)
         else:
-            self._time = self.time_type(time)
+            newtime = self.time_type(time)
+        return newtime
 
-    @as_uninitialized
-    def set_time_type(self,time_type,*time_type_args):
-        """
-        Convenience method to allow time_type to be changed easily.
-        """
-        self.time_type = time_type
-        self.time_type_args = time_type_args
-        self._set_time(time=self._time)
 
     # Note that __init__ can still be called after the
     # Simulation(register=True) instance has been created. E.g. with
@@ -954,9 +972,10 @@ class Simulation(param.Parameterized,OptionalSingleton):
         """
         Initialize a Simulation instance.
         """
+        self._time = self._convert_to_time_type(0)
+
         param.Parameterized.__init__(self,**params)
 
-        self._set_time()
 
         self._event_processors = {}
 
@@ -1075,7 +1094,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
     def time(self):
         """
-        Return the current simulation time as a FixedPoint object.
+        Return the current simulation time.
         
         If the time returned will be used in the computation of a
         floating point variable, it should be cast into a floating
@@ -1091,6 +1110,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         users to control how much precision, etc. is used for time
         displays.
         """
+        # CEBALERT: I doubt this gets all attributes. Does it get
+        # properties (not that there are any right now)?
         all_vars = dict(self.get_param_values())
         all_vars.update(self.__dict__)
         if specified_time is not None:
@@ -1156,8 +1177,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # string to specify the time rather than a float (since float
         # is not compatible with all number types).
         
-        duration = self.time_type(duration,*self.time_type_args)
-        until = self.time_type(until,*self.time_type_args)
+        duration = self._convert_to_time_type(duration)
+        until = self._convert_to_time_type(until)
         
         
         # CEBHACKALERT: If I do topo.sim.run(10), then topo.sim.run(until=3),
@@ -1240,7 +1261,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         override this method as they wish, e.g. to wait for an
         external real time clock to advance first.
         """
-        self._time += delay
+        self._time += self._convert_to_time_type(delay)
 
     def enqueue_event(self,event):
         """
@@ -1271,7 +1292,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         The command should be a string.
         """
-        event = CommandEvent(time=time,command_string=command_string)
+        event = CommandEvent(time=self._convert_to_time_type(time),command_string=command_string)
         self.enqueue_event(event)
         
 
