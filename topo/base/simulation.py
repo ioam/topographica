@@ -994,7 +994,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         self.eps_to_start = []
         self.item_scale=1.0 # this variable determines the size of each item in a diagram
             
-        # CB: make this a parameter for documentation? Otherwise nobody will know
+        # CB (this comment applies to SomeTimer!): make this a
+        # parameter for documentation? Otherwise nobody will know
         # about being able to adjust step.
         #
         # we set step to 2 so that by default timing doesn't slow simulation too much. but
