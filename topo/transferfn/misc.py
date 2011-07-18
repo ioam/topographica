@@ -211,7 +211,9 @@ class HomeostaticResponse(TransferFnWithState):
         x -= self.t
         clip_lower(x,0)
         x *= self.linear_slope
-        
+
+        # CEBALERT: this line is at best confusing; needs to be
+        # commented or simplified!
         if self.plastic & (float(topo.sim.time()) % 1.0 >= 0.54):
             self.y_avg = (1.0-self.smoothing)*x + self.smoothing*self.y_avg 
             self.t += self.learning_rate * (self.y_avg - self.target_activity)
