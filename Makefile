@@ -16,8 +16,7 @@ IMPORT_WEAVE = 1
 # (must match across platforms & for optimized vs unoptimized)
 TESTDP = 7
 
-# see topographica-other-python target
-OTHER_PYTHON = /usr/bin/env python
+PYTHON = ${PREFIX}/bin/python
 
 SVNVERSION = ${shell svnversion}
 
@@ -157,11 +156,11 @@ clean-ext-packages:
 topographica: external Makefile topo/*/*.py examples/*.ty
 # site.USER_SITE is ignored to stop Python finding packages in
 # ~/.local instead of Topographica's own packages.
-	${PREFIX}/bin/python ${PREFIX}/create_topographica_script.py ${PREFIX}bin/python ${RELEASE} ${SVNVERSION} 0
+	${PYTHON} ${PREFIX}/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 0
 
 
-topographica-other-python:
-	${OTHER_PYTHON} ${PREFIX}/create_topographica_script.py "${OTHER_PYTHON}" ${RELEASE} ${SVNVERSION} 1
+topographica-external-python:
+	${PYTHON} ${PREFIX}/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
 
 
 # CB: experimental
@@ -445,7 +444,7 @@ ChangeLog.txt: FORCE
 
 dist-setup.py: doc distdir reference-manual
 # clean dir but keep setup.py-related files
-	${CD} ${DIST_DIR}; ${PREFIX}/bin/python create_topographica_script.py None ${RELEASE} ${SVNVERSION} 1
+	${CD} ${DIST_DIR}; ${PYTHON} create_topographica_script.py None ${RELEASE} ${SVNVERSION} 1
 	${CD} ${DIST_DIR}; ${MV} README.setup.txt README.txt
 	${CD} ${DIST_DIR}; ${MV} setup.py TMPsetup.py; mv MANIFEST.in tmpMANIFEST.in; mv topographica TMPtopographica; mv topographica.ico TMPtopographica.ico; mv windows_postinstall.py TMPwindows_postinstall.py
 	${CD} ${DIST_DIR}; make distclean
@@ -470,14 +469,14 @@ BDIST_WIN_CMD = bdist_wininst
 BDIST_WININST = ${BDIST_WIN_CMD} --install-script windows_postinstall.py --plat-name=win
 
 dist-setup.py-sdist: 
-	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py sdist
+	${CD} ${DIST_DIR}; ${PYTHON} setup.py sdist
 
 # generate windows exe (like the exe you get for numpy or matplotlib)
 dist-setup.py-bdist_wininst: 
-	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py ${BDIST_WININST}
+	${CD} ${DIST_DIR}; ${PYTHON} setup.py ${BDIST_WININST}
 
 dist-pypi-upload:
-	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py register sdist ${BDIST_WININST} upload
+	${CD} ${DIST_DIR}; ${PYTHON} setup.py register sdist ${BDIST_WININST} upload
 
 # CEBALERT: I seem to need these for this 'if' section to be seen by
 # make - is that right?
@@ -505,7 +504,7 @@ endif
 # Or, remove --spec-only to build rpm on your system (but make sure
 # you have python 2.6...I don't).
 rpm:
-	${CD} ${DIST_DIR}; ${PREFIX}/bin/python setup.py bdist_rpm --release=${RPM_RELEASE} --requires "python,python-devel,tkinter,numpy,scipy,python-imaging-tk,python-matplotlib,python-matplotlib-tk,ipython" --group="Productivity/Scientific/Other"  --spec-only
+	${CD} ${DIST_DIR}; ${PYTHON} setup.py bdist_rpm --release=${RPM_RELEASE} --requires "python,python-devel,tkinter,numpy,scipy,python-imaging-tk,python-matplotlib,python-matplotlib-tk,ipython" --group="Productivity/Scientific/Other"  --spec-only
 
 # CEBALERTs about RPM: (1) can't seem to specify python 2.6! so only
 # works where python 2.6 (or 2.5) is the default on a system. (2)

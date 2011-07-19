@@ -63,12 +63,10 @@ least <A HREF="http://www.python.org/download/releases/2.6.5/">Python</A>,
 <P>Once you have installed those on your system, you can create a <code>topographica</code>
 script that uses your copy of Python:
 
-<blockquote><code>make topographica-other-python</code></blockquote>
+<blockquote><code>make PYTHON="/usr/bin/env python2.6" topographica-external-python</code></blockquote>
 
-(If the copy of Python you want to use is not the one specified as
-<code>/usr/bin/env python</code>, you can pass
-<code>OTHER_PYTHON=/path/to/python</code> between 
-<code>make</code> and <code>topographica-other-python</code> above.) 
+(where <code>PYTHON="/usr/bin/env python2.6"</code> shoud be adapted to the
+location of your copy of Python if necessary).
 
 <P>Note that you should not run setup.py, since that would install
 Topographica into your system's Python directory, whereas we want to
