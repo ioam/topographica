@@ -144,32 +144,15 @@ class AudioFolder(AudioFile):
 
 
 
-def convert_to_decibels(amplitudes):
-    amplitudes[amplitudes==0] = 1.0
-    return 20.0 * log10(abs(amplitudes))
-
-
-        
-class DecibelSpectrogram(Spectrogram):
-    """
-    Extends Spectrogram to provide a response in decibels over a base 10 logarithmic scale.
-    """
-        
-    def _set_frequency_spacing(self, min_freq, max_freq):
-        self.frequency_spacing = logspace(log10(min_freq+1), log10(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=10)
-        
-
-    def _shape_response(self, new_column):
-        new_column_in_db = convert_to_decibels(new_column)
-        return super(DecibelSpectrogram, self)._shape_response(new_column_in_db)
-
-
-
-class CochlearSpectrogram(Spectrogram):
+class LogSpectrogram(Spectrogram):
     """
     Extends Spectrogram to provide a response over an octave scale.
     """
 
+    log_base = param.Integer(default=2, bounds=(0.0,None),
+        doc="""The base of the logarithm used to generate logarithmic frequency spacing.""")
+        
+        
     def _get_row_amplitudes(self):
         signal_interval = self.signal()
         sample_rate = self.signal.sample_rate        
@@ -198,56 +181,63 @@ class CochlearSpectrogram(Spectrogram):
         
     
     def _set_frequency_spacing(self, min_freq, max_freq):
-        self.frequency_spacing = logspace(log2(min_freq+1), log2(max_freq), num=self._sheet_dimensions[0]+1, endpoint=True, base=2)
+        min_frequency = log10(min_freq+1) / log10(self.log_base)
+        max_frequency = log10(max_freq) / log10(self.log_base)
+        
+        self.frequency_spacing = logspace(min_frequency, max_frequency, 
+            num=self._sheet_dimensions[0]+1, endpoint=True, base=self.log_base)
 
 
 
-class CochlearSpectrogramWithAmplification(CochlearSpectrogram):
+class ModulatedLogSpectrogram(LogSpectrogram):
     """
     Extends OctaveSpectrogram with a simple model of outer ear amplification. 
     One can set both the range to amplify and the amount.
     """
         
-    amplify_from_frequency=param.Number(default=1000.0, bounds=(0.0,None),
-        doc="""The lower bound of the frequency range to be amplified.""")
+    lower_freq_bound = param.Number(default=1000.0, bounds=(0.0,None),
+        doc="""The lower bound of the frequency range to be modulated.""")
 
-    amplify_till_frequency=param.Number(default=7000.0, bounds=(0.0,None),
-        doc="""The upper bound of the frequency range to be amplified.""")
+    upper_freq_bound = param.Number(default=7000.0, bounds=(0.0,None),
+        doc="""The upper bound of the frequency range to be modulated.""")
     
-    amplify_by_percentage=param.Number(default=15.0, bounds=(0.0,None),
-        doc="""The percentage by which to amplify the signal between the 
-        specified frequency range.""")
+    modulation_function = param.Parameter(default=hanning,
+        doc="""The function by which to modulate the signal between the 
+        specified frequency range.
+        
+        The default (hanning) multiplies a section of the signal by a 
+        hanning window.""")
         
         
     def __init__(self, **params):
-        super(CochlearSpectrogramWithAmplification, self).__init__(**params)
+        super(ModulatedLogSpectrogram, self).__init__(**params)
             
-        if self.amplify_from_frequency > self.amplify_till_frequency:
-            raise ValueError("Amplify from frequency must be less than its amplify till frequency.")
+        if self.lower_freq_bound > self.upper_freq_bound:
+            raise ValueError("Modulation frequency lower bound must be less than the upper bound.")
         
 
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
-        super(CochlearSpectrogramWithAmplification, self).set_matrix_dimensions(bounds, xdensity, ydensity)
+        super(ModulatedLogSpectrogram, self).set_matrix_dimensions(bounds, xdensity, ydensity)
 
-        self._amplify_start_index = nonzero(self.frequency_spacing >= self.amplify_from_frequency)[0][0]
-        self._amplify_end_index = nonzero(self.frequency_spacing >= self.amplify_till_frequency)[0][0]
+        self._modulation_start_index = nonzero(self.frequency_spacing >= self.lower_freq_bound)[0][0]
+        self._modulation_end_index = nonzero(self.frequency_spacing >= self.upper_freq_bound)[0][0]
         
-        self._amplifications = (hanning(self._amplify_end_index-self._amplify_start_index) * (self.amplify_by_percentage/100.0)) + 1.0
-        self._amplifications = reshape(self._amplifications, [-1,1])
+        self._modulation = self.modulation_function(self._modulation_end_index-self._modulation_start_index)
+        self._modulation = reshape(self._modulation, [-1,1])
 
 
     def _shape_response(self, new_column):
         if self.amplify_by_percentage > 0:
-            if (self.amplify_from_frequency < self.min_frequency) or (self.amplify_from_frequency > self.max_frequency):
+            if (self.lower_freq_bound < self.min_frequency) or (self.lower_freq_bound > self.max_frequency):
                 raise ValueError("Lower bound of frequency to amplify is outside the global frequency range.")
  
-            elif (self.amplify_till_frequency < self.min_frequency) or (self.amplify_till_frequency > self.max_frequency):
+            elif (self.upper_freq_bound < self.min_frequency) or (self.upper_freq_bound > self.max_frequency):
                 raise ValueError("Upper bound of frequency to amplify is outside the global frequency range.")
             
             else:
-                new_column[self._amplify_start_index:self._amplify_end_index] *= self._amplifications
+                new_column[self._modulation_start_index:self._modulation_end_index] *= self._modulation
 
-        return super(CochlearSpectrogramWithAmplification, self)._shape_response(new_column)
+        return super(ModulatedLogSpectrogram, self)._shape_response(new_column)
         
 
 
