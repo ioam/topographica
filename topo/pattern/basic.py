@@ -28,6 +28,7 @@ from topo.misc.patternfn import gaussian,exponential,gabor,line,disk,ring,\
     log_gaussian
 
 from topo import numbergen
+from topo.transferfn import DivisiveNormalizeL1
 
 
 # Could add a Gradient class, where the brightness varies as a
@@ -905,11 +906,11 @@ class DifferenceOfGaussians(PatternGenerator):
     def function(self, p):
         positive = Gaussian(x=p.positive_x+p.x, y=p.positive_y+p.y,
             size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio,
-            orientation=p.orientation)
+            orientation=p.orientation, output_fns=[DivisiveNormalizeL1()])
                                     
         negative = Gaussian(x=p.negative_x+p.x, y=p.negative_y+p.y,
             size=p.negative_size*p.size, aspect_ratio=p.negative_aspect_ratio,
-            orientation=p.orientation)
+            orientation=p.orientation, output_fns=[DivisiveNormalizeL1()])
         
         return Composite(generators=[positive,negative], operator=numpy.subtract,
             xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)()
@@ -1110,11 +1111,13 @@ class SigmoidedDoLG(PatternGenerator):
 
     def function(self, p):
         positive = LogGaussian(size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio, x_shape=p.positive_x_shape, 
-            y_shape=p.positive_y_shape, scale=p.positive_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y)
+            y_shape=p.positive_y_shape, scale=p.positive_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y,
+            output_fns=[DivisiveNormalizeL1()])
         
         negative = LogGaussian(size=p.negative_size*p.size, aspect_ratio=p.negative_aspect_ratio, x_shape=p.negative_x_shape, 
-            y_shape=p.negative_y_shape, scale=p.negative_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y)
-                          
+            y_shape=p.negative_y_shape, scale=p.negative_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y,
+            output_fns=[DivisiveNormalizeL1()])
+
         diff_of_log_gaussians = Composite(generators=[positive, negative], operator=subtract, 
             xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)
         
