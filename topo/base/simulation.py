@@ -1445,6 +1445,11 @@ class Simulation(param.Parameterized,OptionalSingleton):
                                cmp=lambda x, y: cmp(x.command_string,y.command_string)),
                         cmp=lambda x, y: cmp(x.time,y.time))]
 
+        # CEBALERT: hack to support importing the time type since the
+        # scheduled actions will have times printed using the
+        # time_type.
+        imports.append("from %s import %s"%(self.time_type.__module__,self.time_type.__name__))
+
         imps  = sorted(set(imports))
 
         vals  = [simulation_path + "." + p + "=" + repr(getattr(self,p)) for p in
