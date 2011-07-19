@@ -995,7 +995,7 @@ class measure_frequency_preference(MeasureResponseCommand):
         return [Feature(name="frequency", range=(min_freq,max_freq), step=1)]
 
 
-pg= create_plotgroup(name='Frequency Preference and Selectivity', category="Preference Maps",
+pg= create_plotgroup(name='Frequency Preference and Selectivity', category="Auditory Preference Maps",
     pre_plot_hooks=[measure_frequency_preference.instance()], normalize='Individually',
     doc='Measure a best frequency preference and selectivity map for auditory neurons.')
 
@@ -1078,7 +1078,7 @@ class measure_latency_preference(MeasureResponseCommand):
         return [Feature(name="latency", range=(min_lat,max_lat), step=1)]
 
 
-pg= create_plotgroup(name='Latency Preference and Selectivity', category="Preference Maps",
+pg= create_plotgroup(name='Latency Preference and Selectivity', category="Auditory Preference Maps",
     pre_plot_hooks=[measure_latency_preference.instance()], normalize='Individually',
     doc='Measure a best onset latency preference and selectivity map for auditory neurons.')
 
