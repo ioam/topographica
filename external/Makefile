@@ -49,47 +49,47 @@ uninstall: python-uninstall jpeg-uninstall pil-uninstall numpy-uninstall tk-unin
 ##############################################################
 # Python (interpreted language)
 #
-PYTHON = Python-2.6.4
+PYTHON2 = Python-2.6.4
 
-PYTHON_LIB  = lib/python2.6
-PYTHON_INC  = include/python2.6
-PYTHON_CONF = lib/python2.6/config
+PYTHON2_LIB  = lib/python2.6
+PYTHON2_INC  = include/python2.6
+PYTHON2_CONF = lib/python2.6/config
 
-PYTHON_UNINSTALL += bin/idle bin/python bin/pydoc bin/python2.6
-PYTHON_UNINSTALL += ${PYTHON_LIB} man/man1/python.1 include/python2.6
+PYTHON2_UNINSTALL += bin/idle bin/python bin/pydoc bin/python2.6
+PYTHON2_UNINSTALL += ${PYTHON2_LIB} man/man1/python.1 include/python2.6
 
 
 # LDFLAGS sets ${PREFIX}/lib as the LD_LIBRARY in the binary
 # CB: rpath is ignored on OS X (so where are the library files taken from?). 
-python: ${PYTHON}.tgz tk readline zlib
+python: ${PYTHON2}.tgz tk readline zlib
 	echo ${PREFIX}
-	tar -xzf ${PYTHON}.tgz
+	tar -xzf ${PYTHON2}.tgz
 
 # Configure for specific operating system versions
 ifeq ("$(shell uname -s)","Darwin")
 ifeq ("$(shell uname -r | cut -d . -f 1)","9") # Darwin 9.x == Mac OS X 10.5 (Leopard)
 	patch -p0 < Python_OSX_tk.diff # build python with tcl/tk from /Library/Frameworks
-	cd ${PYTHON}; ./configure --prefix=${PREFIX} MACOSX_DEPLOYMENT_TARGET=10.5
+	cd ${PYTHON2}; ./configure --prefix=${PREFIX} MACOSX_DEPLOYMENT_TARGET=10.5
 else
 ifeq ("$(shell uname -r | cut -d . -f 1)","10") # Darwin 10.x == Mac OS X 10.6 (Snow Leopard)
-	cd ${PYTHON}; ./configure --prefix=${PREFIX} MACOSX_DEPLOYMENT_TARGET=10.6 
+	cd ${PYTHON2}; ./configure --prefix=${PREFIX} MACOSX_DEPLOYMENT_TARGET=10.6 
 else # Darwin pre 9
 	patch -p0 < Python_OSX_tk.diff # build python with tcl/tk from /Library/Frameworks
-	cd ${PYTHON}; ./configure --prefix=${PREFIX}
+	cd ${PYTHON2}; ./configure --prefix=${PREFIX}
 endif
 endif
 else # linux
-	cd ${PYTHON}; ./configure --prefix=${PREFIX} LDFLAGS=-Wl,-rpath,${PREFIX}/lib
+	cd ${PYTHON2}; ./configure --prefix=${PREFIX} LDFLAGS=-Wl,-rpath,${PREFIX}/lib
 endif
-	cd ${PYTHON}; env PREFIX=${PREFIX} make EXTRA_CFLAGS=-I${PREFIX}/include
-	cd ${PYTHON}; env PREFIX=${PREFIX} make install
+	cd ${PYTHON2}; env PREFIX=${PREFIX} make EXTRA_CFLAGS=-I${PREFIX}/include
+	cd ${PYTHON2}; env PREFIX=${PREFIX} make install
 	touch python
 
 python-clean:
-	rm -rf ${PYTHON} Python-2.4*/ Python-2.5*/
+	rm -rf ${PYTHON2} Python-2.4*/ Python-2.5*/
 
 python-uninstall:
-	rm -rf python ${foreach f,${PYTHON_UNINSTALL}, ${PREFIX}/${f}} Python-2.4*/ Python-2.5*/
+	rm -rf python ${foreach f,${PYTHON2_UNINSTALL}, ${PREFIX}/${f}} Python-2.4*/ Python-2.5*/
 
 ##############################################################
 # Tcl (required by Tk GUI toolkit)
