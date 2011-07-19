@@ -1,21 +1,14 @@
+[topographica-unstable-force-natty]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~ceball/ppa/ubuntu/natty
+login = anonymous
+allow_unsigned_uploads = 0
+
 [topographica-unstable-force-lucid]
 fqdn = ppa.launchpad.net
 method = ftp
 incoming = ~ceball/ppa/ubuntu/lucid
-login = anonymous
-allow_unsigned_uploads = 0
-
-[topographica-unstable-force-karmic]
-fqdn = ppa.launchpad.net
-method = ftp
-incoming = ~ceball/ppa/ubuntu/karmic
-login = anonymous
-allow_unsigned_uploads = 0
-
-[topographica-unstable-force-jaunty]
-fqdn = ppa.launchpad.net
-method = ftp
-incoming = ~ceball/ppa/ubuntu/jaunty
 login = anonymous
 allow_unsigned_uploads = 0
 
@@ -26,25 +19,17 @@ incoming = ~ceball/ppa/ubuntu/hardy
 login = anonymous
 allow_unsigned_uploads = 0
 
+[topographica-force-natty]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~topographica-developers/topographica/ubuntu/natty
+login = anonymous
+allow_unsigned_uploads = 0
 
 [topographica-force-lucid]
 fqdn = ppa.launchpad.net
 method = ftp
 incoming = ~topographica-developers/topographica/ubuntu/lucid
-login = anonymous
-allow_unsigned_uploads = 0
-
-[topographica-force-karmic]
-fqdn = ppa.launchpad.net
-method = ftp
-incoming = ~topographica-developers/topographica/ubuntu/karmic
-login = anonymous
-allow_unsigned_uploads = 0
-
-[topographica-force-jaunty]
-fqdn = ppa.launchpad.net
-method = ftp
-incoming = ~topographica-developers/topographica/ubuntu/jaunty
 login = anonymous
 allow_unsigned_uploads = 0
 
