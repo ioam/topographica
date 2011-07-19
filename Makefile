@@ -546,8 +546,8 @@ rpm:
 
 UBUNTU_ENV = env DEBFULLNAME='C. E. Ball' DEBEMAIL='ceball@gmail.com' GPGKEY=4275E3C7
 DEBUILD = ${UBUNTU_ENV} debuild
-UBUNTU_TARGET = lucid
-UBUNTU_BACKPORTS = karmic^ jaunty^ hardy^ 
+UBUNTU_TARGET = natty
+UBUNTU_BACKPORTS = lucid^ hardy^ 
 
 UBUNTU_DIR = ${DIST_TMPDIR}/topographica-${UBUNTU_RELEASE}
 UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
@@ -565,7 +565,7 @@ deb: dist-setup.py
 	echo " -- C. E. Ball <ceball@gmail.com>  ${shell date -R}" >> ${UBUNTU_CHANGELOG}
 	cd ${UBUNTU_DIR}; ${DEBUILD} 
 	cd ${UBUNTU_DIR}; ${DEBUILD} -S -sa
-# CEBALERT: should put this line in to test the build
+# CB: could put this line in to test the build locally
 # sudo pbuilder build topographica_${UBUNTU_RELEASE}~${UBUNTU_TARGET}.dsc 
 
 # You must first have run 'make deb'
