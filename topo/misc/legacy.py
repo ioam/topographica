@@ -159,9 +159,23 @@ def param_add_pickle_default_value():
 support[11321] = param_add_pickle_default_value
 
 
+######################################################################
 # CEB: deliberately no support for audio-related changes, since
 # audio-related code is changing fast and isn't in general
 # use. Support could be added if necessary.
+
+def pattern_basic_rectangular_removed():
+    # 11558 pattern.basic.rectangular() was removed
+    # CB: I'm assuming nobody cares about this, but if
+    # they do, replace the lambda with 11557's rectangular()
+    def rectangular(*args,**kw): raise NotImplementedError
+    import topo.pattern.basic as B
+    B.rectangular = rectangular
+
+support[11558] = pattern_basic_rectangular_removed
+
+######################################################################
+
 
 
 # CEBALERT: not sure whether to keep the "-l" option to Topographica.
