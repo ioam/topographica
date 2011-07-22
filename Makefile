@@ -194,7 +194,7 @@ print-info:
 
 # for people who can't stop typing "make tests"
 tests:
-	./topographica -p 'targets=["unit"]' runtests.py
+	./topographica -p 'targets=["unit"]' topo/tests/runtests.py
 
 
 
@@ -224,10 +224,10 @@ ifeq ("${COVERAGE}","1")
 endif
 
 train-tests: print-info
-	${COVERAGE_CMD} ./topographica -p 'targets=["traintests"]' runtests.py
+	${COVERAGE_CMD} ./topographica -p 'targets=["traintests"]' topo/tests/runtests.py
 
 unopt-train-tests: print-info
-	${COVERAGE_CMD} ./topographica -p 'extra_args="-c import_weave=False"' -p 'targets=["traintests"]' runtests.py
+	${COVERAGE_CMD} ./topographica -p 'extra_args="-c import_weave=False"' -p 'targets=["traintests"]' topo/tests/runtests.py
 
 
 # General rules for generating test data and running the tests
