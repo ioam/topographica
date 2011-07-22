@@ -82,7 +82,8 @@ topographica_script = xvfb + " " + sys.argv[0] + " " + p.extra_args
 
 def _runc(cmd):
     print cmd
-    os.system(cmd)
+    return os.system(cmd)
+    
 
 import topo.misc.keyedlist
 target = topo.misc.keyedlist.KeyedList()
@@ -173,10 +174,24 @@ target['maptests'].append(topographica_script + ' -c "cortex_density=8" %s -c "t
 
 
 def start():
+    exitstatus=0
     for name in (p.targets or target.keys()):
         print "*** " + name
         for cmd in target[name]:
-            _runc(cmd)
+            if _runc(cmd) > 0:
+                exitstatus+=1
+
+    print
+    print "="*60
+    print
+    print "runtests.start(): targets with errors: %s"%exitstatus
+    print
+    if exitstatus>0:
+        sys.exit(1)
+    else:
+        sys.exit(0)
+
+    
 
 if __name__=="__main__":
     start()
