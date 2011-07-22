@@ -20,7 +20,6 @@ import glob
 import os
 import sys
 import tempfile
-import shutil
 import commands
 
 import param
@@ -125,7 +124,9 @@ target['snapshots'].append(topographica_script + " -c 'from topo.tests.test_scri
 target['snapshots'].append(topographica_script + " -c 'from topo.tests.test_script import compare_with_and_without_snapshot_CreateSnapshot as B; B()'")
 
 target['snapshots'].append(topographica_script + " -c 'from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C()'")
-target['snapshots'].append('shutil.rmtree(os.path.join(scripts_dir,"lissom_oo_or.ty_PICKLETEST*"))')
+
+# CEBALERT: remove ~/topographica/*PICKLETEST* ?
+
 
 target['pickle'] = []
 # pickle-all-classes:
