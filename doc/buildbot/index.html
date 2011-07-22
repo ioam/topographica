@@ -8,71 +8,70 @@
 <body>
 <h1>Topographica: automatic tests and builds</h1>
 
-<P>
-These tests and builds are run automatically. You can use the test
-results to see the status of the latest version of Topographica on
-your platform. The automatic builds allow you to get the latest
-versions of Topographica without using SVN, but note that they have
-probably not been tested by a human. To download an official release
-of Topographica, please
-see <a href="http://topographica.org/Downloads">topographica.org/Downloads</a>.
 
-<p>
-<em><b>February 2011: not all builds are running at the moment because of faulty harware.</b></em>
-</p>
-
-<H2>Tests</H2>
 <ul>
+
 <li>
-Results of latest builds:&nbsp;&nbsp;
-<a href="one_box_per_builder?builder=x86_DICE_FC13&builder=x86_64_DICE_SL5">Linux</a>&nbsp;&nbsp;
-<a href="one_box_per_builder?builder=x86_SnowLeopard">Mac</a>&nbsp;&nbsp;
-<a href="one_box_per_builder?builder=x86_WinXP">Win</a>&nbsp;&nbsp;
-<a href="one_box_per_builder">All</a>
+Results of latest builds from source (includes tests):&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=x86_64_DICE_SL5">Linux</a>&nbsp;&nbsp;
 </li>
+
 <li>
-<a href="waterfall?show_events=False">All builds plus developers' changes</a>
+Results of latest setup.py tests:&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=x86_DICE_FC13_setup&builder=x86_64_UbuntuLucid_setup">Linux</a>&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=EPD7_rh5_x86_64">EPD on Linux</a>&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=EPD7_Win7_x86_64">EPD on Windows</a>&nbsp;&nbsp;
+EPD on Mac&nbsp;&nbsp;
 </li>
+
+<li>
+Coverage:&nbsp;&nbsp;&nbsp;
+[<a href="coverage/unittests/">unit tests</a>]&nbsp;&nbsp;&nbsp;
+[<a href="coverage/unittests_guitests/">unit tests + gui tests</a>]&nbsp;&nbsp;&nbsp;
+[<a href="coverage/unittests_guitests_slowtests_unopttests/">unit tests + gui tests + results tests</a>]
+</li>
+
 <li>
 Performance:&nbsp;&nbsp;
-<a href="p/running.html">running</a>&nbsp;&nbsp;
-<a href="p/lissom_oo_or_startup_svnversion.png">startup</a>
+running time&nbsp;&nbsp;
+startup
 </li>
+
+<li>
+<a href="waterfall?show_events=False">All builds, plus developers' changes</a>
+</li>
+
 </ul>
 
-<h2>Weekly builds</h2>
+<h2>Weekly distribution builds</h2>
 
 <P>Automatically produced from our SVN repository every week, these
 builds have passed our unit tests but have not been checked by a
-human.
+human. To download an official release of Topographica, please
+see <a href="http://topographica.org/Downloads">topographica.org/Downloads</a>.
+
 
 <ul>
-<li>DEB
-builds: <a href="https://launchpad.net/~ceball/+archive/ppa">Ubuntu
-PPA</a> 
-</li>
-
-<li>RPM builds: <a href="https://build.opensuse.org/project/show?project=home:ceball:topographica-unstable">OpenSUSE build service</a>
+<li>Linux <a href="https://launchpad.net/~ceball/+archive/ppa">DEBs</a> or 
+<a href="https://build.opensuse.org/project/show?project=home:ceball:topographica-unstable">RPMs</a>
 </li>
 
 <li>
-<a href="dist/setup.py/">source archives</a> (for "python setup.py
-install" into existing python environment)
-</li>
-
-<li>
-<a href="dist/exe/">windows exe</a> (for double click install into
+Windows <a href="dist/exe/">exe</a> or <a href="dist/msi/">msi</a> (for installation into
 existing python environment)
+</li>
+
+<li>
+Platform-independent <a href="dist/setup.py/">tar.gz</a> source archives (for "python setup.py
+install" into existing python environment)
 </li>
 
 <!--
 <li>
-<a href="dist/deb/">deb packages</a>
-</li>
-<li>
-<a href="dist/rpm/">rpm packages</a> 
+Complete <a href="dist/source/">tar.gz</a> source archives (for make from source)
 </li>
 -->
+
 </ul>
 
 <h2>Documentation</h2>
