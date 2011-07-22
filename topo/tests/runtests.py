@@ -21,6 +21,7 @@ import os
 import sys
 import tempfile
 import shutil
+import commands
 
 import param
 from topo.misc.commandline import global_params as p
@@ -136,7 +137,7 @@ target['pickle'].append(topographica_script + " -c 'from topo.tests.test_script 
 
 
 # CB: hack that this will always be created even when test not being run
-tmpd = tempfile.mkdtemp()
+tmpd = commands.getoutput("mktemp -d")
 #script-repr-tests:
 target['scriptrepr']=[]
 script = os.path.join(scripts_dir,"hierarchical.ty")
@@ -144,8 +145,7 @@ target['scriptrepr'].append(topographica_script + " %(script)s -a -c \"import pa
 
 script_repr_test_path = os.path.join(tmpd,"script_repr_test.ty")    
 target['scriptrepr'].append(topographica_script + " " + script_repr_test_path)
-shutil.rmtree(tmpd)
-
+target['scriptrepr'].append(topographica_script + "-c \"import shutil;shutil.rmtree('%s')\""%tmpd)
 
 
 
