@@ -172,10 +172,12 @@ script = os.path.join(scripts_dir,"lissom_oo_or.ty")
 target['maptests'].append(topographica_script + ' -c "cortex_density=8" %s -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)"'%script)
 
 
-if __name__=="__main__":
-
+def start():
     for name in (p.targets or target.keys()):
         print "*** " + name
         for cmd in target[name]:
             _runc(cmd)
+
+if __name__=="__main__":
+    start()
 
