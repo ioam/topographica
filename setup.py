@@ -45,6 +45,7 @@ if 'bdist_wininst' in sys.argv:
     # CEBALERT: how else to get the ico into a place the postinstall script can find?!
     scripts.append("topographica.ico")
 
+from topo.tests.runtests import TRAINSCRIPTS
 
 _topographica_devs='Topographica Developers'
 _topographica_devs_email='developers[at]topographica[dot]org' 
@@ -164,7 +165,7 @@ performance.
                   'externaltk/tooltip-1.4/*.tcl'],
         'topo.tkgui': ['icons/*.*'],
         'topo.command':['*.png','*.pdf'],
-        'topo.tests':['*.txt','*.jpg','*.pgm']},
+        'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINTESTS]+['*.data']},
 
     data_files=[('share/topographica/examples',examples)],
 
