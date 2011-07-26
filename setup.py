@@ -165,7 +165,7 @@ performance.
                   'externaltk/tooltip-1.4/*.tcl'],
         'topo.tkgui': ['icons/*.*'],
         'topo.command':['*.png','*.pdf'],
-        'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINTESTS]+['*.data']},
+        'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINSCRIPTS]+['*.data']},
 
     data_files=[('share/topographica/examples',examples)],
 
