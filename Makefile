@@ -131,8 +131,11 @@ topographica: external Makefile topo/*/*.py examples/*.ty
 
 
 topographica-external-python:
+ifeq ("${PYTHON}","${PREFIX}/bin/python")
+	$(error "Must specify external Python (via PYTHON=/path/to/external/python)")
+else
 	${PYTHON} ${PREFIX}/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
-
+endif
 
 # CB: experimental
 topographicagui: 
