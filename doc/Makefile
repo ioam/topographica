@@ -16,6 +16,7 @@ M4BASE = ${wildcard */*_text.php.m4}
 PHPBASE = ${wildcard */*_text.php} ${subst .php.m4,.php,${M4BASE}}
 PHPHTML = ${subst _text.php,.html,${PHPBASE}}
 
+EPYDOC = bin/epydoc
 
 # General rule based only on target filename and location
 
@@ -46,7 +47,7 @@ Home/index.html: Home/news_text.php
 reference-manual: Reference_Manual/toc.html
 Reference_Manual/toc.html: ../topo/*.py ../topo/*/*.py ../param/*.py Reference_Manual/index_text.php
 	-mv ../topo/tests ../topo-tests-tmp
-	cd .. ; bin/epydoc --graph=classtree --inheritance=listed --docformat=ReStructuredText --show-sourcecode --html -o doc/Reference_Manual --name=Topographica --url=http://topographica.org topo param
+	cd .. ; ${EPYDOC} --graph=classtree --inheritance=listed --docformat=ReStructuredText --show-sourcecode --html -o doc/Reference_Manual --name=Topographica --url=http://topographica.org topo param
 	mv ../topo-tests-tmp ../topo/tests 
 # CEBALERT: shoud topo.html be topographica.html or maybe hierarchy.html?
 	mv Reference_Manual/index.html Reference_Manual/topo.html
