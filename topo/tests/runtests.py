@@ -76,7 +76,7 @@ elif p.targets == ['all']:
 TESTDP = 7
 tests_dir = param.resolve_path("topo/tests",path_to_file=False)
 scripts_dir = param.resolve_path("examples",path_to_file=False) ### XXX
-topographica_script = xvfb + " " + sys.argv[0] + " " + p.extra_args
+topographica_script = xvfb + " " + coverage_cmd + " " + sys.argv[0] + " " + p.extra_args
 
 
 
