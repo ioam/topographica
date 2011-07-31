@@ -176,6 +176,8 @@ target['maptests'].append(topographica_script + ' -c "cortex_density=8" %s -c "t
 
 def start():
     exitstatus=0
+    print "Running: %s"%p.targets
+    print
     for name in (p.targets or target.keys()):
         print "*** " + name
         for cmd in target[name]:
