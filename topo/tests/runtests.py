@@ -88,17 +88,8 @@ def _runc(cmd):
 import topo.misc.keyedlist
 target = topo.misc.keyedlist.KeyedList()
 
+from _setup import TRAINSCRIPTS
 
-TRAINSCRIPTS = [
-    "hierarchical.ty",
-    "lissom_or.ty",
-    "lissom_oo_or.ty",
-    "som_retinotopy.ty",
-    "sullivan_neurocomputing04.ty",
-    "lissom.ty",
-    "lissom_fsa.ty",
-    "gcal.ty"
-    ]
 
 target['traintests'] = []
 for script in TRAINSCRIPTS:
