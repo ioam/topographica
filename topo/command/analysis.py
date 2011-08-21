@@ -29,7 +29,7 @@ import Image,ImageDraw
 import copy
 
 from numpy.oldnumeric import array, maximum
-from numpy import where, pi, sin, cos, nonzero, max, round
+from numpy import where, pi, sin, cos, nonzero, max, round, linspace
 
 import param
 from param.parameterized import ParameterizedFunction
@@ -917,12 +917,12 @@ class PatternPresenter2(param.Parameterized):
 
 
 
-class frequencyMapper(PatternGenerator):
+class frequency_mapper(PatternGenerator):
     """Activates a generator sheet at the specified frequency (for all latencies).
     It does so by translating from a frequency to a y position and presenting a line
     at that y position (of the specified size)."""
-    __abstract = True
     
+    __abstract = True
             
     size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
         doc="Thickness (width) of the frequency band for every presentation.")
@@ -932,8 +932,9 @@ class frequencyMapper(PatternGenerator):
         (and hence map) a non linear spacing by specifying the frequency value at each
         sheet unit.""")
     
+    
     def __init__(self, **params):
-        super(frequencyMapper, self).__init__(**params) 
+        super(frequency_mapper, self).__init__(**params) 
         self.frequency_spacing = round(self.frequency_spacing)
 
             
@@ -984,18 +985,24 @@ class measure_frequency_preference(MeasureResponseCommand):
             assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
         
         divisions = float(input_sheets[0].ydensity)
-    
-        min_freq = input_sheets[0].input_generator.min_frequency
-        max_freq = input_sheets[0].input_generator.max_frequency
-        freq_spacing = input_sheets[0].input_generator.frequency_spacing
 
-        generator = frequencyMapper(size=1.0/divisions, frequency_spacing=freq_spacing)
+        try:
+            min_frequency = input_sheets[0].input_generator.min_frequency
+            max_frequency = input_sheets[0].input_generator.max_frequency
+            frequency_spacing = input_sheets[0].input_generator.frequency_spacing
+        except AttributeError:
+            min_frequency = 1
+            max_frequency = int(divisions) + 1
+            frequency_spacing = linspace(min_frequency, max_frequency, num=divisions+1, endpoint=True)
+            self.warning("Input generator is missing min_frequency, max_frequency, or frequency_spacing - will present linearly from", str(min_frequency), "to", str(max_frequency), "instead.")
+
+        generator = frequency_mapper(size=1.0/divisions, frequency_spacing=frequency_spacing)
         self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
         
-        return [Feature(name="frequency", range=(min_freq,max_freq), step=1)]
+        return [Feature(name="frequency", range=(min_frequency,max_frequency), step=1)]
 
 
-pg= create_plotgroup(name='Frequency Preference and Selectivity', category="Auditory Preference Maps",
+pg= create_plotgroup(name='Frequency Preference and Selectivity', category="Auditory",
     pre_plot_hooks=[measure_frequency_preference.instance()], normalize='Individually',
     doc='Measure a best frequency preference and selectivity map for auditory neurons.')
 
@@ -1004,19 +1011,106 @@ pg.add_plot('[Frequency Selectivity]', [('Strength','FrequencySelectivity')])
 
 
 
-class latencyMapper(PatternGenerator):
+class log_frequency_mapper(PatternGenerator):
+    """Activates a generator sheet at the specified frequency (for all latencies).
+        It does so by translating from a frequency to a y position and presenting a line
+        at that y position (of the specified size)."""
+
+    __abstract = True
+    
+    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
+        doc="Thickness (width) of the frequency band for every presentation.")
+    
+    frequency_spacing = param.Array(default=None,
+        doc="""The spacing of the available frequency range, this allows us to define
+            (and hence map) a non linear spacing by specifying the frequency value at each
+            sheet unit.""")
+    
+    
+    def __init__(self, **params):
+        super(log_frequency_mapper, self).__init__(**params) 
+        self.frequency_spacing = round(self.frequency_spacing)
+    
+    
+    def getFrequency(self):
+        sheet_min = (self.bounds.lbrt())[1]
+        index = (self.y - sheet_min) * (self.frequency_spacing.size - 1.0)
+        return self.frequency_spacing[index]
+    
+    
+    def setFrequencyBand(self, new_frequency_band):
+        sheet_min = (self.bounds.lbrt())[1]
+        y = sheet_min + (new_frequency_band / (self.frequency_spacing.size - 1.0))
+        setattr(self, 'y', y)
+    
+    
+    frequency = property(getFrequency, setFrequencyBand, "The log frequency band at which to present.")
+    
+    
+    def function(self, p):
+        return line(self.pattern_y, p.size, 0.001)
+        
+        
+        
+class measure_log_frequency_preference(MeasureResponseCommand):
+    """Measure a best frequency preference and selectivity map for auditory neurons."""
+    
+    display = param.Boolean(True) 
+    static_parameters = param.List(default=["scale", "offset"])        
+    
+    
+    def _feature_list(self,p):
+        input_sheets = topo.sim.objects(GeneratorSheet).values()
+        
+        # BK-NOTE: if anyone wants to generalise this method for heterogeneous sheets, by all means do so,
+        # for my personal use the additional code required to generalise was overkill.
+        for sheet in range(1, len(input_sheets)-1):
+            assert input_sheets[sheet].bounds == input_sheets[sheet-1].bounds
+            assert input_sheets[sheet].xdensity == input_sheets[sheet-1].xdensity
+            assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
+        
+        divisions = float(input_sheets[0].ydensity)
+        step = 1.0 / divisions
+        
+        try:
+            min_frequency = input_sheets[0].input_generator.min_frequency
+            max_frequency = input_sheets[0].input_generator.max_frequency
+            frequency_spacing = input_sheets[0].input_generator.frequency_spacing
+        except AttributeError:
+            min_frequency = 1
+            max_frequency = int(divisions) + 1
+            frequency_spacing = linspace(min_frequency, max_frequency, num=divisions+1, endpoint=True)
+            self.warning("Input generator is missing min_frequency, max_frequency, or frequency_spacing - will present linearly from", str(min_frequency), "to", str(max_frequency), "instead.")
+        
+        generator = log_frequency_mapper(size=1.0/divisions, frequency_spacing=frequency_spacing)
+        self.pattern_presenter = PatternPresenter2(pattern_generator=generator)        
+        
+        return [Feature(name="frequency", range=(0,divisions), step=1)]
+
+
+pg= create_plotgroup(name='Log Frequency Band Preference and Selectivity', category="Auditory",
+                     pre_plot_hooks=[measure_log_frequency_preference.instance()], normalize='Individually',
+                     doc='Measure a best frequency preference and selectivity map for auditory neurons (presents frequencies with logarithmically increasing bandwidth).')
+
+pg.add_plot('[Log Frequency Band Preference]', [('Strength','FrequencyPreference')])
+pg.add_plot('[Log Frequency Band Selectivity]', [('Strength','FrequencySelectivity')])
+
+
+
+class latency_mapper(PatternGenerator):
     """Activates a generator sheet at the specified latency (for all frequencies).
     It does so by translating from a latency to an x position and presenting a line
-    st theat x position (of the specified size)."""
+    at that x position (of the specified size)."""
+    
     __abstract = True
 
     size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
         doc="Thickness (width) of the latency band for every presentation.")
         
-    min_latency = param.Integer(default=1, bounds=(0,None), inclusive_bounds=(True,False),
+    min_latency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False),
         doc="""Smallest latency on the generator sheet.""")
 
-    max_latency = param.Integer(default=50, bounds=(0,None), inclusive_bounds=(False,False),
+    max_latency = param.Integer(default=100, bounds=(0,None), inclusive_bounds=(False,False),
         doc="""Largest latency on the generator sheet.""")
 
 
@@ -1068,17 +1162,22 @@ class measure_latency_preference(MeasureResponseCommand):
             assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
         
         divisions = float(input_sheets[0].xdensity)
-            
-        min_lat = input_sheets[0].input_generator.min_latency
-        max_lat = input_sheets[0].input_generator.max_latency
-        
-        generator = latencyMapper(size=1.0/divisions, min_latency=min_lat, max_latency=max_lat)
+
+        try:
+            min_latency = input_sheets[0].input_generator.min_latency
+            max_latency = input_sheets[0].input_generator.max_latency
+        except AttributeError:
+            min_latency = 0
+            max_latency = int(divisions)
+            self.warning("Input generator is missing min_latency or max_latency, setting to", str(min_latency), "&", str(max_latency),"respectively.")
+
+        generator = latency_mapper(size=1.0/divisions, min_latency=min_latency, max_latency=max_latency)
         self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
         
-        return [Feature(name="latency", range=(min_lat,max_lat), step=1)]
+        return [Feature(name="latency", range=(min_latency,max_latency), step=1)]
 
 
-pg= create_plotgroup(name='Latency Preference and Selectivity', category="Auditory Preference Maps",
+pg= create_plotgroup(name='Latency Preference and Selectivity', category="Auditory",
     pre_plot_hooks=[measure_latency_preference.instance()], normalize='Individually',
     doc='Measure a best onset latency preference and selectivity map for auditory neurons.')
 
