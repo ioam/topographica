@@ -1112,11 +1112,11 @@ class SigmoidedDoLG(PatternGenerator):
     def function(self, p):
         positive = LogGaussian(size=p.positive_size*p.size, aspect_ratio=p.positive_aspect_ratio, x_shape=p.positive_x_shape, 
             y_shape=p.positive_y_shape, scale=p.positive_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y,
-            output_fns=[DivisiveNormalizeL1()])
-        
+            output_fns=[])
+
         negative = LogGaussian(size=p.negative_size*p.size, aspect_ratio=p.negative_aspect_ratio, x_shape=p.negative_x_shape, 
             y_shape=p.negative_y_shape, scale=p.negative_scale*p.scale, orientation=p.orientation, x=p.x, y=p.y,
-            output_fns=[DivisiveNormalizeL1()])
+            output_fns=[])
 
         diff_of_log_gaussians = Composite(generators=[positive, negative], operator=subtract, 
             xdensity=p.xdensity, ydensity=p.ydensity, bounds=p.bounds)
@@ -1124,7 +1124,7 @@ class SigmoidedDoLG(PatternGenerator):
         sigmoid = Sigmoid(x=p.x+p.sigmoid_position, slope=p.sigmoid_slope, orientation=p.orientation+pi/2.0)
         
         return Composite(generators=[diff_of_log_gaussians, sigmoid], bounds=p.bounds,
-            operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity)()
+            operator=multiply, xdensity=p.xdensity, ydensity=p.ydensity, output_fns=[DivisiveNormalizeL1()])()
 
 
 
