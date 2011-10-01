@@ -16,6 +16,8 @@ important project to improve them.
 # CEBALERT: need to fix the issue with global_params reporting name=X
 # is unused.
 
+# CEBALERT: get /usr/bin/time in here if possible.
+
 import glob
 import os
 import sys
@@ -96,6 +98,20 @@ for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
     data_path = os.path.join(tests_dir,script+"_DATA")
     target['traintests'].append(topographica_script +  " -c 'from topo.tests.test_script import TestScript; TestScript(script=\"%(script_path)s\",data_filename=\"%(data_path)s\",decimal=6)'"%dict(script_path=script_path,data_path=data_path))
+
+target['speedtests'] = []
+for script in TRAINSCRIPTS:
+    script_path = os.path.join(scripts_dir,script)
+    target['speedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_speed_data;compare_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
+
+
+STARTUPSPEEDSCRIPTS = ["lissom.ty","gcal.ty"]
+
+target['startupspeedtests'] = []
+for script in STARTUPSPEEDSCRIPTS:
+    script_path = os.path.join(scripts_dir,script)
+    target['startupspeedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_startup_speed_data;compare_startup_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
+
 
 
 ##### snapshot-tests

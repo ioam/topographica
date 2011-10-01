@@ -274,7 +274,10 @@ oo_or_comparisons:
 ##### speed-tests
 
 speed-tests: ${SPEEDTESTS}
-startup-speed-tests: ${STARTUPSPEEDTESTS}
+	./topographica -p 'targets=["speedtests"]' topo/tests/runtests.py
+
+startup-speed-tests: 
+	./topographica -p 'targets=["startupspeedtests"]' topo/tests/runtests.py
 
 all-speed-tests: speed-tests startup-speed-tests
 
@@ -288,34 +291,9 @@ all-speed-tests: speed-tests startup-speed-tests
 # - making sure weave compilation has already occurred before running speed tests
 # - when to delete data files (i.e. when to generate new data)
 
-# CEBALERT: should move logic about whether or not new data needs to
-# be generated into topo/tests/test_script.py; that way, won't need
-# this complex scheme in the Makefile, and won't need to guess at what
-# the default output directory is (~/topographica).
-SPEEDSCRIPTS=${SCRIPTS}
-SPEEDDATA =${subst ^,~/topographica/tests/$(shell hostname)/,${subst .ty,.ty_SPEEDDATA,${SPEEDSCRIPTS}}}
-SPEEDTESTS=${subst ^,~/topographica/tests/$(shell hostname)/,${subst .ty,.ty_SPEEDTEST,${SPEEDSCRIPTS}}}
-
-STARTUPSPEEDSCRIPTS= ^lissom_oo_or.ty ^lissom_or.ty  
-STARTUPSPEEDDATA =${subst ^,~/topographica/tests/$(shell hostname)/,${subst .ty,.ty_STARTUPSPEEDDATA,${STARTUPSPEEDSCRIPTS}}}
-STARTUPSPEEDTESTS=${subst ^,~/topographica/tests/$(shell hostname)/,${subst .ty,.ty_STARTUPSPEEDTEST,${STARTUPSPEEDSCRIPTS}}}
 
 
-%_SPEEDDATA:
-	${TIMER}./topographica -c 'from topo.tests.test_script import generate_speed_data; generate_speed_data(script="examples/${notdir $*}",iterations=250,data_filename="tests/$(shell hostname)/${notdir $*}_SPEEDDATA")'
 
-%_SPEEDTEST: %_SPEEDDATA
-	${TIMER}./topographica -c 'from topo.tests.test_script import compare_speed_data; compare_speed_data(script="examples/${notdir $*}",data_filename="tests/$(shell hostname)/${notdir $*}_SPEEDDATA")'
-
-
-%_STARTUPSPEEDDATA:
-	${TIMER}./topographica -c 'from topo.tests.test_script import generate_startup_speed_data; generate_startup_speed_data(script="examples/${notdir $*}",density=48,data_filename="tests/$(shell hostname)/${notdir $*}_STARTUPSPEEDDATA")'
-
-%_STARTUPSPEEDTEST: %_STARTUPSPEEDDATA
-	${TIMER}./topographica -c 'from topo.tests.test_script import compare_startup_speed_data; compare_startup_speed_data(script="examples/${notdir $*}",data_filename="tests/$(shell hostname)/${notdir $*}_STARTUPSPEEDDATA")'
-
-topo/tests/lissom.ty_SPEEDDATA:
-	./topographica -c 'from topo.tests.test_script import generate_speed_data; generate_speed_data(script="examples/lissom.ty",data_filename="tests/$(shell hostname)/lissom.ty_SPEEDDATA",iterations=250,cortex_density=8,retina_density=6,lgn_density=6,dims=["or","od","dr","dy","cr","sf"])'
 
 v_lissom:
 	make -C topo/tests/reference/	

@@ -151,14 +151,15 @@ def time_sim_run(script="examples/lissom_oo_or.ty",iterations=10):
     return timeit.Timer('topo.sim.run('+`iterations`+')','gc.enable(); import topo').timeit(number=1)
 
      
-def generate_speed_data(script="examples/lissom_oo_or.ty",iterations=100,data_filename=None,
-                        **args):
+def _generate_speed_data(script,iterations=100,**args):
     """
     Calls time_sim_run(script,iterations) and saves 'iterations=time'
     to script_SPEEDDATA.
     """
-    if data_filename==None:
-        data_filename=script+"_SPEEDDATA"
+    import socket
+    script_name = os.path.basename(script)
+    data_filename=os.path.expanduser("~")+"/topographica/tests/"+socket.gethostname()+"/"+script_name+"_SPEEDDATA"
+    
 
     for arg,val in args.items():
         __main__.__dict__[arg]=val
@@ -170,21 +171,34 @@ def generate_speed_data(script="examples/lissom_oo_or.ty",iterations=100,data_fi
                   'how_long':how_long}
 
 
-    locn = normalize_path(data_filename)
+    locn = data_filename
+    if not os.path.exists(os.path.dirname(data_filename)):
+        os.makedirs(os.path.dirname(data_filename))
+                          
     print "Saving data to %s"%locn
     pickle.dump(speed_data,open(locn,'wb'),2)
 
 
+SOMEDENSITY=4
+SOMEITERATIONS = 5
 
-def compare_speed_data(script="examples/lissom_oo_or.ty",data_filename=None):
+def compare_speed_data(script):
     """
     Using previously generated script_SPEEDDATA, compares current
     time_sim_run(script) with the previous.
     """
-    if data_filename==None:
-        data_filename=script+"_SPEEDDATA"
+    # **** ALSO DO BY MACHINE DIR!
+    import socket
+    script_name = os.path.basename(script)
+    data_filename = 'tests/'+socket.gethostname()+"/"+script_name+"_SPEEDDATA"
 
-    locn = resolve_path(data_filename)
+    try:
+        locn = resolve_path(data_filename)
+    except IOError:
+        _generate_speed_data(script,cortex_density=SOMEDENSITY,iterations=SOMEITERATIONS)
+        locn = resolve_path(data_filename)
+        
+    
     print "Reading data from %s"%locn
 
     speed_data_file = open(locn,'r')
@@ -237,36 +251,76 @@ def compare_speed_data(script="examples/lissom_oo_or.ty",data_filename=None):
 # now these ones need updating. Can I first share more of the code?
 
 # except variation in these results! see python's timeit module documentation
-def time_sim_startup(script="examples/lissom_oo_or.ty",density=24):
+def time_sim_startup(script):
     return timeit.Timer("execfile('%s',__main__.__dict__)"%script,'import __main__;gc.enable()').timeit(number=1)
 
      
-def generate_startup_speed_data(script="examples/lissom_oo_or.ty",density=24,data_filename=None):
-    if data_filename==None:
-        data_filename=script+"_STARTUPSPEEDDATA"
+def _generate_startup_speed_data(script,**args):
 
-    how_long = time_sim_startup(script,density)
+    for arg,val in args.items():
+        __main__.__dict__[arg]=val
 
-    locn = normalize_path(data_filename)
-    print "Saving to %s"%locn
-    speed_data_file = open(locn,'w')
-    speed_data_file.write("%s=%s"%(density,how_long))
+
+    how_long = time_sim_startup(script)
+
+    import socket
+    script_name = os.path.basename(script)
+    data_filename=os.path.expanduser("~")+"/topographica/tests/"+socket.gethostname()+"/"+script_name+"_STARTUPSPEEDDATA"
+
+
+    speed_data = {'args':args,
+                  'how_long':how_long}
+
+
+
+    locn = data_filename
+    if not os.path.exists(os.path.dirname(data_filename)):
+        os.makedirs(os.path.dirname(data_filename))
+                          
+    print "Saving data to %s"%locn
+    pickle.dump(speed_data,open(locn,'wb'),2)
+
+
+def compare_startup_speed_data(script):
+
+    import socket
+    script_name = os.path.basename(script)
+    data_filename = 'tests/'+socket.gethostname()+"/"+script_name+"_STARTUPSPEEDDATA"
+
+
+    try:
+        locn = resolve_path(data_filename)
+    except IOError:
+        _generate_startup_speed_data(script,cortex_density=SOMEDENSITY)
+        locn = resolve_path(data_filename)
+
+
+    speed_data_file = open(locn,'r')
+
+
+    try:
+        speed_data = pickle.load(speed_data_file)
+    except:
+        ## support old data files (used to be string in the file
+        ## rather than pickle)
+        speed_data_file.seek(0)
+        speed_data = speed_data_file.readline()
+
+        density,old_time = speed_data.split('=')
+        speed_data = {'cortex_density':float(density),
+                      'how_long':float(old_time),
+                      'args':{}}
+
+    _support_old_args(speed_data['args'])
+
+    for arg,val in speed_data['args'].items():
+        __main__.__dict__[arg]=val
+
+
     speed_data_file.close()
-
-
-def compare_startup_speed_data(script="examples/lissom_oo_or.ty",data_filename=None):
-    if data_filename==None:
-        data_filename=script+"_STARTUPSPEEDDATA"
-
-    speed_data_file = open(resolve_path(data_filename),'r')
-        
-    info = speed_data_file.readline()
-    speed_data_file.close()
-
-    density,old_time = info.split('=')
-    density = float(density); old_time=float(old_time)
+    old_time = speed_data['how_long']        
     
-    new_time = time_sim_startup(script,density)
+    new_time = time_sim_startup(script)
 
     percent_change = 100.0*(new_time-old_time)/old_time
 
