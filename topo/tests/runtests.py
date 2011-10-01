@@ -32,7 +32,10 @@ p.add(
 
     extra_args = param.String(default=""),
 
-    coverage = param.Boolean(default=False)
+    coverage = param.Boolean(default=False),
+
+    timing = param.Boolean(default=False)
+    
     )
 
 
@@ -40,6 +43,11 @@ if p.coverage:
     coverage_cmd = "bin/coverage run --rcfile=doc/buildbot/coveragerc -a -p"
 else:
     coverage_cmd = ""
+
+if p.timing:
+    timing_cmd = "/usr/bin/time"
+else:
+    timing_cmd = ""
 
 
 # http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
@@ -78,7 +86,7 @@ elif p.targets == ['all']:
 TESTDP = 7
 tests_dir = param.resolve_path("topo/tests",path_to_file=False)
 scripts_dir = param.resolve_path("examples",path_to_file=False) ### XXX
-topographica_script = xvfb + " " + coverage_cmd + " " + sys.argv[0] + " " + p.extra_args
+topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0] + " " + p.extra_args
 
 
 

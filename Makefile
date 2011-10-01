@@ -274,10 +274,10 @@ oo_or_comparisons:
 ##### speed-tests
 
 speed-tests: ${SPEEDTESTS}
-	./topographica -p 'targets=["speedtests"]' topo/tests/runtests.py
+	./topographica -p timing=True -p 'targets=["speedtests"]' topo/tests/runtests.py
 
 startup-speed-tests: 
-	./topographica -p 'targets=["startupspeedtests"]' topo/tests/runtests.py
+	./topographica -p timing=True -p 'targets=["startupspeedtests"]' topo/tests/runtests.py
 
 all-speed-tests: speed-tests startup-speed-tests
 
