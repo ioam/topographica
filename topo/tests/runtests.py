@@ -142,7 +142,7 @@ TRAINSCRIPTS = [
     "som_retinotopy.ty",
     "sullivan_neurocomputing04.ty",
     "lissom.ty",
-    "lissom_fsa.ty",
+#    "lissom_fsa.ty",  # CEBALERT: disabled for now (needs special case - look_at=fsa not v1, see below)
     "gcal.ty"
     ]
 
