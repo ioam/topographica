@@ -138,7 +138,7 @@ pyflakes: # Everything except topo/tests (where we do lots of importing but not 
 
 lint-base: # topo.base and param 
 	${PYLINT} --ignore=param/tk.py --ignore=param/external.py topo.base param | cat
-#CEBALERT: how to get pylint's "ignore" options to work?
+#CEBALERT: how to get pylint's "ignore" options to work? Upgrade pylint (http://www.logilab.org/ticket/70493)?
 
 
 # CEBALERT: need to update pychecker and work on its configuration if
