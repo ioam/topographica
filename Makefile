@@ -132,24 +132,22 @@ topographicagui:
 	chmod a+x ${PREFIX}topographicagui
 
 
-check:
-	${PYCHECKER} topo/*.py topo/*/*.py
-
-check-base:
-	${PYCHECKER} topo/base/*.py  | cat
-
-# CEBALERT: should add param, but apparently doesn't work. Update pylint?
-lint:
-	${PYLINT} topo
-
-lint-base:
-	${PYLINT} topo.base | cat
-
-pyflakes:
+## Currently useful lint checks
+pyflakes: # Everything except topo/tests (where we do lots of importing but not using...)
 	${PYFLAKES} topo param | grep -v topo/tests
 
-pyflakes-base:
-	${PYFLAKES} topo/base | cat
+lint-base: # topo.base and param 
+	${PYLINT} --ignore=param/tk.py --ignore=param/external.py topo.base param | cat
+#CEBALERT: how to get pylint's "ignore" options to work?
+
+
+# CEBALERT: need to update pychecker and work on its configuration if
+# we're going to use it.
+check:
+	${PYCHECKER} param/*.py topo/*.py topo/*/*.py
+# CEBALERT: way too much output to use.
+lint:
+	${PYLINT} topo param
 
 
 
