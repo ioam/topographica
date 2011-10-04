@@ -7,13 +7,6 @@ PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
 RELEASE = 0.9.7
 
-# currently only applied to train-tests 
-IMPORT_WEAVE = 1
-
-# no. of decimal places to require for verifying a match in slow-tests
-# (must match across platforms & for optimized vs unoptimized)
-TESTDP = 7
-
 PYTHON = ${PREFIX}/bin/python
 
 SVNVERSION = ${shell svnversion}
@@ -57,12 +50,6 @@ else
 	TIMER = time 
 endif
 
-XVFB = ${shell which xvfb-run}
-ifeq ("${XVFB}","")
-	XVFBRUN = @echo "Warning: xvfb-run not found; any GUI components that are run will display windows";
-else
-	XVFBRUN = ${XVFB} -a
-endif
 
 # Commands needed to build a public distribution
 
@@ -190,90 +177,32 @@ print-info:
 	@echo svnversion ${SVNVERSION}
 
 
-#############################################################################
 
-# CEB: Gradually trying to move commands out of Makefile and into
-# Python scripts.
-
-# for people who can't stop typing "make tests"
-tests:
-	./topographica -p 'targets=["unit"]' topo/tests/runtests.py
-
-
-
+# CEBALERT: Move into runtests.py
 generate-map-tests-data:
 	./topographica -c "cortex_density=8" examples/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; generate(plotgroups_to_test)" 
 
 
-# CEBALERT: will change to be just commands to generate data.
 
-# Test that the specified scripts haven't changed in results or speed.
-#SCRIPTS=^lissom_oo_or.ty ^som_retinotopy.ty
-SCRIPTS= ^hierarchical.ty ^lissom_or.ty ^lissom_oo_or.ty ^som_retinotopy.ty ^sullivan_neurocomputing04.ty ^lissom.ty ^lissom_fsa.ty ^gcal.ty #^lissom_whisker_barrels.ty
-# CEB: tests on these scripts temporarily suspended (SF.net #2053538)
-# ^lissom_oo_or_homeostatic.ty ^lissom_oo_or_homeostatic_tracked.ty
-# ^lissom_or_noshrinking.ty  - only matches to 4 dp with IMPORT_WEAVE=0 
+#############################################################################
+##### tests
 
-TRAINSCRIPTS=${SCRIPTS}
-TRAINDATA =${subst ^,topo/tests/,${subst .ty,.ty_DATA,${TRAINSCRIPTS}}}
-TRAINTESTS=${subst ^,topo/tests/,${subst .ty,.ty_TEST,${TRAINSCRIPTS}}}
-
-# COVERAGE_CMD: used by buildbot to generate various coverage data
-COVERAGE = 0
-COVERAGE_CMD = 
-
-ifeq ("${COVERAGE}","1")
-	COVERAGE_CMD = bin/coverage run --rcfile=doc/buildbot/coveragerc -a -p
-endif
+# CEBALERT: remove all these and document elsewhere how to run all the
+# tests (might involve making them simpler to run). This is not even a
+# complete list of the tests available (topo/tests/runtests.py's
+# targets dictionary is the complete list (or see what buildbot runs).
+# When removing, check that buildbot uses the command below for each
+# target rather than just "make target".
+tests:
+	./topographica -p 'targets=["unit"]' topo/tests/runtests.py
 
 train-tests: print-info
-	${COVERAGE_CMD} ./topographica -p 'targets=["traintests"]' topo/tests/runtests.py
+	./topographica -p 'targets=["traintests"]' topo/tests/runtests.py
 
 unopt-train-tests: print-info
-	${COVERAGE_CMD} ./topographica -p 'extra_args="-c import_weave=False"' -p 'targets=["traintests"]' topo/tests/runtests.py
+	./topographica -p 'testdp=5' -p 'weave=False' -p 'targets=["traintests"]' topo/tests/runtests.py
 
-
-# General rules for generating test data and running the tests
-%_DATA:
-	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/${notdir $*}",data_filename="tests/${notdir $*}_DATA",run_for=[1,99,150],look_at="V1",cortex_density=8,retina_density=24,lgn_density=24)'
-
-%_TEST: %_DATA
-	${TIMER}${COVERAGE_CMD} ./topographica -c 'import_weave=${IMPORT_WEAVE}' -c 'from topo.tests.test_script import TestScript; TestScript(script="examples/${notdir $*}",data_filename="tests/${notdir $*}_DATA",decimal=${TESTDP})'
-# CB: Beyond 14 dp, the results of the current tests do not match on
-# ppc64 and i686 (using linux).  In the future, decimal=14 might have
-# to be reduced (if the tests change, or to accommodate other
-# processors/platforms).
-
-
-.SECONDARY: ${SPEEDDATA} ${TRAINDATA} ${STARTUPSPEEDDATA} # Make sure that *_*DATA is kept around
-
-
-# Special versions for specific scripts:
-topo/tests/lissom.ty_DATA:
-	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom.ty",data_filename="tests/lissom.ty_DATA",run_for=[1,99,150],look_at="V1",cortex_density=8,retina_density=6,lgn_density=6,dims=["or","od","dr","dy","cr","sf"])'
-
-topo/tests/lissom_fsa.ty_DATA:
-	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom_fsa.ty",data_filename="tests/lissom_fsa.ty_DATA",run_for=[1,99,150],look_at="FSA",cortex_density=8,retina_density=24,lgn_density=24)'
-
-topo/tests/lissom_whisker_barrels.ty_DATA:
-	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom_whisker_barrels.ty",data_filename="tests/lissom_whisker_barrels.ty_DATA",run_for=[1,99,150],look_at="S1")'
-
-
-##### Compare topographica and C++ lissom output
-or_comparisons:
-	./topographica -c "from topo.tests.test_script import run_multiple_density_comparisons;nerr=run_multiple_density_comparisons('lissom_or_reference.ty'); import sys;sys.exit(nerr)"
-
-oo_or_comparisons:
-	./topographica -c "from topo.tests.test_script import run_multiple_density_comparisons;nerr=run_multiple_density_comparisons('lissom_oo_or_reference.ty'); import sys;sys.exit(nerr)"
-
-#############################################################################
-
-
-
-#############################################################################
-##### speed-tests
-
-speed-tests: ${SPEEDTESTS}
+speed-tests:
 	./topographica -p timing=True -p 'targets=["speedtests"]' topo/tests/runtests.py
 
 startup-speed-tests: 
@@ -281,23 +210,6 @@ startup-speed-tests:
 
 all-speed-tests: speed-tests startup-speed-tests
 
-
-# While training data is usually checked into topo/tests and is the
-# same for all machines, speed data is generated by the machine
-# running this makefile. Therefore, speed data is stored in a
-# machine-specific directory.
-
-# CB: add notes somewhere about...
-# - making sure weave compilation has already occurred before running speed tests
-# - when to delete data files (i.e. when to generate new data)
-
-
-
-
-
-v_lissom:
-	make -C topo/tests/reference/	
-	${TIMER}./topographica -c "profiling=True;iterations=20000" topo/tests/reference/lissom_oo_or_reference.ty
 
 #############################################################################
 
@@ -311,13 +223,29 @@ clean-coverage-output: clean-coverage-results clean-coverage-html
 clean-coverage-results:
 	${RM} -r .coverage*
 
-# CBALERT: guess at output directory. Needs to be cleaned up (see ALERT by speed-tests)
+# CBALERT: guess at output directory.
 clean-coverage-html:
 	${RM} -r ~/topographica/tests/coverage_html
 
 coverage-html:
 	bin/coverage combine 
 	bin/coverage html --rcfile=doc/buildbot/coveragerc -d ~/topographica/tests/coverage_html
+#############################################################################
+
+
+
+#############################################################################
+##### Compare topographica and C++ lissom output
+or_comparisons:
+	./topographica -c "from topo.tests.test_script import run_multiple_density_comparisons;nerr=run_multiple_density_comparisons('lissom_or_reference.ty'); import sys;sys.exit(nerr)"
+
+oo_or_comparisons:
+	./topographica -c "from topo.tests.test_script import run_multiple_density_comparisons;nerr=run_multiple_density_comparisons('lissom_oo_or_reference.ty'); import sys;sys.exit(nerr)"
+
+## speed test
+v_lissom:
+	make -C topo/tests/reference/	
+	${TIMER}./topographica -c "profiling=True;iterations=20000" topo/tests/reference/lissom_oo_or_reference.ty
 #############################################################################
 
 

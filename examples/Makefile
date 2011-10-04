@@ -4,6 +4,7 @@
 #
 # JPALERT: Should consider rewriting this in Python so that it can run
 # easily under Windows as well.
+# CEBALERT: and how does this relate to topo/misc/genexamples.py?
 
 all_quick: hierarchical som_retinotopy lissom_oo_or
 all_long: lissom_oo_or_10000.typ gcal_10000.typ som_retinotopy_40000.typ lissom_or_10000.typ lissom_fsa_10000.typ

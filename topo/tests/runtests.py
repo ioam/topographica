@@ -3,6 +3,17 @@ Commands that were in the Makefile for running various tests. Roughly
 converted to a Python script so we can run on all platforms. Work in
 progress.
 
+Buildbot shows how to run the tests, but here are some examples:
+
+unit:
+./topographica -p 'targets=["unit"]' topo/tests/runtests.py
+
+default set:
+./topographica topo/tests/runtests.py
+
+all:
+./topographica -p 'targets=["all"]' topo/tests/runtests.py
+
 Ideally, the 'unit' target (i.e. unit tests) would be all that people
 need to run. Developers, for checking they haven't messed obvious
 stuff up. Users, for checking a Topographica installation functions ok
@@ -16,7 +27,16 @@ important project to improve them.
 # CEBALERT: need to fix the issue with global_params reporting name=X
 # is unused.
 
-# CEBALERT: get /usr/bin/time in here if possible.
+
+# Comments from the Makefile that I haven't processed yet:
+#
+# (1)
+# CB: Beyond 14 dp, the results of the current tests do not match on
+# ppc64 and i686 (using linux).  In the future, decimal=14 might have
+# to be reduced (if the tests change, or to accommodate other
+# processors/platforms).
+#
+
 
 import glob
 import os
@@ -30,11 +50,15 @@ from topo.misc.commandline import global_params as p
 p.add(
     targets = param.List(default=[]),
 
-    extra_args = param.String(default=""),
+    extra_args = param.String(default=""), 
 
     coverage = param.Boolean(default=False),
 
-    timing = param.Boolean(default=False)
+    timing = param.Boolean(default=False),
+
+    weave = param.Boolean(default=True),
+
+    testdp = param.Number(default=7)
     
     )
 
@@ -80,15 +104,16 @@ elif p.targets == ['all']:
     # ALL
     p.targets = []
 
-    
+
+if not p.weave:
+    importweave = "-c 'import_weave=False'"
+else:
+    importweave = ""
 
 # ->params ?
-TESTDP = 7
 tests_dir = param.resolve_path("topo/tests",path_to_file=False)
 scripts_dir = param.resolve_path("examples",path_to_file=False) ### XXX
-topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0] + " " + p.extra_args
-
-
+topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0] + " " + importweave +  " " + p.extra_args
 
 def _runc(cmd):
     print cmd
@@ -98,17 +123,41 @@ def _runc(cmd):
 import topo.misc.keyedlist
 target = topo.misc.keyedlist.KeyedList()
 
+# CEBALERT: need to pick which scripts to include for traintests and
+# speedtests and startupspeedtests (see test_script.py).
+#
+# From the Makefile:
+# SCRIPTS= ^hierarchical.ty ^lissom_or.ty ^lissom_oo_or.ty ^som_retinotopy.ty ^sullivan_neurocomputing04.ty ^lissom.ty ^lissom_fsa.ty ^gcal.ty ^lissom_whisker_barrels.ty
+# CEB: tests on these scripts temporarily suspended (SF.net #2053538)
+# ^lissom_oo_or_homeostatic.ty ^lissom_oo_or_homeostatic_tracked.ty
+# ^lissom_or_noshrinking.ty  - only matches to 4 dp with IMPORT_WEAVE=0 
+# Now I'm using this list for train-tests:
 from _setup import TRAINSCRIPTS
+
+# (and a different list for speedtests - see test_script.py).
+#
+# Also: special cases from the Makefile to consider restoring:
+#
+##topo/tests/lissom.ty_DATA:
+##	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom.ty",data_filename="tests/lissom.ty_DATA",run_for=[1,99,150],look_at="V1",cortex_density=8,retina_density=6,lgn_density=6,dims=["or","od","dr","dy","cr","sf"])'
+##
+##topo/tests/lissom_fsa.ty_DATA:
+##	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom_fsa.ty",data_filename="tests/lissom_fsa.ty_DATA",run_for=[1,99,150],look_at="FSA",cortex_density=8,retina_density=24,lgn_density=24)'
+##
+##topo/tests/lissom_whisker_barrels.ty_DATA:
+##	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom_whisker_barrels.ty",data_filename="tests/lissom_whisker_barrels.ty_DATA",run_for=[1,99,150],look_at="S1")'
+
 
 
 target['traintests'] = []
 for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    data_path = os.path.join(tests_dir,script+"_DATA")
-    target['traintests'].append(topographica_script +  " -c 'from topo.tests.test_script import TestScript; TestScript(script=\"%(script_path)s\",data_filename=\"%(data_path)s\",decimal=6)'"%dict(script_path=script_path,data_path=data_path))
+    target['traintests'].append(topographica_script +  " -c 'from topo.tests.test_script import test_script; test_script(script=\"%(script_path)s\",decimal=%(dp)s)'"%dict(script_path=script_path,dp=p.testdp))
 
 target['speedtests'] = []
-for script in TRAINSCRIPTS:
+SPEEDSCRIPTS = TRAINSCRIPTS
+SPEEDSCRIPTS.remove("hierarchical.ty") # CEBALERT: remove problematic example (doesn't work for some densities)
+for script in SPEEDSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
     target['speedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_speed_data;compare_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
 
@@ -152,7 +201,7 @@ pickle_path = os.path.join(tests_dir,"instances-r11275.pickle")
 target['pickle'].append(topographica_script + " -c 'from topo.tests.test_script import pickle_unpickle_everything; pickle_unpickle_everything(existing_pickles=\"%(pickle_path)s\")'"%dict(pickle_path=pickle_path))
 
 
-# CB: hack that this will always be created even when test not being run
+# CEBALERT: hack that this will always be created even when test not being run
 tmpd = commands.getoutput("mktemp -d")
 #script-repr-tests:
 target['scriptrepr']=[]
