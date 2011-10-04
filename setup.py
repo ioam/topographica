@@ -45,7 +45,17 @@ if 'bdist_wininst' in sys.argv:
     # CEBALERT: how else to get the ico into a place the postinstall script can find?!
     scripts.append("topographica.ico")
 
-from _setup import TRAINSCRIPTS
+TRAINSCRIPTS = [
+    "hierarchical.ty",
+    "lissom_or.ty",
+    "lissom_oo_or.ty",
+    "som_retinotopy.ty",
+    "sullivan_neurocomputing04.ty",
+    "lissom.ty",
+    "lissom_fsa.ty",
+    "gcal.ty"
+    ]
+
 
 _topographica_devs='Topographica Developers'
 _topographica_devs_email='developers[at]topographica[dot]org' 
@@ -172,5 +182,5 @@ performance.
     scripts = scripts))
 
 
-
-setup(**setup_args)
+if __name__=="__main__":
+    setup(**setup_args)
