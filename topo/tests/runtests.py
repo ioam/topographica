@@ -132,7 +132,20 @@ target = topo.misc.keyedlist.KeyedList()
 # ^lissom_oo_or_homeostatic.ty ^lissom_oo_or_homeostatic_tracked.ty
 # ^lissom_or_noshrinking.ty  - only matches to 4 dp with IMPORT_WEAVE=0 
 # Now I'm using this list for train-tests:
-from setup import TRAINSCRIPTS
+
+# CEBALERT: this list should be defined in one place.
+#from setup import TRAINSCRIPTS
+TRAINSCRIPTS = [
+    "hierarchical.ty",
+    "lissom_or.ty",
+    "lissom_oo_or.ty",
+    "som_retinotopy.ty",
+    "sullivan_neurocomputing04.ty",
+    "lissom.ty",
+    "lissom_fsa.ty",
+    "gcal.ty"
+    ]
+
 
 # (and a different list for speedtests - see test_script.py).
 #
