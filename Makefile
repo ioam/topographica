@@ -136,7 +136,7 @@ check:
 	${PYCHECKER} topo/*.py topo/*/*.py
 
 check-base:
-	${PYCHECKER} topo/base/*.py 
+	${PYCHECKER} topo/base/*.py  | cat
 
 # CEBALERT: should add param, but apparently doesn't work. Update pylint?
 lint:
