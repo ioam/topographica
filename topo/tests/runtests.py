@@ -132,7 +132,7 @@ target = topo.misc.keyedlist.KeyedList()
 # ^lissom_oo_or_homeostatic.ty ^lissom_oo_or_homeostatic_tracked.ty
 # ^lissom_or_noshrinking.ty  - only matches to 4 dp with IMPORT_WEAVE=0 
 # Now I'm using this list for train-tests:
-from _setup import TRAINSCRIPTS
+from setup import TRAINSCRIPTS
 
 # (and a different list for speedtests - see test_script.py).
 #
