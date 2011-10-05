@@ -268,8 +268,8 @@ def start():
     print "="*60
     print
     print "runtests.start(): targets with errors: %s"%len(errors)
-    print
     if len(errors)>0:
+        print errors
         sys.exit(1)
     else:
         sys.exit(0)
