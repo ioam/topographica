@@ -281,7 +281,7 @@ SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_o
 #@@distclean: FORCE clean
 #@@	   ${RM} .#* */.#* */*/.#* */*~ 
 #@@	   ${RM} etc/topographica.elc ImageSaver*.ppm countalerts* annotate.out emacslog
-#@@	   ${RM} current_profile ./topo/tests/testsnapshot.typ script ./topo/tests/*.ty_*DATA timing* ./topo/tests/testplotfilesaver*.png
+#@@	   ${RM} current_profile script ./topo/tests/*.ty_*DATA timing*
 #@@	   ${RM} examples/*.typ
 #@@	   ${RM} -r Output
 #@@	   -mv images/ellen_arthur.pgm ./TMPellen_arthur.pgm
