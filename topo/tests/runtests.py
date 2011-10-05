@@ -99,7 +99,7 @@ else:
 
 if len(p.targets)==0:
     # DEFAULT
-    p.targets = ['unit','traintests','snapshots','gui','maptests']
+    p.targets = ['unit','traintests','snapshots','gui','maptests'] # maptests wouldn't be default except it's caught platform different problems before (there aren't enough unit tests!)
 elif p.targets == ['all']:
     # ALL
     p.targets = []
