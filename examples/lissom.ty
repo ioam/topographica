@@ -81,7 +81,6 @@ __version__='$Revision: 8706 $'
 
 
 from math import pi, sqrt
-from colorsys import hsv_to_rgb
 import copy
 
 import numpy
@@ -263,12 +262,17 @@ elif p.dataset in natural_image_sets:
 
 # CEBALERT: generating r,g,b from h,1,v means one of r,g,b will always
 # be 0 (s should also be varied).
-# CEBALERT: not currently supported in snapshots: would need "from
-# colorsys import hsv_to_rgb" to be inside the functions. Or would
-# require a change to picklemain.
-def h_to_r(h): return hsv_to_rgb(h,1.0,1.0)[0]
-def h_to_g(h): return hsv_to_rgb(h,1.0,1.0)[1]
-def h_to_b(h): return hsv_to_rgb(h,1.0,1.0)[2]
+# CB: the import must be in the function to support pickling. A hack,
+# but these functions will be removed sometime anyway.
+def h_to_r(h):
+    from colorsys import hsv_to_rgb
+    return hsv_to_rgb(h,1.0,1.0)[0]
+def h_to_g(h):
+    from colorsys import hsv_to_rgb
+    return hsv_to_rgb(h,1.0,1.0)[1]
+def h_to_b(h):
+    from colorsys import hsv_to_rgb
+    return hsv_to_rgb(h,1.0,1.0)[2]
 
 
 for e in eyes:
