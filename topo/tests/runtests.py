@@ -252,21 +252,24 @@ target['maptests'].append(topographica_script + ' -c "cortex_density=8" %s -c "t
 
 
 def start():
-    exitstatus=0
+    errors = []
+
     print "Running: %s"%p.targets
     print
+
     for name in (p.targets or target.keys()):
         print "*** " + name
         for cmd in target[name]:
             if _runc(cmd) > 0:
-                exitstatus+=1
-
+                if name not in errors:
+                    errors.append(name)
+                
     print
     print "="*60
     print
-    print "runtests.start(): targets with errors: %s"%exitstatus
+    print "runtests.start(): targets with errors: %s"%len(errors)
     print
-    if exitstatus>0:
+    if len(errors)>0:
         sys.exit(1)
     else:
         sys.exit(0)
