@@ -208,12 +208,21 @@ http://topographica.git.sourceforge.net/git/gitweb.cgi?p=topographica/NAME
 <!-- ADMIN NOTE: to create ceball_houzi2 repository
 
 $ ssh -t ceball,topographica@shell.sourceforge.net create
+
+(1) Create repository
+
 [sf.net]$ cd /home/scm_git/t/to/topographica
 [sf.net]$ git --git-dir=ceball_houzi2 init --shared=all --bare
-[sf.net]$ emacs -nw ceball_houzi2/description
-[sf.net]$ emacs -nw ceball_houzi2/config # allow fastforwards
-                                         # deny deletes
-		                 	 # emails
+
+(2) Edit description (one line e.g. "celiaf - video camera")
+
+[sf.net]$ emacs -nw ceball_houzi2/description 
+
+(3) Configure repository to allow fastforwards, deny deletes, and send
+emails to topographica-cvs
+
+[sf.net]$ emacs -nw ceball_houzi2/config
+
 ---config---
 [receive]
         denyNonFastforwards = false
@@ -227,11 +236,12 @@ apply to the usage described in this document.)
 
 ---config---
 [hooks]
-        mailinglist = "name@address"
+        mailinglist = "topographica-cvs@lists.sourceforge.net"
         announcelist =
         envelopesender =
         emailprefix = "SF.net Git: "
-        showrev =
+        showrev = "git show -C %s; echo"
+        emailmaxlines = 500
 ---config---
 
 Then, edit ceball_houzi2/hooks/post-receive.sample so that the line in
@@ -239,10 +249,11 @@ there calling "post-receive-email" is uncommented (it's the only line
 in there at the moment) and save it as post-receive. Also, chmod +x
 post-receive.
 
+-->
 
+<!--
 # Backups (currently no rsync access? docs on sf.net out of date?)
 $ rsync -av topographica.git.sourceforge.net::gitroot/topographica/* date-topographica-git
-
 -->
 
 
