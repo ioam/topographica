@@ -218,23 +218,15 @@ $ ssh -t ceball,topographica@shell.sourceforge.net create
 
 [sf.net]$ emacs -nw ceball_houzi2/description 
 
-(3) Configure repository to allow fastforwards, deny deletes, and send
-emails to topographica-cvs
+(3) Configure repository to (a) deny deletes and (b) send emails to topographica-cvs
 
 [sf.net]$ emacs -nw ceball_houzi2/config
 
 ---config---
 [receive]
-        denyNonFastforwards = false
+        ...
 	denyDeletes = true
----config---
 
-(You should NOT do "denyNonFastforwards = false" if others are also
-actively developing on the remote, because the remote's history will
-be rewritten and they will get very confused. But this should not
-apply to the usage described in this document.)
-
----config---
 [hooks]
         mailinglist = "topographica-cvs@lists.sourceforge.net"
         announcelist =
