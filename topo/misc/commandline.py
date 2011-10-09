@@ -26,12 +26,18 @@ except ImportError:
     matplotlib_imported=False
 
 
+ipython = None
 try:
-    import IPython.Shell
-    ipython_imported=True
+    from IPython.frontend.terminal.embed import InteractiveShellEmbed as IPShell
+    from IPython.config.loader import Config
+    ipython = "0.11"
 except ImportError:
-    ipython_imported=False
-    print "Note: IPython is not available; using basic interactive Python prompt instead."
+    try:
+        # older version?
+        from IPython.Shell import IPShell
+        ipython = "0.10"
+    except ImportError:
+        print "Note: IPython is not available; using basic interactive Python prompt instead."
 
 
 
@@ -499,19 +505,35 @@ def process_argv(argv):
         # option has to be added for every ipython option we want to
         # support (e.g. see --pdb)
 
-        if ipython_imported:
-            # Stop IPython namespace hack?
-            # http://www.nabble.com/__main__-vs-__main__-td14606612.html
-            __main__.__name__="__mynamespace__"
+        if ipython:
+            if ipython == "0.10":
+                # Stop IPython namespace hack?
+                # http://www.nabble.com/__main__-vs-__main__-td14606612.html
+                __main__.__name__="__mynamespace__"
 
-            ipython_args = ['-noconfirm_exit','-nobanner',
-                            '-pi1',CommandPrompt.get_format(),
-                            '-pi2',CommandPrompt2.get_format(),
-                            '-po',OutputPrompt.get_format()]
-            if option.pdb:
-                ipython_args.append('-pdb')
+                ipython_args = ['-noconfirm_exit','-nobanner',
+                                '-pi1',CommandPrompt.get_format(),
+                                '-pi2',CommandPrompt2.get_format(),
+                                '-po',OutputPrompt.get_format()]
+                if option.pdb:
+                    ipython_args.append('-pdb')
 
-            IPython.Shell.IPShell(ipython_args, user_ns=__main__.__dict__).mainloop(sys_exit=1)            
-
-        
-
+                ipshell = IPShell(
+                        ipython_args,
+                        user_ns=__main__.__dict__,
+                        )
+                ipshell.mainloop(sys_exit=1)
+            elif ipython == "0.11":
+                config = Config()
+                config.InteractiveShell.prompt_in1 = CommandPrompt.get_format()
+                config.InteractiveShell.prompt_in2 = CommandPrompt2.get_format()
+                config.InteractiveShell.prompt_out = OutputPrompt.get_format()
+                config.InteractiveShell.confirm_exit = False
+                ipshell = IPShell(
+                        config=config,
+                        user_ns=__main__.__dict__,
+                        banner1="",
+                        exit_msg="",
+                        )
+                ipshell()
+                sys.exit()
