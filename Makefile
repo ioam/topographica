@@ -439,7 +439,7 @@ rpm:
 # These commands can take a while to run. There's probably some 
 # redundancy in the creation of the backports.
 
-UBUNTU_ENV = env DEBFULLNAME='C. E. Ball' DEBEMAIL='ceball@gmail.com' GPGKEY=4275E3C7
+UBUNTU_ENV = env DEBFULLNAME='C. E. Ball' DEBEMAIL='ceball@gmail.com' GPGKEY=6C92B17B
 DEBUILD = ${UBUNTU_ENV} debuild
 UBUNTU_TARGET = natty
 UBUNTU_BACKPORTS = lucid^ hardy^ 
