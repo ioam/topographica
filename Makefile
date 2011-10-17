@@ -458,8 +458,8 @@ deb: dist-setup.py
 	echo ${LOG_TEXT} >> ${UBUNTU_CHANGELOG}
 	echo "" >> ${UBUNTU_CHANGELOG}
 	echo " -- C. E. Ball <ceball@gmail.com>  ${shell date -R}" >> ${UBUNTU_CHANGELOG}
-	cd ${UBUNTU_DIR}; ${DEBUILD} 
-	cd ${UBUNTU_DIR}; ${DEBUILD} -S -sa
+	cd ${UBUNTU_DIR}; ${DEBUILD} -k6C92B17B
+	cd ${UBUNTU_DIR}; ${DEBUILD} -S -sa -k6C92B17B
 # CB: could put this line in to test the build locally
 # sudo pbuilder build topographica_${UBUNTU_RELEASE}~${UBUNTU_TARGET}.dsc 
 
