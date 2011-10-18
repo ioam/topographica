@@ -1,4 +1,4 @@
-<H2>Developing Topographica using Subversion</H2>
+<H2>Obtaining Topographica using Subversion</H2>
 
 <P><A HREF="http://subversion.tigris.org/">Subversion</A> (SVN) is the
 version control system used for managing Topographica development.  SVN
@@ -15,14 +15,7 @@ see the
 SourceForge SVN documentation</A> for more details or if you have any
 difficulties.  You will need to run at least SVN 1.4 on your machine;
 SVN clients 1.3 and below will complain that they are too old to
-communicate with our repository.  Note that the SVN version is not
-always usable due to work in progress, but you can check to see if the
-code currently builds on a specific platform, or if our suite of code
-tests pass, by visiting our
-<A HREF="http://buildbot.topographica.org/">automatic tests page</A>.
-If you don't need the very latest updates, you can simply
-<a href="index.html">download a released version</a> instead of using
-SVN.
+communicate with our repository.  
 
 <P>Many platforms (e.g. most Linux and other UNIX platforms) already
 have all of the necessary programs and libraries required to obtain
@@ -30,7 +23,7 @@ Topographica by SVN.  If your machine does not have <code>svn</code>
 installed, you will first need to <A
 HREF="http://subversion.apache.org/packages.html">install it</A>.
 
-<H3>Downloading via Subversion</H3>
+<H3>Downloading</H3>
 
 <P>Once you have SVN installed, the location (URL) of the Topographica
 repository to use is
@@ -52,18 +45,14 @@ svn co $TOPOROOT/trunk/topographica topographica
 </pre>
 
 <P>This will create a <code>topographica</code> directory in your
-present working directory; omitting the final
-<code>topographica</code> will put the files directly into your
-present directory.
+present working directory.
 
 <P>The checkout process will likely take several minutes (probably
-appearing to hang at certain points), as there are some extremely
-large files involved. Once it has completed, you can return to the
-instructions
-for <a href="../Developer_Manual/installation.html">installing
-Topographica</a> to go through the build process.
-
-
+appearing to hang at certain points), as some large files are
+involved.<!-- and subversion is slow...--> Once it has completed, you
+can return to the <a
+href="../Developer_Manual/installation.html#installing">developer
+installation instructions</a> to go through the build process.
 
 
 <!--
@@ -84,20 +73,19 @@ Jim</a> for more details.
 -->
 
 
-<H3>Updating and selecting versions using Subversion</H3>
+<H3>Updating and selecting versions</H3>
 
 Users who have Topographica checked out via SVN can update their copy
 of Topographica by changing to the directory containing the
-Topographica files and then doing:
+Topographica files and then doing <code>svn update</code>. Note that
+updating the external/ subdirectory sometimes takes a long time, if
+some of the external packages have been upgraded.
 
-<pre>
-  svn update 
-  make
-</pre>
-
-<P>Note that updating the external/ subdirectory sometimes takes a
-long time, if some of the external packages have been upgraded, and in
-that case "make" can also take some time to build.
+<P>Following the update, repeat the "make" command you originally used
+when installing Topographica (the command depends on how you installed
+Topographica; return to the <a
+href="../Developer_Manual/installation.html#installing">developer
+installation instructions</a> for details).
 
 <P>If you wish, you can switch your copy of Topographica to a
 different version of the code.  For instance, to update to a
@@ -109,11 +97,10 @@ of release 0.9.4), you can do <code>svn update -r 7472</code>.
 
 <P>There are also various alternative copies of the code for special
 purposes, stored in the tags/ and branches/ sections of the SVN
-repository. Currently available tags and branches are listed on the
-<a
+repository. Currently available tags and branches are listed on the <a
 href="http://topographica.svn.sourceforge.net/viewvc/topographica/tags/">tags</a>
 and <a
 href="http://topographica.svn.sourceforge.net/viewvc/topographica/branches/">branches</a>
 pages, or you can run e.g. <code>svn ls --verbose
-$TOPOROOT/tags/</code>. 
+$TOPOROOT/tags/</code>.
 

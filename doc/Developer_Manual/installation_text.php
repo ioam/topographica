@@ -18,6 +18,23 @@ should be reading the
 nightly documentation build</A> rather than the previous release's
 documentation at topographica.org.
 
+<P>Also note that the SVN version is occasionally not usable due to
+work in progress, but you can check to see if the code currently
+builds on a specific platform, or if our suite of code tests pass, by
+visiting our
+<A HREF="http://buildbot.topographica.org/">automatic tests page</A>.
+<!--If you don't need the very latest updates, you can simply
+<a href="../Downloads/index.html">download a released version</a>
+instead of using SVN.-->
+
+<P>Finally, please bear in mind that most of Topographica's
+development occurs under Linux, so if you have a choice that is the
+best-supported option.
+
+
+
+<H3><A NAME="downloading">Downloading Topographica</A></H3>
+
 <P>To install a version-controlled copy of Topographica, you first
 need to obtain a copy of the SVN repository, either by using SVN as
 described in our <A HREF="../Downloads/cvs.html">SVN instructions</A>,
@@ -26,6 +43,8 @@ with SVN. We ourselves also use and support the distributed version
 control system
 <A HREF="http://git-scm.com">Git</A>; developers who wish to use this should instead
 follow our <A HREF="../Downloads/git.html">git instructions</A>.
+
+<H3><A NAME="installing">Installing Topographica</A></H3>
 
 <P>Once you have obtained the
 version-controlled <code>topographica</code> directory, you need to
@@ -39,12 +58,8 @@ may wish to use the first option, but the second option is frequently
 tested and uses versions of external packages that we know to work
 well together.
 
-<!-- CEBALERT: put this somewhere:
-Note that most development of Topographica is done under Linux.
--->
 
-
-<H3>(1) Installing Topographica's dependencies on your system</H3>
+<H4>(Option 1) Installing Topographica's dependencies on your system</H4>
 
 <!-- I want one place to specify dependencies and read that in
 elsewhere. Or at least have links in one place only. -->
@@ -58,18 +73,17 @@ academic use).
 
 <P>If installing the dependencies yourself, you will need at
 least <A HREF="http://www.python.org/download/releases/2.6.5/">Python</A>, 
-<A HREF="http://www.scipy.org/Download">NumPy</A> and <A HREF="http://www.pythonware.com/products/pil/">PIL</A>, and preferably
+<A HREF="http://www.scipy.org/Download">NumPy</A>, and <A HREF="http://www.pythonware.com/products/pil/">PIL</A>, and preferably
 <A HREF="http://sourceforge.net/projects/matplotlib/files/">MatPlotLib</A>, 
 <A HREF="http://code.google.com/p/gmpy/">gmpy</A>, 
 <A HREF="http://www.scipy.org/Download">SciPy</A>, and 
  <A HREF="http://ipython.scipy.org/moin/">IPython</A> as
- well. 
-
-<P>Step-by-step instructions: <a href="macinstall.html">Mac OSX</a>;
+ well. Step-by-step instructions: <a href="macinstall.html">Mac
+ OSX</a>;
 <a href="aptinstall.html">Ubuntu</a> (and other apt-based systems).
 
-<P>Once you have installed those on your system, you can create a <code>topographica</code>
-script that uses your copy of Python:
+<P>Once you have installed the necessary environment, you can create
+a <code>topographica</code> script that uses your copy of Python:
 
 <blockquote><code>make PYTHON="/usr/bin/env python2.6" topographica-external-python</code></blockquote>
 
@@ -85,13 +99,13 @@ the <A HREF="#postinstall">after installation</A> section below.
 
 
 
-<H3>(2) Build all Topographica's dependencies</H3>
+<H4>(Option 2) Build all Topographica's dependencies</H4>
 
 Building Topographica's dependencies is usually straightforward on Mac
 and Linux. Before beginning, you need to ensure your system has the
 prerequisites described below.
 
-<H4><A NAME="mac-prerequisites">Mac OS X</A></H4>
+<H5><A NAME="mac-prerequisites">Mac OS X</A></H5>
 
 <P>Building Topographica on OS X should be straightforward. Assuming
 you are using OS X 10.6 (Snow Leopard), you need to install
@@ -107,7 +121,7 @@ documentation, you will also need imagemagick, transfig, and php (if
 these are not already installed).
 -->
 
-<H4><A NAME="linux-prerequisites">Linux</A></H4>
+<H5><A NAME="linux-prerequisites">Linux</A></H5>
 
 <P>Most Linux systems will already have the required libraries
 installed, so usually no action will be required here.
@@ -132,7 +146,7 @@ sometimes specific versions must be specified. Example for Ubuntu
 <A HREF="#building">Building</A> instructions below.
 
 
-<H4><A NAME="building">Building Topographica</A></H4>
+<H5><A NAME="building">Building Topographica</A></H5>
 
 <P>The instructions below assume you have followed any necessary
 platform-specific instructions described above. You will need a

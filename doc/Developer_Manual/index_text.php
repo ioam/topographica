@@ -65,9 +65,6 @@ HREF="mailto:&#106&#98&#101&#100&#110&#97&#114&#64&#105&#110&#102&#46&#101&#100&
 your username and what you want to do, and he'll tell you how to
 proceed from there. Alternatively, you can start immediately by using
 any version control system that can interact with SVN. We ourselves <A
-HREF="../Downloads/git.html">use and support Git</A>, but many version
-control systems also interact with SVN (e.g. <A
-HREF="http://doc.bazaar.canonical.com/latest/en/user-guide/svn_plugin.html">Bazaar</A>
-and <A
-HREF="http://mercurial.selenic.com/wiki/WorkingWithSubversion">Mercurial</A>).
+HREF="git.html">use and support Git</A>, but many version
+control systems also interact with SVN. 
 </DD> </DL>
