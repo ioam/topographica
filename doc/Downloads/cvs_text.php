@@ -11,7 +11,15 @@ SourceForge.net</A>.
 
 <P>The essentials for using SVN at SourceForge are described below;
 see the
-<A HREF="http://sourceforge.net/docman/display_doc.php?docid=31070&group_id=1">
+<!--CEBALERT: Not sure we should link to another confusing document that starts like this:
+"
+Note: This documentation is written for the Classic SourceForge system. The documentation for SVN on the SourceForge 2.0 Beta system is available here.
+
+Not sure if you have a Classic or Beta project? See this guide.
+"
+And doesn't contain any content relevant to users until half way down. We could maybe link to the #Access anchor?
+-->
+<A HREF="https://sourceforge.net/apps/trac/sourceforge/wiki/Subversion">
 SourceForge SVN documentation</A> for more details or if you have any
 difficulties.  You will need to run at least SVN 1.4 on your machine;
 SVN clients 1.3 and below will complain that they are too old to
