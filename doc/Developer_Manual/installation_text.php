@@ -7,15 +7,23 @@ own changes. Topographica's source code is held in a
 central <A HREF="http://subversion.tigris.org/">Subversion</A> (SVN)
 repository on <A HREF="http://sourceforge.net/projects/topographica">
 SourceForge.net</A>; the repository contains the files making up
-Topographica itself, plus source code versions of most of the various
-external libraries needed by Topographica.
+Topographica itself (including its documentation), plus source code
+versions of most of the various external libraries needed by
+Topographica.
 
-<P>The first step to installing a version-controlled copy of
-Topographica is to obtain a copy of this repository, either by using
-SVN as described in our <A HREF="../Downloads/cvs.html">SVN
-instructions</A>, or by using an alternative version control system
-that can interact with SVN. We ourselves also use and support the
-distributed version control system
+<P>Note that documentation may change between releases, so developers
+(and others) who want to use a version-controlled copy of Topographica
+should be reading the
+<A HREF="http://buildbot.topographica.org/doc/Developer_Manual/installation.html">
+nightly documentation build</A> rather than the previous release's
+documentation at topographica.org.
+
+<P>To install a version-controlled copy of Topographica, you first
+need to obtain a copy of the SVN repository, either by using SVN as
+described in our <A HREF="../Downloads/cvs.html">SVN instructions</A>,
+or by using an alternative version control system that can interact
+with SVN. We ourselves also use and support the distributed version
+control system
 <A HREF="http://git-scm.com">Git</A>; developers who wish to use this should instead
 follow our <A HREF="../Downloads/git.html">git instructions</A>.
 

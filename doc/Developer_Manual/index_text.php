@@ -7,6 +7,13 @@ of code to the project (which is, of course, strongly <a href="#joining">encoura
 written in the Python language. There are also some bits of C/C++ code
 in the simulator, which use different conventions.
 
+<P><em>Note that Topographica's documentation may change between
+releases, so developers should usually be reading either their locally
+built copy of the documentation, or the online <A
+HREF="http://buildbot.topographica.org/doc/Developer_Manual/index.html">
+nightly documentation build</A>. The documentation at topographica.org
+applies to the previous release, so may be out of date with respect to
+the current version of Topographica in SVN.</em>
 
 <P><DL COMPACT>
 
