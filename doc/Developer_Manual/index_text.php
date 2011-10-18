@@ -20,6 +20,9 @@ the current version of Topographica in SVN.</em>
 <P><DT><A href="installation.html"><strong>Installation instructions</strong></A></DT>
 <DD>Before starting, you will need a version-controlled copy of Topographica.
 
+<P><DT><A href="revisioncontrol.html"><strong>Revision control</strong></A></DT>
+<DD>How we keep track of changes to the code and other files</DD>
+
 <P><DT><A href="coding.html"><strong>General guidelines</strong></A></DT>
 <DD>General info on writing Python, plus Topographica-specific
 conventions such as guidelines for naming, comments, documentation,
@@ -42,9 +45,6 @@ parameters, units, and external imports.
 
 <P><DT><A href="memuse.html"><strong>Memory usage</strong></A></DT>
 <DD>How to measure memory usage and reduce it</DD>
-
-<P><DT><A href="revisioncontrol.html"><strong>Revision control</strong></A></DT>
-<DD>How we keep track of changes to the code and other files</DD>
 
 <P><DT><A href="refactoring.html"><strong>Refactoring/testing tips</strong></A></DT>
 <DD>Tips for improving existing code by refactoring</DD>
