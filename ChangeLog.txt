@@ -3213,14 +3213,6 @@
 	  doc/Developer_Manual/installation_text.php:
 	  Minor tidying.
 
-2010-07-07  antolikjan
-
-	* [r11141] contrib/JanA/LSCSM.py:
-	  new version
-
-	* [r11140] contrib/JanA/LSCSM.py:
-	  new version
-
 2010-07-07  ceball
 
 	* [r11139] topo/misc/genexamples.py:
@@ -3652,21 +3644,6 @@
 
 2010-06-04  antolikjan
 
-	* [r11079] contrib/cc_lesi_final.ty:
-	  small optimization
-
-	* [r11078] contrib/cc_lesi_final.ty:
-	  add init ring size parameter
-
-	* [r11077] contrib/surround_analysis.py:
-	  multiple plotting changes
-
-	* [r11076] contrib/pybrainstuff.py:
-	  changes
-
-	* [r11075] contrib/jacommands.py:
-	  small changes
-
 	* [r11074] topo/analysis/vision.py:
 	  small changes to complexity analysis
 
@@ -3706,110 +3683,15 @@
 	  external/m4-1.4.9.tar.gz:
 	  Added M4 (a not-always-available dependency of GMP).
 
-2010-05-24  antolikjan
-
-	* [r11066] contrib/JanA/glm.py:
-	  update
-
-	* [r11065] contrib/JanA/glm.py:
-	  update
-
-2010-05-20  antolikjan
-
-	* [r11064] contrib/JanA/glm.py:
-	  update
-
-	* [r11063] contrib/JanA/glm.py:
-	  update
-
-	* [r11062] contrib/JanA/noiseEstimation.py:
-	  update
-
-	* [r11061] contrib/modelfit.py:
-	  update
-
-2010-05-18  antolikjan
-
-	* [r11060] contrib/JanA/glm.py:
-	  update
-
 2010-05-18  ceball
 
 	* [r11059] topo/tests/utils.py:
 	  Added note.
 
-2010-05-17  antolikjan
-
-	* [r11058] contrib/JanA/glm.py:
-	  update
-
-	* [r11057] contrib/JanA/glm.py:
-	  update
-
-	* [r11056] contrib/JanA/glm.py:
-	  update
-
-	* [r11055] contrib/JanA/dataimport.py:
-	  update
-
-	* [r11054] contrib/JanA/glm.py:
-	  update
-
-2010-05-14  antolikjan
-
-	* [r11053] contrib/JanA/glm.py:
-	  update
-
-	* [r11052] contrib/JanA/glm.py:
-	  update
-
-	* [r11051] contrib/JanA/glm.py:
-	  update
-
-2010-05-13  antolikjan
-
-	* [r11050] contrib/JanA/dataimport.py:
-	  corrected cutoff
-
-	* [r11049] contrib/JanA/dataimport.py:
-	  corrected cutoff
-
-	* [r11048] contrib/JanA/glm.py:
-	  corrected bug with number of subplots
-
-2010-05-12  antolikjan
-
-	* [r11047] contrib/JanA/glm.py:
-	  update
-
-	* [r11046] contrib/modelfit.py:
-	  update
-
-	* [r11045] contrib/dd.py:
-	  update
-
-	* [r11044] contrib/JanA/LSCSM.py,
-	  contrib/JanA/dataimport.py,
-	  contrib/JanA/glm.py,
-	  contrib/JanA/noiseEstimation.py,
-	  contrib/JanA/sparsness_analysis.py,
-	  contrib/JanA/stim_comparison.py:
-	  reorganization of the fitting code
-
-2010-05-10  antolikjan
-
-	* [r11043] contrib/JanA/noiseEstimation.py:
-	  got rid of dependency
-
 2010-05-09  ceball
 
 	* [r11042] doc/buildbot/master.cfg:
 	  Added Ubuntu server buildslave (no X server installed).
-
-2010-05-07  antolikjan
-
-	* [r11041] contrib/JanA/glm.py:
-	  improvements
 
 2010-05-07  ceball
 
@@ -3837,45 +3719,6 @@
 	* [r11037] param/external.py:
 	  Removed dependency of param.external on Tkinter.
 
-2010-05-06  antolikjan
-
-	* [r11036] contrib/modelfit.py:
-	  changes
-
-	* [r11035] contrib/helper.py:
-	  image preprocessing
-
-	* [r11034] contrib/dd.py:
-	  module for organazing my analysis results
-
-2010-05-05  antolikjan
-
-	* [r11033] contrib/JanA/glm.py:
-	  correction
-
-	* [r11032] contrib/JanA/glm.py:
-	  small changes
-
-	* [r11031] contrib/JanA,
-	  contrib/JanA/__init__.py,
-	  contrib/JanA/__init__.pyc,
-	  contrib/JanA/glm.py,
-	  contrib/JanA/glm.pyc,
-	  contrib/JanA/noiseEstimation.py,
-	  contrib/JanA/noiseEstimation.pyc,
-	  contrib/JanA/stim_comparison.py,
-	  contrib/JanA/stim_comparison.pyc:
-	  with the increasing number of analysis files I added I decided to
-	  make a subdirectory for them
-
-	* [r11030] contrib/modelfit.py:
-	  lot of changes
-
-2010-04-14  antolikjan
-
-	* [r11029] contrib/modelfit.py:
-	  lot of changes
-
 2010-04-10  ceball
 
 	* [r11028] topo/command/basic.py:
@@ -3887,28 +3730,6 @@
 	* [r11027] contrib/lissom_audio.ty,
 	  topo/command/analysis.py:
 	  Removed svn tagging accidentally left in command.analysis
-
-	* [r11026] contrib/lissom_audio.ty:
-	  Updated connections to to calibrated values, put a HalfRectify on
-	  MGB.
-
-	* [r11025] contrib/lissom_audio.ty:
-	  Added calibration sheet to test out STRFs, resized all other
-	  sheets to calibrated dimensions, cochlea now 100 msecs by 10
-	  octaves.
-
-	* [r11024] contrib/lissom_audio.ty:
-	  Changed command line params (densities) to more appropraite
-	  values.
-
-	* [r11023] contrib/lissom_audio.ty:
-	  Updated audio input pattern to millsecond increments per
-	  timestep, cleaned up to use latest version of audio pattern
-	  generator.
-
-	* [r11022] contrib/lissom_audio.ty:
-	  Moved log gaussian and sigmoided difference of log gaussian to
-	  lissom_audio till the quirks can be worked out of them.
 
 	* [r11021] sounds/sine_waves/00020hz.wav,
 	  sounds/sine_waves/*.wav,
@@ -4074,10 +3895,6 @@
 	* [r10993] topo/command/analysis.py:
 	  Added class to measure frequency preference maps in mgb and a1.
 
-	* [r10992] contrib/lissom_audio.ty:
-	  Added imports and code for swapping window functions in
-	  lissom_audio
-
 2010-03-13  ceball
 
 	* [r10991] Makefile:
@@ -4094,22 +3911,12 @@
 	* [r10989] topo/misc/patternfn.py:
 	  Added a line to sigmoid to explain what is meant by axis.
 
-	* [r10988] contrib/lissom_audio.ty:
-	  updated lissom_audio to use new square wave files.
-
 	* [r10987] sounds/sine_waves/ReadMe.txt,
 	  sounds/square_waves/*.wav,
 	  sounds/square_waves/ReadMe.txt:
 	  Added ReadMe files to the sine and square wave sound file folders
 	  explaining the format and how they were generated. Added square
 	  waves for each frequency currently in sine waves.
-
-	* [r10986] contrib/lissom_audio.ty:
-	  Corrected sheet dimensions such that mgb and a1 aren't so small
-	  they only cover half the sheet below them. Each sheet is now
-	  smaller than the one below it by a perimeter of half a connection
-	  field. Updated so the new Audio function from topo.pattern.audio
-	  is employed. Removed cochlea aspect ratio code as its not useful.
 
 	* [r10985] topo/pattern/basic.py:
 	  Defined a new kind of smoothing window, rectangular, which
@@ -4310,11 +4117,6 @@
 
 2010-03-03  bilalkhancnsg
 
-	* [r10952] contrib/lissom_audio.ty:
-	  Modified the mgb afferent strength so a1 isn't flooded with
-	  input. Changed the mgb's weights on the cochlea so it better
-	  resembles known strf data.
-
 	* [r10951] sounds/daisy.wav:
 	  Added a new test sound: the song Daisy Bell, this allows us to
 	  see how the audio pattern generator holds up to a more complex
@@ -4350,12 +4152,6 @@
 	  parameter 'range' was duplication of the functionality provided
 	  by the parameter 'value'.
 
-	* [r10945] contrib/lissom_audio.ty:
-	  Changed the density parameter to density_multiplier so as to
-	  better convey its purpose. Changed the value of
-	  density_multiplier to 1.0 and the densities of the cochlea, mgbv
-	  and a1 sheets to reasonable values
-
 	* [r10944] topo/pattern/basic.py:
 	  Changed the name of GammaDistribution to Gamma. Gamma now
 	  utilises the SciPy implementation for the generalised gamma
@@ -4380,15 +4176,6 @@
 	  topo/misc/patternfn.py:
 	  CORRECTION TO REVISION 10936: misunderstood the CEBENHANCEMENT
 	  about visualising motion, changed the code to reflect this
-
-	* [r10940] contrib/lissom_audio.ty:
-	  Added a density parameter such that cochlea, mgbv and a1
-	  densities can all be multiplicatively modified through a single
-	  parameter on the command line. Changed cochlea, mgbv and a1
-	  densities to unit densities relative to each other. Changed
-	  dimensions of mgbv and a1 sheets to be rectangular and congruent
-	  to the cochlea. Added a SigmoidedDoG weights generator to the
-	  cochlea afferent connection and oriented and scaled it correctly
 
 	* [r10939] topo/pattern/basic.py:
 	  Added a Gamma Distribution class to utilise the gamma function
@@ -4431,16 +4218,6 @@
 	  external/Makefile:
 	  Upgraded Cython to 0.12.1.
 
-2010-02-22  antolikjan
-
-	* [r10931] contrib/jacommands.py:
-	  further changes to measre_histogram
-
-2010-02-21  antolikjan
-
-	* [r10930] contrib/jacommands.py:
-	  various changes to measure activity histogram
-
 2010-02-21  ceball
 
 	* [r10929] debian/install.ex,
@@ -4453,9 +4230,6 @@
 	  (Ubuntu package) Add tk-tile as dependency for Ubuntu 8.04.
 
 2010-02-18  ceball
-
-	* [r10927] contrib/lissom_audio.ty:
-	  Added normal svn properties.
 
 	* [r10926] doc/buildbot/master.cfg:
 	  (Buildbot) Fixed another typo.
@@ -4744,11 +4518,6 @@
 	* [r10864] topo/base/cf.py:
 	  Fixed CFPLearningFn call signature.
 
-2010-01-29  antolikjan
-
-	* [r10863] contrib/modelfit.py:
-	  changes
-
 2010-01-28  ceball
 
 	* [r10862] Makefile:
@@ -4776,12 +4545,6 @@
 	  dependencies that must be installed from elsewhere.
 	  
 	  (I.e. merge branch 'python26' from ceball_fiver.)
-
-2010-01-24  antolikjan
-
-	* [r10860]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  correction of standard retinal waves
 
 2010-01-16  bilalkhancnsg
 
@@ -4857,15 +4620,6 @@
 
 2010-01-09  bilalkhancnsg
 
-	* [r10848] contrib/lissom_audio.ty:
-	  Added connections (afferent from mgb) and AI sheet based on
-	  lissom, not accurate to AI yet, currently commented out till
-	  discussion as to most appropriate parameters
-
-	* [r10847] contrib/lissom_audio.ty:
-	  Dimensions of cochlea are now accurate, errors in cochlea
-	  orientation and connection corrected.
-
 2010-01-09  jbednar
 
 	* [r10846] ChangeLog.txt:
@@ -4875,15 +4629,6 @@
 	  Upgraded alert
 
 2010-01-05  antolikjan
-
-	* [r10844] contrib/surround_analysis.py:
-	  bug
-
-	* [r10843] contrib/surround_analysis.py:
-	  bug
-
-	* [r10842] contrib/surround_analysis.py:
-	  added FREQ parameter
 
 	* [r10841] topo/base/cf.py:
 	  bug correction
@@ -4900,11 +4645,6 @@
 	  arbitrary angle. The dafault values of the new parameters
 	  preserve
 	  the behaviour of the previous version of the pattern.
-
-2010-01-04  antolikjan
-
-	* [r10839] contrib/surround_analysis.py:
-	  small changes
 
 2009-12-29  ceball
 
@@ -4959,12 +4699,6 @@
 
 2009-12-11  antolikjan
 
-	* [r10833] contrib/modelfit.py:
-	  many many changes
-
-	* [r10832] contrib/surround_analysis.py:
-	  numerouse modifications
-
 	* [r10831] topo/command/pylabplots.py:
 	  added frequency to features of orientation contrast measurement
 
@@ -4972,14 +4706,6 @@
 
 	* [r10830] topo/misc/util.py:
 	  Added to comment.
-
-	* [r10829] contrib/parameter_analysis,
-	  contrib/parameter_analysis.cfg:
-	  Bug fixes, cleaning, and simplification.
-
-	* [r10828] contrib/lissom_oo_dr.ty:
-	  Updated to use global_params, and for changes to Topographica's
-	  code (e.g. output_fn -> output_fns).
 
 2009-12-03  ceball
 
@@ -4999,16 +4725,6 @@
 	  Updated parameter_search to allow it to be used simultaneously
 	  from the same directory by different machines (by distinguishing
 	  the names of generated scripts; this makes it clearer anyway).
-
-2009-12-01  bilalkhancnsg
-
-	* [r10824] contrib/lissom_audio.ty:
-	  Added audio pattern generator.
-
-2009-12-01  antolikjan
-
-	* [r10823] contrib/modelfit.py:
-	  load of changes
 
 2009-11-30  ceball
 
@@ -5057,11 +4773,6 @@
 	  Allow specification of order for params in run_batch's directory
 	  name.
 
-2009-11-29  antolikjan
-
-	* [r10811] contrib/surround_analysis.py:
-	  updatez
-
 2009-11-28  antolikjan
 
 	* [r10810] topo/command/pylabplots.py:
@@ -5069,9 +4780,6 @@
 
 	* [r10809] topo/command/pylabplots.py:
 	  bug correction in orientation contrast
-
-	* [r10808] contrib/surround_analysis.py:
-	  bug correction
 
 	* [r10807] topo/command/pylabplots.py:
 	  minor changes to orientation contrast analysis
@@ -5121,20 +4829,10 @@
 	  topo/tests/testparameterizedobject.py:
 	  Minor alteration to test to make it easier to subclass.
 
-2009-11-24  bilalkhancnsg
-
-	* [r10795] contrib/lissom_audio.ty:
-	  Initial version.
-
 2009-11-24  ceball
 
 	* [r10794] topo/pattern/audio.py:
 	  Cleaned up formatting (no other change).
-
-2009-11-24  antolikjan
-
-	* [r10793] contrib/gc_alissom.ty:
-	  made t_init external parameter in Relative HF
 
 2009-11-24  ceball
 
@@ -5143,11 +4841,6 @@
 	  Allow ConnectionFields to be instantiated easily by fixing
 	  default arguments to __init__.
 
-2009-11-22  antolikjan
-
-	* [r10791] contrib/jacommands.py:
-	  added lgn gain param
-
 2009-11-21  antolikjan
 
 	* [r10790] topo/transferfn/basic.py:
@@ -5155,9 +4848,6 @@
 
 	* [r10789] topo/transferfn/basic.py:
 	  added gain to HalfRectify
-
-	* [r10788] contrib/cc_lesi_final.ty:
-	  added V1 Inh gain
 
 2009-11-21  ceball
 
@@ -5181,16 +4871,6 @@
 
 	* [r10785] doc/Downloads/git_text.php:
 	  Added more git documentation.
-
-2009-11-20  antolikjan
-
-	* [r10784] contrib/cc_lesi_final.ty:
-	  lateral learning rate modification
-
-2009-11-18  antolikjan
-
-	* [r10783] contrib/cc_lesi_final.ty:
-	  lateral learning rate modification
 
 2009-11-18  ceball
 
@@ -5229,11 +4909,6 @@
 	  external/Makefile,
 	  mpidemo*:
 	  Mistakenly added files to trunk instead of branch
-
-2009-11-17  antolikjan
-
-	* [r10776] contrib/surround_analysis.py:
-	  bug correction
 
 2009-11-17  ceball
 
@@ -5297,32 +4972,6 @@
 	  Updated topo.pattern.audio and its dependencies to the stage that
 	  at least the Audio PatternGenerator can be called without error.
 
-2009-11-15  antolikjan
-
-	* [r10762] contrib/gc_alissom.ty:
-	  changes
-
-2009-11-14  antolikjan
-
-	* [r10761] contrib/modelfit.py:
-	  parameter changes
-
-2009-11-13  judelaw
-
-	* [r10760] contrib/jacommands.py:
-	  added surround size parameter to AddGC
-
-2009-11-12  antolikjan
-
-	* [r10759] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10758] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10757] contrib/modelfit.py:
-	  parameter changes
-
 2009-11-12  jbednar
 
 	* [r10756] topo/base/cf.py,
@@ -5332,17 +4981,6 @@
 	  Fix Projection Activity plots to show the correct label for the
 	  source of the projection
 
-2009-11-12  antolikjan
-
-	* [r10755] contrib/modelfit.py:
-	  parameter changes
-
-	* [r10754] contrib/modelfit.py:
-	  parameter changes
-
-	* [r10753] contrib/surround_analysis.py:
-	  bug correction
-
 2009-11-12  ceball
 
 	* [r10752] topo/tests/testplotfilesaver.py:
@@ -5350,22 +4988,6 @@
 
 	* [r10751] topo/tests/testplotfilesaver.py:
 	  Improved error message.
-
-2009-11-12  antolikjan
-
-	* [r10750] contrib/surround_analysis.py:
-	  bug correction
-
-2009-11-11  antolikjan
-
-	* [r10749] contrib/surround_analysis.py:
-	  changed the orientation contrast preffered orientation
-	  computation
-
-2009-11-10  antolikjan
-
-	* [r10748] contrib/modelfit.py:
-	  parameter changes
 
 2009-11-10  ceball
 
@@ -5381,19 +5003,6 @@
 	  Added support for git and bzr version control systems when
 	  recording diffs.
 
-2009-11-10  antolikjan
-
-	* [r10744] contrib/jacommands.py:
-	  parameter changes
-
-	* [r10743] contrib/modelfit.py:
-	  parameter changes
-
-2009-11-07  antolikjan
-
-	* [r10742] contrib/modelfit.py:
-	  added complex cell analysis stuff
-
 2009-11-07  ceball
 
 	* [r10741] param/tk.py:
@@ -5402,11 +5011,6 @@
 	* [r10740] topo/command/analysis.py:
 	  Fix for SF.net #2872925: no more 'Projection Activity errors for
 	  mousing'.
-
-2009-11-06  antolikjan
-
-	* [r10739] contrib/modelfit.py:
-	  added complex cell analysis stuff
 
 2009-11-04  kkudryavtsev
 
@@ -5419,14 +5023,6 @@
 	* [r10737] examples/lissom.ty:
 	  Added notes about some known problems with the CR model in this
 	  file (fixed in other versions).
-
-2009-11-04  antolikjan
-
-	* [r10736] contrib/modelfit.py:
-	  changes
-
-	* [r10735] contrib/modelfit.py:
-	  changes
 
 2009-11-04  ceball
 
@@ -5447,20 +5043,6 @@
 	  external/PyFlakes-divmod_r17780.tar.gz,
 	  external/pyflakes-0.3.0.tar.gz:
 	  Updated PyFlakes to a recent SVN version.
-
-2009-11-04  antolikjan
-
-	* [r10729] contrib/modelfit.py:
-	  changes
-
-	* [r10728] contrib/modelfit.py:
-	  changes
-
-	* [r10727] contrib/modelfit.py:
-	  bug correction
-
-	* [r10726] contrib/modelfit.py:
-	  change of dataset#
 
 2009-11-03  ceball
 
@@ -5492,23 +5074,10 @@
 	* [r10720] external/Makefile:
 	  Fixed typo.
 
-2009-11-03  antolikjan
-
-	* [r10719] contrib/surround_analysis.py:
-	  changed default contrasts
-
-	* [r10718] contrib/modelfit.py:
-	  change of dataset#
-
 2009-11-03  ceball
 
 	* [r10717] external/Makefile:
 	  Fixed system MPI build of mpi4py, and added notes.
-
-2009-11-03  antolikjan
-
-	* [r10716] contrib/modelfit.py:
-	  change of dataset#
 
 2009-11-03  ceball
 
@@ -5519,48 +5088,11 @@
 	  added a second mpi4py section, for using the system MPI (which I
 	  couldn't get to work on DICE).
 
-2009-11-03  antolikjan
-
-	* [r10714] contrib/modelfit.py:
-	  change of dataset#
-
-	* [r10713] contrib/modelfit.py:
-	  change of dataset#
-
-	* [r10712] contrib/modelfit.py:
-	  changes
-
-	* [r10711] contrib/modelfit.py:
-	  changes
-
 2009-11-02  ceball
 
 	* [r10710] external/Makefile:
 	  Added sections for OpenMPI and mpi4py (but haven't uploaded
 	  binaries).
-
-2009-11-02  antolikjan
-
-	* [r10709] contrib/modelfit.py:
-	  change of datasets
-
-	* [r10708] contrib/modelfit.py:
-	  change of datasets
-
-	* [r10707] contrib/modelfit.py:
-	  change of datasets
-
-	* [r10706] contrib/modelfit.py:
-	  change of datasets
-
-	* [r10705] contrib/modelfit.py:
-	  change of datasets
-
-	* [r10704] contrib/modelfit.py:
-	  change of datasets
-
-	* [r10703] contrib/modelfit.py:
-	  change of datasets
 
 2009-11-01  jbednar
 
@@ -5576,11 +5108,6 @@
 	  Allow printing of full traceback from errors that occur during
 	  gui callbacks.
 
-2009-11-01  antolikjan
-
-	* [r10699] contrib/cc_lesi_final_new.ty:
-	  cclesi with inhibitory neurons in L4C
-
 2009-11-01  ceball
 
 	* [r10698] param/tk.py,
@@ -5588,17 +5115,6 @@
 	  topo/tests/testtkparameterizedobject.py,
 	  topo/tkgui/__init__.py:
 	  Allow param.tk to work with an external Tkinter.Tk instance.
-
-2009-11-01  antolikjan
-
-	* [r10697] contrib/cc_lesi_final.ty:
-	  added treshold to V1Complex
-
-	* [r10696] contrib/cc_lesi_final.ty:
-	  bug correction
-
-	* [r10695] contrib/cc_lesi_final.ty:
-	  switched off noise in V1Complex
 
 2009-10-31  ceball
 
@@ -5619,27 +5135,6 @@
 	  contrib/rgbimages.py:
 	  Changes in contrib/ missed when moving topo.param to param.
 
-2009-10-31  antolikjan
-
-	* [r10692] contrib/surround_analysis.py:
-	  change title in neural dynamics figure
-
-2009-10-30  antolikjan
-
-	* [r10691] contrib/surround_analysis.py:
-	  change title in neural dynamics figure
-
-	* [r10690] contrib/surround_analysis.py:
-	  change of parameters
-
-2009-10-29  antolikjan
-
-	* [r10689] contrib/jacommands.py:
-	  bug correction
-
-	* [r10688] contrib/jacommands.py:
-	  change of parameters
-
 2009-10-29  ceball
 
 	* [r10687] doc/Future_Work/current_text.php:
@@ -5654,37 +5149,6 @@
 	* [r10685] doc/Forums/index_text.php:
 	  Replaced tracker links with ones that show only open items, and
 	  have the items ordered by priority.
-
-2009-10-29  antolikjan
-
-	* [r10684] contrib/surround_analysis.py:
-	  change of parameters
-
-	* [r10683] contrib/surround_analysis.py:
-	  change of parameters
-
-	* [r10682] contrib/surround_analysis.py:
-	  change of parameters
-
-	* [r10681] contrib/surround_analysis.py:
-	  change of parameters
-
-	* [r10680] contrib/surround_analysis.py:
-	  change of parameters
-
-	* [r10679] contrib/cc_lesi_final.ty:
-	  made feedback delay external parameter
-
-	* [r10678] contrib/cc_lesi_final.ty:
-	  made smoothening external parameter
-
-2009-10-28  antolikjan
-
-	* [r10677] contrib/surround_analysis.py:
-	  added saving of settling figure
-
-	* [r10676] contrib/cc_lesi_final.ty:
-	  made time constant external parameter
 
 2009-10-28  ceball
 
@@ -5856,9 +5320,6 @@
 
 2009-10-27  jbednar
 
-	* [r10667] contrib/surround_analysis.py:
-	  Fixed missing newline at end of file
-
 	* [r10666] topo/pattern/basic.py:
 	  Fixed TwoRectangles to allow non-square patterns
 
@@ -5867,112 +5328,10 @@
 	* [r10665] topo/sheet/basic.py:
 	  made continuos to activate during learning step
 
-	* [r10664] contrib/surround_analysis.py:
-	  parameter changes
-
-	* [r10663] contrib/surround_analysis.py:
-	  parameter changes
-
-	* [r10662] contrib/surround_analysis.py:
-	  moved legend
-
-	* [r10661] contrib/surround_analysis.py:
-	  moved legend
-
-2009-10-26  antolikjan
-
-	* [r10660] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10659] contrib/surround_analysis.py:
-	  parameter changes
-
-	* [r10658] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10657] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10656] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10655] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10654] contrib/surround_analysis.py:
-	  adadded run_dynamics_analysis
-
-	* [r10653] contrib/surround_analysis.py:
-	  added neuron analysis function
-
-	* [r10652] contrib/surround_analysis.py:
-	  added neuron analysis function
-
-2009-10-18  antolikjan
-
-	* [r10651] contrib/surround_analysis.py:
-	  change of parameters
-
-2009-10-17  antolikjan
-
-	* [r10650] contrib/cc_lesi_final.ty:
-	  more parameter changes
-
-	* [r10649] contrib/cc_lesi_final.ty:
-	  delay paremeter change
-
-2009-10-16  antolikjan
-
-	* [r10648] contrib/cc_lesi_final.ty:
-	  Adding newest version of CCLESI
-
-	* [r10647] contrib/surround_analysis.py:
-	  bugg correction
-
-	* [r10646] contrib/surround_analysis.py:
-	  changes
-
-	* [r10645] contrib/surround_analysis.py:
-	  changes
-
-	* [r10644] contrib/surround_analysis.py:
-	  changes
-
-	* [r10643] contrib/surround_analysis.py:
-	  changes
-
-2009-10-14  antolikjan
-
-	* [r10642] contrib/modelfit.py:
-	  moved Image to FileImage
-
-	* [r10641] contrib/modelfit.py:
-	  changes
-
-	* [r10640] contrib/surround_analysis.py:
-	  bug correction
-
-2009-10-13  antolikjan
-
-	* [r10639] contrib/surround_analysis.py:
-	  bug correction
-
-	* [r10638] contrib/surround_analysis.py:
-	  changes
-
-	* [r10637] contrib/surround_analysis.py:
-	  change of parameters
-
 2009-10-12  ceball
 
 	* [r10636] doc/buildbot/master.cfg:
 	  cider.csres was updated to OS X 10.6 (Snow Leopard).
-
-2009-10-11  antolikjan
-
-	* [r10635]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  corrected V1Simple lateral connections
 
 2009-10-09  ceball
 
@@ -6015,12 +5374,6 @@
 
 	* [r10630] doc/Downloads/git_text.php:
 	  Fixed a few formatting errors.
-
-2009-10-05  antolikjan
-
-	* [r10629]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  Image -> FileImage
 
 2009-10-04  ceball
 
@@ -6117,12 +5470,6 @@
 	  topo/pattern/image.py:
 	  Removed old 'Image=FileImage' hack.
 
-2009-10-01  antolikjan
-
-	* [r10609]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  Removed ExpLinear
-
 2009-09-30  ceball
 
 	* [r10608] doc/Downloads/git_text.php:
@@ -6189,26 +5536,10 @@
 	  Upgraded numpy and scipy, and edited the example scipy-site.cfg
 	  to be suitable for DICE.
 
-2009-09-22  antolikjan
-
-	* [r10593] contrib/surround_analysis.py:
-	  further modifications
-
 2009-09-22  jbednar
 
 	* [r10592] topo/plotting/plotgroup.py:
 	  Trivial fixes to comments and docstrings
-
-2009-09-21  antolikjan
-
-	* [r10591]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  changes to lateral connectivity in layer 4C
-
-2009-09-19  antolikjan
-
-	* [r10590] contrib/cc_lesi_oo_or_new.ty:
-	  added treshold to V1 complex
 
 2009-09-18  ceball
 
@@ -6235,25 +5566,10 @@
 	  If Topographica doesn't have 'grab', don't try to get grab for
 	  window causing the error.
 
-2009-09-16  antolikjan
-
-	* [r10584] contrib/surround_analysis.py:
-	  few more changes
-
 2009-09-16  ceball
 
 	* [r10583] doc/buildbot/master.cfg:
 	  Added archive-making slave.
-
-2009-09-15  antolikjan
-
-	* [r10582] contrib/surround_analysis.py:
-	  few more changes
-
-2009-09-14  antolikjan
-
-	* [r10581] contrib/surround_analysis.py:
-	  few more changes
 
 2009-09-13  ceball
 
@@ -6276,40 +5592,6 @@
 	* [r10575] topo/command/analysis.py:
 	  Renamed variable (to avoid potential clash). Should be no visible
 	  change.
-
-2009-09-10  antolikjan
-
-	* [r10574] contrib/surround_analysis.py:
-	  few parameter changes
-
-2009-09-08  antolikjan
-
-	* [r10573] contrib/modelfit.py:
-	  further improvements
-
-	* [r10572]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  further improvements
-
-2009-09-07  antolikjan
-
-	* [r10571] contrib/modelfit.py:
-	  further improvements
-
-	* [r10570] contrib/surround_analysis.py:
-	  moved surround analysis from jaccomands into sepparate file
-
-2009-09-06  antolikjan
-
-	* [r10569] contrib/modelfit.py:
-	  few more changes
-
-	* [r10568] contrib/modelfit.py:
-	  few more changes
-
-	* [r10567]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  few more changes
 
 2009-09-02  ceball
 
@@ -6357,81 +5639,6 @@
 	  Hacked support for exclusive right and top bounds when editing
 	  parameters in the GUI.
 
-2009-08-26  antolikjan
-
-	* [r10557]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  new external parameter lgn_tresh
-
-2009-08-22  antolikjan
-
-	* [r10556]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  new external parameter lgn_density
-
-2009-08-21  antolikjan
-
-	* [r10555]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  new external parameter RingScale
-
-	* [r10554]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  further changes
-
-	* [r10553]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  further changes
-
-2009-08-20  antolikjan
-
-	* [r10552]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  further changes
-
-2009-08-18  antolikjan
-
-	* [r10551] contrib/jacommands.py:
-	  surround modulation analysis, change of contrast parameters
-
-2009-08-14  antolikjan
-
-	* [r10550]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  added external parameterers and made latencies shorter
-
-	* [r10549] contrib/jacommands.py:
-	  surround modulation analysis minor changes
-
-2009-08-13  antolikjan
-
-	* [r10548] contrib/jaanalysis.py:
-	  lot of changes imported from Eddie version
-
-2009-08-07  antolikjan
-
-	* [r10547] contrib/jacommands.py:
-	  Further improvements to the surround modulation analysis
-
-2009-08-06  antolikjan
-
-	* [r10546] contrib/jacommands.py:
-	  Improvements to the surround modulation analysis
-
-2009-08-04  antolikjan
-
-	* [r10545]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  Parameter changes
-
-	* [r10544]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  Parameter changes
-
-	* [r10543]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  Parameter changes
-
 2009-08-03  jbednar
 
 	* [r10542] examples/lissom.ty:
@@ -6441,18 +5648,6 @@
 
 	* [r10541] topo/command/analysis.py:
 	  Added PhaseDisparity Preference&Selectivity plot
-
-2009-08-03  antolikjan
-
-	* [r10540] contrib/jacommands.py:
-	  Corrected some bugs in surround modulation measurements
-
-	* [r10539] contrib/cc_lesi_oo_or_new.ty:
-	  Addapted to new GC parameters
-
-	* [r10538]
-	  contrib/cc_lissom_oo_or_simple_rv.ty:
-	  Made to use expander
 
 2009-08-03  jbednar
 
