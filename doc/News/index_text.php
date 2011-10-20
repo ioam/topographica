@@ -45,11 +45,11 @@
 <dt>Component library:</dt>
 <dd>
   <div class="i2">- PatternGenerators:
-  <?php classref('topo.pattern.basic','SpiralGrating')?>,
-  <?php classref('topo.pattern.basic','HyperbolicGrating')?>,
-  <?php classref('topo.pattern.basic','RadialGrating')?>,
-  <?php classref('topo.pattern.basic','ConcentricRings')?>,
-  <?php classref('topo.pattern.basic','ArcCentered')?>,
+<!--  <?php classref('topo.pattern.basic','SpiralGrating')?>, -->
+<!--  <?php classref('topo.pattern.basic','HyperbolicGrating')?>, -->
+<!--  <?php classref('topo.pattern.basic','RadialGrating')?>, -->
+<!--  <?php classref('topo.pattern.basic','ConcentricRings')?>, -->
+<!--  <?php classref('topo.pattern.basic','ArcCentered')?>, -->
   <?php classref('topo.pattern.basic','Sigmoid')?> (half plane with sigmoidal border),
   <?php classref('topo.pattern.basic','LogGaussian')?> (Gaussian with skew),
   <?php classref('topo.pattern.basic','SigmoidedDoGs')?> (auditory RF with two DoGs multiplied by a sigmoid),
