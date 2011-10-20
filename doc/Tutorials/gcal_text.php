@@ -12,8 +12,8 @@ GCAL model (paper to appear), which is related to the
 model</a> but works more robustly with fewer parameters thanks to 
 including contrast gain control (GC) in the LGN and homeostatic
 adaptation (A) in V1. Although we focus on one model in this tutorial,
-Topographica already supports many other models and is easily
-extensible for models not yet included.
+Topographica provides support for many other models and is easily
+extensible for models not yet supported.
 </p>
 
 <p>This tutorial assumes that you have already followed the

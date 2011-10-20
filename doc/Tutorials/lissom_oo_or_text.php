@@ -6,8 +6,10 @@ This tutorial shows how to use the
 simple orientation map simulation using test patterns and weight
 plots.  This particular example uses a <a
 href="http://homepages.inf.ed.ac.uk/jbednar/research.html">LISSOM model</a>
-cortex, although Topographica supports many other models and is easily
+cortex.   Although we focus on one model in this tutorial,
+Topographica provides support for many other models and is easily
 extensible for models not yet supported.
+
 </p>
 
 <p>This tutorial assumes that you have already followed the
