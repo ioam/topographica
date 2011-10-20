@@ -1,9 +1,3147 @@
-2010-07-09  jbednar
+2011-10-18  ceball
 
-	* [r11154] topo/command/analysis.py:
+	* [r11793]
+	  doc/Developer_Manual/index_text.php:
+	  Moved the revision control section up the list.
+
+	* [r11792]
+	  doc/Downloads/cvs_text.php:
+	  Updated SourceForge SVN instructions link.
+
+	* [r11791] doc/Developer_Manual,
+	  doc/Developer_Manual/git_text.php,
+	  doc/Developer_Manual/index_text.php,
+	  doc/Developer_Manual/installation_text.php,
+	  doc/Developer_Manual/revisioncontrol_text.php,
+	  doc/Downloads/cvs_text.php, doc/Downloads/git_text.php:
+	  Tried to integrate git more clearly into the developer
+	  instructions.
+
+	* [r11790]
+	  doc/Developer_Manual/index_text.php,
+	  doc/Developer_Manual/installation_text.php:
+	  Added note to developers/users of svn about reading
+	  documentation at buildbot.topographica.org/doc.
+
+2011-10-17 ceball
+
+	* [r11789]
+	  Makefile:
+	  Call debsign separately in attempt to get signing to use
+	  gpg-agent
+	  (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=322208).
+
+	* [r11788]
+	  Makefile:
+	  Try adding options to debuild to get it to use gpg key.
+
+	* [r11787]
+	  Makefile:
+	  Changed my GPGKEY (trying to get deb uploads to work).
+
+2011-10-11 dstefanov
+
+	* [r11786]
+	  external/tcl8.5.10-src.tar.gz:
+	  Make tcl8.5.10-src.tar.gz a binary file
+
+2011-10-09 dstefanov
+
+	* [r11785]
+	  external/Makefile,
+	  external/tcl8.5.10-src.tar.gz,
+	  external/tcl8.5.5-src.tar.gz:
+	  Upgrade tcl 8.5.5 -> 8.5.10
+
+	* [r11784]
+	  topo/numbergen/basic.py,
+	  topo/tests/testnumbergen.py:
+	  Tentative fix for bug 2802194
+
+	* [r11783]
+	  topo/misc/commandline.py:
+	  Add IPython 0.11 support
+
+	* [r11782]
+	  topo/tests/testFilename.txt:
+	  Fix doctest on Windows
+
+2011-10-09 ceball
+
+	* [r11781]
+	  doc/buildbot/master.cfg:
+	  Updated paths.
+
+2011-10-07 ceball
+
+	* [r11780]
+	  doc/buildbot/master.cfg:
+	  Upgraded to EPD 7.1 on jupiter3.
+
+2011-10-06 ceball
+
+	* [r11779]
+	  doc/Downloads/git_text.php:
+	  Safer denyNonFastforwards setting for SF.net repositories.
+
+	* [r11778]
+	  Makefile:
+	  Restored all tests targets to Makefile.
+
+	* [r11777]
+	  doc/Downloads/git_text.php:
+	  Clarified admin procedure for making a git repository.
+
+	* [r11776]
+	  doc/buildbot/master.cfg:
+	  Each builder uses a separate /home/ceball to reduce
+	  interference as much as possible (including interference
+	  with the actual user of the machine, if the buildslave is
+	  not running as a separate user.
+
+2011-10-05 ceball
+
+	* [r11775]
+	  topo/tests/runtests.py:
+	  Print names of targets that had errors.
+
+	* [r11774]
+	  topo/tests/runtests.py:
+	  Fixed target error count (was counting all commands that
+	  failed).
+
+	* [r11773]
+	  topo/tests/lissom_oo_or_od_dr_cr_dy_sf_000010.00.typ:
+	  As the last version, but saved on a machine that has gmpy
+	  installed (to ensure gmpy support works where gmpy isn't
+	  available.
+
+	* [r11772]
+	  examples/lissom.ty:
+	  Fix pickling of h_to_*() functions.
+
+	* [r11771]
+	  topo/tests/test_script.py:
+	  Switch to Gaussian dataset so as not to rely on having
+	  natural image database present.
+
+	* [r11770]
+	  MANIFEST.in,
+	  setup.py:
+	  Include lissom snapshot (test data) in packages.
+
+	* [r11769]
+	  Makefile:
+	  Keep the test DATA files in public distributions; necessary
+	  to run results tests.
+
+	* [r11768]
+	  Makefile:
+	  Removed from distclean files that are no longer ever
+	  created.
+
+	* [r11767]
+	  MANIFEST.in:
+	  Attempt to get test data included in packages.
+
+	* [r11766]
+	  topo/tests/runtests.py:
+	  Added comment.
+
+	* [r11765]
+	  topo/tests/lissom_oo_or_od_dr_cr_dy_sf_000010.00.typ:
+	  Modified so that snapshot does not use natural images.
+	  (Required modification to h_to_*() functions.)
+
+2011-10-04 ceball
+
+	* [r11764]
+	  Makefile:
+	  Added note.
+
+	* [r11763]
+	  Makefile:
+	  Made pyflakes option test all of Topographica.  Tried to
+	  make lint-base include param but ignore param/tk.py and
+	  param/external.py.
+
+	* [r11762]
+	  topo/tests/runtests.py:
+	  Temporarily don't test lissom_fsa (needs special case for
+	  running).
+
+	* [r11761]
+	  topo/tests/runtests.py:
+	  Can't import TRAINSCRIPTS from setup.py in some tar.gz
+	  versions of Topographica.  Not sure why (file not present?).
+
+	* [r11760]
+	  topo/tests/runtests.py:
+	  Change missed from previous commit.
+
+	* [r11759]
+	  _setup.py,
+	  setup.py:
+	  Removed _setup.py.
+
+	* [r11758]
+	  doc/buildbot/master.cfg:
+	  Various changes that have been running on buildbot for a
+	  while, plus reinstating performance tests.
+
+	* [r11757]
+	  Makefile:
+	  No error exit from check-base.
+
+	* [r11756]
+	  Makefile,
+	  examples/Makefile,
+	  topo/tests/README.txt,
+	  topo/tests/runtests.py,
+	  topo/tests/test_script.py:
+	  Clean up test running.
+
+2011-10-01 ceball
+
+	* [r11755]
+	  Makefile,
+	  topo/tests/runtests.py:
+	  Added optional overall timing option to runtests (as was in
+	  Makefile).
+
+	* [r11754]
+	  Makefile,
+	  topo/tests/runtests.py,
+	  topo/tests/test_script.py:
+	  Moved speed tests out of Makefile into runtests.
+	  Intermediate checkin: need to clean up.
+
+2011-08-24 bilal-khan
+
+	* [r11741]
+	  contrib/al_audio,
+	  topo/pattern/basic.py:
+	  script changes to al_audio so strf responds to changes in
+	  signal, made sigmoidedDoLG divisiveL1Normalised
+
+2011-08-21 bilal-khan
+
+	* [r11740]
+	  contrib/al_audio,
+	  topo/command/analysis.py:
+	  Added new al_audio folder and changed pattern presentation
+	  for auditory maps to also have the present at sheet units
+	  option, now called log band mapper
+
+2011-07-31 ceball
+
+	* [r11736]
+	  _setup.py,
+	  setup.py,
+	  topo/tests/runtests.py:
+	  _setup.py: temporary place to collect all declarations
+	  together (version number, scripts to distribute, etc).
+
+	* [r11735]
+	  topo/tests/runtests.py:
+	  Print list of tests to be run.
+
+	* [r11734]
+	  topo/tests/runtests.py:
+	  Adding missing coverage command.
+
+2011-07-26 ceball
+
+	* [r11733]
+	  MANIFEST.in:
+	  Try to fix data file inclusion.
+
+	* [r11732]
+	  MANIFEST.in:
+	  Added test data files.
+
+	* [r11731]
+	  setup.py:
+	  Fixed typo in previous commit.
+
+	* [r11730]
+	  external/Makefile:
+	  Renamed EPYDOC to EPYDOC3 to avoid conflict with EPYDOC in
+	  ../Makefile.
+
+	* [r11729]
+	  setup.py:
+	  Include test data in setup.py package.
+
+	* [r11728]
+	  Makefile:
+	  Force external python to be specified for
+	  topographica-external-python.
+
+	* [r11727]
+	  doc/Makefile:
+	  Allow epydoc's path to be specified.
+
+2011-07-22 ceball
+
+	* [r11726]
+	  topo/tests/runtests.py:
+	  Fixed snapshots target.
+
+	* [r11725]
+	  topo/tests/runtests.py:
+	  Fixed scriptrepr target.
+
+	* [r11724]
+	  topo/tests/runtests.py:
+	  Collect exit status to report errors from tests.
+
+	* [r11723]
+	  doc/buildbot/index.html,
+	  doc/buildbot/master.cfg:
+	  Updated buildbot to match Makefile changes.
+
+	* [r11722]
+	  topo/tests/runtests.py:
+	  Added start() function.
+
+	* [r11721]
+	  Makefile,
+	  runtests.py,
+	  topo/tests/runtests.py:
+	  Moved runtests.py into topo/tests.
+
+	* [r11720]
+	  Makefile:
+	  Added missing quotation marks.
+
+	* [r11719]
+	  Makefile:
+	  Missing path to python for setup.py build.
+
+	* [r11718]
+	  Makefile,
+	  runtests.py:
+	  Moved many Makefile test commands into a Python script.
+
+2011-07-20 ceball
+
+	* [r11717]
+	  topo/misc/legacy.py:
+	  Fix failing snapshots test: topo.pattern.basic.rectangular
+	  was removed, but it's the default value for
+	  PowerSpectrum.windowing_function in the test snapshot.  I'm
+	  assuming nobody cares about that.
+
+2011-07-19 ceball
+
+	* [r11716]
+	  external/Makefile:
+	  Renamed PYTHON to PYTHON2 to avoid conflict with PYTHON used
+	  in ../Makefile.
+
+	* [r11715]
+	  Makefile,
+	  doc/Developer_Manual/installation_text.php:
+	  'make OTHER_PYTHON=...  topographica-other-python' is now
+	  'make PYTHON=...  topographica-other-python'.
+	  setup.py-based packages can now be built using any Python
+	  (also specified as PYTHON= argument to Makefile).
+
+	* [r11714]
+	  doc/buildbot/dot-dput.cf:
+	  Change missed from r11713.
+
+	* [r11713]
+	  Makefile,
+	  debian/control:
+	  Move to primary deb target to Ubuntu Natty (build process
+	  not yet tested).  Remove Karmic and Jaunty backports.
+	  Specify 2.5<=Python<2.7.
+
+2011-07-19 bilal-khan
+
+	* [r11711]
+	  topo/pattern/audio.py:
+	  Changed CochlearSpectrogram to LogSpectrogram, added a param
+	  for log base.  Removed AuditorySpectrogram, the new
+	  LogSpectrogram will cover it except for decibel output.
+	  Hopefully the units project will be a success and cover the
+	  decibel side of things.Changed
+	  CochlearSpectrogramWithAmplification to
+	  ModulatedLogSpectrogram.  Added a param for a modulation
+	  function.
+
+	* [r11710]
+	  topo/pattern/basic.py:
+	  Added DivisiveNormalisationL1 to DifferenceOfGaussians, and
+	  SigmoidedDoLG.
+
+	* [r11709]
+	  topo/command/analysis.py:
+	  Moved auditory preference map measurement functions into
+	  their own submenu.
+
+2011-07-19 ceball
+
+	* [r11708]
+	  topo/base/simulation.py:
+	  Changed missed from r11706.
+
+2011-07-18 ceball
+
+	* [r11707]
+	  topo/base/simulation.py:
+	  Clarified a comment.
+
+	* [r11706]
+	  topo/__init__.py,
+	  topo/base/simulation.py,
+	  topo/ep/basic.py,
+	  topo/misc/generatorsheet.py,
+	  topo/sheet/basic.py,
+	  topo/sheet/lissom.py,
+	  topo/sheet/saccade.py,
+	  topo/tests/testfixedpointnumber.txt,
+	  topo/tests/testgmpynumber.txt:
+	  Ensure times are converted to simulation time's type rather
+	  than relying on the type of the outcome of operations such
+	  as add(number,simulation time) to be simulation time's type.
+	  Allows newer versions of gmpy 1 to work for simulation's
+	  time (see
+	  http://code.google.com/p/gmpy/issues/detail?id=44).
+
+	* [r11705]
+	  topo/transferfn/misc.py:
+	  Added ALERT.
+
+2011-07-13 ceball
+
+	* [r11703]
+	  param/tk.py:
+	  (Should have been part of previous commit) Keep externally
+	  used 'cache' attribute of string-object translator the same.
+
+	* [r11702]
+	  param/tk.py:
+	  String-object translators now support non-hashable values
+	  (e.g.  arrays).  Fixes sf.net #3364823.
+
+2011-07-12 ceball
+
+	* [r11701]
+	  param/__init__.py:
+	  Change concrete_descendents to work on classes of any type,
+	  not just Parameterized classes.
+
+2011-07-08 bilal-khan
+
+	* [r11699]
+	  topo/pattern/audio.py:
+	  Changed AudioFolder's default folder to normalised sine
+	  waves.  Renamed AuditorySpectrogram to DecibelSpectrogram.
+	  Renamed OctaveSpectrogram and
+	  OctaveSpectrogramWithAmplification to CochlearSpectrogram
+	  and CochlearSpectrogramWithAmplification respectively,
+	  changed the way they sum frequencies to be more cochlear
+	  like (normalise by non zero count).  Renamed Cochleogram to
+	  LyonsCochleogram.
+
+	* [r11698]
+	  topo/pattern/basic.py:
+	  Parameter tweaks on DifferenceOfGaussians, SigmoidedDoG,
+	  SigmoidedDoLG, PowerSpectrum to make them look pretty in a
+	  gui.  Modified spectrogram such that one can define a min &
+	  max latency & the available latency range will be rescaled.
+
+	* [r11697]
+	  topo/pattern/basic.py:
+	  Changed non zero count method in PowerSpectrum to one
+	  available in all versions of numpy.
+
+2011-07-08 ceball
+
+	* [r11696]
+	  topo/misc/inlinec.py:
+	  Added ALERT.
+
+2011-07-07 bilal-khan
+
+	* [r11695]
+	  sounds/complex/twilight_section.wav:
+	  Added interesting subsection of twilight.wav to complex
+	  folder.
+
+2011-07-06 ceball
+
+	* [r11694]
+	  doc/buildbot/master.cfg:
+	  Various updates that have been running on buildbot for a
+	  while (beginnings of tests for setup.py installs, Windows 7,
+	  EPD).  Also added Ubuntu Natty server (no X) slave.
+
+	* [r11693]
+	  doc/Developer_Manual/installation_text.php:
+	  Fixed ALERT about build-essential.
+
+2011-07-05 bilal-khan
+
+	* [r11692]
+	  topo/pattern/audio.py:
+	  Placed the method convert_to_decibels outside
+	  AuditorySpectrogram as it's useful elsewhere.  Corrected
+	  AuditorySpectrogram and OctaveSpectrogramWithAmplification,
+	  their frequency ranges were counting backwards.  Changed all
+	  spectrogram methods to use the new _shape_response method
+	  from PowerSpectrum.  Fixed
+	  OctaveSpectrogramWithAmplification so it actually works,
+	  changed its default amplification to 15%.
+
+	* [r11691]
+	  topo/pattern/basic.py:
+	  Removed redundant parameter setting code in PowerSpectrum
+	  and TimeSeries.  Corrected a bug in PowerSpectrum where a
+	  frequency range [f : f+1] caused a crash.  Added at method
+	  to PowerSpectrum called _shape response which provides all
+	  subclasses with a minimum overload method to take the
+	  frequency decomposition and manipulate it somehow.  Changed
+	  Spectrogram to use _shape_response.
+
+	* [r11690]
+	  topo/command/analysis.py:
+	  Corrected a bug where measuring an auditory frequency
+	  preference map would fail for the highest frequency in the
+	  sheet.
+
+	* [r11689]
+	  topo/command/analysis.py:
+	  Created a cleaned up version of PatternPresenter.  Changed
+	  frequency and latency presenters to mappers, which is what
+	  they really are.  Set their status to abstract to they don't
+	  appear in the gui.  Changed frequency and latency
+	  measurement commands to use new PatternPresenter and new
+	  Mappers.
+
+	* [r11688]
+	  topo/pattern/basic.py:
+	  Small formatting cleanup.
+
+2011-07-04 bilal-khan
+
+	* [r11681]
+	  topo/pattern/audio.py:
+	  Bugfix to Lyons.
+
+	* [r11680]
+	  topo/pattern/basic.py:
+	  Small parameter tweak to PowerSpectrum so it shows properly
+	  in the GUI
+
+	* [r11676]
+	  topo/pattern/basic.py:
+	  Cleaned up the documentation for DifferenceOfGaussians,
+	  Sigmoid, SigmoidedDoG, SigmoidedDoLG, and Spectrogram.
+
+	* [r11675]
+	  topo/pattern/audio.py:
+	  Removed abstract status for AudioFile & AudioFolder.
+
+	* [r11674]
+	  topo/pattern/basic.py:
+	  Improved Spectrogram memory efficiency by adding new
+	  information in place.
+
+	* [r11673]
+	  topo/pattern/basic.py:
+	  Reduced PowerSpectrum's memory load by eliminating one
+	  amplitude array.  Reduced PowerSpectrum's computational load
+	  by checking to see if the user specified frequency spacing
+	  has actually changed before regenerating the range.
+
+	* [r11672]
+	  topo/pattern/basic.py:
+	  Removed redundant first_call var in PowerSpectrum.  Changed
+	  PowerSpectrum to take advantage of the fact
+	  set_matrix_dimensions is called in a PatternGenerator's
+	  __init__.  Made amplitudes a class var to save on memory
+	  requirements.  Added param labels to LogGaussian.
+
+	* [r11671]
+	  topo/base/patterngenerator.py:
+	  Added set_matrix_dimensions call to __init__ of
+	  PatternGenerator.
+
+2011-07-01 ceball
+
+	* [r11669]
+	  topo/transferfn/optimized.py:
+	  Use array indexing of active_units_mask and sheet_mask
+	  (rather than pointer arithmetic) in
+	  CFPOF_DivisiveNormalizeL1_opt.  No measurable impact on
+	  performance (for lissom_oo_or,
+	  lgn_density=retina_density=48, cortex_density=64, no
+	  scheduled actions, 200 iterations).
+
+	* [r11668]
+	  topo/learningfn/optimized.py:
+	  Use array indexing of output_activity and sheet_mask (rather
+	  than pointer arithmetic) in CFPLF_Hebbian_opt.  No
+	  measurable impact on performance (for lissom_oo_or,
+	  lgn_density=retina_density=48, cortex_density=64, no
+	  scheduled actions, 200 iterations).
+
+	* [r11667]
+	  topo/transferfn/optimized.py:
+	  Use macros for accessing slots in
+	  CFPOF_DivisiveNormalizeL1_opt.  Should be no visible change.
+
+2011-06-29 bilal-khan
+
+	* [r11665]
+	  topo/misc/generatorsheet.py:
+	  Bugfix to set_matrix_dimensions (previous commit).
+
+	* [r11664]
+	  topo/base/patterngenerator.py,
+	  topo/misc/generatorsheet.py,
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Changed update_matrix_dimensions to set_matrix_dimensions in
+	  all patterns that use it.  Updated Spectrogram to use scale
+	  and offset params.
+
+2011-06-23 ceball
+
+	* [r11663]
+	  topo/misc/patternfn.py:
+	  Added ALERT.
+
+	* [r11662]
+	  Makefile:
+	  Some versions of grep are broken, so parse svn revision
+	  number using sed.
+
+2011-06-23 jbednar
+
+	* [r11661]
+	  topo/base/simulation.py,
+	  topo/sheet/basic.py:
+	  Minor cleanup to docstrings
+
+2011-06-17 ceball
+
+	* [r11660]
+	  doc/Downloads/git_text.php:
+	  Minor simplifications.
+
+	* [r11659]
+	  topo/misc/legacy.py:
+	  Minor improvements to message printing.
+
+	* [r11658]
+	  topo/misc/legacy.py:
+	  Always print message when installing legacy snapshot
+	  support.
+
+2011-06-16 jbednar
+
+	* [r11657]
+	  topo/base/patterngenerator.py,
+	  topo/misc/generatorsheet.py:
+	  Minor cleanup
+
+2011-06-16 bilal-khan
+
+	* [r11655]
+	  topo/base/patterngenerator.py,
+	  topo/misc/generatorsheet.py,
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Changed on_install method to update_matrix_dimensions, which
+	  is called to alert a pattern generator that it's dimensions
+	  have changed.
+
+	* [r11651]
+	  topo/pattern/basic.py:
+	  Removed meaningless params in PowerSpectrum (eg x, y, etc).
+
+	* [r11650]
+	  topo/misc/generatorsheet.py,
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Changed function names to fit topo style.
+
+	* [r11647]
+	  topo/pattern/basic.py:
+	  Error corrections.
+
+	* [r11646]
+	  topo/pattern/basic.py:
+	  a
+
+	* [r11645]
+	  topo/tkgui/topoconsole.py:
+	  Added note explaining why we print errors instead of raising
+	  them (it crashes ipython).
+
+2011-06-15 bilal-khan
+
+	* [r11644]
+	  topo/misc/commandline.py:
+	  Conflict resolution.
+
+	* [r11643]
+	  topo/command/analysis.py:
+	  Changed frequency and latency map measurement code to use
+	  custom pattern presenters that map the frequency and latency
+	  range respectively to the sheet x & y coordinates.
+
+	* [r11641]
+	  topo/pattern/audio.py:
+	  Added a description to loadAudioFile explaining the method
+	  by which we're rescaling amplitude to the range [0:1].
+	  Updated frequency_spacing's so that low indices correspond
+	  to low frequencies.
+
+	* [r11640]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Updated power spectrum and auditory methods to use new
+	  generator sheet callback mechanism rather than the first
+	  call mechanism.
+
+	* [r11639]
+	  topo/misc/generatorsheet.py:
+	  Added a call to a special method in a pattern generator when
+	  it is installed into a generator sheet.
+
+2011-06-08 jbednar
+
+	* [r11638]
+	  topo/misc/commandline.py:
+	  Fixed typo
+
+2011-06-01 ceball
+
+	* [r11636]
+	  topo/misc/commandline.py:
+	  Added --pdb option for calling pdb after every unhandled
+	  exception.
+
+2011-05-26 bilal-khan
+
+	* [r11633]
+	  topo/analysis/featureresponses.py:
+	  No idea what that was about.
+
+	* [r11632]
+	  contrib/al_audio_simple.ty,
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Merge branch 'tonotopic_map'
+
+2011-05-24 ceball
+
+	* [r11630]
+	  topo/analysis/featureresponses.py:
+	  Minor simplification; should be no visible change.
+
+2011-05-24 bilal-khan
+
+	* [r11628]
+	  topo/pattern/basic.py:
+	  Updated SigmoidedDoLG to use new LogGaussian.
+
+	* [r11627]
+	  topo/pattern/basic.py:
+	  Re-parametrised LogGaussian, now uses size, aspect_ratio,
+	  x_shape, & y_shape.  Overloaded _call & _setup_xy in
+	  LogGaussian to apply scaling & centre the pattern correctly.
+
+	* [r11626]
+	  topo/misc/patternfn.py:
+	  Changed name of param in log_gaussian (from size to mu).
+
+	* [r11625]
+	  topo/command/analysis.py:
+	  Added code to measure Onset Latency Preference for auditory
+	  models.
+
+	* [r11624]
+	  topo/pattern/audio.py:
+	  Corrected bug in AudioFolder where if seconds_per_timestep >
+	  interval_length an end of signal value error was raised,
+	  even though repeat was turned on.  Corrected bug in
+	  audioFolder where the next audio file loaded was not of the
+	  correct precision.  Corrected bug in AudioFolder where
+	  loading the next audio file occasionally returned an
+	  interval smaller than specified.
+
+	* [r11623]
+	  param/__init__.py:
+	  Corrected bug with Integer param where default=None was not
+	  being allowed even when allow_None was set.  Moved bounds
+	  checking in Number type into its own method (_checkBounds)
+	  to provide a minimum override for _check_value.
+
+	* [r11622]
+	  topo/pattern/basic.py:
+	  Changed TimeSeries.sample_rate to Integer type.  Cleaned up
+	  some error printing code in TimeSeries.  Added check to make
+	  sure interval_start & interval_end in
+	  extractSpecificInterval are ints, also changed any functions
+	  calling extractSpecificInterval to use ints.  Added new
+	  param type TimeSeriesParam.  Changed PowerSpectrum's min and
+	  max frequency params to int types.  Removed debug code from
+	  PowerSpectrum.
+
+	* [r11621]
+	  topo/pattern/audio.py:
+	  Changed error in AudioFile where a file load was attempted
+	  before super param initialisation.  Removed
+	  AudioFile._extractNextInterval as TimeSeries.__call__
+	  obviates the need for it.  Restructured
+	  OctaveSpectrogramwithAmplification to remove setParams and
+	  incorporate them into __init__.  Added normalization
+	  function code to OctaveSpectrogramwithAmplification.  Same
+	  thing for LyonsCochlearModel.  Restructured
+	  LyonsCochlearModel's __everyCall__ method, incorporating it
+	  into _getRowAmplitudes.  Updated Cochleogram accordingly.
+
+	* [r11620]
+	  topo/pattern/basic.py:
+	  Small bugfix to previous debug code.
+
+	* [r11619]
+	  topo/pattern/basic.py:
+	  Added a tiny bit of debug code to
+	  PowerSpectrum._getRowAmplitudes to help track down a weird
+	  error with AudioFolder.  Added a normalization_function
+	  param to Spectrogram so now each column can be normalized
+	  individually.
+
+	* [r11618]
+	  topo/pattern/basic.py:
+	  Consolidated PowerSpectrums setParams into its __init__.
+	  Simplified PowerSpectrums __firstCall__ accordingly.
+	  Modified Spectrogram to use sheet dimensions in preference
+	  to the previous spectrograms shape.
+
+	* [r11617]
+	  topo/pattern/basic.py:
+	  Set TimeSeries' default time_series & sample_rate to None.
+	  The user absolutely must set these as they are intimately
+	  linked.  We cannot set them default values just incase the
+	  user, on __init__, set's one and not the other.  TimeSeries
+	  is only used by other classes, never directly so i think
+	  this is fair.  Lastly, TimeSeries will print an informative
+	  error if these 2 params are not available.
+
+	* [r11615]
+	  topo/pattern/basic.py:
+	  Corrected bug in TimeSeries where a ValueError was raised if
+	  the interval_start > interval_end, even though repeat was
+	  turned on.  Changed TimeSeries' default signal to be an
+	  array of one period of a sine wave from the outset.
+
+	* [r11614]
+	  topo/misc/commandline.py:
+	  Removed cli option -t to display full traceback (full
+	  tracebacks are now on by default).
+
+	* [r11613]
+	  topo/tkgui/topoconsole.py:
+	  Made output of the full trace on error the default.
+
+	* [r11612]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Incorporated setParams of TimeSeries into its other methods,
+	  general restructure & code simplification.  Changed audio
+	  methods that inherit from TimeSeries to use the new code.
+
+	* [r11611]
+	  param/__init__.py:
+	  Changed resolve_path so it now uses a boolean param to
+	  determine if the path is to a file or a folder.  Changed
+	  Filename and Foldername to use the new param.
+
+2011-05-08 bilal-khan
+
+	* [r11610]
+	  topo/__init__.py:
+	  Changed default output path on OS X to be ~/Documents, this
+	  is the Mac convention.
+
+	* [r11609]
+	  topo/tkgui/__init__.py:
+	  Fixes for right click on Mac, now works with keyboard ctrl
+	  click, mouse (MagicMouse) right clicks, trackpad
+	  (MagicTrackpad) right clicks, and 2 finger touch clicks.
+
+	* [r11608]
+	  param/__init__.py:
+	  Added a path_type param to resolve_path, changed it from an
+	  arg.
+
+	* [r11607]
+	  topo/pattern/audio.py:
+	  Corrected indentation errors and missing :'s.
+
+	* [r11606]
+	  topo/pattern/basic.py:
+	  Moved TimeSeries to the new Array param type.
+
+	* [r11605]
+	  topo/misc/commandline.py:
+	  Added new commandline option for full trace back.
+
+	* [r11604]
+	  topo/tkgui/topoconsole.py:
+	  Added new option for full trace back to the console, can be
+	  set in the .topographicarc by setting
+	  tkgui.topoconsole.display_full_trace = True.
+
+	* [r11603]
+	  param/__init__.py:
+	  Added new array param type.
+
+	* [r11602]
+	  topo/tkgui/__init__.py:
+	  Corrected Mac right click button codes.
+
+	* [r11601]
+	  topo/pattern/audio.py:
+	  Can now specify the float precision to use for loaded audio
+	  data in AudioFile/AudioFolder as a param.  Can now specify
+	  float precision to use when calculating ear stage filters in
+	  LyonsCochlearModel.  Defaults for both are numpy.float64.
+
+	* [r11599]
+	  topo/pattern/audio.py:
+	  Cleaned up imports in audio.  Added new OctaveSpctrogram
+	  class where frequency is in base 2 logspace.  Renamed
+	  AuditorySpectrogramSimpleOuterEar to
+	  OctaveSpectrogramWithAmplification, it now inherits from
+	  OctaveSpectrogram.  Simplified frequency spacing
+	  calculations in accord with previous changes to
+	  PowerSpectrum.
+
+	* [r11598]
+	  topo/pattern/basic.py:
+	  Simplified PowerSpectrums _getAmplitudes() method when
+	  compressing the frequency range over the sheet dimensions.
+	  Changed PowerSpectrums frequency index spacing to be a
+	  private param, reduced the number of points it calculates to
+	  the sheet dimensions.
+
+2011-05-06 bilal-khan
+
+	* [r11597]
+	  param/__init__.py:
+	  Corrected error where search_paths were not retained for
+	  Filename & Foldername.
+
+	* [r11595]
+	  topo/pattern/audio.py:
+	  Changed audiolab file load calls to use float64's instead of
+	  float32's.  The documentation used float64's so i imagine we
+	  should too.
+
+2011-05-04 bilal-khan
+
+	* [r11594]
+	  topo/pattern/audio.py:
+	  Removed one further custom range check, replaced with a
+	  param bound.
+
+	* [r11593]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Removed custom parameter range checking and replaced with
+	  bounds where appropriate.
+
+	* [r11592]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Removed superfluous __init__ methods.
+
+	* [r11591]
+	  topo/pattern/basic.py:
+	  Corrected accidental comment error.
+
+2011-05-02 ceball
+
+	* [r11590]
+	  topo/tests/testFilename.txt:
+	  Added test of Filename's search_paths.
+
+	* [r11589]
+	  topo/tkgui/topoconsole.py:
+	  Reverted recent change.  Full tracebacks should not be
+	  printed to the console.
+
+2011-05-02 bilal-khan
+
+	* [r11588]
+	  topo/pattern/audio.py:
+	  Changed Lyons to work in the frequency domain again.
+	  Reduced mem requirements by using float32's.
+
+	* [r11587]
+	  topo/pattern/basic.py:
+	  Put in sensible default params for SigmoidedDoLG.
+
+	* [r11586]
+	  topo/command/analysis.py:
+	  Updated rf and frequency pref/selectivity measurement code.
+
+	* [r11585]
+	  examples/lissom_audio.ty:
+	  Updated lissom_audio to use new pattern generators.
+
+	* [r11582]
+	  topo/pattern/audio.py:
+	  Cleaned up imports.  Changed LyonsCochlearModel to inherit
+	  from PowerSpectrum instead of PatternGenerator as it now
+	  does an FFT, and applys the filters in the frequency domain,
+	  then does an iFFT to get back to time domain.  This is the
+	  inefficient/lossy way to do it, i will be applying the
+	  filters in the time domain as soon as i figure out how to
+	  make it work.  Changed the default value for
+	  LyonsCochlearModel's signal param to None, this way we won't
+	  generate a TimeSeries unless we have to.  Modified
+	  Cochleogram to use new LyonsCochlearModel.
+
+	* [r11581]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Bugfixes to TimeSeries parameter checking.  Changes to
+	  AudioFolder to bring it in line with AudioFile.
+
+	* [r11580]
+	  topo/pattern/audio.py:
+	  Changed AudioFile to correspond to TimeSeries.
+
+	* [r11579]
+	  topo/pattern/basic.py:
+	  Corrected parameter checking bugs in TimeSeries.
+
+	* [r11578]
+	  topo/pattern/basic.py:
+	  Cleaned up some documentation and fucntion names in
+	  PowerSpectrum & TimeSeries.
+
+	* [r11577]
+	  topo/pattern/audio.py:
+	  Modified AudioFile to support new TimeSeries architecture.
+
+	* [r11576]
+	  topo/pattern/basic.py:
+	  Added a repeat parameter to TimeSeries so the signal can be
+	  processed indefinitely.  Incorporated TimeSeries' check
+	  param methods into the setParams method.  Changed
+	  TimeSeries' generateSineWave method to public.  Moved to
+	  firstCall, everyCall structure for TimeSeries.
+
+	* [r11575]
+	  topo/pattern/audio.py:
+	  Added __init__ & __firstCall__ methods to both
+	  AuditorySpectrogram & AuditorySpectrogramSimpleOuterEar,
+	  these simply call their super methods.  Changed some
+	  parameter names in AuditorySpectrogramSimpleOuterEar to make
+	  things clearer.  Fixed bug in
+	  AuditorySpectrogramSimpleOuterEar where all it was
+	  outputting was a sheet of nan's - it now works as expected.
+	  The only thing still not working right is LyonsCochlearModel
+	  as i was attempting to change it from transforming in
+	  frequency space to transforming in time space.
+
+	* [r11574]
+	  topo/pattern/basic.py:
+	  Added __init__ method to Spectrogram, no idea why/how it was
+	  omitted previously, just an oversight.  This shouldn't
+	  affect anyone using Spectrogram, only those using a subclass
+	  of Spectrogram as the usual call to super __init__ would
+	  fail.:
+
+	* [r11573]
+	  topo/pattern/audio.py:
+	  Changed AuditorySpectrogram to use new Spectrogram code,
+	  changed AuditorySpectrogramWithSimpleOuterEar to
+	  AuditorySpectrogramSimpleOuterEar, though note it doesn't
+	  actually work.  Neither does LyonsCochlear model, and hence
+	  neither does cochleogram.
+
+	* [r11572]
+	  topo/pattern/basic.py:
+	  Cleaned up imports, added a check for if the min frequency
+	  passed to PowerSpecturm is lower than the max frequency.
+	  Combined some split lines into single lines, had too much
+	  trouble with line splits, playing it safe from now on.
+
+	* [r11571]
+	  topo/pattern/basic.py:
+	  Updated Spectrogram to use new PowerSpectrum.
+
+	* [r11570]
+	  topo/pattern/basic.py:
+	  Upgraded PowerSpectrum to cleanly differentiate between
+	  first and all other runs.  Changed initialiseWindowParams to
+	  setParams, it now validates PowerSpectrum specific params &
+	  allows setting of superclass params.
+
+	* [r11569]
+	  param/__init__.py:
+	  There was an error with the previous implementation of the
+	  Foldername param that causes Topographica to crash whenever
+	  you try to run *ANYTHING*.  I didn't pick this up on my
+	  system because for some reason the .pyc files weren't
+	  rebuilt.  It's fixed now.
+
+	* [r11568]
+	  osx/xcode3
+	  language
+	  references/Install
+	  Path.png:
+	  Accidentally included a file on last commit, removing in
+	  this commit.
+
+	* [r11567]
+	  osx/xcode3
+	  language
+	  references,
+	  osx/xcode3
+	  language
+	  references/Install
+	  Path.png,
+	  osx/xcode3
+	  language
+	  references/Instructions.txt,
+	  osx/xcode3
+	  language
+	  references/Topographica.xcspec,
+	  osx/xcode3
+	  language
+	  references/Topographica.xcsynspec:
+	  Added files to get automatic syntax colouring for .ty files
+	  in Xcode 3.
+
+	* [r11566]
+	  examples/lissom_audio.ty:
+	  Updates to lissom_audio for compatibility with new methods.
+
+	* [r11565]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Changed AudioFolder to use the new Foldername parameter,
+	  removed some debig code from TimeSeries.
+
+	* [r11563]
+	  param/__init__.py:
+	  Copied the resolve_path class to resolve_path2, a
+	  generalised version that checks for the existance of a path
+	  and does not discriminate between files and folders.
+	  Created 2 new classes resolve_file_path and
+	  resolve_folder_path that take the output of resolve_path and
+	  simply check if it is a file or a folder respectively.
+	  Created a new Path class that is a generalised version of
+	  the old Filename class, changed the Filename class to
+	  inherit from this new Path class, created a new Foldername
+	  class that also inherits from the Path class.  All changes
+	  are backwards compatible.
+
+	* [r11562]
+	  topo/pattern/basic.py:
+	  Made a rectangular smoothing window default again for
+	  PowerSpectrum.  Changed sine wave generation in TimeSeries
+	  to wait until an interval is requested before checking if a
+	  signal is actually present, no only generate a sine wave in
+	  this case.  Changed PowerSpectrum (minor) to fit with this
+	  TimeSeries style.  Changed the fft, each run is computed
+	  using an entire seconds worth of samples, but instead of
+	  filling the difference between the window size and the
+	  number of samples per sec with zeros, we tile the signal
+	  till it's the right size.
+
+	* [r11561]
+	  topo/pattern/audio.py:
+	  Any overrides sent through the Audio methods to the parent
+	  class TimeSeries weren't being sent, so TimeSeries would
+	  fall back to it's default values for sample_rate etc, this
+	  is now fixed.
+
+	* [r11560]
+	  topo/pattern/basic.py:
+	  Corrected sine wave generation in TimeSeries so now when you
+	  specify a signal length you get the actual length you
+	  requested.
+
+	* [r11559]
+	  topo/tkgui/topoconsole.py:
+	  Set so the full message/trace is displayed in the GUI on
+	  error.
+
+	* [r11558]
+	  topo/pattern/basic.py:
+	  Moved sine wave generation inside TimeSeries.  Moved
+	  rectangle window inside PowerSpectrum.
+
+2011-04-30 ceball
+
+	* [r11557]
+	  topo/tests/instances-r11275.pickle:
+	  Set missing svn:mime-type.
+
+	* [r11556]
+	  setup.py:
+	  Removed ALERT.
+
+	* [r11555]
+	  Makefile,
+	  topo/tests/instances-r11275.pickle,
+	  topo/tests/test_script.py:
+	  Added test of unpickling instances from r11275.
+
+	* [r11554]
+	  topo/tests/test_script.py:
+	  Fixed bug in instantiating all classes (some classes were
+	  being instantiated mutiple times).
+
+	* [r11553]
+	  topo/base/patterngenerator.py:
+	  Upgraded 'position' ALERT.
+
+	* [r11552]
+	  param/parameterized.py,
+	  topo/base/boundingregion.py:
+	  If a value for slot X hasn't been set, the attribute X
+	  doesn't exist on the instance.  Replaced the
+	  get_all_slots(class) function with
+	  get_occupied_slots(instance), fixing pickling error for
+	  instances of certain classes.
+
+	* [r11551]
+	  param/__init__.py:
+	  Fixed default value bug in param.Composite (if not set to a
+	  new list on initialization, attribs list could otherwise be
+	  shared between instances).
+
+2011-04-27 ceball
+
+	* [r11550]
+	  param/parameterized.py:
+	  Clarified warning messages for snapshot loading.
+
+	* [r11549]
+	  topo/misc/legacy.py:
+	  Restored support for '-l' option.  (accidentally removed
+	  during cleanup).
+
+	* [r11548]
+	  topo/command/basic.py,
+	  topo/misc/legacy.py,
+	  topo/tests/testFilename.txt:
+	  Stopped snapshot loading from printing out snapshot version
+	  information (except in debug mode).
+
+2011-04-26 ceball
+
+	* [r11547]
+	  topo/tests/testFilename.txt:
+	  Fixed failing test after change to snapshot loading
+	  (snapshot's simulation version is now printed.
+
+2011-04-25 ceball
+
+	* [r11546]
+	  Makefile:
+	  Attempt to set topo.version for git-controlled copies of
+	  Topographica.
+
+	* [r11545]
+	  topo/command/basic.py,
+	  topo/misc/legacy.py:
+	  Legacy support can now be tied to particular
+	  releases/versions, so we can control what support is
+	  installed.
+
+	* [r11544]
+	  param/parameterized.py:
+	  Added a comment.
+
+	* [r11543]
+	  param/parameterized.py:
+	  Fixed bug detecting a value that is different from the
+	  default (when value or default is a numpy array).
+
+	* [r11542]
+	  Makefile,
+	  topo/tests/test_script.py:
+	  Added 'make pickle-all-classes' to test pickling and
+	  unpickling of all classes.
+
+	* [r11541]
+	  topo/base/boundingregion.py:
+	  Added ALERT.
+
+	* [r11540]
+	  topo/misc/legacy.py:
+	  Added ALERT.
+
+	* [r11539]
+	  topo/tests/test_map_measurement.py:
+	  Restored code that had been in topo.misc.legacy, to support
+	  old data file.
+
+	* [r11538]
+	  topo/tests/test_script.py:
+	  First pass at instantiating all classes (to use for various
+	  tests).
+
+	* [r11537]
+	  Makefile,
+	  topo/misc/legacy.py,
+	  topo/tests/lissom_oo_or.ty_pickle_test.typ,
+	  topo/tests/lissom_oo_or_od_dr_cr_dy_sf_000010.00.typ,
+	  topo/tests/test_script.py:
+	  Began official support for all snapshots created since
+	  0.9.7/r11275.  Earlier snapshots are no longer supported.
+	  Switched to lissom.ty from r11275 as simulation to use for
+	  snapshot testing.
+
+	* [r11536]
+	  examples/lissom.ty:
+	  Added minor ALERT.
+
+	* [r11535]
+	  topo/command/basic.py:
+	  Put back a seek(0) command accidentally removed in previous
+	  commit.  Fixed mixed-up order of pickle loading error
+	  message.
+
+	* [r11534]
+	  param/parameterized.py:
+	  Clarified ambiguous warning message.
+
+	* [r11533]
+	  param/parameterized.py:
+	  Pickling support for parameters: removed a warning that was
+	  hiding exceptions we can handle in topo.misc.legacy.  Minor
+	  changes to some other warning messages.
+
+2011-04-24 ceball
+
+	* [r11532]
+	  external/Gnosis_Utils-1.3.0-alpha-7.tar.gz,
+	  external/Gnosis_Utils.diff,
+	  external/Makefile,
+	  topo/command/basic.py,
+	  topo/tests/testsnapshots.py:
+	  Removed apparently unmaintained Gnosis Utils.  Removed
+	  experimental xml snapshot saving.
+
+	* [r11531]
+	  external/Makefile:
+	  Updated to match recent audio package changes.
+
+2011-04-23 ceball
+
+	* [r11530]
+	  external:
+	  Updated ignore list.
+
+2011-04-22 bilal-khan
+
+	* [r11529]
+	  topo/pattern/basic.py:
+	  Fixed error message in PowerSpectrum that is displayed when
+	  the desired frequency range is unavailable.  Changed
+	  TimeSeries default sample_rate to 44100.
+
+	* [r11526]
+	  topo/pattern/audio.py:
+	  Corrected bug with LyonsCochlearModel to fit with new
+	  TimeSeries.
+
+	* [r11525]
+	  topo/pattern/audio.py:
+	  A new class Cochleogram is to LyonsCochlearModel as
+	  Spectrogram is to PowerSpectrum.
+
+	* [r11524]
+	  topo/pattern/audio.py:
+	  A new class LyonsCochlearModel has been implemented to
+	  provide a characterisation of cochlear frequency response,
+	  think of it as analogous to a PowerSpectrum.  See R.  F.
+	  Lyon, 'A computational model of filtering, detection and
+	  compression
+
+	* [r11523]
+	  topo/pattern/audio.py:
+	  The simple outer ear amplification effect code that used to
+	  be in AudioFolder was moved into a new class
+	  AuditorySpectrogramWithSimpleOuterEar, for modularity and
+	  mostly because it had nothing to do with AudioFolders.
+
+	* [r11522]
+	  topo/pattern/audio.py:
+	  The auditory specific code (conversion to decibels, octave
+	  scales etc) was moved out of Spectrogram in pattern.basic
+	  into pattern.audio into the class AuditorySpectrgram (that
+	  inherits from Spectrogram).  This provides clean, modular,
+	  separation between a power spectrogram and and auditory
+	  spectrogram.
+
+	* [r11521]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  SUMMARY OF PREVIOUS CHANGES: Brand new TimeSeries class in
+	  pattern.basic, stores any discrete signal and provide
+	  operations on it such as extracting a consecutive window of
+	  points, Large code restructure of PowerSpectrum and
+	  Spectrogram to use the new TimeSeries class (new
+	  parametrisation on both these classes, all previous signal
+	  parameters are now controlled through the TimeSeries object.
+	  Also now we do much more checking for the sanity of
+	  arguments, and provide clear error/warning messages if they
+	  fail to comply.  Both Spectrgram and PowerSpectrum now
+	  automatically partition the requested frequency space into
+	  the number of sheet rows so changing sheet density is
+	  possible (previously audio sheets had to be fixed at
+	  specific densities to correspond to specific frequency/time
+	  spaces).  Both PowerSpectrum and Spectrogram can now be
+	  instantiated in the GUI as a TimeSeries object initialises
+	  with a sine wave by default if no sign is supplied,
+	  previously these classes were abstract due to the lack of
+	  signal.  NOTE: there seems to be a GUI bug currently
+	  preventing these classes actually being instantiated in the
+	  Test Pattern window, they work as expected everywhere else).
+	  Parameterisation has changed on Diff of Gaussians and
+	  Sigmoided Diff of Gaussians to make things
+	  simpler/clearer/easier to use.  LogGaussian and Sigmoided
+	  diff of LogGaussians now works too, which is to say its
+	  earlier erratic behaviour of jumping all over the sheet has
+	  been corrected and it's parameters drastically cut down for
+	  simplicity/to remove redundant controls.  Audio.py updates
+	  equally substantial, included in this commit as they depend
+	  heavily on PowerSpectrum and Spectrogram.  AudioFile and
+	  AudioFolder have been updated/restructured to use the new
+	  TimeSeries object.
+
+	* [r11520]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Changed some internal variable names for audio methods.
+
+	* [r11519]
+	  topo/pattern/basic.py:
+	  Improved the way a sine wave is generated for a TimeSeries,
+	  corrected the logic so it's actually generated.  Corrected
+	  PowerSpectrum to use new TimeSeries.
+
+	* [r11518]
+	  topo/pattern/basic.py:
+	  Changed LogGaussian & SigmoidedDoLG to have a default size
+	  of 1, a default size of 0 renders a pattern but doesn't make
+	  sense conceptually.
+
+	* [r11517]
+	  topo/pattern/basic.py:
+	  Changed the way a 10s sin wave is generated when no
+	  time_series is set for a TimeSeries object, i have no idea
+	  what i was thinking when i wrote the previous method.
+
+	* [r11516]
+	  topo/pattern/basic.py:
+	  Corrected rounding a error when calculating the ratio by
+	  which the frequency range is compressed to sheet rows.
+
+	* [r11515]
+	  osx,
+	  osx/Instructions.txt,
+	  osx/Launch
+	  Topographica.scpt,
+	  osx/applet.icns,
+	  osx/description.rtfd,
+	  osx/description.rtfd/TXT.rtf:
+	  Added OS X application building resources.
+
+	* [r11514]
+	  topo/pattern/basic.py:
+	  Corrected PowerSpectrum so that it doesn't exclude the
+	  bottom of the frequency range anymore.  Also corrected the
+	  mapping between the frequency range & sheet rows to take
+	  into account the actual number of frequencies per row (on a
+	  row by row basis) rather than the average number of
+	  frequencies per row - this was causing problems with
+	  logarithmic spacing.
+
+	* [r11513]
+	  topo/pattern/audio.py:
+	  Changed AudioFolder such that it now uses the new AudioFile,
+	  externally the mechanisms are the same, internally it's
+	  changes correspond with AudioFile & TimeSeries.
+
+	* [r11512]
+	  topo/pattern/audio.py:
+	  Changed AudioFile such that it now inherits from the
+	  TimeSeries class (vs Spectrogram).  This has vastly
+	  simplified its code such that now all you need to provide is
+	  a file path.
+
+	* [r11511]
+	  topo/pattern/basic.py:
+	  Updated PowerSpectrum to do a rFFT using a full second's
+	  worth of samples, using only those samples in a sample
+	  window was resulting in artefacts.  Now we take the sample
+	  window and pad with zeros up till the sample rate.
+
+	* [r11510]
+	  topo/pattern/basic.py:
+	  Spectrogram has been updated to use the new TimeSeries, &
+	  PowerSpectrum classes, crucially this means it is no longer
+	  abstract & could be instantiated in a GUI without specifying
+	  an audiofile.
+
+	* [r11509]
+	  topo/pattern/basic.py:
+	  PowerSpectrum has been updated to use the new TimeSeries
+	  class, crucially this means it is no longer abstract & could
+	  be instantiated in a GUI.
+
+	* [r11508]
+	  topo/pattern/basic.py:
+	  Added new abstract class TimeSeries to provide a standard
+	  object within which we can store any time
+	  correlated/sequential data.  If no data is provided the
+	  class will generate a 10s sine wave.  This now allows all
+	  the auditory methods to be instantiated in the GUI.  Even
+	  more importantly the class contains methods to extract part
+	  of the series between specified intervals, and can be called
+	  to return a self incrementing, sliding window, on the
+	  series.
+
+	* [r11507]
+	  topo/pattern/basic.py:
+	  Changed rectangular window function from list to numpy
+	  array.
+
+	* [r11506]
+	  topo/pattern/basic.py:
+	  Modified LogGaussian pattern removing params for x_tail &
+	  y_tail, replaced by a single tail param.  Modified
+	  SigmoidedDoLG to use new LogGaussian patter.  Removed
+	  DivisiveNormalise output fns from SigmoidedDoLG,
+	  SigmoidedDoG, and DifferenceOfGaussians.
+
+	* [r11505]
+	  topo/misc/patternfn.py,
+	  topo/pattern/basic.py:
+	  Changed LogGaussian to require only 2 params (x_tail &
+	  y_tail) which govern the decay of the gaussian in the
+	  respective direction.  Corrected the ability to rotate &
+	  scale the pattern, it now behaves like one would expect of
+	  the other patterns, lastly the pattern is centred to the
+	  middle of the sheet by the peak of the gaussian, there is
+	  some debate as to which centering to use (centre of the
+	  gaussian as a whole or centre by the position of the peak),
+	  i believe centering by the peak to be most appropriate as it
+	  is the primary point of interest.
+
+	* [r11504]
+	  external/libsndfile-1.0.20.tar.gz,
+	  external/libsndfile-1.0.24.tar.gz,
+	  external/scikits.audiolab-0.10.2.tar.gz,
+	  external/scikits.audiolab-0.11.0.tar.gz:
+	  Updated AudioLab to 0.11.0 & Libsndfile 1.0.24
+
+2011-04-14 ceball
+
+	* [r11503]
+	  Makefile:
+	  Made option to create msi or exe for Windows (msi not
+	  available until Python 2.7).
+
+	* [r11502]
+	  Makefile:
+	  Attempt to create msi rather than exe for Windows (since msi
+	  can be installed from commandline, among other advantages).
+
+2011-04-13 ceball
+
+	* [r11500]
+	  doc/User_Manual/commandline_text.php,
+	  topo/misc/commandline.py:
+	  Simplified user startup files: ~/.topographica for linux/OS
+	  X, and ~/topographica.ini for Windows.
+
+2011-04-05 bilal-khan
+
+	* [r11499]
+	  doc/Developer_Manual/macinstall_text.php:
+	  Added section about using audiolab with a 32bit EPD 7.
+
+	* [r11498]
+	  doc/Developer_Manual/macinstall_text.php:
+	  Moved guide to Python 2.7, explained EPD vs MacPorts a bit
+	  more thoroughly
+
+2011-04-04 bilal-khan
+
+	* [r11497]
+	  doc/Developer_Manual/macinstall_text.php:
+	  Updated Mac build instructions to make audio lab an optional
+	  install, specified exactly which bits of the Xcode install
+	  are actually necessary.
+
+2011-04-03 ceball
+
+	* [r11496]
+	  doc/Developer_Manual:
+	  More to ignore.
+
+	* [r11495]
+	  doc/Developer_Manual/index_text.php:
+	  Made installation link more prominent.
+
+	* [r11494]
+	  doc/Developer_Manual/aptinstall_text.php,
+	  doc/Developer_Manual/installation_text.php:
+	  Linked to developer installation instructions for OS X and
+	  Ubuntu.
+
+2011-04-03 bilal-khan
+
+	* [r11493]
+	  doc/Developer_Manual/macinstall_text.php:
+	  Added a Notes/Issues section to Mac build instructions.
+
+	* [r11492]
+	  doc/Developer_Manual/macinstall_text.php:
+	  Build instructions for Topographica on Mac OS X 10.6.* using
+	  an external MacPorts Python 2.6, this is preferable to the
+	  EPD for a faster Topographica GUI, and compatibility with
+	  the python audio lab.
+
+2011-04-02 jbednar
+
+	* [r11491]
+	  topo/command/pylabplot.py:
+	  Added skip parameter for topographic grid plots
+
+2011-03-31 ceball
+
+	* [r11490]
+	  external/Makefile,
+	  external/Tkinter_bool_none.diff,
+	  param/tk.py:
+	  Change hack allowing Tkinter.BooleanVar to have a value of
+	  'None' from being a source patch to a dynamic patch
+	  (allowing it to work when we use e.g.  the system's Tkinter;
+	  SF #3261272).
+
+2011-03-28 jbednar
+
+	* [r11487]
+	  examples/lissom.ty:
+	  Made Model Editor diagrams work well for large numbers of
+	  dimensions; still not perfect for small numbers of
+	  dimensions and/or some combinations of dimensions.
+
+2011-03-25 jbednar
+
+	* [r11486]
+	  topo/tkgui/editor.py:
+	  Added toggles for node and connection labels to make the
+	  output usable in a paper by adding a few external labels
+	  (eventually as static text in the model editor)
+
+2011-03-21 aplebe
+
+	* [r11485]
+	  topo/misc/distribution.py:
+	  added a method to subtract distributions, useful in
+	  manipulating multiple feature responses
+
+2011-03-16 jbednar
+
+	* [r11483]
+	  examples/gcal.ty,
+	  examples/lissom_oo_or.ty:
+	  Removed unused function
+
+	* [r11482]
+	  topo/base/simulation.py:
+	  Changed default connection delay to be nonzero, and made
+	  negative values illegal.
+	  
+	  Fixes long-standing problem with the Model Editor that when
+	  adding feedback projections, the network eventually goes
+	  into an endless loop, due to never-ending streams of event
+	  generation
+
+2011-03-03 ceball
+
+	* [r11479]
+	  topo/misc/inlinec.py:
+	  Fix bug in new OpenMP support (when OpenMP was not used,
+	  loop pragma was missing from c_decorators dictionary).
+
+2011-03-03 jbednar
+
+	* [r11478]
+	  topo/misc/inlinec.py:
+	  Added more documentation
+
+2011-03-03 ceball
+
+	* [r11477]
+	  topo/misc/inlinec.py,
+	  topo/responsefn/optimized.py:
+	  Integrated Marco's OpenMP changes.  Setting 'openmp=True' in
+	  __main__ before inlinec is imported causes OpenMP to be used
+	  (similarly to setting 'import_weave' in __main__).  Control
+	  over number of OpenMP threads is via 'openmp_threads'
+	  variable.  'Decoration' of C code uses c_decorators
+	  dictionary."
+
+2011-02-27 ceball
+
+	* [r11476]
+	  doc/Downloads/git_text.php:
+	  Update to git workflow (minor improvement).
+
+2011-02-25 ceball
+
+	* [r11475]
+	  doc/buildbot/master.cfg:
+	  Added cumulative coverage over various tests.
+
+	* [r11474]
+	  Makefile:
+	  Additional Makefile targets for coverage.
+
+	* [r11473]
+	  external:
+	  Updated ignore list.
+
+	* [r11472]
+	  external/coverage-3.4.tar.gz,
+	  external/freetype-2.3.9.tar.gz,
+	  external/numpy-1.3.0.tar.gz,
+	  external/termcap-1.3.1.tar.gz:
+	  Set missing svn:mime-type attribute.
+
+	* [r11471]
+	  Makefile,
+	  doc/buildbot/coveragerc,
+	  external/Makefile,
+	  external/coverage-3.3.1.tar.gz,
+	  external/coverage-3.4.tar.gz,
+	  topo/tests/__init__.py:
+	  Upgraded coverage package to 3.4.  Replaced previous
+	  coverage command (limited to coverage of unit tests) with
+	  more flexible commands in the Makefile (for use by
+	  buildbot).
+
+2011-02-22 ceball
+
+	* [r11454]
+	  Makefile,
+	  doc/buildbot/master.cfg:
+	  Enable RPM spec file generation.
+
+	* [r11453]
+	  doc/buildbot/master.cfg:
+	  Added DICE 'topographica-other-python' buildslave.  Also
+	  reduced frequency of builds.
+
+2011-02-21 ceball
+
+	* [r11452]
+	  Makefile,
+	  topo/tests,
+	  topo/tests/__init__.py:
+	  Data from speed-tests is now stored in
+	  ~/topographica/tests/hostname, to prevent overwriting of one
+	  machine's data by another when ~ is shared (e.g.  on DICE).
+
+2011-02-19 ceball
+
+	* [r11451]
+	  doc/buildbot/index.html,
+	  doc/buildbot/master.cfg:
+	  Updated buildbot config to match current hardware.
+
+	* [r11450]
+	  doc/Downloads/git_text.php:
+	  Updates to git admin documentation.
+
+2011-02-17 ceball
+
+	* [r11448]
+	  topo/responsefn/optimized.py:
+	  Updates to comments.
+
+	* [r11447]
+	  topo/responsefn/optimized.py:
+	  Simplification to mask and activity array indexing in
+	  CFPRF_DotProduct_opt.  Has no effect on performance, and
+	  allows OpenMP optimization (to be committed in the future).
+	  Implemented and tested By Marco Elver.
+
+2011-02-15 jbednar
+
+	* [r11443]
+	  doc/Home/index_text.php,
+	  doc/User_Manual/overview_text.php:
+	  Added more motivation for which users would find
+	  Topographica useful
+
+	* [r11442]
+	  contrib/lissom_oo_or_dr.ty:
+	  Old-style direction map using four retinas for comparison
+	  with lissom_oo_dr.ty, taken from the SVN repository
+	  examples/lissom_oo_or_dr.ty r8657 and updated to work with
+	  the current Topographica by running etc/update_094_to_095
+	  and etc/update_095_to_096 on it, and then manually
+	  correcting the result (which required adding missing
+	  brackets to output_fns and changing the explicity output_fn
+	  manipulations to output_fns[0].
+	  
+	  Runs but has not been tested for a complete simulation
+
+2011-02-10 ceball
+
+	* [r11441]
+	  examples/gcal.ty:
+	  Changed GCAL example to use sheet.lissom.LISSOM rather than
+	  sheet.lissom.JointScaling(apply_scaling=False).  There
+	  should be no change, since JointScaling with
+	  apply_scaling=False appears to be equivalent to LISSOM.
+
+2011-02-09 ceball
+
+	* [r11440]
+	  external,
+	  external/Makefile,
+	  external/blt2.4z.tar.gz:
+	  Removed unused BLT.
+
+2011-02-06 ceball
+
+	* [r11439]
+	  topo/pattern/audio.py:
+	  Fixed typo that was causing test failures.
+
+2011-02-04 ceball
+
+	* [r11438]
+	  doc/Downloads/git_text.php:
+	  Minor cleanup (recommending SF.net as location for git
+	  repositories).
+
+2010-12-23 bilalkhancnsg
+
+	* [r11427]
+	  contrib/lissom_audio.ty,
+	  examples/lissom_audio.ty:
+	  Cleaned up imports in lissom_audio.  Employed standard topo
+	  indentation and comment format throughout.  Merged comments
+	  and variable names (so to speak) to make code much more
+	  readable.  Removed lissom_audio from contrib.  Added
+	  lissom_audio to examples.  Marked it as the completed
+	  undergrad thesis.
+
+	* [r11426]
+	  topo/misc/patternfn.py,
+	  topo/pattern/basic.py:
+	  Added a LogGaussian pattern, this is a 2D Log Gaussian
+	  pattern generator allowing standard gaussian patterns but
+	  with the added advantage of movable peaks.  Also added a
+	  SigmoidedDoLG pattern, this is similar to the SigmoidedDoG
+	  pattern but with the afore mentioned advantes of
+	  LogGaussian.
+
+	* [r11425]
+	  topo/pattern/audio.py,
+	  topo/pattern/basic.py:
+	  Made window params of Spectrogram hidden to users of
+	  AudioFile (as per CEBALERT).  Cleaned up imports in
+	  pattern/audio.  Copied standard topo indentation and comment
+	  format.  Merged comments with variable names (so to speak)
+	  in order to make code far more readable.  Optimised code by
+	  using standard Python constructs and numpy operations rather
+	  than for loops / Java programming style.  Made default
+	  params for AudioFile and AudioFolder reasonable (as per
+	  JABALERT).
+
+2010-12-20 jbednar
+
+	* [r11424]
+	  param/tk.py:
+	  Fixed typo
+
+2010-12-19 ceball
+
+	* [r11421]
+	  param/tk.py:
+	  Rather than requiring an existing Tk instance to be passed
+	  to initialize(), look for one in the standard location
+	  (Tkinter._default_root).
+
+2010-12-14 ceball
+
+	* [r11420]
+	  topo/sheet/lissom.py:
+	  Added ALERT.
+
+2010-12-08 ceball
+
+	* [r11419]
+	  topo/analysis/featureresponses.py:
+	  Added ALERT.
+
+2010-12-03 ceball
+
+	* [r11418]
+	  topo/misc/picklemain.py:
+	  Minor simplification (should have no effect).
+
+	* [r11417]
+	  topo/misc/picklemain.py:
+	  Fixed long-standing bug in PickleMain that was preventing
+	  Topographica simulations from being pickled using pickle
+	  (rather than cPickle, the default).  Also made minor
+	  simplification to pickle.Pickler method calls (should have
+	  no effect).
+
+2010-10-28 ceball
+
+	* [r11403]
+	  external/Cython-0.12.1.tar.gz,
+	  external/Cython-0.13.tar.gz,
+	  external/Makefile,
+	  topo/responsefn/optimized_cy.pyx:
+	  Upgraded Cython.  Altered Cython CFP dot product function to
+	  be something like three times faster than initial version.
+
+2010-10-25 ceball
+
+	* [r11401]
+	  topo/plotting/plot.py:
+	  Fixed bug in 'AllTogether' plot normalization; previously,
+	  normalization was incorrect when there was a mixture of
+	  positive-value and negative-value plots.
+
+2010-10-23 ceball
+
+	* [r11400]
+	  doc/Developer_Manual/index_text.php,
+	  doc/Downloads,
+	  doc/Downloads/bzr_text.php:
+	  Removed outdated instructions for Bazaar.
+
+	* [r11399]
+	  topo/misc/pyxhandler.py:
+	  Added ALERT.
+
+2010-10-22 jbednar
+
+	* [r11397]
+	  topo/misc/inlinec.py,
+	  topo/misc/pyxhandler.py:
+	  Added alerts
+
+2010-10-22 ceball
+
+	* [r11396]
+	  topo/misc/pyxhandler.py:
+	  Removed test line left in accidentally.
+
+	* [r11395]
+	  doc/Developer_Manual/cython_text.php,
+	  doc/Developer_Manual/rt.png:
+	  Added draft Cython tutorial, from Aistis Stankevicius.  Work
+	  in progress.
+
+2010-10-21 ceball
+
+	* [r11394]
+	  topo/misc/pyxhandler.py,
+	  topo/responsefn/optimized.py,
+	  topo/responsefn/optimized_cy.pyx:
+	  Initial version of Cython CFPDotProduct function (from
+	  Aistis Stankevicius) and code to support Cython-optimized
+	  functions.
+
+2010-10-19 ceball
+
+	* [r11393]
+	  topo/transferfn/basic.py:
+	  Removed incorrect ALERT (copy.copy() works for all input
+	  types, and the overhead is presumably small).
+
+2010-10-18 ceball
+
+	* [r11392]
+	  doc/buildbot/master.cfg:
+	  Simplified svn documentation upload for newer version of
+	  buildbot.  Removed lodestar buildslave.  Switched mail
+	  notification to 'failing' (for constant reminders about
+	  failing tests now there are no tests that are constantly
+	  failing).
+
+2010-10-18 jbednar
+
+	* [r11391]
+	  doc/Team_Members/index_text.php:
+	  Added lots of missing people; reorganized slightly
+
+2010-10-17 ceball
+
+	* [r11390]
+	  doc/Downloads/index_text.php,
+	  doc/Home/index_text.php:
+	  Added note about BSD license.
+
+	* [r11389]
+	  doc/Downloads/index_text.php:
+	  Added note that 32-bit EPD is currently required on OS X.
+
+2010-10-08 aplebe
+
+	* [r11387]
+	  topo/plotting/plot.py:
+	  fixed possible errors issued by MultiOrPlot in degenerate
+	  cases of no selectivity to orientations
+
+2010-10-06 aplebe
+
+	* [r11386]
+	  topo/command/analysis.py,
+	  topo/command/key_angles.png:
+	  fixed color coding of corner angles
+
+2010-10-04 aplebe
+
+	* [r11385]
+	  topo/analysis/featureresponses.py,
+	  topo/command/analysis.py,
+	  topo/misc/distribution.py,
+	  topo/plotting/plotgroup.py:
+	  Alternative way of measuring the second response to
+	  orientations in units: instead of taking the second maximum,
+	  detecting if there is an effective second peak in the
+	  distribution of orientation responses, otherwise the
+	  selectivity will be set to zero, and in the relevant plots
+	  it will be ignored
+
+2010-10-02 ceball
+
+	* [r11384]
+	  doc/Developer_Manual/installation_text.php:
+	  Added note that using e.g.  EPD is also possible for
+	  developers.
+
+	* [r11383]
+	  doc/Developer_Manual/index_text.php:
+	  Fixed typo.
+
+2010-09-23 aplebe
+
+	* [r11379]
+	  topo/analysis/featureresponses.py,
+	  topo/command/analysis.py,
+	  topo/command/two_or_key_vert.png,
+	  topo/command/two_or_key_vert_small.png,
+	  topo/misc/distribution.py,
+	  topo/plotting/bitmap.py,
+	  topo/plotting/plot.py,
+	  topo/plotting/plotgroup.py:
+	  Added the measure of a secondary orientation preference, and
+	  plotting facilities for the secondary orientation by
+	  pseudo-colors, and the combination of primary and secondary
+	  orientation as segments in each unit.
+
+2010-09-23 ceball
+
+	* [r11378]
+	  topo/__init__.py:
+	  Added comment to ALERT about PIL package name.
+
+	* [r11377]
+	  topo/command/analysis.py:
+	  Fixed ALERT about PIL import.
+
+	* [r11376]
+	  doc/buildbot/master.cfg:
+	  Minor updates that have been live for a while, plus small
+	  changes to change master from doozy.inf to fiver.inf.
+
+2010-09-13 jbednar
+
+	* [r11367]
+	  topo/pattern/opencvcamera.py,
+	  topo/sheet/ptztracker.py:
+	  Wrapped camera-related imports to avoid problems when -l is
+	  invoked on machines with no camera support
+
+2010-09-10 jbednar
+
+	* [r11366]
+	  topo/pattern/__init__.py,
+	  topo/sheet/__init__.py:
+	  Avoid loading camera-related files by default, to avoid
+	  problems on systems without opencv or a camera
+
+2010-09-08 celiaf
+
+	* [r11365]
+	  examples/ptztracker.ty,
+	  topo/pattern/opencvcamera.py,
+	  topo/sheet/ptztracker.py:
+	  Face detection and tracking.
+
+2010-09-06 ceball
+
+	* [r11363]
+	  topo/plotting/bitmap.py:
+	  Added comments to Bitmap._arrayToImage().
+
+2010-09-04 ceball
+
+	* [r11362]
+	  topo/command/analysis.py:
+	  Put try/except around PIL import that breaks easy_install
+	  and presumably packages.
+
+2010-08-25 jbednar
+
+	* [r11360]
+	  topo/command/disp_key_white_vert.pdf,
+	  topo/command/disp_key_white_vert.svg:
+	  Added vector versions of disp_key_white_vert_small.png for
+	  publications
+
+	* [r11359]
+	  topo/command/disp_key_white_vert_small.png:
+	  Fixed color bar spacing
+
+2010-08-17 ceball
+
+	* [r11352]
+	  doc/Downloads/git_text.php:
+	  Minor addition to git docs.
+
+2010-08-10 ceball
+
+	* [r11351]
+	  doc/Downloads/git_text.php:
+	  More simplification of git/svn workflow.
+
+2010-08-09 ceball
+
+	* [r11341]
+	  doc/Downloads/git_text.php:
+	  Removed references to anything irrelevant to developers.
+	  Also, some minor cleanups.
+
+	* [r11340]
+	  doc/Downloads/git_text.php:
+	  Shortened the git documentation.
+
+2010-08-09 celiaf
+
+	* [r11339]
+	  examples/ptztracker.ty,
+	  topo/base/simulation.py,
+	  topo/misc/ptz.py,
+	  topo/misc/robotics.py,
+	  topo/pattern/opencvcamera.py,
+	  topo/sheet/basic.py,
+	  topo/sheet/ptztracker.py:
+	  Added support for OpenCV camera and uvcdynctrl.
+
+2010-08-09 ceball
+
+	* [r11338]
+	  doc/Developer_Manual/installation_text.php:
+	  Added missing link.
+
+2010-08-06 ceball
+
+	* [r11337]
+	  external:
+	  More to ignore.
+
+2010-08-05 ceball
+
+	* [r11336]
+	  doc/Downloads/cvs_text.php:
+	  Removed LATEST_STABLE.  Removed detail about svn switch
+	  command (it's a potentially dangerous command; I don't think
+	  we should suggest that people use it, though if they already
+	  know how to use it, that's fine).
+
+2010-08-05 jbednar
+
+	* [r11334]
+	  doc/User_Manual/about_text.php,
+	  doc/User_Manual/index_text.php:
+	  Removed outdated about info
+
+	* [r11333]
+	  README.txt:
+	  Minor clarification
+
+2010-08-05 ceball
+
+	* [r11332]
+	  /branches/topographica_tkgui-with-idle:
+	  Removed out-of date experimental tkgui branch.
+
+	* [r11331]
+	  README.setup.txt:
+	  File missed from previous commit.
+
+	* [r11330]
+	  MANIFEST.in,
+	  Makefile:
+	  Added README specifically for packages.  Include LICENSE.txt
+	  in packages (and do not include ChangeLog.txt).
+
+	* [r11329]
+	  setup.py:
+	  Minor alteration to PyPI text.
+
+	* [r11328]
+	  doc/Downloads/existingpython_text.php,
+	  doc/Downloads/index_text.php:
+	  Updated download links to point to SF.net.
+
+2010-07-31 ceball
+
+	* [r11327]
+	  topo/pattern/basic.py:
+	  Removed unused imports.
+
+2010-07-30 jbednar
+
+	* [r11326]
+	  topo/misc/memuse.py:
+	  Reorganized imports and explained why they are unusual
+
+2010-07-29 ceball
+
+	* [r11325]
+	  README.txt:
+	  Updated to reflect recent changes.
+
+2010-07-28 ceball
+
+	* [r11324]
+	  topo/command/basic.py:
+	  Use resolve_path() in load_snapshot().
+
+	* [r11323]
+	  topo/misc/legacy.py:
+	  Do not restore resolve_path and normalize_path.
+
+	* [r11322]
+	  param/__init__.py,
+	  topo/tests/testFilename.txt:
+	  Do not pickle resolve_path's search_paths and
+	  normalize_path's prefix.
+
+	* [r11321]
+	  param/parameterized.py:
+	  Added option to prevent pickling of a Parameter's default
+	  value.
+
+	* [r11320]
+	  topo/command/basic.py:
+	  Added ALERT about not searching param for Parameterized
+	  class attributes to pickle.
+
+	* [r11319]
+	  doc/Developer_Manual/testing_text.php:
+	  Added note about coverage.
+
+	* [r11318]
+	  topo/tests/__init__.py:
+	  Added example usage of run_coverage().
+
+2010-07-27 aistiss
+
+	* [r11317]
+	  Makefile,
+	  topo/tests/__init__.py:
+	  Included 'make tests-coverage-html', run_coverage() now
+	  accepts targets list.
+
+2010-07-27 ceball
+
+	* [r11316]
+	  topo/analysis/featureresponses.py,
+	  topo/analysis/vision.py,
+	  topo/command/analysis.py,
+	  topo/learningfn/basic.py,
+	  topo/learningfn/projfn.py,
+	  topo/learningfn/som.py,
+	  topo/sheet/lissom.py,
+	  topo/sheet/saccade.py:
+	  Removed unused imports.
+
+	* [r11315]
+	  topo/plotting/plotgroup.py,
+	  topo/sheet/basic.py,
+	  topo/sheet/optimized.py:
+	  Removed unused imports.
+
+	* [r11314]
+	  topo/plotting/bitmap.py,
+	  topo/plotting/plot.py,
+	  topo/plotting/plotfilesaver.py,
+	  topo/transferfn/optimized.py:
+	  Removed unused imports.
+
+	* [r11313]
+	  topo/plotting/palette.py:
+	  Added ALERT.
+
+	* [r11312]
+	  topo/plotting/plotgroup.py:
+	  Fixed error calling a method; not sure why we've never seen
+	  a failure.
+
+	* [r11311]
+	  external:
+	  More to ignore.
+
+	* [r11310]
+	  topo/tkgui/editor.py,
+	  topo/tkgui/featurecurvepanel.py,
+	  topo/tkgui/plotgrouppanel.py,
+	  topo/tkgui/projectionpanel.py,
+	  topo/tkgui/templateplotgrouppanel.py,
+	  topo/tkgui/testpattern.py,
+	  topo/tkgui/topoconsole.py:
+	  Removed unused imports.
+
+	* [r11309]
+	  Makefile:
+	  Added param to pyflakes target.
+
+	* [r11308]
+	  topo/misc/memuse.py:
+	  Removed duplicate import and added ALERT.
+
+	* [r11307]
+	  topo/command/pylabplot.py:
+	  Simplification of matplotlib import.
+
+	* [r11306]
+	  topo/command/basic.py:
+	  Cleaned up imports of 'sys' in run_batch().
+
+	* [r11305]
+	  Makefile:
+	  Do not include topo/tests in pyflakes output.
+
+	* [r11304]
+	  topo/misc/memuse.py,
+	  topo/misc/trace.py,
+	  topo/misc/util.py,
+	  topo/transferfn/misc.py:
+	  Removed unused imports.
+
+	* [r11303]
+	  topo/misc/genexamples.py:
+	  Removed unused imports.
+
+	* [r11302]
+	  topo/misc/genexamples.py:
+	  Fixed undefined name error if examples not found.
+
+	* [r11301]
+	  topo/misc/commandline.py:
+	  Minor simplification to matplotlib import.
+
+	* [r11300]
+	  topo/misc/commandline.py:
+	  Minor simplification to IPython import.
+
+	* [r11299]
+	  Makefile:
+	  Added pyflakes-base target.
+
+	* [r11298]
+	  external/Makefile:
+	  Added setuptools as requirement for coverage, plus uninstall
+	  the coverage script for coverage-uninstall.
+
+	* [r11297]
+	  Makefile:
+	  Added pyflakes target.
+
+	* [r11296]
+	  topo/command/analysis.py,
+	  topo/command/basic.py,
+	  topo/command/pylabplot.py,
+	  topo/coordmapper/basic.py:
+	  Removed unused imports.
+
+	* [r11295]
+	  topo/misc/patternfn.py:
+	  Fixed error in line() function causing it to fail when
+	  smoothing was set to 0.
+
+	* [r11294]
+	  topo/pattern/basic.py:
+	  Added ALERT.
+
+	* [r11293]
+	  topo/misc/patternfn.py,
+	  topo/pattern/image.py,
+	  topo/pattern/random.py,
+	  topo/pattern/rds.py:
+	  Removed unused imports.
+
+2010-07-27 aistiss
+
+	* [r11292]
+	  external/coverage-3.3.1.tar.gz:
+	  coverage-3.3.1 by Ned Batchelder:
+	  http://nedbatchelder.com/code/coverage/
+
+	* [r11291]
+	  Makefile,
+	  external/Makefile,
+	  topo/tests/__init__.py:
+	  external/coverage-3.3.1 by Ned Batchelder:
+	  http://nedbatchelder.com/code/coverage/ Makefile now
+	  includes 'make tests-coverage'.  external/Makefile has 'make
+	  coverage', 'make coverage-clean', and 'make
+	  coverage-uninstall'.
+
+2010-07-27 ceball
+
+	* [r11290]
+	  topo/base/arrayutil.py:
+	  Removed unused import and fixed spacing.
+
+	* [r11289]
+	  /releases/0.9.7/topographica/contrib/cov:
+	  Undid previous commit (r11280).
+
+	* [r11288]
+	  topo/pattern/random.py:
+	  Added to comment.
+
+2010-07-26 aistiss
+
+	* [r11287]
+	  /releases/0.9.7/topographica/contrib/cov:
+	  Initial import: topo.tests includes run_coverage(), Makefile
+	  includes 'make tests-coverage'.
+
+2010-07-26 ceball
+
+	* [r11286]
+	  topo/transferfn/misc.py:
+	  Altered ALERT.
+
+	* [r11285]
+	  examples/gcal.ty:
+	  Simplifications that should not affect the results.
+
+	* [r11284]
+	  topo/base/arrayutil.py:
+	  Cleaned up DivideWithConstant as suggested by JAB.
+
+	* [r11283]
+	  topo/tests/reference/lissom_log_parser.py:
+	  Fixed import error.
+
+2010-07-23 jbednar
+
+	* [r11282]
+	  Makefile:
+	  Updated sf-web-site target; had stopped working for some
+	  reason
+
+2010-07-22 ceball
+
+	* [r11281]
+	  Makefile:
+	  Added clean-pyc to default target.
+
+	* [r11280]
+	  /releases/0.9.7/topographica/doc/Downloads/index_text.php:
+	  r11279 from trunk (fixed download link).
+
+	* [r11279]
+	  doc/Downloads/index_text.php:
+	  Fixed download link.
+
+	* [r11278]
+	  /releases/0.9.7/topographica/doc/Downloads/index_text.php:
+	  r11277 from trunk (updated download link).
+
+	* [r11277]
+	  doc/Downloads/index_text.php:
+	  Updated download link.
+
+	* [r11276]
+	  setup.py:
+	  Updated release number.
+
+	* [r11275]
+	  /releases/0.9.7:
+	  Create release 0.9.7
+
+	* [r11274]
+	  /releases/0.9.7:
+	  Aborted 0.9.7 branch.
+
+	* [r11273]
+	  doc/Developer_Manual/releases_text.php:
+	  First pass at updating release instructions.
+
+	* [r11272]
+	  Makefile:
+	  No longer make tar.gz archive of entire svn (only zip).
+
+	* [r11271]
+	  param/__init__.py:
+	  Corrected handling of search_path pickling (fix to r11254).
+
+2010-07-21 ceball
+
+	* [r11270]
+	  doc/Downloads/index_text.php:
+	  Removed out-of-date Mac text.
+
+	* [r11269]
+	  topo/misc/genexamples.py:
+	  Added location of examples/ when installing from
+	  bdist_mpkg-generated installer.
+
+	* [r11268]
+	  topo/misc/genexamples.py:
+	  Added examples path for when installed as egg.
+
+	* [r11267]
+	  examples/obermayer_pnas90.ty:
+	  Removed unused (and incorrect) import.
+
+	* [r11266]
+	  Makefile:
+	  Removed LATEST_STABLE target.  Do not delete
+	  create_topographica_script.py from source release, since
+	  it's needed by the Makefile.
+
+	* [r11265]
+	  doc/Downloads/index_text.php,
+	  doc/FAQ/index_text.php:
+	  Updated download information (includes restoring OS X/EPD
+	  section).
+
+	* [r11264]
+	  param/external.py,
+	  param/tk.py,
+	  topo/tkgui/__init__.py,
+	  topo/tkgui/topoconsole.py:
+	  Allow GUI to work with tcl/tk 8.4.
+
+	* [r11263]
+	  topo/misc/inlinec.py:
+	  Fixed weave-on-Windows hack (i.e.  achieves intention of
+	  r11251).
+
+2010-07-18 ceball
+
+	* [r11261]
+	  /releases/0.9.7/topographica/doc/Downloads/index_text.php:
+	  r11260 from trunk (Corrected rpm link).
+
+	* [r11260]
+	  doc/Downloads/index_text.php:
+	  Corrected rpm link.
+
+	* [r11259]
+	  /tags/LATEST_STABLE:
+	  Removed no-longer-used LATEST_STABLE tag.
+
+	* [r11258]
+	  /releases/0.9.7:
+	  Create branch for release 0.9.7.
+
+	* [r11257]
+	  doc/Downloads/index_text.php,
+	  doc/Home/news_text.php,
+	  doc/News/index_text.php:
+	  Updated release date and download links.
+
+	* [r11256]
+	  doc/Downloads/existingpython_text.php,
+	  setup.py:
+	  Explicitly state we have tested Python 2.5 and 2.6.
+
+	* [r11255]
+	  param/tk.py:
+	  Removed unused variables and imports.
+
+	* [r11254]
+	  param/__init__.py:
+	  Do not pickle Filename's search paths.
+
+	* [r11253]
+	  param/__init__.py:
+	  Removed unused import and fixed name error.
+
+	* [r11252]
+	  external/Makefile:
+	  Clarification of comment.
+
+	* [r11251]
+	  topo/misc/inlinec.py:
+	  Hack to allow weave to work when the user name contains a
+	  space.
+
+	* [r11250]
+	  param/parameterized.py:
+	  Removed unused variable.
+
+	* [r11249]
+	  topo/base/arrayutil.py:
+	  Removed duplicate import.
+
+	* [r11248]
+	  topo/base/sheet.py:
+	  Removed unused imports.
+
+	* [r11247]
+	  topo/base/cf.py:
+	  Removed unused import.
+
+	* [r11246]
+	  topo/plotting/bitmap.py:
+	  Simplified finding default title font.
+
+	* [r11245]
+	  topo/command/basic.py:
+	  Only warn about missing gnosis.xml if trying to save a
+	  snapshot with xml=True.
+
+	* [r11244]
+	  doc/Downloads/existingpython_text.php,
+	  doc/Downloads/index_text.php:
+	  Simplified download instructions (only mention graphical
+	  installers, since presumably people using the commandline
+	  already know what to do).
+
+	* [r11243]
+	  doc/Downloads/index_text.php:
+	  Removed mac installer section.  EPD includes only Tk 8.4.
+
+	* [r11242]
+	  setup.py:
+	  Removed no-longer-needed link to doozy for getting extra
+	  packages.
+
+2010-07-17 ceball
+
+	* [r11241]
+	  Makefile:
+	  More files to keep (that are cleaned by distclean).
+
+2010-07-16 ceball
+
+	* [r11240]
+	  Makefile,
+	  doc/Downloads/index_text.php:
+	  Updated DEB and RPM links to match release candidates.
+
+	* [r11239]
+	  doc/Downloads/existingpython_text.php,
+	  doc/Downloads/index_text.php:
+	  Simplified pypi download links.
+
+	* [r11238]
+	  Makefile:
+	  More to clean for release (no sounds/ dir, remove windows
+	  installer stuff).
+
+	* [r11237]
+	  external/Makefile:
+	  More to clean and uninstall (zlib, m4).
+
+	* [r11236]
+	  doc/buildbot/dot-dput.cf:
+	  Updated for stable repository.
+
+2010-07-16 ceball
+
+	* [r11234]
+	  doc/Downloads/index_text.php:
+	  Added comment.
+
+	* [r11233]
+	  doc/Downloads/existingpython_text.php,
+	  doc/FAQ/index_text.php,
+	  setup.py:
+	  Made easy_install do bare minimum by default for maximum
+	  chance of success.
+
+2010-07-15 ceball
+
+	* [r11232]
+	  /trunk/topographica-win:
+	  Removing obsolete topographica-win.
+
+	* [r11231]
+	  param/__init__.py:
+	  Default param.normalize_path.prefix is now os.getcwd(),
+	  rather than being empty.  Should have no effect on
+	  Topographica because Topographica sets prefix on startup to
+	  ~/topographica.
+
+	* [r11230]
+	  Makefile:
+	  Fixed typo.
+
+	* [r11229]
+	  topo/command/basic.py:
+	  Added documentation about alteration of
+	  param.norm_path.prefix.
+
+	* [r11228]
+	  topo/tkgui/topoconsole.py:
+	  Fix how help pages are looked up (checked on SVN version and
+	  Ubuntu version).
+
+	* [r11227]
+	  doc/Team_Members/index_text.php:
+	  Removed dead link.
+
+	* [r11226]
+	  topo/misc/genexamples.py:
+	  Minor simplification.
+
+	* [r11225]
+	  topo/misc/genexamples.py:
+	  Removed no-longer-necessary hack for Windows quoting.
+
+	* [r11224]
+	  doc/Tutorials/gcal_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  topo/command/basic.py:
+	  Simplified typ-generation command.
+
+	* [r11223]
+	  doc/News/index_text.php:
+	  Corrected news items.
+
+	* [r11222]
+	  topo/misc/legacy.py:
+	  Added support for fixedpoint not existing as an importable
+	  module (instead being topo.misc.fixedpoint).
+
+	* [r11221]
+	  topo/tests/gca_lissom.ty_DATA,
+	  topo/tests/gcal.ty_DATA:
+	  Renamed data file to match GCAL.
+
+	* [r11220]
+	  topo/tests/hierarchical.ty_DATA,
+	  topo/tests/lissom_oo_or.ty_DATA,
+	  topo/tests/lissom_or.ty_DATA,
+	  topo/tests/som_retinotopy.ty_DATA,
+	  topo/tests/sullivan_neurocomputing04.ty_DATA:
+	  Updated saved test data to use gmpy.  No change to results.
+
+	* [r11219]
+	  topo/misc/inlinec.py:
+	  Removed stray print statement.
+
+	* [r11218]
+	  doc/User_Manual/batch_text.php,
+	  doc/User_Manual/commandline_text.php:
+	  Documented default output path of ~/topographica.
+
+	* [r11217]
+	  topo/tests/test_script.py:
+	  Check that output_directory is respected.
+
+	* [r11216]
+	  doc/Makefile:
+	  Added param module to reference manual.
+
+	* [r11215]
+	  Makefile,
+	  topo/tests/test_script.py:
+	  Added test of run_batch(); SF #2564343.
+
+	* [r11214]
+	  doc/Tutorials:
+	  Updated files to ignore.
+
+	* [r11213]
+	  doc/Tutorials/index_text.php:
+	  Restored lissom_oo_or name.
+
+	* [r11212]
+	  doc/User_Manual/batch_text.php,
+	  doc/User_Manual/commandline_text.php,
+	  doc/User_Manual/patterns_text.php:
+	  Updated how to start topographica.
+
+2010-07-14 ceball
+
+	* [r11211]
+	  topo/misc/inlinec.py:
+	  Apart from testing that weave can be imported, test that
+	  compiler works.
+
+	* [r11210]
+	  examples/lissom_or_movie.ty:
+	  Removed application_path.
+
+	* [r11209]
+	  doc/Downloads/win32notes_text.php:
+	  Minor cleanup.
+
+	* [r11208]
+	  doc/Tutorials/som_retinotopy_text.php:
+	  Fixed copy-paste error.
+
+	* [r11207]
+	  doc/Downloads/existingpython_text.php,
+	  doc/Downloads/index_text.php:
+	  Updated installation locations.
+
+	* [r11206]
+	  doc/Downloads/index_text.php:
+	  Added links to deb and rpm files.
+
+	* [r11205]
+	  Makefile:
+	  Added RPM spec generation, suitable as input to OpenSUSE
+	  build service.
+
+	* [r11204]
+	  doc/buildbot/master.cfg:
+	  Cleaned up packages and archives slaves.
+
+	* [r11203]
+	  Makefile:
+	  Fixed pypi upload.
+
+	* [r11202]
+	  external/Makefile:
+	  Include fixedpoint module in topo/misc, so we can assume it
+	  always exists (in case gmpy is not available).  Removed
+	  fixedpoint from default build target in Makefile.
+
+	* [r11201]
+	  topo/__init__.py,
+	  topo/misc/fixedpoint.py,
+	  topo/misc/util.py:
+	  Include fixedpoint module in topo/misc, so we can assume it
+	  always exists (in case gmpy is not available).  Removed
+	  fixedpoint from default build target in Makefile.
+
+	* [r11200]
+	  Makefile:
+	  Updated name for GCAL in tests.
+
+	* [r11199]
+	  Makefile:
+	  Commented out problematic pypi upload target.
+
+	* [r11198]
+	  Makefile,
+	  doc/Developer_Manual/releases_text.php,
+	  doc/Downloads/bzr_text.php,
+	  doc/Downloads/git_text.php:
+	  Removing topographica-win/
+
+	* [r11197]
+	  Makefile,
+	  doc/Downloads/index_text.php,
+	  setup.py,
+	  topographica.ico,
+	  windows_postinstall.py:
+	  Makefile can now generate Windows installer (on linux).
+
+2010-07-13 jbednar
+
+	* [r11196]
+	  examples/gcal.ty:
+	  Renamed gca_lissom to gcal
+
+	* [r11195]
+	  doc/Tutorials/images/gcal_activity_010000.png,
+	  doc/Tutorials/images/gcal_activity_010000_or.png,
+	  doc/Tutorials/images/gcal_cf_center_010000.png,
+	  doc/Tutorials/images/gcal_cf_center_010000_or.png,
+	  doc/Tutorials/images/gcal_cf_vertical_010000_or.png,
+	  doc/Tutorials/images/gcal_natural_image_oo_or.png,
+	  doc/Tutorials/images/gcal_network_diagram.png,
+	  doc/Tutorials/images/gcal_or_pref_010000.png,
+	  doc/Tutorials/images/gcal_ormap_ft.png,
+	  doc/Tutorials/images/gcal_projection_010000.png,
+	  doc/Tutorials/images/gcal_test_pattern.png:
+	  \R\e\n\a\m\e\d\ \g\c\a\_\l\i\s\s\o\m\ \t\o\ \g\c\a\l
+
+	* [r11194]
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  examples/README.txt:
+	  Renamed gca_lissom to gcal
+
+	* [r11193]
+	  doc/News/index_text.php,
+	  doc/Tutorials/gca_lissom_text.php,
+	  doc/Tutorials/gcal_text.php,
+	  doc/Tutorials/images/gca_lissom_activity_010000.png,
+	  doc/Tutorials/images/gca_lissom_activity_010000_or.png,
+	  doc/Tutorials/images/gca_lissom_cf_center_010000.png,
+	  doc/Tutorials/images/gca_lissom_cf_center_010000_or.png,
+	  doc/Tutorials/images/gca_lissom_cf_vertical_010000_or.png,
+	  doc/Tutorials/images/gca_lissom_network_diagram.png,
+	  doc/Tutorials/images/gca_lissom_or_pref_010000.png,
+	  doc/Tutorials/images/gca_lissom_ormap_ft.png,
+	  doc/Tutorials/images/gca_lissom_projection_010000.png,
+	  doc/Tutorials/images/gca_lissom_test_pattern.png,
+	  doc/Tutorials/images/gca_natural_image_oo_or.png,
+	  doc/Tutorials/index_text.php,
+	  examples/Makefile,
+	  examples/gca_lissom.ty,
+	  topo/misc/genexamples.py:
+	  Renamed gca_lissom to gcal
+
+2010-07-13 ceball
+
+	* [r11192]
+	  doc/Reference_Manual:
+	  More to ignore.
+
+	* [r11191]
+	  doc/Reference_Manual:
+	  More to ignore.
+
+	* [r11190]
+	  doc/Developer_Manual/installation_text.php:
+	  Removed duplicate suggestion to run 'make tests'.
+
+	* [r11189]
+	  setup.py:
+	  Minor changes to pypi info.
+
+2010-07-12 jbednar
+
+	* [r11188]
+	  doc/Tutorials/gca_lissom_text.php,
+	  doc/Tutorials/index_text.php:
+	  Changed GCA to GCAL
+
+2010-07-10 jbednar
+
+	* [r11187]
+	  doc/Tutorials/som_retinotopy_text.php:
+	  Updated instructions for 0.9.7
+
+	* [r11186]
+	  doc/Tutorials/gca_lissom_text.php,
+	  doc/Tutorials/images/gca_lissom_activity_010000.png,
+	  doc/Tutorials/images/gca_lissom_activity_010000_or.png,
+	  doc/Tutorials/images/gca_lissom_cf_center_010000.png,
+	  doc/Tutorials/images/gca_lissom_cf_center_010000_or.png,
+	  doc/Tutorials/images/gca_lissom_cf_vertical_010000_or.png,
+	  doc/Tutorials/images/gca_lissom_network_diagram.png,
+	  doc/Tutorials/images/gca_lissom_or_pref_010000.png,
+	  doc/Tutorials/images/gca_lissom_ormap_ft.png,
+	  doc/Tutorials/images/gca_lissom_projection_010000.png,
+	  doc/Tutorials/images/gca_natural_image_oo_or.png,
+	  doc/Tutorials/index_text.php:
+	  Updated GCA tutorial images, and changed text to match
+
+	* [r11185]
+	  Makefile:
+	  Made update setup.py's version number
+
+	* [r11184]
+	  doc/Tutorials/gca_lissom_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php:
+	  Made gca and lissom tutorials match
+
+2010-07-10 ceball
+
+	* [r11183]
+	  param/parameterized.py:
+	  Reverted r11145: parameter repr() returned to original, and
+	  full parameter declaration not used in commandline help.
+	  Opened SF #3027874.
+
+	* [r11182]
+	  setup.py:
+	  Updated version number.
+
+2010-07-10 jbednar
+
+	* [r11181]
+	  doc/User_Manual/scripts_text.php:
+	  Added link target
+
+	* [r11180]
+	  doc/Tutorials/lissom_oo_or_text.php:
+	  Added link to copying examples and encouragd people to read
+	  the .ty file.
+
+	* [r11179]
+	  doc/Developer_Manual/installation_text.php:
+	  Suggested linking to topographica script
+
+	* [r11178]
+	  doc/Downloads/win32notes_text.php:
+	  Fixed space problem
+
+	* [r11177]
+	  doc/Downloads/existingpython_text.php,
+	  doc/Downloads/index_text.php,
+	  doc/Home/index_text.php,
+	  doc/News/index_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  doc/User_Manual/plotting_text.php:
+	  Tweaked text for new release
+
+	* [r11176]
+	  topo/misc/genexamples.py:
+	  Added notes
+
+2010-07-10 ceball
+
+	* [r11175]
+	  topo/misc/genexamples.py:
+	  Fixed typo.
+
+2010-07-10 jbednar
+
+	* [r11174]
+	  topo/command/basic.py:
+	  Imported generate from misc.genexamples to simplify the
+	  tutorials
+
+2010-07-10 ceball
+
+	* [r11173]
+	  topo/misc/genexamples.py:
+	  Restored missing examples location.
+
+	* [r11172]
+	  topo/misc/genexamples.py:
+	  Fixed error in path.
+
+	* [r11171]
+	  doc/Tutorials/lissom_oo_or_text.php:
+	  Updated tutorial for path locations.
+
+	* [r11170]
+	  doc/Developer_Manual/installation_text.php:
+	  Updated space and time requirements for building.
+
+	* [r11169]
+	  Makefile:
+	  Made mktemp command compatible with Mac.
+
+2010-07-10 jbednar
+
+	* [r11168]
+	  Makefile,
+	  doc/Home/news_text.php,
+	  doc/News/index_text.php:
+	  Updated release number
+
+	* [r11167]
+	  README.txt:
+	  Minor updates
+
+	* [r11166]
+	  /trunk/topographica-win/common/setup.py,
+	  /trunk/topographica-win/create_installer/topographica.iss:
+	  Changed release to 0.9.7.
+
+2010-07-10 ceball
+
+	* [r11165]
+	  topo/misc/genexamples.py,
+	  topo/tkgui/topoconsole.py:
+	  Missed from previous commit.
+
+	* [r11164]
+	  doc/Downloads/win32notes_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  doc/User_Manual/scripts_text.php:
+	  Intermediate checkin: updating instructions for runing
+	  topographica and generating saved networks.
+
+	* [r11163]
+	  topo/tkgui/topoconsole.py:
+	  Updated file locations.
+
+	* [r11162]
+	  topo/misc/genexamples.py:
+	  Added copy_examples() function.
+
+	* [r11161]
+	  topo/__init__.py:
+	  Print message about creating ~/topographica.
+
+	* [r11160]
+	  topo/tests/test_script.py:
+	  Fixed another path error.
+
+	* [r11159]
+	  external/Makefile:
+	  Patch to allow PIL to build on a Mac with Fink (or possibly
+	  Macports) installed.
+
+2010-07-10 jbednar
+
+	* [r11158]
+	  doc/FAQ/index_text.php,
+	  doc/Future_Work/index_text.php,
+	  doc/Reference_Manual/index_text.php,
+	  doc/User_Manual/overview_text.php,
+	  doc/User_Manual/scripts_text.php:
+	  Cleaned up docs
+
+2010-07-09 ceball
+
+	* [r11157]
+	  topo/tests/test_script.py:
+	  Fixed paths.
+
+2010-07-09 jbednar
+
+	* [r11156]
+	  ChangeLog.txt:
+	  Added recent revisions
+
+	* [r11155]
+	  topo/pattern/audio.py,
+	  topo/transferfn/optimized.py:
+	  Added alerts
+
+	* [r11154]
+	  topo/command/analysis.py:
 	  Minor cleanup of organization
 
-	* [r11153] examples/lissom_whisker_barrels.ty:
+	* [r11153] 
+          examples/lissom_whisker_barrels.ty:
 	  Minor cleanup
 
 2010-07-09  ceball
