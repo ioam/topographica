@@ -5,10 +5,13 @@ print '<table width="100%" cellpadding="5"><tr><td bgcolor="'.$banner_bg_color.'
 <i>
 <b>Recent news:</b>
 
+<p><b>21 Oct 2011:</b> New release in preparation; see <A
+  target="_top" href="../News/index.html">News</A> page  
+  for new features (currently available in <A target="_top"
+  href="../Downloads/cvs.html">SVN</A> version).<BR>
+
 <p><b>18 July 2010:</b> Version 0.9.7
-  <A target="_top" href="../Downloads/index.html">released</A>; 
-  see the <A target="_top" href="../News/index.html">News</A> page for
-  more information.<BR>
+  <A target="_top" href="../Downloads/index.html">released</A>.<BR>
 
 <p><b>12 February 2009:</b> Version 0.9.6
   <A target="_top" href="../Downloads/index.html">released</A>.<BR>

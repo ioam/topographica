@@ -1,3 +1,75 @@
+<p><b>21 Oct 2011:</b> New release in preparation.  Changes already available in <A target="_top"
+  href="../Downloads/cvs.html">SVN</A> include:
+
+<!-- TimeSeries - generic container for sequential data -->
+<!-- Legacy support can now be tied to particular releases/versions, so we can control what support is installed.-->
+<!-- Removed apparently unmaintained Gnosis Utils.  Removed experimental xml snapshot saving.-->
+
+<!-- Updated to r11793 -->
+<center>
+<table width="100%" cellpadding="5">
+<tr>
+<td width="50%">
+<dl COMPACT>
+<font size="-1">
+<dt>General improvements:</dt>
+<dd>
+  <div class="i2">- support for Python 2.6, numpy 1.3, Tcl 8.5.10, IPython 0.11</div>
+  <div class="i2">- greatly expanded support for auditory input; see topo.pattern.audio</div>
+  <div class="i2">- default output path now ~/Documents/Topographica on all platforms</div>
+  <div class="i2">- Mac OS X: right click supported on more platforms, automatic .ty file syntax colouring in Xcode 3</div>
+  <div class="i2">- loading snapshots now supported for 0.9.7 and above</div>
+  <!-- Should link to our OpenMP documentation page; do we have one? -->
+  <div class="i2">- shared-memory multiprocessing support: add "-c openmp=True" at commandline; number of threads controlled via openmp_threads environment variable</div>
+  <!-- Should link to our MPI documentation page; do we have one? -->
+  <div class="i2">- multiprocessor support (via MPI)</div>
+  <div class="i2">- <A target="_top" href="../Developer_Manual/cython.html">Cython support</A> for writing portable, fast components</div>
+  <div class="i2">- better package and native-Python support; should now be easier to integrate Topographica into your workflow</div>
+</dd>
+<br>
+<dt>Command-line and batch:</dt>
+<dd>
+  <div class="i2">- --pdb calls debugger after every unhandled exception</div>
+</dd>
+</font>
+</dl>
+</td>
+<td width="50%">
+<dl COMPACT>
+<font size="-1">
+<dt>GUI:</dt>
+<dd>
+  <div class="i2">- Model Editor allows text labels to be suppressed so that .eps output can be labeled in an illustration program (e.g. Inkscape) for use in publications</div>
+</dd>
+<br>
+<dt>Component library:</dt>
+<dd>
+  <div class="i2">- PatternGenerators:
+  <?php classref('topo.pattern.basic','SpiralGrating')?>,
+  <?php classref('topo.pattern.basic','HyperbolicGrating')?>,
+  <?php classref('topo.pattern.basic','RadialGrating')?>,
+  <?php classref('topo.pattern.basic','ConcentricRings')?>,
+  <?php classref('topo.pattern.basic','ArcCentered')?>,
+  <?php classref('topo.pattern.basic','Sigmoid')?> (half plane with sigmoidal border),
+  <?php classref('topo.pattern.basic','LogGaussian')?> (Gaussian with skew),
+  <?php classref('topo.pattern.basic','SigmoidedDoGs')?> (auditory RF with two DoGs multiplied by a sigmoid),
+  <?php classref('topo.pattern.basic','SigmoidedDoLG')?> (auditory RF with two DoLGs multiplied by a sigmoid),
+  <?php classref('topo.pattern.opencvcamera','CameraImage')?> (OpenCV live camera import) pattern families
+  </div>
+</dd>
+<br>
+<dt>Example scripts:</dt>
+<dd>
+  <div class="i2">- ptztracker.ty: example of controlling a pan/tilt/zoom camera to track objects in real time</div>
+</dd>
+</font>
+</dl>
+</td>
+</tr>
+</table>
+</center>
+
+
 <p><b>18 July 2010:</b> Version 0.9.7 released, including:
 
 <!-- Updated to r10814 -->
