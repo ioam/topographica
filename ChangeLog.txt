@@ -1100,30 +1100,16 @@
 	  rebuilt.  It's fixed now.
 
 	* [r11568]
-	  osx/xcode3
-	  language
-	  references/Install
-	  Path.png:
+	  osx/xcode3 language references/Install Path.png:
 	  Accidentally included a file on last commit, removing in
 	  this commit.
 
 	* [r11567]
-	  osx/xcode3
-	  language
-	  references,
-	  osx/xcode3
-	  language
-	  references/Install
-	  Path.png,
-	  osx/xcode3
-	  language
-	  references/Instructions.txt,
-	  osx/xcode3
-	  language
-	  references/Topographica.xcspec,
-	  osx/xcode3
-	  language
-	  references/Topographica.xcsynspec:
+	  osx/xcode3 language references,
+	  osx/xcode3 language references/Install Path.png,
+	  osx/xcode3 language references/Instructions.txt,
+	  osx/xcode3 language references/Topographica.xcspec,
+	  osx/xcode3 language references/Topographica.xcsynspec:
 	  Added files to get automatic syntax colouring for .ty files
 	  in Xcode 3.
 
@@ -1460,8 +1446,7 @@
 	* [r11515]
 	  osx,
 	  osx/Instructions.txt,
-	  osx/Launch
-	  Topographica.scpt,
+	  osx/Launch Topographica.scpt,
 	  osx/applet.icns,
 	  osx/description.rtfd,
 	  osx/description.rtfd/TXT.rtf:
