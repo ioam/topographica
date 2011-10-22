@@ -1431,12 +1431,10 @@ class Simulation(param.Parameterized,OptionalSingleton):
         objs  = [o.script_repr(imports=imports) for o in
                  sorted(self.objects().values(), cmp=lambda x, y: cmp(x.name,y.name))]
 
-        # CBENHANCEMENT: I have a function that compares conns based
-        # on name, then on src, then on dest, because lots of
-        # connections share the same name and I want the order to be
-        # the same every time for comparion. Can I just put that in
-        # here instead of cmp-by-name, or should we provide the chance
-        # for a user to plug in any sorting function?
+        # CBENHANCEMENT: could allow user to plug in a sorting
+        # function.  E.g. might want to compare conns based on name
+        # then dest then src if lots of conns share the same name (so
+        # the order is always the same).
         conns = [o.script_repr(imports=imports) for o in
                  sorted(self.connections(),      cmp=lambda x, y: cmp(x.name,y.name))]
 
