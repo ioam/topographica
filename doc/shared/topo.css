@@ -16,7 +16,7 @@
 
 body {
   margin: 1em 1em 1em 1em;
-  font-family: serif;
+  font-family: "Times New Roman", serif;
   color: black;
   background: #ffffff;
   background-position: top left;
@@ -43,7 +43,7 @@ a:active.button { color: #770000; background: transparent; font-size: 12; text-d
 a:hover.button { color: #227700; background: transparent; font-size: 12; text-decoration: none; text-weight: bold}
 
 th, td { /* ns 4 */
-  font-family: serif;
+  font-family: "Times New Roman", serif;
 }
 
 h1, h2, h3, h4, h5, h6 { text-align: center }
