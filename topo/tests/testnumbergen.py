@@ -9,32 +9,38 @@ import unittest
 from topo import numbergen
 
 
-class TestUniformRandomMeanRange(unittest.TestCase):
-    def test_lbound_ubound(self):
-        lbound = 3.0
+_seed = 0  # keep tests deterministic
+_iterations = 1000
+
+
+class TestUniformRandom(unittest.TestCase):
+    def test_range(self):
+        lbound = 2.0
         ubound = 5.0
-        d = numbergen.UniformRandom(lbound=lbound, ubound=ubound)
-        self.assertEqual(d.lbound, lbound)
-        self.assertEqual(d.ubound, ubound)
+        gen = numbergen.UniformRandom(
+                seed=_seed,
+                lbound=lbound,
+                ubound=ubound)
+        for _ in xrange(_iterations):
+            value = gen()
+            self.assertTrue(lbound <= value < ubound)
 
-    def test_mean_range(self):
-        d = numbergen.UniformRandom(mean=4.0, range=2.0)
-        self.assertEqual(d.lbound, 3.0)
-        self.assertEqual(d.ubound, 5.0)
-
-    def test_default_mean(self):
-        d = numbergen.UniformRandom(range=2.0)
-        self.assertEqual(d.lbound, -1.0)
-        self.assertEqual(d.ubound, 1.0)
-
-    def test_lbound_ubound_mean_range(self):
-        def f():
-            numbergen.UniformRandom(lbound=1.0, ubound=2.0, mean=2.0)
-        self.assertRaises(TypeError, f)
+class TestUniformRandomOffset(unittest.TestCase):
+    def test_range(self):
+        lbound = 2.0
+        ubound = 5.0
+        gen = numbergen.UniformRandomOffset(
+                seed=_seed,
+                mean=(ubound + lbound) / 2,
+                range=ubound - lbound)
+        for _ in xrange(_iterations):
+            value = gen()
+            self.assertTrue(lbound <= value < ubound)
 
 
 cases = [
-            TestUniformRandomMeanRange,
+            TestUniformRandom,
+            TestUniformRandomOffset,
         ]
 
 suite = unittest.TestSuite()

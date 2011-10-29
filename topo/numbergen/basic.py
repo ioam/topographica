@@ -149,32 +149,32 @@ class UniformRandom(RandomDistribution):
     Specified with lbound and ubound; when called, return a random
     number in the range [lbound, ubound).
 
-    Alternatively, may be specified by mean and range; this results
-    in the range [mean - range/2, mean + range/2).
-
     See the random module for further details.    
     """
     lbound = param.Number(default=0.0,doc="inclusive lower bound")
     ubound = param.Number(default=1.0,doc="exclusive upper bound")
-
-    def __init__(self, *args, **kwargs):
-        if any(kw in kwargs for kw in ("mean", "range")):
-            if any(kw in kwargs for kw in ("lbound", "ubound")):
-                raise TypeError(
-                        "Cannot set both lbound/ubound and mean/range; "
-                        "use one or the other")
-            # convert lbound/ubound to corresponding mean/range values
-            mean = kwargs.get("mean", 0.0)
-            range_ = kwargs.get("range", 2.0)
-            kwargs["lbound"] = mean - range_ / 2
-            kwargs["ubound"] = mean + range_ / 2
-            for kw in "mean", "range":
-                if kw in kwargs:
-                    del kwargs[kw]
-        super(UniformRandom, self).__init__(*args, **kwargs)
     
     def __call__(self):
         return self.random_generator.uniform(self.lbound,self.ubound)
+
+
+class UniformRandomOffset(RandomDistribution):
+    """
+    Identical to UniformRandom, but specified by mean and range.
+    When called, return a random number in the range
+    [mean - range/2, mean + range/2).
+
+    See the random module for further details.
+    """
+    mean = param.Number(default=0.0, doc="""
+        Mean value""")
+    range = param.Number(default=1.0, doc="""
+        Difference of maximum and minimum value""")
+
+    def __call__(self):
+        return self.random_generator.uniform(
+                self.mean - self.range / 2.0,
+                self.mean + self.range / 2.0)
 
 
 class UniformRandomInt(RandomDistribution):
