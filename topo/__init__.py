@@ -57,17 +57,55 @@ version = ''
 
 import param 
 import os
+import errno
 import platform
 
-# Default location in which to create files
-if platform.system()=='Darwin' or platform.mac_ver()[0]:
-    _default_output_path = os.path.join(os.path.expanduser("~"),'Documents')
+def _win_my_documents_path():
+    """
+    Get Windows "My Documents" folder path
+    """
+    # try finding the path using the Windows API via ctypes
+    try:
+        import ctypes
+        import ctypes.wintypes
 
+        CSIDL_PERSONAL = 0x0005
+        dll = ctypes.windll.shell32
+        buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH + 1)
+        if dll.SHGetSpecialFolderPathW(None, buf, CSIDL_PERSONAL, False):
+            return buf.value.encode()
+    except ImportError:
+        pass
+
+    # just return a reasonable default
+    return _default_output_path = os.path.join(
+            os.path.expanduser('~'),
+            'Documents')
+
+# Default location in which to create files
+if platform.system() == 'Darwin' or platform.mac_ver()[0]:
+    _default_output_path = os.path.join(
+            os.path.expanduser('~'),
+            'Documents',
+            'Topographica')
+elif platform.system() == 'Windows':
+    my_documents = _win_my_documents_path()
+    _default_output_path = os.path.join(
+            my_documents,
+            'Topographica')
 else:
-    _default_output_path = os.path.join(os.path.expanduser("~"),'topographica')
-    if not os.path.exists(_default_output_path):
-        print "Creating %s"%_default_output_path
-        os.mkdir(_default_output_path)
+    _default_output_path = os.path.join(
+            os.path.expanduser('~'),
+            'Documents',
+            'Topographica')
+
+if not os.path.exists(_default_output_path):
+    print "Creating %s"%_default_output_path
+    try:
+        os.makedirs(_default_output_path)
+    except OSError, e:
+        if e.errno != errno.EEXIST:
+            raise
 
 # Location of topo/ package. This kind of thing won't work with py2exe
 # etc. Need to see if we can get rid of it.

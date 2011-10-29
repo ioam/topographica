@@ -60,13 +60,13 @@ scripts:
 (During installation, the Topographica example scripts are installed
 into a location that varies by operating system and installation type;
 this command copies those examples
-to <code>~/topographica/examples/</code>.)
+to <code>~/Documents/Topographica/examples/</code>.)
 
 <P>Then, you can run an example script using a command like the
 following:
 
 <blockquote>
-  <code>topographica ~/topographica/examples/som_retinotopy.ty -g</code>
+  <code>topographica ~/Documents/Topographica/examples/som_retinotopy.ty -g</code>
 </blockquote>
 
 <P>Topographica can also be run without the GUI by omitting
@@ -176,7 +176,7 @@ optionally be set at startup, such as
 and <code>cortex_density</code>, e.g.:
 
 <pre>topographica -i -p retina_density=12 -p cortex_density=12 \
-~/topographica/examples/lissom_oo_or.ty 
+~/Documents/Topographica/examples/lissom_oo_or.ty 
 </pre>
 
 In this case, we are specifying that the retina and V1 sheets in a
@@ -198,7 +198,7 @@ commands can be specified at the commandline by using the
 
 <pre>
 topographica -c 'from topo.command.analysis import measure_sine_pref'\
--c 'measure_sine_pref.num_directions=12' ~/topographica/examples/tiny.ty
+-c 'measure_sine_pref.num_directions=12' ~/Documents/Topographica/examples/tiny.ty
 </pre>
 
 would import <code>measure_sine_pref</code> and set its

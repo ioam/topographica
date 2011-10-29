@@ -12,7 +12,7 @@ identifiable directory that records the options used for the run.
 Example:
 
 <pre>
-  topographica -a -c "run_batch('~/topographica/examples/tiny.ty')"
+  topographica -a -c "run_batch('~/Documents/Topographica/examples/tiny.ty')"
 </pre>
 
 <P>Here the <A href="commandline.html#option-a">"-a" option</a> is
@@ -21,7 +21,7 @@ and also so that all commands will be available to the various
 plotting and analysis routines called by run_batch (as described
 below). The result will be a directory with a name like
 <code>200710112056_tiny</code> in the <code>Output</code> subdirectory
-of <code>~/topographica</code> (the value of <A
+of <code>~/Documents/Topographica</code> (the value of <A
 HREF="../Reference_Manual/param.normalize_path-class.html">param.normalize_path</A>'s
 <code>prefix</code> parameter). The name encodes the date of the run
 (in year/month/day/hour/minute format) plus the name of the script
@@ -31,7 +31,7 @@ file.
 can do that when you call run_batch:
 
 <pre>
-  topographica -a -c "run_batch('~/topographica/examples/tiny.ty',cortex_density=3)"
+  topographica -a -c "run_batch('~/Documents/Topographica/examples/tiny.ty',cortex_density=3)"
 </pre>
 
 <p>To help you keep the options straight, they will be encoded into
@@ -63,7 +63,7 @@ after the batch run, respectively:
 
 <pre>
   topographica -a -c "save_script_repr()" -p cortex_density=3\
-  -c "run_batch('~/topographica/examples/tiny.ty')" \
+  -c "run_batch('~/Documents/Topographica/examples/tiny.ty')" \
   -c "save_snapshot()"
 </pre>
 

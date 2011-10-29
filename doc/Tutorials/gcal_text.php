@@ -609,7 +609,7 @@ sure where it is located, you can find out by first running
 
 Then you can use the path to the example, as well as specifying a higher cortex density:
 <blockquote><code class='to_type'>
-  topographica -p cortex_density=142 ~/topographica/examples/gcal.ty -g
+  topographica -p cortex_density=142 ~/Documents/Topographica/examples/gcal.ty -g
   </code></blockquote>
 <p></p>
   

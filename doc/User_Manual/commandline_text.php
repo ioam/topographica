@@ -16,7 +16,7 @@ a Sheet named V1, you can display and change V1's parameters using
 Python commands:
 
 <pre>
-[cloud]v1cball: topographica -i ~/topographica/examples/tiny.ty 
+[cloud]v1cball: topographica -i ~/Documents/Topographica/examples/tiny.ty 
 
 Welcome to Topographica!
 
@@ -178,7 +178,7 @@ equivalent to entering its commands manually.
 program:</A>
 
 <pre>
-$ topographica -g ~/topographica/examples/tiny.ty
+$ topographica -g ~/Documents/Topographica/examples/tiny.ty
 Topographica&gt; topo.sim.run(1)
 Topographica&gt; from topo.command.pylabplot import *
 Topographica&gt; V1 = topo.sim['V1']
@@ -264,7 +264,7 @@ command save_plotgroup then uses this data to generate the bitmap
 images, and saves them to disk.
 
 <P>By default, all output from Topographica goes into
-<code>~/topographica</code> (the value of <A
+<code>~/Documents/Topographica</code> (the value of <A
 HREF="../Reference_Manual/param.normalize_path-class.html">param.normalize_path</A>'s
 <code>prefix</code>).
 

@@ -8,8 +8,9 @@ typing <code>cmd</code>, then clicking 'Ok'.
 
 <P>To convert UNIX shell commands to Windows Command Prompt commands:
 <ul>
-<li>Replace <code>~</code> in a path with the path to your <code>My Documents</code> folder
-(e.g. <code>~/topographica</code> might become <code>"%HOMEPATH%\My Documents\topographica"</code>)</li>
+<li>Replace <code>~/Documents</code> in a path with the path to your <code>My Documents</code> folder
+(e.g. <code>~/Documents/topographica</code> might become <code>"%HOMEPATH%\My Documents\topographica"</code>)</li>
+<li>Replace <code>~</code> in a path with the path to your user profile folder (<code>%HOMEPATH%</code>)
 <li>Replace any forward slash '<code>/</code>' in a path with a backslash '<code>\</code>'</li>
 <li>Single quotes (<code>'</code>) must appear inside double quotes
 (<code>"</code>); double quotes cannot appear inside single quotes 
@@ -24,10 +25,10 @@ for DOS Users</A></li>
 
 <P>
 Example UNIX command:
-<BR><code>topographica -g ~/topographica/examples/lissom_oo_or.ty</code>
+<BR><code>topographica -g ~/Documents/Topographica/examples/lissom_oo_or.ty</code>
 <BR>
 Windows equivalent:
-<BR><code>topographica -g "%HOMEPATH%\My Documents\topographica\examples\lissom_oo_or.ty"</code>
+<BR><code>topographica -g "%HOMEPATH%\My Documents\Topographica\examples\lissom_oo_or.ty"</code>
 
 
 

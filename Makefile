@@ -232,11 +232,11 @@ clean-coverage-results:
 
 # CBALERT: guess at output directory.
 clean-coverage-html:
-	${RM} -r ~/topographica/tests/coverage_html
+	${RM} -r ~/Documents/Topographica/tests/coverage_html
 
 coverage-html:
 	bin/coverage combine 
-	bin/coverage html --rcfile=doc/buildbot/coveragerc -d ~/topographica/tests/coverage_html
+	bin/coverage html --rcfile=doc/buildbot/coveragerc -d ~/Documents/Topographica/tests/coverage_html
 #############################################################################
 
 

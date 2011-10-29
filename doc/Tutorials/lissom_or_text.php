@@ -35,7 +35,7 @@ presenting different visual input patterns.
 <p></p>
 <li>First, change to your topographica directory, e.g.:
 
-<blockquote><code class='to_type'>cd ~/topographica/</code></blockquote>
+<blockquote><code class='to_type'>cd ~/Documents/Topographica/</code></blockquote>
 <p></p>
 </li>
 
