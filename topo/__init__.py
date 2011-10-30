@@ -78,9 +78,7 @@ def _win_my_documents_path():
         pass
 
     # just return a reasonable default
-    return _default_output_path = os.path.join(
-            os.path.expanduser('~'),
-            'Documents')
+    return os.path.join(os.path.expanduser('~'), 'Documents')
 
 # Default location in which to create files
 if platform.system() == 'Darwin' or platform.mac_ver()[0]:
