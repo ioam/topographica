@@ -15,9 +15,8 @@ developers are:
 
   <p><dt>Chris Ball, 2005 - </dt>
   <dd>Chris has worked on nearly every part of Topographica.  Since
-      September 2008 he has been a PhD student in Edinburgh, working on
-      modeling the development of circuitry for color vision.
-
+      January 2009 he has been a PhD student in Edinburgh, working on
+      the formation of color maps in V1.
 </dl>
 
 <P><BR><BR>
@@ -30,38 +29,39 @@ Other current developers are:
       V1, and also contributes optimizations and other code to
       Topographica.
 
-  <p><dt>Marco Elver, 2010 - 2011 </dt>
-  <dd>As part of his undergraduate degree at the 
-      University of Edinburgh, Marco is working on analyzing and
-      optimizing for single-processor and multi-core operation.
-
   <p><dt>Bilal Khan, 2009 - 2011 </dt>
   <dd>Bilal has been working on audio file support for Topographica
       and on auditory system modelling, first as part of his
       undergraduate project and now as part of his MSc project at the
       University of Edinburgh.
+
+  <p><dt>Gautham Ganapathy, 2011 -</dt>
+  <dd>Gautham completed his MSc at the University of Edinburgh,
+      including a project on realistic lateral connectivity in V1.
     
   <p><dt>Konstantin Kudryavtsev, 2009 - 2011 </dt>
-  <dd>Konstantin has been working on MPI support for Topographica,
-      first as part of his undergraduate project and now as part of
-      his MSc project at the University of Edinburgh EPCC.
-
-  <p><dt>Judith Law, 2005 - </dt>
-  <dd>Judith completed her University of Edinburgh PhD thesis in Autumn
-      2009, focusing on homeostasis and species differences in V1.
-      Judith also contributed tuning curve support and various GUI
-      improvements.
-
+  <dd>Konstantin received an MSc from the University of Edinburgh EPCC,
+      and has implemented MPI support for Topographica.
+      
   <p><dt>Alessio Plebe, 2010 -</dt>
   <dd>Alessio teaches at the University of Messina, Italy,
       and contributes code for analyzing higher-order
       feature maps.
-    
-  <p><dt>Roger Zhao, 2006 - </dt>
-  <dd>Roger is completing his PhD thesis about face aftereffects at the
-      University of Edinburgh, and contributes face-related code to
-      Topographica. He also helps out with Mac OS X support.
 
+  <p><dt>Aistis Stankevicius, 2010 -</dt>
+  <dd>Aistis completed his undergraduate degree at the University of
+      Edinburgh, and is now an MSc student in Edinburgh. He is working
+      on GPU support, and has previously contributed Cython support.
+
+  <p><dt>Dobromir Stefanov, 2011 -</dt>
+  <dd>As part of Dobromir's undergraduate project, he is preparing
+      Topographica for release 1.0.
+
+  <p><dt>Jean-Luc Stevens, 2011 -</dt>
+  <dd>Jean-Luc received an MSc degree from the University of Edinburgh
+      (project: A temporal model of neural activity and VSD response
+      in the primary visual cortex) and is now a PhD student in
+      Edinburgh.
 </dl>
 
 <P><BR><BR>
@@ -101,6 +101,11 @@ Previous significant contributors include:
       responsible for the initial Windows support, and implemented the
       first complete plotting and related GUI code.
 
+  <p><dt>Marco Elver, 2010 - 2011 </dt>
+  <dd>Marco completed his undergraduate degree at the University of
+      Edinburgh, including a project on analyzing and optimizing for
+      single-processor and multi-core operation.
+
   <p><dt>C&eacute;lia Fillion, May - September 2010</dt>
   <dd>In an undergraduate project in collaboration with ISEN Brest
       (France), C&eacute;lia implemented real-time web camera support.
@@ -121,6 +126,12 @@ Previous significant contributors include:
       University of Edinburgh, including a project of
       evaluating models for homeostatic plasticity,
       and contributing code for homeostatic rules.
+
+  <p><dt>Judith Law, 2005 - 2011</dt>
+  <dd>Judith completed her University of Edinburgh PhD thesis in Autumn
+      2009, focusing on homeostasis and species differences in V1.
+      Judith also contributed tuning curve support and various GUI
+      improvements.
 
   <p><dt>Alan Lindsay, 2005 - 2006</dt>
   <dd>As part of his undergraduate degree at the
@@ -187,6 +198,11 @@ Previous significant contributors include:
       on rodent barrel cortex maps.  He contributed
       barrel cortex modelling examples and analysis code.
 
+  <p><dt>Chen (Roger) Zhao, 2006 - 2011</dt>
+  <dd>Roger completed his PhD thesis about face aftereffects at the
+      University of Edinburgh, and contributed face-related code to
+      Topographica. He also helped out with Mac OS X support.
+
 </dl>
 
 
@@ -203,4 +219,8 @@ Other people who did work that isn't currently distributed:
       University of Edinburgh, including a project of
       building a model of somatosensory cortex.
 
+  <p><dt>Ravi Kiran Mattaparthi, Jan - Aug 2011</dt>
+  <dd>Ravi completed his MSc degree at the
+      University of Edinburgh, including a project of
+      adding real-world units.
 -->
