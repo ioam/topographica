@@ -14,17 +14,17 @@
 <font size="-1">
 <dt>General improvements:</dt>
 <dd>
-  <div class="i2">- support for Python 2.6, numpy 1.3, Tcl 8.5.10, IPython 0.11</div>
+  <div class="i2">- support for NumPy 1.3 and IPython 0.11</div>
+  <div class="i2">- minor bugfixes</div>
   <div class="i2">- greatly expanded support for auditory input; see topo.pattern.audio</div>
   <div class="i2">- default output path now ~/Documents/Topographica on all platforms</div>
   <div class="i2">- Mac OS X: right click supported on more platforms, automatic .ty file syntax colouring in Xcode 3</div>
-  <div class="i2">- loading snapshots now supported for 0.9.7 and above</div>
-  <!-- Should link to our OpenMP documentation page; do we have one? -->
-  <div class="i2">- shared-memory multiprocessing support: add "-c openmp=True" at commandline; number of threads controlled via openmp_threads environment variable</div>
-  <!-- Should link to our MPI documentation page; do we have one? -->
-  <div class="i2">- multiprocessor support (via MPI)</div>
-  <div class="i2">- <A target="_top" href="../Developer_Manual/cython.html">Cython support</A> for writing portable, fast components</div>
-  <div class="i2">- better package and native-Python support; should now be easier to integrate Topographica into your workflow</div>
+  <div class="i2">- snapshots created by version 0.9.7 and above will be supported</div>
+  <div class="i2">- <A target="_top" href="../Developer_Manual/cython.html">Cython support</A> for writing fast components</div>
+  <!--
+  <div class="i2">- shared-memory multiprocessing support ADD DOC LINK</div>
+  <div class="i2">- multiprocessor support (via MPI) ADD DOC LINK</div>
+  -->
 </dd>
 <br>
 <dt>Command-line and batch:</dt>
