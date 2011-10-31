@@ -603,6 +603,10 @@ Then you can use the path to the example, as well as specifying a higher cortex 
 <blockquote><code class='to_type'>
   topographica -p cortex_density=142 ~/Documents/Topographica/examples/lissom_oo_or.ty -g
   </code></blockquote>
+(<code>~/Documents/Topographica</code> should be replaced with
+<code>~/topographica</code> for release 0.9.7 and earlier; Windows
+users should refer to our <A
+HREF="../Downloads/win32notes.html">command prompt</A> notes).
 <p></p>
   
 You'll need about a gigabyte of memory and a lot of time, but you can then step

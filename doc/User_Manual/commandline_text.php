@@ -264,9 +264,11 @@ command save_plotgroup then uses this data to generate the bitmap
 images, and saves them to disk.
 
 <P>By default, all output from Topographica goes into
-<code>~/Documents/Topographica</code> (the value of <A
-HREF="../Reference_Manual/param.normalize_path-class.html">param.normalize_path</A>'s
-<code>prefix</code>).
+<code>~/Documents/Topographica</code> (this can be customized, and
+is <code>~/topographica</code> in release 0.9.7 and earlier; see the
+note about the <A HREF="scripts.html#outputpath">default output
+path</A> for more information).
+
 
 <P>Other examples:
 
@@ -394,17 +396,10 @@ that do not support them will display them as unrecognizable symbols.
 <H2><A name="toporc">Site-specific customizations</A></H2>
 
 <P>If you have any commands that you want to be executed whenever you
-start Topographica, you can put them into a user configuration file.
-Topographica will run the following files in order:
-<blockquote>
-<code>~/.topographicarc</code> (typically for UNIX/Linux/Mac OS X systems) <br />
-<code>%USERPROFILE%\topographica.ini</code> (on Windows, where
-<code>%USERPROFILE%</code> is typically 
-<code>C:\Users\username</code> on Vista/7 or <code>c:\Documents and Settings\username</code> on XP).
-</blockquote>
-
-<P>For instance, to use the ANSI colors every time, just create
-one of the files above and add these lines to it:
+start Topographica, you can put them into the <A
+HREF="scripts.html#toporc">user configuration file</A>.  For
+instance, to use the ANSI colors every time, just add these lines to
+your user configuration file:
 
 <pre>
 from topo.misc.commandline import CommandPrompt

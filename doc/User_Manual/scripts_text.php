@@ -57,23 +57,69 @@ scripts:
   <code>topographica -c "from topo.misc.genexamples import copy_examples; copy_examples()"</code>
 </blockquote>
 
-(During installation, the Topographica example scripts are installed
-into a location that varies by operating system and installation type;
-this command copies those examples
-to <code>~/Documents/Topographica/examples/</code>.)
+<!--CEBALERT: output path is probably not the best term.-->
 
-<P>Then, you can run an example script using a command like the
+During installation, the Topographica example scripts are installed
+into a location that varies by operating system and installation type;
+this command copies those to an examples subdirectory of your <A
+HREF="#outputpath">output path</A> (see below), typically
+<code>~/Documents/Topographica/examples</code> (or
+<code>~/topographica/examples</code> for release 0.9.7 or earlier).
+
+<P>Now you can run an example script using a command like the
 following:
 
 <blockquote>
   <code>topographica ~/Documents/Topographica/examples/som_retinotopy.ty -g</code>
 </blockquote>
 
+(Again, Windows users might find it easiest to launch Topographica by
+double clicking the Topographica icon on the Desktop, then selecting
+"Examples" from the "Help" menu to open a dialog box from which the
+desired example can be selected.)
+
 <P>Topographica can also be run without the GUI by omitting
 the <code>-g</code> flag from the startup command.
 
 <!--CEBALERT: describe Simulation/Run script GUI?-->
 
+
+<H2><a name="outputpath">Output path</a></H2>
+
+By default, output from Topographica is stored in a particular folder,
+typically <code>~/Topographica/Documents</code> (this path is
+<code>~/topographica</code> for release 0.9.7 and earlier; Windows
+users should see our notes about the <A HREF="../Downloads/win32notes.html">command prompt</A>).
+
+<P>You can override the default output path by 
+the setting the value of <A
+HREF="../Reference_Manual/param.normalize_path-class.html">param.normalize_path</A>'s
+<code>prefix</code> parameter, e.g.:
+
+<blockquote>
+<code>
+import param<BR>
+param.normalize_path.prefix = "/some/other/path/"
+</code>
+</blockquote>
+
+To override the default location every time you use Topographica, you
+can put these two lines in a <A HREF="#toporc">user configuration
+file</A>.
+
+
+<H2><a name="toporc">User configuration file</a></H2>
+
+On startup, Topographica will run the following files in order:
+<blockquote>
+<code>~/.topographicarc</code> (typically for UNIX/Linux/Mac OS X systems) <br />
+<code>%USERPROFILE%\topographica.ini</code> (on Windows, where
+<code>%USERPROFILE%</code> is typically 
+<code>C:\Users\username</code> on Vista/7 or <code>c:\Documents and Settings\username</code> on XP).
+</blockquote>
+Any code you put into your user configuration file will run every time you start Topographica,
+so it is useful for overriding various default settings such as the <A HREF="#toporc">output path</A> (as described above),
+ or the <A HREF="commandline.html#toporc">command prompt format</A>.
 
 
 <H2><a name="ty-files">Topographica Scripts</a></H2>

@@ -272,8 +272,8 @@ subplot from Activity plots using:
 (which is what Subplotting.set_subplots() does, for Activity and
 several other types of plots).
 
-<P>You can also put lines like these into
-<a href="commandline.html#toporc">~/.topographicarc</a>, if you find
+<P>You can also put lines like these into your
+<a href="scripts.html#toporc">user configuration file</a>, if you find
 that you always want different defaults than Topographica's, for all
 scripts that you run.
 
