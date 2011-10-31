@@ -17,16 +17,16 @@ developers are:
   <dd>Chris has worked on nearly every part of Topographica.  Since
       January 2009 he has been a PhD student in Edinburgh, working on
       the formation of color maps in V1.
+
+  <p><dt>Dobromir Stefanov, 2011 -</dt>
+  <dd>As part of Dobromir's undergraduate project at the University of
+      Edinburgh, he is preparing Topographica's next major release.
 </dl>
 
 <P><BR><BR>
 Other current and recent developers are:
 
 <dl>
-  <p><dt>Dobromir Stefanov, 2011 -</dt>
-  <dd>As part of Dobromir's undergraduate project at the University of
-      Edinburgh, he is preparing Topographica's next major release.
-
   <p><dt>Jan Antolik, 2006 - </dt>
   <dd>Jan completed his University of Edinburgh PhD thesis in Autumn
       2010, focusing on complex cells and surround modulation in V1.
