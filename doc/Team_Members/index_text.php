@@ -20,28 +20,31 @@ developers are:
 </dl>
 
 <P><BR><BR>
-Other current developers are:
+Other current and recent developers are:
 
 <dl>
+  <p><dt>Dobromir Stefanov, 2011 -</dt>
+  <dd>As part of Dobromir's undergraduate project at the University of
+      Edinburgh, he is preparing Topographica's next major release.
+
   <p><dt>Jan Antolik, 2006 - </dt>
   <dd>Jan completed his University of Edinburgh PhD thesis in Autumn
-      2010, focusing on the complex cells and surround modulation in
-      V1, and also contributes optimizations and other code to
-      Topographica.
+      2010, focusing on complex cells and surround modulation in V1.
+      He continues to use Topographica in his postdoctoral work and
+      has contributed a variety of related code.
 
-  <p><dt>Bilal Khan, 2009 - 2011 </dt>
-  <dd>Bilal has been working on audio file support for Topographica
-      and on auditory system modelling, first as part of his
-      undergraduate project and now as part of his MSc project at the
-      University of Edinburgh.
-
-  <p><dt>Gautham Ganapathy, 2011 -</dt>
+  <p><dt>Gautham Ganapathy, May - Dec 2011</dt>
   <dd>Gautham completed his MSc at the University of Edinburgh,
       including a project on realistic lateral connectivity in V1.
     
+  <p><dt>Bilal Khan, 2009 - 2011 </dt>
+  <dd>Bilal developed audio file support and auditory system models
+      for Topographica, first as part of his undergraduate project and
+      then as part of his MSc project at the University of Edinburgh.
+
   <p><dt>Konstantin Kudryavtsev, 2009 - 2011 </dt>
-  <dd>Konstantin received an MSc from the University of Edinburgh EPCC,
-      and has implemented MPI support for Topographica.
+  <dd>Konstantin implemented MPI support for Topographica as part of
+      his undergraduate and MSc theses at the University of Edinburgh.
       
   <p><dt>Alessio Plebe, 2010 -</dt>
   <dd>Alessio teaches at the University of Messina, Italy,
@@ -50,19 +53,16 @@ Other current developers are:
 
   <p><dt>Aistis Stankevicius, 2010 -</dt>
   <dd>Aistis completed his undergraduate degree at the University of
-      Edinburgh, and is now an MSc student in Edinburgh. He is working
+      Edinburgh, and is now an MSc/PhD student in Edinburgh. He is working
       on GP-GPU support, and has previously contributed Cython and code
       coverage support.
-
-  <p><dt>Dobromir Stefanov, 2011 -</dt>
-  <dd>As part of Dobromir's undergraduate project, he is preparing
-      Topographica for release 1.0.
 
   <p><dt>Jean-Luc Stevens, 2011 -</dt>
   <dd>Jean-Luc received an MSc degree from the University of Edinburgh
       (project: A temporal model of neural activity and VSD response
       in the primary visual cortex) and is now a PhD student in
-      Edinburgh.
+      Edinburgh working on temporal processing in V1 using
+      Topographica models.
 </dl>
 
 <P><BR><BR>
@@ -131,7 +131,7 @@ Previous significant contributors include:
   <p><dt>Judith Law, 2005 - 2011</dt>
   <dd>Judith completed her University of Edinburgh PhD thesis in Autumn
       2009, focusing on homeostasis and species differences in V1.
-      Judith also contributed tuning curve support and various GUI
+      Judith contributed tuning curve support and various GUI
       improvements.
 
   <p><dt>Alan Lindsay, 2005 - 2006</dt>
