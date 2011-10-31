@@ -51,7 +51,8 @@ Other current developers are:
   <p><dt>Aistis Stankevicius, 2010 -</dt>
   <dd>Aistis completed his undergraduate degree at the University of
       Edinburgh, and is now an MSc student in Edinburgh. He is working
-      on GPU support, and has previously contributed Cython support.
+      on GP-GPU support, and has previously contributed Cython and code
+      coverage support.
 
   <p><dt>Dobromir Stefanov, 2011 -</dt>
   <dd>As part of Dobromir's undergraduate project, he is preparing
@@ -185,11 +186,6 @@ Previous significant contributors include:
       responsible for making the first Topographica implementation of
       LISSOM match the previous C++ version, and for writing C code to
       optimize key Topographica functions.
-
-  <p><dt>Aistis Stankevicius, May - September 2010</dt>
-  <dd>While at the University of Edinburgh for his undergraduate
-      degree, Aistis contributed optimizations and code coverage
-      support, and implemented code for GP-GPUs.
 
   <p><dt>Stuart Wilson, 2007 - 2010</dt>
   <dd>Stuart completed his MSc degree at the
