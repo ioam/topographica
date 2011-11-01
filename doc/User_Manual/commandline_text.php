@@ -333,7 +333,7 @@ use "-a" only for interactive debugging.
 
 
 
-<H2>Customizing the command prompt</H2>
+<H2><A NAME="promptformat">Customizing the command prompt</A></H2>
 
 <P>The contents of the command prompt itself are controlled by the
 <A HREF="../Reference_Manual/topo.misc.commandline.CommandPrompt-class.html">CommandPrompt</A> class, and can be set to

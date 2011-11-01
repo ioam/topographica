@@ -118,8 +118,8 @@ On startup, Topographica will run the following files in order:
 <code>C:\Users\username</code> on Vista/7 or <code>c:\Documents and Settings\username</code> on XP).
 </blockquote>
 Any code you put into your user configuration file will run every time you start Topographica,
-so it is useful for overriding various default settings such as the <A HREF="#toporc">output path</A> (as described above),
- or the <A HREF="commandline.html#toporc">command prompt format</A>.
+so it is useful for overriding various default settings such as the <A HREF="#outputpath">output path</A> (as described above),
+ or the <A HREF="commandline.html#promptformat">command prompt format</A>.
 
 
 <H2><a name="ty-files">Topographica Scripts</a></H2>
