@@ -20,7 +20,9 @@
   <div class="i2">- default output path now ~/Documents/Topographica on all platforms</div>
   <div class="i2">- Mac OS X: right click supported on more platforms, automatic .ty file syntax colouring in Xcode 3</div>
   <div class="i2">- snapshots created by version 0.9.7 and above will be supported</div>
-  <div class="i2">- <A target="_top" href="../Developer_Manual/cython.html">Cython support</A> for writing fast components more easily</div>
+<!--
+  <div class="i2">- Added <A target="_top" href="../Developer_Manual/cython.html">Cython tutorial</A> for writing fast components more easily</div>
+-->
   <!--
   <div class="i2">- shared-memory multiprocessing support ADD DOC LINK</div>
   <div class="i2">- multiprocessor support (via MPI) ADD DOC LINK</div>
