@@ -22,7 +22,7 @@ from topo.base.functionfamily import Hebbian,LearningFn
 # Imported here so that all ProjectionLearningFns will be in the same package
 from topo.base.cf import CFPLF_Identity,CFPLF_Plugin
 
-from basic import BCMFixed
+#from basic import BCMFixed
 
 
 class CFPLF_EuclideanHebbian(CFPLearningFn):
