@@ -59,6 +59,7 @@
   <?php classref('topo.pattern.basic','SigmoidedDoLG')?> (auditory RF with two DoLGs multiplied by a sigmoid),
   <?php classref('topo.pattern.opencvcamera','CameraImage')?> (OpenCV live camera import) pattern families
   </div>
+  <div class="i2">- <?php classref('param','Array')?> parameter</div>
 </dd>
 <br>
 <dt>Example scripts:</dt>
