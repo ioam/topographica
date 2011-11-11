@@ -13,7 +13,7 @@ Changes since 0.9.7. Last updated: 2011/10/09.
 <ul>
 <li>r11817: BCMFixed removed from learningfn.projfn
 <li>r11803: Output path now ~/Documents/Topographica [CB: not yet finalized]
-<li>r11715: 'make OTHER_PYTHON=... topographica-other-python' is now 'make PYTHON=... topographica-other-python'.
+<li>r11715: 'make OTHER_PYTHON=... topographica-other-python' is now 'make PYTHON=... topographica-external-python'.
 
 <!-- CEBALERT: check backwards compatibility; is there a new feature here?
 r11611 | bilal-khan | 2011-05-24 15:06:57 +0100 (Tue, 24 May 2011) | 1 line
