@@ -14,6 +14,7 @@ from optparse import OptionParser
 import sys, __main__, math, os, re
 
 import topo
+import param
 from param.parameterized import Parameterized,OptionalSingleton
 
 
@@ -498,6 +499,7 @@ def process_argv(argv):
     ## INTERACTIVE SESSION BEGINS HERE (i.e. can't have anything but
     ## some kind of cleanup code afterwards)
     if os.environ.get('PYTHONINSPECT'):
+        print "Output path: %s" % param.normalize_path.prefix
         print BANNER    
         # CBALERT: should probably allow a way for users to pass
         # things to IPython? Or at least set up some kind of
