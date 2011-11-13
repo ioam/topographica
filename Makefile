@@ -1,7 +1,6 @@
 # $Id$
 PREFIX =  ${CURDIR}/
 PYLINT = bin/pylint --rcfile=doc/buildbot/pylintrc
-PYFLAKES = bin/pyflakes
 
 PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
@@ -10,6 +9,8 @@ RELEASE = 0.9.7
 PYTHON = ${PREFIX}/bin/python
 
 SVNVERSION = ${shell svnversion}
+
+PYFLAKES = ${PYTHON} pyflakes-ignore.py
 
 # If SVNVERSION is "exported", form a new SVNVERSION xyz:abc where xyz
 # is the svn version from git svn, and abc is the git id of the HEAD
