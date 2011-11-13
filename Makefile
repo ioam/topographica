@@ -135,7 +135,7 @@ topographicagui:
 
 ## Currently useful lint checks
 pyflakes: # Everything except topo/tests (where we do lots of importing but not using...)
-	${PYFLAKES} topo param | grep -v topo/tests
+	${PYFLAKES} topo param --ignore topo/tests --total
 
 lint-base: # topo.base and param 
 	${PYLINT} --ignore=param/tk.py --ignore=param/external.py topo.base param | cat

@@ -7,6 +7,7 @@
 Implementation of the command-line I{pyflakes} tool.
 """
 
+import optparse
 import sys
 import os
 import _ast
@@ -24,6 +25,66 @@ ignore_re = re.compile(
                 .*
                 $
                 """, re.VERBOSE)
+
+ignored_paths = []
+
+def ignored(path):
+    for ignored_path in ignored_paths:
+        if os.path.normpath(commonprefix(ignored_path, path)) == \
+                os.path.normpath(ignored_path):
+                    return True
+    return False
+
+# path handling functions below from:
+# http://code.activestate.com/recipes/577016-path-entire-split-commonprefix/
+
+def isplit(path):
+    "Generator splitting a path"
+    dirname, basename = os.path.split(path)
+    if path == dirname:
+        # stop recursivity
+        yield path
+    elif dirname:
+        # continue recursivity
+        for i in isplit(dirname):
+            yield i
+    if basename:
+        # return tail
+        yield basename
+
+def join(iterable):
+    """Join iterable's items as a path string
+
+    >>> join(('a', 'b')) == os.path.join('a', 'b')
+    True
+    """
+    items = tuple(iterable)
+    if not items:
+        return ''
+    return os.path.join(*items)
+
+def split(path):
+    """Return the folder list of the given path
+
+    >>> split(os.path.join('a', 'b'))
+    ('a', 'b')
+    """
+    return tuple(isplit(path))
+
+def commonprefix(*paths):
+    """Return the common prefix path of the given paths
+
+    >>> commonprefix(os.path.join('a', 'c'), os.path.join('a', 'b'))
+    'a'
+    """
+    paths = map(split, paths)
+    if not paths: return ''
+    p1 = min(paths)
+    p2 = max(paths)
+    for i, c in enumerate(p1):
+        if c != p2[i]:
+            return join(p1[:i])
+    return join(p1)
 
 def check(codeString, filename):
     """
@@ -90,22 +151,33 @@ def checkPath(filename):
         return 1
 
 
-def main():
+def main(args, print_totals=False):
     warnings = 0
-    args = sys.argv[1:]
     if args:
         for arg in args:
             if os.path.isdir(arg):
                 for dirpath, dirnames, filenames in os.walk(arg):
                     for filename in filenames:
                         if filename.endswith('.py'):
-                            warnings += checkPath(os.path.join(dirpath, filename))
+                            path = os.path.join(dirpath, filename)
+                            if not ignored(path):
+                                warnings += checkPath(path)
             else:
                 warnings += checkPath(arg)
     else:
         warnings += check(sys.stdin.read(), '<stdin>')
 
+    if print_totals:
+        print "Total: %s" % warnings
+
     raise SystemExit(warnings > 0)
 
 if __name__ == '__main__':
-    main()
+    parser = optparse.OptionParser()
+    parser.add_option("--ignore", dest="ignore", action="append",
+            help="Path prefixes to ignore")
+    parser.add_option("--totals", dest="totals", action="store_true",
+            help="Print total number of warnings")
+    options, args = parser.parse_args()
+    ignored_paths = options.ignore if options.ignore else []
+    main(args, options.totals)
