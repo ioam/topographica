@@ -80,6 +80,24 @@ def _win_my_documents_path():
     else:
         raise ValueError
 
+def _xdg_documents_path():
+    import subprocess
+
+    p = subprocess.Popen(["xdg-user-dir", "DOCUMENTS"], stdout=subprocess.PIPE)
+    path = p.communicate()[0]
+    if path:
+        return path
+    else:
+        raise ValueError
+
+# attempt to get a more correct path on systems with xdg-utils (e.g. linux)
+try:
+    documents = _xdg_documents_path()
+    _default_output_path = os.path.join(documents, 'Topographica')
+except:
+    # if it doesn't work, just fall back to the default
+    pass
+
 # attempt to get a more correct path on Windows
 if platform.system() == 'Windows':
     try:
