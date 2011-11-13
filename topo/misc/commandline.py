@@ -27,16 +27,16 @@ except ImportError:
     matplotlib_imported=False
 
 
-ipython = None
+ipython_shell_interface = None
 try:
     from IPython.frontend.terminal.embed import InteractiveShellEmbed as IPShell
     from IPython.config.loader import Config
-    ipython = "0.11"
+    ipython_shell_interface = "IPython.frontend.terminal.embed.InteractiveShellEmbed"
 except ImportError:
     try:
         # older version?
         from IPython.Shell import IPShell
-        ipython = "0.10"
+        ipython_shell_interface = "IPython.Shell"
     except ImportError:
         print "Note: IPython is not available; using basic interactive Python prompt instead."
 
@@ -507,8 +507,10 @@ def process_argv(argv):
         # option has to be added for every ipython option we want to
         # support (e.g. see --pdb)
 
-        if ipython:
-            if ipython == "0.10":
+        if ipython_shell_interface:
+            if ipython_shell_interface == "IPython.Shell":
+                # IPython 0.10 and earlier
+
                 # Stop IPython namespace hack?
                 # http://www.nabble.com/__main__-vs-__main__-td14606612.html
                 __main__.__name__="__mynamespace__"
@@ -525,7 +527,9 @@ def process_argv(argv):
                         user_ns=__main__.__dict__,
                         )
                 ipshell.mainloop(sys_exit=1)
-            elif ipython == "0.11":
+            elif ipython_shell_interface == "IPython.frontend.terminal.embed.InteractiveShellEmbed":
+                # IPython 0.11 and later
+
                 config = Config()
                 config.InteractiveShell.prompt_in1 = CommandPrompt.get_format()
                 config.InteractiveShell.prompt_in2 = CommandPrompt2.get_format()
@@ -537,5 +541,7 @@ def process_argv(argv):
                         banner1="",
                         exit_msg="",
                         )
+                if option.pdb:
+                    ipshell.call_pdb = True
                 ipshell()
                 sys.exit()
