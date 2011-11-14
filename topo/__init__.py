@@ -50,7 +50,7 @@ __all__ = ['analysis',
            'responsefn',
            'sheet']
 
-# get set by the topographica script
+# These values should be set by the topographica script
 release = ''
 version = ''
 
@@ -60,15 +60,12 @@ import os
 import errno
 import platform
 
-# Default location in which to create files
-_default_output_path = os.path.join(
-        os.path.expanduser('~'), 'Documents', 'Topographica')
 
-def _win_my_documents_path():
+def _win_documents_path():
     """
-    Get Windows "My Documents" folder path
+    Return the Windows "My Documents" folder path, if available.
     """
-    # try finding the path using the Windows API via ctypes
+    # Accesses the Windows API via ctypes
     import ctypes
     import ctypes.wintypes
 
@@ -80,9 +77,15 @@ def _win_my_documents_path():
     else:
         raise ValueError
 
-def _xdg_documents_path():
-    import subprocess
 
+def _xdg_documents_path():
+    """
+    Return the Linux/UNIX XDG "Documents" folder path, if available.
+    """
+    # Runs the xdg-user-dir command from xdg-utils
+    # (which comes with most Linux systems)
+
+    import subprocess
     p = subprocess.Popen(["xdg-user-dir", "DOCUMENTS"], stdout=subprocess.PIPE)
     path = p.communicate()[0]
     if path:
@@ -90,23 +93,24 @@ def _xdg_documents_path():
     else:
         raise ValueError
 
-# attempt to get a more correct path on systems with xdg-utils (e.g. linux)
+
+# Determine the appropriate location in which to create files
+# on this operating system
+_default_output_path = os.path.join(os.path.expanduser('~'), 
+                                    'Documents', 'Topographica')
 try:
     documents = _xdg_documents_path()
     _default_output_path = os.path.join(documents, 'Topographica')
-except:
-    # if it doesn't work, just fall back to the default
-    pass
+except: pass
 
-# attempt to get a more correct path on Windows
 if platform.system() == 'Windows':
     try:
-        my_documents = _win_my_documents_path()
-        _default_output_path = os.path.join(my_documents, 'Topographica')
-    except:
-        # if it doesn't work, just fall back to the default
-        pass
+        documents = _win_documents_path()
+        _default_output_path = os.path.join(documents, 'Topographica')
+    except: pass
 
+
+# Make sure the default output path exists
 if not os.path.exists(_default_output_path):
     print "Creating %s"%_default_output_path
     try:
@@ -114,6 +118,7 @@ if not os.path.exists(_default_output_path):
     except OSError, e:
         if e.errno != errno.EEXIST:
             raise
+
 
 # Location of topo/ package. This kind of thing won't work with py2exe
 # etc. Need to see if we can get rid of it.
