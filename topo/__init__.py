@@ -87,7 +87,7 @@ def _xdg_documents_path():
 
     import subprocess
     p = subprocess.Popen(["xdg-user-dir", "DOCUMENTS"], stdout=subprocess.PIPE)
-    path = p.communicate()[0]
+    path = p.communicate()[0].strip()
     if path:
         return path
     else:
