@@ -10,7 +10,7 @@ PYTHON = ${PREFIX}/bin/python
 
 SVNVERSION = ${shell svnversion}
 
-PYFLAKES = ${PYTHON} pyflakes-ignore.py
+PYFLAKES = ${PYTHON} etc/pyflakes-ignore.py
 
 # If SVNVERSION is "exported", form a new SVNVERSION xyz:abc where xyz
 # is the svn version from git svn, and abc is the git id of the HEAD
