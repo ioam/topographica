@@ -21,7 +21,7 @@ __version__='$Revision$'
 
 import os.path
 
-from numpy import ndarray, float
+from numpy import ndarray
 from parameterized import Parameterized, Parameter, String, \
      descendents, ParameterizedFunction, ParamOverrides
 

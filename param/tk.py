@@ -1949,10 +1949,10 @@ class Translator(object):
 
     def __copy__(self):
         """Copy only translator-specific state."""
-        new = self.__class__(self.param)
-        new.last_string2object_failed = self.last_string2object_failed
-        new.msg_handler = self.msg_handler
-        return new
+        copy = self.__class__(self.param)
+        copy.last_string2object_failed = self.last_string2object_failed
+        copy.msg_handler = self.msg_handler
+        return copy
 
 
 class DoNothingTranslator(Translator):

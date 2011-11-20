@@ -1118,7 +1118,7 @@ class Values(object):
             keys = self._main._sequence[index]
             if len(keys) != len(value):
                 raise ValueError('attempt to assign sequence of size %s '
-                    'to slice of size %s' % (len(name), len(keys)))
+                    'to slice of size %s' % (len(value), len(keys)))
             # FIXME: efficiency?  Would be better to calculate the indexes
             #   directly from the slice object
             # NOTE: the new keys can collide with existing keys (or even
@@ -1404,7 +1404,6 @@ class SequenceOrderedDict(OrderedDict):
 # not depend on Tkinter).
 try:
     import Tkinter
-    from Tkconstants import * # CB: should get the specific imports and move to section below
     Tkinter_imported = True
 except ImportError:
     Tkinter_imported = False

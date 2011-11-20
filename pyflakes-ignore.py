@@ -20,7 +20,7 @@ ignore_re = re.compile(
                 ^
                 .*
                 \#
-                \s*
+                .*
                 pyflakes:ignore
                 .*
                 $
