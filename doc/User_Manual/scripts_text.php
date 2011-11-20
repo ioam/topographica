@@ -87,9 +87,13 @@ the <code>-g</code> flag from the startup command.
 <H2><a name="outputpath">Output path</a></H2>
 
 By default, output from Topographica is stored in a particular folder,
-typically <code>~/Topographica/Documents</code> (this path is
-<code>~/topographica</code> for release 0.9.7 and earlier; Windows
-users should see our notes about the <A HREF="../Downloads/win32notes.html">command prompt</A>).
+which is typically a "Topographica" folder inside the documents folder on
+your platform. Topographica attempts to determine the platform-specific
+documents folder, or falls back to <code>~/Documents/Topographica</code>. The
+output path is printed on startup when running topographica interactively.
+(Windows users should see our notes about the <A HREF="../Downloads/win32notes.html">command prompt</A>)
+
+For release 0.9.7 and earlier, the default output path is instead always <code>~/topographica</code>.
 
 <P>You can override the default output path by 
 the setting the value of <A
