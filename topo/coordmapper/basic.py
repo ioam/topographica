@@ -21,7 +21,7 @@ from numpy.matlib import matrix
 
 import param
 
-from topo.base.functionfamily import CoordinateMapperFn, IdentityMF
+from topo.base.functionfamily import CoordinateMapperFn
 from topo.misc.util import signabs
 from topo import numbergen
 

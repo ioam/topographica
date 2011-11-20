@@ -11,10 +11,9 @@ $Id$
 __version__ = "$Revision$"
 
 
-import Image,ImageOps
+import ImageOps
 from topo.pattern.image import GenericImage
 import param
-import copy
 
 try:
     import opencv

@@ -536,7 +536,6 @@ def default_analysis_function():
     # CEBALERT: why are these imports here rather than at the top?
     import topo
     from topo.command.analysis import save_plotgroup
-    from topo.base.projection import ProjectionSheet
 
     # Save all plotgroups listed in default_analysis_plotgroups
     for pg in default_analysis_plotgroups:

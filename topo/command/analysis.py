@@ -29,19 +29,19 @@ import Image,ImageDraw
 import copy
 
 from numpy.oldnumeric import array, maximum
-from numpy import where, pi, sin, cos, nonzero, max, round, linspace
+from numpy import pi, sin, cos, nonzero, round, linspace
 
 import param
 from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
 
 import topo
-from topo.base.cf import Projection, CFSheet
+from topo.base.cf import Projection
 from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
 from topo.base.sheetview import SheetView
 from topo.misc.distribution import Distribution
-from topo.pattern.basic import GaussiansCorner, RawRectangle, Line, Constant
+from topo.pattern.basic import GaussiansCorner, RawRectangle, Constant
 from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
 

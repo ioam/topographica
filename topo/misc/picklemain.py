@@ -4,7 +4,6 @@ Extensions to pickle allowing items in __main__ to be saved.
 
 import new
 import pickle
-import new
 import types
 import __main__
 from StringIO import StringIO

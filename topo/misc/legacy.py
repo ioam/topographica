@@ -6,9 +6,6 @@ $Id$
 """
 __version__='$Revision: 8021 $'
 
-import imp
-import sys
-
 import param
 
 # CEB: Add note that snapshot can be re-saved, making updates

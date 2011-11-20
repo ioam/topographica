@@ -19,8 +19,6 @@ from PIL import  Image
 
 try:
     import opencv
-    from opencv.cv import *
-    from opencv.highgui import *
 
 except ImportError:
     param.Parameterized().warning("ptztracker.py classes will not be usable; python-opencv is not available.")
@@ -195,10 +193,10 @@ class FaceTracker(PtzTracker):
         self.image=image
         self.im=array2image(image)
         self.ipl_im = opencv.adaptors.PIL2Ipl(self.im)
-        self.storage = cvCreateMemStorage(0)
-        cvClearMemStorage(self.storage)
-        self.cascade = cvLoadHaarClassifierCascade('/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml',cvSize(1,1))
-        self.faces = cvHaarDetectObjects(self.ipl_im, self.cascade, self.storage, 1.2, 2,CV_HAAR_DO_CANNY_PRUNING, cvSize(50,50))
+        self.storage = opencv.cvCreateMemStorage(0)
+        opencv.cvClearMemStorage(self.storage)
+        self.cascade = opencv('/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml',opencv.cvSize(1,1))
+        self.faces = opencv.cvHaarDetectObjects(self.ipl_im, self.cascade, self.storage, 1.2, 2,opencv.CV_HAAR_DO_CANNY_PRUNING, opencv.cvSize(50,50))
 
         if self.faces.total < 1:
             return None

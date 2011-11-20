@@ -107,7 +107,7 @@ try:
         try:
             import weave
         except ImportError:
-            from scipy import weave
+            from scipy import weave  # pyflakes:ignore (try/except import)
 
         weave_imported = True
 

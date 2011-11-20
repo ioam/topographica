@@ -14,8 +14,6 @@ __version__ = "$Revision$"
 
 from param import Parameterized
 import subprocess
-from subprocess import call
-import sys, os
 
 UVCDYNCTRLEXEC='/usr/bin/uvcdynctrl'
 
@@ -38,21 +36,21 @@ class PTZ(Parameterized):
     def tilt(self,value):
         control = "Tilt (relative)"
         disp([UVCDYNCTRLEXEC, "-s", control, "--", str(value)])
-        result = subprocess.call([UVCDYNCTRLEXEC, "-s", control, "--", str(-value)])
+        subprocess.call([UVCDYNCTRLEXEC, "-s", control, "--", str(-value)])
 
     def pan(self, value):
         control = "Pan (relative)"
         disp([UVCDYNCTRLEXEC, "-s", control, "--", str(value)])
-        result = subprocess.call([UVCDYNCTRLEXEC, "-s", control, "--", str(-value)]) 
- 
+        subprocess.call([UVCDYNCTRLEXEC, "-s", control, "--", str(-value)])
+
     def reset(self):
         value = "3"
         control = "Pan Reset"
         disp([UVCDYNCTRLEXEC, "-s", control, value])
-        result = subprocess.call([UVCDYNCTRLEXEC, "-s", control, value]) 
+        subprocess.call([UVCDYNCTRLEXEC, "-s", control, value])
         control = "Tilt Reset"
         disp([UVCDYNCTRLEXEC, "-s", control, value])
-        result = subprocess.call([UVCDYNCTRLEXEC, "-s", control, value]) 
+        subprocess.call([UVCDYNCTRLEXEC, "-s", control, value])
         control = "Pan/tilt Reset"
         disp([UVCDYNCTRLEXEC, "-s", control, value])
         result = subprocess.call([UVCDYNCTRLEXEC, "-s", control, value])

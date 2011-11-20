@@ -55,7 +55,7 @@ $Id$
 __version__='$Revision$'
 
 import param
-from param.parameterized import as_uninitialized,OptionalSingleton
+from param.parameterized import OptionalSingleton
 
 from copy import copy, deepcopy
 import time
@@ -594,7 +594,6 @@ class PeriodicEventSequence(EventSequence):
 ### JP: Is it possible that some or all of this can be more cleanly
 ### implemented using PeriodicEvents?
 
-import time
 from math import floor
 class SomeTimer(param.Parameterized):
     """

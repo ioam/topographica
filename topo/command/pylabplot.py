@@ -23,7 +23,7 @@ try:
 except ImportError:
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
     from basic import ImportErrorRaisingFakeModule
-    pylab = ImportErrorRaisingFakeModule("matplotlib")
+    pylab = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
 
 import numpy
@@ -596,7 +596,7 @@ class tuning_curve(PylabPlotCommand):
         for coordinate in p.coords:
             i_value,j_value=sheet.sheet2matrixidx(coordinate[0],coordinate[1])
         
-            f = pylab.figure(figsize=(7,7))
+            pylab.figure(figsize=(7,7))
             isint=pylab.isinteractive()
             pylab.ioff()
     

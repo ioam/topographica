@@ -140,7 +140,7 @@ param.resolve_path.search_paths+=([_default_output_path] + [_package_path])
 try:
     import Image
 except ImportError:
-    from PIL import Image, ImageOps, ImageDraw, ImageFont
+    from PIL import Image, ImageOps, ImageDraw, ImageFont  # pyflakes:ignore (try/except import)
     import sys
     sys.modules['Image']=Image
     sys.modules['ImageOps']=ImageOps
@@ -152,7 +152,7 @@ try:
     import ImageTk
 except ImportError:
     try:
-        from PIL import ImageTk
+        from PIL import ImageTk  # pyflakes:ignore (try/except import)
         import sys
         sys.modules['ImageTk']=ImageTk
     except ImportError:

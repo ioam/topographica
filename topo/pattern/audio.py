@@ -10,10 +10,10 @@ import param
 import os
 
 from topo.pattern.basic import TimeSeries, Spectrogram, PowerSpectrum
-from topo import transferfn
 
-from numpy import arange, array, ceil, complex64, concatenate, cos, exp, fft, flipud, float64, floor, hanning, hstack, log, log2, log10, \
-    logspace, multiply, nonzero, ones, pi, repeat, reshape, shape, size, sqrt, sum, tile, where, zeros
+from numpy import arange, array, ceil, complex64, cos, exp, fft, flipud, \
+        float64, floor, hanning, hstack, log, log10, logspace, multiply, \
+        nonzero, ones, pi, reshape, shape, size, sqrt, sum, tile, zeros
     
 try:
     import scikits.audiolab as audiolab
@@ -518,7 +518,7 @@ class LyonsCochleogram(LyonsCochlearModel):
             
                     
     def set_matrix_dimensions(self, bounds, xdensity, ydensity):
-        super(Cochleogram, self).set_matrix_dimensions(bounds, xdensity, ydensity)
+        super(LyonsCochleogram, self).set_matrix_dimensions(bounds, xdensity, ydensity)
         self._cochleogram = zeros(self._sheet_dimensions)
 
 

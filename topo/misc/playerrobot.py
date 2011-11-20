@@ -19,7 +19,6 @@ from threading import RLock, Thread
 from Queue import Queue
 
 from operator import eq,ne
-from copy import copy
 from math import pi
 
 

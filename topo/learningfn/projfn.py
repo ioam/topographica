@@ -127,7 +127,6 @@ class CFPLF_Trace(CFPLearningFn):
 
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
-        single_cf_fn = self.single_cf_fn
         ##Initialise traces to zero if they don't already exist
         if not hasattr(self,'traces'):
             self.traces=zeros(output_activity.shape,activity_type)

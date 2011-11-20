@@ -19,7 +19,7 @@ from topo.base.functionfamily import Hebbian,LearningFn
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
 from topo.learningfn.basic import BCMFixed
 
-from projfn import CFPLF_Trace
+from projfn import CFPLF_Trace  # pyflakes:ignore (optimized version provided)
 
 
 

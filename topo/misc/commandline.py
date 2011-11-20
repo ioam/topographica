@@ -35,7 +35,7 @@ try:
 except ImportError:
     try:
         # older version?
-        from IPython.Shell import IPShell
+        from IPython.Shell import IPShell  # pyflakes:ignore (try/except import)
         ipython_shell_interface = "IPython.Shell"
     except ImportError:
         print "Note: IPython is not available; using basic interactive Python prompt instead."
@@ -441,7 +441,6 @@ def exec_startup_files():
     #####
     # CEBALERT: locations we used to use on Windows and OS X. Should
     # remove after 0.9.8.
-    import param
     # application data on windows
     inipath = os.path.join(os.path.expandvars("$APPDATA"),'Topographica','topographica.ini')
     # application support on OS X  

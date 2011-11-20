@@ -10,8 +10,9 @@ __version__='$Revision$'
 
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or
-from numpy import abs, add, alltrue, array, asarray, ceil, clip, cos, fft, flipud, floor, equal, exp, hstack, Infinity, linspace, multiply, \
-    nonzero, pi, repeat, round, sin, sqrt, subtract, tile, zeros, sum, max
+from numpy import abs, add, alltrue, array, ceil, clip, cos, fft, flipud, \
+        floor, exp, hstack, Infinity, linspace, multiply, nonzero, pi, \
+        repeat, sin, sqrt, subtract, tile, zeros, sum, max
 
 import param
 from param.parameterized import ParamOverrides

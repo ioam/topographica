@@ -196,7 +196,7 @@ def profile(command,n=50,sorting=('cumulative','time'),strip_dirs=False):
 
     # CB: leaves around "filename": should give this a proper name and maybe
     # put in /tmp/ and maybe allow someone to choose where to save it
-    prof = cProfile.run(command,'filename')
+    cProfile.run(command,'filename')
     prof_stats = pstats.Stats('filename')
 
     if strip_dirs:prof_stats.strip_dirs()
@@ -389,7 +389,7 @@ class MultiFile(object):
 # Alternative module faking using import hooks (see
 # http://www.python.org/dev/peps/pep-0302/).
 # Based on http://orestis.gr/blog/2008/12/20/python-import-hooks/.
-import os,sys,imp
+import sys,imp
 class ModuleFaker(object):
     def load_module(self,name):
         if name not in sys.modules:
