@@ -264,7 +264,8 @@ command save_plotgroup then uses this data to generate the bitmap
 images, and saves them to disk.
 
 <P>By default, all output from Topographica goes into
-<code>~/Documents/Topographica</code> (this can be customized, and
+<code>Topographica</code> folder in your
+<code>Documents</code> directory (this can be customized, and
 is <code>~/topographica</code> in release 0.9.7 and earlier; see the
 note about the <A HREF="scripts.html#outputpath">default output
 path</A> for more information).

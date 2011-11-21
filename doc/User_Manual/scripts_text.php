@@ -87,16 +87,19 @@ the <code>-g</code> flag from the startup command.
 <H2><a name="outputpath">Output path</a></H2>
 
 By default, output from Topographica is stored in a particular folder,
-which is typically a "Topographica" folder inside the documents folder on
-your platform. Topographica attempts to determine the platform-specific
+which is typically a folder named "Topographica" inside your home
+directory's documents folder.  The name and location of the documents
+folder depends on your platform, e.g. "My Documents" on some versions
+of Windows, or "Documents" on most other platforms.   Topographica
+attempts to determine the platform-specific 
 documents folder, or falls back to <code>~/Documents/Topographica</code>. The
 output path is printed on startup when running topographica interactively.
-(Windows users should see our notes about the <A HREF="../Downloads/win32notes.html">command prompt</A>)
+(Windows users should see our notes about the <A HREF="../Downloads/win32notes.html">command prompt</A>.)
 
-For release 0.9.7 and earlier, the default output path is instead always <code>~/topographica</code>.
+<P>For release 0.9.7 and earlier, the default output path is instead always <code>~/topographica</code>.
 
 <P>You can override the default output path by 
-the setting the value of <A
+setting the value of <A
 HREF="../Reference_Manual/param.normalize_path-class.html">param.normalize_path</A>'s
 <code>prefix</code> parameter, e.g.:
 
@@ -114,16 +117,20 @@ file</A>.
 
 <H2><a name="toporc">User configuration file</a></H2>
 
-On startup, Topographica will run the following files in order:
+On startup, Topographica will look for and run the following files in order:
 <blockquote>
 <code>~/.topographicarc</code> (typically for UNIX/Linux/Mac OS X systems) <br />
 <code>%USERPROFILE%\topographica.ini</code> (on Windows, where
 <code>%USERPROFILE%</code> is typically 
 <code>C:\Users\username</code> on Vista/7 or <code>c:\Documents and Settings\username</code> on XP).
 </blockquote>
-Any code you put into your user configuration file will run every time you start Topographica,
-so it is useful for overriding various default settings such as the <A HREF="#outputpath">output path</A> (as described above),
- or the <A HREF="commandline.html#promptformat">command prompt format</A>.
+If you want to have any code run every time you start Topographica,
+you can create the appropriate user configuration file for your
+platform and add your preferred startup commands to it.  The user
+configuration file is particularly useful for overriding various
+default settings such as the <A HREF="#outputpath">output path</A> (as
+described above), or the
+<A HREF="commandline.html#promptformat">command prompt format</A>.
 
 
 <H2><a name="ty-files">Topographica Scripts</a></H2>

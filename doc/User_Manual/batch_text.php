@@ -23,7 +23,8 @@ and also so that all commands will be available to the various
 plotting and analysis routines called by run_batch (as described
 below). The result will be a directory with a name like
 <code>200710112056_tiny</code> in the <code>Output</code> subdirectory
-of <code>~/Documents/Topographica</code> (this can be customized, and
+of your <code>Topographica</code> folder in your
+<code>Documents</code> directory (this can be customized, and
 is <code>~/topographica</code> in release 0.9.7 and earlier; see the
 note about the <A HREF="scripts.html#outputpath">default output
 path</A> for more information).  The name encodes the date of the run
