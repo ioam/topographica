@@ -302,7 +302,7 @@ numpy-uninstall:
 ##############################################################
 # MatPlotLib (plotting library)
 #
-MATPLOTLIB = matplotlib-0.99.1.1
+MATPLOTLIB = matplotlib-1.1.0
 MATPLOTLIB_UNINSTALL =  ${PYTHON_LIB}/site-packages/matplotlib
 
 # Workaround to allow MATPLOTLIB to compile on a remote session.
@@ -319,9 +319,6 @@ endif
 matplotlib: ${MATPLOTLIB}.tar.gz python freetype libpng
 	make ${MATPLOTLIB}.tar.gz_extract
 #	tar -xzf ${MATPLOTLIB}.tar.gz
-# mistakenly included in matplotlib distribution?
-# http://thread.gmane.org/gmane.comp.python.matplotlib.devel/7737
-	cd ${MATPLOTLIB}; rm setup.cfg
 # use env vars because mpl somehow doesn't pass through I and L properly
 	cd ${MATPLOTLIB}; env LDFLAGS="-L${PREFIX}/lib" CFLAGS="-I${PREFIX}/include -I${PREFIX}/include/freetype2 -I${PREFIX}/include/libpng12" ${PREFIX}/bin/python setup.py build_ext -L${PREFIX}/lib/
 	cd ${MATPLOTLIB}; env PREFIX=${PREFIX} LD_LIBRARY_PATH=${PREFIX}/lib ${MATPLOTLIB_DISPLAY} ${PREFIX}/bin/python setup.py build
