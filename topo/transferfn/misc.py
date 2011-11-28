@@ -124,10 +124,13 @@ class HalfRectify(TransferFn):
     """
     Transfer function that applies a half-wave rectification (clips at zero)
     """
-    t_init = param.Number(default=0.0,doc="""The initial value of threshold at which output becomes non-zero..""")
+
+    t_init = param.Number(default=0.0,doc="""
+        The initial value of threshold at which output becomes non-zero..""")
     
     
-    gain = param.Number(default=1.0,doc="""The neuronal gain""")
+    gain = param.Number(default=1.0,doc="""
+        The neuronal gain""")
     
     randomized_init = param.Boolean(False,doc="""
         Whether to randomize the initial t parameter.""")
@@ -146,7 +149,9 @@ class HalfRectify(TransferFn):
             self.first_call = False
             if self.randomized_init:
                 self.t = ones(x.shape, x.dtype.char) * self.t_init + \
-		(topo.pattern.random.UniformRandom()(xdensity=x.shape[0],ydensity=x.shape[1])-0.5)*self.noise_magnitude*2
+		(topo.pattern.random.UniformRandom() \
+                 (xdensity=x.shape[0],ydensity=x.shape[1])-0.5) * \
+                 self.noise_magnitude*2
             else:
                 self.t = ones(x.shape, x.dtype.char) * self.t_init
         
@@ -214,6 +219,7 @@ class HomeostaticResponse(TransferFnWithState):
         # CEBALERT: this line is at best confusing; needs to be
         # commented or simplified!
         if self.plastic & (float(topo.sim.time()) % 1.0 >= 0.54):
+            # print "Called at %f" % float(topo.sim.time())
             self.y_avg = (1.0-self.smoothing)*x + self.smoothing*self.y_avg 
             self.t += self.learning_rate * (self.y_avg - self.target_activity)
 
@@ -264,7 +270,7 @@ class AttributeTrackingTF(TransferFnWithState):
 
         If this parameter's value is a string, it will be evaluated first
         (by calling Python's eval() function).  This feature is designed to
-        allow circular references, so that the OF can track the object that
+        allow circular references, so that the TF can track the object that
         owns it, without causing problems for recursive traversal (as for
         script_repr()).""")
     # There may be some way to achieve the above without using eval(), which would be better.
@@ -279,17 +285,17 @@ class AttributeTrackingTF(TransferFnWithState):
     step = param.Number(default=1, doc="""
         How often to update the tracked values.
 
-        For instance, step=1 means to update them every time this OF is
+        For instance, step=1 means to update them every time this TF is
         called; step=2 means to update them every other time.""")
 
     coordframe = param.Parameter(default=None,doc="""
-        The SheetCoordinateSystem to use to convert the position
-        into matrix coordinates. If this parameter's value is a string,
-        it will be evaluated first(by calling Python's eval() function).
-        This feature is designed to allow circular references,
-        so that the OF can track the object that
-        owns it, without causing problems for recursive traversal (as for
-        script_repr()).""")
+        SheetCoordinateSystem to use to convert the position into matrix coordinates.
+
+        If this parameter's value is a string, it will be evaluated
+        first(by calling Python's eval() function).  This feature is
+        designed to allow circular references, so that the TF can
+        track the object that owns it, without causing problems for
+        recursive traversal (as for script_repr()).""")
 
     def __init__(self,**params):
         super(AttributeTrackingTF,self).__init__(**params)

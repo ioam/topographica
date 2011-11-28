@@ -97,9 +97,11 @@ class NakaRushton(TransferFn):
     """
     
     c50 = param.Number(default=0.1, doc="""
-        The input of the neuron at which it responds at half of its maximal firing rate (1.0).""")
+        The input of the neuron at which it responds at half of its
+        maximal firing rate (1.0).""")
 
-    e = param.Number(default=1.0,doc="""The exponent of the input x.""")
+    e = param.Number(default=1.0,doc="""
+        The exponent of the input x.""")
 
     #JABALERT: (pow(x_orig,self.e) should presumably be done only once, using a temporary
     def __call__(self,x):
@@ -244,6 +246,7 @@ class HalfRectifyAndSquare(TransferFn):
         x *= x
 
 
+
 class HalfRectifyAndPower(TransferFn):
     """
     Transfer function that applies a half-wave rectification (i.e.,
@@ -263,10 +266,13 @@ class HalfRectifyAndPower(TransferFn):
         x*=0
         x+=a
 
+
+
 class ExpLinear(TransferFn):
     """
     Transfer function that is exponential until t from which point it is linear.
     """
+
     e = param.Number(default=1.0,doc="""
         The exponent of the exponetial part of the curve""")
     t1 = param.Number(default=0.5,doc="""
@@ -280,7 +286,8 @@ class ExpLinear(TransferFn):
     def __call__(self,x):
         x-=self.t1
         clip_lower(x,0)
-        z = (x>=self.t2)*(1.0*exp(self.e*(-self.t2))+(x-self.t2)) + (x<self.t2)*(exp(self.e*(x-self.t2))-exp(self.e*(-self.t2)))
+        z = (x>=self.t2)*(1.0*exp(self.e*(-self.t2))+(x-self.t2)) + \
+            (x<self.t2)*(exp(self.e*(x-self.t2))-exp(self.e*(-self.t2)))
         x*=0
         x+=self.a*z
 
@@ -298,7 +305,9 @@ class BinaryThreshold(TransferFn):
     """
     Forces all values below a threshold to zero, and above it to 1.0.
     """
-    threshold = param.Number(default=0.25, doc="Decision point for determining binary value.")
+
+    threshold = param.Number(default=0.25, doc="""
+        Decision point for determining binary value.""")
 
     def __call__(self,x):
         above_threshold = x>=self.threshold
@@ -310,7 +319,9 @@ class Threshold(TransferFn):
     """
     Forces all values below a threshold to zero, and leaves others unchanged.
     """
-    threshold = param.Number(default=0.25, doc="Decision point for determining values to clip.")
+
+    threshold = param.Number(default=0.25, doc="""
+        Decision point for determining values to clip.""")
 
     def __call__(self,x):
         clip_upper(x,self.threshold)
@@ -493,14 +504,15 @@ class ActivityAveragingTF(TransferFnWithState):
 
     step = param.Number(default=1, doc="""
         How often to update the average.
-
-        For instance, step=1 means to update it every time this OF is
+        For instance, step=1 means to update it every time this TF is
         called; step=2 means to update it every other time.""")
     
     smoothing = param.Number(default=0.9997, doc="""
-        The degree of weighting for the previous average, when calculating the new average.""")
+        The degree of weighting for the previous average, when
+        calculating the new average.""")
    
-    initial_average=param.Number(default=0, doc="Starting value for the average activity.")
+    initial_average=param.Number(default=0, doc="""
+        Starting value for the average activity.""")
 
     
     def __init__(self,**params):
@@ -536,25 +548,32 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
     to disable changes to the state.
     
     Also calculates average activity as useful debugging information,
-    for use with ValueTrackingOutoutFn  Average activity is calculated as
+    for use with AttributeTrackingTF.  Average activity is calculated as
     an exponential moving average with a smoothing factor (smoothing).
     For more information see:
     NIST/SEMATECH e-Handbook of Statistical Methods, Single Exponential Smoothing
     http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
     """
 
-    eta = param.Number(default=0.0002,doc="Learning rate for homeostatic plasticity.")
+    eta = param.Number(default=0.0002,doc="""
+        Learning rate for homeostatic plasticity.""")
     
-    mu = param.Number(default=0.01,doc="Target average firing rate.")
+    mu = param.Number(default=0.01,doc="""
+        Target average firing rate.""")
     
     smoothing = param.Number(default=0.9997, doc="""
-        Weighting of previous activity vs. current activity when calculating the average.""")
+        Weighting of previous activity vs. current activity when
+        calculating the average.""")
 
-    a_init = param.Parameter(default=None,doc="Multiplicative parameter controlling the exponential.")
+    a_init = param.Parameter(default=None,doc="""
+        Multiplicative parameter controlling the exponential.""")
    
-    b_init = param.Parameter(default=None,doc="Additive parameter controlling the exponential.")
+    b_init = param.Parameter(default=None,doc="""
+        Additive parameter controlling the exponential.""")
 
-    step = param.Number(default=1, doc=""" How often to update the a and b parameters.  For instance, step=1 means to update it every time this OF is
+    step = param.Number(default=1, doc="""
+        How often to update the a and b parameters.  
+        For instance, step=1 means to update it every time this TF is
         called; step=2 means to update it every other time.""")
 
     def __init__(self,**params):
