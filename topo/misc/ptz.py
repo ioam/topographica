@@ -53,4 +53,4 @@ class PTZ(Parameterized):
         subprocess.call([UVCDYNCTRLEXEC, "-s", control, value])
         control = "Pan/tilt Reset"
         disp([UVCDYNCTRLEXEC, "-s", control, value])
-        result = subprocess.call([UVCDYNCTRLEXEC, "-s", control, value])
+        subprocess.call([UVCDYNCTRLEXEC, "-s", control, value])

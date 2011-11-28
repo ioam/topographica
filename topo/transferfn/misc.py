@@ -207,7 +207,6 @@ class HomeostaticResponse(TransferFnWithState):
             
             self.y_avg = ones(x.shape, x.dtype.char) * self.target_activity
 
-        x_orig = copy.copy(x)
         x -= self.t
         clip_lower(x,0)
         x *= self.linear_slope

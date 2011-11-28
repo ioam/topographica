@@ -15,7 +15,7 @@ from topo.base.cf import CFPResponseFn, CFPRF_Plugin
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,\
      c_header,c_decorators
 from topo.misc.pyxhandler import provide_unoptimized_equivalent_cy
-from topo.responsefn.projfn import CFPRF_EuclideanDistance
+from topo.responsefn.projfn import CFPRF_EuclideanDistance  # pyflakes:ignore (optimized version provided)
 
 
 # CEBALERT: this function works for 1D arrays; the docstring below is
@@ -99,7 +99,7 @@ provide_unoptimized_equivalent("CFPRF_DotProduct_opt","CFPRF_DotProduct",locals(
 
 
 try:
-    from optimized_cy import CFPRF_DotProduct_cyopt
+    from optimized_cy import CFPRF_DotProduct_cyopt  # pyflakes:ignore (optimized version)
 except:
     pass
 

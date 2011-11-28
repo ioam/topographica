@@ -324,7 +324,6 @@ Many hooks accept 'display=True' so that the progress can be viewed in an open A
                 label="Combined plot: %s %s"%(plot.plot_src_name,plot.name),
                 state=NORMAL)            
             (r,c),(x,y) = event_info['coords']
-            sheet = topo.sim[plot.plot_src_name]    
             self._canvas_menu.entryconfig("unit_menu",
                 label="Single unit:(% 3d,% 3d) Coord:(% 2.2f,% 2.2f)"%(r,c,x,y),
                 state=NORMAL)
@@ -640,7 +639,7 @@ Many hooks accept 'display=True' so that the progress can be viewed in an open A
 
         # CEBALERT: I guess some widgets don't have state?
         try:
-            current_state = widget.configure('state')[3]
+            current_state = widget.configure('state')[3]  # pyflakes:ignore (try/except test)
         except TclError:
             return
 

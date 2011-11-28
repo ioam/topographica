@@ -1295,8 +1295,6 @@ class EditorEP(EditorNode):
     #   Util methods
 
     def in_bounds(self, pos_x, pos_y):
-        x = self.x - pos_x; y = self.y - pos_y
-        
         return ((pos_x> self.x-self.width)  and (pos_x<= self.x+self.width) and 
                 (pos_y> self.y-self.height) and (pos_y<= self.y+self.height))
 
@@ -1763,7 +1761,6 @@ class EditorProjection(EditorEPConnection):
             lateral_colour = ''
         # midpoint of line
         middle = self.get_middle(from_position, to_position)
-        factor = self.canvas.scaling_factor
         if (to_position == from_position) : # connection to and from the same node
             a, b = self.get_radius()
             x1 = to_position[0] - a

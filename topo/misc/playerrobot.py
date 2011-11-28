@@ -41,20 +41,20 @@ def use_processing():
     """
     import processing
     global RLock, Thread, Queue
-    RLock = processing.RLock
-    Thread = processing.Process
-    Queue = processing.Queue
+    RLock = processing.RLock  # pyflakes:ignore (optional alternative)
+    Thread = processing.Process  # pyflakes:ignore (optional alternative)
+    Queue = processing.Queue  # pyflakes:ignore (optional alternative)
 
 def use_threading():
     """
     Configure the module to use the threading library for asynchronous
     process support. (the default)
     """
-    import threading, Queue
+    import threading
     global RLock, Thread, Queue
-    RLock = threading.RLock
-    Thread = threading.Thread
-    Queue = Queue.Queue
+    RLock = threading.RLock  # pyflakes:ignore (optional alternative)
+    Thread = threading.Thread  # pyflakes:ignore (optional alternative)
+    Queue = Queue.Queue  # pyflakes:ignore (optional alternative)
 
 # JPALERT This is a HACK for the CVS version of Player, this value
 # should be defined in the playerc module:

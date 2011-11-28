@@ -9,8 +9,6 @@ __version__='$Revision$'
 import copy
 import numpy
 
-import numpy
-
 from numpy.oldnumeric import zeros, ones, Float, divide
 from math import pi, sin, cos
 
@@ -503,7 +501,6 @@ class RGBPlot(TemplatePlot):
         Applies normalizing and cropping if required.
         """
         zero=zeros(shape,Float)
-        one=ones(shape,Float)   
 
         r,g,b = rgb_matrices
         # Determine appropriate defaults for each matrix
