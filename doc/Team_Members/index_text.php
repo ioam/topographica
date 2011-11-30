@@ -1,6 +1,6 @@
 <P>Topographica is developed by a distributed team of researchers in
-the United Kingdom, the United States, and Europe.  The principal
-developers are:
+the United Kingdom, the United States, and Europe.  The most active
+current developers are:
 
 <dl>
   <p><dt><a target="_top" href="http://homepages.inf.ed.ac.uk/jbednar">James
@@ -19,7 +19,7 @@ developers are:
 </dl>
 
 <P><BR><BR>
-Other current and recent developers are:
+Other recent developers include:
 
 <dl>
   <p><dt>Jan Antolik, 2006 - </dt>
@@ -66,7 +66,7 @@ Other current and recent developers are:
 </dl>
 
 <P><BR><BR>
-Previous significant contributors include:
+Previous contributors include:
 
 <dl>
   <p><dt>James Adwick, 2008 - 2009 </dt>
