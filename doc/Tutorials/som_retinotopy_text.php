@@ -27,7 +27,8 @@ develops a mapping of the dimensions of variance in the input space.
 <li>First, 
   <A HREF="../User_Manual/scripts.html#copy_examples">get a copy of the
   example files to work with</A> if you do not have them already, and
-  open a terminal in the examples directory.
+  open a terminal in the examples directory (the path of the examples directory is 
+  printed by Topographica when you are getting a copy of the example files).
 
 <P><li>To start the full simulation from the book using the
   Topographica GUI, you could run:
@@ -319,7 +320,7 @@ equivalent results.
 Topographica.  This time, change one of the parameter values, either
 by editing the <code>som_retinotopy.ty</code> file before starting, or
 by providing it on the command line before the script name (for those
-parameters set via global_params.  For
+parameters set via global_params).  For
 instance, the starting value of the neighborhood radius (from which
 all future values are calculated according to exponential decay) is
 1.0.  You can change this value as you see fit, e.g. to 0.1, by

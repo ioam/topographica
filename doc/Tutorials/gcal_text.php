@@ -29,9 +29,9 @@ prompt</A> by running
 snack at this point; on a 3GHz machine this training process
 currently takes about 12 minutes.
 <!--cortex: 11:24 -->
-When training completes, the .typ file should be ready in the
-topographica subdirectory of your home directory. 
-</p>
+When training completes, gcal_10000.typ will be saved in
+Topographica's <A HREF="../User_Manual/scripts.html#outputpath">output
+path</A> ready for use in the tutorial.</p>
 
 
 
@@ -500,7 +500,7 @@ start a new run of Topographica:
   </code></blockquote>
 <p></p>
 
-From the <code>examples</code> directory, open <code>gcal.ty</code>.
+From the Simulation menu, select Run Script. Then from the <code>examples</code> directory, open <code>gcal.ty</code>.
 <p></p></li><li>Next, open an <span class='w_title'>Activity</span> window 
 and make sure that it has <span class='t_item'>Auto-refresh</span> enabled.  Unless your machine is 
 very slow, also enable <span class='t_item'>Auto-refresh</span> in a
@@ -600,8 +600,10 @@ iterations at a time instead before looking at an
 <p><li> If you are <em>really</em> patient, you can change the number
 of units to something closer to real primate cortex, by quitting
 and then restarting with a higher density in V1. To do this, you will need
-to specify the example script from the commandline. If you are not
-sure where it is located, you can find out by first running
+to specify the example script from the commandline. The path of the
+gcal.ty script was printed by Topographica in step 1 of this
+Learning section, but if you are not sure where the examples are
+located, you can find out by first running
 
 <blockquote><code class='to_type'>
   topographica -c "from topo.misc.genexamples import print_examples_dir; print_examples_dir()"

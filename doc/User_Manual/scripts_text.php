@@ -23,22 +23,9 @@ for <A HREF="../Tutorials/lissom_oo_or.html">lissom_oo_or.ty</A>
 and <A HREF="../Tutorials/som_retinotopy.ty">som_retinotopy.ty</A>,
 which make a good starting point for using Topographica.
 
-<P>Note that the first time Topographica is run on a given example,
-there may be a short pause while the program compiles some of the
-optimized components used in that example.  (Some components,
-generally those with <code>_opt</code> in their names, use code
-written in C++ internally for speed, and this code must be compiled.)
-The compiled versions are stored in <code>~/.python26_compiled/</code>
-on most systems (or in the temporary directory
-<code>%TEMP%\%USERNAME%</code> on Windows), and they will be reused on
-the next run unless the source files have changed.  Thus you should
-only notice such pauses the first time you use a particular component,
-at which time you may also notice various inscrutable messages from
-the compiler. These messages vary depending on platform (because they
-come from the compiler), and may generally be ignored.
-
-<P>Alternatively, you can instead pass the name of a script to run
-when you start Topographica from the terminal, e.g.
+<P>Alternatively, instead of selecting an example from the GUI, you
+can pass the name of a script to run when you start Topographica from
+the terminal, e.g.
 
 <blockquote>
   <code>topographica /path/to/some_script.ty -g</code>
@@ -73,13 +60,25 @@ following:
   <code>topographica ~/Documents/Topographica/examples/som_retinotopy.ty -g</code>
 </blockquote>
 
-(Again, Windows users might find it easiest to launch Topographica by
-double clicking the Topographica icon on the Desktop, then selecting
-"Examples" from the "Help" menu to open a dialog box from which the
-desired example can be selected.)
-
 <P>Topographica can also be run without the GUI by omitting
 the <code>-g</code> flag from the startup command.
+
+<P>Finally, note that the first time Topographica is run on a given example,
+there may be a short pause while the program compiles some of the
+optimized components used in that example.  (Some components,
+generally those with <code>_opt</code> in their names, use code
+written in C++ internally for speed, and this code must be compiled.)
+The compiled versions are stored in <code>~/.python26_compiled/</code>
+on most systems (or in the temporary directory
+<code>%TEMP%\%USERNAME%</code> on Windows), and they will be reused on
+the next run unless the source files have changed.  Thus you should
+only notice such pauses the first time you use a particular component,
+at which time you may also notice various inscrutable messages from
+the compiler. These messages vary depending on platform (because they
+come from the compiler), and may generally be ignored.
+
+
+
 
 <!--CEBALERT: describe Simulation/Run script GUI?-->
 
@@ -130,7 +129,8 @@ platform and add your preferred startup commands to it.  The user
 configuration file is particularly useful for overriding various
 default settings such as the <A HREF="#outputpath">output path</A> (as
 described above), or the
-<A HREF="commandline.html#promptformat">command prompt format</A>.
+<A HREF="commandline.html#promptformat">command prompt format</A>. The file can
+contain any valid Python code.
 
 
 <H2><a name="ty-files">Topographica Scripts</a></H2>

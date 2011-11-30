@@ -27,9 +27,9 @@ snack at this point; on a 3GHz 512MB machine this training process
 currently takes from 7-15 minutes (depending on the amount of level
 2 cache).<!--lodestar: 15:46 ; cortex: 7:31; fiver: 8:07; jupiter1: 9:00 -->
 <!-- 10 Jul 2010: 6:28 on cortex -->
-When training completes, the .typ file should be ready in the
-topographica subdirectory of your home directory. 
-</p>
+When training completes, lissom_oo_or_10000.typ will be saved in
+Topographica's <A HREF="../User_Manual/scripts.html#outputpath">output
+path</A> ready for use in the tutorial.</p>
 
 
 
@@ -492,7 +492,7 @@ start a new run of Topographica:
   </code></blockquote>
 <p></p>
 
-From the <code>examples</code> directory, open <code>lissom_oo_or.ty</code>.
+From the Simulation menu, select Run Script. Then from the <code>examples</code> directory, open <code>lissom_oo_or.ty</code>.
 <p></p></li><li>Next, open an <span class='w_title'>Activity</span> window 
 and make sure that it has <span class='t_item'>Auto-refresh</span> enabled.  Unless your machine is 
 very slow, also enable <span class='t_item'>Auto-refresh</span> in a
@@ -590,23 +590,21 @@ iterations at a time instead before looking at an
 <span class='w_title'>Orientation Preference</span> map.<p></p></li>
 
 <p><li> If you are <em>really</em> patient, you can change the number
-of units to something closer to real primate cortex, by quitting
-and then restarting with a higher density in V1. To do this, you will need
-to specify the example script from the commandline. If you are not
-sure where it is located, you can find out by first running
+of units to something closer to real primate cortex, by quitting and
+then restarting with a higher density in V1. To do this, you will need
+to specify the example script from the commandline. The path of the
+lissom_oo_or.ty script was printed by Topographica in step 1 of this
+Learning section, but if you are not sure where the examples are
+located, you can find out by first running
 
 <blockquote><code class='to_type'>
   topographica -c "from topo.misc.genexamples import print_examples_dir; print_examples_dir()"
   </code></blockquote>
 
-Then you can use the path to the example, as well as specifying a higher cortex density:
+Then you can use the path to the example, as well as specifying a higher cortex density, e.g.
 <blockquote><code class='to_type'>
   topographica -p cortex_density=142 ~/Documents/Topographica/examples/lissom_oo_or.ty -g
   </code></blockquote>
-(<code>~/Documents/Topographica</code> should be replaced with
-<code>~/topographica</code> for release 0.9.7 and earlier; Windows
-users should refer to our <A
-HREF="../Downloads/win32notes.html">command prompt</A> notes).
 <p></p>
   
 You'll need about a gigabyte of memory and a lot of time, but you can then step

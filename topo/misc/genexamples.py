@@ -133,7 +133,14 @@ def find_examples(specified_examples=None,dirs=None):
         
 
     if not dirs:
+        # CEBALERT: is there any significance to the order? E.g. if I have ~/Documents/Topographica/examples
+        # from an installation, will my development copy in ~/topographica-git still find its examples in
+        # ~/topographica-git/examples ?
         candidate_example_dirs = [
+            # CEBALERT: ~/topographica/examples is out of date. I just
+            # added the line below without testing it or removing the
+            # ~/topographica line.
+            topo._default_output_path,
             os.path.join(os.path.expanduser("~"),'topographica/examples'),
             # version-controlled topographica dir
             os.path.join(topo._package_path,"../examples"),
