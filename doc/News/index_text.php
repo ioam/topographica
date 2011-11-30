@@ -14,7 +14,7 @@
 <font size="-1">
 <dt>General improvements:</dt>
 <dd>
-  <div class="i2">- support for NumPy 1.3 and IPython 0.11</div>
+  <div class="i2">- support for NumPy 1.3, IPython 0.11, and Matplotlib 1.1.0</div>
   <div class="i2">- minor bugfixes</div>
   <div class="i2">- greatly expanded support for auditory input; see topo.pattern.audio</div>
   <div class="i2">- default output path now ~/Documents/Topographica on all platforms</div>
