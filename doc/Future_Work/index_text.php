@@ -1,7 +1,11 @@
-<P>Topographica is under very active development, and there are many
-features we have not yet been able to add.  This page describes some
-of the major ones; the rest are listead in SourceForge's
-<a href="http://sourceforge.net/tracker/?group_id=53602">trackers</a>.
+<P>Topographica is under very active development, but there are always
+more features that we have not yet been able to implement.  These will
+be listed in our SourceForge
+<a href="https://sourceforge.net/tracker/?words=tracker_browse&sort=priority&sortdir=desc&group_id=53602&atid=470932&status=1&limit=100">Feature
+Request tracker</a>.  Feel free to add suggestions of your own to that
+list, or to <A HREF="../Developer_Manual/index.html#joining">
+tackle one of the problems on the list</A> if you need that
+feature for your work.  Other general, ongoing tasks include:
 
 <!--  
 <H2>Most urgent (Summer 2010):</H2>
@@ -13,11 +17,9 @@ possible to build add-in components and model scripts and expect them
 to be usable in future versions (or to have a conversion program
 available for them).
 </DL>
--->
 
 <DL COMPACT>
 
-<!--  
 <P><DT>Archival state saving</DT><DD>
 
 Model state saving is currently implemented using Python "pickling"
@@ -33,14 +35,11 @@ Topographica, and should be considered temporary.
 -->  
 <!-- Also consider HDF5 or possibly netCDF4 for binary files, -->
 <!-- e.g. through PyTables, http://www.pytables.org/docs/manual/ch04.html#id2553542 -->
-  
 <!-- From: fwh@inf.ed.ac.uk ; Oct  5 08:41:59 2005 +0100:
-
   Consider http://www.neurogems.org/nmlparser/index.html ; see
   message in mail/research/Topographica from the above date.
-
   Also: binary file formats for XML:
-
+  
   XOP 
   http://www.w3.org/TR/2005/REC-xop10-20050125/
   
@@ -56,46 +55,14 @@ Topographica, and should be considered temporary.
   BinX
   http://www.edikt.org/binx/
 -->
-
-							 
+<!--
 <P><DT>Parallelization</DT><DD>
-Due to their weakly interconnected graph structure, Topographica
-models lend themselves naturally to coarse-grained parallelization.
-Each event processor (e.g. a Sheet) can run on a different physical
-processor, exchanging information with other event processors using
-either shared memory or message passing protocols such as MPI.
-Implementing this type of parallelization is not likely to require
-significant changes to the simulator.  We are also working on a
-GPU-based implementation, to use the processors available on modern
-graphics cards.
-<!-- 
-  Should be able to do this without significant
-  changes to the code, by adding a parallel Simulator class and proxies
-  for the EPs and Connections. E.g. for shared memory threads, need
-  two new classes ThreadedSimulator and EPThreadProxy:
-
-  - Each time an EP is added to  the simulator it's wrapped in an
-    EPThreadProxy that intercepts all calls between the Simulator
-    and the EP (i.e. the EP's .sim attribute points to the proxy,
-    instead of the simulator) (jprovost)
-
-  Should also be able to do it using RPC or MPI.
-
-  May also be able to distribute Projections, not just Sheets,
-  automatically. 
+Parallel support using MPI and OpenMP has been implemented, and should
+soon be part of the Topographica release.  GP-GPU support has also been
+prototyped, but has not yet delivered significant performance gains,
+and so it is not an area of current focus.
 -->
-
-<P>Fine-grained parallelism is also possible, distributing computation
-for different units or subregions of a single Sheet, or different
-parts of a Projection across different
-processors.  This has been implemented on a prototype version for a
-shared-memory Cray MPP machine, and may be brought into the main
-release if it can be made more general.  Such fine-grained parallelism
-will be restricted to specific Sheet and/or Projection types, because
-it requires access to the inner workings of the Sheet.
-
-
-  <!-- Should consider sparse layers with patchy distribution of units -->
+<!-- Should consider sparse layers with patchy distribution of units -->
 <!--
 <P><DT>Bitmap plotting enhancements</DT><DD>
 
@@ -105,25 +72,6 @@ brightness scaling, allow custom colormaps, and add an "overload" or "cropped"
 indicator to show if some values are too large to be displayed in the
 selected range.
 -->							 
-
-<P><DT>Automatic line-based 2D plotting</DT><DD>
-There are currently 1D (line), 2D (contour or vector field),
-and 3D (wireframe mesh) plots available based on
-<A HREF="http://matplotlib.sourceforge.net/">MatPlotLib</A> for any
-program object selected by the user.  We will also eventually be
-making the general-purpose template-based plotting use the 2D plots,
-which will make it simpler to do
-<A HREF="http://matplotlib.sourceforge.net/screenshots/pcolor_demo_large.png">contour</A>
-plots, as well as matrix plots showing axis ticks and labels.
-<!--
-  We also plan to use MatPlotLib 2D plots to allow any SheetView(s) to be
-used as a contour or vector field overlay on top of a bitmap, e.g. for joint
-preference maps (such as direction arrows on top of an orientation
-bitmap plot); currently some of these are implemented but they could
-be done more generally. -->
-<!-- Plan: Templates accept a Contours parameter, which can be a list
-of (sheetview, threshold) pairs, which will be drawn in order. -->
-
 <!--
 <P>Other minor changes planned include adding outlining of
 ConnectionField extents, plotting histograms for each bitmap,
@@ -132,23 +80,21 @@ and separate default colors for onscreen and publication plots.
 <!-- plus user-defined arbitrary colormaps ("KRYW", "BbKrR", etc.), 
 including allowing a threshold so that a colormap plot can be
 shown on top of a monochrome background plot, e.g. an activity blob on
-top of an ocular dominance or other grayscale map. -->
+top of an ocular dominance or other grayscale map. 
+-->
+<!--  
 <P><DT>Spiking support</DT><DD>
-Topographica primarily supports firing-rate (scalar) units, but
-spiking models are currently under development, and preliminary
-versions are included already.  We will be developing interfaces
-between spiking and non-spiking Sheets and analysis tools for spiking
-neurons.  We primarily expect to support integrate-and-fire and
-related computationally tractable spiking unit models.  More detailed
-compartmental models can be simulated in NEST, Neuron or Genesis instead,
-and packaged up using the Sheet interface so that they can be used
-in Topographica.
-
-<!-- Consider implementing:
+Topographica primarily supports firing-rate (scalar) units, but a
+small spiking model is included with topographica
+(examples/leaky_lissom_or.ty), and other models can be implemented in
+external spiking simulators and
+<A HREF="http://dx.doi.org/10.3389/neuro.11.008.2009">easily
+interfaced to Topographica</A>).
+  
+  Consider implementing:
   Neural Computation Volume 21, Number 3, 2009, "A Canonical Model for
   Event-Driven Neural Simulators", Stefan Mihalas and Ernst Niebur
 -->
-
 <!--  
 <P><DT>Animating plot histories</DT><DD>
 GUI plot windows save a history of each plot, and it should be
@@ -166,29 +112,30 @@ editor to allow these values to be inspected and changed more easily.
 actually been used by a given object, so that it is clear how
 to modify the behavior of that object.
 -->
-  
+<!--  
 <P><DT>User-defined scales</DT><DD>
 The simulator is written in terms of abstract dimensions, such as
 Sheet areas that default to 1.0.  This helps ensure that the simulator
 is general enough to model a variety of systems.  However, it is often
 desirable to calibrate the system for specific scales, such as degrees
-of visual angle, millimeters in cortex, etc.  We plan to add
-user-defined scales on top of the arbitrary scales, mapping from
-values in the simulator to user-defined quantities for display.
-<!-- See http://ipython.scipy.org/doc/manual/node11.html for bg on handling arbitrary units. -->
+of visual angle, millimeters in cortex, etc.  We have developed 
+simple support for making user-defined scales explicit, and eventually
+hope to make it part of the standard distribution.
 
-<P><DT>Data import/export</DT><DD>   We would like to provide
-easy-to-use interfaces for exchanging data and calling code in other
-simulators, such as Matlab (see the optional external package
+<P><DT>Data import/export</DT><DD>
+We would like to provide easy-to-use interfaces for exchanging data
+(e.g. in HDF5 format) and calling code in other simulators, such as
+Matlab (see the optional external package
 <A HREF="../Reference_Manual/index.html#mlabwrap">mlabwrap</A>).
 These will be used both for analyzing Topographica data, and for
 allowing connection patterns and/or map organization to be specified
 from experimental data.  Meanwhile, the Python command-line interface
 can be used to display or save any element of the model.
-
 </DL>
 
 <H2>Ongoing:</H2>
+-->
+
 <DL COMPACT>
 
 <DT>ALERTs</DT><DD>
