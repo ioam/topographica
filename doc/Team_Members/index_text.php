@@ -13,11 +13,6 @@ developers are:
       reviews all code and is the last word on the design and
       features.
 
-  <p><dt>Chris Ball, 2005 - </dt>
-  <dd>Chris has worked on nearly every part of Topographica.  Since
-      January 2009 he has been a PhD student in Edinburgh, working on
-      the formation of color maps in V1.
-
   <p><dt>Dobromir Stefanov, 2011 -</dt>
   <dd>As part of Dobromir's undergraduate project at the University of
       Edinburgh, he is preparing Topographica's next major release.
@@ -32,6 +27,11 @@ Other current and recent developers are:
       2010, focusing on complex cells and surround modulation in V1.
       He continues to use Topographica in his postdoctoral work and
       has contributed a variety of related code.
+
+  <p><dt>Chris Ball, 2005 - </dt>
+  <dd>Chris has worked on nearly every part of Topographica.  Since
+      January 2009 he has been a PhD student in Edinburgh, working on
+      the formation of color maps in V1.
 
   <p><dt>Gautham Ganapathy, May - Dec 2011</dt>
   <dd>Gautham completed his MSc at the University of Edinburgh,
