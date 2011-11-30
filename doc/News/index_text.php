@@ -1,4 +1,4 @@
-<p><b>21 Oct 2011:</b> New release in preparation.  Changes already available in <A target="_top"
+<p><b>30 Nov 2011:</b> New release in preparation.  Changes already available in <A target="_top"
   href="../Downloads/cvs.html">SVN</A> include:
 
 <!-- TimeSeries - generic container for sequential data -->
