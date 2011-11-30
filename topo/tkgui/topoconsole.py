@@ -555,7 +555,11 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             if topo.tkgui.system_platform=="linux" and os.getenv('EMACS')!='t':
                 try: os.system("stty sane")
                 except: pass
-
+            # CEBALERT: re. above. Shouldn't we be able to store the
+            # output of "stty --save" before starting the gui, then
+            # ensure that when the gui exits (however badly it
+            # happens) run "stty saved_settings"?
+                
             # CEBALERT: there was no call to self.master.destroy()
             sys.exit(exit_status)
 
