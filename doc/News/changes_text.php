@@ -157,6 +157,10 @@ request tracker</A>.
 <P>Smaller additions:
 
 <ul>
+<!-- commented out because there might have been other additions since
+the 'last updated' date that should be added before this one
+<li>r11853: Fixed quoting of command used to launch a batch run (allowing it to be copied and pasted to re-run).
+--> 
 <li>r11756: all tests can be run from Python (runtests.py) without needing the Makefile.
 <li>r11491: Added skip parameter for topographic grid plots.
 <li>r11487: Made Model Editor diagrams work well for large numbers of dimensions; still not perfect for small numbers of dimensions and/or some combinations of dimensions.
