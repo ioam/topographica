@@ -719,8 +719,24 @@ class run_batch(ParameterizedFunction):
         starttime=time.time()
         startnote = "Batch run started at %s." % time.strftime("%a %d %b %Y %H:%M:%S +0000",
                                                                time.gmtime())
-        command_used_to_start = string.join(sys.argv)
-    
+
+        # store a re-runnable copy of the command used to start this batch run
+        try:
+            # pipes.quote is undocumented, so I'm not sure which
+            # versions of python include it (I checked python 2.6 and
+            # 2.7 on linux; they both have it).
+            import pipes
+            quotefn = pipes.quote            
+        except (ImportError,AttributeError):
+            # command will need a human to insert quotes before it can be re-used
+            quotefn = lambda x: x
+            
+        command_used_to_start = string.join([quotefn(arg) for arg in sys.argv])
+
+        # CBENHANCEMENT: would be nice to separately write out a
+        # runnable script that does everything necessary to
+        # re-generate results (applies diffs etc).
+
         # Shadow stdout to a .out file in the output directory, so that
         # print statements will go to both the file and to stdout.
         batch_output = open(normalize_path(simname+".out"),'w')
