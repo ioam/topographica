@@ -85,9 +85,9 @@ least <A HREF="http://www.python.org/download/releases/2.6.5/">Python</A>,
 <P>Once you have installed the necessary environment, you can create
 a <code>topographica</code> script that uses your copy of Python:
 
-<blockquote><code>make PYTHON="/usr/bin/env python2.6" topographica-external-python</code></blockquote>
+<blockquote><code>make PYTHON="/usr/bin/python26" topographica-external-python</code></blockquote>
 
-(where <code>PYTHON="/usr/bin/env python2.6"</code> shoud be adapted to the
+(where <code>PYTHON="/usr/bin/python26"</code> should be adapted to the
 location of your copy of Python if necessary).
 
 <P>Note that you should not run setup.py, since that would install
