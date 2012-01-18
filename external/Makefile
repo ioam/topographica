@@ -285,7 +285,7 @@ pil-uninstall:
 ##############################################################
 # numpy (matrix library)
 #
-NUMPY = numpy-1.3.0
+NUMPY = numpy-1.6.1
 NUMPY_UNINSTALL =  ${PYTHON_LIB}/site-packages/numpy
 
 numpy: ${NUMPY}.tar.gz python
