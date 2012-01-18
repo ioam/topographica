@@ -31,14 +31,14 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
         TransferFn,DivisiveNormalizeL1(norm_value=1.0),readonly=True)
     
     def __call__(self, iterator, **params):
-        cf_type=iterator.cf_type
-        cfs = iterator.flatcfs
-        num_cfs = len(iterator.flatcfs)
+        cf_type=iterator.cf_type  # pyflakes:ignore (passed to weave C code)
+        cfs = iterator.flatcfs  # pyflakes:ignore (passed to weave C code)
+        num_cfs = len(iterator.flatcfs)  # pyflakes:ignore (passed to weave C code)
         
         # CB: for performance, it is better to process the masks in
         # the C code (rather than combining them before).
-        active_units_mask = iterator.get_active_units_mask()
-        sheet_mask = iterator.get_sheet_mask()
+        active_units_mask = iterator.get_active_units_mask()  # pyflakes:ignore (passed to weave C code)
+        sheet_mask = iterator.get_sheet_mask()  # pyflakes:ignore (passed to weave C code)
 
         code = c_header + """
 
@@ -107,7 +107,6 @@ class CFPOF_DivisiveNormalizeL1(CFPOutputFn):
         """
         # CEBALERT: fix this here and elsewhere
         if type(self.single_cf_fn) is not IdentityTF:
-            single_cf_fn = self.single_cf_fn
             norm_value = self.single_cf_fn.norm_value                
             for cf,i in iterator():
                 current_sum=cf.norm_total

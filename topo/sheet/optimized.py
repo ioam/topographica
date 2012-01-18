@@ -11,7 +11,7 @@ from topo.base.cf import MaskedCFIter
 from topo.base.projection import NeighborhoodMask
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
 from topo.sheet.lissom import LISSOM
-from topo.sheet.basic import compute_joint_norm_totals
+from topo.sheet.basic import compute_joint_norm_totals  # pyflakes:ignore (replaced by optimized version)
 
 def compute_joint_norm_totals_opt(projlist,active_units_mask):
     """
@@ -25,9 +25,9 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
 
     proj = projlist[0]
     iterator = MaskedCFIter(proj,active_units_mask=active_units_mask)
-    num_cfs = len(proj.flatcfs)
+    num_cfs = len(proj.flatcfs)  # pyflakes:ignore (passed to weave C code)
     active_units_mask = iterator.get_active_units_mask()
-    sheet_mask = iterator.get_sheet_mask()
+    sheet_mask = iterator.get_sheet_mask()  # pyflakes:ignore (passed to weave C code)
 
     code = c_header + """
         npfloat *x = active_units_mask;
@@ -107,9 +107,9 @@ class NeighborhoodMask_Opt(NeighborhoodMask):
         ignore1,matradius = self.sheet.sheet2matrixidx(self.radius,0)
         ignore2,x = self.sheet.sheet2matrixidx(0,0)
         matradius = int(abs(matradius -x))
-        thr = self.threshold
-        activity = self.sheet.activity
-        mask = self.data
+        thr = self.threshold  # pyflakes:ignore (passed to weave C code)
+        activity = self.sheet.activity  # pyflakes:ignore (passed to weave C code)
+        mask = self.data  # pyflakes:ignore (passed to weave C code)
         
         code = c_header + """
             #define min(x,y) (x<y?x:y)

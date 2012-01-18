@@ -35,14 +35,14 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
 
     def __call__(self, iterator, input_activity, activity, strength, **params):
        
-        temp_act = activity
+        temp_act = activity  # pyflakes:ignore (passed to weave C code)
         irows,icols = input_activity.shape
-        X = input_activity.ravel()
+        X = input_activity.ravel()  # pyflakes:ignore (passed to weave C code)
         cfs = iterator.flatcfs
-        num_cfs = len(cfs)
-        mask = iterator.mask.data
+        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
+        mask = iterator.mask.data  # pyflakes:ignore (passed to weave C code)
 
-        cf_type = iterator.cf_type
+        cf_type = iterator.cf_type  # pyflakes:ignore (passed to weave C code)
 
         # Note: no performance hit from array indexing of mask and
         # temp_act (r11447).
@@ -117,12 +117,12 @@ class CFPRF_EuclideanDistance_opt(CFPResponseFn):
     equivalent) version in Python.
     """
     def __call__(self, iterator, input_activity, activity, strength, **params):
-        temp_act = activity
+        temp_act = activity  # pyflakes:ignore (passed to weave C code)
         rows,cols = activity.shape
         irows,icols = input_activity.shape
-        X = input_activity.ravel()
+        X = input_activity.ravel()  # pyflakes:ignore (passed to weave C code)
         cfs = iterator.flatcfs
-        num_cfs = len(cfs)
+        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
 
         code = c_header + """
             #include <math.h>

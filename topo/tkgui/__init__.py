@@ -180,7 +180,6 @@ def start(mainloop=False,banner=True):
 
     # Provide a way for other code to access the GUI when necessary
     # CEBALERT: why is this import necessary? Need to cleanup this method.
-    import topo
     topo.guimain=console
 
     

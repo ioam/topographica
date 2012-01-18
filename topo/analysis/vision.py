@@ -62,7 +62,6 @@ def complexity(full_matrix):
     modulation ratio (see Hawken et al. for definition) for each neuron and returns them as a matrix.
     """
     rows,cols = full_matrix.matrix_shape
-    complexity = zeros(full_matrix.matrix_shape)
     complex_matrix = zeros(full_matrix.matrix_shape,object_)
     fftmeasure = zeros(full_matrix.matrix_shape,Float)
     i = 0

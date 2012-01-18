@@ -1597,11 +1597,9 @@ class EditorEPConnection(EditorConnection):
         # set the colour to be used depending on whether connection has the focus.
         if (self.focus) : 
             text_col = col = self.colour[0]
-            lateral_colour = self.from_node.colour[0]
         else:
             text_col = 'black'
             col = self.colour[1]
-            lateral_colour = ''
         middle = self.get_middle(from_position, to_position)
         factor = self.canvas.scaling_factor
         if (to_position == from_position) : # connection to and from the same node
@@ -1916,12 +1914,12 @@ class EditorProjection(EditorEPConnection):
                 A = (to_position[0] - x, to_position[1] - y)
                 T = (from_position[0] + (self.deviation * factor) - x, from_position[1] - y)
                 B = (T[0] - self.radius[0], T[1])
-                C = (T[0] + self.radius[0], T[1])
+                #C = (T[0] + self.radius[0], T[1])
             else:
                 A = (to_position[0] - x, to_position[1] - y)
                 T = (from_position[0] + (self.deviation * factor) - x, from_position[1] - y)
                 B = (T[0] - (self.normal_radius * factor), T[1])
-                C = (T[0] + (self.normal_radius * factor), T[1])
+                #C = (T[0] + (self.normal_radius * factor), T[1])
             # if the y coords lie outwith the boundaries, return false
             if (((A[1] < B[1]) and (B[1] < 0 or A[1] > 0)) or 
                 ((A[1] >= B[1]) and (B[1] > 0 or A[1] < 0))):

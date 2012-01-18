@@ -46,9 +46,9 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
             return
 
         cfs = iterator.flatcfs
-        num_cfs = len(cfs)
+        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
         irows,icols = input_activity.shape
-        cf_type = iterator.cf_type
+        cf_type = iterator.cf_type  # pyflakes:ignore (passed to weave C code)
 
         # CEBALERT: this function *always* skips inactive units,
         # because it uses the output_activity directly rather than
@@ -59,7 +59,7 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
         # iterator's active_units_mask to be True before calling the
         # iterator in the unoptimized version.)
 
-        sheet_mask = iterator.get_sheet_mask()
+        sheet_mask = iterator.get_sheet_mask()  # pyflakes:ignore (passed to weave C code)
 
         code = c_header + """
             DECLARE_SLOT_OFFSET(weights,cf_type);
@@ -143,15 +143,15 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         rows,cols = output_activity.shape
         cfs = iterator.flatcfs
-        num_cfs = len(cfs)
+        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         if single_connection_learning_rate==0:
             return
         
-        unit_threshold=self.unit_threshold
+        unit_threshold=self.unit_threshold  # pyflakes:ignore (passed to weave C code)
         
         irows,icols = input_activity.shape
-        cf_type = iterator.cf_type
+        cf_type = iterator.cf_type  # pyflakes:ignore (passed to weave C code)
         code = c_header + """
             // CEBALERT: should provide a macro for getting offset
 
@@ -256,10 +256,10 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
         if self.learning_rate_scaling_factor is None:
             self.learning_rate_scaling_factor = ones(output_activity.shape)*1.0
 
-        learning_rate_scaling_factor = self.learning_rate_scaling_factor
+        learning_rate_scaling_factor = self.learning_rate_scaling_factor  # pyflakes:ignore (passed to weave C code)
 
         cfs = iterator.flatcfs
-        num_cfs = len(cfs)
+        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         if single_connection_learning_rate==0:
             return
@@ -346,7 +346,7 @@ class CFPLF_Trace_opt(CFPLearningFn):
         doc="LearningFn that will be applied to each CF individually.")              
 
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
-        cfs = iterator.flatcfs
+        cfs = iterator.flatcfs  # pyflakes:ignore (passed to weave C code)
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         irows,icols = input_activity.shape
         
@@ -358,7 +358,7 @@ class CFPLF_Trace_opt(CFPLearningFn):
             self.traces=zeros(output_activity.shape,activity_type)
         
         self.traces = (self.trace_strength*output_activity)+((1-self.trace_strength)*self.traces)
-        traces = self.traces
+        traces = self.traces  # pyflakes:ignore (passed to weave C code)
         
         code = c_header + """
             npfloat *x = traces;

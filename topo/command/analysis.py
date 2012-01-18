@@ -1070,7 +1070,6 @@ class measure_log_frequency_preference(MeasureResponseCommand):
             assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
         
         divisions = float(input_sheets[0].ydensity)
-        step = 1.0 / divisions
         
         try:
             min_frequency = input_sheets[0].input_generator.min_frequency
