@@ -125,6 +125,7 @@ if not os.path.exists(_default_output_path):
 _package_path = os.path.split(__file__)[0]
 
 param.normalize_path.prefix = _default_output_path
+# CEBALERT: _default_output_path shouldn't be in there, right?
 param.resolve_path.search_paths+=([_default_output_path] + [_package_path])
 
 
