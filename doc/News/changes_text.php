@@ -8,12 +8,14 @@ the next.
 <H3>Upcoming release</H3>
 
 Changes since 0.9.7. Last updated: 2011/10/09. 
+<!-- CB: and again by me for one specific change, r11XXX). -->
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
+<li>r11XXX: 'make OTHER_PYTHON=/path/to/python topographica-other-python' is now '/path/to/python create_topographica_script.py'. Additionally, Windows users can then run '/path/to/python windows_postinstall.py create_batchfile' to get an executable topographica.bat.
 <li>r11817: BCMFixed removed from learningfn.projfn
 <li>r11803: Output path now ~/Documents/Topographica [CB: not yet finalized]
-<li>r11715: 'make OTHER_PYTHON=... topographica-other-python' is now 'make PYTHON=... topographica-external-python'.
+<li>r11715: 'make OTHER_PYTHON=... topographica-other-python' is now 'make PYTHON=... topographica-external-python'. But this option will likely be removed from the Makefile (see r11XXX).
 
 <!-- CEBALERT: check backwards compatibility; is there a new feature here?
 r11611 | bilal-khan | 2011-05-24 15:06:57 +0100 (Tue, 24 May 2011) | 1 line

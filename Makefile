@@ -4,6 +4,7 @@ PYLINT = bin/pylint --rcfile=doc/buildbot/pylintrc
 
 PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
+# CEBALERT: this is duplicated in create_topographica_script.py
 RELEASE = 0.9.7
 
 PYTHON = ${PREFIX}/bin/python
@@ -117,7 +118,9 @@ topographica: external Makefile topo/*/*.py examples/*.ty
 # ~/.local instead of Topographica's own packages.
 	${PYTHON} ${PREFIX}/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 0
 
-
+# CEBALERT: We can remove this target - see developer manual
+# installation page for direct python command. Not all platforms have
+# make.
 topographica-external-python:
 ifeq ("${PYTHON}","${PREFIX}/bin/python")
 	$(error "Must specify external Python (via PYTHON=/path/to/external/python)")

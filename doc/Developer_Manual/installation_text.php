@@ -85,12 +85,19 @@ least <A HREF="http://www.python.org/download/releases/2.6.5/">Python</A>,
 <P>Once you have installed the necessary environment, you can create
 a <code>topographica</code> script that uses your copy of Python:
 
-<blockquote><code>make PYTHON="/usr/bin/python26" topographica-external-python</code></blockquote>
+<blockquote><code>/path/to/python
+create_topographica_script.py</code></blockquote>
 
-(where <code>PYTHON="/usr/bin/python26"</code> should be adapted to the
-location of your copy of Python if necessary).
+(where <code>/path/to/python</code> should be adjusted to however you
+run Python on your system). 
+
+<P>Windows users can optionally also run <code>/path/to/python
+windows_postinstall.py create_batch</code> to get an
+executable <code>topographica.bat</code> script.
+
 
 <P>Note that you should not run setup.py, since that would install
+<!-- CB: unless someone figures out setuptools... -->
 Topographica into your system's Python directory, whereas we want to
 use the version-controlled directory. Also, you can delete
 the <code>external</code> directory, since you have already installed

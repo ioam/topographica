@@ -1,15 +1,23 @@
-#!python
+# This script is called by distutils: note that some of the functions
+# in here are only available when called by distutils.
 
 import os, sys, shutil
-from _winreg import OpenKey,HKEY_CLASSES_ROOT,KEY_SET_VALUE,REG_SZ,SetValue
 
-def _create_association(python,scriptloc,ico_path):
-
+def create_topographica_bat(python,location):
     # topographica.bat
-    bat_path = os.path.join(scriptloc,'topographica.bat')
+    bat_path = os.path.join(location,'topographica.bat')
     f = open(bat_path,'w')
-    f.write("@"+python+" "+scriptloc+r"\topographica %*")
+    f.write("@"+python+" "+location+r"\topographica %*")
     f.close()
+    print "Created %s"%bat_path
+    return bat_path
+
+
+# CEBALERT: needs administrator permissions
+def _create_association(python,scriptloc,ico_path):
+    from _winreg import OpenKey,HKEY_CLASSES_ROOT,KEY_SET_VALUE,REG_SZ,SetValue
+
+    bat_path = create_topographica_bat(python,scriptloc)
 
     # Link '.ty' file extension to  "topographica.bat -g"
     os.system('assoc .ty=Topographica.Script')
@@ -26,6 +34,7 @@ def _create_association(python,scriptloc,ico_path):
 
 def install():
 
+    # CEBALERT: sys.executable? And we do this in too many places (can't it be done once)?
     python = sys.prefix + r'\python.exe'
 
     start_menu_folder = get_special_folder_path('CSIDL_COMMON_PROGRAMS') + r'\Topographica'
@@ -74,9 +83,13 @@ def remove():
 
 
 if len(sys.argv) > 1:
+    # install and remove are for distutils
     if sys.argv[1] == '-install':
         install()
     elif sys.argv[1] == '-remove':
         remove()
+    # create_batchfile is for svn/git users to get an executable batch file
+    elif sys.argv[1] == 'create_batchfile':
+        create_topographica_bat(sys.executable,os.getcwd())
     else:
         raise ValueError

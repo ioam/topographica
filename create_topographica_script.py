@@ -1,22 +1,41 @@
-#!/usr/bin/env python
-
 # should probably think of something better than this
 # name, and than having it in the root topo dir
 
+# CEBALERT: another duplicate
+RELEASE = '0.9.7'
+
 import sys
 import os
+import copy
+import subprocess
+import re
 
-DEFAULTS = dict(python_bin="/usr/bin/env python",
-                release = None,
-                version = None,
-                usersite = 1)
+# Python 2.7 has subprocess.check_output, which might be what I wanted.
+def get_call_output(cmd):
+    return subprocess.Popen(cmd.split(),stdout=subprocess.PIPE).communicate()[0].strip()
+    
 
-def write(python_bin=None,release=None,version=None,usersite=None):
+def _get_version():
+    # CEBALERT: just copied shell commands from Makefile
+    try:
+        svnversion = get_call_output("svnversion")
+        if svnversion=="exported":
+            git_came_from = re.search("Revision: ([0-9]*)",get_call_output("git svn info")).group(1)
+            git_version = get_call_output("git rev-parse HEAD")
+            svnversion = git_came_from+":"+git_version
+    except:
+        svnversion = "None"
+    return svnversion
 
-    python_bin = python_bin or DEFAULTS['python_bin']
-    release = release or DEFAULTS['release']
-    version = version or DEFAULTS['version']
-    usersite = DEFAULTS['usersite'] if usersite is None else int(usersite)
+def _get_release():
+    return RELEASE
+
+def _get_python():
+    # CEBALERT: to work with pyinstaller etc, would need to check for sys.frozen
+    return sys.executable
+
+
+def write(python_bin,release,version,usersite):
 
     if usersite==0:
         python_bin+=" -s"
@@ -38,20 +57,24 @@ process_argv(argv[1:])
     f = open('topographica','w')
     f.write(script)
     f.close()
-    os.system('chmod +x topographica')
+    try:
+        os.system('chmod +x topographica')
+    except:
+        pass
 
 
 
 if __name__=='__main__':
     print "creating topographica script..."
 
-    args = sys.argv[1::]
-    assert len(args)==4, "Pass python_bin, release, version, usersite (any of which may be 'None' to get the default value)"
-
-    python_bin = args[0] if args[0]!='None' else DEFAULTS['python_bin']
-    release = args[1] if args[1]!='None' else DEFAULTS['release']
-    version = args[2] if args[2]!='None' else DEFAULTS['version']
-    usersite = args[3] if args[3]!='None' else DEFAULTS['usersite']
+    if len(sys.argv)==5:
+        python_bin,release,version,usersite = sys.argv[1::]
+    else:
+        assert len(sys.argv)==1, "Either pass no arguments, or pass python_bin, release, version, usersite"
+        python_bin = _get_python()
+        release = _get_release()
+        version = _get_version()
+        usersite = 1
 
     print "python: %s"%python_bin
     print "release: %s"%release
@@ -59,5 +82,4 @@ if __name__=='__main__':
     print "usersite: %s"%usersite
 
     write(python_bin,release,version,usersite)
-
 
