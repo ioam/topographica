@@ -47,13 +47,6 @@ develops a mapping of the dimensions of variance in the input space.
   topographica -g
 </pre>
 
-  Then, from the <code>examples</code> directory, open
-  <code>som_retinotopy.ty</code>. 
-  
-  <P>(The plots below show the results from the full density of the
-  book simulation, but results are similar for the default (lower)
-  densities.)
-
 <p>
 You should now see a window for the GUI:
 <p class='center'>
@@ -65,6 +58,15 @@ align="middle" width="409" height="127">
 The font, window, and button style will differ on different platforms,
 but similar controls should be provided.
 </p>
+
+  Then, from the <span class='t_item'>Simulation menu</span>,
+  select <span class='t_item'>Run Script</span> and
+  open <code>som_retinotopy.ty</code> from the <code>examples</code>
+  directory.
+  
+  <P>(The plots below show the results from the full density of the
+  book simulation, but results are similar for the default (lower)
+  densities.)
 
 </li>
 
