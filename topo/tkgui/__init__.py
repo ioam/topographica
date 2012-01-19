@@ -179,7 +179,6 @@ def start(mainloop=False,banner=True):
     console = TopoConsole(param.tk.root)
 
     # Provide a way for other code to access the GUI when necessary
-    # CEBALERT: why is this import necessary? Need to cleanup this method.
     topo.guimain=console
 
     
