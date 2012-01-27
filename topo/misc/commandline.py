@@ -28,10 +28,16 @@ except ImportError:
 
 
 ipython_shell_interface = None
+ipython_prompt_interface = None
 try:
     from IPython.frontend.terminal.embed import InteractiveShellEmbed as IPShell
     from IPython.config.loader import Config
     ipython_shell_interface = "InteractiveShellEmbed"
+    try:
+        from IPython.core.prompts import PromptManager  # pyflakes:ignore (try/except import)
+        ipython_prompt_interface = "PromptManager"
+    except ImportError:
+        pass
 except ImportError:
     try:
         # older version?
@@ -227,14 +233,18 @@ class CommandPrompt(IPCommandPromptHandler):
       # Print the command number but don't use color:
       CommandPrompt.set_format('\N ')
       # Print the value of my_var at each prompt:
-      CommandPrompt.set_format('${my_var}>>> ')        
+      CommandPrompt.set_format('{my_var}>>> ')
     """
     _prompt = 'prompt1'
     
     # Predefined alternatives
     basic_format   = 'Topographica>>> '
-    simtime_format = 'topo_t${topo.sim.timestr()}>>> '
-    simtimecmd_format = 'topo_t${topo.sim.timestr()}_c\\#>>> '
+    if ipython_prompt_interface == "PromptManager":
+        simtime_format = 'topo_t{topo.sim.timestr_prop}>>> '
+        simtimecmd_format = 'topo_t{topo.sim.timestr_prop}_c\\#>>> '
+    else:
+        simtime_format = 'topo_t${topo.sim.timestr()}>>> '
+        simtimecmd_format = 'topo_t${topo.sim.timestr()}_c\\#>>> '
     
     _format = simtimecmd_format
 
@@ -527,9 +537,15 @@ def process_argv(argv):
             # IPython 0.11 and later
 
             config = Config()
-            config.InteractiveShell.prompt_in1 = CommandPrompt.get_format()
-            config.InteractiveShell.prompt_in2 = CommandPrompt2.get_format()
-            config.InteractiveShell.prompt_out = OutputPrompt.get_format()
+
+            if ipython_prompt_interface == "PromptManager":
+                config.PromptManager.in_template = CommandPrompt.get_format()
+                config.PromptManager.in2_template = CommandPrompt2.get_format()
+                config.PromptManager.out_template = OutputPrompt.get_format()
+            else:
+                config.InteractiveShell.prompt_in1 = CommandPrompt.get_format()
+                config.InteractiveShell.prompt_in2 = CommandPrompt2.get_format()
+                config.InteractiveShell.prompt_out = OutputPrompt.get_format()
             config.InteractiveShell.confirm_exit = False
             ipshell = IPShell(config=config,user_ns=__main__.__dict__,
                               banner1="",exit_msg="")

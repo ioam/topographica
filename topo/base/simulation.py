@@ -1120,6 +1120,15 @@ class Simulation(param.Parameterized,OptionalSingleton):
         return timestr
 
 
+    @property
+    def timestr_prop(self):
+        """
+        A property that simply returns self.timestr(); useful for setting the
+        interactive command-line prompt.
+        """
+        return self.timestr()
+
+
     def basename(self):
         """
         Return a string suitable for labeling an object created
