@@ -20,7 +20,7 @@ from topo.base.cf import CFPLearningFn
 from topo.base.sheet import activity_type
 from topo.base.functionfamily import Hebbian,LearningFn
 # Imported here so that all ProjectionLearningFns will be in the same package
-from topo.base.cf import CFPLF_Identity,CFPLF_Plugin
+from topo.base.cf import CFPLF_Identity,CFPLF_Plugin  # pyflakes:ignore (API import)
 
 #from basic import BCMFixed
 

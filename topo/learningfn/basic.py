@@ -9,7 +9,7 @@ import param
 
 from topo.base.functionfamily import LearningFn
 # Imported here so that all learning functions will be in the same package
-from topo.base.functionfamily import Hebbian,IdentityLF
+from topo.base.functionfamily import Hebbian,IdentityLF  # pyflakes:ignore (API import)
 
 
 

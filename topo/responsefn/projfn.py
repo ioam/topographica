@@ -18,7 +18,7 @@ from topo.base.functionfamily import ResponseFn,DotProduct
 from topo.base.arrayutil import L2norm
 
 # Imported here so that all ResponseFns will be in the same package
-from topo.base.cf import CFPRF_Plugin
+from topo.base.cf import CFPRF_Plugin  # pyflakes:ignore (API import)
 
 
 # CEBERRORALERT: doesn't use iterator, so ignores

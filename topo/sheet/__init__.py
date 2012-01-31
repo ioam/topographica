@@ -17,7 +17,7 @@ __all__ = basic.__all__ + [f.split('.py')[0] for f in os.listdir(__path__[0]) if
 del f,os,fnmatch
 
 # Not a sheet, but needed for using Sheets
-from topo.base.sheet import BoundingBox
+from topo.base.sheet import BoundingBox  # pyflakes:ignore (API import)
 
 # By default, avoid loading modules that rely on external libraries
 # that might not be present on this system.

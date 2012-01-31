@@ -27,7 +27,7 @@ from topo.base.arrayutil import clip_lower,clip_upper
 from topo.base.arrayutil import L2norm, norm
 from topo.base.functionfamily import TransferFn
 # Imported here so that all TransferFns will be in the same package
-from topo.base.functionfamily import IdentityTF
+from topo.base.functionfamily import IdentityTF  # pyflakes:ignore (API import)
 
 
 # CEBHACKALERT: these need to respect the mask - which will be passed in.

@@ -672,7 +672,8 @@ class SeparatedComposite(Composite):
                     valid_generators.append(g)
                     break
                 
-                vals = (g.force_new_dynamic_value('x'), g.force_new_dynamic_value('y'))
+                g.force_new_dynamic_value('x')
+                g.force_new_dynamic_value('y')
                 
             else:
                 self.warning("Unable to place pattern %s subject to given constraints" %

@@ -7,13 +7,13 @@ __version__='$Revision: 8986 $'
 
 # Imported here so that all Sheets will be in the same package
 from topo.base.sheet import Sheet
-from topo.base.projection import ProjectionSheet
+from topo.base.projection import ProjectionSheet  # pyflakes:ignore (API import)
 from topo.base.cf import CFSheet
 from topo.misc.generatorsheet import GeneratorSheet
 
 # Imported here for ease of access by users
-from topo.base.boundingregion import BoundingBox
-from topo.base.sheet import activity_type # CEBALERT: ...is it?
+from topo.base.boundingregion import BoundingBox  # pyflakes:ignore (API import)
+from topo.base.sheet import activity_type  # pyflakes:ignore (API import)
 
 import numpy
 
