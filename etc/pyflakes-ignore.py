@@ -132,10 +132,12 @@ def check(codeString, filename):
         lines = codeString.split("\n")
         w = checker.Checker(tree, filename)
         w.messages.sort(lambda a, b: cmp(a.lineno, b.lineno))
+        non_ignored_messages = 0
         for warning in w.messages:
             if not ignore_re.match(lines[warning.lineno - 1]):
                 print warning
-        return len(w.messages)
+                non_ignored_messages += 1
+        return non_ignored_messages
 
 
 def checkPath(filename):
