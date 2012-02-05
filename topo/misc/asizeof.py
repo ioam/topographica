@@ -300,7 +300,7 @@ except NameError:  # callable() removed in Python 3.0
 try:  # get 'all' current objects
     from gc import get_objects as _getobjects
 except ImportError:
-    def _getobjects():
+    def _getobjects():  # pyflakes:ignore
          # modules first, globals and stack
          # (may contain duplicate objects)
         return tuple(_values(sys.modules)) + (
@@ -311,7 +311,7 @@ try:  # get 'all' referents of objects
       # returns () for dict...-iterators
     from gc import get_referents as _getreferents
 except ImportError:  # no get_referents() in Python 2.2
-    def _getreferents(unused):
+    def _getreferents(unused):  # pyflakes:ignore
         return ()  # sorry, no refs
 
  # sys.getsizeof() new in Python 2.6
@@ -931,14 +931,14 @@ try:  # no Class- and InstanceType in Python 3.0
 
 except AttributeError:  # Python 3.0
 
-    def _keytuple(obj):  #PYCHOK expected
+    def _keytuple(obj):  #PYCHOK expected  # pyflakes:ignore
         '''Return class and instance keys for a class.
         '''
         if type(obj) is _Type_type:  # isclass(obj):
             return _claskey(obj, _new_style), obj
         return None, None  # not a class
 
-    def _objkey(obj):  #PYCHOK expected
+    def _objkey(obj):  #PYCHOK expected  # pyflakes:ignore
         '''Return the key for any object.
         '''
         k = type(obj)
@@ -1198,7 +1198,7 @@ try:
 except NameError:  # missing
     pass
 try:  # XXX like bytes
-    _typedef_both(str8, item=_sizeof_Cbyte, leng=_len)  #PYCHOK str8 new in 2.6, 3.0
+    _typedef_both(str8, item=_sizeof_Cbyte, leng=_len)  #PYCHOK str8 new in 2.6, 3.0  # pyflakes:ignore
 except NameError:  # missing
     pass
 
