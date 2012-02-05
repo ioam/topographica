@@ -141,7 +141,7 @@ Topographica&gt; matrixplot(pg(orientation=pi/1.8, x=0.2, y=0.1, offset=0.5, siz
 </center>
 
 <P>A wide variety of operators are provided for combining the patterns; see the
-<A HREF="../Reference_Manual/topo.pattern.basic.Composite-class.html#operator">
+<A HREF="../Reference_Manual/topo.pattern.Composite-class.html#operator">
 Composite parameter <code>operator</code></A> for more details.
 
 

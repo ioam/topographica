@@ -26,9 +26,9 @@ from topo.base.cf import CFProjection
 
 from topo.sheet import GeneratorSheet
 from topo.sheet.saccade import ShiftingGeneratorSheet, SaccadeController    
-from topo.projection.basic import SharedWeightCFProjection
+from topo.projection import SharedWeightCFProjection
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
-from topo.coordmapper.basic import OttesSCMotorMapper
+from topo.coordmapper import OttesSCMotorMapper
 from topo import numbergen
 
 import topo.pattern.image
@@ -51,7 +51,7 @@ ShiftingGeneratorSheet.print_level = NORMAL
 ##########################################################################
 # Generators
 
-saccade_generator = topo.pattern.basic.Gaussian(
+saccade_generator = topo.pattern.Gaussian(
 
     #
     # A cycle through a series of saccades to the
@@ -98,7 +98,7 @@ topo.sim.connect('SC','SaccadeControl',name="Efferent",
                  dest_port = 'Activity',
                  delay = 0.5,
                  connection_type=CFProjection,
-                 weights_generator = topo.pattern.basic.Gaussian(),
+                 weights_generator = topo.pattern.Gaussian(),
                  nominal_bounds_template = BoundingBox(radius=0),
                  response_fn = CFPRF_DotProduct_opt(),
                  min_matrix_radius=0,

@@ -106,7 +106,7 @@ Docstring:
 
 topo_t000000.00_c12&gt;&gt;&gt; help(topo.sim['Retina'])
 
-Help on GeneratorSheet in module topo.sheet.basic object:
+Help on GeneratorSheet in module topo.sheet object:
 
 class GeneratorSheet(topo.base.sheet.Sheet)
  |  Sheet for generating a series of 2D patterns.
@@ -155,10 +155,10 @@ very helpful, often you will want to create a representation of your
 simulation that you can use again. One way of doing this is to save an
 existing simulation that you have already created at the commandline
 (see <A
-HREF="../Reference_Manual/topo.command.basic-module.html#save_script_repr">save_script_repr</A>
+HREF="../Reference_Manual/topo.command-module.html#save_script_repr">save_script_repr</A>
 for how to save a runnable specification of your simulation (but not
 its internal state), or <A
-HREF="../Reference_Manual/topo.command.basic-module.html#save_snapshot">save_snapshot</A>
+HREF="../Reference_Manual/topo.command-module.html#save_snapshot">save_snapshot</A>
 for how to save your simulation's current state). Another way is to
 create a .ty script file yourself, and then run it with Topographica.
 As discussed in the <A HREF="scripts.html#ty-files">Topographica

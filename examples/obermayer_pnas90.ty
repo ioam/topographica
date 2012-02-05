@@ -28,14 +28,14 @@ import topo
 from topo.base.boundingregion import BoundingBox
 from topo.base.cf import CFSheet,CFProjection
 from topo.learningfn.projfn import CFPLF_EuclideanHebbian
-from topo.transferfn.basic import DivisiveNormalizeL1
+from topo.transferfn import DivisiveNormalizeL1
 from topo.transferfn.misc import KernelMax
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
 from topo.sheet import GeneratorSheet
 
 from topo import numbergen
 
-import topo.pattern.basic
+import topo.pattern
 import topo.pattern.random
 
 
@@ -96,7 +96,7 @@ GeneratorSheet.nominal_density = p.retina_density
 gaussian_width = 0.23/sqrt(2)
 gaussian_height = 0.09/sqrt(2)
 
-input_pattern = topo.pattern.basic.Gaussian(
+input_pattern = topo.pattern.Gaussian(
     x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=12),
     y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=34),
     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56),
@@ -122,5 +122,5 @@ topo.sim.connect('Retina','V1',delay=0.10,connection_type=CFProjection,
                  weights_generator = topo.pattern.random.UniformRandom())
 
 # Initialize weight values once; should verify that it does this ok
-from topo.transferfn.basic import IdentityTF
+from topo.transferfn import IdentityTF
 topo.sim.schedule_command(0,'topo.sim["V1"].weights_output_fn=IdentityTF()')

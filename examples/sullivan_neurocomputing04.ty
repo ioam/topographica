@@ -149,7 +149,7 @@ topo.sim['V1'] = sheet.CFSheet(nominal_density=p.cortex_density,
                          output_fns = [transferfn.misc.KernelMax(density=p.cortex_density,kernel_radius=3.5)])
 
 topo.sim.connect('Retina','V1',delay=0.05,connection_type=projection.CFProjection,
-                 weights_generator = topo.pattern.basic.Line(orientation=
+                 weights_generator = topo.pattern.Line(orientation=
                      numbergen.UniformRandom(lbound=0.0,ubound=2*pi,seed=30)),
                  nominal_bounds_template=sheet.BoundingBox(radius=0.1),
                  response_fn = responsefn.optimized.CFPRF_DotProduct_opt(),

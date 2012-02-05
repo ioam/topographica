@@ -121,7 +121,7 @@ $ ./topographica -a -c 'from topo.misc import memuse, asizeof' examples/tiny.ty 
 </pre>
 
 Again, this value does not include any arrays, which are counted by
-<?php fnref('topo.command.basic','n_bytes') ?> 
+<?php fnref('topo.command','n_bytes') ?> 
 (below).
 
 
@@ -136,7 +136,7 @@ networks.
 <P>
 The estimated number of bytes taken for the weights and activity
 arrays can be found from the 
-<?php fnref('topo.command.basic','n_bytes') ?> command:
+<?php fnref('topo.command','n_bytes') ?> command:
 
 <pre>
 $ ./topographica -a examples/lissom_oo_or.ty -c 'print n_bytes()'
@@ -145,7 +145,7 @@ $ ./topographica -a examples/lissom_oo_or.ty -c 'print n_bytes()'
 
 <P>As an aside, you can determine how many neural connections have
 been defined using the
-<?php fnref('topo.command.basic','n_conns') ?> command:
+<?php fnref('topo.command','n_conns') ?> command:
 
 <pre>
 $ ./topographica -a examples/lissom_oo_or.ty -c 'print n_conns()'
@@ -153,10 +153,10 @@ $ ./topographica -a examples/lissom_oo_or.ty -c 'print n_conns()'
 </pre>
 
 The results from 
-<?php fnref('topo.command.basic','n_conns') ?> and 
-<?php fnref('topo.command.basic','n_bytes') ?> are reported by
+<?php fnref('topo.command','n_conns') ?> and 
+<?php fnref('topo.command','n_bytes') ?> are reported by
 default for batch simulations using the 
-<?php fnref('topo.command.basic','print_sizes') ?> command:
+<?php fnref('topo.command','print_sizes') ?> command:
 
 <pre>
 $ ./topographica -a examples/lissom_oo_or.ty -c 'print_sizes()'
@@ -164,10 +164,10 @@ Defined 2197512-connection network; 15MB required for weight storage.
 </pre>
 
 Note that 
-<?php fnref('topo.command.basic','n_conns') ?> reports the total
+<?php fnref('topo.command','n_conns') ?> reports the total
 number of connections defined, unique or not; for simulations like
 <code>lissom_oo_or.ty</code> that include a
-<?php classref('topo.projection.basic','SharedWeightCFProjection')?> the 
+<?php classref('topo.projection','SharedWeightCFProjection')?> the 
 memory taken can be far less than the number of weights would
 suggest because most of the connections share the same physical
 memory.

@@ -77,7 +77,7 @@ SOM network like examples/som_retinotopy.ty is simply built from:
 <li>An input pattern specified from a large library of possible 
   <?php classref('topo.base.patterngenerator','PatternGenerator')?>s
 <li>A general-purpose
-  <?php classref('topo.sheet.basic','GeneratorSheet')?> 
+  <?php classref('topo.sheet','GeneratorSheet')?> 
   for presenting input patterns
 <li>A general-purpose weight projection class 
   <?php classref('topo.base.cf','CFProjection')?> 

@@ -7,7 +7,7 @@ e.g. to compare parameter settings or other options, usually using
 clusters or networks of workstations.
 
 <P>To make this process simpler, Topographica provides a command
-topo.command.basic.run_batch, which puts all results into a uniquely
+topo.command.run_batch, which puts all results into a uniquely
 identifiable directory that records the options used for the run.
 Example:
 

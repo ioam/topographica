@@ -148,7 +148,7 @@ activity values covering this region.
         <ul>
         <li><?php classref('topo.base.cf','CFProjection')?>
             <ul>
-            <li><?php classref('topo.projection.basic','SharedWeightCFProjection')?>
+            <li><?php classref('topo.projection','SharedWeightCFProjection')?>
             </ul>
         </ul>
     </ul>
@@ -183,7 +183,7 @@ projections (using a nominal_bounds_template BoundingBox with a radius
 larger than the source Sheet), or one-to-one projections (using a
 nominal_bounds_template sized to cover only a single unit on the
 source Sheet).  A special type of CFProjection, <?php
-classref('topo.projection.basic','SharedWeightCFProjection')?> is used
+classref('topo.projection','SharedWeightCFProjection')?> is used
 to perform the mathematical operation of convolution, i.e., applying a
 set of weights to all points in a plane, and is equivalent to having
 one ConnectionField shared by every destination neuron.
@@ -193,7 +193,7 @@ one ConnectionField shared by every destination neuron.
 <ul>
 <li><?php classref('topo.base.patterngenerator','PatternGenerator')?>
     <ul>
-    <li><?php classref('topo.pattern.basic','Gaussian')?>
+    <li><?php classref('topo.pattern','Gaussian')?>
     <li><?php classref('topo.base.patterngenerator','Constant')?>
     <li><?php classref('topo.pattern.random','UniformRandom')?>
     </ul>
@@ -209,9 +209,9 @@ producing 2D patterns is provided, as described on
 <ul>
 <li><?php classref('topo.base.functionfamily','TransferFn')?>
     <ul>
-    <li><?php classref('topo.transferfn.basic','DivisiveNormalizeL1')?>
-    <li><?php classref('topo.transferfn.basic','DivisiveNormalizeL2')?>
-    <li><?php classref('topo.transferfn.basic','PiecewiseLinear')?>
+    <li><?php classref('topo.transferfn','DivisiveNormalizeL1')?>
+    <li><?php classref('topo.transferfn','DivisiveNormalizeL2')?>
+    <li><?php classref('topo.transferfn','PiecewiseLinear')?>
     <li><?php classref('topo.transferfn.misc','PatternCombine')?>
     <li><?php classref('topo.base.functionfamily','IdentityTF')?>
     </ul>
@@ -296,8 +296,8 @@ entire Sheet.
 <li><?php classref('topo.base.functionfamily','LearningFn')?>
     <ul>
     <li><?php classref('topo.base.functionfamily','Hebbian')?>
-    <li><?php classref('topo.learningfn.basic','Oja')?>
-    <li><?php classref('topo.learningfn.basic','Covariance')?>
+    <li><?php classref('topo.learningfn','Oja')?>
+    <li><?php classref('topo.learningfn','Covariance')?>
     </ul>
 </ul>
 
