@@ -1,4 +1,3 @@
-from __future__ import with_statement
 """
 Family of two-dimensional functions indexed by x and y.
 
@@ -8,6 +7,9 @@ the functions therefore have the same mathematical behaviour as numpy.
 
 $Id$
 """
+
+from __future__ import with_statement
+
 __version__='$Revision$'
 
 

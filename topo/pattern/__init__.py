@@ -1,4 +1,3 @@
-from __future__ import with_statement
 """
 Objects capable of generating a two-dimensional array of values.
 
@@ -9,6 +8,9 @@ directory will automatically become available for any model.
 
 $Id$
 """
+
+from __future__ import with_statement
+
 __version__='$Revision$'
 
 #from math import pi, sqrt
