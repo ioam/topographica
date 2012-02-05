@@ -27,8 +27,8 @@ __version__='$Revision$'
 # should be set by a parameter in the .ty file and then respected by
 # this file.  The .ty file could also specify a set of default
 # analysis functions to run, e.g. selecting from some options to be
-# made available in topo.command.basic, and if so this file need not
-# have any handling for specific scripts.  Meanwhile, at least it works.
+# made available in topo.command, and if so this file need not have any
+# handling for specific scripts.  Meanwhile, at least it works.
 
 # Note: has none of the Makefile's dependency processing, so just does
 # what you tell it (i.e. over-writes existing files).
@@ -44,7 +44,7 @@ from param import ParamOverrides
 ### Convenience functions
 def snapshot(filename):
     """Return a command for saving a snapshot named filename."""
-    return "from topo.command.basic import save_snapshot ; save_snapshot('%s')"%filename
+    return "from topo.command import save_snapshot ; save_snapshot('%s')"%filename
     
 def or_analysis():
     """Return a command for orientation analysis."""

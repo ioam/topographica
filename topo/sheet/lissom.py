@@ -15,7 +15,7 @@ import topo
 from topo.base.projection import Projection
 from topo.base.sheet import activity_type
 from topo.base.simulation import EPConnectionEvent
-from topo.transferfn.basic import PiecewiseLinear
+from topo.transferfn import PiecewiseLinear
 from topo.sheet import JointNormalizingCFSheet
 
 

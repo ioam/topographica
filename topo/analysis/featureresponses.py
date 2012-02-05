@@ -28,11 +28,11 @@ from topo.base.cf import CFSheet
 from topo.base.functionfamily import PatternDrivenAnalysis 
 from topo.base.sheet import Sheet, activity_type
 from topo.base.sheetview import SheetView
-from topo.command.basic import pattern_present,restore_input_generators, save_input_generators
+from topo.command import pattern_present,restore_input_generators, save_input_generators
 from topo.misc.distribution import Distribution
 from topo.misc.util import cross_product, frange
 from topo import pattern
-from topo.pattern.basic import SineGrating, Gaussian, RawRectangle, Disk
+from topo.pattern import SineGrating, Gaussian, RawRectangle, Disk
 from topo.plotting.plotgroup import plotgroups
 from topo.sheet import GeneratorSheet
 
@@ -756,7 +756,7 @@ class PatternPresenter(param.Parameterized):
             else:
             #### old motion model ####
                 orientation = features_values['direction']+pi/2
-                from topo.pattern.basic import Sweeper            
+                from topo.pattern import Sweeper            
                 for name in inputs.keys():
                     speed=features_values['speed']
                     try:

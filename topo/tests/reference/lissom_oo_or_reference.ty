@@ -19,18 +19,18 @@ __version__='$Revision$'
 import numpy.oldnumeric as Numeric
 from math import pi, sqrt
 
-import topo.pattern.basic
+import topo.pattern
 
 from topo.sheet.lissom import LISSOM
 from topo.sheet import GeneratorSheet
-from topo.projection.basic import CFProjection,SharedWeightCFProjection,ResizableCFProjection
+from topo.projection import CFProjection,SharedWeightCFProjection,ResizableCFProjection
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
 from topo.base.sheet import BoundingBox
 from topo.base.cf import CFSheet
 from topo.base.boundingregion import BoundingBox
 from topo.learningfn.optimized import CFPLF_Hebbian_opt
 from topo.transferfn.optimized import CFPOF_DivisiveNormalizeL1_opt
-from topo.transferfn.basic import DivisiveNormalizeL1,PiecewiseLinear
+from topo.transferfn import DivisiveNormalizeL1,PiecewiseLinear
 
 
 ### Name of the basis simulation (set this)
@@ -107,7 +107,7 @@ print "Number of patterns available for learning iterations:",n_inputs
 gaussian_width = xsigma/BaseRN/sqrt(2.0)
 gaussian_height = ysigma/BaseRN/sqrt(2.0)
 
-input_pattern = topo.pattern.basic.Gaussian(
+input_pattern = topo.pattern.Gaussian(
     scale=scale_input,
     size = 2*gaussian_height,
     aspect_ratio= gaussian_width/gaussian_height,
@@ -127,8 +127,8 @@ inhibitory_weight_bounds = BoundingBox(radius=inh_rad/BaseN)
 
 
 # Circular ConnectionFields
-CFProjection.cf_shape = topo.pattern.basic.Disk(smoothing=0.0)
-CFProjection.weights_generator = topo.pattern.basic.Constant()
+CFProjection.cf_shape = topo.pattern.Disk(smoothing=0.0)
+CFProjection.weights_generator = topo.pattern.Constant()
 CFProjection.response_fn=CFPRF_DotProduct_opt()
 CFProjection.learning_fn=CFPLF_Hebbian_opt()
 CFProjection.weights_output_fns=[CFPOF_DivisiveNormalizeL1_opt()]
@@ -140,7 +140,7 @@ SharedWeightCFProjection.response_fn=CFPRF_DotProduct_opt()
 # same for certain values of r_L, but topographica makes the mask size
 # match the actual connectionfield in general).
 SharedWeightCFProjection.autosize_mask=False
-SharedWeightCFProjection.cf_shape=topo.pattern.basic.Disk(smoothing=0.0,
+SharedWeightCFProjection.cf_shape=topo.pattern.Disk(smoothing=0.0,
                                                            size=2.0*r_L/BaseLN)
 
 
@@ -168,19 +168,19 @@ topo.sim['Primary'] = LISSOM(nominal_density=BaseN,
 
 # C++ LISSOM divides by pi in RadialFunction::Gaussian but not for
 # Gaussian in retinalobjs (and elsewhere)
-centerg = topo.pattern.basic.Gaussian(
+centerg = topo.pattern.Gaussian(
     size=2*sigma_c*sqrt(pi)/BaseRN,aspect_ratio=1.0,
     output_fns=[DivisiveNormalizeL1(norm_value=blur_scale)])
 
-surroundg = topo.pattern.basic.Gaussian(
+surroundg = topo.pattern.Gaussian(
     size=2*sigma_s*sqrt(pi)/BaseRN,aspect_ratio=1.0,
     output_fns=[DivisiveNormalizeL1(norm_value=blur_scale)])
 
 
-on_weights = topo.pattern.basic.Composite(
+on_weights = topo.pattern.Composite(
     generators=[centerg,surroundg],operator=Numeric.subtract)
 
-off_weights = topo.pattern.basic.Composite(
+off_weights = topo.pattern.Composite(
     generators=[surroundg,centerg],operator=Numeric.subtract)
 
 

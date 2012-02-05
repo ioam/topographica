@@ -20,9 +20,8 @@ from topo.base.simulation import Simulation
 from topo.base.patterngenerator import PatternGenerator
 from topo.base.sheet import Sheet
 
-import topo.pattern.basic
-from topo.pattern.basic import Gaussian        
-from topo.transferfn.basic import PiecewiseLinear
+from topo.pattern import Gaussian, Ring, Rectangle
+from topo.transferfn import PiecewiseLinear
 
 
 # CEBALERT: will be replaced with call to param.tk.initialize() when
@@ -334,11 +333,11 @@ class TestParameterTypeRepresentations(unittest.TestCase):
         # a window).
 
         csp_tkvar.set('Ring')
-        self.assertEqual(type(self.f.csp),topo.pattern.basic.Ring)
+        self.assertEqual(type(self.f.csp),Ring)
         ring_id = id(self.f.csp)
         
         csp_tkvar.set('Rectangle')
-        self.assertEqual(type(self.f.csp),topo.pattern.basic.Rectangle)
+        self.assertEqual(type(self.f.csp),Rectangle)
         rectangle_id = id(self.f.csp)
         
         csp_tkvar.set('Ring')
@@ -397,12 +396,12 @@ class TestParameterTypeRepresentations(unittest.TestCase):
         self.assertEqual(self.f.pa,'test') # didn't get set to wrong value
 
         # Check that we can create an object from a class in __main__
-        exec "from topo.transferfn.basic import IdentityTF" in __main__.__dict__
+        exec "from topo.transferfn import IdentityTF" in __main__.__dict__
         w.delete(0,"end")
         w.insert(0,"IdentityTF()")
         self.f._update_param_from_tkvar('pa',force=True)
-        import topo.transferfn.basic
-        self.assertEqual(type(self.f.pa),topo.transferfn.basic.IdentityTF)
+        import topo.transferfn
+        self.assertEqual(type(self.f.pa),topo.transferfn.IdentityTF)
 
 
 

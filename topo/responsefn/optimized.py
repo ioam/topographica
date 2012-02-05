@@ -1,6 +1,6 @@
 """
-Response functions (see basic.py) and CFProjection response functions
-(see projfn.py) written in C to optimize performance.
+Response functions and CFProjection response functions (see projfn.py) written
+in C to optimize performance.
 
 Requires the weave package; without it unoptimized versions are used.
 

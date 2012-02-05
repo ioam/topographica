@@ -25,7 +25,6 @@ from topo.base.cf import CFProjection, CFSheet
 from topo.base.simulation import Simulation
 from topo.learningfn.optimized import CFPLF_Hebbian
 
-from topo.pattern import basic
 from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps
 from topo.command.analysis import Feature
 

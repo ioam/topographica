@@ -20,8 +20,8 @@ from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.boundingregion import BoundingBox
 from topo.base.sheetcoords import SheetCoordinateSystem
 
-from topo.transferfn.basic import TransferFn,TransferFnWithState
-from topo.pattern.basic import Gaussian
+from topo.transferfn import TransferFn,TransferFnWithState
+from topo.pattern import Gaussian
 
 
 # Not suitable for basic.py due to its dependence on patterns.
@@ -42,8 +42,8 @@ class PatternCombine(TransferFn):
 
         Any binary Numeric array "ufunc" returning the same type of
         array as the operands and supporting the reduce operator is
-        allowed here.  See topo.pattern.basic.Composite.operator for
-        more details.              
+        allowed here.  See topo.pattern.Composite.operator for more
+        details.              
         """)
     
     def __call__(self,x):

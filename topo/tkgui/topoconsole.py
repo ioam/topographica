@@ -32,7 +32,7 @@ from topo.plotting.plotgroup import plotgroups, FeatureCurvePlotGroup
 from topo.misc.keyedlist import KeyedList
 from topo.misc.commandline import sim_name_from_filename
 import topo.misc.genexamples
-import topo.command.basic
+import topo.command
 
 import topo.tkgui 
 
@@ -602,13 +602,13 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
                                         initialfile=topo.sim.basename()+"_script_repr.ty")
         
         if script_name:
-            topo.command.basic.save_script_repr(script_name)
+            topo.command.save_script_repr(script_name)
             self.messageBar.response('Script saved to ' + script_name)
             
     
     def load_snapshot(self):
         """
-        Dialog to load a user-selected snapshot (see topo.command.basic.load_snapshot() ).
+        Dialog to load a user-selected snapshot (see topo.command.load_snapshot() ).
         """
         snapshot_name = askopenfilename(initialdir=normalize_path(),filetypes=SAVED_FILETYPES)
 
@@ -617,7 +617,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         else:
             self.messageBar.dynamicinfo('Loading snapshot (may take some time)...')
             self.update_idletasks()            
-            topo.command.basic.load_snapshot(snapshot_name)
+            topo.command.load_snapshot(snapshot_name)
             self.messageBar.response('Loaded snapshot ' + snapshot_name)
             self.title(topo.sim.name)
 
@@ -626,7 +626,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
 
     def save_snapshot(self):
         """
-        Dialog to save a snapshot (see topo.command.basic.save_snapshot() ).
+        Dialog to save a snapshot (see topo.command.save_snapshot() ).
         
         Adds the file extension .typ if not already present.
         """
@@ -642,7 +642,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
                 
             self.messageBar.dynamicinfo('Saving snapshot (may take some time)...')
             self.update_idletasks()            
-            topo.command.basic.save_snapshot(snapshot_name)
+            topo.command.save_snapshot(snapshot_name)
             self.messageBar.response('Snapshot saved to ' + snapshot_name)
     
 

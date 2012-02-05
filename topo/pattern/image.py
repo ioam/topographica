@@ -16,7 +16,7 @@ from param.parameterized import overridable_property
 from topo.base.boundingregion import BoundingBox
 from topo.base.patterngenerator import PatternGenerator
 from topo.base.sheetcoords import SheetCoordinateSystem
-from topo.transferfn.basic import DivisiveNormalizeLinf,TransferFn
+from topo.transferfn import DivisiveNormalizeLinf,TransferFn
 
 
 class ImageSampler(param.Parameterized):

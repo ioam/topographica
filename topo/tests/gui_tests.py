@@ -69,7 +69,7 @@ def test_test_pattern():
 
     ## Test for state_push bug (simulation not run() before Present pressed)
     assert len(topo.sim.eps_to_start)>0, "test must be run before simulation is run()"
-    from topo.pattern.basic import Gaussian
+    from topo.pattern import Gaussian
     from topo import numbergen
     topo.sim['GS'].set_input_generator(Gaussian(x=numbergen.UniformRandom()))
     tp.Present()
@@ -80,7 +80,7 @@ def test_test_pattern():
     ##
     
     tp.gui_set_param('pattern_generator','TwoRectangles')
-    from topo.pattern.basic import TwoRectangles
+    from topo.pattern import TwoRectangles
     assert isinstance(tp.pattern_generator,TwoRectangles), "Pattern generator did not change."
 
     preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict['Activity'].view()[0]

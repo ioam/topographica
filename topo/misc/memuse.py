@@ -77,7 +77,7 @@ def simsize_mb():
 
 def wtsize_mb():
     """String-formatted version of the memory taken by the weights, from print_sizes()."""
-    from topo.command.basic import n_bytes
+    from topo.command import n_bytes
     return "wtsize:%s" % (mb(n_bytes()))
 
 def allsizes_mb():
@@ -87,7 +87,7 @@ def allsizes_mb():
     Formatted to suggest that the topsize is made up of code (not
     currently estimated), topo.sim (apart from weights), and weights.
     """
-    from topo.command.basic import n_bytes
+    from topo.command import n_bytes
     return "%s =? code + %s + %s (%s tot)" % (topsize_mb(),simsize_mb(),wtsize_mb(),mb(simsize()+n_bytes()))
 
 
@@ -105,7 +105,7 @@ def default_memuse_analysis_fn(prefix=""):
 def plotting_and_saving_analysis_fn(prefix=""):
     """For use with memuse_batch() to test snapshot and plotting memory usage."""
     import topo
-    from topo.command.basic import save_snapshot
+    from topo.command import save_snapshot
     from topo.command.analysis import measure_sine_pref,save_plotgroup
     
     print "%sMemuse at time %s: %s" % (prefix,topo.sim.timestr(),allsizes_mb())

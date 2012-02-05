@@ -11,7 +11,7 @@ from topo.base.cf import CFPOutputFn
 from topo.base.functionfamily import TransferFn, IdentityTF
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
 
-from basic import DivisiveNormalizeL1
+from topo.transferfn import DivisiveNormalizeL1
 
 
 # For backwards compatibility when loading pickled files; can be deleted

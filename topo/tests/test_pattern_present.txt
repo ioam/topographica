@@ -1,10 +1,10 @@
 >>> import copy
->>> from topo.pattern.basic import Gaussian,Constant
+>>> from topo.pattern import Gaussian,Constant
 >>> from numpy import array
 >>> from numpy.testing import assert_array_equal
 >>> from topo.tests.utils import assert_array_not_equal, new_simulation
 >>> from topo import numbergen
->>> from topo.command.basic import pattern_present,save_input_generators,restore_input_generators
+>>> from topo.command import pattern_present,save_input_generators,restore_input_generators
 >>> import topo
 
 

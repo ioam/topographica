@@ -13,7 +13,8 @@ from math import pi
 
 import param
 
-import topo.pattern.basic
+import topo
+from topo.pattern import Gaussian
 from topo.plotting import plot
 from topo.plotting.bitmap import *
 from topo.base.sheet import Sheet, BoundingBox
@@ -137,7 +138,7 @@ class TestCFSom(unittest.TestCase):
         gaussian_width = 0.02
         gaussian_height = 0.9
 
-        input_pattern = topo.pattern.basic.Gaussian(
+        input_pattern = Gaussian(
             bounds=BoundingBox(points=((-0.8,-0.8),(0.8,0.8))),
             scale=gaussian_height,
             aspect_ratio=gaussian_width/gaussian_height,

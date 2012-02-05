@@ -41,7 +41,7 @@ from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
 from topo.base.sheetview import SheetView
 from topo.misc.distribution import Distribution
-from topo.pattern.basic import GaussiansCorner, RawRectangle, Constant
+from topo.pattern import GaussiansCorner, Gaussian, RawRectangle, Composite, Constant
 from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
 
@@ -49,7 +49,7 @@ from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasur
 from topo.analysis.featureresponses import Feature, PatternPresenter, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
 from topo.base.patterngenerator import PatternGenerator
-from topo.command.basic import pattern_present
+from topo.command import pattern_present
 
 from topo.misc.patternfn import line
 
@@ -616,10 +616,10 @@ pg.add_plot('Hue Selectivity',[('Strength','HueSelectivity')])
 
 
 
-gaussian_corner = topo.pattern.basic.Composite(
+gaussian_corner = Composite(
     operator = maximum, generators = [
-        topo.pattern.basic.Gaussian(size = 0.06,orientation=0,aspect_ratio=7,x=0.3),
-        topo.pattern.basic.Gaussian(size = 0.06,orientation=pi/2,aspect_ratio=7,y=0.3)])
+        Gaussian(size = 0.06,orientation=0,aspect_ratio=7,x=0.3),
+        Gaussian(size = 0.06,orientation=pi/2,aspect_ratio=7,y=0.3)])
 
 
 class measure_second_or_pref(SinusoidalMeasureResponseCommand):

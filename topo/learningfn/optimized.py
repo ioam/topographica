@@ -1,6 +1,6 @@
 """
-Learning functions (see basic.py) and projection-level learning
-functions (see projfn.py) written in C to optimize performance.
+Learning functions and projection-level learning functions (see projfn.py)
+written in C to optimize performance.
 
 Requires the weave package; without it unoptimized versions are used.
 
@@ -17,7 +17,7 @@ from topo.base.cf import CFPLearningFn,CFPLF_Plugin
 from topo.learningfn.projfn import CFPLF_PluginScaled
 from topo.base.functionfamily import Hebbian,LearningFn
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
-from topo.learningfn.basic import BCMFixed
+from topo.learningfn import BCMFixed
 
 from projfn import CFPLF_Trace  # pyflakes:ignore (optimized version provided)
 

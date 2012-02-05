@@ -27,7 +27,7 @@ from param import resolve_path
 
 from topo.base.boundingregion import BoundingBox
 from topo.pattern.image import FileImage
-from topo.transferfn.basic import IdentityTF
+from topo.transferfn import IdentityTF
 
 
 

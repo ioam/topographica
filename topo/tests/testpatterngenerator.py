@@ -15,7 +15,7 @@ from numpy.testing import assert_array_equal
 from topo.base.patterngenerator import Constant,PatternGenerator
 from topo.base.boundingregion import BoundingBox
 
-from topo.pattern.basic import Rectangle,Gaussian,Composite,Selector
+from topo.pattern import Rectangle,Gaussian,Composite,Selector
 from topo import numbergen
 
 

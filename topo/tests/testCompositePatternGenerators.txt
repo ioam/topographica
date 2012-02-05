@@ -1,4 +1,4 @@
->>> from topo.pattern.basic import Composite, SeparatedComposite, Gaussian
+>>> from topo.pattern import Composite, SeparatedComposite, Gaussian
 >>> from topo import numbergen
 >>> from topo.base.simulation import Simulation
 >>> from topo.base.cf import CFSheet,CFProjection

@@ -9,7 +9,7 @@ __version__='$Revision$'
 import param
 import os
 
-from topo.pattern.basic import TimeSeries, Spectrogram, PowerSpectrum
+from topo.pattern import TimeSeries, Spectrogram, PowerSpectrum
 
 from numpy import arange, array, ceil, complex64, cos, exp, fft, flipud, \
         float64, floor, hanning, hstack, log, log10, logspace, multiply, \

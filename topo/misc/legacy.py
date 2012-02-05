@@ -166,7 +166,7 @@ def pattern_basic_rectangular_removed():
     # CB: I'm assuming nobody cares about this, but if
     # they do, replace the lambda with 11557's rectangular()
     def rectangular(*args,**kw): raise NotImplementedError
-    import topo.pattern.basic as B
+    import topo.pattern as B
     B.rectangular = rectangular
 
 support[11558] = pattern_basic_rectangular_removed

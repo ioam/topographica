@@ -22,7 +22,7 @@ try:
     import pylab
 except ImportError:
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
-    from basic import ImportErrorRaisingFakeModule
+    from topo.command import ImportErrorRaisingFakeModule
     pylab = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
 
@@ -46,7 +46,7 @@ from topo.plotting.plot import make_template_plot
 import param
 from param import ParameterizedFunction,normalize_path
 from param.parameterized import ParamOverrides
-from topo.pattern.basic import SineGrating, OrientationContrast
+from topo.pattern import SineGrating, OrientationContrast
 from topo.plotting.plotgroup import create_plotgroup
 from topo.base.cf import CFSheet
 
@@ -54,7 +54,7 @@ from topo.analysis.featureresponses import Feature, PatternPresenter
 from topo.analysis.featureresponses import PositionMeasurementCommand, FeatureCurveCommand, UnitCurveCommand
 
 
-from basic import Command
+from topo.command import Command
 
 
 

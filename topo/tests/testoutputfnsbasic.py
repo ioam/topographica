@@ -16,9 +16,9 @@ __version__='$Revision$'
 import unittest
 import copy
 
-from topo.transferfn.basic import PiecewiseLinear, DivisiveNormalizeL1
-from topo.transferfn.basic import DivisiveNormalizeL2, DivisiveNormalizeLinf
-from topo.transferfn.basic import DivisiveNormalizeLp, HomeostaticMaxEnt
+from topo.transferfn import PiecewiseLinear, DivisiveNormalizeL1
+from topo.transferfn import DivisiveNormalizeL2, DivisiveNormalizeLinf
+from topo.transferfn import DivisiveNormalizeLp, HomeostaticMaxEnt
 
 from numpy.oldnumeric import array
 from numpy.testing import assert_array_equal

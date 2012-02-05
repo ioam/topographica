@@ -20,7 +20,7 @@ try:
     import pylab
 except ImportError:
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
-    from topo.command.basic import ImportErrorRaisingFakeModule
+    from topo.command import ImportErrorRaisingFakeModule
     pylab = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
 # CEBALERT: commands in here should inherit from the appropriate base

@@ -523,7 +523,7 @@ def compare_with_and_without_snapshot_CreateSnapshot(script="examples/lissom.ty"
     assert_array_equal(data[topo.sim.time()],topo.sim[look_at].activity,
                        err_msg="\nAt topo.sim.time()=%d"%topo.sim.time())
 
-    from topo.command.basic import save_snapshot
+    from topo.command import save_snapshot
     locn = normalize_path(os.path.join('tests',data_filename+'.typ_'))
     print "Saving snapshot to %s"%locn
     save_snapshot(locn)
@@ -553,7 +553,7 @@ def compare_with_and_without_snapshot_LoadSnapshot(script="examples/lissom.ty"):
 #    dims=data['dims']
 #    dataset=data['dataset']
     
-    from topo.command.basic import load_snapshot
+    from topo.command import load_snapshot
 
     locn = resolve_path(os.path.join('tests',snapshot_filename))
     print "Loading snapshot at %s"%locn

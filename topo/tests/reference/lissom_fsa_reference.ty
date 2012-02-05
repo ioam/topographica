@@ -24,20 +24,20 @@ import numpy.oldnumeric as Numeric
 
 from topo.sheet.lissom import LISSOM
 from topo.sheet import GeneratorSheet
-from topo.projection.basic import CFProjection, SharedWeightCFProjection,ResizableCFProjection
+from topo.projection import CFProjection, SharedWeightCFProjection,ResizableCFProjection
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
 from topo.base.parameterclasses import DynamicNumber
 from topo.base.cf import CFSheet
 from topo.base.boundingregion import BoundingBox
 from topo.learningfn.optimized import CFPLF_Hebbian_opt
 from topo.transferfn.optimized import CFPOF_DivisiveNormalizeL1_opt
-from topo.transferfn.basic import DivisiveNormalizeL1, PiecewiseLinear
+from topo.transferfn import DivisiveNormalizeL1, PiecewiseLinear
 #from topo.responsefn.optimized import CFPRF_SharedWeightDotProduct_opt
 from topo.base.patterngenerator import PatternGenerator
 from topo.numbergen import UniformRandom, NormalRandom, Choice
 from topo.base.parameterclasses import DynamicNumber, Number, ListParameter
 from topo.param import Parameter
-from topo.pattern.basic import Composite, SeparatedComposite, Gaussian, Disk, Constant
+from topo.pattern import Composite, SeparatedComposite, Gaussian, Disk, Constant
 from topo.pattern.image import Image
 
 #from topo.tests.reference.lissom_log_parser import get_input_params
@@ -225,7 +225,7 @@ inhibitory_weight_bounds = BoundingBox(radius = inh_rad / (BaseN * area_scale))
 
 # Circular ConnectionFields
 RandomArray.seed(500,500)
-CFProjection.weights_generator = topo.pattern.basic.Gaussian(
+CFProjection.weights_generator = topo.pattern.Gaussian(
     size = 2.0 * sigma_aff / (BaseLN), aspect_ratio = 1.0)
 CFProjection.response_fn=CFPRF_DotProduct_opt()
 CFProjection.learning_fn=CFPLF_Hebbian_opt()
@@ -250,16 +250,16 @@ topo.sim['FSA'] = LISSOM(nominal_bounds=fsa_bounds,nominal_density=BaseN,
 # Gaussian in retinalobjs (and elsewhere)
 # So here each original sigma values are multiplied by sqrt(pi). Because sigma_c and sigma_s were adjusted, the produced Gaussians match the C++ LISSOM simulation.
 
-centerg = topo.pattern.basic.Gaussian(
+centerg = topo.pattern.Gaussian(
     size = 2.0 * sigma_c * sqrt(pi) / BaseLN, aspect_ratio = 1.0, output_fn = DivisiveNormalizeL1(norm_value = 2.33))
 
-surroundg = topo.pattern.basic.Gaussian(
+surroundg = topo.pattern.Gaussian(
     size = 2.0 * sigma_s * sqrt(pi) / BaseLN, aspect_ratio = 1.0, output_fn = DivisiveNormalizeL1(norm_value = 2.33))
 
-on_weights = topo.pattern.basic.Composite(
+on_weights = topo.pattern.Composite(
     generators = [centerg,surroundg], operator = numpy.subtract)
 
-off_weights = topo.pattern.basic.Composite(
+off_weights = topo.pattern.Composite(
     generators = [surroundg,centerg], operator = numpy.subtract)
 
 topo.sim.connect('Retina','LGNOn',delay=FixedPoint("0.05"),
@@ -284,7 +284,7 @@ topo.sim.connect('LGNOff','FSA',delay=FixedPoint("0.05"),
           nominal_bounds_template=afferent_weight_bounds, learning_rate = alpha_input * n_aff_units)
 
 # Temporarily moved here to avoid masking the LGN weights until we can do it in a way that doesn't change the sum of the weights
-CFProjection.cf_shape = topo.pattern.basic.Disk(smoothing=0.0)
+CFProjection.cf_shape = topo.pattern.Disk(smoothing=0.0)
 
 topo.sim.connect('FSA','FSA',delay=FixedPoint("0.05"),
           connection_type=ResizableCFProjection,strength=gammaexc,name='LateralExcitatory',

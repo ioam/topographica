@@ -13,8 +13,8 @@ import __main__
 
 from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
-from topo.command.basic import save_snapshot,load_snapshot
-from topo.pattern.basic import Gaussian, Line
+from topo.command import save_snapshot,load_snapshot
+from topo.pattern import Gaussian, Line
 from topo.base.simulation import Simulation,SomeTimer
 
 
