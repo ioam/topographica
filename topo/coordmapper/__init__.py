@@ -497,9 +497,10 @@ def test_ottes_inverse():
                       % (r,phi,r2,phi2,r2-r,phi2-phi,phi/phi2)
 
 
-_public = list(set([_k for _k,_v in locals().items()
-                    if isinstance(_v,type) \
-                    and issubclass(_v,CoordinateMapperFn)]))
+_public = list(set([k for k,v in locals().items()
+                    if isinstance(v,type) \
+                    and issubclass(v,CoordinateMapperFn)]))
+del k, v
 
 # Automatically discover all .py files in this directory.
 import os,fnmatch

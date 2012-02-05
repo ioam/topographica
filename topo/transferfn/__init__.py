@@ -725,7 +725,8 @@ class Hysteresis(TransferFnWithState):
         super(Hysteresis,self).state_pop()
 
 
-_public = list(set([_k for _k,_v in locals().items() if isinstance(_v,type) and issubclass(_v,TransferFn)]))
+_public = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,TransferFn)]))
+del k, v
 
 
 # Automatically discover all .py files in this directory.
