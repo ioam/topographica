@@ -6,6 +6,8 @@ $Id$
 """
 __version__='$Revision: 8021 $'
 
+import sys
+
 import param
 
 # CEB: Add note that snapshot can be re-saved, making updates
@@ -121,6 +123,14 @@ def preprocess_state(class_,state_mod_fn):
         old_setstate(instance,state)
     class_.__setstate__ = new_setstate
 
+# CEBNOTE: eventually, might have to support multiple redirections for
+# one module (see version in r11323).
+def module_redirect(name,parent,actual_module):
+    """
+    For use when module parent.name is now actual_module.
+    """
+    sys.modules[parent.__name__+'.'+name]=actual_module
+    setattr(sys.modules[parent.__name__],name,actual_module)
 
 ######################################################################
 ######################################################################
@@ -170,6 +180,13 @@ def pattern_basic_rectangular_removed():
     B.rectangular = rectangular
 
 support[11558] = pattern_basic_rectangular_removed
+
+
+#def pattern_basic_removed():
+#    import topo.pattern
+#    module_redirect('basic',topo.pattern,topo.pattern)
+#
+#support[N] = pattern_basic_removed
 
 ######################################################################
 
