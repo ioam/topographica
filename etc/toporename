@@ -1,7 +1,7 @@
-#!bin/python
+#!/usr/bin/python
 #
 # Script to change the name of an element of the Topographica code relatively safely.
-# First shows the existing uses, then changes it, then prompts for CVS checkin.
+# First shows the existing uses, then changes it, then prompts for SVN checkin.
 #
 # Examples: cd .. ; etc/toporename CFPHebbian CFPLF_Hebbian
 #           cd .. ; etc/toporename '\bCFPHebbian\b' 'CFPLF_Hebbian'
@@ -43,13 +43,13 @@ if len(argv)<=3:
 else:    
     files=quotedlist(argv[3:])
 
-checkcvs=True
+checksvn=True
 
 # Main script
-if checkcvs:
-    differences=system("cvs diff --brief")
+if checksvn:
+    differences=system("svn diff")
     if differences:
-        cont = raw_input("CVS error or differences already present; continue with toporename (Y/N)?")
+        cont = raw_input("SVN error or differences already present; continue with toporename (Y/N)?")
         if not (cont[0] == 'y' or cont[0] == 'Y'):
             exit(-1)
 
@@ -68,13 +68,13 @@ system("etc/replaceall '" + fromregexp + "' '" + toregexp + "' " + files)
 
 
 print separator
-print "New CVS differences:"
-system("cvs diff")
+print "New SVN differences:"
+system("svn diff")
 
 print separator
 print
 print "If these differences are ok, check them in with:"
-print "cvs commit -m 'Changed " + fromregexp + " to " + toregexp + "' " + files
+print "svn commit -m 'Changed " + fromregexp + " to " + toregexp + "' " + files
 
 #if __name__ == '__main__':
 
