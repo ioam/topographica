@@ -126,7 +126,7 @@ CFProjection.cf_shape to a PatternGenerator that returns different
 results each time it is evaluated. By default, dynamic parameters in
 Topographica only advance once per simulation time, so it is next
 necessary to call CFProjection.cf_shape.set_dynamic_time_fn(None),
-causing the PatternGenerator's dynamic values change each time it is
+causing the PatternGenerator's dynamic values to change each time it is
 evaluated. Note that one further command may be necessary in some
 cases: by default, the PatternGenerator used for cf_shape has its size
 set automatically; if instead you want to control the size, set
