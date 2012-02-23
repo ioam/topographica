@@ -160,7 +160,7 @@ CFProjection.weights_generator=pattern.Selector(generators=[
                      x=numbergen.UniformRandom(lbound=-0.2,ubound=0.2,seed=12),
                      y=numbergen.UniformRandom(lbound=-0.2,ubound=0.2,seed=34)),
     pattern.Rectangle(orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=99),
-                      size0.3=),
+                      size=0.3),
     pattern.Disk(size=0.2)])
 </pre>
 
