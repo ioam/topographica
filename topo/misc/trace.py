@@ -426,6 +426,7 @@ def get_images(name,times,recorder,overlays=(0,0,0)):
 
 # JABALERT: Is there some reason it is called ActivityMovie in
 # particular, if it can plot things other than Activity?
+# Maybe DataRecorderMovie?
 class ActivityMovie(param.Parameterized):
     """
     An object encapsulating a series of movie frames displaying the
