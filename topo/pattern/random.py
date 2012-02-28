@@ -130,8 +130,11 @@ class GaussianCloud(Composite):
         precedence=0.31,doc="""
         Ratio of gaussian width to height; width is gaussian_size*aspect_ratio.""")
 
+    seed = param.Integer(default=42, doc="Random seed used to control the uniform random noise.")
+
     def __call__(self,**params_to_override):
         p = ParamOverrides(self,params_to_override)
-        p.generators=[Gaussian(aspect_ratio=p.aspect_ratio,size=p.gaussian_size),
-                      UniformRandom()]
+        p.generators=[Gaussian(aspect_ratio=p.aspect_ratio,size=p.gaussian_size), 
+                      UniformRandom(random_generator=numpy.random.RandomState(seed=p.seed))]
+
         return super(GaussianCloud,self).__call__(**p)
