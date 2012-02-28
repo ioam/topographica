@@ -159,36 +159,46 @@ class HalfRectify(TransferFn):
         clip_lower(x,0)
         x *= self.gain
 
-
-
 class HomeostaticResponse(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
-    constant desired average activity.
+    constant desired average activity. Details can be found in the report 
+    'Mechanisms for Stable and Robust Development of Orientation Maps
+     and Receptive Fields' by Judith S. Law and Jan Antolik and James A. Bednar
+    (http://www.inf.ed.ac.uk/publications/report/1404.html)
     """
-    
+
+    t_init = param.Number(default=0.15,doc="""
+        Initial value of the threshold value t.""")
+
+    randomized_init = param.Boolean(False,doc="""
+        Whether to randomize the initial t parameter.""")
+
+    seed_init = param.Integer(default=42, doc="""
+       Random seed used to control the initial randomized t values.""")
+
     target_activity = param.Number(default=0.024,doc="""
         The target average activity.""")
 
     linear_slope = param.Number(default=1.0,doc="""
         Slope of the linear portion above threshold.""")
-    
-    t_init = param.Number(default=0.15,doc="""
-        Initial value of the threshold.""")
-    
-    learning_rate = param.Number(default=0.001,doc="""
+        
+    learning_rate = param.Number(default=0.009,doc="""
         Learning rate for homeostatic plasticity.""")
     
-    smoothing = param.Number(default=0.999,doc="""
-        Weighting of previous activity vs. current activity when
-        calculating the average.""")
-    
-    randomized_init = param.Boolean(False,doc="""
-        Whether to randomize the initial t parameter.""")
-    
+    smoothing = param.Number(default=0.991,doc="""
+        Weighting of previous activity vs. current activity when 
+        calculating the average activity. """)
+        
     noise_magnitude =  param.Number(default=0.1,doc="""
         The magnitude of the additive noise to apply to the t_init
         parameter at initialization.""")
+    
+    period = param.Number(default=1.0,doc="""
+        The period with which the homeostatic threshold is recomputed and applied.
+        Homeostasis is applied on the first event received by the sheet where  
+        topo.sim.time() has increased by an integer multiple of period. 
+        A period of 0.0 sets Homeostasis to occur continuously, ie. at every event.""")
 
     def __init__(self,**params):
         super(HomeostaticResponse,self).__init__(**params)
@@ -197,45 +207,75 @@ class HomeostaticResponse(TransferFnWithState):
         self.t=None     # To allow state_push at init
         self.y_avg=None # To allow state_push at init
         
+        self._prev_timestamp = None
+        self._y_avg_prev = None
+        self._x_prev = None
+
+    def _initialize(self,x):
+        self._prev_timestamp = float(topo.sim.time())
+        self._x_prev = numpy.copy(x)
+        self._y_avg_prev = ones(x.shape, x.dtype.char) * self.target_activity
+
+        if self.randomized_init:
+            self.t = ones(x.shape, x.dtype.char) * self.t_init + \
+                (topo.pattern.random.UniformRandom( \
+                    random_generator=numpy.random.RandomState(seed=self.seed_init)) \
+                     (xdensity=x.shape[0],ydensity=x.shape[1]) \
+                     -0.5)*self.noise_magnitude*2
+        else:
+            self.t = ones(x.shape, x.dtype.char) * self.t_init    
+        self.y_avg = ones(x.shape, x.dtype.char) * self.target_activity
+
+    def _apply_threshold(self,x):
+        """ Applies the piecewise-linear thresholding operation to the activity. """
+        x -= self.t; clip_lower(x,0); x *= self.linear_slope
+
+    def _update_threshold(self, prev_t, x, prev_avg, smoothing, learning_rate, target_activity):
+        """ Applies exponential smoothing to the given current activity and previous
+            smoothed value following the equations given in the report cited above"""
+        y_avg = (1.0-smoothing)*x + smoothing*prev_avg 
+        t = prev_t + learning_rate * (y_avg - target_activity)
+        return (y_avg, t)
+
+    def _periodic_transition(self):
+        """ Returns a Boolean indicating if a transition between presentations
+        has occurred (specified by period)."""
+        old_period_count = numpy.floor(self._prev_timestamp / self.period)
+        new_period_count = numpy.floor(float(topo.sim.time()) / self.period)
+        self._prev_timestamp = float(topo.sim.time())
+        return (topo.sim.time() > ((old_period_count + 1) * self.period))
+
     def __call__(self,x):
-        if self.first_call:
-            self.first_call = False
-            if self.randomized_init:
-                # CEBALERT: UniformRandom's seed should be available
-                # as a parameter.
-                self.t = ones(x.shape, x.dtype.char) * self.t_init + \
-                         (topo.pattern.random.UniformRandom() \
-                          (xdensity=x.shape[0],ydensity=x.shape[1]) \
-                          -0.5)*self.noise_magnitude*2
-            else:
-                self.t = ones(x.shape, x.dtype.char) * self.t_init
-            
-            self.y_avg = ones(x.shape, x.dtype.char) * self.target_activity
+        """ Initialises on the first call and then applies homeostasis """
+        if self.first_call: self._initialize(x)
 
-        x -= self.t
-        clip_lower(x,0)
-        x *= self.linear_slope
+        if (self.period == 0.0): update_flag = True # Run in continuous mode
+        else: update_flag = self._periodic_transition()
 
-        # CEBALERT: this line is at best confusing; needs to be
-        # commented or simplified!
-        if self.plastic & (float(topo.sim.time()) % 1.0 >= 0.54):
-            # print "Called at %f" % float(topo.sim.time())
-            self.y_avg = (1.0-self.smoothing)*x + self.smoothing*self.y_avg 
-            self.t += self.learning_rate * (self.y_avg - self.target_activity)
+        if update_flag & (not self.first_call): 
+            # Using activity matrix and and smoothed activity from *previous* call.
+            (self.y_avg, self.t) = self._update_threshold(self.t, self._x_prev, self._y_avg_prev, 
+                                                          self.smoothing, self.learning_rate,
+                                                          self.target_activity)
+            self._y_avg_prev = self.y_avg   # Copy only if not in continuous mode
 
+        self._apply_threshold(x)            # Apply the threshold only after it is updated
+        self._x_prev[...,...] = x[...,...]  # Recording activity for the next periodic update
+        self.first_call = False
 
     def state_push(self):
         self.__current_state_stack.append((copy.copy(self.t),
                                            copy.copy(self.y_avg),
-                                           copy.copy(self.first_call)))
+                                           copy.copy(self.first_call),
+                                           copy.copy(self._prev_timestamp),
+                                           copy.copy(self._y_avg_prev),
+                                           copy.copy(self._x_prev)))
         super(HomeostaticResponse, self).state_push()
-
         
     def state_pop(self):
-        self.t, self.y_avg, self.first_call = self.__current_state_stack.pop()
+        (self.t, self.y_avg, self.first_call, self._prev_timestamp, 
+        self._y_avg_prev, self._x_prev) = self.__current_state_stack.pop()
         super(HomeostaticResponse, self).state_pop()
-
-
 
 class AttributeTrackingTF(TransferFnWithState):
     """
