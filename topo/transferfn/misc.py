@@ -33,6 +33,7 @@ class PatternCombine(TransferFn):
     Useful for operations like adding noise or masking out lesioned
     items or around the edges of non-rectangular shapes.
     """
+
     generator = param.ClassSelector(PatternGenerator,
         default=Constant(), doc="""
         Pattern to combine with the supplied matrix.""")
@@ -75,6 +76,7 @@ class KernelMax(TransferFn):
     instance, or any function accepting bounds, density, radius, and
     height to return a kernel matrix.
     """
+
     kernel_radius = param.Number(default=0.0,bounds=(0,None),doc="""
         Kernel radius in Sheet coordinates.""")
     
@@ -90,6 +92,7 @@ class KernelMax(TransferFn):
         Density of the Sheet whose matrix we act on, for use
         in converting from matrix to Sheet coordinates.""")
     
+
     def __call__(self,x):
         rows,cols = x.shape
         radius = self.density*self.kernel_radius
@@ -139,6 +142,7 @@ class HalfRectify(TransferFn):
         The magnitude of the additive noise to apply to the t_init
         parameter at initialization.""")
 
+
     def __init__(self,**params):
         super(TransferFn,self).__init__(**params)
         self.first_call = True
@@ -159,13 +163,15 @@ class HalfRectify(TransferFn):
         clip_lower(x,0)
         x *= self.gain
 
+
+
 class HomeostaticResponse(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
     constant desired average activity. Details can be found in the report 
     'Mechanisms for Stable and Robust Development of Orientation Maps
-     and Receptive Fields' by Judith S. Law and Jan Antolik and James A. Bednar
-    (http://www.inf.ed.ac.uk/publications/report/1404.html)
+    and Receptive Fields', by Judith S. Law, Jan Antolik, and James A. 
+    Bednar, 2011 (http://www.inf.ed.ac.uk/publications/report/1404.html).
     """
 
     t_init = param.Number(default=0.15,doc="""
@@ -188,17 +194,26 @@ class HomeostaticResponse(TransferFnWithState):
     
     smoothing = param.Number(default=0.991,doc="""
         Weighting of previous activity vs. current activity when 
-        calculating the average activity. """)
+        calculating the average activity.""")
         
     noise_magnitude =  param.Number(default=0.1,doc="""
         The magnitude of the additive noise to apply to the t_init
         parameter at initialization.""")
     
     period = param.Number(default=1.0,doc="""
-        The period with which the homeostatic threshold is recomputed and applied.
-        Homeostasis is applied on the first event received by the sheet where  
-        topo.sim.time() has increased by an integer multiple of period. 
-        A period of 0.0 sets Homeostasis to occur continuously, ie. at every event.""")
+        How often the threshold should be adjusted.
+
+        If the period is 0, the threshold is adjusted continuously, each 
+        time this TransferFn is called.
+
+        For nonzero periods, adjustments occur only the first time
+        this TransferFn is called after topo.sim.time() reaches an
+        integer multiple of the period.  
+ 
+        For example, if period is 2.5 and the TransferFn is evaluated
+        every 0.05 simulation time units, the threshold will be
+        adjusted at times 2.55, 5.05, 7.55, etc.""")
+
 
     def __init__(self,**params):
         super(HomeostaticResponse,self).__init__(**params)
@@ -210,6 +225,7 @@ class HomeostaticResponse(TransferFnWithState):
         self._prev_timestamp = None
         self._y_avg_prev = None
         self._x_prev = None
+
 
     def _initialize(self,x):
         self._prev_timestamp = float(topo.sim.time())
@@ -226,34 +242,42 @@ class HomeostaticResponse(TransferFnWithState):
             self.t = ones(x.shape, x.dtype.char) * self.t_init    
         self.y_avg = ones(x.shape, x.dtype.char) * self.target_activity
 
+
     def _apply_threshold(self,x):
-        """ Applies the piecewise-linear thresholding operation to the activity. """
+        """Applies the piecewise-linear thresholding operation to the activity."""
         x -= self.t; clip_lower(x,0); x *= self.linear_slope
 
+
     def _update_threshold(self, prev_t, x, prev_avg, smoothing, learning_rate, target_activity):
-        """ Applies exponential smoothing to the given current activity and previous
-            smoothed value following the equations given in the report cited above"""
+        """
+        Applies exponential smoothing to the given current activity and previous
+        smoothed value following the equations given in the report cited above.
+        """
         y_avg = (1.0-smoothing)*x + smoothing*prev_avg 
         t = prev_t + learning_rate * (y_avg - target_activity)
         return (y_avg, t)
 
+
     def _periodic_transition(self):
-        """ Returns a Boolean indicating if a transition between presentations
-        has occurred (specified by period)."""
+        """
+        Returns a Boolean indicating if a transition between presentations
+        has occurred (specified by period).
+        """
         old_period_count = numpy.floor(self._prev_timestamp / self.period)
         new_period_count = numpy.floor(float(topo.sim.time()) / self.period)
         self._prev_timestamp = float(topo.sim.time())
         return (topo.sim.time() > ((old_period_count + 1) * self.period))
 
+
     def __call__(self,x):
-        """ Initialises on the first call and then applies homeostasis """
+        """Initialises on the first call and then applies homeostasis."""
         if self.first_call: self._initialize(x)
 
         if (self.period == 0.0): update_flag = True # Run in continuous mode
         else: update_flag = self._periodic_transition()
 
         if update_flag & (not self.first_call): 
-            # Using activity matrix and and smoothed activity from *previous* call.
+            # Using activity matrix and smoothed activity from *previous* call.
             (self.y_avg, self.t) = self._update_threshold(self.t, self._x_prev, self._y_avg_prev, 
                                                           self.smoothing, self.learning_rate,
                                                           self.target_activity)
@@ -262,6 +286,7 @@ class HomeostaticResponse(TransferFnWithState):
         self._apply_threshold(x)            # Apply the threshold only after it is updated
         self._x_prev[...,...] = x[...,...]  # Recording activity for the next periodic update
         self.first_call = False
+
 
     def state_push(self):
         self.__current_state_stack.append((copy.copy(self.t),
@@ -276,6 +301,8 @@ class HomeostaticResponse(TransferFnWithState):
         (self.t, self.y_avg, self.first_call, self._prev_timestamp, 
         self._y_avg_prev, self._x_prev) = self.__current_state_stack.pop()
         super(HomeostaticResponse, self).state_pop()
+
+
 
 class AttributeTrackingTF(TransferFnWithState):
     """
@@ -347,7 +374,6 @@ class AttributeTrackingTF(TransferFnWithState):
             self.values[p]={}
             for u in self.units:
                 self.values[p][u]=[]
-                
          
         
     def __call__(self,x):
@@ -368,7 +394,6 @@ class AttributeTrackingTF(TransferFnWithState):
             else:
                 raise ValueError("A coordinate frame (e.g. coordframe=topo.sim['V1']) must be specified in order to track"+str(self._object))
                 
-
         #collect values on each appropriate step
         self.n_step += 1
         
