@@ -12,6 +12,10 @@ Changes since 0.9.7. Last updated: 2011/10/09.
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
+<li>r11896: Changed interface of topo.command.activityplot (rarely
+  used so far) and changed "Plot with axis labels" right-click option
+  in plots to "Plot in matrix coords", to acknowledge new option
+  "Plot in sheet coords".
 <li>r11862: 'make OTHER_PYTHON=/path/to/python topographica-other-python' is now '/path/to/python create_topographica_script.py'. Additionally, Windows users can then run '/path/to/python windows_postinstall.py create_batchfile' to get an executable topographica.bat.
 <li>r11817: BCMFixed removed from learningfn.projfn
 <li>r11803: Output path now ~/Documents/Topographica [CB: not yet finalized]
