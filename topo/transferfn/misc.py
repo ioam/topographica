@@ -163,8 +163,6 @@ class HalfRectify(TransferFn):
         clip_lower(x,0)
         x *= self.gain
 
-
-
 class HomeostaticResponse(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
@@ -226,7 +224,6 @@ class HomeostaticResponse(TransferFnWithState):
         self._y_avg_prev = None
         self._x_prev = None
 
-
     def _initialize(self,x):
         self._prev_timestamp = float(topo.sim.time())
         self._x_prev = numpy.copy(x)
@@ -268,7 +265,6 @@ class HomeostaticResponse(TransferFnWithState):
         self._prev_timestamp = float(topo.sim.time())
         return (topo.sim.time() > ((old_period_count + 1) * self.period))
 
-
     def __call__(self,x):
         """Initialises on the first call and then applies homeostasis."""
         if self.first_call: self._initialize(x)
@@ -287,7 +283,6 @@ class HomeostaticResponse(TransferFnWithState):
         self._x_prev[...,...] = x[...,...]  # Recording activity for the next periodic update
         self.first_call = False
 
-
     def state_push(self):
         self.__current_state_stack.append((copy.copy(self.t),
                                            copy.copy(self.y_avg),
@@ -301,8 +296,6 @@ class HomeostaticResponse(TransferFnWithState):
         (self.t, self.y_avg, self.first_call, self._prev_timestamp, 
         self._y_avg_prev, self._x_prev) = self.__current_state_stack.pop()
         super(HomeostaticResponse, self).state_pop()
-
-
 
 class AttributeTrackingTF(TransferFnWithState):
     """
