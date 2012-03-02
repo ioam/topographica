@@ -220,12 +220,12 @@ class HomeostaticResponse(TransferFnWithState):
         self.t=None     # To allow state_push at init
         self.y_avg=None # To allow state_push at init
         
-        self._prev_timestamp = None
+        self._next_update_timestamp = topo.sim.time_type(topo.sim.time()+self.period)
         self._y_avg_prev = None
         self._x_prev = None
 
+
     def _initialize(self,x):
-        self._prev_timestamp = float(topo.sim.time())
         self._x_prev = numpy.copy(x)
         self._y_avg_prev = ones(x.shape, x.dtype.char) * self.target_activity
 
@@ -255,25 +255,13 @@ class HomeostaticResponse(TransferFnWithState):
         return (y_avg, t)
 
 
-    def _periodic_transition(self):
-        """
-        Returns a Boolean indicating if a transition between presentations
-        has occurred (specified by period).
-        """
-        old_period_count = numpy.floor(self._prev_timestamp / self.period)
-        new_period_count = numpy.floor(float(topo.sim.time()) / self.period)
-        self._prev_timestamp = float(topo.sim.time())
-        return (topo.sim.time() > ((old_period_count + 1) * self.period))
-
     def __call__(self,x):
         """Initialises on the first call and then applies homeostasis."""
-        if self.first_call: self._initialize(x)
+        if self.first_call: self._initialize(x); self.first_call = False
 
-        if (self.period == 0.0): update_flag = True # Run in continuous mode
-        else: update_flag = self._periodic_transition()
-
-        if update_flag & (not self.first_call): 
-            # Using activity matrix and smoothed activity from *previous* call.
+        if (topo.sim.time() > self._next_update_timestamp):
+            self._next_update_timestamp += self.period
+            # Using activity matrix and and smoothed activity from *previous* call.
             (self.y_avg, self.t) = self._update_threshold(self.t, self._x_prev, self._y_avg_prev, 
                                                           self.smoothing, self.learning_rate,
                                                           self.target_activity)
@@ -281,19 +269,19 @@ class HomeostaticResponse(TransferFnWithState):
 
         self._apply_threshold(x)            # Apply the threshold only after it is updated
         self._x_prev[...,...] = x[...,...]  # Recording activity for the next periodic update
-        self.first_call = False
+
 
     def state_push(self):
         self.__current_state_stack.append((copy.copy(self.t),
                                            copy.copy(self.y_avg),
                                            copy.copy(self.first_call),
-                                           copy.copy(self._prev_timestamp),
+                                           copy.copy(self._next_update_timestamp),
                                            copy.copy(self._y_avg_prev),
                                            copy.copy(self._x_prev)))
         super(HomeostaticResponse, self).state_push()
         
     def state_pop(self):
-        (self.t, self.y_avg, self.first_call, self._prev_timestamp, 
+        (self.t, self.y_avg, self.first_call, self._next_update_timestamp, 
         self._y_avg_prev, self._x_prev) = self.__current_state_stack.pop()
         super(HomeostaticResponse, self).state_pop()
 
