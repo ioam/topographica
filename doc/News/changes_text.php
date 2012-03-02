@@ -8,7 +8,7 @@ the next.
 <H3>Upcoming release</H3>
 
 Changes since 0.9.7. Last updated: 2011/10/09. 
-<!-- CB: and again by me for one specific change, r11862). -->
+<!-- plus specific changes for r11862 and r11896). -->
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
