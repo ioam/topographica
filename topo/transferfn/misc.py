@@ -178,7 +178,7 @@ class HomeostaticResponse(TransferFnWithState):
     randomized_init = param.Boolean(False,doc="""
         Whether to randomize the initial t parameter.""")
 
-    seed_init = param.Integer(default=42, doc="""
+    seed = param.Integer(default=42, doc="""
        Random seed used to control the initial randomized t values.""")
 
     target_activity = param.Number(default=0.024,doc="""
@@ -187,7 +187,7 @@ class HomeostaticResponse(TransferFnWithState):
     linear_slope = param.Number(default=1.0,doc="""
         Slope of the linear portion above threshold.""")
         
-    learning_rate = param.Number(default=0.009,doc="""
+    learning_rate = param.Number(default=0.01,doc="""
         Learning rate for homeostatic plasticity.""")
     
     smoothing = param.Number(default=0.991,doc="""
@@ -198,7 +198,7 @@ class HomeostaticResponse(TransferFnWithState):
         The magnitude of the additive noise to apply to the t_init
         parameter at initialization.""")
     
-    period = param.Number(default=1.0,doc="""
+    period = param.Number(default=1.0, constant=True, doc="""
         How often the threshold should be adjusted.
 
         If the period is 0, the threshold is adjusted continuously, each 
@@ -232,7 +232,7 @@ class HomeostaticResponse(TransferFnWithState):
         if self.randomized_init:
             self.t = ones(x.shape, x.dtype.char) * self.t_init + \
                 (topo.pattern.random.UniformRandom( \
-                    random_generator=numpy.random.RandomState(seed=self.seed_init)) \
+                    random_generator=numpy.random.RandomState(seed=self.seed)) \
                      (xdensity=x.shape[0],ydensity=x.shape[1]) \
                      -0.5)*self.noise_magnitude*2
         else:
