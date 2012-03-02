@@ -189,13 +189,24 @@ class matrixplot(PylabPlotCommand):
     plot_type = param.Callable(default=pylab.gray,doc="""
         Matplotlib command to generate the plot, e.g. pylab.gray or pylab.hsv.""")
     
+    extent = param.Parameter(default=None,doc="""
+        Subregion of the matrix to plot, as a tuple (l,b,r,t).""")
+    
     # JABALERT: All but the first two should probably be Parameters
     def __call__(self,mat,aspect=None,colorbar=True,**params):
         p=ParamOverrides(self,params)
         
         p.plot_type()
         pylab.figure(figsize=(5,5))
-        pylab.imshow(mat,interpolation='nearest',aspect=aspect)
+
+        # Swap lbrt to lrbt to match pylab
+        if p.extent is None:
+            extent = None
+        else:
+            (l,b,r,t)=p.extent
+            extent=(l,r,b,t)
+            
+        pylab.imshow(mat,interpolation='nearest',aspect=aspect,extent=extent)
         if colorbar and (mat.min()!= mat.max()): pylab.colorbar()
         self._generate_figure(p)
 
@@ -369,29 +380,19 @@ class fftplot(matrixplot):
         super(fftplot,self).__call__(fft_plot,**p)
 
         
-
-class activityplot(PylabPlotCommand):
+class activityplot(matrixplot):
     """
-    Plots the activity in a sheet.
+    Plots the activity in a sheet with axis labels in Sheet (not matrix) coordinates.
 
-    Gets plot's extent from sheet.bounds.aarect(). Adds a title and
-    allows the selection of a colormap.  If activity is not given,
-    the sheet's current activity is used.
+    Same as matrixplot, but only for matrices associated with a Sheet.
+    By default plots the Sheet's activity, but any other matrix of the
+    same size may be supplied for plotting in these coordinates instead.
     """
-
-    # JABALERT: All but the first two arguments should probably be Parameters    
-    # Not sure what this command is for or if anyone is using it.
-    def __call__(self,sheet,activity=None,cmap=None,**params):
+    def __call__(self,sheet,mat=None,**params):
         p=ParamOverrides(self,params)
-
-        l,b,r,t = sheet.bounds.aarect().lbrt()
-        if activity is None:
-            activity = sheet.activity
-        if cmap is None:
-            cmap=pylab.cm.Greys
-        pylab.imshow(activity, extent=(l,r,b,t),cmap=cmap)
-
-        self._generate_figure(p)
+        if p.extent is None: p.extent=sheet.bounds.aarect().lbrt()
+        if mat is None: mat = sheet.activity
+        super(activityplot,self).__call__(mat,**p)
         
 
 
