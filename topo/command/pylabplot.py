@@ -380,6 +380,23 @@ class fftplot(matrixplot):
         super(fftplot,self).__call__(fft_plot,**p)
 
         
+class autocorrelationplot(matrixplot):
+    """
+    Compute and show the 2D autocorrelation of the supplied data.
+    Requires the external SciPy package.
+    
+    Example:: autocorrelationplot(topo.sim["V1"].sheet_views["OrientationPreference"].view()[0],filename="out")
+    """
+
+    plot_type = param.Callable(default=pylab.autumn)
+    
+    def __call__(self,data,**params):
+        p=ParamOverrides(self,params)
+        import scipy.signal
+        mat=scipy.signal.correlate2d(data,data)
+        super(autocorrelationplot,self).__call__(mat,**p)
+
+
 class activityplot(matrixplot):
     """
     Plots the activity in a sheet with axis labels in Sheet (not matrix) coordinates.

@@ -132,6 +132,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
             newmenu.add_command(label="Plot in matrix coords", command=lambda c=chan: self.__plot_matrix(c))
             newmenu.add_command(label="Plot as 3D wireframe",  command=lambda c=chan: self.__plot_matrix3d(c))
             newmenu.add_command(label="Fourier transform",     command=lambda c=chan: self.__fft(c))
+            newmenu.add_command(label="Autocorrelation",       command=lambda c=chan: self.__autocorrelate(c))
             newmenu.add_command(label="Histogram",             command=lambda c=chan: self.__histogram(c))
             newmenu.add_command(label="Gradient",              command=lambda c=chan: self.__gradient(c))
             channel_menus[chan]=newmenu
@@ -211,6 +212,12 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         description = "%s %s at time %s" % (plot.plot_src_name, plot.name, topo.sim.timestr())
         m=plot._get_matrix(channel)
         topo.command.pylabplot.fftplot(m, title="FFT Plot: " + description)
+
+    def __autocorrelate(self,channel):
+        plot = self._right_click_info['plot']
+        description = "%s %s at time %s" % (plot.plot_src_name, plot.name, topo.sim.timestr())
+        m=plot._get_matrix(channel)
+        topo.command.pylabplot.autocorrelationplot(m, title="Autocorrelation: " + description)
 
     def __histogram(self,channel):
         plot = self._right_click_info['plot']

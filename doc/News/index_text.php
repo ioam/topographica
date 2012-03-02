@@ -43,6 +43,8 @@
 <dt>GUI:</dt>
 <dd>
   <div class="i2">- Model Editor allows text labels to be suppressed so that .eps output can be labeled in an illustration program (e.g. Inkscape) for use in publications</div>
+  <div class="i2">- New plot options for right-clicking: plot in sheet
+  coords, plot in matrix coords, autocorrelation (requires SciPy)</div>
 </dd>
 <br>
 <dt>Component library:</dt>
