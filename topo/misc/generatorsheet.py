@@ -26,7 +26,7 @@ class GeneratorSheet(Sheet):
 
     src_ports=['Activity']
     
-    period = param.Number(default=1,bounds=(0,None),doc=
+    period = param.Number(default=1,bounds=(0,None), inclusive_bounds=(False, True), constant=True, doc=
         "Delay (in Simulation time) between generating new input patterns.")
     
     phase  = param.Number(default=0.05,doc=
@@ -47,8 +47,6 @@ class GeneratorSheet(Sheet):
         self.input_generator_stack = []
         self.set_input_generator(self.input_generator)
 
-        # JABALERT: Should make period have an exclusive lower bound instead
-        assert self.period!=0, "Period must be greater than zero."
 
     def set_input_generator(self,new_ig,push_existing=False):
         """
