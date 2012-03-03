@@ -231,7 +231,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         m=plot._get_matrix(channel)
         view = plot.view_dict[plot.channels[channel]]
         topo.command.pylabplot.gradientplot(m,title="Gradient: " + description,
-                                              cyclic=view.cyclic,cyclic_range=view.norm_factor)
+                                              cyclic=view.cyclic,cyclic_range=view.cyclic_range)
 
     def __print_matrix(self,channel):
         plot = self._right_click_info['plot']

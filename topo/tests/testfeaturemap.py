@@ -26,9 +26,16 @@ from topo.base.simulation import Simulation
 from topo.learningfn.optimized import CFPLF_Hebbian
 
 from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps
+from topo.misc.distribution import DSF_WeightedAverage
 from topo.command.analysis import Feature
 
+# globals to use weighted_average, selectivity, vector_sum, which are not methods
+# of DistributionMatrix any more
+weighted_average    = ( lambda x: x.apply_DSF( DSF_WeightedAverage() )['']['preference'] )
+selectivity         = ( lambda x: x.apply_DSF( DSF_WeightedAverage() )['']['selectivity'] )
+
 class TestDistributionMatrix(unittest.TestCase):
+
 
     def setUp(self):
 
@@ -57,8 +64,8 @@ class TestDistributionMatrix(unittest.TestCase):
         
         for i in range(3):
             for j in range(2):
-                self.assertAlmostEqual(self.fm1.weighted_average()[i,j], 0.5)
-                self.assertAlmostEqual(self.fm2.weighted_average()[i,j], 0.5)
+                self.assertAlmostEqual( weighted_average( self.fm1 )[i,j], 0.5)
+                self.assertAlmostEqual( weighted_average( self.fm2 )[i,j], 0.5)
 
 
         # To test the update function     
@@ -67,9 +74,9 @@ class TestDistributionMatrix(unittest.TestCase):
 
         for i in range(3):
             for j in range(2):
-                self.assertAlmostEqual(self.fm1.weighted_average()[i,j], 0.6)
+                self.assertAlmostEqual( weighted_average( self.fm1 )[i,j], 0.6)
                 vect_sum = wrap(0,1,arg(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/(2*pi)) 
-                self.assertAlmostEqual(self.fm2.weighted_average()[i,j],vect_sum) 
+                self.assertAlmostEqual( weighted_average( self.fm2 )[i,j],vect_sum) 
                                       
                                       
 
@@ -80,18 +87,18 @@ class TestDistributionMatrix(unittest.TestCase):
 
         for i in range(3):
             for j in range(2):
-                self.assertAlmostEqual(self.fm1.weighted_average()[i,j], 0.6)
+                self.assertAlmostEqual( weighted_average( self.fm1 )[i,j], 0.6)
                 vect_sum =wrap(0,1,arg(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/(2*pi))
-                self.assertAlmostEqual(self.fm2.weighted_average()[i,j],vect_sum)
+                self.assertAlmostEqual( weighted_average( self.fm2 )[i,j],vect_sum)
                                       
         self.fm1.update(self.a2,0.7)
         self.fm2.update(self.a2,0.7)
 
         for i in range(3):
             for j in range(2):
-                self.assertAlmostEqual(self.fm1.weighted_average()[i,j], 0.65)
+                self.assertAlmostEqual( weighted_average( self.fm1 )[i,j], 0.65)
                 vect_sum =wrap(0,1,arg(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/(2*pi))
-                self.assertAlmostEqual(self.fm2.weighted_average()[i,j],vect_sum)
+                self.assertAlmostEqual( weighted_average( self.fm2 )[i,j],vect_sum)
 
         # to even test more....
         
@@ -99,12 +106,12 @@ class TestDistributionMatrix(unittest.TestCase):
         self.fm2.update(self.a3,0.9)
         
         for i in range(3):
-            self.assertAlmostEqual(self.fm1.weighted_average()[i,0], 0.65)
-            self.assertAlmostEqual(self.fm1.weighted_average()[i,1], 0.7)
+            self.assertAlmostEqual( weighted_average( self.fm1 )[i,0], 0.65)
+            self.assertAlmostEqual( weighted_average( self.fm1 )[i,1], 0.7)
             vect_sum = wrap(0,1,arg(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/(2*pi))
-            self.assertAlmostEqual(self.fm2.weighted_average()[i,0],vect_sum)
+            self.assertAlmostEqual( weighted_average( self.fm2 )[i,0],vect_sum)
             vect_sum = wrap(0,1,arg(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j)+exp(0.9*2*pi*1j))/(2*pi))
-            self.assertAlmostEqual(self.fm2.weighted_average()[i,1],vect_sum)
+            self.assertAlmostEqual( weighted_average( self.fm2 )[i,1],vect_sum)
             
                                           
     def test_selectivity(self):
@@ -112,8 +119,8 @@ class TestDistributionMatrix(unittest.TestCase):
         for i in range(3):
             for j in range(2):
                 # when only one bin the selectivity is 1 (from C code)
-                self.assertAlmostEqual(self.fm1.selectivity()[i,j], 1.0)
-                self.assertAlmostEqual(self.fm2.selectivity()[i,j], 1.0)
+                self.assertAlmostEqual( selectivity( self.fm1 )[i,j], 1.0)
+                self.assertAlmostEqual( selectivity( self.fm2 )[i,j], 1.0)
 
         # To test the update function     
         self.fm1.update(self.a1,0.7)
@@ -124,9 +131,9 @@ class TestDistributionMatrix(unittest.TestCase):
                 proportion = 1.0/2.0
                 offset = 1.0/2.0
                 relative_selectivity = (proportion-offset)/(1.0-offset)  ## gives 0 ..?
-                self.assertAlmostEqual(self.fm1.selectivity()[i,j],relative_selectivity)
+                self.assertAlmostEqual( selectivity( self.fm1 )[i,j],relative_selectivity)
                 vect_sum = abs(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/2.0 
-                self.assertAlmostEqual(self.fm2.selectivity()[i,j],vect_sum) 
+                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum) 
                                       
                                       
 
@@ -140,9 +147,9 @@ class TestDistributionMatrix(unittest.TestCase):
                 proportion = 1.0/2.0
                 offset = 1.0/2.0
                 relative_selectivity = (proportion-offset)/(1.0-offset)
-                self.assertAlmostEqual(self.fm1.selectivity()[i,j],relative_selectivity)
+                self.assertAlmostEqual( selectivity( self.fm1 )[i,j],relative_selectivity)
                 vect_sum = abs(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/2.0 
-                self.assertAlmostEqual(self.fm2.selectivity()[i,j],vect_sum) 
+                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum) 
 
                                                            
         self.fm1.update(self.a2,0.7)
@@ -153,9 +160,9 @@ class TestDistributionMatrix(unittest.TestCase):
                 proportion = 3.0/4.0
                 offset = 1.0/2.0
                 relative_selectivity = (proportion-offset)/(1.0-offset)
-                #self.assertAlmostEqual(self.fm1.selectivity()[i,j],relative_selectivity)
+                #self.assertAlmostEqual( selectivity( self.fm1 )[i,j],relative_selectivity)
                 vect_sum = abs(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/4.0 
-                self.assertAlmostEqual(self.fm2.selectivity()[i,j],vect_sum) 
+                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum) 
                  
         # to even test more....
         
@@ -168,17 +175,17 @@ class TestDistributionMatrix(unittest.TestCase):
             ### Check with Bednar what is num_bins in the original C-file and see what he wants
             ### now for the selectivity ....
             relative_selectivity = (proportion-offset)/(1.0-offset)
-            self.assertAlmostEqual(self.fm1.selectivity()[i,0], relative_selectivity)
+            self.assertAlmostEqual( selectivity( self.fm1 )[i,0], relative_selectivity)
             proportion = 3.0/5.0
             offset = 1.0/3.0
             relative_selectivity = (proportion-offset)/(1.0-offset)
             ### to fix this test as well
-            #self.assertAlmostEqual(self.fm1.selectivity()[i,1], relative_selectivity)
+            #self.assertAlmostEqual( selectivity( self.fm1 )[i,1], relative_selectivity)
             
             vect_sum = abs(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/4.0
-            self.assertAlmostEqual(self.fm2.selectivity()[i,0],vect_sum)
+            self.assertAlmostEqual( selectivity( self.fm2 )[i,0],vect_sum)
             vect_sum = abs(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j)+exp(0.9*2*pi*1j))/5.0
-            self.assertAlmostEqual(self.fm2.selectivity()[i,1],vect_sum)
+            self.assertAlmostEqual( selectivity( self.fm2 )[i,1],vect_sum)
              
 
 

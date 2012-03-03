@@ -40,7 +40,9 @@ from topo.base.cf import Projection
 from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
 from topo.base.sheetview import SheetView
-from topo.misc.distribution import Distribution
+from topo.misc.distribution import Distribution, DistributionStatisticFn
+from topo.misc.distribution import DSF_MaxValue, DSF_TopTwoValues, DSF_BimodalPeaks
+from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit, DSF_BimodalVonMisesFit
 from topo.pattern import GaussiansCorner, Gaussian, RawRectangle, Composite, Constant
 from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
@@ -433,7 +435,8 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
             [Feature(name="frequency",values=p.frequencies)]
 
         if p.num_direction==0: features += \
-            [Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True)]
+            [Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,
+                            cyclic=True, preference_fn=self.preference_fn)]
 
         features += \
             [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
@@ -459,7 +462,7 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
             or_values = list(set([compute_orientation_from_direction([("direction",v)]) for v in dr.values]))
             features += [dr, \
                  Feature(name="orientation",range=(0.0,pi),values=or_values,cyclic=True,
-                         compute_fn=compute_orientation_from_direction)]
+                         compute_fn=compute_orientation_from_direction,preference_fn=self.preference_fn)]
 
         return features
 
@@ -471,14 +474,17 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
     subplot = param.String("Orientation")
     
     def _feature_list(self,p):
+
         return [Feature(name="frequency",values=p.frequencies),
-                Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True),
+                Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,
+                        preference_fn=self.preference_fn),
                 Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
 
 
 pg= create_plotgroup(name='Orientation Preference',category="Preference Maps",
              doc='Measure preference for sine grating orientation.',
-             pre_plot_hooks=[measure_sine_pref.instance()])
+             pre_plot_hooks=[measure_sine_pref.instance(
+                 preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi), selectivity_scale=(0.,17.) ))] )
 pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',
             [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
@@ -486,6 +492,49 @@ pg.add_plot('Orientation Selectivity',[('Strength','OrientationSelectivity')])
 pg.add_plot('Phase Preference',[('Hue','PhasePreference')])
 pg.add_plot('Phase Selectivity',[('Strength','PhaseSelectivity')])
 pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
+
+
+pg= create_plotgroup(name='vonMises Orientation Preference',category="Preference Maps",
+             doc='Measure preference for sine grating orientation using von Mises fit.',
+             pre_plot_hooks=[measure_sine_pref.instance(
+                 preference_fn=DSF_VonMisesFit( value_scale=(0., 1./pi), selectivity_scale=(0.,17.) ),
+                 num_orientation=16)])
+pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
+pg.add_plot('Orientation Preference&Selectivity',
+            [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity',[('Strength','OrientationSelectivity')])
+pg.add_plot('Phase Preference',[('Hue','PhasePreference')])
+pg.add_plot('Phase Selectivity',[('Strength','PhaseSelectivity')])
+pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
+
+
+pg= create_plotgroup(name='Bimodal Orientation Preference', category="Preference Maps",
+             doc='Measure preference for sine grating orientation using bimodal von Mises fit.',
+             pre_plot_hooks=[measure_sine_pref.instance(
+                 preference_fn=DSF_BimodalVonMisesFit( value_scale=(0., 1./pi), selectivity_scale=(0.,17.) ),
+                 num_orientation=16)])
+pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
+pg.add_plot('Orientation Preference&Selectivity',
+            [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity',[('Strength','OrientationSelectivity')])
+pg.add_plot('Second Orientation Preference', [('Hue','OrientationMode2Preference')])
+pg.add_plot('Second Orientation Preference&Selectivity',
+            [('Hue','OrientationMode2Preference'), ('Confidence','OrientationMode2Selectivity')])
+pg.add_plot('Second Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+
+        
+pg = create_plotgroup(name='Two Orientation Preferences',category='Preference Maps',
+    doc='Display the two most preferred orientations for each units, using bimodal von Mises fit.',
+    pre_plot_hooks=[measure_sine_pref.instance(
+         preference_fn=DSF_BimodalVonMisesFit(), num_orientation=16)])
+pg.add_plot( 'Two Orientation Preferences', [
+		( 'Or1',	'OrientationPreference' ),
+		( 'Sel1',	'OrientationSelectivity' ),
+		( 'Or2',	'OrientationMode2Preference' ),
+		( 'Sel2',	'OrientationMode2Selectivity' )
+])
+pg.add_static_image('Color Key','command/two_or_key_vert.png')
 
 
 pg= create_plotgroup(name='Spatial Frequency Preference',category="Preference Maps",
@@ -625,7 +674,6 @@ gaussian_corner = Composite(
 class measure_second_or_pref(SinusoidalMeasureResponseCommand):
     """Measure the secondary  orientation preference maps."""
 
-    weighted_average	= param.Boolean( False ) 
     num_orientation	= param.Integer( default=16, bounds=(1,None), softbounds=(1,64),
                                     doc="Number of orientations to test.")
     true_peak 	 	= param.Boolean( default=True, doc="""If set the second
@@ -634,66 +682,52 @@ class measure_second_or_pref(SinusoidalMeasureResponseCommand):
 
     subplot		= param.String("Second Orientation")
     
-    def _feature_list(self,p):
-    	fs	= [ Feature(name="frequency",values=p.frequencies) ]
+    def _feature_list(self, p):
+    	fs	= [ Feature(name="frequency", values=p.frequencies) ]
     	if p.true_peak:
 	    fs.append(
-		Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True,second_peak=True,second_response=False) )
+		Feature(name="orientation", range=(0.0, pi), step=pi/p.num_orientation,
+                    cyclic=True, preference_fn=DSF_BimodalPeaks() ) )
 	else:
 	    fs.append(
-		Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True,second_peak=False,second_response=True) )
-	fs.append( Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True) )
+		Feature(name="orientation", range=(0.0, pi), step=pi/p.num_orientation,
+                    cyclic=True, preference_fn=DSF_BimodalPeaks() ) )
+	fs.append( Feature(name="phase", range=(0.0, 2*pi), step=2*pi/p.num_phase, cyclic=True) )
 
 	return fs
 
 
-pg= create_plotgroup(name='Second Orientation Preference',category="Preference Maps",
+pg= create_plotgroup(name='Second Orientation Preference', category="Preference Maps",
              doc='Measure the second preference for sine grating orientation.',
              pre_plot_hooks=[measure_second_or_pref.instance( true_peak=False )])
-pg.add_plot('Second Orientation Preference',[('Hue','SecondOrientationPreference')])
+pg.add_plot('Second Orientation Preference', [('Hue','OrientationMode2Preference')])
 pg.add_plot('Second Orientation Preference&Selectivity',
-            [('Hue','SecondOrientationPreference'), ('Confidence','SecondOrientationSelectivity')])
-pg.add_plot('Second Orientation Selectivity',[('Strength','SecondOrientationSelectivity')])
-pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
+            [('Hue','OrientationMode2Preference'), ('Confidence','OrientationMode2Selectivity')])
+pg.add_plot('Second Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
 
 
 pg= create_plotgroup(name='Second Peak Orientation Preference',category="Preference Maps",
              doc='Measure the second peak preference for sine grating orientation.',
              pre_plot_hooks=[measure_second_or_pref.instance( true_peak=True )])
-pg.add_plot('Second Peak Orientation Preference',[('Hue','SecondPeakOrientationPreference')])
+pg.add_plot('Second Peak Orientation Preference', [('Hue','OrientationMode2Preference')])
 pg.add_plot('Second Peak Orientation Preference&Selectivity',
-            [('Hue','SecondPeakOrientationPreference'), ('Confidence','SecondPeakOrientationSelectivity')])
-pg.add_plot('Second Peak Orientation Selectivity',[('Strength','SecondPeakOrientationSelectivity')])
+            [('Hue','OrientationMode2Preference'), ('Confidence','OrientationMode2Selectivity')])
+pg.add_plot('Second Peak Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
 pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
-
-        
-pg = create_plotgroup(name='Two Orientation Preferences',category='Preference Maps',
-    doc='Display the two most preferred orientations for each units.',
-    pre_plot_hooks=[
-		measure_sine_pref.instance(num_orientation=16,weighted_average=False),
-    		measure_second_or_pref.instance(num_orientation=16,weighted_average=False,true_peak=False)
-])
-pg.add_plot( 'Two Orientation Preferences', [
-		( 'Or1',	'OrientationPreference' ),
-		( 'Sel1',	'OrientationSelectivity' ),
-		( 'Or2',	'SecondOrientationPreference' ),
-		( 'Sel2',	'SecondOrientationSelectivity' )
-])
-pg.add_static_image('Color Key','command/two_or_key_vert.png')
 
         
 pg = create_plotgroup(name='Two Peaks Orientation Preferences',category='Preference Maps',
     doc="""Display the two most preferred orientations for all units with a
     multimodal orientation preference distribution.""",
     pre_plot_hooks=[
-		measure_sine_pref.instance(num_orientation=16,weighted_average=False),
-    		measure_second_or_pref.instance(num_orientation=16,weighted_average=False,true_peak=True)
+    		measure_second_or_pref.instance(num_orientation=16, true_peak=True)
 ])
 pg.add_plot( 'Two Peaks Orientation Preferences', [
 		( 'Or1',	'OrientationPreference' ),
 		( 'Sel1',	'OrientationSelectivity' ),
-		( 'Or2',	'SecondPeakOrientationPreference' ),
-		( 'Sel2',	'SecondPeakOrientationSelectivity' )
+		( 'Or2',	'OrientationMode2Preference' ),
+		( 'Sel2',	'OrientationMode2Selectivity' )
 ])
 pg.add_static_image('Color Key','command/two_or_key_vert.png')
 
@@ -783,12 +817,11 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
 	a_step	= ( angle_1 - angle_0 ) / float( p.num_angle - 1 )
 	self._make_key_image( p )
         return [
-            Feature( name = "x",           range = p.x_range, step = x_step ),
-            Feature( name = "y",           range = p.y_range, step = y_step ),
-            Feature( name = "orientation", range = (0, 2*pi), step = o_step, cyclic = True ),
-            Feature( name = "angle",       range = a_range,   step = a_step,
-                     value_offset     =  - angle_0,
-                     value_multiplier = 1. / ( angle_1 - angle_0 ) )
+            Feature( name="x",           range=p.x_range, step=x_step ),
+            Feature( name="y",           range=p.y_range, step=y_step ),
+            Feature( name="orientation", range=(0, 2*pi), step=o_step, cyclic=True ),
+            Feature( name="angle",       range=a_range,   step=a_step,
+                    preference_fn=DSF_WeightedAverage( value_scale=( -angle_0, 1./(angle_1-angle_0) ) ) )
 	]
 
 

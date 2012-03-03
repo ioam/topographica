@@ -10,12 +10,19 @@ __version__='$Revision$'
 # finished in distribution.
 
 import unittest
-from topo.misc.distribution import Distribution
+from topo.misc.distribution import Distribution, DSF_WeightedAverage
 import copy 
 
 # for testing the statistics
 from math import pi, atan2, cos
 from topo.base.arrayutil import arg
+
+# globals to use weighted_average, selectivity, vector_sum, which are not methods
+# of Distribution any more
+dsf                 = DSF_WeightedAverage()
+weighted_average    = ( lambda d: dsf( d )[ '' ][ 'preference' ] )
+selectivity         = ( lambda d: dsf( d )[ '' ][ 'selectivity' ] )
+vector_sum          = dsf.vector_sum
 
 
 class TestDistribution(unittest.TestCase):
@@ -108,29 +115,29 @@ class TestDistribution(unittest.TestCase):
 
         self.assertAlmostEqual(self.g.weighted_sum(), 28.0)
         # (should return _weighted_average:)
-        self.assertAlmostEqual(self.g.weighted_average(), 28.0/sum(self.g.values()))
-        self.assertAlmostEqual(self.g.vector_sum()[1], 4.40449904283) 
+        self.assertAlmostEqual( weighted_average( self.g ), 28.0/sum(self.g.values()))
+        self.assertAlmostEqual(vector_sum( self.g )[1], 4.40449904283) 
 
 
         self.q = Distribution((0,4), cyclic=True)
         self.q.add({3:1})
         self.q.add({0:0, 1:0, 2:0, 4:0})                
-        self.assertAlmostEqual(self.q.vector_sum()[0], 1.0)
-        self.assertAlmostEqual(self.q.weighted_average(), 3.0)
-        self.assertAlmostEqual(self.q.vector_sum()[1], 3.0)  
+        self.assertAlmostEqual(vector_sum( self.q )[0], 1.0)
+        self.assertAlmostEqual(weighted_average( self.q ), 3.0)
+        self.assertAlmostEqual(vector_sum( self.q )[1], 3.0)  
 
         # Example where this matches LISSOM by using an empty bin at 5.
         self.rr = Distribution((0,5), cyclic=True)  # 5 because in the L. test example 0 and 4 are distinct
         self.rr.add({0:1, 1:1, 2:1, 3:1, 4:1})
         
-        self.assertAlmostEqual(self.rr.vector_sum()[0], 0.0)
-        self.assertAlmostEqual(self.rr.weighted_average(), self.rr.vector_sum()[1])
+        self.assertAlmostEqual(vector_sum( self.rr )[0], 0.0)
+        self.assertAlmostEqual(weighted_average( self.rr ), vector_sum( self.rr )[1])
         self.rr.add({1:2})
-        self.assertAlmostEqual(self.rr.vector_sum()[0], 2.0) 
-        self.assertAlmostEqual(self.rr.weighted_average(), 1.0)  
+        self.assertAlmostEqual(vector_sum( self.rr )[0], 2.0) 
+        self.assertAlmostEqual(weighted_average( self.rr ), 1.0)  
         self.rr.add({3:2})
-        self.assertAlmostEqual(self.rr.vector_sum()[0], 2*2*cos(2*pi/5)) 
-        self.assertAlmostEqual(self.rr.weighted_average(), 2.0)
+        self.assertAlmostEqual(vector_sum( self.rr )[0], 2*2*cos(2*pi/5)) 
+        self.assertAlmostEqual(weighted_average( self.rr ), 2.0)
 
 
 
@@ -160,55 +167,56 @@ class TestDistribution(unittest.TestCase):
 
         self.a = Distribution(cyclic=True)
         self.a.add({0.0:0.0, pi/2:1.0})
-        self.assertAlmostEqual(self.a.vector_sum()[0], 1.0)
-        self.assertAlmostEqual(self.a.weighted_average(), pi/2)
-        self.assertAlmostEqual(self.a.vector_sum()[1], self.a.weighted_average())
-        self.assertAlmostEqual(self.a.selectivity(), 1.0)
+        self.assertAlmostEqual(vector_sum( self.a )[0], 1.0)
+        self.assertAlmostEqual(weighted_average( self.a ), pi/2)
+        self.assertAlmostEqual(vector_sum( self.a )[1], weighted_average( self.a ))
+        self.assertAlmostEqual(selectivity( self.a ), 1.0)
 
         self.a.add({-pi/2:1.0}) # (should be like 3pi/2)
-        self.assertAlmostEqual(self.a.vector_sum()[0], 0.0)
-        self.assertAlmostEqual(self.a.weighted_average(), 0.0)
-        self.assertAlmostEqual(self.a.selectivity(), 0.0)
+        self.assertAlmostEqual(vector_sum( self.a )[0], 0.0)
+        self.assertAlmostEqual(weighted_average( self.a ), 0.0)
+        self.assertAlmostEqual(selectivity( self.a ), 0.0)
 
         self.a.add({3*pi/8:0.3})
-        self.assertAlmostEqual(self.a.vector_sum()[0], 0.3)
-        self.assertAlmostEqual(self.a.weighted_average(), 3*pi/8)
-        self.assertAlmostEqual(self.a.selectivity(), self.a.vector_sum()[0]/2.3)
+        self.assertAlmostEqual(vector_sum( self.a )[0], 0.3)
+        self.assertAlmostEqual(weighted_average( self.a ), 3*pi/8)
+        self.assertAlmostEqual(selectivity( self.a ), vector_sum( self.a )[0]/2.3)
 
         self.c = Distribution((0.0,1.0), cyclic=True)
         self.c.add({0.0:1.0, 0.25:1.0})
-        self.assertAlmostEqual(self.c.vector_sum()[0], (1.0+1.0)**0.5) 
-        self.assertAlmostEqual(self.c.weighted_average(), self.c.vector_sum()[1])
-        self.assertEqual(self.c.vector_sum()[1], atan2(1.0,1.0)/(2*pi))
+        self.assertAlmostEqual(vector_sum( self.c )[0], (1.0+1.0)**0.5) 
+        self.assertAlmostEqual(weighted_average( self.c ), vector_sum( self.c )[1])
+        self.assertEqual(vector_sum( self.c )[1], atan2(1.0,1.0)/(2*pi))
 
         self.c.add({1.75:1.0})  # added beyond bounds
-        self.assertAlmostEqual(self.c.vector_sum()[0], 1.0) 
-        self.assertEqual(self.c.weighted_average(), 0.0)
+        self.assertAlmostEqual(vector_sum( self.c )[0], 1.0) 
+        self.assertEqual(weighted_average( self.c ), 0.0)
 
         
         self.d = Distribution(axis_bounds=(0.0,1.0),cyclic=False,keep_peak=False)
         self.assertEqual(self.d.undefined_vals, 0)
-        self.assertAlmostEqual(self.d.selectivity(), 1.0)
+        self.assertAlmostEqual(selectivity( self.d ), 1.0)
 
         self.d.add({0.0: 0.0})
-        self.assertAlmostEqual(self.d.selectivity(), 1.0)
+        self.assertAlmostEqual(selectivity( self.d ), 1.0)
         self.d.add({0.5: 0.0})
-        self.assertAlmostEqual(self.d.selectivity(), 0.0)
-        self.assertEqual(self.d.undefined_vals, 1)
+        self.assertAlmostEqual(selectivity( self.d ), 0.0)
+        # note that selectivity() actually includes a call to DSF_WeightedAverage
+        self.assertEqual(self.d.undefined_vals, 4)
 
 
-        self.assertAlmostEqual(self.d.weighted_average(),0.0)
-        self.assertEqual(self.d.undefined_vals, 2)
+        self.assertAlmostEqual(weighted_average( self.d ),0.0)
+        self.assertEqual(self.d.undefined_vals, 6)
         
         self.d.add({0.0: 1.0})
-        self.assertAlmostEqual(self.d.selectivity(), 1.0)
-        self.assertEqual(self.d.undefined_vals, 2)
+        self.assertAlmostEqual(selectivity( self.d ), 1.0)
+        self.assertEqual(self.d.undefined_vals, 6)
         
         self.d.add({0.5: 1.0})
-        self.assertAlmostEqual(self.d.selectivity(), 0.0)
+        self.assertAlmostEqual(selectivity( self.d ), 0.0)
 
         self.d.add({0.75: 2.0})
-        self.assertAlmostEqual(self.d.selectivity(), 0.25) 
+        self.assertAlmostEqual(selectivity( self.d ), 0.25) 
         
 
 suite = unittest.TestSuite()

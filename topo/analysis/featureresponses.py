@@ -25,11 +25,11 @@ import topo
 import topo.base.sheetcoords
 from topo.base.arrayutil import wrap
 from topo.base.cf import CFSheet
-from topo.base.functionfamily import PatternDrivenAnalysis 
+from topo.base.functionfamily import PatternDrivenAnalysis
 from topo.base.sheet import Sheet, activity_type
 from topo.base.sheetview import SheetView
 from topo.command import pattern_present,restore_input_generators, save_input_generators
-from topo.misc.distribution import Distribution
+from topo.misc.distribution import Distribution, DistributionStatisticFn, DSF_MaxValue, DSF_WeightedAverage
 from topo.misc.util import cross_product, frange
 from topo import pattern
 from topo.pattern import SineGrating, Gaussian, RawRectangle, Disk
@@ -73,94 +73,34 @@ class DistributionMatrix(param.Parameterized):
         ### function name altogether (e.g. update(x,y)).
         self.distribution_matrix + fromfunction(vectorize(lambda i,j: {bin:new_values[i,j]}),
                                                 new_values.shape)  
-            
-
-    def weighted_average(self):
-        """Return the weighted average of each Distribution as a matrix."""
-
-        weighted_average_matrix=zeros(self.distribution_matrix.shape,Float)
-              
-        for i in range(len(weighted_average_matrix)):
-            for j in range(len(weighted_average_matrix[i])):
-                weighted_average_matrix[i,j]=self.distribution_matrix[i,j].weighted_average()
-#                weighted_average_matrix[i,j]=self.distribution_matrix[i,j].estimated_maximum()               
-                           
-
-        return weighted_average_matrix
         
-        
-    def max_value_bin(self):
-        """Return the bin with the max value of each Distribution as a matrix."""
-
-        max_value_bin_matrix=zeros(self.distribution_matrix.shape,Float)
-
-        for i in range(len(max_value_bin_matrix)):
-            for j in range(len(max_value_bin_matrix[i])):           
-                max_value_bin_matrix[i,j]=self.distribution_matrix[i,j].max_value_bin()                             
-
-        return max_value_bin_matrix
-        
-        
-    def second_max_value_bin(self):
-        """Return the bin with the second max value of each Distribution as a matrix."""
-
-        m	= zeros(self.distribution_matrix.shape,Float)
-            
-        for i in range( len(m) ):
-            for j in range( len(m[i]) ):           
-                m[i,j]	= self.distribution_matrix[i,j].second_max_value_bin()                             
-
-        return m
-        
-        
-    def second_peak_bin(self):
-        """Return the bin with the second peak of each Distribution as a matrix."""
-
-        m	= zeros(self.distribution_matrix.shape,Float)
-            
-        for i in range( len(m) ):
-            for j in range( len(m[i]) ):           
-                m[i,j]	= self.distribution_matrix[i,j].second_peak_bin()                             
-
-        return m
-        
-        
-    def selectivity(self):
-        """Return the selectivity of each Distribution as a matrix."""
-
-        selectivity_matrix=zeros(self.distribution_matrix.shape,Float) 
-
-        for i in range(len(selectivity_matrix)):
-            for j in range(len(selectivity_matrix[i])):
-                selectivity_matrix[i,j]=self.distribution_matrix[i,j].selectivity()
-
-        return selectivity_matrix
-        
-        
-    def second_selectivity(self):
+    def apply_DSF( self, dsf ):
         """
-	Return the selectivity for the second maximum response of each Distribution as a matrix.
-	"""
-        s	= zeros(self.distribution_matrix.shape,Float) 
+        Apply the given dsf DistributionStatisticFn on each element of the distribution_matrix
 
-        for i in range( len(s) ):
-            for j in range( len(s[i]) ):
-                s[i,j]	= self.distribution_matrix[i,j].second_selectivity()
-
-        return s
-
-        
-    def second_peak_selectivity(self):
+        Return a dictionary of dictionaries, with the same structure of the called
+        DistributionStatisticFn, but with matrices as values, instead of scalars
         """
-	Return the selectivity for the second peak response of each Distribution as a matrix.
-	"""
-        s	= zeros(self.distribution_matrix.shape,Float) 
 
-        for i in range( len(s) ):
-            for j in range( len(s[i]) ):
-                s[i,j]	= self.distribution_matrix[i,j].second_peak_selectivity()
+        shape   = self.distribution_matrix.shape
+        result  = {}
 
-        return s
+        # this is an extra call to the dsf() DistributionStatisticFn, in order to retrieve
+        # the dictionaries structure, and allocate the necessary matrices
+        r0      = dsf( self.distribution_matrix[ 0, 0 ] )
+        for k, maps in r0.items():
+            result[ k ] = {}
+            for m in maps.keys():
+                result[ k ][ m ]    = zeros( shape, Float )
+
+        for i in range( shape[ 0 ] ):
+            for j in range( shape[ 1 ] ):
+                response        = dsf( self.distribution_matrix[ i, j ] )
+                for k, d in response.items():
+                    for item, item_value in d.items():
+                        result[ k ][ item ][ i, j ]  = item_value
+
+        return result
 
 
 
@@ -446,57 +386,40 @@ class FeatureMaps(FeatureResponses):
     sheet_views; these can then be plotted as preference
     or selectivity maps.
     """
+
+    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
+            doc=""" Function that will be used to analyze the distributions of unit responses.
+            Note that this default is orverriden by specific functions for features, if
+            specified in the Feature objects""" )
     
-    selectivity_multiplier = param.Number(default=17,bounds=(0.0,None),doc="""
-        Factor by which to multiply the calculated selectivity values
-        before plotting them.  Usually set much greater than 1.0 to
-        highlight particularly unselective areas, especially when
-        combining selectivity with other plots as when using Confidence
-        subplots.""")
     
     # CBENHANCEMENT: could allow full control over the generated names
     # using a format parameter. The default would be
     # ${prefix}${feature}${type} (where type is Preference or
     # Selectivity)
     sheet_views_prefix = param.String(default="",doc="""
-        Prefix to add to the name under which results are stored in
-        sheet_views.""")
+            Prefix to add to the name under which results are stored in sheet_views.""")
 
     def __init__(self,features,**params):
         super(FeatureMaps,self).__init__(features,**params)
         self.features=features
         
-    def collect_feature_responses(self,pattern_presenter,param_dict,display,weighted_average=True):
+    def collect_feature_responses(self,pattern_presenter,param_dict,display):
         """
         Present the given input patterns and collate the responses.
 
-        If weighted_average is True, the feature responses are
-        calculated from a weighted average of the values of each bin
-        in the distribution, rather than simply using the actual value
-        of the parameter for which response was maximal (the discrete
-        method).  Such a computation will generally produce much more
-        precise maps using fewer test stimuli than the discrete
-        method.  However, weighted_average methods generally require
-        uniform and full-range sampling, as described below, which is
-        not always feasible.
-
-        For measurements at evenly-spaced intervals over the full
-        range of possible parameter values, weighted_averages are a
-        good measure of the underlying continuous-valued parameter
-        preference, assuming that neurons are tuned broadly enough
-        (and/or sampled finely enough) that they respond to at least
-        two of the tested parameter values.  This method will not
-        usually give good results when those criteria are not met,
-        i.e. if the sampling is too sparse, not at evenly-spaced
-        intervals, or does not cover the full range of possible
-        values.  In such cases weighted_average should be set to
-        False, and the number of test patterns will usually need
-        to be increased instead.
+        Responses are statistics on the distributions of measure for every unit,
+        extracted by functions that are subclasses of DistributionStatisticFn, and could
+        be specified in each feature with the preference_fn parameter, otherwise the
+        default in self.preference_fn is used.
         """
         self.measure_responses(pattern_presenter,param_dict,self.features,display)    
 
         for sheet in self.sheets_to_measure():
-            bounding_box = sheet.bounds
+            bounding_box    = sheet.bounds
+            sn              = sheet.name
+            sp              = sheet.precedence
+            sr              = sheet.row_precedence
             
             for feature in self._featureresponses[sheet].keys():
             ### JCHACKALERT! This is temporary to avoid the positionpref plot to shrink
@@ -506,45 +429,23 @@ class FeatureMaps(FeatureResponses):
             ### I guess it is always cyclic value that we will color with hue in an hsv plot
             ### but still we should catch the error.
             ### Also, what happens in case of negative values?
-            # CB: (see also ALERT by SheetView's norm_factor.)
-            #JL: Should be able to get rid of norm factor and incorporate with value_multiplier
-            #should also add similar method for selectivity_offset and selectivity_multiplier
-                cyclic = self._featureresponses[sheet][feature].distribution_matrix[0,0].cyclic
-                if cyclic:
-                    norm_factor = self._featureresponses[sheet][feature].distribution_matrix[0,0].axis_range
-                else:
-                    norm_factor = 1.0
+                fp                  = filter( lambda f: f.name==feature, self.features )[ 0 ]
+                ar                  = self._featureresponses[sheet][feature].distribution_matrix[0,0].axis_range
+                cyclic              = fp.cyclic
+                cyclic_range        = ar    if cyclic   else 1.0
+                preference_fn       = fp.preference_fn if fp.preference_fn is not None else self.preference_fn
+                fr                  = self._featureresponses[sheet][feature]
+                response            = fr.apply_DSF( preference_fn )
+                base_name           = self.sheet_views_prefix + feature.capitalize()
 
-                value_offset		= [f.value_offset for f in self.features if f.name==feature]
-                value_multiplier	= [f.value_multiplier for f in self.features if f.name==feature]
-                second_response		= [f.second_response for f in self.features if f.name==feature][ 0 ]
-                second_peak		= [f.second_peak for f in self.features if f.name==feature][ 0 ]
-		fr			= self._featureresponses[sheet][feature]
-
-                if second_response:
-                    response	= ( fr.second_max_value_bin() + value_offset ) * value_multiplier / norm_factor
-		    selectivity	= self.selectivity_multiplier * fr.second_selectivity()
-		    view_name	= self.sheet_views_prefix + "Second" + feature.capitalize()
-                elif second_peak:
-                    response	= ( fr.second_peak_bin() + value_offset ) * value_multiplier / norm_factor
-		    selectivity	= self.selectivity_multiplier * fr.second_peak_selectivity()
-		    view_name	= self.sheet_views_prefix + "SecondPeak" + feature.capitalize()
-                elif weighted_average:
-                    response	= ( fr.weighted_average() + value_offset ) * value_multiplier / norm_factor
-		    selectivity	= self.selectivity_multiplier * fr.selectivity()
-		    view_name	= self.sheet_views_prefix + feature.capitalize()
-                else:
-                    response	= ( fr.max_value_bin() + value_offset ) * value_multiplier / norm_factor
-		    selectivity	= self.selectivity_multiplier * fr.selectivity()
-		    view_name	= self.sheet_views_prefix + feature.capitalize()
-
-	        preference_map = SheetView( (response, bounding_box), sheet.name, sheet.precedence, topo.sim.time() )
-                preference_map.cyclic = cyclic
-                preference_map.norm_factor = norm_factor
-                sheet.sheet_views[view_name+'Preference']=preference_map
-                
-                selectivity_map = SheetView( (selectivity, bounding_box), sheet.name, sheet.precedence, topo.sim.time(), sheet.row_precedence)
-                sheet.sheet_views[view_name+'Selectivity']=selectivity_map
+                for k, maps in response.items():
+                    t           = topo.sim.time()
+                    for map_name, map_view in maps.items():
+                        name                        = base_name + k + map_name.capitalize()
+                        view                        = SheetView( (map_view, bounding_box), sn, sp, t, sr )
+                        view.cyclic                 = cyclic
+                        view.cyclic_range           = cyclic_range
+                        sheet.sheet_views[ name ]   = view
 
                 
 class FeatureCurves(FeatureResponses):
@@ -604,51 +505,68 @@ class FeatureCurves(FeatureResponses):
 # Define user-level commands and helper classes for calling the above
 
 
-class Feature(object):
+class Feature( param.Parameterized ):
     """
-    Stores the parameters required for generating a map of one input feature.
+    Specifies several parameters required for generating a map of one input feature
+
     """
 
-    def __init__(self, name, range=None, step=0.0, values=None, cyclic=False, value_offset=0.0, value_multiplier=1.0, compute_fn=None, offset=0, keep_peak=True, second_response=False, second_peak=False):
-         """
-         Users can provide either a range and a step size, or a list of values.
-         If a list of values is supplied, the range can be omitted unless the
-         default of the min and max in the list of values is not appropriate.
+    name            = param.String( default="", doc="Name of the feature to test" )
 
-         If non-None, the compute_fn should be a function that when given a list 
-         of other parameter values, computes and returns the value for this feature.
+    cyclic          = param.Boolean( default=False, doc="""
+            Whether the range of this feature is cyclic (wraps around at the high end)""" )
 
-         If supplied, the offset is added to the given or computed values to allow
-         the starting value to be specified.
+    compute_fn      = param.Callable( default=None, doc="""
+            If non-None, a function that when given a list of other parameter values,
+            computes and returns the value for this feature""" )
 
-	 If second_response is set, additional analysis is performed on values
-	 of this feature, that elicit the second maximum response in units.
+    preference_fn   = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
+            doc="""Function that will be used to analyze the distributions of unit response
+            to this feature""")
 
-	 If second_peak is set, additional analysis is performed on values
-	 of this feature, that elicit the second peak response in units.
-         """
-         self.name=name
-         self.cyclic=cyclic
-         self.compute_fn=compute_fn
-         self.range=range
-         self.keep_peak=keep_peak
-         self.second_response=second_response
-         self.second_peak=second_peak
-         self.value_offset=value_offset
-         self.value_multiplier=value_multiplier
+    range           = param.NumericTuple( default=(0,0), doc="""
+            lower and upper values for a feature, used to build a list of values,
+            together with the step parameter""" )
+
+    step            = param.Number( default=0.0, doc="""
+            increment used to build a list of values for this feature, together with
+            the range parameter""" )
+
+    offset          = param.Number( default=0.0, doc="offset to add to the values for this feature" )
+
+    values          = param.List( class_=float, default=[], doc="""
+            explicit list of values for this feature, used in alternative to the range
+            and step parameters""" )
+
+
+    def __init__(self, **params ):
+        """
+        Users can provide either a range and a step size, or a list of values.
+        If a list of values is supplied, the range can be omitted unless the
+        default of the min and max in the list of values is not appropriate.
+
+        If non-None, the compute_fn should be a function that when given a list 
+        of other parameter values, computes and returns the value for this feature.
+
+        If supplied, the offset is added to the given or computed values to allow
+        the starting value to be specified.
+
+        """
+
+        super( Feature, self ).__init__( **params )
                  
-         if values is not None:
-             self.values=values if offset == 0 else [v+offset for v in values]
-             if not self.range:
-                 self.range=(min(self.values),max(self.values))
-         else:
-             if range is None:
-                 raise ValueError('The range or values must be specified.')
-             low_bound,up_bound = self.range
-             values=(frange(low_bound,up_bound,step,not cyclic))
-             self.values = values if offset == 0 else \
-                           [(v+offset)%(up_bound-low_bound) if cyclic else (v+offset)
-                            for v in values]
+        if len( self.values ):
+            self.values = self.values if self.offset == 0 else [v+self.offset for v in self.values]
+            if self.range == ( 0, 0 ):
+                self.range = ( min(self.values), max(self.values) )
+        else:
+            if self.range == ( 0, 0 ):
+                raise ValueError('The range or values must be specified.')
+            low_bound,up_bound = self.range
+            self.values = frange( low_bound, up_bound, self.step, not self.cyclic )
+            self.values = self.values if self.offset == 0 else \
+                    [(v + self.offset) % (up_bound - low_bound) if self.cyclic else (v + self.offset)
+                    for v in self.values]
 
 
 class PatternPresenter(param.Parameterized):
@@ -1169,6 +1087,9 @@ class MeasureResponseCommand(ParameterizedFunction):
         The default value of [] results in all GeneratorSheets being
         used.""")
 
+    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_MaxValue(),
+            doc="""Function that will be used to analyze the distributions of unit responses.""" )
+
     __abstract = True
 
 
@@ -1186,7 +1107,7 @@ class MeasureResponseCommand(ParameterizedFunction):
         p.pattern_presenter.generator_sheets=p.generator_sheets
 
         x.collect_feature_responses(p.pattern_presenter,static_params,
-                                    p.display,p.weighted_average)
+                                    p.display)
 
         if p.subplot != "":
             Subplotting.set_subplots(p.subplot,force=True)
@@ -1221,6 +1142,9 @@ class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
                                     doc="Number of orientations to test.")
 
     scale = param.Number(default=0.3)
+
+    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
+            doc="""Function that will be used to analyze the distributions of unit responses.""" )
 
     __abstract = True
     

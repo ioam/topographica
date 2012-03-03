@@ -597,13 +597,14 @@ class MultiOrPlot(TemplatePlot):
         help function for generating coordinates of line vertices
         from normalized orientation value.
         Return a list with two tuples, the coordinates of the segment with the
-        given orientation, in the normalized range [ 0...1 ]. Space
+        given orientation, in the normalized range [ 0...1 ].
+	Orientation is expected in range [ 0..pi ]. Space
 	representation is in ordinary image convention: first coordinate is X,
 	from left to right, second coordinate Y, from top to bottom.
         """
 
-        s       = 0.5 * sin( pi * o )
-        c       = 0.5 * cos( pi * o )
+        s       = 0.5 * sin( o )
+        c       = 0.5 * cos( o )
         return [ ( 0.5 - c, 0.5 + s ), ( 0.5 + c, 0.5 - s ) ]
         
 
