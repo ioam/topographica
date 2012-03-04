@@ -52,12 +52,18 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
 
             %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
-                if(mask[r] == 0.0)
+                if(mask[r] == 0.0) {
                     temp_act[r] = 0;
-                else {
+                } else {
                     PyObject *cf = PyList_GetItem(cfs,r);
 
-                    CONTIGUOUS_ARRAY_FROM_SLOT_OFFSET(float,weights,cf)
+                    // CONTIGUOUS_ARRAY_FROM_SLOT_OFFSET(float,weights,cf) <<<<<<<<<<<
+
+                    LOOKUP_FROM_SLOT_OFFSET_UNDECL_DATA(float,weights,cf);
+                    char *data = weights_obj->data;                  
+                    int s0 = weights_obj->strides[0];
+                    int s1 = weights_obj->strides[1];
+
                     LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
 
                     UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
@@ -68,18 +74,27 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
                     // computes the dot product
                     for (int i=rr1; i<rr2; ++i) {
                         npfloat *xi = xj;
-                        float *wi = weights;                       
-                        for (int j=cc1; j<cc2; ++j) {
-                            tot += *wi * *xi;
-                            ++wi;
-                            ++xi;
-                        }
+
+
+                    //    float *wi = weights;                       
+                    //    for (int j=cc1; j<cc2; ++j) {
+                    //        tot += *wi * *xi;
+                    //        ++wi;
+                    //        ++xi;
+                    //    }
+
+
+                   for (int j=cc1; j<cc2; ++j) {
+                      tot += *((float *)(data + (i-rr1)*s0 + (j-cc1)*s1)) * *xi;
+                      ++xi;
+                   }
+
                         xj += icols;
-                        weights += cc2-cc1;
+                 //       weights += cc2-cc1;
                     }  
                     temp_act[r] = tot*strength;
 
-                    DECREF_CONTIGUOUS_ARRAY(weights);
+                //    DECREF_CONTIGUOUS_ARRAY(weights);
                 }
             }
         """%c_decorators

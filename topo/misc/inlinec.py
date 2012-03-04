@@ -65,7 +65,7 @@ c_decorators = collections.defaultdict(lambda:'')
 # code (search for cfs_loop_pragma to see which routines use
 # OpenMP). Good multi-threaded performance requires a machine with
 # separate memory subsystems for each core, such as a Xeon. See Marco
-# Elver's report at XXX.
+# Elver's report at http://homepages.inf.ed.ac.uk/s0787712/stuff/melver_project-report.pdf.
 openmp = __main__.__dict__.get('openmp',False)
     
 # Variable that will be used to report whether weave was successfully
@@ -218,9 +218,14 @@ typedef double npfloat;
   PyArrayObject *attr ## _obj = *((PyArrayObject **)((char *)obj + attr ## _offset)); \
   type *attr = (type *)(attr ## _obj->data)
 
+/* LOOKUP_FROM_SLOT_OFFSET without declaring data variable */
+#define LOOKUP_FROM_SLOT_OFFSET_UNDECL_DATA(type,attr,obj) \
+  PyArrayObject *attr ## _obj = *((PyArrayObject **)((char *)obj + attr ## _offset));
+
 /* Same as LOOKUP_FROM_SLOT_OFFSET but ensures the array is contiguous.
    Must call DECREF_CONTIGUOUS_ARRAY(attr) to release temporary.
    Does PyArray_FLOAT need to be an argument for this to work with doubles? */
+
 // This code is optimized for contiguous arrays, which are typical,
 // but we make it work for noncontiguous arrays (e.g. views) by
 // creating a contiguous copy if necessary.
@@ -246,8 +251,8 @@ typedef double npfloat;
   }
 
 #define DECREF_CONTIGUOUS_ARRAY(attr) \
-   if(attr ## _array != 0) \
-       Py_DECREF(attr ## _array)
+   if(attr ## _array != 0) { \
+       Py_DECREF(attr ## _array); }
 
 
 
