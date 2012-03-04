@@ -9,7 +9,8 @@ import param
 
 from topo.base.cf import CFPOutputFn
 from topo.base.functionfamily import TransferFn, IdentityTF
-from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
+from topo.misc.inlinec import inline,provide_unoptimized_equivalent,\
+     c_header,c_decorators
 
 from topo.transferfn import DivisiveNormalizeL1
 
@@ -21,6 +22,9 @@ DivisiveNormalizeL1_opt=DivisiveNormalizeL1
 # JABALERT: Need to remove 0.0000000000001 constant;
 # currently needed to avoid divide-by-zero issues
 # in some cases, but should be replaced.
+
+# CEBALERT: not documented: unlike unoptimized equivalent, requires
+# _norm_total to have been set.
 class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
     """
     Performs divisive normalization of the weights of all cfs.
@@ -44,43 +48,36 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
 
             DECLARE_SLOT_OFFSET(weights,cf_type);
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
-
-            // CB: I doubt norm_total can be a property and a slot, but maybe
-            // it could be, or maybe we could use the actual attribute...
+            DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
             
+            %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
                 if (active_units_mask[r] != 0 && sheet_mask[r] != 0) {
                     PyObject *cf = PyList_GetItem(cfs,r);
 
                     LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
                     LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
 
-                    PyObject *sum_obj     = PyObject_GetAttrString(cf,"norm_total");
-
-                    double total = PyFloat_AsDouble(sum_obj); // sum of the cf's weights
-
-                    if( total > 0.0000000000001 ) {
+                    if( _norm_total[0] > 0.0000000000001 ) {
 
                         UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
     
                         // normalize the weights
-                        double factor = 1.0/total;
+                        double factor = 1.0/_norm_total[0];
                         int rc = (rr2-rr1)*(cc2-cc1);
                         for (int i=0; i<rc; ++i) {
                             *(weights++) *= factor;
                         }
 
                     }
-
-                    // Anything obtained with PyObject_GetAttrString must be explicitly freed
-                    Py_DECREF(sum_obj);
-
                     // Indicate that norm_total is stale
-                    PyObject_SetAttrString(cf,"_has_norm_total",Py_False);
-                }
-                
+                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+                    _has_norm_total[0]=0;
+                }                
             }
-        """    
+        """%c_decorators    
         inline(code, ['sheet_mask','active_units_mask','cfs','cf_type','num_cfs'], 
                local_dict=locals(),
                headers=['<structmember.h>'])

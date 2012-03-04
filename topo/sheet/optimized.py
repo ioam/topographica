@@ -28,8 +28,15 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
     num_cfs = len(proj.flatcfs)  # pyflakes:ignore (passed to weave C code)
     active_units_mask = iterator.get_active_units_mask()
     sheet_mask = iterator.get_sheet_mask()  # pyflakes:ignore (passed to weave C code)
+    cf_type = iterator.cf_type  # pyflakes:ignore (passed to weave C code)
+    
+    # CEBALERT: Not consistent with other C code. E.g. could be
+    # simplified to use active_units_mask[] and sheet_mask[]? 
 
     code = c_header + """
+        DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+        DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
+        
         npfloat *x = active_units_mask;
         npfloat *m = sheet_mask;
         for (int r=0; r<num_cfs; ++r) {
@@ -52,18 +59,21 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
                     PyObject *proj = PyList_GetItem(projlist,p);
                     PyObject *cfs = PyObject_GetAttrString(proj,"flatcfs");
                     PyObject *cf = PyList_GetItem(cfs,r);
-                    PyObject *total_obj = PyFloat_FromDouble(nt);  //(new ref)
-                    PyObject_SetAttrString(cf,"_norm_total",total_obj);
-                    PyObject_SetAttrString(cf,"_has_norm_total",Py_True);
+
+                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+                    _norm_total[0] = nt;
+                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+                    _has_norm_total[0] = 1;
+                    
                     Py_DECREF(cfs);
-                    Py_DECREF(total_obj);
                 }
             }
 
         }
     """    
-    inline(code, ['projlist','active_units_mask','sheet_mask','num_cfs','length'], 
-           local_dict=locals())
+    inline(code, ['projlist','active_units_mask','sheet_mask','num_cfs','length','cf_type'], 
+           local_dict=locals(),
+           headers=['<structmember.h>'])
 
 provide_unoptimized_equivalent("compute_joint_norm_totals_opt",
                                "compute_joint_norm_totals",locals())

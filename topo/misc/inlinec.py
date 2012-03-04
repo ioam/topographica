@@ -37,6 +37,13 @@ openmp=True in the main namespace before importing this file, and
 openmp_threads is not set, then a thread will be allocated for each
 available core by default.
 
+Note that in order to use OpenMP, the C functions are obliged to use the
+thread-safe portions of the Python/Numpy C API. In general, the Python
+C API cannot be assumed to be thread safe.  Calls to PyObject_SetAttrString
+are a common hazard which can often be avoided using LOOKUP_FROM_SLOT_OFFSET.
+This makes use of Python's __slots__ mechanism with the added benefit of
+bypassing the GIL.
+
 $Id$
 """
 

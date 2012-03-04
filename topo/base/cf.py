@@ -105,9 +105,10 @@ class ConnectionField(object):
         See the norm_total property for more details.
         """
         # The actual value is cached in _norm_total.
-        if self._has_norm_total:
-            return self._norm_total
+        if self._has_norm_total[0]>0:
+            return self._norm_total[0]
         else:
+            # CEBALERT: what was I playing with for this before?
             return abs(self.weights).sum()
             
     def __set_norm_total(self,new_norm_total):
@@ -115,15 +116,15 @@ class ConnectionField(object):
         Set an explicit value to be returned by norm_total.
         See the norm_total property for more details.
         """
-        self._has_norm_total = True
-        self._norm_total = new_norm_total
+        self._has_norm_total[0] = 1
+        self._norm_total[0] = new_norm_total
 
     def __del_norm_total(self):
         """
         Delete any cached norm_total that may have been set.
         See the norm_total property for more details.
         """
-        self._has_norm_total = False
+        self._has_norm_total[0] = 0
 
 
     # CB: Accessing norm_total as a property from the C code takes
@@ -226,7 +227,8 @@ class ConnectionField(object):
         # http://docs.python.org/reference/datamodel.html). Can we
         # somehow avoid having to think about _has_norm_total in the
         # python code? Could the C code initialize this value?
-        self._has_norm_total=False
+        self._has_norm_total=array([0],dtype=numpy.int32)
+        self._norm_total=array([0.0],dtype=float)
 
         if output_fns is None:
             output_fns = []

@@ -16,7 +16,8 @@ from topo.base.sheet import activity_type
 from topo.base.cf import CFPLearningFn,CFPLF_Plugin
 from topo.learningfn.projfn import CFPLF_PluginScaled
 from topo.base.functionfamily import Hebbian,LearningFn
-from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
+from topo.misc.inlinec import inline,provide_unoptimized_equivalent,\
+     c_header,c_decorators
 from topo.learningfn import BCMFixed
 
 from projfn import CFPLF_Trace  # pyflakes:ignore (optimized version provided)
@@ -65,7 +66,10 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
             DECLARE_SLOT_OFFSET(weights,cf_type);
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
             DECLARE_SLOT_OFFSET(mask,cf_type);
+            DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
 
+            %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
                 double load = output_activity[r];
                 if (load != 0 && sheet_mask[r] != 0) {
@@ -97,16 +101,15 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
                             ++inpi;
                         }
                         inpj += icols;
-                    }
-
+                    }                    
                     // store the sum of the cf's weights
-                    PyObject *total_obj = PyFloat_FromDouble(total);  //(new ref)
-                    PyObject_SetAttrString(cf,"_norm_total",total_obj);
-                    PyObject_SetAttrString(cf,"_has_norm_total",Py_True);
-                    Py_DECREF(total_obj);
+                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+                    _norm_total[0]=total;
+                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+                    _has_norm_total[0]=1;
                 }
             }
-        """
+        """%c_decorators
 
         inline(code, ['input_activity', 'output_activity','sheet_mask','num_cfs',
                       'icols', 'cfs', 'single_connection_learning_rate','cf_type'],
