@@ -1,3 +1,621 @@
+2012-03-04 jlstevens
+
+	* [r11906] topo/base/cf.py, topo/learningfn/optimized.py,
+	  topo/misc/inlinec.py, topo/sheet/optimized.py,
+	  topo/transferfn/optimized.py: Applied CB's OpenMP patches to
+	  make the optimized learningfns and transferfns thread-safe:
+	  cf slots _has_norm_total[0] and _norm_total are now arrays
+	  (mutable) to avoid use of thread-unsafe use of
+	  PyObject_SetAttrString, using LOOKUP_FROM_SLOT_OFFSET
+	  instead.  Corresponding changes made to joint normalisation
+	  in topo/sheet/optimized.py and a general comment in the
+	  docstring of /misc/inlinec.py about general thread-safety.
+
+	* [r11905] topo/misc/inlinec.py, topo/responsefn/optimized.py:
+	  Discarded non thread-safe dotproduct code
+	  (topo/responsefn/optimized.py) in favour of the thread-safe
+	  OpenMP version.  Minor clean up changes to
+	  topo/misc/inlinec.py.
+
+2012-03-03 aplebe
+
+	* [r11904] topo/analysis/featureresponses.py,
+	  topo/base/sheetview.py, topo/command/analysis.py,
+	  topo/command/key_angles.png, topo/misc/distribution.py,
+	  topo/plotting/plot.py, topo/plotting/plotgroup.py,
+	  topo/tests/testdistribution.py,
+	  topo/tests/testfeaturemap.py,
+	  topo/tkgui/templateplotgrouppanel.py: A class of functions
+	  for distribution analysis has been introduced, that comprise
+	  the previous weighted_sum and max_value_bin, and additional
+	  fit with von Mises functions.  In DistributionMatrix a
+	  single method applies the distribution analysis function
+	  chosen with each processed feature.
+
+2012-03-02 jlstevens
+
+	* [r11903] topo/misc/generatorsheet.py: Set period param in
+	  GeneratorSheet to constant and set exclusive lower bound.
+
+	* [r11902] topo/transferfn/misc.py: Unified continuous
+	  application as a special case of periodic application in
+	  HomeostaticResponse.  Removed '_periodic_transition' method
+	  and cleaned up __call__ logic.
+
+	* [r11901] topo/transferfn/misc.py: Adjusted
+	  HomeostaticResponse parameter values to be more sensible
+	  (learning_rate:0.009 -> 0.1, smoothing: 0.991-> 0.99),
+	  renamed 'seed_init' parameter to 'seed' and declared period
+	  to be a constant parameter
+
+	* [r11900] topo/transferfn/misc.py: Whitespace changes.
+
+2012-03-02 jbednar
+
+	* [r11899] doc/News/changes_text.php: Fixed comment
+
+	* [r11898] doc/News/index_text.php, topo/command/pylabplot.py,
+	  topo/tkgui/templateplotgrouppanel.py: Added autocorrelation
+	  plots and right-click option for them
+
+	* [r11897] doc/News/changes_text.php: Updated to reflect
+	  changes in activityplot
+
+	* [r11896] topo/command/pylabplot.py,
+	  topo/tkgui/templateplotgrouppanel.py: Updated and clarified
+	  activityplot to match matrixplot conventions; changes
+	  interface of activityplot command and adds extent option to
+	  matrixplot.
+	  
+	  Changed name of 'Plot with axis labels' right-click option
+	  to 'Plot in matrix coords', for clarity, and added new 'Plot
+	  in sheet coords' right-click option
+
+2012-02-29 jbednar
+
+	* [r11895] topo/transferfn/misc.py: Cleaned up checkin and
+	  other whitespace and formatting issues.
+
+2012-02-29 antolikjan
+
+	* [r11894] contrib/JanA/CCLISSOM_push_pull.py,
+	  contrib/JanA/CCLISSOM_push_pull.ty: renamed push pull model
+	  to have .ty ending
+
+	* [r11893] contrib/JanA/CCLISSOM_push_pull.py,
+	  contrib/JanA/new_surround_modulation.py: small modification
+	  to push-pull model and added map autocorelation plotting in
+	  surround analysis
+
+2012-02-28 jlstevens
+
+	* [r11892] topo/transferfn/misc.py: The cleaned up and
+	  corrected version of HomeostaticResponse transfer function.
+	  Designed to work either periodically or continuously
+
+	* [r11891] topo/pattern/random.py: Added a random seed
+	  parameter to control GaussianCloud patterns
+
+2012-02-27 antolikjan
+
+	* [r11890] contrib/JanA/processSeqLSCSM.py,
+	  contrib/JanA/surround_model_design.py: some more changes
+
+	* [r11889] contrib/JanA/modelparametrization.py,
+	  contrib/JanA/new_surround_modulation.py,
+	  contrib/JanA/noiseEstimation.py,
+	  contrib/JanA/ofestimation.py, contrib/JanA/visualization.py,
+	  contrib/cc_lissom_oo_or_simple_rv.ty,
+	  contrib/complex_cell_lissom.ty, contrib/jacommands.py: new
+	  changes to Jan Antolik contrib code
+
+	* [r11888] contrib/JanA/LSCSMNEW.py: new analysis
+
+2012-02-24 antolikjan
+
+	* [r11887] contrib/JanA/CCLISSOM_push_pull.py: removed
+	  dependency on modelparametrization package
+
+	* [r11886] contrib/JanA/CCLISSOM_push_pull.py: added the push
+	  pull simulation
+
+	* [r11885] contrib/JanA/CCLISSOM_push_pull.py,
+	  contrib/JanA/CCLISSOM_push_pull_extra.py: added the push
+	  pull simulation
+
+2012-02-23 jbednar
+
+	* [r11884] doc/User_Manual/noise_text.php: Fixed typo
+
+	* [r11883] doc/User_Manual/patterns_text.php: Fixed syntax
+	  error in example
+
+	* [r11882] topo/misc/trace.py: Minor addition
+
+2012-02-13 ceball
+
+	* [r11881] topo/misc/legacy.py: Added module removal support
+	  and commented-out example of its use.
+
+	* [r11880] topo/tests/runtests.py: Added missing legacy switch
+	  to test of old pickles.
+
+	* [r11879] topo/tests/runtests.py: Added missing error count
+	  return code.
+
+2012-02-13 jbednar
+
+	* [r11878] etc/toporename: Updated for SVN; not tested
+	  exhaustively
+
+2012-02-10 ceball
+
+	* [r11877] doc/buildbot/master.cfg: Fix the previous commit.
+
+	* [r11876] doc/buildbot/master.cfg: Disable deb upload to
+	  Launchpad (until someone figures out how to get deb signing
+	  to work without interaction).  Means we miss out on deb
+	  testingon various platforms.
+
+2012-02-06 antolikjan
+
+	* [r11875] contrib/JanA/new_surround_modulation.py: gif
+	  modifications
+
+2012-02-05 dstefanov
+
+	* [r11874] contrib/basic.py, contrib/hegdeessen.py,
+	  contrib/patternfn.py, topo/misc/patternfn.py,
+	  topo/pattern/__init__.py: Move __future__ imports below
+	  docstrings so the docstrings count as such
+
+	* [r11873]
+	  contrib/JLStevens-TCAL/MastersVersion/models/gcal_temporal.py,
+	  contrib/JLStevens-TCAL/MastersVersion/models/modelUtils/VSDUtils.py,
+	  contrib/JLStevens-TCAL/MastersVersion/models/modelUtils/snapshotUtils.py,
+	  contrib/JLStevens-TCAL/TCAL.ty,
+	  contrib/JanA/surround_model_design.py,
+	  contrib/JanA/surrounnd_model_design.py, contrib/ae.py,
+	  contrib/al_audio/fully_connected/balanced_strf.ty,
+	  contrib/al_audio/fully_connected/balanced_strf_half_frequency.ty,
+	  contrib/al_audio/fully_connected/miller_strf.ty,
+	  contrib/al_audio/fully_connected/miller_strf_half_frequency.ty,
+	  contrib/al_audio/jittered.ty,
+	  contrib/al_audio/topographic/balanced_strf.ty,
+	  contrib/al_audio/topographic/balanced_strf_half_frequency.ty,
+	  contrib/al_audio/topographic/miller_strf.ty,
+	  contrib/al_audio/topographic/miller_strf_half_frequency.ty,
+	  contrib/cc_lesi_final.ty, contrib/cc_lesi_final_new.ty,
+	  contrib/cc_lesi_oo_or.ty, contrib/cc_lesi_oo_or_new.ty,
+	  contrib/cc_lissom_oo_or_simple_rv.ty,
+	  contrib/complex_cell_lissom.ty, contrib/fft_fit.py,
+	  contrib/gc_alissom.ty,
+	  contrib/gc_lissom_oo_or_homeostatic_new.ty,
+	  contrib/hegdeessen.py, contrib/jaanalysis.py,
+	  contrib/jacommands.py, contrib/jm_cc_lissom.ty,
+	  contrib/jm_cf_matrix.py, contrib/jsldefs.py,
+	  contrib/lesi.ty, contrib/lesi_gg.ty,
+	  contrib/lesi_judethesisversion.ty, contrib/lesi_linear.ty,
+	  contrib/lesi_whisker_barrels.ty, contrib/lgn_lateral.ty,
+	  contrib/lissom.ty, contrib/lissom_oo_dr.ty,
+	  contrib/lissom_oo_or_dr.ty,
+	  contrib/lissom_oo_or_homeostatic.ty,
+	  contrib/lissom_oo_or_homeostatic_tracked.ty,
+	  contrib/lissom_oo_or_homeostatic_tracked_new.ty,
+	  contrib/lissom_oo_or_noshrinking.ty,
+	  contrib/lissom_oo_or_noshrinking_latswitch.ty,
+	  contrib/lissom_or_noshrinking.ty,
+	  contrib/lissom_or_noshrinking_latswitch.ty,
+	  contrib/modelfit.py, contrib/sparse_connectivity_LESI.ty,
+	  contrib/sparse_connectivity_model.ty,
+	  contrib/species_cf_jitter.ty, contrib/species_lat_jitter.ty,
+	  contrib/species_pf_jitter.ty, contrib/surround_analysis.py,
+	  doc/Developer_Manual/memuse_text.php,
+	  doc/FAQ/index_text.php, doc/Tutorials/gcal_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  doc/User_Manual/batch_text.php,
+	  doc/User_Manual/commandline_text.php,
+	  doc/User_Manual/overview_text.php,
+	  doc/User_Manual/patterns_text.php,
+	  examples/goodhill_network90.ty, examples/leaky_lissom_or.ty,
+	  examples/lissom.ty, examples/obermayer_pnas90.ty,
+	  examples/saccade_demo.ty,
+	  examples/sullivan_neurocomputing04.ty: Replace usage of
+	  .basic in contrib/, doc/ and examples/
+
+	* [r11872] topo/command/__init__.py,
+	  topo/coordmapper/__init__.py, topo/learningfn/__init__.py,
+	  topo/numbergen/__init__.py, topo/pattern/__init__.py,
+	  topo/projection/__init__.py, topo/responsefn/__init__.py,
+	  topo/sheet/__init__.py, topo/transferfn/__init__.py: Delete
+	  k, v that leak out of list comprehension scope
+
+	* [r11871] contrib/JanA/__init__.pyc, contrib/JanA/glm.pyc,
+	  contrib/JanA/noiseEstimation.pyc,
+	  contrib/JanA/stim_comparison.pyc, param/parameterized.py,
+	  topo/analysis/__init__.py,
+	  topo/analysis/featureresponses.py, topo/analysis/vision.py,
+	  topo/command/__init__.py, topo/command/analysis.py,
+	  topo/command/basic.py, topo/command/pylabplot.py,
+	  topo/coordmapper/__init__.py, topo/coordmapper/basic.py,
+	  topo/learningfn/__init__.py, topo/learningfn/basic.py,
+	  topo/learningfn/optimized.py, topo/learningfn/projfn.py,
+	  topo/learningfn/som.py, topo/misc/genexamples.py,
+	  topo/misc/legacy.py, topo/misc/memuse.py,
+	  topo/numbergen/__init__.py, topo/numbergen/basic.py,
+	  topo/pattern/__init__.py, topo/pattern/audio.py,
+	  topo/pattern/basic.py, topo/pattern/image.py,
+	  topo/projection/__init__.py, topo/projection/basic.py,
+	  topo/responsefn/__init__.py, topo/responsefn/basic.py,
+	  topo/responsefn/optimized.py, topo/sheet/__init__.py,
+	  topo/sheet/basic.py, topo/sheet/lissom.py,
+	  topo/sheet/optimized.py, topo/tests/gui_tests.py,
+	  topo/tests/reference/lissom_fsa_reference.ty,
+	  topo/tests/reference/lissom_oo_dr_reference.ty,
+	  topo/tests/reference/lissom_oo_or_reference.ty,
+	  topo/tests/reference/lissom_or_reference.ty,
+	  topo/tests/runtests.py,
+	  topo/tests/testCompositePatternGenerators.txt,
+	  topo/tests/test_pattern_present.txt,
+	  topo/tests/test_script.py, topo/tests/testcfsom.py,
+	  topo/tests/testfeaturemap.py, topo/tests/testimage.py,
+	  topo/tests/testoutputfnsbasic.py,
+	  topo/tests/testparameterizedobject_tk.py,
+	  topo/tests/testpatterngenerator.py,
+	  topo/tests/testsnapshots.py, topo/tkgui/testpattern.py,
+	  topo/tkgui/topoconsole.py, topo/transferfn/__init__.py,
+	  topo/transferfn/basic.py, topo/transferfn/misc.py,
+	  topo/transferfn/optimized.py: Move basic.py into __init__.py
+	  and remove references to basic
+
+	* [r11870] topo/plotting/__init__.py,
+	  topo/tests/testpalette.py: Remove palette tests and __all__
+	  entry
+
+	* [r11869] topo/misc/asizeof.py: Pyflakes cleanup in asizeof
+
+2012-01-31 dstefanov
+
+	* [r11868] topo/learningfn/basic.py,
+	  topo/learningfn/projfn.py, topo/pattern/basic.py,
+	  topo/responsefn/basic.py, topo/responsefn/projfn.py,
+	  topo/sheet/__init__.py, topo/sheet/basic.py,
+	  topo/transferfn/basic.py, topo/transferfn/projfn.py:
+	  Pyflakes cleanup of API import and more
+
+	* [r11867] etc/pyflakes-ignore.py: Do not count ignored
+	  warnings when printing total
+
+2012-01-27 dstefanov
+
+	* [r11866] external/Makefile, external/ipython-0.10.tar.gz,
+	  external/ipython-0.12.tar.gz: Upgrade IPython to version
+	  0.12
+
+	* [r11865] topo/base/simulation.py, topo/misc/commandline.py:
+	  Add support for IPython 0.12
+
+2012-01-24 antolikjan
+
+	* [r11864] contrib/JanA/new_surround_modulation.py: adding new
+	  surround modulation
+
+2012-01-19 ceball
+
+	* [r11863] doc/News/changes_text.php: File I'd forgotten to
+	  save - part of previous commit.
+
+	* [r11862] Makefile, create_topographica_script.py,
+	  doc/Developer_Manual/installation_text.php,
+	  doc/News/changes_text.php, windows_postinstall.py: Instead
+	  of 'make PYTHON=/path/to/python
+	  topographica-external-python', can now just do
+	  '/path/to/python create_topographica_script.py'.
+	  Additionally, Windows developers can run '/path/to/python
+	  windows_postinstall.py create_batchfile' to get an
+	  executable batchfile.
+
+	* [r11861] doc/News: More to ignore.
+
+	* [r11860] topo/__init__.py: Added ALERT.
+
+	* [r11859] doc/Tutorials/som_retinotopy_text.php: Minor
+	  clarification.
+
+	* [r11858] topo/tkgui/__init__.py: Removed outdated ALERT.
+
+2012-01-18 dstefanov
+
+	* [r11857] topo/analysis/vision.py, topo/command/analysis.py,
+	  topo/learningfn/optimized.py, topo/responsefn/optimized.py,
+	  topo/sheet/optimized.py, topo/tkgui/__init__.py,
+	  topo/tkgui/editor.py, topo/transferfn/optimized.py: More
+	  pyflakes cleanup and ignore comments where necessary
+
+	* [r11856] external/Makefile, external/numpy-1.3.0.tar.gz,
+	  external/numpy-1.6.1.tar.gz: Upgrade numpy to version 1.6.1
+
+2012-01-12 antolikjan
+
+	* [r11855] contrib/cc_lissom_oo_or_simple_rv.ty: eddie version
+
+2011-12-02 ceball
+
+	* [r11854] doc/News/changes_text.php: Change missed from the
+	  previous commit.
+
+	* [r11853] topo/command/basic.py: Fixed quoting of command
+	  used to launch the batch run (allowing it to be copied and
+	  pasted to re-run).
+
+	* [r11852] doc/buildbot/master.cfg: Removed lodestar
+	  buildslave.  Removed various chunks of commented-out code.
+
+	* [r11851] doc/Developer_Manual/installation_text.php: Example
+	  of 'make topographica-external-python' now uses explicit
+	  path to python.  Also fixed typo.
+
+2011-11-30 jbednar
+
+	* [r11850] doc/Home/news_text.php, doc/News/index_text.php:
+	  Fixed date
+
+	* [r11849] doc/Future_Work/index_text.php: Removed specific
+	  tasks; everything is on the tracker instead
+
+	* [r11848] doc/Team_Members/index_text.php: Minor change in
+	  emphasis
+
+	* [r11847] doc/News/index_text.php: Updated Matplotlib
+	  revision number
+
+2011-11-30 ceball
+
+	* [r11846] doc/Team_Members/index_text.php: Update current
+	  situation.
+
+	* [r11845] topo/tkgui/topoconsole.py: Added comment.
+
+	* [r11844] doc/Tutorials/gcal_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  doc/Tutorials/som_retinotopy_text.php,
+	  doc/User_Manual/scripts_text.php, topo/misc/genexamples.py:
+	  Output path documentation fixes.
+
+2011-11-28 jbednar
+
+	* [r11843] topo/transferfn/basic.py, topo/transferfn/misc.py:
+	  Cleaned up docstrings and formatting; no change to logic
+
+2011-11-28 dstefanov
+
+	* [r11842] external/Makefile,
+	  external/matplotlib-0.99.1.1.tar.gz,
+	  external/matplotlib-1.1.0.tar.gz: Upgrade matplotlib to
+	  version 1.1.0
+
+	* [r11841] topo/misc/playerrobot.py, topo/misc/ptz.py,
+	  topo/plotting/plot.py, topo/responsefn/optimized.py,
+	  topo/tkgui/editor.py, topo/tkgui/plotgrouppanel.py,
+	  topo/transferfn/misc.py: More pyflakes cleanup in topo/
+
+2011-11-21 jbednar
+
+	* [r11840] doc/User_Manual/batch_text.php,
+	  doc/User_Manual/commandline_text.php,
+	  doc/User_Manual/scripts_text.php: Cleaned up pointers to the
+	  output path and rcfile
+
+2011-11-20 dstefanov
+
+	* [r11839] Makefile, etc/pyflakes-ignore.py,
+	  pyflakes-ignore.py: Move pyflakes-ignore.py to etc/
+
+	* [r11838] topo/__init__.py, topo/analysis/vision.py,
+	  topo/base/simulation.py, topo/command/analysis.py,
+	  topo/command/basic.py, topo/command/pylabplot.py,
+	  topo/coordmapper/basic.py, topo/learningfn/optimized.py,
+	  topo/learningfn/projfn.py, topo/misc/commandline.py,
+	  topo/misc/inlinec.py, topo/misc/legacy.py,
+	  topo/misc/picklemain.py, topo/misc/playerrobot.py,
+	  topo/misc/ptz.py, topo/misc/robotics.py, topo/misc/util.py,
+	  topo/pattern/audio.py, topo/pattern/basic.py,
+	  topo/pattern/opencvcamera.py, topo/sheet/ptztracker.py,
+	  topo/sheet/saccade.py: Some pyflakes cleanup of topo/
+
+	* [r11837] param/__init__.py, param/external.py, param/tk.py,
+	  pyflakes-ignore.py: Pyflakes cleanup ot param
+
+	* [r11836] doc/User_Manual/scripts_text.php: Clarify default
+	  output path documentation w/r/t recent changes
+
+2011-11-15 dstefanov
+
+	* [r11835] topo/__init__.py: Ignore newline in xdg-user-dir
+	  output
+
+2011-11-14 dstefanov
+
+	* [r11834] external/Makefile,
+	  external/PyFlakes-divmod_r17780.tar.gz,
+	  external/pyflakes-0.5.0.tar.gz: Update pyflakes to 0.5.0
+
+2011-11-14 ceball
+
+	* [r11833] doc/buildbot/master.cfg: Added ALERT about
+	  duplication of 'description' fields.
+
+2011-11-14 jbednar
+
+	* [r11832] topo/misc/commandline.py: Minor cleanup; should be
+	  no change in function
+
+	* [r11831] topo/__init__.py: Reorganized code for readability,
+	  cleaned up names; edited comments and docstrings; should be
+	  no change in function.
+
+2011-11-13 dstefanov
+
+	* [r11830] doc/buildbot/index.html, doc/buildbot/master.cfg,
+	  doc/buildbot/plot_performance.py: Plot performance test
+	  results in buildbot
+
+	* [r11829] Makefile, pyflakes-ignore.py: Add --ignore and
+	  --total options to pyflakes-ignore and use them in Makefile
+
+	* [r11828] Makefile: Use pyflakes-ignore.py instead of the
+	  regular pyflakes
+
+	* [r11827] pyflakes-ignore.py: Pyflakes wrapper which ignores
+	  lines with pyflakes:ignore
+
+	* [r11826] topo/misc/commandline.py: Made IPython
+	  version-dependant code clearer; enabled --pdb option for
+	  v0.11
+
+	* [r11825] topo/misc/commandline.py: Print output path on
+	  interactive startup
+
+	* [r11824] topo/__init__.py: Use xdg-utils if available to
+	  determine Documents location on Linux
+
+	* [r11823] topo/__init__.py: Use common default for default
+	  output dir on all platforms
+
+2011-11-11 ceball
+
+	* [r11822] doc/News/changes_text.php: Fixed typo.
+
+2011-11-10 ceball
+
+	* [r11821] etc/filterlog.py: Short hack to filter verbose svn
+	  log output: excludes entries where all changed paths are in
+	  a list of paths to exclude.
+
+	* [r11820] doc/News/changes_text.php: Detailed changes since
+	  0.9.7.
+
+2011-11-09 ceball
+
+	* [r11819] doc/News/index_text.php: Added Array parameter (not
+	  sure I added to right category).
+
+2011-11-07 ceball
+
+	* [r11818] doc/News/index_text.php: Removed Cython item from
+	  list; Cython was already announced in 0.9.6.  Added
+	  commented-out Cython tutorial announcement (uncomment when
+	  we sort out SF.net #3434667).
+
+2011-11-07 jbednar
+
+	* [r11817] topo/learningfn/projfn.py: Removed outdated import
+
+2011-11-02 gauthamg123
+
+	* [r11816] contrib/lesi_gg.ty, contrib/lesi_linear.ty: Added
+	  LESI files (lesi_gg.ty, lesi_linear.ty)
+
+2011-11-01 jbednar
+
+	* [r11815] doc/User_Manual/commandline_text.php,
+	  doc/User_Manual/scripts_text.php: Fixed targets
+
+	* [r11814] doc/shared/trailer.php: Fixed PHP warning
+
+2011-10-31 ceball
+
+	* [r11813] doc/Downloads/win32notes_text.php,
+	  doc/Tutorials/gcal_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  doc/User_Manual/batch_text.php,
+	  doc/User_Manual/commandline_text.php,
+	  doc/User_Manual/plotting_text.php,
+	  doc/User_Manual/scripts_text.php: Attempted to clarify
+	  output path (including for people using 0.9.7 and earlier).
+
+	* [r11812] doc/Team_Members/index_text.php: Moved Dobromir up
+	  to list of main current developers.
+
+2011-10-31 jbednar
+
+	* [r11811] doc/Team_Members/index_text.php: Minor updates to
+	  Chris's version
+
+2011-10-31 ceball
+
+	* [r11810] doc/buildbot/master.cfg: Began moving configuration
+	  variables to top of file.  Fixed output paths.  Restored
+	  missing unit tests before building 'archives'
+	  (setup.py-based distributions).
+
+	* [r11809] doc/Team_Members/index_text.php: Removed duplicate
+	  entry.
+
+	* [r11808] doc/News/index_text.php: Clarified point of Cython.
+	  Added commented-out item that should apply by 1.0.
+
+2011-10-30 dstefanov
+
+	* [r11807] topo/__init__.py: Fix syntax error in
+	  topo/__init__.py
+
+2011-10-30 ceball
+
+	* [r11806] doc/Team_Members/index_text.php: Updated team
+	  members.
+
+	* [r11805] doc/News/index_text.php: Adjusted news items.
+
+2011-10-29 dstefanov
+
+	* [r11804] doc/shared/topo.css: Change website font CSS to fix
+	  IE font issue
+
+	* [r11803] Makefile, doc/Downloads/win32notes_text.php,
+	  doc/Tutorials/gcal_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  doc/Tutorials/lissom_or_text.php,
+	  doc/User_Manual/batch_text.php,
+	  doc/User_Manual/commandline_text.php,
+	  doc/User_Manual/scripts_text.php, topo/__init__.py: Default
+	  output path is now ~/Documents/Topographica Fallback default
+	  My Documents path for when ctypes is not available
+
+	* [r11802] topo/numbergen/basic.py,
+	  topo/tests/testnumbergen.py: Add
+	  numbergen.UniformRandomOffset and remove mean/range keywords
+	  from numbergen.UniformRandom
+
+2011-10-26 antolikjan
+
+	* [r11801] contrib/surround_analysis.py: some more changes
+	  pulled from eddie
+
+2011-10-22 ceball
+
+	* [r11800] topo/base/simulation.py: Minor rewording of
+	  comment.
+
+2011-10-20 jbednar
+
+	* [r11799] doc/News/index_text.php: Commented out Hegde
+	  patterns while still in Contrib
+
+	* [r11798] ChangeLog.txt: Fixed spacing
+
+	* [r11797] doc/Home/news_text.php, doc/News/index_text.php:
+	  Added notes on new release
+
+	* [r11796] doc/Tutorials/gcal_text.php,
+	  doc/Tutorials/lissom_oo_or_text.php,
+	  doc/Tutorials/lissom_or_text.php: Minor rewording
+
+	* [r11795] ChangeLog.txt: Removed most contrib/ entries; still
+	  lots of irrelevant ones left
+
+	* [r11794] ChangeLog.txt: Updated to r11793
+
 2011-10-18  ceball
 
 	* [r11793]
