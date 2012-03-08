@@ -9,6 +9,10 @@ is a special type of Python attribute extended to have
 features such as type and range checking, dynamically generated
 values, documentation strings, default values, etc., each of which
 is inherited from parent classes if not specified in a subclass.
+Parameter support is provided by the
+<A HREF="../Reference_Manual/param-module.html">param</A> package,
+which is distributed with Topographica but is actually completely
+indepenent and usable directly for any Python project.
 
 <P>Objects that can contain Parameters are called
 <?php classref('param.parameterized','Parameterized')?> objects.
@@ -64,12 +68,14 @@ distribution, such as for generating random input patterns; in this
 case the random number will be updated at most once for each unique
 value of simulation time.  <!-- Explain more? -->
 
-<P>Some Parameter types or instances can also be declared to have
-<code>softbounds</code>, which are used to suggest the sizes of GUI
-sliders for the object, <code>precedence</code>, which determines the
-sorting order for the Parameter in the GUI or in lists, and a
-<code>doc</code> string, which is a brief explanation of what the
-Parameter does.
+<P>Parameters also typically have a <code>doc</code> string, which is
+a brief explanation of what the Parameter does (as for function and
+class docstrings in Python).  Some Parameter types or instances can
+be declared to have <code>softbounds</code>, which are used to
+suggest the sizes of GUI sliders for the object, and
+<code>precedence</code>, which determines the sorting order for the
+Parameter in the GUI or in lists.  A large number of Parameter types
+are provided, and more can be added easily.
 
 
 <H2>Inheritance and class Parameters</H2>
