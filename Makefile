@@ -331,11 +331,11 @@ dist: doc distdir reference-manual FORCE
 
 
 # Note that the output needs to be appended to a copy of the old file,
-# to keep old fixes to formatting. The HEAD:9000 can be omitted to get
+# to keep old fixes to formatting. The HEAD:XXXXX can be omitted to get
 # the full list, but this is faster.
 ChangeLog.txt: FORCE
 	make -C external svn2cl
-	external/svn2cl -r HEAD:9000 --include-rev --group-by-day --separate-daylogs --break-before-msg --stdout https://topographica.svn.sourceforge.net/svnroot/topographica/ | sed -e 's|/trunk/topographica/||g' > ChangeLog.txt
+	external/svn2cl -r HEAD:11500 --include-rev --group-by-day --separate-daylogs --break-before-msg --stdout https://topographica.svn.sourceforge.net/svnroot/topographica/ | sed -e 's|/trunk/topographica/||g' > ChangeLog.txt
 
 
 ######################################################################
