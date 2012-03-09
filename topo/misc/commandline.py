@@ -414,6 +414,7 @@ def auto_import_commands():
         if re.match('^[^_.].*\.py$',f):
             modulename = re.sub('\.py$','',f)
             exec "from topo.command."+modulename+" import *" in __main__.__dict__
+    exec "from topo.command import *" in __main__.__dict__
     
 def a_action(option,opt_str,value,parser):
     """Callback function for the -a option."""
