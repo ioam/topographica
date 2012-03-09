@@ -94,8 +94,7 @@ inputs=[input_type(x=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
                    y=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
                                              ubound= (p.area/2.0+0.25),seed=34+i),
                    orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56+i),
-                   size=0.088388, aspect_ratio=4.66667, scale=1.0,
-                   bounds=sheet.BoundingBox(radius=0.8))
+                   size=0.088388, aspect_ratio=4.66667, scale=1.0)
         for i in xrange(total_num_inputs)]
 
 combined_inputs = pattern.SeparatedComposite(min_separation=2.2*0.27083,generators=inputs)

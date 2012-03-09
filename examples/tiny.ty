@@ -69,8 +69,7 @@ gaussian_generator = pattern.Gaussian(
     y=numbergen.UniformRandom(lbound=-0.8,ubound=0.8,seed=34),
     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56),
     size = 2*0.3*1.5/7.0,
-    aspect_ratio = 7.0/1.5,
-    bounds = sheet.BoundingBox(radius=0.8))
+    aspect_ratio = 7.0/1.5)
 
 # Sheets, connections, and their parameters
 topo.sim['Retina'] = sheet.GeneratorSheet(input_generator=gaussian_generator,

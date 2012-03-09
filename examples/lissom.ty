@@ -302,8 +302,7 @@ for e in eyes:
                       numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+5+6*i)*('rg' not in p.dims) \
                       if e=='Right' else \
                       2*(r*(cone=='Red')+g*(cone=='Green')+b*(cone=='Blue')) + \
-                      numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+5+6*i)*('rg' not in p.dims)),
-                    bounds=sheet.BoundingBox(radius=0.8))
+                      numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+5+6*i)*('rg' not in p.dims)))
                 for i in xrange(num_inputs)]
                 input_composite=pattern.SeparatedComposite(min_separation=2.2*v1aff_radius,generators=inputs)
 

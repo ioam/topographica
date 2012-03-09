@@ -1,9 +1,7 @@
-#JABALERT: Should update the docstring once the GCA paper has been
-# accepted or at least submitted.
 """
 GCAL
 
-Work in progress on an improved version of the LISSOM orientation map
+A simplified and improved version of the LISSOM orientation map
 simulation from figure 5.9 of Miikkulainen, Bednar, Choe, and Sirosh
 (2005), Computational Maps in the Visual Cortex, Springer.  Important
 differences include:
@@ -14,6 +12,13 @@ differences include:
    to avoid the need for most parameter adjustment and to be more robust
  - Using a fixed lateral excitatory radius rather than shrinking it
    (now that homeostatic plasticity allows all neurons to develop robustly) 
+
+GCAL is described fully in:
+
+  Law, Antolik, and Bednar (2011). Mechanisms for stable and robust
+  development of orientation maps and receptive fields.
+  Technical report, University of Edinburgh, EDI-INF-RR-1404.  
+  http://www.inf.ed.ac.uk/publications/report/1404.html
 
 $Id$
 """
@@ -111,8 +116,6 @@ if p.dataset=="Gaussian":
                        y=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
                                                  ubound= (p.area/2.0+0.25),seed=35+i),
                        orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=21+i),
-                       # CEBALERT: is this used?
-                       bounds=sheet.BoundingBox(radius=1.125),
                        size=0.088388, aspect_ratio=4.66667, scale=p.scale)
             for i in xrange(total_num_inputs)]
     

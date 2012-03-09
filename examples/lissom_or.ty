@@ -78,8 +78,7 @@ input_type=pattern.Gaussian
 inputs=[input_type(x=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=12+i),
                    y=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=34+i),
                    orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56+i),
-                   size=0.088388, aspect_ratio=4.66667, scale=1.0,
-                   bounds=sheet.BoundingBox(radius=0.8))
+                   size=0.088388, aspect_ratio=4.66667, scale=1.0)
         for i in xrange(num_inputs)]
 
 combined_inputs = pattern.SeparatedComposite(min_separation=2.2*0.27083,generators=inputs)

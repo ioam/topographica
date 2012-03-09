@@ -71,8 +71,7 @@ saccade_generator = topo.pattern.Gaussian(
     # y = 0.0,
     
     size =  0.1,
-    aspect_ratio=1.0,
-    bounds = BoundingBox(radius = 0.5))
+    aspect_ratio=1.0)
 
 scene_seq = [(1,topo.pattern.image.FileImage())]
 

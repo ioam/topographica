@@ -100,8 +100,7 @@ input_pattern = topo.pattern.Gaussian(
     x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=12),
     y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=34),
     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56),
-    size=2*gaussian_height,aspect_ratio=gaussian_width/gaussian_height,
-    bounds=BoundingBox(radius=0.5))
+    size=2*gaussian_height,aspect_ratio=gaussian_width/gaussian_height)
 
 
 topo.sim['Retina'] = GeneratorSheet(input_generator=input_pattern)

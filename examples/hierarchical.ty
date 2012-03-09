@@ -41,14 +41,12 @@ sheet.GeneratorSheet.nominal_density = p.retina_density
 
 left_input_pattern = pattern.Line(
     thickness=0.02,
-    bounds=sheet.BoundingBox(points=((-1.05,-0.8),(1.05,0.8))),
     x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=12),
     y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=34),
     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56))
 
 right_input_pattern = pattern.Line(
     thickness=0.02,
-    bounds=sheet.BoundingBox(points=((-0.8,-1.05),(0.8,1.05))),
     x=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=100),
     y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=200),
     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=300))
