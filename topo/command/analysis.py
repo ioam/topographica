@@ -158,7 +158,7 @@ class save_plotgroup(ParameterizedFunction):
 
 
 
-def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=(0.0,1.0), cyclic=True, weighted_average=True):
+def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=(0.0,1.0), cyclic=True, weighted_average=True, cropfn=lambda(x):x):
     """
     Estimate the value of a feature from the current activity pattern on a sheet.
     
@@ -179,20 +179,38 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
     quantity), then the result will be the vector average of the
     activated orientations.  For an orientation map this value should
     be an estimate of the orientation present on the input.
+
+    If desired, a cropfn can be supplied that will narrow the analysis
+    down to a specific region of the array; this function will be
+    applied to the preference_map and to the activity array before
+    decoding.  Examples:
+
+    Decode whole area:
+ 
+       decode_feature(topo.sim["V1"])
+    
+    Decode left half only:
+
+       r,c = topo.sim["V1"].activity.shape
+       lefthalf  = lambda(x): x[:,0:c/2]
+       righthalf = lambda(x): x[:,c/2:]
+
+       decode_feature(topo.sim["V1"], cropfn=lefthalf)
+    
     """
+
     d = Distribution(axis_bounds, cyclic)
     
     if not (preference_map in sheet.sheet_views):
         topo.sim.warning(preference_map + " should be measured before calling decode_feature.")
     else:
-        map = sheet.sheet_views[preference_map]
-        d.add(dict(zip(map.view()[0].ravel(), sheet.activity.ravel())))
+        v = sheet.sheet_views[preference_map]
+        d.add(dict(zip(cropfn(v.view()[0]).ravel(), 
+                       cropfn(sheet.activity).ravel())))
     
-    if weighted_average:
-        return d.weighted_average()
-    else:
-        return d.max_value_bin()
-
+    res = DSF_WeightedAverage()(d) if weighted_average else DSF_MaxValue()(d)
+    return res['']['preference']
+    
 
 
 def update_activity():
