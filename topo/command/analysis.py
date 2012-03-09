@@ -183,7 +183,7 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
     d = Distribution(axis_bounds, cyclic)
     
     if not (preference_map in sheet.sheet_views):
-        topo.sim.warning(preference_map + " should be measured before calling decode_orientations.")
+        topo.sim.warning(preference_map + " should be measured before calling decode_feature.")
     else:
         map = sheet.sheet_views[preference_map]
         d.add(dict(zip(map.view()[0].ravel(), sheet.activity.ravel())))
@@ -439,7 +439,8 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
                             cyclic=True, preference_fn=self.preference_fn)]
 
         features += \
-            [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
+            [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True,
+                     preference_fn=DSF_WeightedAverage( value_scale=(0., 1/2.0/pi), selectivity_scale=(0.,17.) ))]
 
         if p.num_ocularity>1: features += \
             [Feature(name="ocular",range=(0.0,1.0),step=1.0/p.num_ocularity)]
