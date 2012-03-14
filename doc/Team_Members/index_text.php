@@ -28,10 +28,13 @@ Other recent developers include:
       He continues to use Topographica in his postdoctoral work and
       has contributed a variety of related code.
 
-  <p><dt>Chris Ball, 2005 - </dt>
-  <dd>Chris has worked on nearly every part of Topographica.  Since
-      January 2009 he has been a PhD student in Edinburgh, working on
-      the formation of color maps in V1.
+  <p><dt><a target="_top"
+  href="http://homepages.inf.ed.ac.uk/s0454615">Chris Ball</a>, 2005 -
+  </dt>
+  <dd>Chris was the main developer from 2005 - 2012, working on nearly
+      every part of Topographica.  Since January 2009 he has been a
+      PhD student in Edinburgh, working on the formation of color maps
+      in V1.
 
   <p><dt>Gautham Ganapathy, May - Dec 2011</dt>
   <dd>Gautham completed his MSc at the University of Edinburgh,
