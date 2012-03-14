@@ -167,6 +167,9 @@ clean-pyc:
 clean-doc:
 	make -C doc clean
 
+# CEB: If not using fat distribution, can run this command by
+# supplying alternative path to epydoc, e.g. "make
+# EPYDOC=/path/to/epydoc reference-manual"
 reference-manual: 
 	make -C doc reference-manual
 
