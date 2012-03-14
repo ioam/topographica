@@ -154,8 +154,8 @@ processing and graphics routines</A>, which are available for use in
 Topographica components and scripts.</DD>
 </DL>
 
-For full use of the features of these packages, see their
-documentation.  
+<P>Installation of these packages is covered on
+the <a href="../Downloads/index.html">Downloads</a> page. 
 
 <H2>Typical external Packages</H2>
 
@@ -196,33 +196,53 @@ requires GMP to be built, Topographica will fall back to a slower,
 purely Python implementation of fixed-point numbers (<A
 HREF="http://fixedpoint.sourceforge.net/">fixedpoint</A>).
 
-<!--CBENHANCEMENT: add gnosis when (if) we begin to advertise it-->
-
 </DL>
 
-<P>They are included in the source distribution, or can be installed via
-your regular package manager.
+<P>Again, installation of these packages is covered on
+the <a href="../Downloads/index.html">Downloads</a> page.
  
 <H3>Optional External Packages</H3>
 
 <P>A number of other packages are also useful with Topographica, but
-can sometimes be difficult to install.  They include:
+are not necessarily required.  Packages listed below are therefore not
+part of the default Topographica installation, but many are in use by
+Topographica users and/or developers.
+
+<P>In most cases, these packages are included in Python distributions
+such
+as <a href="http://enthought.com/products/epd.php">EPD</a>/<a href="http://pythonxy.com">Python(x,y)</a>,
+or are available via package managers such as
+apt-get/MacPorts. Alternatively, the packages are available for
+easy_install/pip install/standard Python installation
+via <a href="http://pypi.python.org/pypi">PyPI</a>. We also include
+many of the packages in the fat distribution of Topographica.  Note
+that, however you choose to install any of these packages, if your
+system has more than one copy Python <em>you must install the package
+using the same copy of Python that you are using for
+Topographica</em>.
+
+<P>If you encounter problems using these packages, feel free
+to <a href="http://sourceforge.net/projects/topographica/forums/forum/178312">ask
+the Topographica community for help</a>.
 
 <P><DL COMPACT>
 
 <P><DT><A href="http://www.scipy.org/">SciPy</A></DT>
 <DD>
-<!--CBALERT: update this text. JA has more information already?
-It's easy on Ubuntu linux because you can get the package manager
-to add the libraries. Also on Windows, it's already working.-->
 SciPy includes many, many functions useful in scientific research,
-such as statistics, linear algebra, image processing, integration and
-differential equation solvers, etc.  However, because of all the
-external libraries that it uses, getting SciPy to work 
-on a particular installation can be difficult. You can try with
-<code>make -C external scipy</code> if you installed Topographica from
-source; otherwise install Scipy described in its documentation.</DD>
+such as statistics, linear algebra, integration and differential
+equation solvers, etc. 
+<!--
+SciPy is included in many Python distributions
+(e.g. <a href="http://enthought.com/products/epd.php">EPD</a>), and is
+usually available via package managers (e.g. "sudo apt-get install
+python-scipy"). If using the fat distribution of Topographica, "make
+-C external scipy" will build SciPy (but note that building SciPy is
+not always straightforward).
+-->
+</DD>
 
+<!--CEBALERT: I need to update mlabwrap/check the bug I had on jupiter-->
 <P><DT><A name="mlabwrap" href="http://mlabwrap.sourceforge.net/">mlabwrap</A></DT>
 <DD>mlabwrap is a high-level Python-to-Matlab bridge, allowing Matlab to look like
 a normal Python library:
@@ -230,12 +250,15 @@ a normal Python library:
 from mlabwrap import mlab  # start a Matlab session
 mlab.plot([1,2,3],'-o')
 </PRE>
-To use this package, first check you can run 
-<code>matlab -nodesktop -nosplash</code> successfully, then build with
-<code>make -C external mlabwrap</code>.
-If the matlab libraries are not in your <code>LD_LIBRARY_PATH</code>,
-there will be a note during the build telling you to add the libraries 
-to your path. For example:
+
+mlabwrap is transitioning to SciKits (see above), but installation can
+be tricky so we describe it further here. First, check you can run
+<code>matlab -nodesktop -nosplash</code> successfully, then build from 
+source (e.g. from Topographica's fat distribution with
+<code>make -C external mlabwrap</code>, or download and build the
+source yourself).  If the matlab libraries are not in
+your <code>LD_LIBRARY_PATH</code>, there will be a note during the
+build telling you to add the libraries to your path. For example:
 <pre>
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/matlab-7.5/bin/glnx86
 </pre>
@@ -243,12 +266,20 @@ You can either add that permanently to your path, or add it each time
 before using mlabwrap.
 </DD>
 
+<!--CEBALERT: now a scikit, and called audiolab:
+http://scikits.appspot.com/audiolab? What version did Bilal use?-->
 <P><DT><A href="http://www.ar.media.kyoto-u.ac.jp/members/david/softwares/pyaudiolab/index.html">pyaudiolab</A></DT>
 <DD>
-pyaudiolab provides an easy way to read from and write to sound files (it wraps 
-<A href="http://www.mega-nerd.com/libsndfile/">libsndfile</A>).
-On Linux source installations, building should require nothing more than <code>make -C external pyaudiolab</code>.
-<!--Currently: untested on OSX, not present on Windows-->
+pyaudiolab provides an easy way to read from and write to sound files
+(it wraps
+<A href="http://www.mega-nerd.com/libsndfile/">libsndfile</A>).  In
+the fat distribtion, building should be simple: <code>make -C external
+pyaudiolab</code>.
+</DD>
+
+<P><DT><a href="http://scikits-image.org/">scikits-image</a></DT>
+<DD>
+A collection of algorithms for image processing.
 </DD>
 
 <!--
@@ -270,14 +301,16 @@ or <code>matrixplot()</code>, or modify
 <DD>
 The Player/Stage/Gazebo project provides interfaces for a large
 variety of external hardware and simulation software, such as cameras,
-digitizers, and robots.  A connection to Player is provided in
-topo/misc/robotics.py, but the Player software is not distributed
-directly with Topographica.  To install it, just download
-player-2.0.4.tar.bz2 from playerstage.sf.net, put it in the externals/
+digitizers, and robots. The Gazebo and Stage simulators that support
+the Player interface can also be used, as described on the Player
+site. Note that a connection to Player is provided in
+topo/misc/robotics.py (last tested with player-2.0.4.tar.bz2 from
+playerstage.sf.net).
+<!--
+To install it, just download
+player-2.0.4.tar.bz2 from , put it in the externals/
 subdirectory, and do <code>make -C external player</code>.  
-<!--Currently: untested on OSX, not present on Windows-->
-The Gazebo and Stage simulators that support the Player interface
-can also be used, as described on the Player site.
+-->
 </DD>
 
 <P><DT><A HREF="http://pypi.python.org/pypi/processing">Processing</A></DT>
@@ -293,6 +326,7 @@ creation of python objects in other processes that communicate through
 proxies. 
 </DD>
 
+<!--CEBALERT: need to link to Cython tutorial when that's finished.-->
 <P><DT><A HREF="http://cython.org">Cython</A></DT>
 <DD>
 Cython is a language that is very similar to Python, but supports
@@ -301,33 +335,30 @@ compile C code. Therefore, the performance benefit of C is available
 from a much simpler language. Because Cython can compile almost any
 Python code to C, one can start with a component written entirely in
 Python and then optimize it step by step (by adding types, for
-example). See the Cython documentation for more information.  To
-install Cython for Topographica, just enter <code>make -C external
-cython</code> from your Topographica directory.
+example). See the Cython documentation for more information.  
 </DD>
+<!--To
+install Cython for Topographica, just enter <code>make -C external
+cython</code> from your Topographica directory.-->
 
+<!--CEBENHANCEMENT: I'll add mpi stuff and opencv-->
+
+<!--CEBENHANCEMENT: mention things used in projects (e.g. blender)?-->
 
 </DL>
 
-
 <P>Topographica runs on an unmodified version of the Python language,
 and so it can be used with any Python package that you install
-yourself.  To install such a package in Topographica, just run its
-<code>setup.py</code> as usual, being sure to use whichever copy of
-Python that you use for Topographica
-<code>topographica/bin/python</code>.  For instance, if you are
-currently in the main topographica source directory and the new package has
-been unpacked in your home directory <code>/home/user/pkg</code>, just type
-<code>bin/python /home/user/pkg/setup.py</code>.
-Running setup in this way ensures that the package will be installed
-in Topographica's copy of python, rather than any other copy of Python
-that might be present on your system.
-
-<P>A good list of potentially useful software is located at 
-<A href="http://www.scipy.org/Topical_Software">SciPy.org</A>.
-Some packages of note:
+yourself. A good list of potentially useful software is located at 
+<A href="http://www.scipy.org/Topical_Software">SciPy.org</A>.  Some
+packages of note:
 
 <P><DL COMPACT>
+
+<P><DT><A href="http://scikits.appspot.com/scikits">SciKits</A></DT>
+<DD>SciKits provide many useful extensions to SciPy, e.g. for machine
+learning and numerical optimization.
+</DD>
 
 <P><DT><A href="http://rpy.sourceforge.net/">RPy</A></DT>
 <DD>The language R (a free implementation of the S statistical
@@ -336,5 +367,11 @@ function to be called from Python.  Nearly any statistical
 function you might ever need is in R.
 </DD>
 
+<!-- theano -->
+
 </DL>
+
+<P>As above, note that if your system has more than one copy Python,
+you must install the package using the same copy of Python that you
+are using for Topographica.
 
