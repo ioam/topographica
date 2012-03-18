@@ -359,14 +359,12 @@ dist-pysource: doc distdir reference-manual
 
 
 ######################################################################
-# Public "setup.py"-type distributions (sdist, msi, rpm)
+# Public "setup.py"-type distributions
 #
 # These commands assume you have run "make dist-pysource".
 # (Archives don't include doc/ because of its size.)
 
-# buildbot can set BDIST_WIN_CMD to bdist_msi when we upgrade to
-# Python 2.7 (to get msi file, which can be installed from the
-# commandline)
+# CEB: bdist_msi supports silent install, but seems to be missing other options!
 BDIST_WIN_CMD = bdist_wininst
 BDIST_WININST = ${BDIST_WIN_CMD} --install-script windows_postinstall.py --plat-name=win
 
@@ -377,8 +375,7 @@ dist-pysource-sdist:
 dist-pysource-bdist_wininst: 
 	${CD} ${DIST_DIR}; ${PYTHON} setup.py ${BDIST_WININST}
 
-# CEB: should probably just upload msi and tar.gz to pypi manually, if we're going to do it at all
-#
+# CEB: should probably upload to pypi manually, if we're going to do it at all
 ## put dist onto pypi
 #dist-pypi-upload:
 #	${CD} ${DIST_DIR}; ${PYTHON} setup.py register sdist ${BDIST_WININST} upload
@@ -406,14 +403,13 @@ else
 endif
 
 
-# Or, remove --spec-only to build rpm on your system (but make sure
-# you have python 2.6...I don't).
+# remove --source-only to try building rpm on your system
 rpm:
 	${CD} ${DIST_DIR}; ${PYTHON} setup.py bdist_rpm --release=${RPM_RELEASE} --requires "python,python-devel,tkinter,numpy,scipy,python-imaging-tk,python-matplotlib,python-matplotlib-tk,ipython" --group="Productivity/Scientific/Other" --source-only
 
-# CEBALERTs about RPM: (1) can't seem to specify python 2.6! so only
-# works where python 2.6 (or 2.5) is the default on a system. (2)
-# where is gmpy on FC?
+# CEBALERTs about RPM: (1) can't seem to specify python 2.5+! So only
+# works where python 2.5+ is the default on a system. (2) where is
+# gmpy on FC?
 
 
 ######################################################################
