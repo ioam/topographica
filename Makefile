@@ -342,10 +342,9 @@ ChangeLog.txt: FORCE
 
 
 ######################################################################
-# Create public distribution suitable for creating setup.py-based
-# packages (e.g. debs)
+# Create "pysource", the basis for "python setup.py" distributions
 
-dist-setup.py: doc distdir reference-manual
+dist-pysource: doc distdir reference-manual
 # clean dir but keep setup.py-related files
 	${CD} ${DIST_DIR}; ${PYTHON} create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
 	${CD} ${DIST_DIR}; ${MV} README.setup.txt README.txt
@@ -355,14 +354,14 @@ dist-setup.py: doc distdir reference-manual
 # won't need to build this copy
 	${RM} ${DIST_DIR}/Makefile 
 	${RM} -r ${DIST_DIR}/external
-# create tar.gz
+# create tar.gz  # CEBALERT: can I delete this?
 	${CD} ${DIST_TMPDIR} ; ${MAKE_ARCHIVE} ${DIST_DIRNAME} | ${COMPRESS_ARCHIVE} > ${DIST_ARCHIVE}
 
 
 ######################################################################
-# pypi
+# Public "setup.py"-type distributions (sdist, msi, rpm)
 #
-# These commands assume you have run "make dist-setup.py".
+# These commands assume you have run "make dist-pysource".
 # (Archives don't include doc/ because of its size.)
 
 # buildbot can set BDIST_WIN_CMD to bdist_msi when we upgrade to
@@ -371,15 +370,18 @@ dist-setup.py: doc distdir reference-manual
 BDIST_WIN_CMD = bdist_wininst
 BDIST_WININST = ${BDIST_WIN_CMD} --install-script windows_postinstall.py --plat-name=win
 
-dist-setup.py-sdist: 
+dist-pysource-sdist: 
 	${CD} ${DIST_DIR}; ${PYTHON} setup.py sdist
 
 # generate windows exe (like the exe you get for numpy or matplotlib)
-dist-setup.py-bdist_wininst: 
+dist-pysource-bdist_wininst: 
 	${CD} ${DIST_DIR}; ${PYTHON} setup.py ${BDIST_WININST}
 
-dist-pypi-upload:
-	${CD} ${DIST_DIR}; ${PYTHON} setup.py register sdist ${BDIST_WININST} upload
+# CEB: should probably just upload msi and tar.gz to pypi manually, if we're going to do it at all
+#
+## put dist onto pypi
+#dist-pypi-upload:
+#	${CD} ${DIST_DIR}; ${PYTHON} setup.py register sdist ${BDIST_WININST} upload
 
 # CEBALERT: I seem to need these for this 'if' section to be seen by
 # make - is that right?
@@ -457,7 +459,7 @@ UBUNTU_DIR = ${DIST_TMPDIR}/topographica-${UBUNTU_RELEASE}
 UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
 
 
-deb: dist-setup.py
+deb: dist-pysource
 	cd ${DIST_TMPDIR}; cp topographica-${RELEASE}.tar.gz topographica_${UBUNTU_RELEASE}.orig.tar.gz
 	cd ${DIST_TMPDIR}; mv topographica-${RELEASE} topographica-${UBUNTU_RELEASE}
 	cp -R debian ${UBUNTU_DIR}/debian
