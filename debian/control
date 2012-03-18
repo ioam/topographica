@@ -2,15 +2,15 @@ Source: topographica
 Section: python
 Priority: optional
 Maintainer: C. E. Ball <ceball@gmail.com>
-Original-Maintainer: Krzysztof Gorgolewski <krzysztof.gorgolewski@gmail.com>
+Original-Maintainer: C. E. Ball <ceball@gmail.com>
 Build-Depends: cdbs, debhelper (>= 6), python-central (>= 0.5.6), python-all-dev (>= 2.3.5-11)
 Standards-Version: 3.8.0
-XS-Python-Version: >= 2.5, << 2.7
+XS-Python-Version: >= 2.5
 Homepage: http://www.topographica.org
 
 Package: topographica
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python (>> 2.5), python (<<2.7), python-dev, python-tk, python-numpy, python-gmpy, python-matplotlib, python-scipy, ipython, python-imaging, python-imaging-tk
+Depends: ${misc:Depends}, ${python:Depends}, python (>> 2.5), python-dev, python-tk, python-numpy, python-gmpy, python-matplotlib, python-scipy, ipython, python-imaging, python-imaging-tk
 XB-Python-Version: ${python:Versions}
 Description: Software package for computational modeling of neural maps.
  Topographica is a software package for computational modeling of neural maps, 
