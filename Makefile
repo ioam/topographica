@@ -409,7 +409,7 @@ endif
 # Or, remove --spec-only to build rpm on your system (but make sure
 # you have python 2.6...I don't).
 rpm:
-	${CD} ${DIST_DIR}; ${PYTHON} setup.py bdist_rpm --release=${RPM_RELEASE} --requires "python,python-devel,tkinter,numpy,scipy,python-imaging-tk,python-matplotlib,python-matplotlib-tk,ipython" --group="Productivity/Scientific/Other"  --spec-only
+	${CD} ${DIST_DIR}; ${PYTHON} setup.py bdist_rpm --release=${RPM_RELEASE} --requires "python,python-devel,tkinter,numpy,scipy,python-imaging-tk,python-matplotlib,python-matplotlib-tk,ipython" --group="Productivity/Scientific/Other" --source-only
 
 # CEBALERTs about RPM: (1) can't seem to specify python 2.6! so only
 # works where python 2.6 (or 2.5) is the default on a system. (2)
