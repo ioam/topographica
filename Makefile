@@ -451,7 +451,7 @@ rpm:
 # redundancy in the creation of the backports.
 
 UBUNTU_ENV = env DEBFULLNAME='C. E. Ball' DEBEMAIL='ceball@gmail.com' GPGKEY=6C92B17B
-DEBUILD = ${UBUNTU_ENV} debuild
+DEBUILD = ${UBUNTU_ENV} debuild -S -sa -uc -us 
 UBUNTU_TARGET = oneiric
 UBUNTU_BACKPORTS = lucid^ maverick^ natty^ 
 
@@ -469,7 +469,7 @@ deb: dist-pysource
 	echo ${LOG_TEXT} >> ${UBUNTU_CHANGELOG}
 	echo "" >> ${UBUNTU_CHANGELOG}
 	echo " -- C. E. Ball <ceball@gmail.com>  ${shell date -R}" >> ${UBUNTU_CHANGELOG}
-	cd ${UBUNTU_DIR}; ${DEBUILD} -S -sa -uc -us
+	cd ${UBUNTU_DIR}; ${DEBUILD}
 # CEBALERT: I never got signing to work without interaction in buildbot
 #	cd ${DIST_TMPDIR}; ${UBUNTU_ENV} debsign *.changes  # CB: could move this line to deb-ppa, since signing only required for ppa
 # CB: could put something like this line in to test the build locally
@@ -481,19 +481,10 @@ deb-backports: ${subst ^,_DEB_BACKPORTS,${UBUNTU_BACKPORTS}}
 %_DEB_BACKPORTS:
 	cd ${UBUNTU_DIR}/debian; cp changelog ../../changelog.orig
 	cd ${UBUNTU_DIR}/debian; cp control ../../control.orig;
-
-# CEB: if need special cases, something like this:
-# special case for hardy, which has only tk 8.4
-#	if [ "$*" = hardy ]; then \
-#		cd ${UBUNTU_DIR}/debian; sed -e 's/python-tk/python-tk, tk-tile/' ../../control.orig > control; \
-#	fi;
-
 	cd ${UBUNTU_DIR}/debian; rm changelog*; cp ../../changelog.orig changelog	
 	cd ${UBUNTU_DIR}; ${UBUNTU_ENV} debchange --force-bad-version --newversion "${UBUNTU_RELEASE}~$*" --force-distribution --distribution $* "Backport to $*."
-	cd ${UBUNTU_DIR}; ${DEBUILD} 
-	cd ${UBUNTU_DIR}; ${DEBUILD} -S -sa
-# restore changes made for backports
-	cd ${UBUNTU_DIR}/debian; cp ../../control.orig control
+	cd ${UBUNTU_DIR}; ${DEBUILD}
+# revert changes made for backports
 	cd ${UBUNTU_DIR}/debian; cp ../../changelog.orig changelog
 
 # Requires that you have first run make deb, deb-backports
