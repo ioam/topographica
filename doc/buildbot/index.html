@@ -12,34 +12,35 @@
 <ul>
 
 <li>
-Results of latest builds from source (includes tests):&nbsp;&nbsp;
-<a href="one_box_per_builder?builder=x86_64_DICE_SL5">Linux</a>&nbsp;&nbsp;
+<a href="waterfall?show_events=False">All builds, plus developers' changes</a>
 </li>
 
 <li>
-Results of latest setup.py tests:&nbsp;&nbsp;
-<a href="one_box_per_builder?builder=x86_DICE_FC13_setup&builder=x86_64_UbuntuLucid_setup">Linux</a>&nbsp;&nbsp;
-<a href="one_box_per_builder?builder=EPD7_rh5_x86_64">EPD on Linux</a>&nbsp;&nbsp;
-<a href="one_box_per_builder?builder=EPD7_Win7_x86_64">EPD on Windows</a>&nbsp;&nbsp;
-EPD on Mac&nbsp;&nbsp;
+Performance:&nbsp;&nbsp;&nbsp;
+[running time]&nbsp;&nbsp;&nbsp;
+[startup]</a>&nbsp;&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=performance">[details]</a>
 </li>
 
 <li>
 Coverage:&nbsp;&nbsp;&nbsp;
 [<a href="coverage/unittests/">unit tests</a>]&nbsp;&nbsp;&nbsp;
-[<a href="coverage/unittests_guitests/">unit tests + gui tests</a>]&nbsp;&nbsp;&nbsp;
-[<a href="coverage/unittests_guitests_slowtests_unopttests/">unit tests + gui tests + results tests</a>]
+[<a href="coverage/unittests_slowtests_unopttests/">unit tests + performance tests</a>]
+<!-- [<a href="coverage/unittests_guitests/">gui tests</a>]&nbsp;&nbsp;&nbsp; -->
 </li>
 
 <li>
-Performance:&nbsp;&nbsp;
-running time&nbsp;&nbsp;
-startup
-<a href="p/performance_plot.png">plot</a>
+User install:&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=EPD7-rh5-x86_64">[EPD on Linux]</a>&nbsp;&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=EPD7-win-x86">[EPD on Windows]</a>&nbsp;&nbsp;&nbsp;
+<a href="one_box_per_builder?builder=EPD7-macosx-i386">[EPD on Mac]</a>&nbsp;&nbsp;&nbsp;
 </li>
 
 <li>
-<a href="waterfall?show_events=False">All builds, plus developers' changes</a>
+Developer install:&nbsp;&nbsp;&nbsp;
+[Ubuntu (system Python)]</a>&nbsp;&nbsp;&nbsp;
+[Ubuntu (source)]</a>&nbsp;&nbsp;&nbsp;
+[FC (source)]</a>&nbsp;&nbsp;&nbsp;
 </li>
 
 </ul>
@@ -47,24 +48,25 @@ startup
 <h2>Weekly distribution builds</h2>
 
 <P>Automatically produced from our SVN repository every week, these
-builds have passed our unit tests but have not been checked by a
-human. To download an official release of Topographica, please
+builds have passed our unit tests but have not been checked by a human
+on the relevant platform. To download an official release of
+Topographica, please
 see <a href="http://topographica.org/Downloads">topographica.org/Downloads</a>.
 
-
 <ul>
-<li>Linux <a href="https://launchpad.net/~ceball/+archive/ppa">DEBs</a> or 
-<a href="https://build.opensuse.org/project/show?project=home:ceball:topographica-unstable">RPMs</a>
-</li>
-
-<li>
-Windows <a href="dist/exe/">exe</a> or <a href="dist/msi/">msi</a> (for installation into
-existing python environment)
-</li>
 
 <li>
 Platform-independent <a href="dist/setup.py/">tar.gz</a> source archives (for "python setup.py
-install" into existing python environment)
+install" into existing python environment e.g. EPD 7)
+</li>
+
+<li>
+Windows <a href="dist/exe/">exe</a> (for installation into
+existing python environment e.g. EPD 7)
+</li>
+
+<li>Linux <a href="dist/deb-source/">source DEBs</a> or 
+<a href="dist/rpm-source/">source RPMs</a>
 </li>
 
 <!--
