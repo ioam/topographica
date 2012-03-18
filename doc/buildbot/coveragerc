@@ -4,7 +4,7 @@
 cover_pylib = False
 source = topo , param
 branch = True
-omit = topo/tests/*
+omit = topo/tests/* , topo/tkgui/* , param/tk.py, param/external.py
 
 [report]
-omit = topo/tests/* 
+omit = topo/tests/* , topo/tkgui/* , param/tk.py, param/external.py
