@@ -423,6 +423,7 @@ rpm:
 # sudo apt-get install devscripts fakeroot cdbs dput pbuilder alien
 # sudo pbuilder create
 #
+# --- optional, currently unused steps for launchpad
 # ln -s doc/buildbot/dot-dput.cf ~/.dput.cf
 #
 # Set up GPG key, sign Launchpad code of conduct.
@@ -431,6 +432,7 @@ rpm:
 # export GPGKEY=whatever
 # killall -q gpg-agent
 # eval $(gpg-agent --daemon)
+# ---
 #
 # See https://wiki.ubuntu.com/PackagingGuide/Complete for more info.
 #
@@ -448,8 +450,8 @@ rpm:
 
 UBUNTU_ENV = env DEBFULLNAME='C. E. Ball' DEBEMAIL='ceball@gmail.com' GPGKEY=6C92B17B
 DEBUILD = ${UBUNTU_ENV} debuild
-UBUNTU_TARGET = natty
-UBUNTU_BACKPORTS = lucid^ hardy^ 
+UBUNTU_TARGET = oneiric
+UBUNTU_BACKPORTS = lucid^ maverick^ natty^ 
 
 UBUNTU_DIR = ${DIST_TMPDIR}/topographica-${UBUNTU_RELEASE}
 UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
@@ -466,8 +468,9 @@ deb: dist-setup.py
 	echo "" >> ${UBUNTU_CHANGELOG}
 	echo " -- C. E. Ball <ceball@gmail.com>  ${shell date -R}" >> ${UBUNTU_CHANGELOG}
 	cd ${UBUNTU_DIR}; ${DEBUILD} -S -sa -uc -us
-	cd ${DIST_TMPDIR}; ${UBUNTU_ENV} debsign *.changes  # CB: could move this line to deb-ppa, since signing only required for ppa
-# CB: could put this line in to test the build locally
+# CEBALERT: I never got signing to work without interaction in buildbot
+#	cd ${DIST_TMPDIR}; ${UBUNTU_ENV} debsign *.changes  # CB: could move this line to deb-ppa, since signing only required for ppa
+# CB: could put something like this line in to test the build locally
 # sudo pbuilder build topographica_${UBUNTU_RELEASE}~${UBUNTU_TARGET}.dsc 
 
 # You must first have run 'make deb'
@@ -477,10 +480,11 @@ deb-backports: ${subst ^,_DEB_BACKPORTS,${UBUNTU_BACKPORTS}}
 	cd ${UBUNTU_DIR}/debian; cp changelog ../../changelog.orig
 	cd ${UBUNTU_DIR}/debian; cp control ../../control.orig;
 
+# CEB: if need special cases, something like this:
 # special case for hardy, which has only tk 8.4
-	if [ "$*" = hardy ]; then \
-		cd ${UBUNTU_DIR}/debian; sed -e 's/python-tk/python-tk, tk-tile/' ../../control.orig > control; \
-	fi;
+#	if [ "$*" = hardy ]; then \
+#		cd ${UBUNTU_DIR}/debian; sed -e 's/python-tk/python-tk, tk-tile/' ../../control.orig > control; \
+#	fi;
 
 	cd ${UBUNTU_DIR}/debian; rm changelog*; cp ../../changelog.orig changelog	
 	cd ${UBUNTU_DIR}; ${UBUNTU_ENV} debchange --force-bad-version --newversion "${UBUNTU_RELEASE}~$*" --force-distribution --distribution $* "Backport to $*."
