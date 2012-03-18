@@ -191,12 +191,10 @@ generate-map-tests-data:
 
 #############################################################################
 ##### tests
+#
+# (convenience targets for platforms with Make; each of these should
+# just call a Python command)
 
-# CEBALERT: remove all these and document elsewhere how to run all the
-# tests (might involve making them simpler to run).  When removing,
-# check that buildbot uses the command below (or a new simplified
-# command if one is introduced) for each target rather than just "make
-# target".
 tests:
 	./topographica -p 'targets=["unit"]' topo/tests/runtests.py
 
@@ -214,16 +212,17 @@ startup-speed-tests:
 
 all-speed-tests: speed-tests startup-speed-tests
 
-snapshot-tests:
-	./topographica -p 'targets=["snapshots","pickle","scriptrepr","batch"]' topo/tests/runtests.py
-
 gui-tests:
 	./topographica -p 'targets=["gui"]' topo/tests/runtests.py
 
 map-tests:
 	./topographica -p 'targets=["maptests"]' topo/tests/runtests.py
 
-slow-tests: tests train-tests unopt-train-tests all-speed-tests snapshot-tests gui-tests map-tests
+slow-tests: 
+	./topographica topo/tests/runtests.py
+
+snapshot-tests:
+	./topographica -p 'targets=["allsnapshottests"]' topo/tests/runtests.py
 
 #############################################################################
 

@@ -103,7 +103,9 @@ if len(p.targets)==0:
 elif p.targets == ['all']:
     # ALL
     p.targets = []
-
+elif p.targets == ['allsnapshottests']:
+    # to support an existing Makefile command
+    p.targets = ['snapshots','pickle','scriptrepr']
 
 if not p.weave:
     importweave = "-c 'import_weave=False'"
@@ -224,7 +226,6 @@ target['scriptrepr'].append(topographica_script + " %(script)s -a -c \"import pa
 script_repr_test_path = os.path.join(tmpd,"script_repr_test.ty")    
 target['scriptrepr'].append(topographica_script + " " + script_repr_test_path)
 target['scriptrepr'].append(topographica_script + "-c \"import shutil;shutil.rmtree('%s')\""%tmpd)
-
 
 
 ### GUI tests
