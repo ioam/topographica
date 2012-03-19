@@ -177,12 +177,6 @@ doc: FORCE
 	make -C doc/
 
 
-print-info:
-	@echo Running at ${shell date +%s}
-	@echo svnversion ${SVNVERSION}
-
-
-
 # CEBALERT: Move into runtests.py
 generate-map-tests-data:
 	./topographica -c "cortex_density=8" examples/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; generate(plotgroups_to_test)" 
@@ -192,37 +186,22 @@ generate-map-tests-data:
 #############################################################################
 ##### tests
 #
-# (convenience targets for platforms with Make; each of these should
-# just call a Python command)
+# Convenience targets for platforms with Make; each of these should
+# just call a Python command, and should not be the advertised way to
+# do whatever the target does. (Also, note that buildbot no longer uses
+# any of these.) I think they could be deleted, but some developers
+# are probably used to typing "make slow-tests" or "make tests". Should
+# we make it easier to run these targets via python?
+
+all-speed-tests:
+	./topographica -p timing=True -p 'targets=["speed"]' topo/tests/runtests.py
 
 tests:
 	./topographica -p 'targets=["unit"]' topo/tests/runtests.py
 
-train-tests: print-info
-	./topographica -p 'targets=["traintests"]' topo/tests/runtests.py
+slow-tests: # all tests except speed tests
+	./topographica -p 'targets=["all"]' topo/tests/runtests.py
 
-unopt-train-tests: print-info
-	./topographica -p 'testdp=5' -p 'weave=False' -p 'targets=["traintests"]' topo/tests/runtests.py
-
-speed-tests:
-	./topographica -p timing=True -p 'targets=["speedtests"]' topo/tests/runtests.py
-
-startup-speed-tests: 
-	./topographica -p timing=True -p 'targets=["startupspeedtests"]' topo/tests/runtests.py
-
-all-speed-tests: speed-tests startup-speed-tests
-
-gui-tests:
-	./topographica -p 'targets=["gui"]' topo/tests/runtests.py
-
-map-tests:
-	./topographica -p 'targets=["maptests"]' topo/tests/runtests.py
-
-slow-tests: 
-	./topographica topo/tests/runtests.py
-
-snapshot-tests:
-	./topographica -p 'targets=["allsnapshottests"]' topo/tests/runtests.py
 
 #############################################################################
 

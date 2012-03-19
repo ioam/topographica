@@ -21,7 +21,8 @@ on their system. The other, slower targets would only need to be run
 by buildbot (on behalf of everyone).
 
 Unfortunately, the unit tests do not currently cover enough! It's an
-important project to improve them.
+important project to improve them. Until then, the default is to run
+more of the tests (but not all, since that takes too long).
 """
 
 # CEBALERT: need to fix the issue with global_params reporting name=X
@@ -48,18 +49,16 @@ import param
 from topo.misc.commandline import global_params as p
 
 p.add(
-    targets = param.List(default=[]),
-
-    extra_args = param.String(default=""), 
+    targets = param.List(default=[],doc="Leave empty for default set, ['all'] for all tests except speedtests, ['speed'] for speed tests, or else list the targets required."),
 
     coverage = param.Boolean(default=False),
 
     timing = param.Boolean(default=False),
 
-    weave = param.Boolean(default=True),
-
-    testdp = param.Number(default=7)
+    testdp = param.Number(default=7),
     
+    testdp_unopt = param.Number(default=5)
+
     )
 
 
@@ -100,22 +99,17 @@ else:
 if len(p.targets)==0:
     # DEFAULT
     p.targets = ['unit','traintests','snapshots','gui','maptests'] # maptests wouldn't be default except it's caught platform different problems before (there aren't enough unit tests!)
-elif p.targets == ['all']:
-    # ALL
-    p.targets = []
-elif p.targets == ['allsnapshottests']:
-    # to support an existing Makefile command
-    p.targets = ['snapshots','pickle','scriptrepr']
 
-if not p.weave:
-    importweave = "-c 'import_weave=False'"
-else:
-    importweave = ""
+
+    
+elif p.targets == ['allsnapshottests']:
+    # CEBALERT: should just combine these tests anyway 
+    p.targets = ['snapshots','pickle']
 
 # ->params ?
 tests_dir = param.resolve_path("topo/tests",path_to_file=False)
 scripts_dir = param.resolve_path("examples",path_to_file=False) ### XXX
-topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0] + " " + importweave +  " " + p.extra_args
+topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0] + " " +  " "
 
 def _runc(cmd):
     print cmd
@@ -124,6 +118,8 @@ def _runc(cmd):
 
 import topo.misc.keyedlist
 target = topo.misc.keyedlist.KeyedList()
+speedtarget = topo.misc.keyedlist.KeyedList()
+
 
 # CEBALERT: need to pick which scripts to include for traintests and
 # speedtests and startupspeedtests (see test_script.py).
@@ -169,20 +165,27 @@ for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
     target['traintests'].append(topographica_script +  " -c 'from topo.tests.test_script import test_script; test_script(script=\"%(script_path)s\",decimal=%(dp)s)'"%dict(script_path=script_path,dp=p.testdp))
 
-target['speedtests'] = []
+# CEBALERT: should use the code above but just with the changes for running without weave.
+target['unopttraintests'] = []
+for script in TRAINSCRIPTS:
+    script_path = os.path.join(scripts_dir,script)
+    target['unopttraintests'].append(topographica_script + " -c 'import_weave=False'" +  " -c 'from topo.tests.test_script import test_script; test_script(script=\"%(script_path)s\",decimal=%(dp)s)'"%dict(script_path=script_path,dp=p.testdp_unopt))
+
+
+speedtarget['speedtests'] = []
 SPEEDSCRIPTS = TRAINSCRIPTS
 SPEEDSCRIPTS.remove("hierarchical.ty") # CEBALERT: remove problematic example (doesn't work for some densities)
 for script in SPEEDSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    target['speedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_speed_data;compare_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
+    speedtarget['speedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_speed_data;compare_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
 
 
 STARTUPSPEEDSCRIPTS = ["lissom.ty","gcal.ty"]
 
-target['startupspeedtests'] = []
+speedtarget['startupspeedtests'] = []
 for script in STARTUPSPEEDSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    target['startupspeedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_startup_speed_data;compare_startup_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
+    speedtarget['startupspeedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_startup_speed_data;compare_startup_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
 
 
 
@@ -258,7 +261,18 @@ def start():
     print "Running: %s"%p.targets
     print
 
-    for name in (p.targets or target.keys()):
+    # CEBALERT: rename one of target or targets!
+
+    if p.targets==['all']:
+        targets = target.keys()
+    elif p.targets==['speed']:
+        targets = speedtarget.keys()
+    else:
+        targets = p.targets
+
+    target.update(speedtarget)
+
+    for name in targets:
         print "*** " + name
         for cmd in target[name]:
             if _runc(cmd) > 0:
