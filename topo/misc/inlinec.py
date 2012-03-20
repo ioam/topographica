@@ -150,6 +150,8 @@ try:
     inline = inline_weave
 
 except ImportError:
+    # CEBALERT: where does 'caution' fit in our warnings system? (Also
+    # used in other places in this file.)
     print 'Caution: Unable to import Weave.  Will use non-optimized versions of most components.'
 
 
@@ -159,9 +161,8 @@ if weave_imported:
         # to force recompilation each time
         inline('double x=%s;'%random.random())
         compiled = True
-    except:
-        # CB: should maybe display error
-        print 'Caution: Unable to use Weave to compile (no C/C++ compiler?). Will use non-optimized versions of most components.'
+    except Exception, e:
+        print "Caution: Unable to use Weave to compile: \"%s\". Will use non-optimized versions of most components."%str(e)
 
 # Flag available for all to use to test whether to use the inline
 # versions or not.
