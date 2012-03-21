@@ -215,7 +215,7 @@ target['pickle'] = []
 target['pickle'].append(topographica_script + " -c 'from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(); import sys; sys.exit(errs)'")
 
 # unpickle-compatibility-tests:
-pickle_path = os.path.join(tests_dir,"instances-r11916.pickle")
+pickle_path = os.path.join(tests_dir,"instances-r11275.pickle")
 target['pickle'].append(topographica_script + "-l -c 'from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(existing_pickles=\"%(pickle_path)s\"); import sys; sys.exit(errs)'"%dict(pickle_path=pickle_path))
 
 
