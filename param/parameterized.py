@@ -872,7 +872,6 @@ class Parameterized(object):
         self._setup_params(**params)
         object_count += 1
 
-        self.nopickle = [] # CEBALERT: remove this - we don't use it
         self.debug('Initialized',self)
 
         self.initialized=True
