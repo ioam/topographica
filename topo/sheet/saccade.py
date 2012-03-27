@@ -213,8 +213,8 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
         super(ShiftingGeneratorSheet,self).start()
         if self.fixation_jitter_period > 0:
             now = self.simulation.time()
-            refix_event = PeriodicEventSequence(now+self.simulation._convert_to_time_type(self.fixation_jitter_period),
-                                                self.simulation._convert_to_time_type(self.fixation_jitter_period),
+            refix_event = PeriodicEventSequence(now+self.simulation.convert_to_time_type(self.fixation_jitter_period),
+                                                self.simulation.convert_to_time_type(self.fixation_jitter_period),
                                                 [FunctionEvent(0,self.refixate)])
             self.simulation.enqueue_event(refix_event)
 

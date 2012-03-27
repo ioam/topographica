@@ -202,7 +202,7 @@ class Dynamic(Parameter):
 # (Number is a new abstract base class).
 # http://docs.python.org/whatsnew/2.6.html
 import operator
-is_number = operator.isNumberType
+_is_number = operator.isNumberType
 
 
 
@@ -321,7 +321,7 @@ class Number(Dynamic):
         # Currently, values outside the bounds are silently cropped to
         # be inside the bounds; it may be appropriate to add a warning
         # in such cases.
-        if (is_number(val)):
+        if (_is_number(val)):
             if self.bounds==None:
                 return val
             vmin, vmax = self.bounds 
@@ -388,7 +388,7 @@ class Number(Dynamic):
         if self.allow_None and val==None:
             return
 
-        if not (is_number(val)):
+        if not (_is_number(val)):
             raise ValueError("Parameter '%s' only takes numeric values"%(self._attrib_name))
             
         self._checkBounds(val)
@@ -492,7 +492,7 @@ class NumericTuple(Parameter):
             raise ValueError("%s: tuple is not of the correct length (%d instead of %d)." %
                              (self._attrib_name,len(val),self.length))
         for n in val:
-            if not is_number(n):
+            if not _is_number(n):
                 raise ValueError("%s: tuple element is not numeric: %s." % (self._attrib_name,str(n)))
             
     def __set__(self,obj,val):
@@ -524,7 +524,7 @@ class Callable(Parameter):
 # CBNOTE: python now has abstract base classes, so we could update
 # this. At least if the check is in a method, all such checks could be
 # changed at once.
-def is_abstract(class_):
+def _is_abstract(class_):
     try:
         return class_.abstract
     except AttributeError:
@@ -543,7 +543,7 @@ def concrete_descendents(parentclass):
     Only non-abstract classes will be included.
     """
     return dict([(c.__name__,c) for c in descendents(parentclass)
-                 if not is_abstract(c)])
+                 if not _is_abstract(c)])
 
 
 class Composite(Parameter):

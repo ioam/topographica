@@ -7,7 +7,7 @@
 >>> topo.sim.time_type = fixedpoint.FixedPoint
 >>> topo.sim.time_type_args = (4,)
 >>> z = fixedpoint.FixedPoint(0.999,4)
->>> z-=topo.sim._convert_to_time_type(0.0004)
+>>> z-=topo.sim.convert_to_time_type(0.0004)
 >>> z
 FixedPoint('0.9986', 4)
 >>> topo.sim.time_type = original_type

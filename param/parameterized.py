@@ -96,7 +96,7 @@ def all_equal(arg1,arg2):
     Uses all(arg1==arg2) for sequences, and arg1==arg2 otherwise.
     """
     try:
-        return all(arg1==arg2)
+        return all(a1 == a2 for a1, a2 in zip(arg1, arg2))
     except TypeError:
         return arg1==arg2
 
@@ -729,7 +729,7 @@ def script_repr(val,imports,prefix,settings):
     return rep
 
 
-# see script_repr()
+#: see script_repr()
 script_repr_reg = {}
 
 
@@ -770,10 +770,10 @@ script_repr_reg[tuple]=container_script_repr
 script_repr_reg[FunctionType]=function_script_repr
 
 
-# If not None, the value of this Parameter will be called (using '()')
-# before every call to __db_print, and is expected to evaluate to a
-# string that is suitable for prefixing messages and warnings (such
-# as some indicator of the global state).
+#: If not None, the value of this Parameter will be called (using '()')
+#: before every call to __db_print, and is expected to evaluate to a
+#: string that is suitable for prefixing messages and warnings (such
+#: as some indicator of the global state).
 dbprint_prefix=None
 
 

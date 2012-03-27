@@ -115,7 +115,7 @@ class GeneratorSheet(Sheet):
             # if it has a positive period, then schedule a repeating event to trigger it
             e=FunctionEvent(0,self.generate)
             now = self.simulation.time()
-            self.simulation.enqueue_event(PeriodicEventSequence(now+self.simulation._convert_to_time_type(self.phase),self.simulation._convert_to_time_type(self.period),[e]))
+            self.simulation.enqueue_event(PeriodicEventSequence(now+self.simulation.convert_to_time_type(self.phase),self.simulation.convert_to_time_type(self.period),[e]))
 
     def input_event(self,conn,data):
         raise NotImplementedError

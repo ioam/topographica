@@ -61,10 +61,6 @@ from copy import copy, deepcopy
 import time
 import bisect
 
-# JABALERT: Are these used for anything?
-SLEEP_EXCEPTION = "Sleep Exception"
-STOP = "Simulation Stopped"
-
 # CEBALERT: Is it dangerous to have 'Forever' implemented
 # like this? To start with, min(Forever,1) gives
 # FixedPoint('-1.00,2') i.e. Forever.
@@ -72,10 +68,10 @@ STOP = "Simulation Stopped"
 Forever = -1
 # (Python 2.6 includes support for float('inf') on all platforms?)
 
-# Default path to the current simulation, from main
-# Only to be used by script_repr(), to allow it to generate
-# a runnable script
-simulation_path="topo.sim"
+#: Default path to the current simulation, from main
+#: Only to be used by script_repr(), to allow it to generate
+#: a runnable script
+_simulation_path="topo.sim"
 
 
 
@@ -204,7 +200,7 @@ class EventProcessor(param.Parameterized):
         data=deepcopy(data)
         for conn in out_conns_on_src_port:
             #self.verbose("Sending output on src_port %s via connection %s to %s" % (str(src_port), conn.name, conn.dest.name))
-            e=EPConnectionEvent(self.simulation._convert_to_time_type(conn.delay)+self.simulation.time(),conn,data,deep_copy=False)
+            e=EPConnectionEvent(self.simulation.convert_to_time_type(conn.delay)+self.simulation.time(),conn,data,deep_copy=False)
             self.simulation.enqueue_event(e)
             
 
@@ -229,7 +225,7 @@ class EventProcessor(param.Parameterized):
     
     def script_repr(self,imports=[],prefix="    "):
         """Generate a runnable command for creating this EventProcessor."""
-        return simulation_path+"['"+self.name+"']="+\
+        return _simulation_path+"['"+self.name+"']="+\
         super(EventProcessor,self).script_repr(imports=imports,prefix=prefix)
 
 
@@ -376,7 +372,7 @@ class EPConnection(param.Parameterized):
         mod = self.__module__
         imports.append("from %s import %s" % (mod,cls))
 
-        return simulation_path+".connect('"+self.src.name+"','"+self.dest.name+ \
+        return _simulation_path+".connect('"+self.src.name+"','"+self.dest.name+ \
                "',connection_type="+self.__class__.__name__+ \
                ",\n"+prefix+(",\n"+prefix).join(settings) + ")"
 
@@ -464,7 +460,7 @@ class CommandEvent(Event):
 
     def script_repr(self,imports=[],prefix="    "):
         """Generate a runnable command for creating this CommandEvent."""
-        return simulation_path+'.schedule_command('\
+        return _simulation_path+'.schedule_command('\
                +`self.time`+',"'+self.command_string+'")'
 
 
@@ -748,7 +744,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
     Simulation, no matter how many times it is instantiated.
     """
 
-    # CEBALERT: Must use _convert_to_time_type() everywhere a time is
+    # CEBALERT: Must use convert_to_time_type() everywhere a time is
     # specified to ensure all times are the appropriate type. Relying
     # on everyone to convert times to the time type seems dangerous!
 
@@ -810,7 +806,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
     # with functions requiring arguments
     # (e.g. fixedpoint.FixedPoint(time,precision=4)) by currying or
     # creating their own wrapper function. We wouldn't then need
-    # _convert_to_time_type(), it would instead just be a call to
+    # convert_to_time_type(), it would instead just be a call to
     # time_type() (which should also be renamed).
     time_type_args = param.Parameter(default=(),constant=True,doc="""
         Tuple of arguments passed to time_type after the first
@@ -943,9 +939,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
                 # name x...)
                 
                 
-    # CEBALERT: if we're keeping this, should have a better name,
-    # and probably shouldn't be private.
-    def _convert_to_time_type(self,time):
+    # CEBALERT: if we're keeping this, should have a better name
+    def convert_to_time_type(self,time):
         """
         Convert the supplied time to the Simulation's time_type.
         """
@@ -971,7 +966,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         """
         Initialize a Simulation instance.
         """
-        self._time = self._convert_to_time_type(0)
+        self._time = self.convert_to_time_type(0)
 
         param.Parameterized.__init__(self,**params)
 
@@ -1186,8 +1181,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # string to specify the time rather than a float (since float
         # is not compatible with all number types).
         
-        duration = self._convert_to_time_type(duration)
-        until = self._convert_to_time_type(until)
+        duration = self.convert_to_time_type(duration)
+        until = self.convert_to_time_type(until)
         
         
         # CEBHACKALERT: If I do topo.sim.run(10), then topo.sim.run(until=3),
@@ -1270,7 +1265,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         override this method as they wish, e.g. to wait for an
         external real time clock to advance first.
         """
-        self._time += self._convert_to_time_type(delay)
+        self._time += self.convert_to_time_type(delay)
 
     def enqueue_event(self,event):
         """
@@ -1301,7 +1296,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         The command should be a string.
         """
-        event = CommandEvent(time=self._convert_to_time_type(time),command_string=command_string)
+        event = CommandEvent(time=self.convert_to_time_type(time),command_string=command_string)
         self.enqueue_event(event)
         
 
@@ -1458,7 +1453,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         imps  = sorted(set(imports))
 
-        vals  = [simulation_path + "." + p + "=" + repr(getattr(self,p)) for p in
+        vals  = [_simulation_path + "." + p + "=" + repr(getattr(self,p)) for p in
                  ["name","startup_commands"]
                  if getattr(self,p)]
 

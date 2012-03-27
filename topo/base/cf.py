@@ -75,8 +75,8 @@ def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
 
 
 
-# Specified explicitly when creating weights matrix - required
-# for optimized C functions.
+#: Specified explicitly when creating weights matrix - required
+#: for optimized C functions.
 weight_type = Float32
 
 
@@ -614,6 +614,7 @@ class CFProjection(Projection):
     # CB: should be _initialize_cfs() since we already have 'initialize_cfs' flag?
     def _create_cfs(self):
         vectorized_create_cf = simple_vectorize(self._create_cf)
+        #:
         self.cfs = vectorized_create_cf(*self._generate_coords())
         self.flatcfs = list(self.cfs.flat)
 

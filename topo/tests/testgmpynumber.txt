@@ -28,7 +28,7 @@ True
 >>> topo.sim.time_type = mpq
 >>> topo.sim.time_type_args = ()
 >>> t1.z = mpq(0.999)
->>> t1.z-=topo.sim._convert_to_time_type(0.0004)
+>>> t1.z-=topo.sim.convert_to_time_type(0.0004)
 >>> t1.z
 mpq(4993,5000)
 >>> topo.sim.time_type = original_type
