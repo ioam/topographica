@@ -1,3 +1,149 @@
+2012-03-21 dstefanov
+
+	* [r11937] topo/tests/instances-r11275.pickle,
+	  topo/tests/instances-r11916.pickle, topo/tests/runtests.py:
+	  Revert "Re-generate pickle for pickle tests to remove errors
+	  from numpy API changes" This reverts commit r11918.
+
+	* [r11936] topo/tests/gcal.ty_DATA,
+	  topo/tests/hierarchical.ty_DATA, topo/tests/lissom.ty_DATA,
+	  topo/tests/lissom_oo_or.ty_DATA,
+	  topo/tests/lissom_or.ty_DATA,
+	  topo/tests/som_retinotopy.ty_DATA,
+	  topo/tests/sullivan_neurocomputing04.ty_DATA: Revert
+	  "Re-generate traintest data to fix tests after random seed
+	  change in r11891" This reverts commit r11917.
+
+	* [r11935] topo/pattern/random.py: Revert "Added a random seed
+	  parameter to control GaussianCloud patterns" This reverts
+	  commit r11891.
+
+2012-03-20 ceball
+
+	* [r11934] topo/misc/inlinec.py: Print more info about why
+	  weave failed to compile test C code.
+
+2012-03-19 ceball
+
+	* [r11933] doc/buildbot/index.html, doc/buildbot/master.cfg:
+	  Cleanup of buildbot config (still more to go afterwards).
+
+	* [r11932] Makefile, topo/tests/runtests.py: Simplified test
+	  targets.
+
+2012-03-18 ceball
+
+	* [r11931] Makefile, topo/tests/runtests.py: Support last few
+	  Makefile test targets with runtests script.
+
+	* [r11930] doc/buildbot/index.html, doc/buildbot/master.cfg:
+	  Coverage no longer includes gui-related files by default.
+	  Added skeleton for EPD builders on OS X and Windows.
+	  Removed configs of perpetually missing/broken builders
+	  (including Launchpad PPA uploads, DICE slaves, Ubuntu build
+	  from source).  Renamed various other builders to better
+	  reflect what they do (notably 'archives' to
+	  'create-pysource').  Added build of source debs and rpms.
+
+	* [r11929] Makefile: Changes to comments.
+
+	* [r11928] doc/buildbot/coveragerc: By default, do not include
+	  gui files in coverage results (also do not include
+	  param/external.py).
+
+	* [r11927] debian/control: Python 2.7 now supported.  Changed
+	  original-maintainer to me.
+
+	* [r11926] Makefile: No longer sign any of the deb files (was
+	  still trying to sign backports).
+
+	* [r11925] Makefile: Make source rpm, not just spec.
+
+	* [r11924] Makefile: Using 'pysource' to refer to Python-only
+	  source distribution.
+
+	* [r11923] Makefile: Updated Ubuntu versions.  Removed deb
+	  signing from deb creation step.
+
+2012-03-14 ceball
+
+	* [r11922] Makefile: Note for use of epydoc outside fat
+	  distribution.
+
+	* [r11921] doc/Reference_Manual/index_text.php: Tried to
+	  simplify descriptions of external packages (to avoid
+	  maintaining installation instructions for many different
+	  packages).
+
+	* [r11920] topo/misc/__init__.py: Removed unnecessary __all__
+	  from module.
+
+	* [r11919] doc/Team_Members/index_text.php: Updated my
+	  section.
+
+2012-03-12 dstefanov
+
+	* [r11918] topo/tests/instances-r11275.pickle,
+	  topo/tests/instances-r11916.pickle, topo/tests/runtests.py:
+	  Re-generate pickle for pickle tests to remove errors from
+	  numpy API changes
+
+	* [r11917] topo/tests/gcal.ty_DATA,
+	  topo/tests/hierarchical.ty_DATA, topo/tests/lissom.ty_DATA,
+	  topo/tests/lissom_oo_or.ty_DATA,
+	  topo/tests/lissom_or.ty_DATA,
+	  topo/tests/som_retinotopy.ty_DATA,
+	  topo/tests/sullivan_neurocomputing04.ty_DATA: Re-generate
+	  traintest data to fix tests after random seed change in
+	  r11891
+
+2012-03-09 aplebe
+
+	* [r11916] topo/plotting/plot.py: added a normalization of the
+	  sheet_view matrix in range 0..1 in case it derives from a
+	  cyclic distribution, and it is used as Hue in a color plot
+
+2012-03-09 jbednar
+
+	* [r11915] topo/command/analysis.py: Fixed decode_feature
+	  after recent changes to Distribution, and added cropfn
+	  argument for doing tilt illusion experiments
+
+2012-03-09 dstefanov
+
+	* [r11914] topo/misc/commandline.py: Fix scriptrepr test and
+	  missing imports from -a
+
+2012-03-09 jbednar
+
+	* [r11913] examples/gcal.ty, examples/hierarchical.ty,
+	  examples/lissom.ty, examples/lissom_oo_or.ty,
+	  examples/lissom_or.ty, examples/obermayer_pnas90.ty,
+	  examples/saccade_demo.ty, examples/tiny.ty: Removed unused
+	  bounds parameter values from input patterns to be given to a
+	  GeneratorSheet, which overwrites the values anyway
+
+	* [r11912] Makefile: Made Changelog updating faster
+
+	* [r11911] topo/command/analysis.py: Fixed phase map plotting
+	  for now; may need to revisit
+
+2012-03-08 jbednar
+
+	* [r11910] doc/User_Manual/parameters_text.php: Expanded
+	  documentation of Parameters a bit.
+
+2012-03-05 antolikjan
+
+	* [r11909] contrib/JanA/CCLISSOM_push_pull.ty: more parameters
+
+	* [r11908] contrib/JanA/CCLISSOM_push_pull.ty: more parameters
+
+2012-03-05 jbednar
+
+	* [r11907] ChangeLog.txt: Updated with recent changes; not yet
+	  in News.
+
 2012-03-04 jlstevens
 
 	* [r11906] topo/base/cf.py, topo/learningfn/optimized.py,
