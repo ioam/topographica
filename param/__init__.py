@@ -701,7 +701,6 @@ class ClassSelector(Selector):
     """
     Parameter whose value is an instance of the specified class.    
     """
-    # CEBALERT: allow_None already a slot from superclass?
     __slots__ = ['class_','allow_None']
 
     def __init__(self,class_,default=None,instantiate=True,allow_None=False,**params):
