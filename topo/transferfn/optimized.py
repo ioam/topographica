@@ -118,4 +118,7 @@ provide_unoptimized_equivalent("CFPOF_DivisiveNormalizeL1_opt","CFPOF_DivisiveNo
 
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and
                     (issubclass(v,TransferFn) or issubclass(v,CFPOutputFn))]))
-
+__all__.remove("CFPOutputFn")
+__all__.remove("TransferFn")
+__all__.remove("IdentityTF")
+__all__.remove("DivisiveNormalizeL1")

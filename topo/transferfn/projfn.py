@@ -16,4 +16,4 @@ from topo.base.cf import CFPOF_Plugin,CFPOF_Identity  # pyflakes:ignore (API imp
 
 
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,CFPOutputFn)]))
-
+__all__.remove("CFPOutputFn")
