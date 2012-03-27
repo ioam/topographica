@@ -304,8 +304,6 @@ class Number(Dynamic):
     # should remove hack in
     # topo.tkgui.projectionpanel.UnitsPanel.sheet_change().
 
-    # CEBALERT: in the methods below, should be testing for identity
-    # with None, rather than equality
     def crop_to_bounds(self,val):
         """
         Return the given value cropped to be within the hard bounds
@@ -321,19 +319,19 @@ class Number(Dynamic):
         # Currently, values outside the bounds are silently cropped to
         # be inside the bounds; it may be appropriate to add a warning
         # in such cases.
-        if (_is_number(val)):
-            if self.bounds==None:
+        if _is_number(val):
+            if self.bounds is None:
                 return val
             vmin, vmax = self.bounds 
-            if vmin != None: 
+            if vmin is not None:
                 if val < vmin:
                     return  vmin
 
-            if vmax != None:
+            if vmax is not None:
                 if val > vmax:
                     return vmax
 
-        elif self.allow_None and val==None:
+        elif self.allow_None and val is None:
             return val
         
         else:
@@ -345,7 +343,7 @@ class Number(Dynamic):
 
     def _checkBounds(self, val):
     
-        if self.bounds!=None:
+        if self.bounds is not None:
             vmin,vmax = self.bounds
             incmin,incmax = self.inclusive_bounds
 
@@ -385,10 +383,10 @@ class Number(Dynamic):
         Checks that the value is numeric and that it is within the hard
         bounds; if not, an exception is raised.
         """
-        if self.allow_None and val==None:
+        if self.allow_None and val is None:
             return
 
-        if not (_is_number(val)):
+        if not _is_number(val):
             raise ValueError("Parameter '%s' only takes numeric values"%(self._attrib_name))
             
         self._checkBounds(val)
@@ -399,21 +397,21 @@ class Number(Dynamic):
         For each soft bound (upper and lower), if there is a defined bound (not equal to None)
         then it is returned, otherwise it defaults to the hard bound. The hard bound could still be None.
         """
-        if self.bounds==None:
+        if self.bounds is None:
             hl,hu=(None,None)
         else:
             hl,hu=self.bounds
 
-        if self._softbounds==None:
+        if self._softbounds is None:
             sl,su=(None,None)
         else:
             sl,su=self._softbounds
 
                 
-        if (sl==None): l = hl
+        if sl is None: l = hl
         else:          l = sl
 
-        if (su==None): u = hu
+        if su is None: u = hu
         else:          u = su
 
         return (l,u)
@@ -423,7 +421,7 @@ class Number(Dynamic):
 class Integer(Number):
 
     def _check_value(self,val):
-        if self.allow_None and val==None:
+        if self.allow_None and val is None:
             return
 
         if not isinstance(val,int):
@@ -776,23 +774,23 @@ class List(Parameter):
         if not (isinstance(val,list)):
             raise ValueError("List '%s' must be a list."%(self._attrib_name))
 
-        if self.bounds!=None:
+        if self.bounds is not None:
             min_length,max_length = self.bounds
             l=len(val)
-            if min_length != None and max_length != None:
+            if min_length is not None and max_length is not None:
                 if not (min_length <= l <= max_length):
                     raise ValueError("%s: list length must be between %s and %s (inclusive)"%(self._attrib_name,min_length,max_length))
-            elif min_length != None:
+            elif min_length is not None:
                 if not min_length <= l: 
                     raise ValueError("%s: list length must be at least %s."%(self._attrib_name,min_length))
-            elif max_length != None:
+            elif max_length is not None:
                 if not l <= max_length:
                     raise ValueError("%s: list length must be at most %s."%(self._attrib_name,max_length))
 
         self._check_type(val)
 
     def _check_type(self,val):
-        if self.class_!=None:
+        if self.class_ is not None:
             for v in val:
                 assert isinstance(v,self.class_),repr(v)+" is not an instance of " + repr(self.class_) + "."
 
