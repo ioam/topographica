@@ -291,3 +291,10 @@ pg.add_plot('Phase Preference',[('Hue','PhasePreference')])
 pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
 
 
+__all__ = [
+    "measure_and_analyze_complexity",
+    "complexity",
+    "compute_ACDC_orientation_tuning_curves",
+    "phase_preference_scatter_plot",
+    "analyze_complexity",
+]

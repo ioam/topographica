@@ -1299,3 +1299,22 @@ class UnitCurveCommand(FeatureCurveCommand):
         List of coordinates of units to measure.""")
 
     __abstract = True
+
+
+__all__ = [
+    "DistributionMatrix",
+    "FullMatrix",
+    "FeatureResponses",
+    "ReverseCorrelation",
+    "FeatureMaps",
+    "FeatureCurves",
+    "Feature",
+    "PatternPresenter",
+    "Subplotting",
+    "MeasureResponseCommand",
+    "SinusoidalMeasureResponseCommand",
+    "PositionMeasurementCommand",
+    "SingleInputResponseCommand",
+    "FeatureCurveCommand",
+    "UnitCurveCommand",
+]
