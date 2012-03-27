@@ -282,7 +282,7 @@ SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_o
 #@@	   ${RM} -r images sounds
 #@@	   ${RM} -r info
 #@@	   mkdir images; mv ./TMPellen_arthur.pgm images/ellen_arthur.pgm
-#@@	   ${RM} -r setup.py MANIFEST.in windows_postinstall.py topographica.ico
+#@@	   ${RM} -r setup.py MANIFEST.in
 #@@	   ${RM} -r tmp/
 #@@	   ${RM} -r contrib/
 #@@	   ${RM} -r .svn */.svn */*/.svn */*/*/.svn */*/*/*/.svn
@@ -326,9 +326,9 @@ dist-pysource: doc distdir reference-manual
 # clean dir but keep setup.py-related files
 	${CD} ${DIST_DIR}; ${PYTHON} create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
 	${CD} ${DIST_DIR}; ${MV} README.setup.txt README.txt
-	${CD} ${DIST_DIR}; ${MV} setup.py TMPsetup.py; mv MANIFEST.in tmpMANIFEST.in; mv topographica TMPtopographica; mv topographica.ico TMPtopographica.ico; mv windows_postinstall.py TMPwindows_postinstall.py
+	${CD} ${DIST_DIR}; ${MV} setup.py TMPsetup.py; mv MANIFEST.in tmpMANIFEST.in; mv topographica TMPtopographica
 	${CD} ${DIST_DIR}; make distclean
-	${CD} ${DIST_DIR}; ${MV} TMPsetup.py setup.py; mv tmpMANIFEST.in MANIFEST.in; mv TMPtopographica topographica; mv TMPtopographica.ico topographica.ico; mv TMPwindows_postinstall.py windows_postinstall.py
+	${CD} ${DIST_DIR}; ${MV} TMPsetup.py setup.py; mv tmpMANIFEST.in MANIFEST.in; mv TMPtopographica topographica
 # won't need to build this copy
 	${RM} ${DIST_DIR}/Makefile 
 	${RM} -r ${DIST_DIR}/external
@@ -344,7 +344,7 @@ dist-pysource: doc distdir reference-manual
 
 # CEB: bdist_msi supports silent install, but seems to be missing other options!
 BDIST_WIN_CMD = bdist_wininst
-BDIST_WININST = ${BDIST_WIN_CMD} --user-access-control auto --install-script windows_postinstall.py --plat-name=win
+BDIST_WININST = ${BDIST_WIN_CMD} --user-access-control auto --install-script platform/windows/windows_postinstall.py --plat-name=win
 
 dist-pysource-sdist: 
 	${CD} ${DIST_DIR}; ${PYTHON} setup.py sdist

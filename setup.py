@@ -41,9 +41,9 @@ for package_list in packages_to_state:
 
 
 if 'bdist_wininst' in sys.argv:
-    scripts.append('windows_postinstall.py')
+    scripts.append('platform/windows/windows_postinstall.py')
     # CEBALERT: how else to get the ico into a place the postinstall script can find?!
-    scripts.append("topographica.ico")
+    scripts.append("platform/windows/topographica.ico")
 
 TRAINSCRIPTS = [
     "hierarchical.ty",

@@ -92,7 +92,7 @@ create_topographica_script.py</code></blockquote>
 run Python on your system). 
 
 <P>Windows users can optionally also run <code>/path/to/python
-windows_postinstall.py create_batch</code> to get an
+platform/windows/windows_postinstall.py create_batch</code> to get an
 executable <code>topographica.bat</code> script.
 
 
