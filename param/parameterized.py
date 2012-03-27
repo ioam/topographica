@@ -13,6 +13,7 @@ import __main__
 
 from operator import itemgetter,attrgetter
 from types import FunctionType
+from functools import partial, wraps
 
 # JABALERT: Could consider using Python's logging facilities instead.
 SILENT  = 0
@@ -101,13 +102,6 @@ def all_equal(arg1,arg2):
         return arg1==arg2
 
 
-# CEBALERT: decorators hide the docstring when using help().  Consider
-# the decorator module: would allow doc to be seen for the actual
-# method rather than seeing 'partial object at ...'.
-# Not part of standard library:
-# http://www.phyast.pitt.edu/~micheles/python/documentation.html
-
-from functools import partial
 class bothmethod(object): # pylint: disable-msg=R0903
     """
     'optional @classmethod'
@@ -127,9 +121,9 @@ class bothmethod(object): # pylint: disable-msg=R0903
     # i.e. this is also a non-data descriptor
     def __get__(self, obj, type_=None):
         if obj is None:
-            return partial(self.func, type_)
+            return wraps(self.func)(partial(self.func, type_))
         else:
-            return partial(self.func, obj)
+            return wraps(self.func)(partial(self.func, obj))
 
 
 class ParameterMetaclass(type):
@@ -782,6 +776,7 @@ def as_uninitialized(fn):
     (Used to decorate Parameterized methods that must alter
     a constant Parameter.)
     """
+    @wraps(fn)
     def override_initialization(parameterized_instance,*args,**kw):
         original_initialized=parameterized_instance.initialized
         parameterized_instance.initialized=False
