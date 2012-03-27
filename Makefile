@@ -288,7 +288,7 @@ SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_o
 #@@	   ${RM} -r .svn */.svn */*/.svn */*/*/.svn */*/*/*/.svn
 #@@	   ${CD} topo/tests/reference ; make clean
 #@@	   ${RM} -r doc/buildbot/
-#@@	   ${RM} -r debian/
+#@@	   ${RM} -r platform/debian/
 #@@	   find examples/*.ty -maxdepth 1 ${subst ^,! -name ,${SCRIPTS_TO_KEEP_IN_DIST}} -exec rm {} \;
 
 
@@ -436,7 +436,7 @@ UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
 deb: dist-pysource
 	cd ${DIST_TMPDIR}; cp topographica-${RELEASE}.tar.gz topographica_${UBUNTU_RELEASE}.orig.tar.gz
 	cd ${DIST_TMPDIR}; mv topographica-${RELEASE} topographica-${UBUNTU_RELEASE}
-	cp -R debian ${UBUNTU_DIR}/debian
+	cp -R platform/debian ${UBUNTU_DIR}/debian
 	rm -rf ${UBUNTU_DIR}/debian/.svn
 	echo "topographica (${UBUNTU_RELEASE}~${UBUNTU_TARGET}) ${UBUNTU_TARGET}; urgency=low" > ${UBUNTU_CHANGELOG}
 	echo "" >> ${UBUNTU_CHANGELOG}
