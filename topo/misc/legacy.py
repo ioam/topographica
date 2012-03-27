@@ -182,11 +182,28 @@ def pattern_basic_rectangular_removed():
 support[11558] = pattern_basic_rectangular_removed
 
 
-#def pattern_basic_removed():
-#    import topo.pattern
-#    module_redirect('basic',topo.pattern,topo.pattern)
-#
-#support[N] = pattern_basic_removed
+def pattern_basic_removed():
+   import topo.pattern
+   import topo.command
+   import topo.coordmapper
+   import topo.learningfn
+   import topo.numbergen
+   import topo.pattern
+   import topo.projection
+   import topo.responsefn
+   import topo.sheet
+   import topo.transferfn
+   module_redirect('basic',topo.command,topo.command)
+   module_redirect('basic',topo.coordmapper,topo.coordmapper)
+   module_redirect('basic',topo.learningfn,topo.learningfn)
+   module_redirect('basic',topo.numbergen,topo.numbergen)
+   module_redirect('basic',topo.pattern,topo.pattern)
+   module_redirect('basic',topo.projection,topo.projection)
+   module_redirect('basic',topo.responsefn,topo.responsefn)
+   module_redirect('basic',topo.sheet,topo.sheet)
+   module_redirect('basic',topo.transferfn,topo.transferfn)
+
+support[11871] = pattern_basic_removed
 
 ######################################################################
 
