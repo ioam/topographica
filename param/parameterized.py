@@ -656,9 +656,6 @@ class ParameterizedMetaclass(type):
             # Search up the hierarchy until param.slot (which has to
             # be obtained using getattr(param,slot)) is not None, or
             # we run out of classes to search.
-            #
-            # CEBALERT: there's probably a better way than while and
-            # an iterator, but it works.
             while getattr(param,slot) is None:
                 try:
                     param_super_class = superclasses.next()
@@ -666,7 +663,7 @@ class ParameterizedMetaclass(type):
                     break
 
                 new_param = param_super_class.__dict__.get(param_name)
-                if new_param != None and hasattr(new_param,slot):
+                if new_param is not None and hasattr(new_param,slot):
                     # (slot might not be there because could be a more
                     # general type of Parameter)
                     new_value = getattr(new_param,slot)
