@@ -287,3 +287,13 @@ class CFPLF_PluginScaled(CFPLearningFn):
         """Update the single-connection learning rate scaling factor."""
         self.learning_rate_scaling_factor = new_scaling_factor
 
+
+__all__ = [
+    "CFPLF_Identity",
+    "CFPLF_Plugin",
+    "CFPLF_EuclideanHebbian",
+    "CFPLF_Trace",
+    "CFPLF_OutstarHebbian",
+    "HomeoSynaptic",
+    "CFPLF_PluginScaled",
+]
