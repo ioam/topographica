@@ -7,11 +7,16 @@ the next.
 
 <H3>Upcoming release</H3>
 
-Changes since 0.9.7. Last updated: 2011/10/09. 
-<!-- plus specific changes for r11862 and r11896). -->
+Changes since 0.9.7. Fully updated 2011/10/09; some updates as of 2012/03/27. 
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
+  <li>r11904, r11916: Changed map measurement code to use an
+  extensible hierarchy of objects for extracting the preference and
+  selectivity values from a histogram.  Any custom map measurement
+  code derived from those used in topo.command.analysis, or custom
+  parameter values mentioning weighted_average, will 
+  need updating.
 <li>r11896: Changed interface of topo.command.activityplot (rarely
   used so far) and changed "Plot with axis labels" right-click option
   in plots to "Plot in matrix coords", to acknowledge new option
