@@ -107,3 +107,6 @@ class Composer(Sheet):
                                                                       left_clip:in_cols-right_clip]
 
 
+__all__ = [
+    "Composer",
+]

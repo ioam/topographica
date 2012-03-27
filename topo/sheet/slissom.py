@@ -190,3 +190,7 @@ class SLISSOM(LISSOM):
 
         self.trace_count = (self.trace_count+1)%self.trace_n
 
+
+__all__ = [
+    "SLISSOM",
+]

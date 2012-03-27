@@ -203,6 +203,12 @@ class JointNormalizingCFSheet_Continuous(JointNormalizingCFSheet):
 
 
 _public = list(set([_k for _k,_v in locals().items() if isinstance(_v,type) and issubclass(_v,Sheet)]))
+_public += [
+    "compute_joint_norm_totals",
+    "BoundingBox",
+    "ProjectionSheet",
+    "activity_type",
+]
 
 # Automatically discover all .py files in this directory.
 import os,fnmatch

@@ -159,3 +159,10 @@ class NeighborhoodMask_Opt(NeighborhoodMask):
         inline(code, ['thr','activity','matradius','mask','rows','cols'], local_dict=locals())
 
 provide_unoptimized_equivalent("NeighborhoodMask_Opt","NeighborhoodMask",locals())
+
+
+__all__ = [
+    "compute_joint_norm_totals",
+    "LISSOM",
+    "NeighborhoodMask",
+]

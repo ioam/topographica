@@ -348,10 +348,10 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
             self._translate(radius,theta)
 
 
-
-
-
-
-
-
-        
+__all__ = [
+    "SaccadeController",
+    "ShiftingGeneratorSheet",
+    "activity_centroid",
+    "activity_sample",
+    "activity_mode",
+]
