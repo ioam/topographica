@@ -86,7 +86,7 @@ least <A HREF="http://www.python.org/download/releases/2.6.5/">Python</A>,
 a <code>topographica</code> script that uses your copy of Python:
 
 <blockquote><code>/path/to/python
-create_topographica_script.py</code></blockquote>
+etc/create_topographica_script.py</code></blockquote>
 
 (where <code>/path/to/python</code> should be adjusted to however you
 run Python on your system). 
