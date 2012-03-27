@@ -32,7 +32,7 @@ unavailable_scipy_optimize  = False
 try:
     from scipy            import optimize
 except ImportError:
-    param.Parameterized().warning("scipy.optimize not available, dummy von Mises fit" )
+    param.Parameterized().debug("scipy.optimize not available, dummy von Mises fit")
     unavailable_scipy_optimize  = True
 
 from numpy            import sin, cos, sqrt, log
@@ -778,7 +778,9 @@ class VonMisesStatisticFn( DistributionStatisticFn ):
     # exit code of the distribution fit function. Codes are function-specific and
     # each fit function, if provide exit codes, should have corresponding string translation
     fit_exit_code   = 0
-    
+
+    user_warned_if_unavailable = False
+
     __abstract = True
 
     def _orth( self, t ):
@@ -862,10 +864,13 @@ class VonMisesStatisticFn( DistributionStatisticFn ):
             * no estimated Jacobian around the solution
             * negative bandwith (the peak of the distribution is convex)
         Note that these are the minimal conditions, their fulfillment does not
-        warrant unimodality, is up to the user to check the goodnes-of-fit value
+        warrant unimodality, is up to the user to check the goodness-of-fit value
         for an accurate acceptance of the fit.
         """
         if unavailable_scipy_optimize:
+            if not VonMisesStatisticFn.user_warned_if_unavailable:
+                param.Parameterized().warning("scipy.optimize not available, dummy von Mises fit")
+                VonMisesStatisticFn.user_warned_if_unavailable=True
             self.fit_exit_code  = 3
             return 0, 0, 0
 
@@ -943,6 +948,9 @@ class VonMisesStatisticFn( DistributionStatisticFn ):
         """
         null    = 0, 0, 0, 0, 0, 0
         if unavailable_scipy_optimize:
+            if not VonMisesStatisticFn.user_warned_if_unavailable:
+                param.Parameterized().warning("scipy.optimize not available, dummy von Mises fit")
+                VonMisesStatisticFn.user_warned_if_unavailable=True
             self.fit_exit_code  = 3
             return null
 
