@@ -163,7 +163,7 @@ TRAINSCRIPTS = [
 target['traintests'] = []
 for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    target['traintests'].append(topographica_script +  " -c 'from topo.tests.test_script import test_script; test_script(script=\"%(script_path)s\",decimal=%(dp)s)'"%dict(script_path=script_path,dp=p.testdp))
+    target['traintests'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=p.testdp))
 
 # CEBALERT: should use the code above but just with the changes for running without weave.
 target['unopttraintests'] = []
@@ -177,7 +177,7 @@ SPEEDSCRIPTS = TRAINSCRIPTS
 SPEEDSCRIPTS.remove("hierarchical.ty") # CEBALERT: remove problematic example (doesn't work for some densities)
 for script in SPEEDSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    speedtarget['speedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_speed_data;compare_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
+    speedtarget['speedtests'].append(topographica_script +  ''' -c "from topo.tests.test_script import compare_speed_data;compare_speed_data(script=%(script_path)s)"'''%dict(script_path=repr(script_path)))
 
 
 STARTUPSPEEDSCRIPTS = ["lissom.ty","gcal.ty"]
@@ -185,7 +185,7 @@ STARTUPSPEEDSCRIPTS = ["lissom.ty","gcal.ty"]
 speedtarget['startupspeedtests'] = []
 for script in STARTUPSPEEDSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    speedtarget['startupspeedtests'].append(topographica_script +  " -c 'from topo.tests.test_script import compare_startup_speed_data;compare_startup_speed_data(script=\"%(script_path)s\")'"%dict(script_path=script_path))
+    speedtarget['startupspeedtests'].append(topographica_script +  ''' -c "from topo.tests.test_script import compare_startup_speed_data;compare_startup_speed_data(script=%(script_path)s)"'''%dict(script_path=repr(script_path)))
 
 
 
@@ -194,32 +194,34 @@ target['snapshots'] = []
 
 # snapshot-compatibility-tests:
 snapshot_path = os.path.join(tests_dir,"lissom_oo_or_od_dr_cr_dy_sf_000010.00.typ")
-target['snapshots'].append(topographica_script + " -c \"from topo.command import load_snapshot; load_snapshot('%(snapshot_path)s')\" -c \"topo.sim.run(1)\""%dict(snapshot_path=snapshot_path))
+target['snapshots'].append(topographica_script + ''' -c "from topo.command import load_snapshot; load_snapshot(%(snapshot_path)s)" -c "topo.sim.run(1)"'''%dict(snapshot_path=repr(snapshot_path)))
 
 
 # Test that simulations give the same results whether run straight
 # through or run part way, saved, reloaded, and run on to the same
 # point.
 # simulation-snapshot-tests:
-target['snapshots'].append(topographica_script + " -c 'from topo.tests.test_script import compare_with_and_without_snapshot_NoSnapshot as A; A()'")
+target['snapshots'].append(topographica_script + ''' -c "from topo.tests.test_script import compare_with_and_without_snapshot_NoSnapshot as A; A()"''')
 
-target['snapshots'].append(topographica_script + " -c 'from topo.tests.test_script import compare_with_and_without_snapshot_CreateSnapshot as B; B()'")
+target['snapshots'].append(topographica_script + ''' -c "from topo.tests.test_script import compare_with_and_without_snapshot_CreateSnapshot as B; B()"''')
 
-target['snapshots'].append(topographica_script + " -c 'from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C()'")
+target['snapshots'].append(topographica_script + ''' -c "from topo.tests.test_script import compare_with_and_without_snapshot_LoadSnapshot as C; C()"''')
 
 # CEBALERT: remove ~/topographica/*PICKLETEST* ?
 
 
 target['pickle'] = []
 # pickle-all-classes:
-target['pickle'].append(topographica_script + " -c 'from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(); import sys; sys.exit(errs)'")
+target['pickle'].append(topographica_script + ''' -c "from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(); import sys; sys.exit(errs)"''')
 
 # unpickle-compatibility-tests:
 pickle_path = os.path.join(tests_dir,"instances-r11275.pickle")
-target['pickle'].append(topographica_script + "-l -c 'from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(existing_pickles=\"%(pickle_path)s\"); import sys; sys.exit(errs)'"%dict(pickle_path=pickle_path))
+target['pickle'].append(topographica_script + '''-l -c "from topo.tests.test_script import pickle_unpickle_everything; errs = pickle_unpickle_everything(existing_pickles=%(pickle_path)s); import sys; sys.exit(errs)"'''%dict(pickle_path=repr(pickle_path)))
 
 
 # CEBALERT: hack that this will always be created even when test not being run
+# DSALERT: also it's not portable; python has a tempfile module that should
+# easily be able to replace this
 tmpd = commands.getoutput("mktemp -d")
 #script-repr-tests:
 target['scriptrepr']=[]

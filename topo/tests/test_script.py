@@ -66,6 +66,7 @@ def _setargs(args):
 # CEBALERT: is this somehow causing func to run more slowly than
 # without forking?
 def _run_in_forked_process(func, *args, **kwds):
+    # DSALERT: os.fork() is not supported on Windows
     pid = os.fork()
     if pid > 0:
         os.waitpid(pid, 0)
