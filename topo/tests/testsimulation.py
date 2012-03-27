@@ -10,7 +10,7 @@ import pickle
 
 from numpy.oldnumeric import array
 from topo.base.simulation import Simulation,EPConnection,EPConnectionEvent,Event
-from topo.ep.basic import *
+from topo.ep import *
 
 from topo.base.cf import CFSheet, CFProjection
 
