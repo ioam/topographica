@@ -344,7 +344,7 @@ dist-pysource: doc distdir reference-manual
 
 # CEB: bdist_msi supports silent install, but seems to be missing other options!
 BDIST_WIN_CMD = bdist_wininst
-BDIST_WININST = ${BDIST_WIN_CMD} --install-script windows_postinstall.py --plat-name=win
+BDIST_WININST = ${BDIST_WIN_CMD} --user-access-control auto --install-script windows_postinstall.py --plat-name=win
 
 dist-pysource-sdist: 
 	${CD} ${DIST_DIR}; ${PYTHON} setup.py sdist
