@@ -871,6 +871,12 @@ _public = list(set([_k for _k,_v in locals().items()
                     if isinstance(_v,types.FunctionType) or 
                     (isinstance(_v,type) and issubclass(_v,ParameterizedFunction))
                     and not _v.__name__.startswith('_')]))
+_public += [
+    "_VersionPrinter",
+    "UnpickleEnvironmentCreator",
+    "ImportErrorRaisingFakeModule",
+    "ImportErrorObject",
+]
 
 # Automatically discover all .py files in this directory.
 import os,fnmatch

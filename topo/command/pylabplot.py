@@ -1252,4 +1252,3 @@ __all__ = list(set([k for k,v in locals().items()
                     if isinstance(v,types.FunctionType) or 
                     (isinstance(v,type) and issubclass(v,ParameterizedFunction))
                     and not v.__name__.startswith('_')]))
-
