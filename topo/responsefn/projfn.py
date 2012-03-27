@@ -95,3 +95,9 @@ class CFPRF_ActivityBased(CFPResponseFn):
             strength_fn=self.l+(self.u/(1+exp(-self.r*(x-2*self.m)))**(1.0/self.b))
             activity[r,c] = single_cf_fn(X,cf.weights)
             activity[r,c] *= strength_fn
+
+__all__ = [
+    "CFPRF_EuclideanDistance",
+    "CFPRF_ActivityBased",
+    "CFPRF_Plugin",
+]
