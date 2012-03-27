@@ -33,14 +33,14 @@ import param
 from param import resolve_path
 
 
-# CEBALERT: can we just use load_default()? Do we even need TITLE_FONT
+# CEBALERT: can we just use load_default()? Do we even need _TITLE_FONT
 # at all?
 try:
    import matplotlib
-   vera_path = resolve_path(os.path.join(matplotlib.__file__,'matplotlib/mpl-data/fonts/ttf/Vera.ttf'))
-   TITLE_FONT = ImageFont.truetype(vera_path,20)
+   _vera_path = resolve_path(os.path.join(matplotlib.__file__,'matplotlib/mpl-data/fonts/ttf/Vera.ttf'))
+   _TITLE_FONT = ImageFont.truetype(_vera_path,20)
 except:
-   TITLE_FONT = ImageFont.load_default()
+   _TITLE_FONT = ImageFont.load_default()
 
 
 ### JCALERT: To do:
@@ -333,7 +333,7 @@ class MontageBitmap(Bitmap):
         self.image = Image.new('RGB',(width,height),
                                (bgr*255,bgg*255,bgb*255))
 
-        self.title_options.setdefault('font',TITLE_FONT)
+        self.title_options.setdefault('font',_TITLE_FONT)
         
         for r in xrange(rows):
             for c in xrange(cols):
@@ -419,3 +419,12 @@ class DrawBitmap(Bitmap):
 	    ) )
 	return in_box_coords
 
+
+__all__ = [
+    "Bitmap",
+    "PaletteBitmap",
+    "HSVBitmap",
+    "RGBBitmap",
+    "MontageBitmap",
+    "DrawBitmap",
+]

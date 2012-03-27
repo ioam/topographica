@@ -568,8 +568,8 @@ class MultiOrPlot(TemplatePlot):
                                    plot_bounding_box,normalize,**params)
         
         n       = len( channels.keys() )
-	if density > 10:
-	    self.unit_size	= int( density )
+        if density > 10:
+            self.unit_size = int( density )
 
         # there should be an even number of channels
         if n % 2:
@@ -577,7 +577,7 @@ class MultiOrPlot(TemplatePlot):
             return
 
         if ( self.unit_size % 2 ) == 0:
-            self.unit_size	= self.unit_size + 1
+            self.unit_size = self.unit_size + 1
         
         n       = n / 2
         m       = []
@@ -603,8 +603,8 @@ class MultiOrPlot(TemplatePlot):
         Return a list with two tuples, the coordinates of the segment with the
         given orientation, in the normalized range [ 0...1 ].
 	Orientation is expected in range [ 0..pi ]. Space
-	representation is in ordinary image convention: first coordinate is X,
-	from left to right, second coordinate Y, from top to bottom.
+        representation is in ordinary image convention: first coordinate is X,
+        from left to right, second coordinate Y, from top to bottom.
         """
 
         s       = 0.5 * sin( o )
@@ -621,7 +621,7 @@ class MultiOrPlot(TemplatePlot):
         d_hue   = 360 / len( os_list )
         hue     = 0
         p       = []
-	n	= self.max_brightness - self.min_brightness
+        n       = self.max_brightness - self.min_brightness
         for o,s in os_list:
             if s > 0.:
                 f       = "hsl(%d,100%%,%2d%%)" % ( hue, max( self.min_brightness, n * ( 1. - s ) ) )
@@ -633,9 +633,9 @@ class MultiOrPlot(TemplatePlot):
 
     def __make_lines_from_or_matrix( self, matrices, shape ):
         """ 
-	return a matrix of line drawing directives for each unit, derived from
-	the given list of tuples ( o, s ), where o is the orientation view and s
-	is the selectivity. The list is ordered by the orientation preference.
+        return a matrix of line drawing directives for each unit, derived from
+        the given list of tuples ( o, s ), where o is the orientation view and s
+        is the selectivity. The list is ordered by the orientation preference.
         """
 
         vertices_from_or        = numpy.vectorize( self.__vertices_from_or, otypes=[numpy.object_] )
@@ -643,9 +643,9 @@ class MultiOrPlot(TemplatePlot):
         for o, s in matrices:
             a   = s.mean()
             d   = s.std()
-	    ad	= a + d
-	    if isinstance( ad, numpy.number ) and ad > 0:
-	        mat_list.append( ( vertices_from_or( o ), ( s - d ) / ad ) )
+            ad  = a + d
+        if isinstance( ad, numpy.number ) and ad > 0:
+            mat_list.append( ( vertices_from_or( o ), ( s - d ) / ad ) )
 
         lines   = numpy.empty( shape, numpy.object_ )
         for x in range( shape[ 0 ] ):
@@ -656,7 +656,3 @@ class MultiOrPlot(TemplatePlot):
                 lines[ x, y ]   = self.__make_line_directive( os_list )
 
         return lines
-
-
-
-

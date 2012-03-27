@@ -15,6 +15,7 @@ __version__='$Revision$'
 
 import topo
 from topo.plotting.bitmap import *
+from topo.plotting.bitmap import hsv_to_rgb
 import Image
 import numpy.oldnumeric as Numeric
 import unittest
