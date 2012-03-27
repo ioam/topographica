@@ -198,7 +198,7 @@ class Dynamic(Parameter):
             return gen 
         
 
-# CEBALERT: isinstance(x,Number) should be possible in Python 2.6
+# CEBNOTE: isinstance(x,Number) should be possible in Python 2.6
 # (Number is a new abstract base class).
 # http://docs.python.org/whatsnew/2.6.html
 import operator
