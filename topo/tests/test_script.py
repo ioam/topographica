@@ -453,7 +453,7 @@ def compare_startup_speed_data(script):
 # This is clumsy. We could control topographica subprocesses, but I
 # can't remember how to do it
 
-def compare_with_and_without_snapshot_NoSnapshot(script="examples/lissom.ty",look_at='V1',cortex_density=8,lgn_density=4,retina_density=4,dims=['or','od','dr','cr','dy','sf'],dataset="Gaussian",run_for=10,break_at=5):
+def compare_with_and_without_snapshot_NoSnapshot(script="models/lissom.ty",look_at='V1',cortex_density=8,lgn_density=4,retina_density=4,dims=['or','od','dr','cr','dy','sf'],dataset="Gaussian",run_for=10,break_at=5):
 
     data_filename=os.path.split(script)[1]+"_PICKLETEST"
     
@@ -488,7 +488,7 @@ def compare_with_and_without_snapshot_NoSnapshot(script="examples/lissom.ty",loo
     pickle.dump(data,open(locn,'wb'),2)
 
 
-def compare_with_and_without_snapshot_CreateSnapshot(script="examples/lissom.ty"):
+def compare_with_and_without_snapshot_CreateSnapshot(script="models/lissom.ty"):
     data_filename=os.path.split(script)[1]+"_PICKLETEST"
 
     locn = resolve_path(os.path.join('tests',data_filename))
@@ -530,7 +530,7 @@ def compare_with_and_without_snapshot_CreateSnapshot(script="examples/lissom.ty"
     save_snapshot(locn)
 
 
-def compare_with_and_without_snapshot_LoadSnapshot(script="examples/lissom.ty"):
+def compare_with_and_without_snapshot_LoadSnapshot(script="models/lissom.ty"):
     data_filename=os.path.split(script)[1]+"_PICKLETEST"
     snapshot_filename=os.path.split(script)[1]+"_PICKLETEST.typ_"
 

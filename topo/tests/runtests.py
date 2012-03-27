@@ -108,7 +108,7 @@ elif p.targets == ['allsnapshottests']:
 
 # ->params ?
 tests_dir = param.resolve_path("topo/tests",path_to_file=False)
-scripts_dir = param.resolve_path("examples",path_to_file=False) ### XXX
+scripts_dir = param.resolve_path(".",path_to_file=False) ### XXX
 topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0] + " " +  " "
 
 def _runc(cmd):
@@ -134,14 +134,14 @@ speedtarget = topo.misc.keyedlist.KeyedList()
 # CEBALERT: this list should be defined in one place.
 #from setup import TRAINSCRIPTS
 TRAINSCRIPTS = [
-    "hierarchical.ty",
-    "lissom_or.ty",
-    "lissom_oo_or.ty",
-    "som_retinotopy.ty",
-    "sullivan_neurocomputing04.ty",
-    "lissom.ty",
-#    "lissom_fsa.ty",  # CEBALERT: disabled for now (needs special case - look_at=fsa not v1, see below)
-    "gcal.ty"
+    "examples/hierarchical.ty",
+    "models/lissom_or.ty",
+    "models/lissom_oo_or.ty",
+    "examples/som_retinotopy.ty",
+    "models/sullivan_neurocomputing04.ty",
+    "models/lissom.ty",
+#    "models/lissom_fsa.ty",  # CEBALERT: disabled for now (needs special case - look_at=fsa not v1, see below)
+    "examples/gcal.ty"
     ]
 
 
@@ -174,13 +174,13 @@ for script in TRAINSCRIPTS:
 
 speedtarget['speedtests'] = []
 SPEEDSCRIPTS = TRAINSCRIPTS
-SPEEDSCRIPTS.remove("hierarchical.ty") # CEBALERT: remove problematic example (doesn't work for some densities)
+SPEEDSCRIPTS.remove("examples/hierarchical.ty") # CEBALERT: remove problematic example (doesn't work for some densities)
 for script in SPEEDSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
     speedtarget['speedtests'].append(topographica_script +  ''' -c "from topo.tests.test_script import compare_speed_data;compare_speed_data(script=%(script_path)s)"'''%dict(script_path=repr(script_path)))
 
 
-STARTUPSPEEDSCRIPTS = ["lissom.ty","gcal.ty"]
+STARTUPSPEEDSCRIPTS = ["models/lissom.ty","examples/gcal.ty"]
 
 speedtarget['startupspeedtests'] = []
 for script in STARTUPSPEEDSCRIPTS:
@@ -225,7 +225,7 @@ target['pickle'].append(topographica_script + '''-l -c "from topo.tests.test_scr
 tmpd = commands.getoutput("mktemp -d")
 #script-repr-tests:
 target['scriptrepr']=[]
-script = os.path.join(scripts_dir,"hierarchical.ty")
+script = os.path.join(scripts_dir,"examples/hierarchical.ty")
 target['scriptrepr'].append(topographica_script + " %(script)s -a -c \"import param;param.normalize_path.prefix='%(tmpd)s'\" -c \"save_script_repr('script_repr_test.ty')\""%dict(tmpd=tmpd,script=script))
 
 script_repr_test_path = os.path.join(tmpd,"script_repr_test.ty")    
@@ -253,7 +253,7 @@ target['unit'].append(topographica_script + ' -c "import topo.tests; t=topo.test
 # CEBALERT: should use lissom.ty and test more map types
 # pass a list of plotgroup names to test() instead of plotgroups_to_test to restrict the tests
 target['maptests'] = []
-script = os.path.join(scripts_dir,"lissom_oo_or.ty")
+script = os.path.join(scripts_dir,"models/lissom_oo_or.ty")
 target['maptests'].append(topographica_script + ' -c "cortex_density=8" %s -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)"'%script)
 
 

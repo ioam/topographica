@@ -129,7 +129,7 @@ def find_examples(specified_examples=None,dirs=None):
 
     if not specified_examples:
         # CEBALERT: hack!
-        specified_examples = ["hierarchical","lissom_oo_or","som_retinotopy"]
+        specified_examples = ["hierarchical","som_retinotopy"]
         
 
     if not dirs:
