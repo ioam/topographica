@@ -872,19 +872,14 @@ class Parameterized(object):
         self.initialized=True
 
 
-    @bothmethod
-    def _add_parameter(self_or_cls,param_name,param_obj):
+    @classmethod
+    def _add_parameter(cls, param_name,param_obj):
         """
         Add a new Parameter object into this object's class.
 
         Supposed to result in a Parameter equivalent to one declared
         in the class's source code.
         """
-        if isinstance(self_or_cls,type):
-            cls=self_or_cls
-        else:
-            cls=type(self_or_cls)
-
         # CEBALERT: can't we just do
         # setattr(cls,param_name,param_obj)?  The metaclass's
         # __setattr__ is actually written to handle that.  (Would also
@@ -971,17 +966,13 @@ class Parameterized(object):
                 g.state_pop()
         
 
-    @bothmethod
-    def set_default(self_or_cls,param_name,value):
+    @classmethod
+    def set_default(cls,param_name,value):
         """
         Set the default value of param_name.
 
         Equivalent to setting param_name on the class.
         """
-        if isinstance(self_or_cls,type):
-            cls=self_or_cls
-        else:
-            cls=type(self_or_cls)
         setattr(cls,param_name,value)
     
 
