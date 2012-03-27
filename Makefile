@@ -325,7 +325,7 @@ ChangeLog.txt: FORCE
 dist-pysource: doc distdir reference-manual
 # clean dir but keep setup.py-related files
 	${CD} ${DIST_DIR}; ${PYTHON} etc/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
-	${CD} ${DIST_DIR}; ${MV} README.setup.txt README.txt
+	${CD} ${DIST_DIR}; ${MV} platform/distutils/README.setup.txt README.txt
 	${CD} ${DIST_DIR}; ${MV} setup.py TMPsetup.py; mv MANIFEST.in tmpMANIFEST.in; mv topographica TMPtopographica
 	${CD} ${DIST_DIR}; make distclean
 	${CD} ${DIST_DIR}; ${MV} TMPsetup.py setup.py; mv tmpMANIFEST.in MANIFEST.in; mv TMPtopographica topographica

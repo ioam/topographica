@@ -1,6 +1,3 @@
-# should probably think of something better than this
-# name, and than having it in the root topo dir
-
 # CEBALERT: another duplicate
 RELEASE = '0.9.7'
 
