@@ -1448,8 +1448,7 @@ class Spectrogram(PowerSpectrum):
 
 
 
-_public = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,PatternGenerator)]))
-del k, v
+_public = list(set([_k for _k,_v in locals().items() if isinstance(_v,type) and issubclass(_v,PatternGenerator)]))
 
 # Automatically discover all .py files in this directory.
 import os,fnmatch

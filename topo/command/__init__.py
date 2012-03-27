@@ -867,11 +867,10 @@ PatternDrivenAnalysis.pre_presentation_hooks.append(clear_event_queue)
             
 # maybe an explicit list would be better?
 import types
-_public = list(set([k for k,v in locals().items()
-                    if isinstance(v,types.FunctionType) or 
-                    (isinstance(v,type) and issubclass(v,ParameterizedFunction))
-                    and not v.__name__.startswith('_')]))
-del k, v
+_public = list(set([_k for _k,_v in locals().items()
+                    if isinstance(_v,types.FunctionType) or 
+                    (isinstance(_v,type) and issubclass(_v,ParameterizedFunction))
+                    and not _v.__name__.startswith('_')]))
 
 # Automatically discover all .py files in this directory.
 import os,fnmatch
