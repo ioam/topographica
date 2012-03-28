@@ -112,8 +112,8 @@ clean-ext-packages:
 
 
 # Build the Python startup script.  Rebuilt whenever a file changes in
-# topo/ or examples, to make sure that topo.version is up to date.
-topographica: external Makefile topo/*/*.py examples/*.ty
+# topo/ or examples/ or models/, to make sure that topo.version is up to date.
+topographica: external Makefile topo/*/*.py examples/*.ty models/*.ty
 # site.USER_SITE is ignored to stop Python finding packages in
 # ~/.local instead of Topographica's own packages.
 	${PYTHON} ${PREFIX}/etc/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 0
@@ -162,7 +162,7 @@ clean-weave:
 	rm -rf ~/.python2*_compiled/ | cat
 
 clean-pyc:
-	rm -f *.pyc param/*.pyc topo/*.pyc topo/*/*.pyc topo/*/*/*.pyc examples/*.pyc contrib/*.pyc
+	rm -f *.pyc param/*.pyc topo/*.pyc topo/*/*.pyc topo/*/*/*.pyc examples/*.pyc models/*.pyc contrib/*.pyc
 
 clean-doc:
 	make -C doc clean
@@ -179,7 +179,7 @@ doc: FORCE
 
 # CEBALERT: Move into runtests.py
 generate-map-tests-data:
-	./topographica -c "cortex_density=8" examples/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; generate(plotgroups_to_test)" 
+	./topographica -c "cortex_density=8" models/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; generate(plotgroups_to_test)" 
 
 
 
@@ -276,7 +276,7 @@ SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_o
 #@@	   ${RM} .#* */.#* */*/.#* */*~ 
 #@@	   ${RM} etc/topographica.elc ImageSaver*.ppm countalerts* annotate.out emacslog
 #@@	   ${RM} current_profile script timing*
-#@@	   ${RM} examples/*.typ
+#@@	   ${RM} examples/*.typ models/*.typ
 #@@	   ${RM} -r Output
 #@@	   -mv images/ellen_arthur.pgm ./TMPellen_arthur.pgm
 #@@	   ${RM} -r images sounds
