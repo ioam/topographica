@@ -791,7 +791,7 @@ class List(Parameter):
     def _check_type(self,val):
         if self.class_ is not None:
             for v in val:
-                assert isinstance(v,self.class_),repr(v)+" is not an instance of " + repr(self.class_) + "."
+                assert isinstance(v,self.class_),repr(self._attrib_name)+": "+repr(v)+" is not an instance of " + repr(self.class_) + "."
 
 
 
@@ -807,7 +807,7 @@ class HookList(List):
 
     def _check_type(self,val):
         for v in val:
-            assert callable(v),repr(v)+" is not callable."
+            assert callable(v),repr(self._attrib_name)+": "+repr(v)+" is not callable."
 
 
 
