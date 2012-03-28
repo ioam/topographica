@@ -60,14 +60,14 @@ from topoconsole import TopoConsole,ControllableMenu
 # also appear in the GUI menus if they are derived from any class
 # derived from the one specified in each widget, and imported before
 # the relevant GUI window starts.
-from topo.coordmapper import *
-from topo.ep import *
-from topo.learningfn import *
-from topo.transferfn import *
-from topo.pattern import *
-from topo.projection import *
-from topo.responsefn import *
-from topo.sheet import *
+from topo.coordmapper import *  # pyflakes:ignore (see comment above)
+from topo.ep import *  # pyflakes:ignore (see comment above)
+from topo.learningfn import *  # pyflakes:ignore (see comment above)
+from topo.transferfn import *  # pyflakes:ignore (see comment above)
+from topo.pattern import *  # pyflakes:ignore (see comment above)
+from topo.projection import *  # pyflakes:ignore (see comment above)
+from topo.responsefn import *  # pyflakes:ignore (see comment above)
+from topo.sheet import *  # pyflakes:ignore (see comment above)
 
 
 
