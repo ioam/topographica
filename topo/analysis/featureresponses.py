@@ -534,7 +534,7 @@ class Feature( param.Parameterized ):
 
     offset          = param.Number( default=0.0, doc="offset to add to the values for this feature" )
 
-    values          = param.List( class_=float, default=[], doc="""
+    values          = param.List(default=[], doc="""
             explicit list of values for this feature, used in alternative to the range
             and step parameters""" )
 
