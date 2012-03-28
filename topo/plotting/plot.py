@@ -10,7 +10,7 @@ import copy
 import numpy
 
 from numpy.oldnumeric import zeros, ones, Float, divide
-from math import pi, sin, cos
+from math import sin, cos
 
 import param
 

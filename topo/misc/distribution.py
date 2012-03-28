@@ -35,11 +35,10 @@ except ImportError:
     param.Parameterized().debug("scipy.optimize not available, dummy von Mises fit")
     unavailable_scipy_optimize  = True
 
-from numpy            import sin, cos, sqrt, log
+from numpy            import cos, log
 from numpy.oldnumeric import innerproduct, array, exp, argmax
 
 from topo.base.arrayutil import arg, wrap
-from param.parameterized import Parameterized
 
 class Distribution(object):
     """

@@ -40,8 +40,8 @@ from topo.base.cf import Projection
 from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
 from topo.base.sheetview import SheetView
-from topo.misc.distribution import Distribution, DistributionStatisticFn
-from topo.misc.distribution import DSF_MaxValue, DSF_TopTwoValues, DSF_BimodalPeaks
+from topo.misc.distribution import Distribution
+from topo.misc.distribution import DSF_MaxValue, DSF_BimodalPeaks
 from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit, DSF_BimodalVonMisesFit
 from topo.pattern import GaussiansCorner, Gaussian, RawRectangle, Composite, Constant
 from topo.analysis.featureresponses import ReverseCorrelation
