@@ -433,8 +433,9 @@ UBUNTU_BACKPORTS = lucid^ maverick^ natty^
 UBUNTU_DIR = ${DIST_TMPDIR}/topographica-${UBUNTU_RELEASE}
 UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
 
-
-deb: dist-pysource
+# You must first have run make dist-pysource. (Not a dependency
+# because buildbot runs these targets separately.
+deb:
 	cd ${DIST_TMPDIR}; cp topographica-${RELEASE}.tar.gz topographica_${UBUNTU_RELEASE}.orig.tar.gz
 	cd ${DIST_TMPDIR}; mv topographica-${RELEASE} topographica-${UBUNTU_RELEASE}
 	cp platform/debian ${UBUNTU_DIR}
@@ -451,7 +452,7 @@ deb: dist-pysource
 # CB: could put something like this line in to test the build locally
 # sudo pbuilder build topographica_${UBUNTU_RELEASE}~${UBUNTU_TARGET}.dsc 
 
-# You must first have run 'make deb'
+# You must first have run 'make deb'.
 deb-backports: ${subst ^,_DEB_BACKPORTS,${UBUNTU_BACKPORTS}}
 
 %_DEB_BACKPORTS:
