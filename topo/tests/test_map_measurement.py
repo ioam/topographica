@@ -97,8 +97,10 @@ def generate(plotgroup_names):
         if hasattr(sheet,'curve_dict'):
             sheets_views['curve_dict'] = sheet.curve_dict
 
-        f = open(normalize_path('tests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
-                                                        name.replace(' ','_'))),'wb')
+        filename = normalize_path('tests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
+                                                          name.replace(' ','_')))
+        print "Saving results to %s" % (filename)
+        f = open(filename,'wb')
         pickle.dump((topo.version,views),f)
         f.close()
     
@@ -117,8 +119,10 @@ def test(plotgroup_names):
         _reset_views(sheet)
         plotgroups[name]._exec_pre_plot_hooks()
 
-        f = open(resolve_path('tests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
-                                                      name.replace(' ','_'))),'r')
+        filename = resolve_path('tests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
+                                                          name.replace(' ','_')))
+        print "Reading previous results from %s" % (filename)
+        f = open(filename,'r')
 
         try:
             topo_version,previous_views = pickle.load(f)
@@ -148,10 +152,10 @@ def test(plotgroup_names):
         if 'sheet_views' in previous_views[sheet.name]:
             previous_sheet_views = previous_views[sheet.name]['sheet_views']
             for view_name in previous_sheet_views:
+                print '...'+view_name,
                 assert_array_almost_equal(sheet.sheet_views[view_name].view()[0],
-                                          previous_sheet_views[view_name].view()[0],
-                                          12)
-                print '...'+view_name+' array is unchanged since data was generated (%s)'%topo_version
+                                          previous_sheet_views[view_name].view()[0],12)
+                print 'array is unchanged since data was generated (%s)'%topo_version
 
         if 'curve_dict' in previous_views[sheet.name]:
             previous_curve_dicts = previous_views[sheet.name]['curve_dict']
@@ -159,11 +163,10 @@ def test(plotgroup_names):
             for curve_name in previous_curve_dicts:
                 for other_param in previous_curve_dicts[curve_name]:
                     for val in previous_curve_dicts[curve_name][other_param]:
-
+                        print "...%s %s %s" %(curve_name,other_param,val),
                         assert_array_almost_equal(sheet.curve_dict[curve_name][other_param][val].view()[0],
-                                                  previous_curve_dicts[curve_name][other_param][val].view()[0],
-                                                  12)
-                        print "...%s %s %s array is unchanged since data was generated (%s)"%(curve_name,other_param,val,topo_version)
+                                                  previous_curve_dicts[curve_name][other_param][val].view()[0],12)
+                        print "array is unchanged since data was generated (%s)"%(topo_version)
                                           
 
 
