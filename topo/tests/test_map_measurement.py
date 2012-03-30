@@ -22,6 +22,7 @@ import pickle
 
 from numpy.testing import assert_array_almost_equal
 
+import numpy
 import topo
 
 from param import resolve_path, normalize_path
@@ -103,6 +104,16 @@ def generate(plotgroup_names):
         f = open(filename,'wb')
         pickle.dump((topo.version,views),f)
         f.close()
+
+def checkclose(x,y,topo_version):
+    errors=0
+    if not numpy.allclose(x,y):
+        print " arrays are no longer close:\n",x,"\n",y
+        errors +=1
+    else:
+        print 'array is unchanged since data was generated (%s)'%topo_version
+    return errors
+        
     
 
 def test(plotgroup_names):
@@ -149,13 +160,13 @@ def test(plotgroup_names):
             
         f.close()
 
+        errors=0
         if 'sheet_views' in previous_views[sheet.name]:
             previous_sheet_views = previous_views[sheet.name]['sheet_views']
             for view_name in previous_sheet_views:
                 print '...'+view_name,
-                assert_array_almost_equal(sheet.sheet_views[view_name].view()[0],
-                                          previous_sheet_views[view_name].view()[0],12)
-                print 'array is unchanged since data was generated (%s)'%topo_version
+                errors += checkclose(sheet.sheet_views[view_name].view()[0],
+                                     previous_sheet_views[view_name].view()[0],topo_version)
 
         if 'curve_dict' in previous_views[sheet.name]:
             previous_curve_dicts = previous_views[sheet.name]['curve_dict']
@@ -164,9 +175,9 @@ def test(plotgroup_names):
                 for other_param in previous_curve_dicts[curve_name]:
                     for val in previous_curve_dicts[curve_name][other_param]:
                         print "...%s %s %s" %(curve_name,other_param,val),
-                        assert_array_almost_equal(sheet.curve_dict[curve_name][other_param][val].view()[0],
-                                                  previous_curve_dicts[curve_name][other_param][val].view()[0],12)
-                        print "array is unchanged since data was generated (%s)"%(topo_version)
+                        errors += checkclose(sheet.curve_dict[curve_name][other_param][val].view()[0],
+                                             previous_curve_dicts[curve_name][other_param][val].view()[0],topo_version)
                                           
+        if errors: raise AssertionError, "%s errors" % (errors)
 
 
