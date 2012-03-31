@@ -89,20 +89,21 @@ a <code>topographica</code> script that uses your copy of Python:
 etc/create_topographica_script.py</code></blockquote>
 
 (where <code>/path/to/python</code> should be adjusted to however you
-run Python on your system). 
+run Python on your system).
 
 <P>Windows users can optionally also run <code>/path/to/python
 platform/windows/windows_postinstall.py create_batch</code> to get an
 executable <code>topographica.bat</code> script.
 
+<P>Note that nothing is installed outside your version-controlled
+Topographica directory (e.g. nothing is written into your Python
+environment). You should not run setup.py, since that would install
+Topographica into your copy of Python. Also, you can optionally delete
+the <code>external</code> directory, since you already have the
+external dependencies. 
 
-<P>Note that you should not run setup.py, since that would install
-<!-- CB: unless someone figures out setuptools... -->
-Topographica into your system's Python directory, whereas we want to
-use the version-controlled directory. Also, you can delete
-the <code>external</code> directory, since you have already installed
-the external dependencies. Now you can skip to
-the <A HREF="#postinstall">after installation</A> section below.
+<P>Now you can skip to the <A HREF="#postinstall">after
+installation</A> section below.
 
 
 
