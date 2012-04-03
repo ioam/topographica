@@ -2830,8 +2830,11 @@ class Menu(T.Menu):
             start = self.index(index1)
             end = self.index(index2)
             if start is not None and end is not None:
-                for i in range(start,end+1):
-                    self.__delete(i)
+                for _ in range(start,end+1):
+                    # __delete shifts the remaining items one position back,
+                    # so repeatedly deleting the first item in the range will
+                    # delete all of them
+                    self.__delete(start)
         else:
             self.__delete(index1)
 
