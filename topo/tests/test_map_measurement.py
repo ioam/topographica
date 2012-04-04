@@ -105,15 +105,14 @@ def generate(plotgroup_names):
         pickle.dump((topo.version,views),f)
         f.close()
 
-def checkclose(x,y,topo_version):
-    errors=0
+def checkclose(label,topo_version,x,y):
+    errors=[]
     if not numpy.allclose(x,y):
-        print " arrays are no longer close:\n",x,"\n",y
-        errors +=1
+        print "...%s array is no longer close to the %s version:\n%s\n---\n%s" % (label,topo_version,x,y)
+        errors=[label]
     else:
-        print 'array is unchanged since data was generated (%s)'%topo_version
+        print '...%s array is unchanged since data was generated (%s)' % (label,topo_version)
     return errors
-        
     
 
 def test(plotgroup_names):
@@ -123,6 +122,7 @@ def test(plotgroup_names):
     assert topo.sim['V1'].nominal_density==8
     assert topo.sim.time()==100
     
+    failing_tests=[]
     for name in plotgroup_names:
         print "\n* Testing plotgroups['%s']:"%name
 
@@ -160,24 +160,23 @@ def test(plotgroup_names):
             
         f.close()
 
-        errors=0
         if 'sheet_views' in previous_views[sheet.name]:
             previous_sheet_views = previous_views[sheet.name]['sheet_views']
             for view_name in previous_sheet_views:
-                print '...'+view_name,
-                errors += checkclose(sheet.sheet_views[view_name].view()[0],
-                                     previous_sheet_views[view_name].view()[0],topo_version)
-
+                failing_tests += checkclose(sheet.name + " " + view_name,topo_version,
+                                            sheet.sheet_views[view_name].view()[0],
+                                            previous_sheet_views[view_name].view()[0])
+                    
         if 'curve_dict' in previous_views[sheet.name]:
             previous_curve_dicts = previous_views[sheet.name]['curve_dict']
             # CB: need to cleanup var names e.g. val
             for curve_name in previous_curve_dicts:
                 for other_param in previous_curve_dicts[curve_name]:
                     for val in previous_curve_dicts[curve_name][other_param]:
-                        print "...%s %s %s" %(curve_name,other_param,val),
-                        errors += checkclose(sheet.curve_dict[curve_name][other_param][val].view()[0],
-                                             previous_curve_dicts[curve_name][other_param][val].view()[0],topo_version)
+                        failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),topo_version,
+                                                    sheet.curve_dict[curve_name][other_param][val].view()[0],
+                                                    previous_curve_dicts[curve_name][other_param][val].view()[0])
                                           
-        if errors: raise AssertionError, "%s errors" % (errors)
+    if failing_tests != []: raise AssertionError, "Failed map tests: %s" % (failing_tests)
 
 
