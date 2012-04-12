@@ -1,4 +1,4 @@
-Copyright (c) 2005-2010, Topographica Developers
+Copyright (c) 2005-2012, Topographica Developers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
