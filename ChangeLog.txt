@@ -1,3 +1,237 @@
+2012-04-04 jbednar
+
+	* [r11986] topo/tests/test_map_measurement.py: Keeps track of
+	  multiple errors more cleanly
+
+2012-04-03 dstefanov
+
+	* [r11985] param/tk.py: Fix menu item deletion bug (causes
+	  exception on some tk versions)
+
+2012-03-31 ceball
+
+	* [r11984] doc/Developer_Manual/installation_text.php: Made it
+	  clearer that create_topographica_script.py does not install
+	  anything into the Python environment.
+
+2012-03-30 jbednar
+
+	* [r11983] topo/tests/test_map_measurement.py: Made check all
+	  maps even on errors and then report how many failed
+
+	* [r11982] topo/tests/test_map_measurement.py: Changed to
+	  print map name before it is tested so that which array is
+	  failing would be clear.
+	  
+	  Now also prints name of the data file used so that it is
+	  clear what to update when values are meant to change.
+
+2012-03-29 ceball
+
+	* [r11981] Makefile: Removed dependency of deb on
+	  dist-pysource, so that deb can be run after dist-pysource
+	  without duplicating steps.
+
+2012-03-28 jbednar
+
+	* [r11980] param/__init__.py: Added attrib name to error
+	  messages to aid debugging
+
+	* [r11979] Makefile: Additional updates to match split of
+	  examples into models and examples
+
+	* [r11978] topo/analysis/featureresponses.py: Removed
+	  restriction that Feature values be floats; integers and
+	  probably other types are also ok
+
+	* [r11977] topo/command/analysis.py,
+	  topo/misc/distribution.py, topo/plotting/plot.py: Removed
+	  unused imports
+
+2012-03-28 dstefanov
+
+	* [r11976] topo/tkgui/__init__.py: Add pyflakes ignore markers
+	  to * imports
+
+	* [r11975] debian, osx: Remove empty debian/ and osx/
+	  directories
+
+2012-03-27 dstefanov
+
+	* [r11974] param/parameterized.py: Change bothmethods that are
+	  actually classmethods into classmethods
+
+	* [r11973] param/parameterized.py: Use functools.wraps on
+	  decorators to preserve docstrings
+
+	* [r11972] param/__init__.py: Demote ALERT to NOTE The
+	  proposed change is incompatible with older Python versions,
+	  while the current way will work in all 2.x
+
+	* [r11971] param/parameterized.py: Remove
+	  Parametrized.nopickle - not used
+
+	* [r11970] param/parameterized.py: Code is clear enough and
+	  there isn't a significantly more elegant way to write it as
+	  far as I can see
+
+	* [r11969] param/__init__.py: Remove unnecessary ALERT about
+	  slot
+
+	* [r11968] param/__init__.py: Compare for identity rather than
+	  equality with None
+
+	* [r11967] topo/misc/genexamples.py, topo/tests/runtests.py,
+	  topo/tests/test_script.py: Fix tests after examples/models
+	  split
+
+	* [r11966] Makefile, platform/distutils/setup.py, setup.py:
+	  Move setup.py to platform/distutils/
+
+	* [r11965] MANIFEST.in, Makefile, platform/debian/MANIFEST.in:
+	  Move MANIFEST.in to platfor/debian
+
+	* [r11964] Makefile, README.setup.txt,
+	  etc/create_topographica_script.py, platform/distutils,
+	  platform/distutils/README.setup.txt: Move README.setup.txt
+	  to platform/distutils/
+
+	* [r11963] Makefile, create_topographica_script.py,
+	  doc/Developer_Manual/installation_text.php,
+	  etc/create_topographica_script.py: Move
+	  create_topographica_script.py to etc/
+
+	* [r11962] Makefile, debian/changelog, debian/compat,
+	  debian/control, debian/copyright, debian/docs,
+	  debian/install.ex, debian/menu.ex, debian/pycompat,
+	  debian/rules, debian/topographica.desktop, platform/debian,
+	  platform/debian/changelog, platform/debian/compat,
+	  platform/debian/control, platform/debian/copyright,
+	  platform/debian/docs, platform/debian/install.ex,
+	  platform/debian/menu.ex, platform/debian/pycompat,
+	  platform/debian/rules, platform/debian/topographica.desktop:
+	  Move debian/ to platform/debian/
+
+	* [r11961] Makefile,
+	  doc/Developer_Manual/installation_text.php,
+	  platform/windows, platform/windows/topographica.ico,
+	  platform/windows/windows_postinstall.py, setup.py,
+	  topographica.ico, windows_postinstall.py: Move
+	  topographica.ico and windows_postinstall.py to
+	  platform/windows/
+
+	* [r11960] osx/Instructions.txt, osx/Launch Topographica.scpt,
+	  osx/applet.icns, osx/description.rtfd/TXT.rtf, osx/xcode3
+	  language references/Instructions.txt, osx/xcode3 language
+	  references/Topographica.xcspec, osx/xcode3 language
+	  references/Topographica.xcsynspec, platform, platform/osx,
+	  platform/osx/Instructions.txt, platform/osx/Launch
+	  Topographica.scpt, platform/osx/applet.icns,
+	  platform/osx/description.rtfd,
+	  platform/osx/description.rtfd/TXT.rtf, platform/osx/xcode3
+	  language references, platform/osx/xcode3 language
+	  references/Instructions.txt, platform/osx/xcode3 language
+	  references/Topographica.xcspec, platform/osx/xcode3 language
+	  references/Topographica.xcsynspec: Move osx/ into platform/
+
+	* [r11959] examples/Makefile, examples/README.txt,
+	  examples/goodhill_network90.ty, examples/leaky_lissom_or.ty,
+	  examples/lissom.ty, examples/lissom_fsa.ty,
+	  examples/lissom_oo_or.ty, examples/lissom_oo_or_cr.ty,
+	  examples/lissom_or.ty, examples/lissom_or_movie.ty,
+	  examples/lissom_whisker_barrels.ty,
+	  examples/obermayer_pnas90.ty,
+	  examples/sullivan_neurocomputing04.ty, models,
+	  models/README.txt, models/goodhill_network90.ty,
+	  models/leaky_lissom_or.ty, models/lissom.ty,
+	  models/lissom_fsa.ty, models/lissom_oo_or.ty,
+	  models/lissom_oo_or_cr.ty, models/lissom_or.ty,
+	  models/lissom_or_movie.ty, models/lissom_whisker_barrels.ty,
+	  models/obermayer_pnas90.ty,
+	  models/sullivan_neurocomputing04.ty: Clean up examples
+	  directory for feature req 2900472
+
+	* [r11958] topo/plotting/bitmap.py: Revert an API change that
+	  breaks some tests
+
+	* [r11957] topo/misc/legacy.py: Add legacy support for *.basic
+	  modules removed in r11871
+
+	* [r11956] topo/transferfn/misc.py,
+	  topo/transferfn/optimized.py, topo/transferfn/projfn.py: API
+	  cleanup for topo.transferfn
+
+	* [r11955] topo/responsefn/projfn.py: API cleanup for
+	  topo/responsefn
+
+	* [r11954] topo/projection/__init__.py: API cleanup for
+	  topo.projection
+
+	* [r11953] topo/learningfn/projfn.py: API cleanup for
+	  topo.learningfn
+
+	* [r11952] topo/plotting/bitmap.py, topo/plotting/plot.py,
+	  topo/tests/testbitmap.py: API cleanup for topo.plotting
+	  Conflicts: topo/plotting/plot.py
+
+	* [r11951] topo/sheet/__init__.py, topo/sheet/composer.py,
+	  topo/sheet/lissom.py, topo/sheet/optimized.py,
+	  topo/sheet/ptztracker.py, topo/sheet/saccade.py,
+	  topo/sheet/slissom.py: API cleanup for topo.sheet
+
+	* [r11950] topo/command/__init__.py, topo/command/analysis.py,
+	  topo/command/pylabplot.py: API cleanup for topo.command
+
+	* [r11949] topo/analysis/featureresponses.py,
+	  topo/analysis/vision.py: API clenaup for topo.analysis
+
+	* [r11948] topo/ep/basic.py: Remove topo.ep.basic
+
+	* [r11947] topo/tests/testsimulation.py: Fix rerefences to
+	  topo.ep.basic
+
+	* [r11946] topo/ep/__init__.py: Move topo.ep.basic into
+	  topo.ep
+
+	* [r11945] param/__init__.py, param/parameterized.py,
+	  topo/base/cf.py, topo/base/simulation.py, topo/ep/basic.py,
+	  topo/misc/generatorsheet.py, topo/sheet/__init__.py,
+	  topo/sheet/lissom.py, topo/sheet/saccade.py,
+	  topo/tests/testfixedpointnumber.txt,
+	  topo/tests/testgmpynumber.txt: API cleanup for param and
+	  topo.base
+
+	* [r11944] Makefile: Show UAC prompt on Windows from exe
+	  installer if necessary
+
+	* [r11943] topo/command/__init__.py,
+	  topo/coordmapper/__init__.py, topo/learningfn/__init__.py,
+	  topo/numbergen/__init__.py, topo/pattern/__init__.py,
+	  topo/projection/__init__.py, topo/responsefn/__init__.py,
+	  topo/sheet/__init__.py, topo/transferfn/__init__.py: Revert
+	  "Delete k, v that leak out of list comprehension scope" This
+	  reverts commit c88fec2d4f231c46ed43d3999f24c929769e8a50
+	  (r11872).
+
+	* [r11942] topo/tests/runtests.py, topo/tests/test_script.py:
+	  Make some of the tests run on Windows Conflicts:
+	  topo/tests/runtests.py
+
+	* [r11941] topo/plotting/palette.py: Removing
+	  topo/plotting/palette.py as requestsed; it largely does not
+	  work and requires a rewrite
+
+2012-03-27 jbednar
+
+	* [r11940] topo/misc/distribution.py: Suppressed warning
+	  except with von Mises fits actually attempted
+
+	* [r11939] doc/News/changes_text.php: Added some recent
+	  changes
+
+	* [r11938] ChangeLog.txt: Updated with recent changes; not yet
+	  in News.
+
 2012-03-21 dstefanov
 
 	* [r11937] topo/tests/instances-r11275.pickle,
