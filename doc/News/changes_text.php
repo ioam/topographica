@@ -11,6 +11,11 @@ Changes since 0.9.7. Fully updated 2011/10/09; some updates as of 2012/03/27.
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
+
+  <li>r11906: OpenMP changes to the optimized learningfns and 
+  transferfns mean that 'private' attributes _has_norm_total and 
+  _norm_total are now implemented differently (with arrays). Any 
+  code directly accessing these attributes may break.
   <li>r11904, r11916: Changed map measurement code to use an
   extensible hierarchy of objects for extracting the preference and
   selectivity values from a histogram.  Any custom map measurement
