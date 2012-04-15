@@ -700,8 +700,8 @@ class run_batch(ParameterizedFunction):
     
         # Create output directories
         if not os.path.isdir(normalize_path(p['output_directory'])):
-            os.mkdir(normalize_path(p['output_directory']))
-    
+            try: os.mkdir(normalize_path(p['output_directory'])) 
+            except OSError: pass   # Catches potential race condition (simultaneous run_batch runs)
         
         dirname = self._truncate(p,p.dirname_prefix+prefix)
         normalize_path.prefix = normalize_path(os.path.join(p['output_directory'],dirname))
