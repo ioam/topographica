@@ -516,19 +516,29 @@ class param_formatter(ParameterizedFunction):
 
         Names not specified here will be sorted alphabetically.""")
 
+    map_only=param.Boolean(default=False, doc="""
+       Flag indicating whether or not to format the parameters that are
+       not specified in the map. """ )
+
+    separator=param.String(default=",", doc="""
+       Separator to use between the <parameter>=<value> pairs.""" )
+
     def __call__(self,params):
         result = ""
-        # present in params but not in map
-        unspecified_in_map = sorted(set(params).difference(set(self.map)))
         # present in params and in map, preserving order of map
         specified_in_map = [n for n in self.map.keys() if n in params]
+        # present in params but not in map
+        unspecified_in_map = sorted(set(params).difference(set(self.map)))
 
-        for pname in specified_in_map+unspecified_in_map:
+        if self.map_only: pnames = specified_in_map
+        else:             pnames = specified_in_map + unspecified_in_map
+
+        for pname in pnames:
             val = params[pname]
             # Special case to give reasonable filenames for lists
             valstr= ("_".join([str(i) for i in val]) if isinstance(val,list)
                      else str(val))
-            result += "," + self.map.get(pname,pname) + "=" + valstr
+            result += self.separator + self.map.get(pname,pname) + "=" + valstr
         return result
 
 
@@ -589,9 +599,7 @@ def load_kwargs(fname, glob, loc):
     if not isinstance(kwargs,dict): return {}
     else:                        return kwargs
 
-# NOTE:
-#  Could make eval safer:
-# eval(expression, {"__builtins__":None}, {'<name>':<object or class>})
+
 
 
 
