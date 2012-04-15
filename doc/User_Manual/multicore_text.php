@@ -31,19 +31,34 @@ This problem can be avoided if you always check that the string 'Using OpenMP' i
 
 <H3>Setting the number of threads</H3>
 
-The proper way to reduce the number of threads used by OpenMP in Topographica is to set the 'openmp_threads' variable to the appropriate positive integer value. This can be useful if you want to leave a core free to maintain responsiveness on your system over the course of a simulation. Here is an example of how the number of threads used can be set to two:
+The best way to set the number of threads used by OpenMP in Topographica is to supply the global 'openmp_threads' variable with the appropriate positive integer value. This can be done at the commandline per simulation or globally across simulations using the topographicarc file. In general, it may be useful to leave at least one core free in order to maintain a responsive system when running simulations. 
+
+<H4>Via the commandline</H4>
+
+Here is an example of how the number of threads used can be set to two on the commandline:
 
 <pre>
 ./topographica  -c openmp_threads=2 -c openmp=True -g ./examples/tiny.ty -c 'topo.sim.run(10000)'
 </pre>
 
-If the number of OpenMP threads is not set explicitly in this way, the 'OMP_NUM_THREADS' environment variable  is consulted (if it exists). To illustrate, the following simulation will only use two cores:
+<H4>Via .topographicarc</H4>
+
+If you find yourself wanting to keep OpenMP enabled, it can get tedious to specify the OpenMP behaviour each time at the commandline. In such a scenario, you may just want to add the following two lines to ~/.topographicarc (setting the number of threads to your desired value):
+
+<pre>
+openmp=True
+openmp_threads=2
+</pre>
+
+<H4>Via environment variable</H4>
+
+If the number of OpenMP threads is not set explicitly using the methods above, the 'OMP_NUM_THREADS' environment variable  is consulted (if it exists). To illustrate, the following simulation will only use two cores:
 
 <pre>
 OMP_NUM_THREADS=2 ./topographica  -c openmp=True -p seed_val=42 -g ./examples/gcal.ty
 </pre>
 
-The OMP_NUM_THREADS environment variable is designed to be a system-wide setting. For this reason, explicit use of "openmp_threads" is prefered unless there is good reason to use the system-wide default.
+The OMP_NUM_THREADS environment variable is designed to be a system-wide setting for all OpenMP enabled programs. For this reason, explicit use of "openmp_threads" is prefered unless there is good reason to use the system-wide default.
 
 <H3>When to use OpenMP</H3>
 
