@@ -564,6 +564,37 @@ def default_analysis_function():
     save_plotgroup("Activity",saver_params={"filename_suffix":"_45d"})
 
 
+
+
+def load_kwargs(fname, glob, loc):
+    """ 
+    Helper function to allow keyword arguments (dictionary format)
+    to be  loaded from a file 'fname'. The intended use is to allow a callable
+    (specifically run_batch) to obtain its settings and parameters from file. 
+
+    This is useful when dispatching jobs on a cluster as you can then queue
+    run_batch jobs (eg. using qsub) before all the settings are known. This
+    type of scenario is typical in parameter search (eg hillclimbing) where
+    the settings file for future run_batch instances are conditional on data
+    from previous simulations.
+
+    Variable glob should be provided as globals() and loc should be provided
+    as locals(). A dictionary is always returned - if eval does not evaluate
+    as expected, an empty dictionary is returned. Eval is used as it allows
+    objects, classes and other more complex datastructures to be loaded.
+    """
+    with open(fname,'r') as f: lines = f.readlines()
+    expression = "".join([l.strip() for l in lines])
+    kwargs = eval(expression, glob, loc)
+    if not isinstance(kwargs,dict): return {}
+    else:                        return kwargs
+
+# NOTE:
+#  Could make eval safer:
+# eval(expression, {"__builtins__":None}, {'<name>':<object or class>})
+
+
+
 # ALERT: Need to move docs into params.
 class run_batch(ParameterizedFunction):
     """
