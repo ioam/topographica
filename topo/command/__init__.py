@@ -458,10 +458,10 @@ def _print_vc_info(filename):
     """Save the version control status of the current code to the specified file."""
     try:
         import subprocess
-        file = open(normalize_path(filename),'w')
-        file.write("Information about working copy used for batch run\n\n")
-        file.write("topo.version=%s\n"% topo.version)
-        file.flush()
+        f = open(normalize_path(filename),'w')
+        f.write("Information about working copy used for batch run\n\n")
+        f.write("topo.version=%s\n"% topo.version)
+        f.flush()
         vctype,commands = _get_vc_commands()
         for cmd in commands:
             fullcmd = [vctype,cmd] if isinstance(cmd,str) else [vctype]+cmd
@@ -474,11 +474,11 @@ def _print_vc_info(filename):
             # time (i.e. the command outputs appear in the order of
             # finishing, rather than in the order of starting, making
             # it impossible to label the commands).
-            subprocess.Popen(fullcmd,stdout=file,stderr=subprocess.STDOUT)
+            subprocess.Popen(fullcmd,stdout=f,stderr=subprocess.STDOUT)
     except:
         print "Unable to retrieve version control information."
     finally:
-        file.close()
+        f.close()
 
 
 def _save_parameters(p,filename):
