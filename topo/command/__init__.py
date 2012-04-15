@@ -576,7 +576,7 @@ def default_analysis_function():
 
 
 
-def load_kwargs(fname, glob, loc):
+def load_kwargs(fname, glob, loc, fail_exception=False):
     """ 
     Helper function to allow keyword arguments (dictionary format)
     to be  loaded from a file 'fname'. The intended use is to allow a callable
@@ -589,14 +589,17 @@ def load_kwargs(fname, glob, loc):
     from previous simulations.
 
     Variable glob should be provided as globals() and loc should be provided
-    as locals(). A dictionary is always returned - if eval does not evaluate
-    as expected, an empty dictionary is returned. Eval is used as it allows
-    objects, classes and other more complex datastructures to be loaded.
+    as locals(). Either a dictionary is returned or an exception is raised
+    (conditioned on fail_exception). If fail_exception=False and eval does 
+    not evaluateas expected, an empty dictionary is returned. Eval is used
+    as it allows classes, objects and other complex datastructures to load.
     """
     with open(fname,'r') as f: lines = f.readlines()
     expression = "".join([l.strip() for l in lines])
     kwargs = eval(expression, glob, loc)
-    if not isinstance(kwargs,dict): return {}
+    if not isinstance(kwargs,dict): 
+        if fail_exception: raise Exception('Invalid settings file.')
+        else:              return {}
     else:                        return kwargs
 
 
