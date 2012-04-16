@@ -37,9 +37,8 @@ illustrate this with the example model (tiny.ty), monitor your
 processor usage (eg. using top or htop on Linux) after running the
 following command:
 
-<pre>
-./topographica -c 'openmp=True' -g ./examples/tiny.ty -c 'topo.sim.run(10000)'
-</pre>
+<pre> ./topographica -c 'openmp=True' -g ./examples/tiny.ty -c \
+'topo.sim.run(10000)' </pre>
 
 You should see that all available cores are in use for the duration of
 the simulation and you may notice some loss of responsiveness on your
@@ -59,8 +58,8 @@ simulations.
 
 <H4>Via .topographicarc</H4>
 
-If you wish to use OpenMP with Topographica regularly, you will want
-to enable OpenMP define the number of threads to use in one place.
+If you wish to use OpenMP with Topographica regularly, you may wish
+to enable OpenMP and define the number of threads in one place.
 Therefore, the recommended way of configuring OpenMP is to add the
 following two lines to ~/.topographicarc (setting the number of
 threads to your desired value):
@@ -75,7 +74,7 @@ openmp_threads=2
 Here is an example of how the number of threads used can be set to two
 on the commandline:
 
-<pre> ./topographica -c openmp_threads=2 -c openmp=True -g
+<pre> ./topographica -c openmp_threads=2 -c openmp=True -g \
 ./examples/tiny.ty -c 'topo.sim.run(10000)' </pre>
 
 
@@ -104,7 +103,7 @@ methods above, the 'OMP_NUM_THREADS' environment variable is consulted
 (if it exists). To illustrate, the following simulation will only use
 two cores:
 
-<pre> OMP_NUM_THREADS=2 ./topographica -c openmp=True -p seed_val=42
+<pre> OMP_NUM_THREADS=2 ./topographica -c openmp=True -p seed_val=42 \
 -g ./examples/gcal.ty </pre>
 
 The OMP_NUM_THREADS environment variable is designed to be a
