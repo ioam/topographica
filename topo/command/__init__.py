@@ -563,8 +563,6 @@ def default_analysis_function():
     save_plotgroup("Activity",saver_params={"filename_suffix":"_45d"})
 
 
-
-
 def load_kwargs(fname, glob, loc, fail_exception=False):
     """ 
     Helper function to allow keyword arguments (dictionary format)
@@ -590,9 +588,6 @@ def load_kwargs(fname, glob, loc, fail_exception=False):
         if fail_exception: raise Exception('Invalid settings file.')
         else:              return {}
     else:                        return kwargs
-
-
-
 
 
 # ALERT: Need to move docs into params.
@@ -673,6 +668,15 @@ class run_batch(ParameterizedFunction):
         Optional prefix for the directory name (allowing e.g. easy
         grouping).""")
 
+    embed_scriptname = param.Boolean(default=True, doc="""
+        Flag to indicate whether or not the script name should be
+        automatically included in the directory prefix string.""")
+
+    tag = param.String(default="",doc="""
+        Optional tag to embed in directory prefix to allow unique
+        directory naming across multiple independent batches that
+        share a common timestamp.""")
+
     # CB: do any platforms also have a maximum total path length?
     max_name_length = param.Number(default=200,doc="""
         The experiment's directory name will be truncated at this
@@ -685,6 +689,12 @@ class run_batch(ParameterizedFunction):
         documentation for codes.
         
         E.g. Adding '%S' to the default would include seconds.""")
+
+    timestamp = param.NumericTuple(default=(0,0), doc="""
+        Optional override of timestamp in Python struct_time 8-tuple format. 
+        Useful when running many run_batch commands as part of a group with
+        a shared timestamp. By default, the timestamp used is the time when
+        run_batch is started.""") 
 
     save_global_params = param.Boolean(default=True,doc="""
         Whether to save the script's global_parameters to a pickle in
@@ -713,8 +723,11 @@ class run_batch(ParameterizedFunction):
         # Construct simulation name, etc.
         scriptbase= re.sub('.ty$','',os.path.basename(script_file))
         prefix = ""
-        prefix += time.strftime(p.name_time_format)
-        prefix += "_" + scriptbase
+        if p.timestamp==(0,0): prefix += time.strftime(p.name_time_format)
+        else:                  prefix += time.strftime(p.name_time_format, p.timestamp)
+
+        if p.embed_scriptname: prefix += "_" + scriptbase
+        prefix += "_" + p.tag
         simname = prefix
 
         # Construct parameter-value portion of filename; should do more filtering
