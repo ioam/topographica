@@ -450,7 +450,8 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
         # Always varies frequency and phase; everything else depends on parameters.
 
         features = \
-            [Feature(name="frequency",values=p.frequencies)]
+            [Feature(name="frequency",values=p.frequencies,
+                    preference_fn=DSF_WeightedAverage(selectivity_scale=(0.,17.)))]
 
         if p.num_direction==0: features += \
             [Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,
@@ -558,7 +559,8 @@ pg.add_static_image('Color Key','command/two_or_key_vert.png')
 
 pg= create_plotgroup(name='Spatial Frequency Preference',category="Preference Maps",
              doc='Measure preference for sine grating orientation and frequency.',
-             pre_plot_hooks=[measure_sine_pref.instance()])
+             pre_plot_hooks=[measure_sine_pref.instance(
+                 preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi), selectivity_scale=(0.,17.) ))] )
 pg.add_plot('Spatial Frequency Preference',[('Strength','FrequencyPreference')])
 pg.add_plot('Spatial Frequency Selectivity',[('Strength','FrequencySelectivity')])
 # Just calls measure_sine_pref to plot different maps.
@@ -772,14 +774,18 @@ class measure_corner_or_pref(PositionMeasurementCommand):
     def _feature_list(self,p):
         width =1.0*p.x_range[1]-p.x_range[0]
         height=1.0*p.y_range[1]-p.y_range[0]
-        return [Feature(name="x",range=p.x_range,step=width/p.divisions),
-                Feature(name="y",range=p.y_range,step=height/p.divisions),
-                Feature(name="orientation",range=(0,2*pi),step=2*pi/p.num_orientation,cyclic=True)]
+        return [
+            Feature(name="x",range=p.x_range,step=width/p.divisions,preference_fn=self.preference_fn),
+            Feature(name="y",range=p.y_range,step=height/p.divisions,preference_fn=self.preference_fn),
+            Feature(name="orientation",range=(0,2*pi),step=2*pi/p.num_orientation,cyclic=True,
+                preference_fn=DSF_WeightedAverage(value_scale=(0., 1/2.0/pi),selectivity_scale=(0.,17.))
+            )]
 
 
 pg= create_plotgroup(name='Corner OR Preference',category="Preference Maps",
              doc='Measure orientation preference for corner shape (or other complex stimuli that cannot be represented as fullfield patterns).',
-             pre_plot_hooks=[measure_corner_or_pref.instance()],
+             pre_plot_hooks=[measure_corner_or_pref.instance(
+                 preference_fn=DSF_WeightedAverage( selectivity_scale=(0.,17.) ))],
              normalize='Individually')
 pg.add_plot('Corner Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Corner Orientation Preference&Selectivity',[('Hue','OrientationPreference'),

@@ -859,13 +859,15 @@ class measure_position_pref(PositionMeasurementCommand):
     def _feature_list(self,p):
         width =1.0*p.x_range[1]-p.x_range[0]
         height=1.0*p.y_range[1]-p.y_range[0]
-        return [Feature(name="x",range=p.x_range,step=width/p.divisions),
-                Feature(name="y",range=p.y_range,step=height/p.divisions)]
+        return [Feature(name="x",range=p.x_range,step=width/p.divisions,preference_fn=self.preference_fn),
+                Feature(name="y",range=p.y_range,step=height/p.divisions,preference_fn=self.preference_fn)]
 
 
+from topo.misc.distribution import DSF_WeightedAverage
 pg= create_plotgroup(name='Position Preference',category="Preference Maps",
            doc='Measure preference for the X and Y position of a Gaussian.',
-           pre_plot_hooks=[measure_position_pref.instance()],
+           pre_plot_hooks=[measure_position_pref.instance(
+            preference_fn=DSF_WeightedAverage( selectivity_scale=(0.,17.) ))],
            plot_hooks=[topographic_grid.instance()],
            normalize='Individually')
 

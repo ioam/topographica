@@ -442,6 +442,10 @@ class FeatureMaps(FeatureResponses):
                     t           = topo.sim.time()
                     for map_name, map_view in maps.items():
                         name                        = base_name + k + map_name.capitalize()
+                        # JABALERT: Is this safe and general enough?
+                        if map_name == 'selectivity':
+                            cyclic          = False
+                            cyclic_range    = None
                         view                        = SheetView( (map_view, bounding_box), sn, sp, t, sr )
                         view.cyclic                 = cyclic
                         view.cyclic_range           = cyclic_range
