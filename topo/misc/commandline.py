@@ -383,7 +383,9 @@ def c_action(option,opt_str,value,parser):
     exec value in __main__.__dict__
     global something_executed
     something_executed=True
-            
+    if __main__.__dict__.get('openmp',False) and parser.values.gui: 
+        print "\nWARNING: For OpenMP to be used, -g flag must be specified *after* openmp=True\n"
+    
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
 		       help="string of arbitrary Python code to be executed in the main namespace.")
@@ -393,6 +395,8 @@ topo_parser.add_option("-c","--command",action = "callback",callback=c_action,ty
 def p_action(option,opt_str,value,parser):
     """Callback function for the -p option."""
     global_params.exec_in_context(value)
+    if global_params.context.get('openmp',False) and parser.values.gui: 
+        print "\nWARNING: For OpenMP to be used, -g flag must be specified *after* openmp=True\n"
     global something_executed
     something_executed=True
             
