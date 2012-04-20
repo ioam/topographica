@@ -668,10 +668,6 @@ class run_batch(ParameterizedFunction):
         Optional prefix for the directory name (allowing e.g. easy
         grouping).""")
 
-    embed_scriptname = param.Boolean(default=True, doc="""
-        Flag to indicate whether or not the script name should be
-        automatically included in the directory prefix string.""")
-
     tag = param.String(default="",doc="""
         Optional tag to embed in directory prefix to allow unique
         directory naming across multiple independent batches that
@@ -726,8 +722,7 @@ class run_batch(ParameterizedFunction):
         if p.timestamp==(0,0): prefix += time.strftime(p.name_time_format)
         else:                  prefix += time.strftime(p.name_time_format, p.timestamp)
 
-        if p.embed_scriptname: prefix += "_" + scriptbase
-        prefix += "_" + p.tag
+        prefix += "_" + scriptbase + "_" + p.tag
         simname = prefix
 
         # Construct parameter-value portion of filename; should do more filtering
