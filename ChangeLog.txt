@@ -424,7 +424,7 @@
 
 	* [r11901] topo/transferfn/misc.py: Adjusted
 	  HomeostaticResponse parameter values to be more sensible
-	  (learning_rate:0.009 -> 0.1, smoothing: 0.991-> 0.99),
+	  (learning_rate:0.009 -> 0.01, smoothing: 0.991-> 0.99),
 	  renamed 'seed_init' parameter to 'seed' and declared period
 	  to be a constant parameter
 
