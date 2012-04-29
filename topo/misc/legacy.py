@@ -7,18 +7,18 @@ $Id$
 __version__='$Revision: 8021 $'
 
 import sys
-
+import imp
+import decimal # CEBALERT: when did decimal appear? too late to use?
+    
 import param
 
 # CEB: Add note that snapshot can be re-saved, making updates
 # permanent. All functions in here should be written to support that.
 
-
 # CEB: code to support older snapshots is available in earlier
 # versions of this file (e.g. r11323). I consider that version of the
 # file to be a "proof of concept"; techniques from it will be used to
 # support changes made from 0.9.7 onwards.
-
 
 # CEBNOTE: could also support running old scripts without modifying
 # them.
@@ -42,7 +42,7 @@ import param
 releases = {"0.9.7": 11275}
 
 
-def get_version(snapshot_release,snapshot_version):
+def _get_version(snapshot_release,snapshot_version):
 
     found_version = False
     
@@ -78,11 +78,22 @@ class SnapshotSupport(object):
         # fine-grained control over what's loaded. We can at least use
         # the release number for coarse-grained control, though.
 
-        snapshot_version = get_version(snapshot_release,snapshot_version)
+        snapshot_version = _get_version(snapshot_release,snapshot_version)
 
         param.Parameterized().debug("Snapshot is from release %s (r%s)"%(snapshot_release,snapshot_version))
 
+        SnapshotSupport.apply_external_patches()
         SnapshotSupport.apply_support(snapshot_version)
+
+
+    @staticmethod
+    def apply_external_patches():
+        global external_patches
+
+        # not ordered
+        for message in external_patches.keys():
+            param.Parameterized().message(message)
+            external_patches[message]()
 
 
     @staticmethod
@@ -96,11 +107,17 @@ class SnapshotSupport(object):
                 support[version]()
 
 
+
 ######################################################################
 ######################################################################
 
 # Supporting code
 
+def _version_greater_or_equal(module,than):
+    # CB: I forgot Python: how do I do "if module version >= than"?!
+    major,minor = module.__version__.split(".")[0:2]
+    version = decimal.Decimal(major+"."+minor)
+    return version>=than
 
 def _setstate(inst,state):
     for k,v in state.items():
@@ -131,6 +148,39 @@ def module_redirect(name,parent,actual_module):
     """
     sys.modules[parent.__name__+'.'+name]=actual_module
     setattr(sys.modules[parent.__name__],name,actual_module)
+
+# CEBALERT: adapted from topo.misc.util's version; need to merge and
+# clean up.
+class _ModuleFaker(object):
+    def __init__(self,module):
+        self.module = module
+        
+    def load_module(self,name):
+        if name not in sys.modules:
+            self.module.__file__ = self.path
+            sys.modules[name] = self.module
+            if '.' in name:
+                parent_name, child_name = name.rsplit('.', 1)
+                setattr(sys.modules[parent_name], child_name, self.module)
+        return sys.modules[name]
+    
+class _ModuleImporter(object):
+    def __init__(self,module,fullname):
+        self.fullname = fullname
+        self.module = module
+    
+    def find_module(self, fullname, path=None):
+        if fullname == self.fullname:
+            param.Parameterized().message("%s imported as %s"%(self.module.__name__,self.fullname))
+            faker = _ModuleFaker(self.module)
+            faker.path = path
+            return faker
+        return None
+
+def allow_import(module,location):
+    """Allow module to be imported from location."""
+    sys.meta_path.append(_ModuleImporter(module,location))
+
 
 ######################################################################
 ######################################################################
@@ -205,9 +255,30 @@ def pattern_basic_removed():
 
 support[11871] = pattern_basic_removed
 
+
+
+######################################################################
 ######################################################################
 
+# patches for external dependencies
 
+# pickle stores path to modules; if path to module changes, module
+# can't be imported, so snapshot can't be opened.
+
+external_patches = {}
+
+def numpy_core_defmatrix():
+    import numpy.matrixlib.defmatrix
+    allow_import(numpy.matrixlib.defmatrix,'numpy.core.defmatrix')
+
+import numpy
+if _version_greater_or_equal(numpy,decimal.Decimal("1.4")):
+    external_patches['Support numpy.core.defmatrix for numpy>=1.4'] = numpy_core_defmatrix
+
+
+
+######################################################################
+######################################################################
 
 # CEBALERT: not sure whether to keep the "-l" option to Topographica.
 # The idea is that we could start old scripts by loading legacy
@@ -220,5 +291,6 @@ def install_legacy_support(release="0.9.7",version=None):
         version = releases[release]
 
     assert version>=releases[release], "Release/version mismatch."
-    
+
+    SnapshotSupport.apply_external_patches()
     SnapshotSupport.apply_support(version)
