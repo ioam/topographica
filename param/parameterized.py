@@ -1616,7 +1616,7 @@ class PicklableClassAttributes(object):
             if '__all__' in dict_ and inspect.ismodule(v) and k not in exclude:
                 if k in dict_['__all__'] and v not in processed_modules:
                     self.get_PO_class_attributes(v,class_attributes,processed_modules,exclude)
-                processed_modules.append(v)
+                    processed_modules.append(v)
 
             else:
                 if isinstance(v,type) and issubclass(v,Parameterized):
