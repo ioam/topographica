@@ -10,6 +10,12 @@ from StringIO import StringIO
 
 import copy
 
+def _name_is_main(obj):
+    # CEBALERT: see IPython hack in commandline.py
+    return obj.__module__ == "__main__" or obj.__module__ == "__mynamespace__"
+
+    
+
 class PickleMain(object):
     """
     Pickle support for types and functions defined in __main__.
@@ -58,7 +64,7 @@ class PickleMain(object):
             if not name.startswith('_'):
                 if isinstance(obj,types.FunctionType) or isinstance(obj,type):
                     # (could be extended to other types, I guess
-                    if obj.__module__ == "__main__":
+                    if _name_is_main(obj): 
                         #CB: how do I print out info via Parameterized?
                         print "%s is defined in __main__: saving bytecode."%name
                         bytecode[name] = obj
@@ -105,7 +111,7 @@ def save_code(self, obj):
 
 def save_function(self, obj):
     """ Save functions by value if they are defined interactively """
-    if obj.__module__ == '__main__' or obj.func_name == '<lambda>':
+    if _name_is_main(obj) or obj.func_name == '<lambda>':
         args = (obj.func_code, obj.func_globals, obj.func_name, obj.func_defaults, obj.func_closure)
         self.save_reduce(new.function, args, obj=obj)
     else:
@@ -127,7 +133,7 @@ def save_module_dict(self, obj, main_dict=vars(__import__('__main__'))):
 
 def save_classobj(self, obj):
     """ Save an interactively defined classic class object by value """
-    if obj.__module__ == '__main__':
+    if _name_is_main(obj):
         args = (obj.__name__, obj.__bases__, obj.__dict__)
         self.save_reduce(new.classobj, args, obj=obj)
     else:  
@@ -143,7 +149,7 @@ def save_instancemethod(self, obj):
 
 def save_module(self, obj):
     """ Save modules by reference, except __main__ which also gets its contents saved by value """
-    if obj.__name__ == '__main__':
+    if _name_is_main(obj):
         self.save_reduce(__import__, (obj.__name__,), obj=obj, state=vars(obj).copy())
     elif obj.__name__.count('.') == 0:
         self.save_reduce(__import__, (obj.__name__,), obj=obj)
@@ -154,7 +160,7 @@ def save_type(self, obj):
     if getattr(new, obj.__name__, None) is obj:
         # Types in 'new' module claim their module is '__builtin__' but are not actually there
         save_global_byname(self, obj, 'new', obj.__name__)
-    elif obj.__module__ == '__main__':
+    elif _name_is_main(obj):
         # Types in __main__ are saved by value
 
         # Make sure we have a reference to type.__new__        
