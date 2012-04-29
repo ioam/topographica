@@ -7,7 +7,6 @@ $Id$
 __version__='$Revision: 8021 $'
 
 import sys
-import imp
 import decimal # CEBALERT: when did decimal appear? too late to use?
     
 import param
