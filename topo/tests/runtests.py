@@ -100,11 +100,12 @@ if len(p.targets)==0:
     # DEFAULT
     p.targets = ['unit','traintests','snapshots','gui','maptests'] # maptests wouldn't be default except it's caught platform different problems before (there aren't enough unit tests!)
 
-
-    
-elif p.targets == ['allsnapshottests']:
-    # CEBALERT: should just combine these tests anyway 
-    p.targets = ['snapshots','pickle']
+# Allow allsnapshottests as shortcut for snapshots and pickle.
+# CEBALERT: should just combine these tests anyway.
+if "allsnapshottests" in p.targets:
+    index = p.targets.index("allsnapshottests")
+    p.targets[index] = "snapshots"
+    p.targets.insert(index,"pickle")
 
 # ->params ?
 tests_dir = param.resolve_path("topo/tests",path_to_file=False)
