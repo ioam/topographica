@@ -497,7 +497,7 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
 
         return [Feature(name="frequency",values=p.frequencies),
                 Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,
-                        preference_fn=self.preference_fn),
+                        preference_fn=self.preference_fn,cyclic=True),
                 Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
 
 
