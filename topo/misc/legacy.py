@@ -230,7 +230,9 @@ def pattern_basic_rectangular_removed():
 
 support[11558] = pattern_basic_rectangular_removed
 
-
+# CEBALERT: should be renamed (it's not only about pattern.basic). And
+# did all these happen in one commit?  I added topo.ep recently; did
+# that happen in the same commit as the others or not?
 def pattern_basic_removed():
    import topo.pattern
    import topo.command
@@ -272,9 +274,24 @@ def numpy_core_defmatrix():
     import numpy.matrixlib.defmatrix
     allow_import(numpy.matrixlib.defmatrix,'numpy.core.defmatrix')
 
+
 import numpy
 if _version_greater_or_equal(numpy,decimal.Decimal("1.4")):
     external_patches['Support numpy.core.defmatrix for numpy>=1.4'] = numpy_core_defmatrix
+
+# CB: About support for things like the numpy defmatrix change
+# (above). When someone asks to load a snapshot, and they have
+# numpy>=1.4, we register an import hook so that if the snapshot tries
+# to import numpy.core.defmatrix, numpy.matrixlib.defmatrix will be
+# provided. This happens without testing that the snapshot will
+# actually try to import numpy.core.defmatrix (i.e. "import
+# numpy.core.defmatrix" will work (with a warning) after loading *any*
+# snapshot if version of numpy>=1.4). As far as I can see, the only
+# way of improving this would be either (a) to set
+# cPickle.Unpickler.find_global and make it handle all the various
+# import changes (plus normal imports; there's no default because
+# that's hidden in C) or (b) store version numbers of imported modules
+# in the snapshot and use those to figure out what to do.
 
 
 
