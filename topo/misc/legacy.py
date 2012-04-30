@@ -91,7 +91,7 @@ class SnapshotSupport(object):
 
         # not ordered
         for message in external_patches.keys():
-            param.Parameterized().message(message)
+            #param.Parameterized().message(message)
             external_patches[message]()
 
 
