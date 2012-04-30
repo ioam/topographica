@@ -14,6 +14,7 @@ from numpy import zeros, array, size, object_
 
 import param
 from param import normalize_path
+from topo.misc.distribution import DSF_WeightedAverage
 
 try:
     import matplotlib
@@ -74,6 +75,11 @@ def complexity(full_matrix):
     sum = 0.0
     res = 0.0
     average = 0.0
+    
+    print "Z"
+    print size(full_matrix.features)
+    print full_matrix.features[0].values
+    
     for x in range(rows):
         for y in range(cols):
             complex_matrix[x,y] = []#
@@ -269,19 +275,18 @@ def analyze_complexity(full_matrix,simple_sheet_name,complex_sheet_name,filename
         print "Skipping phase preference scatter plot; could not analyze region %s." \
               % simple_sheet_name
 
-
-class measure_and_analyze_complexity(measure_sine_pref):
+from topo.command.analysis import measure_or_pref
+class measure_and_analyze_complexity(measure_or_pref):
     """Macro for measuring orientation preference and then analyzing its complexity."""
     def __call__(self,**params):
         fm = super(measure_and_analyze_complexity,self).__call__(**params)
-        #from topo.command.analysis import measure_or_pref
-        #fm = measure_or_pref()
         analyze_complexity(fm,simple_sheet_name="V1Simple",complex_sheet_name="V1Complex",filename="ModulationRatio")
-    
 
 pg= create_plotgroup(name='Orientation Preference and Complexity',category="Preference Maps",
              doc='Measure preference for sine grating orientation.',
-             pre_plot_hooks=[measure_and_analyze_complexity.instance()])
+              pre_plot_hooks=[measure_and_analyze_complexity.instance(
+                             preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi), selectivity_scale=(0.,17.0)))])
+             
 pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',[('Hue','OrientationPreference'),
                                                    ('Confidence','OrientationSelectivity')])
