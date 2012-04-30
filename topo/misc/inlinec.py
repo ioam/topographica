@@ -73,7 +73,7 @@ c_decorators = collections.defaultdict(lambda:'')
 # OpenMP). Good multi-threaded performance requires a machine with
 # separate memory subsystems for each core, such as a Xeon. See Marco
 # Elver's report at http://homepages.inf.ed.ac.uk/s0787712/stuff/melver_project-report.pdf.
-openmp = __main__.__dict__.get('openmp',False)
+openmp_threads = __main__.__dict__.get('openmp_threads',False)
     
 # Variable that will be used to report whether weave was successfully
 # imported (below).
@@ -125,20 +125,10 @@ try:
         'compiler':'gcc',
         'verbose':0}
 
-    if openmp:
-        print "Using OpenMP"
+    if openmp_threads != 1:
         c_decorators['cfs_loop_pragma']="#pragma omp parallel for schedule(guided, 8)"
         inline_named_params['extra_compile_args'].append('-fopenmp')
-        inline_named_params['extra_link_args'].append('-fopenmp')        
-        # JABNOTE: By default, when OMP_NUM_THREADS has not been set,
-        # requests as many threads as there are cores.  We could
-        # instead put a limit on the default number of threads, if we
-        # find that there is little extra benefit from each additional
-        # thread.
-        openmp_threads = __main__.__dict__.get('openmp_threads') 
-        if openmp_threads is not None:
-            print "Setting OMP_NUM_THREADS=%s"%openmp_threads
-            os.environ['OMP_NUM_THREADS']=str(openmp_threads)
+        inline_named_params['extra_link_args'].append('-fopenmp')
 
 
     def inline_weave(*params,**nparams):

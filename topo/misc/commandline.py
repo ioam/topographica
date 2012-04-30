@@ -383,8 +383,10 @@ def c_action(option,opt_str,value,parser):
     exec value in __main__.__dict__
     global something_executed
     something_executed=True
-    if __main__.__dict__.get('openmp',False) and parser.values.gui: 
-        print "\nWARNING: For OpenMP to be used, -g flag must be specified *after* openmp=True\n"
+    openmp_settings_names = ['openmp_threads', 'openmp_min_threads', 'openmp_max_threads']
+    openmp_present = [(k in __main__.__dict__) for k in openmp_settings_names]
+    if openmp_present and parser.values.gui: 
+        print "\nWARNING: For OpenMP settings to be used properly they need to be specified after the -g flag."
     
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
@@ -395,8 +397,6 @@ topo_parser.add_option("-c","--command",action = "callback",callback=c_action,ty
 def p_action(option,opt_str,value,parser):
     """Callback function for the -p option."""
     global_params.exec_in_context(value)
-    if global_params.context.get('openmp',False) and parser.values.gui: 
-        print "\nWARNING: For OpenMP to be used, -g flag must be specified *after* openmp=True\n"
     global something_executed
     something_executed=True
             
@@ -466,6 +466,55 @@ def exec_startup_files():
     #####
 
 
+def get_omp_num_threads(openmp_threads, openmp_min_threads, openmp_max_threads):
+    """ Helper function to implement sensible OpenMP behaviour where
+        possible.  Returns a integer tuple (OpenMP threads, CPUs detected).  
+
+        CPUs detected may be None if multiprocessing is not available (ie
+        Python 2.5) and consequently OpenMP threads may be None if the user
+        gave a relative thread specification (ie openmp_threads <= 0). When
+        OpenMP threads is None, the default OpenMP behaviour of using all
+        available cores is used.
+        """
+
+    if 'OMP_NUM_THREADS' in os.environ: return (None, None)
+
+    try:  
+        import multiprocessing
+        total_cores = multiprocessing.cpu_count()
+        if total_cores == 1: return (1, 1)
+        if total_cores == 2: 
+            print "Two CPUs detected, using both with OpenMP"
+            return (2, 2)
+    except: 
+        print "Cannot import multiprocessing to determine number of cores."
+        total_cores = None
+
+    if total_cores and (-openmp_threads >= (total_cores-1)):
+        print "OpenMP: Topographica needs a positive number of threads to execute!"
+        return (1, total_cores)
+
+    if (openmp_threads <= 0) and total_cores:      openmp_threads = total_cores + openmp_threads
+    if (openmp_threads <= 0) and not total_cores:  return (None, total_cores)
+
+    if (total_cores is not None) and (openmp_threads > total_cores):
+        print "OpenMP: More threads specified than cores detected."; return (total_cores, total_cores)
+
+    if openmp_threads < openmp_min_threads:
+        print "OpenMP: Using minimum number of allowed threads."
+        openmp_threads = openmp_min_threads
+
+    if (openmp_max_threads is None): return (openmp_threads, total_cores)
+
+    elif (openmp_max_threads < openmp_min_threads):
+        print"OpenMP: Maximum allowed threads lower than minimum allowed threads. Ignoring maximum limit." 
+        return (openmp_threads, total_cores)
+    elif (openmp_threads > openmp_max_threads):
+        print "OpenMP: Using maximum number of allowed threads."
+        return (openmp_max_threads, total_cores)
+    else:
+        return (openmp_threads, total_cores)
+
 
 ### Execute what is specified by the options.
 
@@ -504,6 +553,30 @@ def process_argv(argv):
             break
 
     global_params.check_for_unused_names()
+
+    # OpenMP settings and defaults
+    openmp_threads = __main__.__dict__.get('openmp_threads')
+    if (openmp_threads is None): openmp_threads=-1
+    
+    openmp_min_threads = __main__.__dict__.get('openmp_min_threads')
+    if (openmp_min_threads is None): openmp_min_threads=2
+    
+    openmp_max_threads = __main__.__dict__.get('openmp_max_threads')
+
+    if (openmp_threads != 1): # OpenMP is disabled if openmp_threads == 1
+
+        (num_threads, total_cores) = get_omp_num_threads(openmp_threads, 
+                                                         openmp_min_threads, 
+                                                         openmp_max_threads)
+        
+        if num_threads is None: 
+            print "OpenMP: Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use."
+        elif total_cores is None: 
+            print "OpenMP: Using %d threads" % num_threads
+            os.environ['OMP_NUM_THREADS'] =  str(num_threads)
+        else: 
+            print "OpenMP: Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores)
+            os.environ['OMP_NUM_THREADS'] =  str(num_threads)
 
     # If no scripts and no commands were given, pretend -i was given.
     if not something_executed: interactive()
