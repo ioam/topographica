@@ -235,6 +235,7 @@ def pattern_basic_removed():
    import topo.pattern
    import topo.command
    import topo.coordmapper
+   import topo.ep
    import topo.learningfn
    import topo.numbergen
    import topo.pattern
@@ -244,6 +245,7 @@ def pattern_basic_removed():
    import topo.transferfn
    module_redirect('basic',topo.command,topo.command)
    module_redirect('basic',topo.coordmapper,topo.coordmapper)
+   module_redirect('basic',topo.ep,topo.ep)
    module_redirect('basic',topo.learningfn,topo.learningfn)
    module_redirect('basic',topo.numbergen,topo.numbergen)
    module_redirect('basic',topo.pattern,topo.pattern)
