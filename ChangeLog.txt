@@ -22,7 +22,7 @@
 	* [r11982] topo/tests/test_map_measurement.py: Changed to
 	  print map name before it is tested so that which array is
 	  failing would be clear.
-	  
+
 	  Now also prints name of the data file used so that it is
 	  clear what to update when values are meant to change.
 
@@ -446,7 +446,7 @@
 	  activityplot to match matrixplot conventions; changes
 	  interface of activityplot command and adds extent option to
 	  matrixplot.
-	  
+	
 	  Changed name of 'Plot with axis labels' right-click option
 	  to 'Plot in matrix coords', for clarity, and added new 'Plot
 	  in sheet coords' right-click option
@@ -5526,7 +5526,7 @@
 	  Upgraded to Python 2.6. Includes: upgrade to numpy 1.3 (necessary
 	  for Windows and Mac); freetype and libpng so they are no longer
 	  dependencies that must be installed from elsewhere.
-	  
+
 	  (I.e. merge branch 'python26' from ceball_fiver.)
 
 2010-01-16  bilalkhancnsg
@@ -5874,7 +5874,6 @@
 2009-11-17  KKudryavtsev
 
 	* [r10779] /branches/kkudryavtsev_branch:
-	  
 
 	* [r10778]
 	  contrib/cc_lissom_oo_or_simple_rv.ty,
@@ -5885,7 +5884,7 @@
 	  examples/tiny.ty,
 	  external/Makefile,
 	  mpidemo, setup_ez.py:
-	  
+
 
 	* [r10777] examples/lissom_oo_or.ty,
 	  examples/tiny.ty,
@@ -11983,10 +11982,8 @@
 2008-10-28  rczhao
 
 	* [r9530] /trunk/facespace/face_space_patterns.py:
-	  
 
 	* [r9529] /trunk/facespace/face_space.ty:
-	  
 
 	* [r9528] /trunk/facespace/evofacemodel/fs1mf.m:
 	  Generate a face on a male/female trajectory given a strength
@@ -29743,9 +29740,9 @@
 	  Dynamic threshold and membrane potential calculation/plotting
 	  facilities added.
 	  Simply do, e.g.
-	  
+
 	  topo.sim["V1"].plot_trace()
-	  
+
 	  in the example script.
 	  This the a first rudimentary version that showd
 	  synchronization/desynchronization behavior.
@@ -35007,14 +35004,14 @@
 	  actual
 	  weights. Apart from the sharing, it works just like in
 	  CFProjection.
-	  
+
 	  This allowed us to remove the special DummyCF and
 	  CFPRF_SharedWeightDotProduct_opt classes entirely, replacing them
 	  with
 	  the standard ConnectionField and CFPRF_DotProduct_opt (modified
 	  to
 	  allow non-contiguous arrays).
-	  
+
 	  External code should now avoid using _cfs. To get the shape of
 	  the
 	  projection without accessing _cfs, a new property
@@ -35022,7 +35019,7 @@
 	  been
 	  simplified to store the bounds_template internally, rather than
 	  sending it around as a parameter.
-	  
+
 	  The result should be much simpler to maintain, test, and
 	  understand,
 	  but at least on lissom_oo_or.ty the results are unchanged.
@@ -35031,22 +35028,22 @@
 	  Updated to use numpy instead of Numeric, on a separate CVS branch
 	  named numpy_test_branch. First, ran the automatic conversion
 	  code:
-	  
+
 	  import numpy.oldnumeric.alter_code1 as noa
 	  noa.converttree('topo') noa.convertall('examples') # (After
 	  temporarily renaming .ty to .py)
-	  
+
 	  The main automatic changes were:
-	  
+
 	  - Changed 'import Numeric' to 'import numpy.oldnumeric as
 	  Numeric'
 	  - Changed 'from Numeric import' to 'from numpy.oldnumeric import'
 	  - Converted .flat to .ravel()
 	  - Changed typecode= to dtype=
 	  - Eliminated savespace() and spacesaver()
-	  
+
 	  Then cleaned up the results by hand:
-	  
+
 	  - Removed all traces of savespace
 	  - Replaced custom ExtraPickler and ExtraUnpickler with
 	  standard pickle.Pickler and pickle.Unpickler
@@ -35161,22 +35158,22 @@
 	  Updated to use numpy instead of Numeric, on a separate CVS branch
 	  named numpy_test_branch. First, ran the automatic conversion
 	  code:
-	  
+
 	  import numpy.oldnumeric.alter_code1 as noa
 	  noa.converttree('topo') noa.convertall('examples') # (After
 	  temporarily renaming .ty to .py)
-	  
+
 	  The main automatic changes were:
-	  
+
 	  - Changed 'import Numeric' to 'import numpy.oldnumeric as
 	  Numeric'
 	  - Changed 'from Numeric import' to 'from numpy.oldnumeric import'
 	  - Converted .flat to .ravel()
 	  - Changed typecode= to dtype=
 	  - Eliminated savespace() and spacesaver()
-	  
+
 	  Then cleaned up the results by hand:
-	  
+
 	  - Removed all traces of savespace
 	  - Replaced custom ExtraPickler and ExtraUnpickler with
 	  standard pickle.Pickler and pickle.Unpickler
@@ -43740,11 +43737,11 @@
 	  topo/tests/testplotgroup.py:
 	  Attempting to organize functions that iterate over the CFs of a
 	  CFProjection and those that act on a single array.
-	  
+
 	  (As part of the more general idea that there are e.g. output
 	  functions
 	  which apply to a Projection.)
-	  
+
 	  For output functions, we have the single-array (normal
 	  mathematical) output
 	  functions, e.g.:
@@ -43757,20 +43754,20 @@
 	  CFProjectionOuputFn
 	  CFProjectionIdentityOutputFn(single_cf_fn=Identity())
 	  CFProjectionDivisiveSumNormalize(single_cf_fn=DivisiveSumNormalize())
-	  
+
 	  OutputFns are in topo.outputfns.basic, and CFProjectionOutputFns
 	  are
 	  in topo.outputfns.projfns. Other Projection-level output
 	  functions
 	  would also go in the projfns module.
-	  
+
 	  The same applies to LearningFns and
 	  CFProjectionLearningFns. ResponseFunctions have been renamed
 	  CFProjectionResponseFunctions where they apply to a CFProjection.
 	  The
 	  reorganization of LearningFns and ResponseFns is not complete
 	  yet.
-	  
+
 	  Along with this reorganization, CFProjectionOutputFnParameter (as
 	  distinct from OutputFnParameter) has been introduced (and
 	  similarly
@@ -43779,7 +43776,7 @@
 	  the __init__.py files in the outputfns, learningfns, and
 	  responsefns
 	  packages need to be cleaned up.
-	  
+
 	  In addition to this, minor cleanups may also have occurred,
 	  including:
 	  skipping calls to __init__() methods if all they do is call the
@@ -49766,21 +49763,21 @@
 	  topo/tests/tkgui/testactivitypanel.py,
 	  topo/tests/tkgui/testplotgrouppanel.py:
 	  The PatternGenerator subclasses lose the 'Generator' suffix.
-	  
+
 	  For example:
 	  "
 	  from topo.patterns.basic import LineGenerator
 	  ...
 	  LineGenerator()
 	  "
-	  
+
 	  has changed to:
 	  "
 	  import topo.patterns.basic
 	  ...
 	  topo.patterns.basic.Line()
 	  "
-	  
+
 	  This checkin was part of an approximately 10-kilometre diff, so
 	  the chance of a mistake somewhere is quite high.
 
@@ -49874,12 +49871,12 @@
 	  computing the conversion between sheet and matrix coordinates,
 	  which
 	  were computed in these conversion functions.
-	  
+
 	  There are two reasons for moving them into the sheet:
 	  1) more efficient because the true densities are cached in Sheet
 	  2) It ensure the same densities are used across all conversion
 	  functions and different bounds.
-	  
+
 	  - All conversion functions between matrix and sheet coordinates
 	  now
 	  require BOTH the true x and y densities.
@@ -53419,7 +53416,7 @@
 	  that uses the C pointer functions is renamed as
 	  CFProjection_CPointer and moved into a new file
 	  projections/optimized.py.
-	  
+
 	  projections/kernelprojection.py will be removed.
 
 2005-11-08  jbednar
@@ -55352,7 +55349,7 @@
 	  EventProcessor now has 2 separate data stuctures (in_connections
 	  and out_connections) to store the incoming and outgoing
 	  connections.
-	  
+
 	  ProjectinSheet, a subclass of EventProcessor, has it own storage
 	  for incoming connection (in_projections) that are indexed by the
 	  source name of the projection to optimize projection lookup.
@@ -55925,7 +55922,7 @@
 	  topo/sheets/lissom.py:
 	  temp_activity in Sheet and its subclasses is now changed to
 	  activity_buffer.
-	  
+
 	  temp_activity in Projection and its subclasses is now changed to
 	  activity.
 
@@ -55985,7 +55982,7 @@
 	* [r851] topo/base/cfsheet.py:
 	  Removed the parameter weight_type in ConnectionField and made it
 	  an optional argument.
-	  
+
 	  Added explanation on the Numeric.Int32 type of
 	  ConnectionField.slice_array.
 
@@ -56301,9 +56298,9 @@
 	  radius.
 	  - type of connection weight, e.g. Numeric.Float32, is a parameter
 	  of Projection.
-	  
+
 	  Fixed the divisive normalization code in learningrules.py.
-	  
+
 	  Added UniformGenerator in patterns/basic.py.
 
 2005-10-05  ceball
@@ -56344,11 +56341,11 @@
 	  Connections between two EventProcessors are now instances of
 	  EPConnection, which was a tuple.
 	  Projection is now a subclass of EPConnection.
-	  
+
 	  The interface of _connect_to and _connect_from of EventProcessors
 	  are changed to
 	  _connect_to(self, proj, **args) (similarly for _connect_from).
-	  
+
 	  All the subclasses of EventProcessor that invoke these methods
 	  are updated accordingly.
 
@@ -56418,7 +56415,7 @@
 	  into simulator.
 	  - removed the redundant flag execfn.
 	  - renamed sched_execfn to schedule_action.
-	  
+
 	  examples/lissom.ty is changed accordingly.
 
 2005-10-04  jdepaula
@@ -57007,7 +57004,7 @@
 	  topo/learningrules.py,
 	  topo/utils.py:
 	  All the weight arrays are now of type Float32.
-	  
+
 	  The learn method is largely moved to learningrules.py
 
 2005-09-14  yfsit
@@ -57663,7 +57660,7 @@
 	  topo/sheet.py:
 	  fixed cfsheet.py and sheet.py so that the all the unit tests are
 	  passed.
-	  
+
 	  The way that the weights in a connection field are initialized
 	  was changed
 	  quite significantly in the previous version of cfsheet (1.11).
@@ -57681,7 +57678,7 @@
 	  simulator and should be correct. In 1.10, the size seems to be
 	  off by one
 	  in some cases.
-	  
+
 	  To fix the code so that all kinds of initial weight distributions
 	  will have the
 	  correct connection field boundary may require some significant
@@ -57736,7 +57733,7 @@
 	  changed cfsheet.py, sheet.py, and utils.py so that the new
 	  lissom.ty now
 	  matches the c++ simulator.
-	  
+
 	  The computation of response of each connection field is now moved
 	  into
 	  the Projection class. The response is stored in temp_activation
