@@ -287,9 +287,8 @@ class UnpickleEnvironmentCreator(object):
         self.version = state['version']
         import topo.misc.legacy as L
         L.SnapshotSupport.install(self.release,self.version)
-        
 
-        
+
 
 def save_snapshot(snapshot_name=None):
     """
@@ -338,7 +337,6 @@ def save_snapshot(snapshot_name=None):
     snapshot_file.close()
 
 
-
 def load_snapshot(snapshot_name):
     """
     Load the simulation stored in snapshot_name.
@@ -355,22 +353,38 @@ def load_snapshot(snapshot_name):
         snapshot.seek(0)
     except (IOError,NameError):
         snapshot = open(snapshot_name,'r')
-
+    
     try:
         pickle.load(snapshot)
-    except:
-        import traceback
+    except ImportError:
+        # CEBALERT: Support snapshots where the unpickling support
+        # (UnpickleEnvironmentCreator) cannot be found because the
+        # support itself was moved from topo.command.basic to
+        # topo.command.__init__! Was it a bad idea to have the support
+        # code loaded via an object?
+        sys.modules['topo.command.basic'] = topo.command
+        # Could instead set find_global on cPickle.Unpickler (could
+        # support all import changes that way, as alternative to what
+        # we currently do), but I'm reluctant to mess with cPickle's
+        # default way of finding things. (Also it would be specific to
+        # cPickle; would be different for pickle.)
+        
+        snapshot.seek(0)
+        try:
+            pickle.load(snapshot)
+        except:
+            import traceback
 
-        m = """
-        Snapshot could not be loaded.
+            m = """
+            Snapshot could not be loaded.
 
-        Please file a support request via topographica.org.
-    
+            Please file a support request via topographica.org.
+
 Loading error:
 %s
-        """%traceback.format_exc()
+            """%traceback.format_exc()
 
-        param.Parameterized(name="load_snapshot").warning(m)
+            param.Parameterized(name="load_snapshot").warning(m)
 
 
     snapshot.close()
