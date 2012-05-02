@@ -31,7 +31,7 @@ import topo
 from topo.base.cf import CFSheet
 from topo.base.sheetview import SheetView
 from topo.plotting.plotgroup import create_plotgroup
-from topo.command.analysis import measure_sine_pref
+from topo.command.analysis import measure_or_pref
 
 from topo import numbergen
 
@@ -275,7 +275,6 @@ def analyze_complexity(full_matrix,simple_sheet_name,complex_sheet_name,filename
         print "Skipping phase preference scatter plot; could not analyze region %s." \
               % simple_sheet_name
 
-from topo.command.analysis import measure_or_pref
 class measure_and_analyze_complexity(measure_or_pref):
     """Macro for measuring orientation preference and then analyzing its complexity."""
     def __call__(self,**params):
