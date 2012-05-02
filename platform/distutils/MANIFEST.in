@@ -1,0 +1,8 @@
+# Duplicates setup.py, doesn't it?
+include LICENSE.txt
+#recursive-include doc *.html *.png *.gif
+recursive-include param/externaltk *.tcl
+recursive-include examples *.ty
+recursive-include topo/tkgui/icons *.*
+recursive-include topo/command *.png *.pdf
+recursive-include topo/tests *.txt *.jpg *.pgm *DATA *.data *.typ
