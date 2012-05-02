@@ -1,0 +1,2 @@
+External tcl/tk dependencies that are not easily available on all
+platforms. We include them to simplify distribution.

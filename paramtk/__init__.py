@@ -229,8 +229,8 @@ def initialize():
 
     # Until tklib, tcllib, and scrodget become more commonly
     # available, we include them in tkgui.
-    externaltk_path = os.path.join(os.path.split(__file__)[0],"externaltk")
-    root.tk.call("lappend","auto_path",externaltk_path)
+    externaltcl_path = os.path.join(os.path.split(__file__)[0],"tcl")
+    root.tk.call("lappend","auto_path",externaltcl_path)
 
     T.BooleanVar.get = _BooleanVar_get
 
