@@ -17,8 +17,8 @@ from Tkinter import  Frame, TOP, YES, BOTH, X, LEFT, \
      NO, NONE,TclError
 
 import param
-# CEB: maybe bad, since people reading code will probably assume tk is Tkinter
-from param import tk
+# CEBALERT: here and elsewhere, change tk to paramtk
+import paramtk as tk
 
 from topo.base.sheet import Sheet
 from topo.base.cf import CFSheet

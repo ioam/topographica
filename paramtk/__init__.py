@@ -142,6 +142,11 @@ representing those of an external parameterized instance or class).
 $Id$
 """
 
+# CEBALERT: moving todo
+# (1) move icons from topo/tkgui.
+# (2) update documentation
+
+
 # CB: This file is too long because the param/gui interface code has
 # become too long, and needs cleaning up.  I'm still working on it
 # (still have to attend to simple ALERTs and do a one-pass cleanup)
@@ -176,14 +181,15 @@ from inspect import getdoc
 
 from tkMessageBox import _show,QUESTION,YESNO
 
-from parameterized import Parameterized,ParameterizedMetaclass,\
+import param.parameterized
+from param.parameterized import Parameterized,ParameterizedMetaclass,\
      classlist
 
 import param
 
 from external import Combobox,OrderedDict,Progressbar
 
-from . import Boolean,String,Number,Selector,ClassSelector,\
+from param import Boolean,String,Number,Selector,ClassSelector,\
      ObjectSelector,Callable,Dynamic,Parameter,List,HookList,\
      Filename,resolve_path
 
@@ -223,7 +229,7 @@ def initialize():
 
     # Until tklib, tcllib, and scrodget become more commonly
     # available, we include them in tkgui.
-    externaltk_path = os.path.join(os.path.split(param.__file__)[0],"externaltk")
+    externaltk_path = os.path.join(os.path.split(__file__)[0],"externaltk")
     root.tk.call("lappend","auto_path",externaltk_path)
 
     T.BooleanVar.get = _BooleanVar_get
@@ -1977,7 +1983,7 @@ class BoolTranslator(DoNothingTranslator):
 
 
 # Error messages: need to change how they're reported
-from parameterized import script_repr
+from param.parameterized import script_repr
 class ListTranslator(Translator):
 
     def __init__(self,param,initial_value=None):

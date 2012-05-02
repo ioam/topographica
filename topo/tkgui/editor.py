@@ -19,8 +19,9 @@ from tkFileDialog import asksaveasfilename
 
 
 import param
-from param import tk,parameterized,normalize_path
-from param.external import Combobox
+from param import parameterized,normalize_path
+import paramtk as tk
+from paramtk.external import Combobox
 
 import topo
 from topo.command.analysis import update_activity

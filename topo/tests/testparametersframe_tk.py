@@ -11,7 +11,7 @@ import unittest
 import Tkinter
 
 import param
-from param import tk
+import paramtk as tk
 
 from topo.base.patterngenerator import PatternGenerator
 

@@ -14,7 +14,7 @@ import unittest
 from Tkinter import Frame,Toplevel
 
 import param
-from param import tk
+import paramtk as tk
 
 from topo.base.simulation import Simulation
 from topo.base.patterngenerator import PatternGenerator

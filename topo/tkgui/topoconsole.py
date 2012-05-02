@@ -24,7 +24,8 @@ from Tkinter import Frame, Button, \
 from tkFileDialog import asksaveasfilename,askopenfilename
 
 import param
-from param import tk,normalize_path,resolve_path
+from param import normalize_path,resolve_path
+import paramtk as tk
 
 
 import topo
@@ -162,7 +163,7 @@ class PlotsMenuEntry(param.Parameterized):
 
 # Notebook only available for Tkinter>=8.5
 try:
-    from param.external import Notebook
+    from paramtk.external import Notebook
     class DockManager(Notebook):
         """Manages windows that can be tabs in a notebook, or toplevels."""
         def __init__(self, master=None, cnf={}, **kw):

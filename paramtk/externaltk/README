@@ -1,0 +1,3 @@
+External dependencies (for the Tk GUI) that are not easily available
+on all platforms. We include them in Topographica to simplify
+distribution.

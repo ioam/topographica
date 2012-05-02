@@ -13,7 +13,8 @@ from Tkinter import DISABLED, NORMAL
 from tkFileDialog import asksaveasfilename
 
 import param
-from param import tk,normalize_path
+from param import normalize_path
+import paramtk as tk
 
 import topo.command.pylabplot
 from topo.plotting.plotgroup import TemplatePlotGroup

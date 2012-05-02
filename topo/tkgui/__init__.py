@@ -15,7 +15,7 @@ import os
 import platform
 import Tkinter
 
-import param.tk
+import paramtk
 
 import topo
 
@@ -125,7 +125,7 @@ TK_SUPPORTS_DOCK = True
 
 
 # CEBALERT: this function needs some cleaning up.
-# Some stuff should be moved out to param.tk,
+# Some stuff should be moved out to paramtk,
 # which could also make this file much simpler.
 
 # gets set to the TopoConsole instance created by start.
@@ -156,13 +156,13 @@ def start(mainloop=False,banner=True):
         global TK_SUPPORTS_DOCK
         TK_SUPPORTS_DOCK=False
 
-    param.tk.initialize()
-    param.tk.root.menubar = ControllableMenu(param.tk.root)
-    param.tk.root.configure(menu=param.tk.root.menubar)
+    paramtk.initialize()
+    paramtk.root.menubar = ControllableMenu(paramtk.root)
+    paramtk.root.configure(menu=paramtk.root.menubar)
     
     # default,clam,alt,classic
     try:
-        param.tk.root.tk.call("ttk::style","theme","use","classic")  
+        paramtk.root.tk.call("ttk::style","theme","use","classic")  
     except:
         pass
 
@@ -171,12 +171,12 @@ def start(mainloop=False,banner=True):
     # or p. 49 Grayson)
     try:
         options_database = os.path.join(sys.path[0],"topo","tkgui","options_database")
-        param.tk.root.option_readfile(options_database)
+        paramtk.root.option_readfile(options_database)
         print "Read options database from",options_database
     except Tkinter.TclError:
         pass
 
-    console = TopoConsole(param.tk.root)
+    console = TopoConsole(paramtk.root)
 
     # Provide a way for other code to access the GUI when necessary
     topo.guimain=console
@@ -195,7 +195,7 @@ def start(mainloop=False,banner=True):
 
     # mainloop() freezes the commandline until the GUI window exits.
     # Without this line the command-line remains responsive.
-    if mainloop: param.tk.root.mainloop()
+    if mainloop: paramtk.root.mainloop()
 
 
 
