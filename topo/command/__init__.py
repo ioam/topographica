@@ -28,9 +28,10 @@ except ImportError:
 import param
 from param.parameterized import PicklableClassAttributes, ParameterizedFunction
 from param.parameterized import ParamOverrides
-# CEBALERT: Could have an OrderedDict in topo. Or could say min Python
-# 2.6 and Python's own. Or is it 2.7?
-from paramtk.external import OrderedDict
+# CEBALERT: This can only be temporary. Could have an OrderedDict in
+# topo. Or could say min Python 2.6 and use Python's own. Or is it
+# 2.7?
+from paramtk.odict import OrderedDict
 from param import normalize_path
 
 import topo

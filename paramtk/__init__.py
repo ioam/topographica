@@ -187,7 +187,11 @@ from param.parameterized import Parameterized,ParameterizedMetaclass,\
 
 import param
 
-from external import Combobox,OrderedDict,Progressbar
+# CEBALERT: try to import from python 2.7's ttk first
+from tilewrapper import Combobox,Progressbar
+
+# CEBALERT: try to import python 2.7's ordered dictionary first
+from odict import OrderedDict
 
 from param import Boolean,String,Number,Selector,ClassSelector,\
      ObjectSelector,Callable,Dynamic,Parameter,List,HookList,\

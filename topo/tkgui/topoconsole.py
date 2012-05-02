@@ -163,7 +163,7 @@ class PlotsMenuEntry(param.Parameterized):
 
 # Notebook only available for Tkinter>=8.5
 try:
-    from paramtk.external import Notebook
+    from paramtk.tilewrapper import Notebook
     class DockManager(Notebook):
         """Manages windows that can be tabs in a notebook, or toplevels."""
         def __init__(self, master=None, cnf={}, **kw):
