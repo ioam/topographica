@@ -282,7 +282,6 @@ SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_o
 #@@	   ${RM} -r images sounds
 #@@	   ${RM} -r info
 #@@	   mkdir images; mv ./TMPellen_arthur.pgm images/ellen_arthur.pgm
-#@@	   ${RM} -r setup.py MANIFEST.in
 #@@	   ${RM} -r tmp/
 #@@	   ${RM} -r contrib/
 #@@	   ${RM} -r .svn */.svn */*/.svn */*/*/.svn */*/*/*/.svn
@@ -323,13 +322,11 @@ ChangeLog.txt: FORCE
 # Create "pysource", the basis for "python setup.py" distributions
 
 dist-pysource: doc distdir reference-manual
-# clean dir but keep setup.py-related files
-	${CD} ${DIST_DIR}; ${PYTHON} etc/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
-	${CD} ${DIST_DIR}; ${MV} platform/distutils/README.setup.txt README.txt
-	${CD} ${DIST_DIR}; ${MV} platform/distutils/setup.py setup.py
-	${CD} ${DIST_DIR}; ${MV} setup.py TMPsetup.py; mv MANIFEST.in tmpMANIFEST.in; mv topographica TMPtopographica
 	${CD} ${DIST_DIR}; make distclean
-	${CD} ${DIST_DIR}; ${MV} TMPsetup.py setup.py; mv tmpMANIFEST.in MANIFEST.in; mv TMPtopographica topographica
+	${CD} ${DIST_DIR}; ${PYTHON} etc/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
+	${CD} ${DIST_DIR}; ${CP} platform/distutils/README.setup.txt README.txt
+	${CD} ${DIST_DIR}; ${CP} platform/distutils/setup.py setup.py
+	${CD} ${DIST_DIR}; ${CP} platform/distutils/MANIFEST.in MANIFEST.in
 # won't need to build this copy
 	${RM} ${DIST_DIR}/Makefile 
 	${RM} -r ${DIST_DIR}/external
