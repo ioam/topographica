@@ -200,3 +200,7 @@ class TestParameterizedFunction(unittest.TestCase):
 suite = unittest.TestSuite()
 cases = [TestParameterized,TestParameterizedFunction]
 suite.addTests([unittest.makeSuite(case) for case in cases])
+
+
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite)
