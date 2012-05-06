@@ -12,6 +12,12 @@ import param
 
 # CEBALERT: not anything like a complete test of Parameterized!
 
+import random
+class _SomeRandomNumbers(object):
+    def __call__(self):
+        return random.random()
+
+
 class TestPO(param.Parameterized):
     inst = param.Parameter(default=[1,2,3],instantiate=True)
     notinst = param.Parameter(default=[1,2,3],instantiate=False)
@@ -136,8 +142,7 @@ class TestParameterized(unittest.TestCase):
 
 
     def test_state_saving(self):
-        from topo import numbergen
-        t = TestPO(dyn=numbergen.UniformRandom())
+        t = TestPO(dyn=_SomeRandomNumbers())
         g = t.get_value_generator('dyn')
         g._Dynamic_time_fn=None
         assert t.dyn!=t.dyn
