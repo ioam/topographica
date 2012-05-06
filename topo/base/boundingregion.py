@@ -93,12 +93,11 @@ class BoundingBox(BoundingRegion):
         """
         Create a BoundingBox.
 
-        Either 'radius' or 'points' can be specified for the
-        AARectangle.
+        Either 'radius' or 'points' can be specified for the AARectangle.
 
-        If radius is passed in, the BoundingBox will use min_radius
-        (which defaults to 0.0) if it's larger than radius - so by
-        passing min_radius=1.25/density, a BoundingBox of at least 3x3
+        If radius is passed in, the BoundingBox will use min_radius 
+        (which defaults to 0.0) if it's larger than radius - so by 
+        passing min_radius=1.25/density, a BoundingBox of at least 3x3 
         matrix units can be guaranteed.
 
         If neither radius nor points is passed in, create a default
@@ -108,16 +107,9 @@ class BoundingBox(BoundingRegion):
         # args before they're passed to the superclass (because they
         # aren't parameters to be set)
         if 'radius' in args:
-            radius = args['radius']
+            r = args['radius']
             del args['radius']
 
-            if 'min_radius' in args:
-                min_radius = args['min_radius']
-                del args['min_radius']
-            else:
-                min_radius = 0.0
-
-            r=max(radius,min_radius)
             self._aarect=AARectangle((-r,-r),(r,r))
                 
         elif 'points' in args:
@@ -187,7 +179,6 @@ class BoundingBox(BoundingRegion):
         return left,bottom,right,top values for the BoundingBox.
         """
         return self._aarect.lbrt()
-
 
 
 class Cartesian2DPoint(param.Parameter):
@@ -411,12 +402,27 @@ class BoundingRegionParameter(param.Parameter):
     """
     Parameter whose value can be any BoundingRegion instance, enclosing a region in a 2D plane.
     """
+    __slots__=['set_hook']
+
     def __init__(self,default=BoundingBox(radius=0.5),**params):
+        self.set_hook = lambda obj,val: val
+
         super(BoundingRegionParameter,self).__init__(default=default,instantiate=True,**params)
         
     def __set__(self,obj,val):
+        """
+        Set a non default bounding box, checking that the current bounding box is not defined
+        by coordinates with units. If the current bounding region is defined with units, use the installed set hook to apply the conversion
+        and create a new bounding box with the converted coordinate set.
+        """
+        
+        coords = [self.set_hook(obj,point) for point in val.lbrt()]
+        if coords != val.lbrt():
+            val = BoundingBox(points=[(coords[0],coords[1]),(coords[2],coords[3])])
+        
         if not isinstance(val,BoundingRegion):
             raise ValueError("Parameter must be a BoundingRegion.")
         else:
             super(BoundingRegionParameter,self).__set__(obj,val)
+
             

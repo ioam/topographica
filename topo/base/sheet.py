@@ -293,4 +293,3 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         """
         return self.activity.nbytes
 
-

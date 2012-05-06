@@ -1045,5 +1045,3 @@ class ResizableCFProjection(CFProjection):
             for of in output_fns:
                 of(cf.weights)
             del cf.norm_total
-
-

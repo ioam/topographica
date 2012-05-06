@@ -269,4 +269,3 @@ license (http://www.opensource.org/licenses/bsd-license.php).
 from numpy import seterr
 old_seterr_settings=seterr(all="raise",under="ignore")
 
-

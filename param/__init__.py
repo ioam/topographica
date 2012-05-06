@@ -247,7 +247,7 @@ class Number(Dynamic):
     Example of creating a Number::
       AB = Number(default=0.5, bounds=(None,10), softbounds=(0,1), doc='Distance from A to B.')
     """
-    __slots__ = ['bounds','_softbounds','allow_None','inclusive_bounds']
+    __slots__ = ['bounds','_softbounds','allow_None','inclusive_bounds','set_hook']
  
     def __init__(self,default=0.0,bounds=None,softbounds=None,allow_None=False,inclusive_bounds=(True,True),**params):
         """
@@ -257,6 +257,7 @@ class Number(Dynamic):
         """
         super(Number,self).__init__(default=default,**params)
         
+        self.set_hook = lambda obj,val: val
         self.bounds = bounds
         self.inclusive_bounds = inclusive_bounds
         self._softbounds = softbounds
@@ -276,14 +277,16 @@ class Number(Dynamic):
         if self._value_is_dynamic(obj,objtype): self._check_value(result)
         return result
 
-
     def __set__(self,obj,val):
         """
-        Set to the given value, raising an exception if out of bounds.
-        """
+        Set to the given value, converting unit to the coordinate system
+        specified in the containing parameterized object and
+        raising an exception if out of bounds.
+        """        
+        val = self.set_hook(obj,val)
+
         if not callable(val): self._check_value(val)
         super(Number,self).__set__(obj,val)
-        
 
     def set_in_bounds(self,obj,val):
         """
@@ -1023,5 +1026,3 @@ class Foldername(Path):
             return resolve_path(path, path_to_file=False, search_paths=self.search_paths)
         else:
             return resolve_path(path, path_to_file=False)       
-
-

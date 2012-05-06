@@ -586,4 +586,3 @@ class Slice(ndarray):
         right, top  = scs.matrix2sheet(r1,c2)
 
         return ((left,bottom),(right,top))
-
