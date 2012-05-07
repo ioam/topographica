@@ -59,9 +59,13 @@ class Conversions(object):
     conversions to be performed.
     """
     
-    __slots__ = ['_base_unit','_unit_objects','_unit_specs','_ut_bak','package']
+    #__slots__ = ['_base_unit','_unit_objects','_unit_specs','_ut_bak','package']
 
     package = 'Quantities'
+
+    _public_methods = ['convert_to_base']
+    _unum_methods = ['_convert_to_base_unum']
+    _quantities_methods = ['_convert_to_base_pq']
 
     def __init__(self,units=None):
         """
@@ -76,34 +80,21 @@ class Conversions(object):
         self._unit_objects = {}
         self._unit_specs = {}
 
-        if self.package == 'Unum':
-            self._initialize_unum(units)
-        if self.package == 'Quantities':
-            self._initialize_pq(units)
+        public_methods = ['convert_to_base','initialize','initialize_units','set_local_units']
+        unum_methods = [self._convert_to_base_unum,self._initialize_unum,self._initialize_units_unum,self._set_local_units_unum]
+        pq_methods = [self._convert_to_base_pq,self._initialize_pq,self._initialize_units_pq,self._set_local_units_pq]
+
+        if self.package =='Unum': selected = unum_methods
+        else: selected = pq_methods
+        [setattr(self, pub,sel) for (sel,pub) in zip(selected, public_methods)]
+
+        self.initialize(units)
 
         if 'unit_conversions' not in sheet.Sheet.params():
             sheet.Sheet._add_parameter("unit_conversions",param.Parameter(None))
         if 'unit_conversions' not in pattern.PatternGenerator.params():
             pattern.PatternGenerator._add_parameter("unit_conversions",param.Parameter(None))            
 
-    def convert_to_base(self,val):
-        """
-        Convert to base unit using specified unit package.
-        """
-        if self.package == 'Unum':
-            return self._convert_to_base_unum(val)
-        if self.package == 'Quantities':
-            return self._convert_to_base_pq(val)
-
-    def initialize_units(self,units):
-        """
-        Initialize specified units using specified unit package.
-        """
-        if self.package == 'Unum':
-            return self._initialize_units_unum(units)
-        if self.package == 'Quantities':
-            return self._initialize_units_pq(units)
-    
     @bothmethod
     def set_base_unit(obj,unit_key,conversion,name):
         """
@@ -113,15 +104,6 @@ class Conversions(object):
             obj._set_base_unit_unum(unit_key,conversion,name)
         elif obj.package == 'Quantities':
             obj._set_base_unit_pq(unit_key,conversion,name)
-
-    def set_local_units(self):
-        """
-        Call method to set local units using specified unit package.
-        """
-        if self.package == 'Unum':
-            return self._set_local_units_unum()
-        if self.package == 'Quantities':
-            return self._set_local_units_pq()
 
     @bothmethod
     def create_unit(obj,unit_key,conversion,name):
