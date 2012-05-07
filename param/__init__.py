@@ -205,6 +205,8 @@ import operator
 _is_number = operator.isNumberType
 
 
+def identity_hook(obj,val): return val
+
 
 class Number(Dynamic):
     """
@@ -257,7 +259,7 @@ class Number(Dynamic):
         """
         super(Number,self).__init__(default=default,**params)
         
-        self.set_hook = lambda obj,val: val
+        self.set_hook = identity_hook
         self.bounds = bounds
         self.inclusive_bounds = inclusive_bounds
         self._softbounds = softbounds
@@ -277,16 +279,18 @@ class Number(Dynamic):
         if self._value_is_dynamic(obj,objtype): self._check_value(result)
         return result
 
+
     def __set__(self,obj,val):
         """
-        Set to the given value, converting unit to the coordinate system
-        specified in the containing parameterized object and
-        raising an exception if out of bounds.
+        Set to the given value raising an exception if out of bounds.
+        Also applies set_hook, providing support for conversions
+        and transformations of the value.
         """        
         val = self.set_hook(obj,val)
 
         if not callable(val): self._check_value(val)
         super(Number,self).__set__(obj,val)
+
 
     def set_in_bounds(self,obj,val):
         """

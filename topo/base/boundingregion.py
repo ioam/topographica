@@ -393,6 +393,7 @@ class AARectangle(object):
         return (r <= l) or (t <= b)
 
 
+def identity_hook(obj,val): return val
 ### JABALERT: Should classes like this inherit from something like
 ### ClassInstanceParameter, which takes a class name and verifies that
 ### the value is in that class?
@@ -405,15 +406,16 @@ class BoundingRegionParameter(param.Parameter):
     __slots__=['set_hook']
 
     def __init__(self,default=BoundingBox(radius=0.5),**params):
-        self.set_hook = lambda obj,val: val
-
+        
+        self.set_hook = identity_hook
+        
         super(BoundingRegionParameter,self).__init__(default=default,instantiate=True,**params)
         
     def __set__(self,obj,val):
         """
-        Set a non default bounding box, checking that the current bounding box is not defined
-        by coordinates with units. If the current bounding region is defined with units, use the installed set hook to apply the conversion
-        and create a new bounding box with the converted coordinate set.
+        Set a non default bounding box, use the installed set hook to
+        apply any conversion or transformation on the coordinates and
+        create a new bounding box with the converted coordinate set.
         """
         
         coords = [self.set_hook(obj,point) for point in val.lbrt()]

@@ -238,7 +238,6 @@ class Conversions(object):
         Set base unit, which is used to interface with Topographicas
         coordinate system, using Unum unit package.
         """    
-        unit_table = unum.Unum.getUnitTable()
         obj.del_unit(unit_key)
         obj._base_unit = (unum.Unum.unit(unit_key,conversion,name),unit_key,conversion,name)
 
@@ -256,7 +255,6 @@ class Conversions(object):
         Set the local unit definitions according to stored unit definitions and using
         the Quantities unit package.
         """
-        unit_table = unum.Unum.getUnitTable()
         for unit_key in self._unit_specs.keys():
             self.del_unit(unit_key)
             unit_spec = self._unit_specs[unit_key]
