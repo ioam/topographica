@@ -83,6 +83,10 @@ Previous contributors include:
       University of Edinburgh, including a project of
       building Matlab interfaces for Topographica.
 
+  <p><dt>Celia Fillion, 2010 </dt>
+  <dd>Celia contributed real-time OpenCV camera support
+      as part of a work-placement program from ISEN-Brest (France).
+
   <p><dt><a target="_top" href="http://faculty.cs.tamu.edu/choe/">Yoonsuck Choe</a>, 2002 - </dt>
   <dd>Yoonsuck is an Assistant Professor at Texas A&amp;M University.
       He implemented preliminary spiking neuron support,
