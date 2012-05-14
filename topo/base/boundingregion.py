@@ -252,6 +252,7 @@ class BoundingCircle(BoundingRegion):
         return AARectangle((xc-r,yc-r),(xc+r,yc+r))
 
 
+
 class Unbounded(BoundingRegion):
     def contains(self,x,y):
         return True
@@ -334,33 +335,24 @@ class AARectangle(object):
             setattr(self,k,v)
 
     def top(self):
-        """
-        Return the y-coordinate of the top of the rectangle.
-        """
+        """Return the y-coordinate of the top of the rectangle."""
         return self._top
+
     def bottom(self):
-        """
-        Return the y-coordinate of the bottom of the rectangle.
-        """
+        """Return the y-coordinate of the bottom of the rectangle."""
         return self._bottom
+
     def left(self):
-        """
-        Return the x-coordinate of the left side of the rectangle.
-        """
+        """Return the x-coordinate of the left side of the rectangle."""
         return self._left
+
     def right(self):
-        """
-        Return the x-coordinate of the right side of the rectangle.
-        """
+        """Return the x-coordinate of the right side of the rectangle."""
         return self._right
+
     def lbrt(self):
-        """
-        Return (left,bottom,right,top) as a tuple
-        """
-        return (self._left,
-                self._bottom,
-                self._right,
-                self._top)
+        """Return (left,bottom,right,top) as a tuple."""
+        return (self._left,self._bottom,self._right,self._top)
 
 
     def centroid(self):
@@ -372,7 +364,6 @@ class AARectangle(object):
     
 
     def intersect(self,other):
-
         l1,b1,r1,t1 = self.lbrt()
         l2,b2,r2,t2 = other.lbrt()
 
@@ -385,6 +376,7 @@ class AARectangle(object):
 
     def width(self):
         return self._right - self._left
+
     def height(self):
         return self._top - self._bottom
 
@@ -405,11 +397,11 @@ class BoundingRegionParameter(param.Parameter):
     """
     __slots__=['set_hook']
 
+
     def __init__(self,default=BoundingBox(radius=0.5),**params):
-        
         self.set_hook = identity_hook
-        
         super(BoundingRegionParameter,self).__init__(default=default,instantiate=True,**params)
+
         
     def __set__(self,obj,val):
         """
