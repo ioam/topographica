@@ -187,7 +187,7 @@ def test_script(script,decimal=None):
     
     script_name = os.path.basename(script)
     # CEBALERT: clean up
-    data_filename_only = script_name+"_DATA"
+    data_filename_only = script_name+"_DATAT"
     data_filename = os.path.join(TESTSDATADIR,data_filename_only)
 
     try:
@@ -195,6 +195,7 @@ def test_script(script,decimal=None):
     except IOError:
         print "No existing data"
         _run_in_forked_process(_generate_data,script,data_filename,run_for=RUN_FOR,cortex_density=TRAINTESTS_CORTEXDENSITY,lgn_density=LGN_DENSITY,retina_density=RETINA_DENSITY)
+        raise
         locn = resolve_path(data_filename)
             
     print "Reading data from %s"%locn

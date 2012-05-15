@@ -139,11 +139,6 @@ import param
 __all__ = [re.sub('\.py$','',f)
            for f in fnmatch.filter(os.listdir(__path__[0]),'test*.py')]
 
-# CEBALERT: temporary while moving param out (haven't done the same
-# for all_doctest; haven't decided what to do about doctests yet).
-__all__+= [re.sub('\.py$','',f)
-           for f in fnmatch.filter(os.listdir(os.path.join(os.path.dirname(param.__file__),"tests")),'test*.py')]
-
 all_doctest = sorted(fnmatch.filter(os.listdir(__path__[0]),'test*.txt'))
 
 # location in which to create semi-permanent test data
