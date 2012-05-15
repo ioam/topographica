@@ -4,53 +4,61 @@ packages to interact with Topographica.
 
 $Id$
 """
+
 __version__ = "$Revision$"
 
 import param
 from param.parameterized import bothmethod
 
-from topo import sheet, pattern, base
+from topo import sheet, pattern, base, numbergen
 import numpy as np
 
 got_unum = False; got_pq=False
-try:  import quantities as pq; got_pq=True
+
+try:  
+    import quantities as pq 
+    got_pq=True
 except: pass
 
-try: import unum; import unum.units; got_unum=True
+try: 
+    import unum 
+    import unum.units
+    unum.Unum.UNIT_FORMAT = '%s'
+    got_unum=True
 except: pass
 
 if True not in [got_unum, got_pq]: raise 'No unit package installed'
+
 
 def strip_pq_hook(clas,obj,val):
     """
     Hook to convert units provided by the quantities package to the base
     unit as defined in the QuantityConversions class and return a float.
     """
-    if hasattr(val,'units') and hasattr(obj,'unit_conversions'):
-        val = obj.unit_conversions.convert_to_base(val)
-    elif hasattr(val,'units') and hasattr(obj.src,'unit_conversions'):
-        val = obj.src.unit_conversions.convert_to_base(val)
-    return val
+    if not hasattr(val,'units'):
+        return val
+
+    if hasattr(obj,'unit_conversions'):
+        return obj.unit_conversions.convert_to_base(val)
+    elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
+        return obj.src.unit_conversions.convert_to_base(val)
+
+
 
 def strip_unum_hook(cls,obj, val):
     """
     Hook to convert unum unit objects to the specified base unit and
     return as a float.
     """
+    if not val.__class__.__name__ == 'Unum':
+        return val
 
-    if (val.__class__.__name__ == 'Unum') and hasattr(obj,'unit_conversions'):
-        try:
-            val.checkNoUnit()
-            val = float(val)
-        except unum.ShouldBeUnitlessError:
-            val = obj.unit_conversions.convert_to_base(val)
-    elif (val.__class__.__name__ == 'Unum') and hasattr(obj.src,'unit_conversions'):
-        try:
-            val.checkNoUnit()
-            val = float(val)
-        except unum.ShouldBeUnitlessError:
-            val = obj.src.unit_conversions.convert_to_base(val)
-    return val
+    if hasattr(obj,'unit_conversions'):
+        return obj.unit_conversions.convert_to_base(val)
+    elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
+        return obj.src.unit_conversions.convert_to_base(val)
+
+
 
 class Conversions(object):
     """
@@ -58,14 +66,9 @@ class Conversions(object):
     setting and resetting the unum unit table allowing sheet specific
     conversions to be performed.
     """
-    
-    #__slots__ = ['_base_unit','_unit_objects','_unit_specs','_ut_bak','package']
 
     package = 'Quantities'
-
-    _public_methods = ['convert_to_base']
-    _unum_methods = ['_convert_to_base_unum']
-    _quantities_methods = ['_convert_to_base_pq']
+    _unit_types = {'temporal':'s','spatial':'m'}
 
     def __init__(self,units=None):
         """
@@ -74,36 +77,18 @@ class Conversions(object):
         specified unum unit objects and then restoring the backed up
         unit table.
         """
-        if self.package == 'Unum' and not got_unum: raise 'Unum package not installed, set Conversions.package = \'Quantities\' or install Unum.'
-        if self.package == 'Quantities' and not got_pq: raise 'Quantities package not installed, set Conversions.package = \'Unum\' or install Quantities.'
-
         self._unit_objects = {}
         self._unit_specs = {}
-
-        public_methods = ['convert_to_base','initialize','initialize_units','set_local_units']
-        unum_methods = [self._convert_to_base_unum,self._initialize_unum,self._initialize_units_unum,self._set_local_units_unum]
-        pq_methods = [self._convert_to_base_pq,self._initialize_pq,self._initialize_units_pq,self._set_local_units_pq]
-
-        if self.package =='Unum': selected = unum_methods
-        else: selected = pq_methods
-        [setattr(self, pub,sel) for (sel,pub) in zip(selected, public_methods)]
-
-        self.initialize(units)
 
         if 'unit_conversions' not in sheet.Sheet.params():
             sheet.Sheet._add_parameter("unit_conversions",param.Parameter(None))
         if 'unit_conversions' not in pattern.PatternGenerator.params():
             pattern.PatternGenerator._add_parameter("unit_conversions",param.Parameter(None))            
+        if 'unit_conversions' not in numbergen.NumberGenerator.params():
+            numbergen.NumberGenerator._add_parameter("unit_conversions",param.Parameter(None))
 
-    @bothmethod
-    def set_base_unit(obj,unit_key,conversion,name):
-        """
-        Set base unit using specified unit package.
-        """
-        if obj.package == 'Unum':
-            obj._set_base_unit_unum(unit_key,conversion,name)
-        elif obj.package == 'Quantities':
-            obj._set_base_unit_pq(unit_key,conversion,name)
+        self.initialize(units)
+
 
     @bothmethod
     def create_unit(obj,unit_key,conversion,name):
@@ -117,15 +102,6 @@ class Conversions(object):
                 conversion = 0
             return unum.Unum.unit(unit_key,conversion,name)
 
-    @bothmethod
-    def del_unit(obj,unit_key):
-        """
-        Delete specified unit definition from global unum unit table.
-        """
-        unit_table = unum.Unum.getUnitTable()
-        if unit_key in unit_table.keys():
-            del unit_table[unit_key]
-        unum.Unum.reset(unit_table)
 
     def get_local_unit(self,unit_key):
         """
@@ -136,20 +112,71 @@ class Conversions(object):
         else:
             return None
 
+
     @bothmethod
     def get_unit(obj,unit_key):
         if obj.package == 'Unum': return getattr(unum.units,unit_key)
         elif obj.package == 'Quantities': return pq.registry.unit_registry[unit_key]
         elif unit_key in obj._unit_objects.keys(): return obj._unit_objects[unit_key]
 
+
+    @bothmethod
+    def set_base_units(obj,spatial=None,temporal=None):
+        """
+        Set base unit using specified unit package.
+        """
+        if obj.package == 'Unum':
+            obj._set_base_units_unum(spatial,temporal)
+        elif obj.package == 'Quantities':
+            obj._set_base_units_pq(spatial,temporal)
+  
+
+    @classmethod
+    def set_package(obj,package):
+        """
+        Set the public methods in accordance with the selected package.
+        """
+        obj.package = package
+
+        public_methods = ['convert_to_base','initialize','initialize_units','set_local_units']
+        unum_methods = [obj._convert_to_base_unum,obj._initialize_unum,obj._initialize_units_unum,obj._set_local_units_unum]
+        pq_methods = [obj._convert_to_base_pq,obj._initialize_pq,obj._initialize_units_pq,obj._set_local_units_pq]
+
+        if obj.package == 'Unum' and not got_unum: 
+            raise 'Unum package not installed, call Conversions.set_package(\'Quantities\') or install Unum.'
+        if obj.package == 'Quantities' and not got_pq: 
+            raise 'Quantities package not installed, call Conversions.set_package = (\'Unum\') or install Quantities.'
+
+        if obj.package =='Unum': selected = unum_methods
+        else: selected = pq_methods
+        [setattr(obj,pub,sel) for (sel,pub) in zip(selected, public_methods)]
+
+
+    @bothmethod
+    def del_unit(obj,unit_key):
+        """
+        Delete specified unit definition from global unum unit table.
+        """
+        unit_table = unum.Unum.getUnitTable()
+        if unit_key in unit_table.keys():
+            del unit_table[unit_key]
+        unum.Unum.reset(unit_table)
+
+
     def _convert_to_base_pq(self,val):
         """
-        Convert value to base unit using local unit definitions and
-        return a float.
+        Set local unit definitions and detect unit type then convert
+        the value and return as a float.
         """
         self._set_local_units_pq()
+        for key in self._base_units.keys():
+            try:
+                val.rescale(self._unit_types[key])
+                break
+            except: pass
 
-        return val.rescale(self._base_unit[1]).magnitude
+        return val.rescale(self._base_units[key][1]).magnitude
+
 
     def _convert_to_base_unum(self,val):
         """
@@ -158,10 +185,21 @@ class Conversions(object):
         """
         self._ut_bak = unum.Unum.getUnitTable()
         self._set_local_units_unum()
-        val = float(val.asUnit(self._base_unit[0])/self._base_unit[0])
+        try:
+            val.checkNoUnit()
+            val = float(val)
+        except unum.ShouldBeUnitlessError:
+            for key in self._base_units.keys():
+                try:
+                    val.asUnit(self.get_unit(self._unit_types[key]))
+                    break
+                except: pass
+            val = float(val.asUnit(self._base_units[key][0])/self._base_units[key][0])
+
         unum.Unum.reset(self._ut_bak)
 
         return val
+
 
     def _initialize_pq(self,units):
         """
@@ -174,6 +212,7 @@ class Conversions(object):
 
         self.initialize_units(units)
         
+
     def _initialize_unum(self,units):
         """
         Initialize param and Topographica to deal with Unum unit
@@ -185,6 +224,7 @@ class Conversions(object):
 
         self.initialize_units(units)
 
+
     def _initialize_units_pq(self,units):
         """
         Initialize specified units using Quantities unit package.
@@ -194,34 +234,47 @@ class Conversions(object):
             self._unit_objects[unit_key] = unit[0]
             self._unit_specs[unit_key] = (unit[1],unit[0].name)
 
+
     def _initialize_units_unum(self,units):
         """
         Initialize specified units using Unum unit package.
         """
         for unit in units:
             unit_key = unit[0].strUnit()
-            if unit_key[0] == '[':
-                unit_key = unit_key[1:-1]
             self._unit_objects[unit_key] = unit[0]
             self._unit_specs[unit_key] = (unit[1],unit[0].getUnitTable()[unit_key][2])
 
+
     @bothmethod
-    def _set_base_unit_pq(obj,unit_key,conversion,name):
+    def _set_base_units_pq(obj,spatial,temporal):
         """
         Set base unit, which is used to interface with Topographicas
         coordinate system, using Quantities unit package.
         """
-        base_unit = pq.UnitQuantity(name, definition=conversion, symbol=unit_key)
-        obj._base_unit = (base_unit,unit_key,conversion,name)
+        obj._base_units = {}
+        if spatial:
+            base_unit = pq.UnitQuantity(spatial[2], definition=spatial[1], symbol=spatial[0])
+            obj._base_units['spatial'] = (base_unit,spatial[0],spatial[1],spatial[2])
+        if temporal:
+            base_unit = pq.UnitQuantity(temporal[2], definition=temporal[1], symbol=temporal[0])
+            obj._base_units['temporal'] = (base_unit,temporal[0],temporal[1],temporal[2])
 
     @bothmethod
-    def _set_base_unit_unum(obj,unit_key,conversion,name):
+    def _set_base_units_unum(obj,spatial,temporal):
         """
-        Set base unit, which is used to interface with Topographicas
+        Set base units, which are used to interface with Topographicas
         coordinate system, using Unum unit package.
-        """    
-        obj.del_unit(unit_key)
-        obj._base_unit = (unum.Unum.unit(unit_key,conversion,name),unit_key,conversion,name)
+        """
+        obj._base_units = {}
+        if spatial:
+            obj.del_unit(spatial[0])
+            base_unit = unum.Unum.unit(spatial[0],spatial[1],spatial[2])
+            obj._base_units['spatial'] = (base_unit,spatial[0],spatial[1],spatial[2])
+        if temporal:
+            obj.del_unit(temporal[0])
+            base_unit = unum.Unum.unit(temporal[0],temporal[1],temporal[2])
+            obj._base_units['temporal'] = (base_unit,temporal[0],temporal[1],temporal[2])
+
 
     def _set_local_units_pq(self):
         """
@@ -230,8 +283,10 @@ class Conversions(object):
         """
         for unit in self._unit_specs.keys():
             self._unit_objects[unit]._conv_ref = np.array(self._unit_specs[unit][0].magnitude) * self._unit_specs[unit][0].units.simplified
-            self._base_unit[0]._conv_ref = np.array(self._base_unit[2].magnitude) * self._base_unit[2].units.simplified
+        for key in self._base_units.keys():    
+            self._base_units[key][0]._conv_ref = np.array(self._base_units[key][2].magnitude) * self._base_units[key][2].units.simplified
     
+
     def _set_local_units_unum(self):
         """
         Set the local unit definitions according to stored unit definitions and using

@@ -204,8 +204,8 @@ class Dynamic(Parameter):
 import operator
 _is_number = operator.isNumberType
 
-
 def identity_hook(obj,val): return val
+
 
 
 class Number(Dynamic):

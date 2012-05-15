@@ -95,11 +95,6 @@ class BoundingBox(BoundingRegion):
 
         Either 'radius' or 'points' can be specified for the AARectangle.
 
-        If radius is passed in, the BoundingBox will use min_radius 
-        (which defaults to 0.0) if it's larger than radius - so by 
-        passing min_radius=1.25/density, a BoundingBox of at least 3x3 
-        matrix units can be guaranteed.
-
         If neither radius nor points is passed in, create a default
         AARectangle defined by (-0.5,-0.5),(0.5,0.5).
         """
@@ -385,7 +380,11 @@ class AARectangle(object):
         return (r <= l) or (t <= b)
 
 
+
 def identity_hook(obj,val): return val
+
+
+
 ### JABALERT: Should classes like this inherit from something like
 ### ClassInstanceParameter, which takes a class name and verifies that
 ### the value is in that class?
@@ -395,6 +394,7 @@ class BoundingRegionParameter(param.Parameter):
     """
     Parameter whose value can be any BoundingRegion instance, enclosing a region in a 2D plane.
     """
+
     __slots__=['set_hook']
 
 
@@ -403,13 +403,13 @@ class BoundingRegionParameter(param.Parameter):
         super(BoundingRegionParameter,self).__init__(default=default,instantiate=True,**params)
 
         
+
     def __set__(self,obj,val):
         """
         Set a non default bounding box, use the installed set hook to
         apply any conversion or transformation on the coordinates and
         create a new bounding box with the converted coordinate set.
         """
-        
         coords = [self.set_hook(obj,point) for point in val.lbrt()]
         if coords != val.lbrt():
             val = BoundingBox(points=[(coords[0],coords[1]),(coords[2],coords[3])])

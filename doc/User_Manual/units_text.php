@@ -1,7 +1,7 @@
 <H1>Working with Real World Units in Topographica</H1>
 
 <P>Starting from May 2012, Topographica has limited support to
-formally define spatial dimensions using units. This allows modellers
+formally define physical quantities using units. This allows modellers
 to express most variables in their models using real world units,
 simplifying the tuning process and allowing for a much more intuitive
 interaction between experiments and models.
@@ -13,21 +13,22 @@ primary limitation is the lack of support for non-linear
 units. Secondly, the unit support is currently limited to the
 specification side, i.e. models can be specified in different units
 but there is no easy way of displaying scales and spatial units in the
-GUI and the outputted files. Finally, so far there is only support for
-spatial units but ultimately this should be extended to temporal
-units.
+GUI and the outputted files.
 
-<H3>Installing Unum</H3>
+<H3>Installing Unum and/or Quantities</H3>
 
-<P>As pointed out above, unit support in Topographica depends on the
-Unum Python library, the full documentation for which can be accessed
-<A href="http://home.scarlet.be/be052320/Unum.html">here</A>. The
-archived package can be downloaded from the direct link <A
-href="http://bitbucket.org/kiv/unum/get/409befe069ac.zip">here</A>.
+<P>Topographica now supports two units libraries, Unum and Quantities.
+
+<P>The full documentation for the Unum Python library can be accessed <A
+href="http://home.scarlet.be/be052320/Unum.html">here</A>. From
+there you will also be able to download the package.
+
+<P>The Quantities Python library is available <A
+href="http://pypi.python.org/pypi/quantities">here</A>.
 
 <P>The installation is the same as for other Python packages. Simply
 extract the .zip archive in a folder, start the version of Python that
-is associated with Topographica, go to extracted folder and run:
+is associated with Topographica, go to the extracted folder and run:
 
 <pre>setup.py install</pre>
 
@@ -60,7 +61,7 @@ angle" (or whatever feature dimension we are dealing with) and "sheet
 coordinates" for each sheet group.
 
 <P>These definitions are then stored by so called
-<code>UnitConversion</code> objects in each sheet, so that the
+<code>Conversions</code> objects in each sheet, so that the
 appropriate conversion can be applied at the sheet level.
 
 <H3>Importing and Defining Units in the Model.ty file</H3>
@@ -70,29 +71,33 @@ a version of the GCAL model with unit support. You can have a look at
 the complete file here. We'll only cover the parts that have been
 altered.
 
-<P>The Unum package includes definitions for the most common physical
-quantities including all SI and Imperial units, which you can import
-by calling:
+<P>We begin by importing unitsupport.
 
-<pre> from unum import Unum, units </pre>
+<pre>from.misc import unitsupport</pre>
 
-<P>In addition we have imported <code>Unum</code>, which we need to
-define new units such as degrees of visual angle. The syntax to define
-a new unit is simple, just use the <code>Unum.unit</code> method and
-pass it an abbreviation of the unit, a conversion factor and a
-description of the unit. In this particular case we aren't going to
-define the actual conversion factor since visual degrees will have
-different definitions depending on which sheet is being referenced.
+Next, set the desired unit package either to 'Quantities' or 'Unum'.
 
-<pre>vdeg = Unum.unit('vdeg', 0, 'Degrees of Visual Angle')</pre>
+<pre>unitsupport.Conversions.set_package('Quantities')</pre>
 
-<P>Now that we have imported and initially defined the units we will
-be working with we just have to import the classes and functions,
-which provide or which need to be given unit support.
+<P>Both packages include definitions for the most common physical
+quantities including all SI and Imperial units. For now we will only
+need millimetres and milliseconds. To return these units into the
+current namespace, we call:
 
-<pre> 
-from topo.base.boundingregion import BoundingRegionParameter
-from topo.misc.unitsupport import strip_units_hook, UnitConversions
+<pre>
+mm = unitsupport.Conversions.get_unit('mm')
+ms = unitsupport.Conversions.get_unit('ms')
+</pre>
+
+<P>In addition, we want to define distances in different sheets in
+degrees of visual angle so we create a new unit by passing an
+abbreviation, a conversion and a description to the
+<code>create_unit</code> method. Since visual degrees describe
+different distances depending on the sheet you are in, we don't yet
+provide a conversion.
+
+<pre>
+vdeg = unitsupport.Conversions.create_unit('vdeg', None, 'Degrees of Visual Angle')
 </pre>
 
 <P>Next we have to define some of the basic conversion or
@@ -100,7 +105,7 @@ magnification factors. In the <code>global_params</code> section of
 the <code>.ty</code> file we start by defining the number of degrees
 of visual angle represented by a unit area in sheet coordinates:
 
-<pre> vdeg_area=param.Number(default=1.3333*vdeg,doc=""" Degrees of
+<pre> vdeg_area=param.Number(default=1.33333*vdeg,doc=""" Degrees of
 visual angle per unit area in sheet coordinates."""), </pre>
 
 Now we just need to specify the magnification factor of each sheet.
@@ -108,15 +113,15 @@ In this case we specify it in the number of millimetres per degree of
 visual angle:
 
 <pre> 
-retina_mf=param.Number(default=0.2*units.mm,doc="""The magnification
+retina_mf=param.Number(default=0.2*mm,doc="""The magnification
     factor of the retinal sheet, expressed per degree of visual
     angle."""),
 
-lgn_mf=param.Number(default=0.3*units.mm,doc=""" The magnification
+lgn_mf=param.Number(default=0.3*mm,doc=""" The magnification
     factor of the LGN sheets, expressed per degree of visual
     angle."""),
 
-cortex_mf=param.Number(default=3.0*units.mm,doc=""" The magnification
+cortex_mf=param.Number(default=3.0*mm,doc=""" The magnification
     factor of the cortical sheet, expressed per degree of visual
     angle."""), 
 </pre>
@@ -129,53 +134,34 @@ details that are required for the conversions to work appropriately.
 
 <P>Having defined the numeric conversions we now have to generate
 instances of the UnitConversions class for each sheet. The
-UnitConversions class has an attribute called the base unit, which is
-the default unit it will convert to when it's asked to provide a
-numeric value. In our case this is sheet coordinates, which we'll
-define by passing the unit abbreviation, conversion and description
-into the <code>define_base</code> class method.
+UnitConversions class has an attributes called the base units, which
+are the default unit it will convert to when it's asked to provide a
+numeric value. In our case this is sheet coordinates and the
+topographica time base, which we'll define by passing the unit
+abbreviation, conversion and description into the
+<code>set_base_units</code> class method.
 
 <pre> 
-UnitConversions.define_base('sc',p.vdeg_area,'SheetCoordinates') 
+unitsupport.Conversions.set_base_units(spatial = ('sc',p.vdeg_per_sc,'Sheet Coordinates'),
+				      temporal = ('tb',p.unit_time,'Topographica time base'))
 </pre>
 
-<P>Now it's time to instantiate the UnitConversions class. Since GCAL
-has three seperate sheet groups we'll create three instances with
+<P>Now it's time to instantiate the Conversions class. Since GCAL has
+three seperate sheet groups we'll create three instances with
 different conversion values for the visual degree unit. The unit
-definitions can set up either by passing a list of tuples (containing
-the abbreviation, conversion and description) or by using the
-<code>define_unit</code> instance method, which accepts a single unit
-definition in the form of a tuple at a time.
+definitions can be set up calling the conversions class with the units
+keyword and passing it a list of tuples containing the unit object and
+conversion.
 
 <pre> 
-retina_scales = UnitConversions(units =[('vdeg',p.retina_mf,'Degrees of Visual Angle')])
-lgn_scales = UnitConversions(units = [('vdeg',p.lgn_mf,'Degrees of Visual Angle')])
-v1_scales = UnitConversions(units = [('vdeg',p.cortex_mf,'Degrees of Visual Angle')])
-</pre>
-
-<P>Before we can install these UnitConversions class instances in the
-sheets we have to add parameters, which can hold them. This prevents
-warnings from being generated.
-
-<pre>
-sheet.Sheet._add_parameter("unit_conversions",param.Parameter(None))
-pattern.PatternGenerator._add_parameter("unit_conversions",param.Parameter(None))
-</pre>
-
-<P>Finally, we have to install the strip_units_hook, which we imported
-earlier, in the Number and BoundingRegion parameters. This allows them
-to look up the appropriate conversions in their containing
-parameterized object and convert the value to sheet coordinates or
-whatever other base unit you specified.
-
-<pre> 
-param.Number.set_hook = strip_units_hook
-topo.base.boundingregion.BoundingRegionParameter.set_hook = strip_units_hook
+retina_scales = unitsupport.Conversions(units = [(vdeg,p.retina_mf)])
+lgn_scales = unitsupport.Conversions(units = [(vdeg,p.lgn_mf)])
+v1_scales = unitsupport.Conversions(units = [(vdeg,p.cortex_mf)])
 </pre>
 
 <H3>Define a model using units</H3>
 
-<P>Now that we've defined the units and generated unit conversion
+<P>Now that we've defined the units and generated Conversions
 objects for each sheet group, we can actually begin to define the
 model in terms of units.
 
@@ -189,7 +175,7 @@ their own <code>Sheet</code> or of the input sheet of a
 <code>Projection</code>. The <code>pattern</code> objects, on the
 other hand, are instantiated long before they are installed in a
 <code>Sheet</code> and therefore cannot retrieve the appropriate
-<code>UnitConversions</code> object automatically. Therefore the
+<code>Conversions</code> object automatically. Therefore the
 <code>unit_conversions</code> parameter needs to be defined for both
 <code>pattern</code> and <code>Sheet</code> objects.
 
@@ -201,10 +187,10 @@ below.
 if p.dataset=="Gaussian":
     input_type=pattern.Gaussian
     total_num_inputs=int(p.num_inputs*p.area*p.area)
-    inputs=[input_type(x=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
-                                                 ubound= (p.area/2.0+0.25),seed=12+i),
-                       y=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
-                                                 ubound= (p.area/2.0+0.25),seed=35+i),
+    inputs=[input_type(x=numbergen.UniformRandom(lbound=-1.0*vdeg,
+                                                 ubound= 1.0*vdeg,seed=12+i,unit_conversions=retina_scales),
+                       y=numbergen.UniformRandom(lbound=-1.0*vdeg,
+                                                 ubound= 1.0*vdeg,seed=35+i,unit_conversions=retina_scales),
                        orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=21+i),
                        size=0.11785*vdeg, aspect_ratio=4.66667, scale=p.scale, unit_conversions=retina_scales)
             for i in xrange(total_num_inputs)]
@@ -214,7 +200,7 @@ if p.dataset=="Gaussian":
 to pass the <code>retina_scales</code> object into the
 <code>unit_conversions</code> parameter. This also allows us to
 specify the size of the pattern in terms of visual degrees, using our
-unit abbreviation <code>vdeg</code> and the standard Unum syntax
+unit abbreviation <code>vdeg</code> and the standard syntax
 (i.e. multiplying the value by the desired unit).
 
 <P>We do the exact same thing when defining a sheet:
@@ -222,7 +208,7 @@ unit abbreviation <code>vdeg</code> and the standard Unum syntax
 <pre>
 topo.sim['Retina']=sheet.GeneratorSheet(nominal_density=p.retina_density,
     input_generator=combined_inputs, period=1.0, phase=0.05, unit_conversions=retina_scales,
-    nominal_bounds=sheet.BoundingBox(radius=((p.area*p.vdeg_area)/2.0)+1.125*p.vdeg_area))
+    nominal_bounds=sheet.BoundingBox(radius=2.16667*vdeg))
 </pre>
 
 <P>Let's do the same for the LGN sheets:
@@ -230,7 +216,7 @@ topo.sim['Retina']=sheet.GeneratorSheet(nominal_density=p.retina_density,
 <pre>
 for s in ['LGNOn','LGNOff']:
     topo.sim[s]=sheet.optimized.LISSOM_Opt(nominal_density=p.lgn_density,
-        nominal_bounds=sheet.BoundingBox(radius=((p.area*p.vdeg_area)/2.0)+0.75*p.vdeg_area),
+        nominal_bounds=sheet.BoundingBox(radius=1.66667*vdeg),
         output_fns=[transferfn.misc.HalfRectify()],tsettle=2,strict_tsettle=1,
         measure_maps=False, unit_conversions=lgn_scales)
 </pre>
@@ -242,14 +228,14 @@ the <code>topo.sim.connect</code> as its
 <code>weights_generator</code> parameter.
 
 <pre>
-    lgn_surroundg = pattern.Gaussian(size=0.33334*vdeg,aspect_ratio=1.0,
+    lgn_surroundg = pattern.Gaussian(size=0.33333*vdeg,aspect_ratio=1.0,
         output_fns=[transferfn.DivisiveNormalizeL1()], unit_conversions=lgn_scales)
 
     topo.sim.connect(s,s,delay=0.05,name='LateralGC',dest_port=('Activity'),                     
         activity_group=(0.6,DivideWithConstant(c=0.11)),
         connection_type=projection.SharedWeightCFProjection,
         strength=0.6,weights_generator=lgn_surroundg,
-        nominal_bounds_template=sheet.BoundingBox(radius=0.33334*vdeg))
+        nominal_bounds_template=sheet.BoundingBox(radius=0.33333*vdeg))
 </pre>
 
 <P>We've now gone through all the requirements to specify a model
