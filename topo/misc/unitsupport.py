@@ -27,7 +27,7 @@ try:
     got_unum=True
 except: pass
 
-if True not in [got_unum, got_pq]: raise 'No unit package installed'
+if True not in [got_unum, got_pq]: raise ImportError('Could not find Quantities or Unum.')
 
 
 def strip_pq_hook(clas,obj,val):
@@ -68,7 +68,6 @@ class Conversions(object):
     """
 
     package = 'Quantities'
-    _unit_types = {'temporal':'s','spatial':'m'}
 
     def __init__(self,units=None):
         """
@@ -121,14 +120,14 @@ class Conversions(object):
 
 
     @bothmethod
-    def set_base_units(obj,spatial=None,temporal=None):
+    def set_base_units(obj,units):
         """
         Set base unit using specified unit package.
         """
         if obj.package == 'Unum':
-            obj._set_base_units_unum(spatial,temporal)
+            obj._set_base_units_unum(units)
         elif obj.package == 'Quantities':
-            obj._set_base_units_pq(spatial,temporal)
+            obj._set_base_units_pq(units)
   
 
     @classmethod
@@ -143,9 +142,9 @@ class Conversions(object):
         pq_methods = [obj._convert_to_base_pq,obj._initialize_pq,obj._initialize_units_pq,obj._set_local_units_pq]
 
         if obj.package == 'Unum' and not got_unum: 
-            raise 'Unum package not installed, call Conversions.set_package(\'Quantities\') or install Unum.'
+            raise ImportError('Unum package not installed, call Conversions.set_package(\'Quantities\') or install Unum.')
         if obj.package == 'Quantities' and not got_pq: 
-            raise 'Quantities package not installed, call Conversions.set_package = (\'Unum\') or install Quantities.'
+            raise ImportError('Quantities package not installed, call Conversions.set_package = (\'Unum\') or install Quantities.')
 
         if obj.package =='Unum': selected = unum_methods
         else: selected = pq_methods
@@ -169,13 +168,14 @@ class Conversions(object):
         the value and return as a float.
         """
         self._set_local_units_pq()
-        for key in self._base_units.keys():
+        for idx,unit in enumerate(self._base_units):
             try:
-                val.rescale(self._unit_types[key])
+                val.rescale(unit[1])
                 break
             except: pass
+            if idx == len(self._base_units): print 'Cannot convert {0} to base unit.'.format(val)
 
-        return val.rescale(self._base_units[key][1]).magnitude
+        return val.rescale(self._base_units[idx][1]).magnitude
 
 
     def _convert_to_base_unum(self,val):
@@ -189,12 +189,13 @@ class Conversions(object):
             val.checkNoUnit()
             val = float(val)
         except unum.ShouldBeUnitlessError:
-            for key in self._base_units.keys():
+            for idx,unit in enumerate(self._base_units):
                 try:
-                    val.asUnit(self.get_unit(self._unit_types[key]))
+                    val.asUnit(unit[0])
                     break
                 except: pass
-            val = float(val.asUnit(self._base_units[key][0])/self._base_units[key][0])
+                if idx == len(self._base_units): print 'Cannot convert {0} to base unit.'.format(val)
+            val = float(val.asUnit(self._base_units[idx][0])/self._base_units[idx][0])
 
         unum.Unum.reset(self._ut_bak)
 
@@ -246,34 +247,27 @@ class Conversions(object):
 
 
     @bothmethod
-    def _set_base_units_pq(obj,spatial,temporal):
+    def _set_base_units_pq(obj,units):
         """
         Set base unit, which is used to interface with Topographicas
         coordinate system, using Quantities unit package.
         """
-        obj._base_units = {}
-        if spatial:
-            base_unit = pq.UnitQuantity(spatial[2], definition=spatial[1], symbol=spatial[0])
-            obj._base_units['spatial'] = (base_unit,spatial[0],spatial[1],spatial[2])
-        if temporal:
-            base_unit = pq.UnitQuantity(temporal[2], definition=temporal[1], symbol=temporal[0])
-            obj._base_units['temporal'] = (base_unit,temporal[0],temporal[1],temporal[2])
+        obj._base_units = []
+        for unit in units:
+            base_unit = pq.UnitQuantity(unit[2], definition=unit[1], symbol=unit[0])
+            obj._base_units.append((base_unit,unit[0],unit[1],unit[2]))
 
     @bothmethod
-    def _set_base_units_unum(obj,spatial,temporal):
+    def _set_base_units_unum(obj,units):
         """
         Set base units, which are used to interface with Topographicas
         coordinate system, using Unum unit package.
         """
-        obj._base_units = {}
-        if spatial:
-            obj.del_unit(spatial[0])
-            base_unit = unum.Unum.unit(spatial[0],spatial[1],spatial[2])
-            obj._base_units['spatial'] = (base_unit,spatial[0],spatial[1],spatial[2])
-        if temporal:
-            obj.del_unit(temporal[0])
-            base_unit = unum.Unum.unit(temporal[0],temporal[1],temporal[2])
-            obj._base_units['temporal'] = (base_unit,temporal[0],temporal[1],temporal[2])
+        obj._base_units = []
+        for unit in units:
+            obj.del_unit(unit[0])
+            base_unit = unum.Unum.unit(unit[0],unit[1],unit[2])
+            obj._base_units.append((base_unit,unit[0],unit[1],unit[2]))
 
 
     def _set_local_units_pq(self):
@@ -283,8 +277,8 @@ class Conversions(object):
         """
         for unit in self._unit_specs.keys():
             self._unit_objects[unit]._conv_ref = np.array(self._unit_specs[unit][0].magnitude) * self._unit_specs[unit][0].units.simplified
-        for key in self._base_units.keys():    
-            self._base_units[key][0]._conv_ref = np.array(self._base_units[key][2].magnitude) * self._base_units[key][2].units.simplified
+        for idx,unit in enumerate(self._base_units):    
+            self._base_units[idx][0]._conv_ref = np.array(unit[2].magnitude) * unit[2].units.simplified
     
 
     def _set_local_units_unum(self):
