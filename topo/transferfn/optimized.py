@@ -50,6 +50,7 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
             DECLARE_SLOT_OFFSET(_norm_total,cf_type);
             DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
+            DECLARE_SLOT_OFFSET(mask,cf_type);
             
             %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
@@ -59,21 +60,34 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
                     LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
                     LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
                     LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
-
-                    if( _norm_total[0] > 0.0000000000001 ) {
-
-                        UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
-    
-                        // normalize the weights
-                        double factor = 1.0/_norm_total[0];
-                        int rc = (rr2-rr1)*(cc2-cc1);
-                        for (int i=0; i<rc; ++i) {
-                            *(weights++) *= factor;
-                        }
-
-                    }
-                    // Indicate that norm_total is stale
                     LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+
+                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
+
+                    // if normalized total is not available, sum the weights
+                    if (_has_norm_total[0] == 0) {
+                        double total = 0.0;
+                        float* weights_init = weights;
+                        LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);
+                        for (int i=rr1; i<rr2; ++i) {
+                            for (int j=cc1; j<cc2; ++j) {
+                                if (*(mask++) >= 0.000001) {
+                                    total += fabs(*weights_init);
+                                }
+                                ++weights_init;
+                            }
+                        }
+                        _norm_total[0] = total; // Get new normalized total
+                    }
+    
+                    // normalize the weights
+                    double factor = 1.0/_norm_total[0];
+                    int rc = (rr2-rr1)*(cc2-cc1);
+                    for (int i=0; i<rc; ++i) {
+                        *(weights++) *= factor;
+                    }
+
+                    // Indicate that norm_total is stale
                     _has_norm_total[0]=0;
                 }                
             }
