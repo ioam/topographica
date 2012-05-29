@@ -23,7 +23,6 @@
 >>> param.resolve_path.search_paths = [tmp2]
 
 >>> command.load_snapshot(os.path.join(tmp1,'test.typ'))
-Time: 000001.00 TopoConsole00277: Applying legacy support for change r11871
 >>> assert param.normalize_path.prefix==tmp2
 >>> assert param.resolve_path.search_paths==[tmp2], "%s %s %s"%(tmp1,tmp2,param.resolve_path.search_paths)
 
