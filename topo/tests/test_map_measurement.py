@@ -107,7 +107,7 @@ def generate(plotgroup_names):
 
 def checkclose(label,topo_version,x,y):
     errors=[]
-    if not numpy.allclose(x,y):
+    if not numpy.allclose(x,y,rtol=1e-05,atol=1e-07):
         print "...%s array is no longer close to the %s version:\n%s\n---\n%s" % (label,topo_version,x,y)
         errors=[label]
     else:
