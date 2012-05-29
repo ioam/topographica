@@ -78,14 +78,14 @@ class Conversions(object):
         """
         self._unit_objects = {}
         self._unit_specs = {}
-
+        
         if 'unit_conversions' not in sheet.Sheet.params():
             sheet.Sheet._add_parameter("unit_conversions",param.Parameter(None))
         if 'unit_conversions' not in pattern.PatternGenerator.params():
             pattern.PatternGenerator._add_parameter("unit_conversions",param.Parameter(None))            
         if 'unit_conversions' not in numbergen.NumberGenerator.params():
             numbergen.NumberGenerator._add_parameter("unit_conversions",param.Parameter(None))
-
+        
         self.initialize(units)
 
 
@@ -102,6 +102,21 @@ class Conversions(object):
             return unum.Unum.unit(unit_key,conversion,name)
 
 
+    def get_unit(self,unit_key,local=True,glob=True):
+        """
+        Looks up and returns unit_key in local then global unit
+        dictionary, if not in either returns None.
+        """
+        if local:
+            local_unit = self.get_local_unit(unit_key)
+            if not local_unit: break
+            return local_unit
+        if global:
+            return self.get_global_unit(unit_key)
+        else:
+            return None
+
+
     def get_local_unit(self,unit_key):
         """
         Returns local unit object or if nonexistent None.
@@ -113,14 +128,14 @@ class Conversions(object):
 
 
     @bothmethod
-    def get_unit(obj,unit_key):
+    def get_global_unit(obj,unit_key):
         if obj.package == 'Unum': return getattr(unum.units,unit_key)
         elif obj.package == 'Quantities': return pq.registry.unit_registry[unit_key]
-        elif unit_key in obj._unit_objects.keys(): return obj._unit_objects[unit_key]
+        else: return None
 
 
     @bothmethod
-    def set_base_units(obj,units):
+    def declare_base_units(obj,units):
         """
         Set base unit using specified unit package.
         """
@@ -252,7 +267,8 @@ class Conversions(object):
         Set base unit, which is used to interface with Topographicas
         coordinate system, using Quantities unit package.
         """
-        obj._base_units = []
+        if not hasattr(obj,'_base_units'):
+            obj._base_units = []
         for unit in units:
             base_unit = pq.UnitQuantity(unit[2], definition=unit[1], symbol=unit[0])
             obj._base_units.append((base_unit,unit[0],unit[1],unit[2]))
@@ -263,7 +279,8 @@ class Conversions(object):
         Set base units, which are used to interface with Topographicas
         coordinate system, using Unum unit package.
         """
-        obj._base_units = []
+        if not hasattr(obj,'_base_units'):
+            obj._base_units = []
         for unit in units:
             obj.del_unit(unit[0])
             base_unit = unum.Unum.unit(unit[0],unit[1],unit[2])
@@ -289,4 +306,4 @@ class Conversions(object):
         for unit_key in self._unit_specs.keys():
             self.del_unit(unit_key)
             unit_spec = self._unit_specs[unit_key]
-            self._unit_objects[unit_key] = unum.Unum.unit(unit_key,unit_spec[0],unit_spec[1]) 
+            self._unit_objects[unit_key] = unum.Unum.unit(unit_key,unit_spec[0],unit_spec[1])
