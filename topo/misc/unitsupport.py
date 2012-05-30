@@ -111,7 +111,7 @@ class Conversions(object):
             local_unit = self.get_local_unit(unit_key)
             if not local_unit: break
             return local_unit
-        if global:
+        if glob:
             return self.get_global_unit(unit_key)
         else:
             return None
