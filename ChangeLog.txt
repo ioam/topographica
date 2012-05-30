@@ -1,3 +1,362 @@
+2012-05-30 philippjfr
+
+	* [r12048] contrib/PhilippJFR/gcal_units.ty,
+	  topo/misc/unitsupport.py: Cleaned up syntax and code in
+	  unitsupport.py and gcal_units.ty
+
+	* [r12047] topo/misc/unitsupport.py: Fixed overloaded
+	  reference to keyword global in unitsupport.py causing
+	  pyflakes error
+
+2012-05-29 philippjfr
+
+	* [r12046] contrib/PhilippJFR/gcal_units.ty,
+	  topo/misc/unitsupport.py: Changes to unitsupport.py and
+	  gcal_units.ty to simplify syntax when declaring new units.
+
+	* [r12045] topo/tests/testFilename.txt: Revert accidental
+	  change to /topo/test/testFilename.txt in last commit.
+
+	* [r12044] topo/tests/test_map_measurement.py: Introduced
+	  explicit tolerance values (rtol=1e-05, atol=1e-07) in
+	  checkclose method in test/test_map_measurement.py, allowing
+	  for slight numeric mismatch introduced due to change in the
+	  way some CF norm_total values are calculated.
+
+	* [r12043] topo/tests/testFilename.txt: Added: "Time:
+	  000001.00 TopoConsole00277: Applying legacy support for
+	  change r11871" to testFilename.txt to prevent test error
+
+2012-05-25 philippjfr
+
+	* [r12042] topo/tests/gcal.ty_DATA: Updated GCAL test data to
+	  account for changes in homeostatic function and in
+	  CFPOF_DivisiveNormalizeL1_opt, which no longer calls to
+	  norm_total property and thus avoids numpy.sum() (which is
+	  numerically slightly different than summing in C code)
+
+2012-05-24 philippjfr
+
+	* [r12041] topo/transferfn/optimized.py: Fixed failing LISSOM
+	  test: if CF has no norm_total sum its weights, in
+	  CFPOF_DivisiveNormalizeL1_opt in /transferfn/optimized.py.
+	  Removed 0.0000000000001 magic number check.
+
+2012-05-23 philippjfr
+
+	* [r12040] contrib/PhilippJFR/gcal_units.ty,
+	  topo/misc/unitsupport.py: Changed the way base units are
+	  handled by Conversions class
+
+2012-05-15 philippjfr
+
+	* [r12039] contrib/PhilippJFR/gcal_units.ty,
+	  doc/User_Manual/units_text.php, param/__init__.py,
+	  topo/base/boundingregion.py, topo/misc/unitsupport.py:
+	  Cleaned up gcal_units.ty and removed min_radius doc from
+	  boundingregion.ty
+
+2012-05-15 ceball
+
+	* [r12038] topo/tests/test_script.py: Remove change committed
+	  in error as part of r12037.
+
+	* [r12037] param/tests, topo/tests/__init__.py,
+	  topo/tests/test_script.py,
+	  topo/tests/testparameterizedobject.py: Undo r12030 ('Moved
+	  testparameterizedobject.py from topo/tests to
+	  param/tests.').
+
+2012-05-15 jlstevens
+
+	* [r12036] dispatch, dispatch/__init__.py, dispatch/doctests,
+	  dispatch/doctests/dsl.doctest,
+	  dispatch/doctests/dsl_dynamic.doctest, dispatch/examples,
+	  dispatch/examples/topographica,
+	  dispatch/examples/topographica/topo_analysis.py,
+	  dispatch/examples/topographica/topo_simple.py,
+	  dispatch/examples/tutorial,
+	  dispatch/examples/tutorial/collatz.py,
+	  dispatch/examples/tutorial/haystack.py,
+	  dispatch/examples/tutorial/simple.py, dispatch/python.py,
+	  dispatch/topographica.py: Initial commit of dispatch system
+	  (WIP).  Topographica examples tested and working.
+
+2012-05-14 jbednar
+
+	* [r12035] topo/base/boundingregion.py: Cleaned up whitespace
+	  and source-code formatting
+
+2012-05-11 antolikjan
+
+	* [r12034] contrib/JanA/CCLISSOM_push_pull_extra.py: corrected
+	  the anti-hebbian rule
+
+2012-05-09 jbednar
+
+	* [r12033] doc/Team_Members/index_text.php: Added Celia
+
+2012-05-07 philippjfr
+
+	* [r12032] topo/misc/unitsupport.py: Cleaned up
+	  topo/misc/unitsupport.py
+
+	* [r12031] param/__init__.py, topo/base/boundingregion.py,
+	  topo/misc/unitsupport.py: Fixed make tests problem by
+	  replacing lambda identity functions in param.Number and
+	  BoundingRegionParameter with actual functions, updating some
+	  doc strings and cleaning up unitsupport.py
+
+2012-05-06 ceball
+
+	* [r12030] param/tests,
+	  param/tests/testparameterizedobject.py,
+	  topo/tests/__init__.py,
+	  topo/tests/testparameterizedobject.py: Moved
+	  testparameterizedobject.py from topo/tests to param/tests.
+
+	* [r12029] topo/tests/testparameterizedobject.py: Stopped
+	  testparameterizedobject.py from depending on topo.numbergen.
+
+2012-05-06 philippjfr
+
+	* [r12028] contrib/PhilippJFR,
+	  contrib/PhilippJFR/gcal_units.ty,
+	  contrib/al_audio/.DS_Store,
+	  contrib/al_audio/fully_connected/.DS_Store,
+	  contrib/al_audio/topographic/.DS_Store,
+	  doc/User_Manual/units_text.php, param/__init__.py,
+	  topo/__init__.py, topo/base/boundingregion.py,
+	  topo/base/cf.py, topo/base/sheet.py,
+	  topo/base/sheetcoords.py, topo/misc/unitsupport.py: Initial
+	  commit of unit support, added /topo/misc/unitsupport.py and
+	  /contrib/PhilippJFR/gcal_units.ty
+
+2012-05-02 ceball
+
+	* [r12027] paramtk/__init__.py, paramtk/external.py,
+	  paramtk/odict.py, paramtk/tilewrapper.py,
+	  topo/command/__init__.py, topo/tkgui/editor.py,
+	  topo/tkgui/topoconsole.py: Split paramtk/external.py into
+	  /odict.py and /tilewrapper.py.
+
+	* [r12026] param/externaltk: Removed param/externaltk
+	  directory (should have been deleted in a previous commit).
+
+	* [r12025] paramtk/__init__.py, paramtk/externaltk,
+	  paramtk/tcl, paramtk/tcl/README: paramtk: Renamed
+	  externaltk/ to tcl/
+
+	* [r12024] param/external.py, param/tk.py, paramtk,
+	  paramtk/__init__.py, paramtk/external.py,
+	  paramtk/externaltk, paramtk/externaltk/README,
+	  paramtk/externaltk/scrodget-2.1,
+	  paramtk/externaltk/scrodget-2.1/pkgIndex.tcl,
+	  paramtk/externaltk/scrodget-2.1/scrodget.tcl,
+	  paramtk/externaltk/snit-2.2.1,
+	  paramtk/externaltk/snit-2.2.1/main1.tcl,
+	  paramtk/externaltk/snit-2.2.1/main1_83.tcl,
+	  paramtk/externaltk/snit-2.2.1/main2.tcl,
+	  paramtk/externaltk/snit-2.2.1/pkgIndex.tcl,
+	  paramtk/externaltk/snit-2.2.1/snit.tcl,
+	  paramtk/externaltk/snit-2.2.1/snit2.tcl,
+	  paramtk/externaltk/snit-2.2.1/snit_tcl83_utils.tcl,
+	  paramtk/externaltk/snit-2.2.1/validate.tcl,
+	  paramtk/externaltk/tooltip-1.4,
+	  paramtk/externaltk/tooltip-1.4/pkgIndex.tcl,
+	  paramtk/externaltk/tooltip-1.4/tipstack.tcl,
+	  paramtk/externaltk/tooltip-1.4/tooltip.tcl,
+	  topo/command/__init__.py,
+	  topo/tests/testparameterizedobject_tk.py,
+	  topo/tests/testparametersframe_tk.py,
+	  topo/tkgui/__init__.py, topo/tkgui/editor.py,
+	  topo/tkgui/plotgrouppanel.py,
+	  topo/tkgui/templateplotgrouppanel.py,
+	  topo/tkgui/testpattern.py, topo/tkgui/topoconsole.py: Moved
+	  param/tk to paramtk; paramtk will be a separate package from
+	  param.
+
+2012-05-02 jbednar
+
+	* [r12023] Makefile: Simplified dist-pysource; may still need
+	  work
+
+	* [r12022] platform/distutils/MANIFEST.in: Moved
+	  platform/debian/MANIFEST.in to
+	  platform/distutils/MANIFEST.in
+
+	* [r12021] platform/debian/MANIFEST.in: Moved
+	  platform/debian/MANIFEST.in to
+	  platform/distutils/MANIFEST.in
+
+	* [r12020] topo/analysis/vision.py: Removed unused import
+
+2012-04-30 jlstevens
+
+	* [r12019] topo/misc/commandline.py, topo/misc/inlinec.py:
+	  Updated useage of OpenMP [misc/inlinec.py,
+	  misc/commandline.py] with new default setting that
+	  automatically detects CPUs leaving one free (Py2.6+).
+	  Introduces openmp_threads, openmp_min_threads and
+	  openmp_max_threads settings (to be documented).  Updated
+	  warning when -g flag appears prior to setting with -c flag
+	  but removed warning for -p flag as these are not parameters.
+
+2012-04-30 jbednar
+
+	* [r12018] topo/command/analysis.py: Added missing cyclic
+	  declaration
+
+	* [r12017] ChangeLog.txt: Cleaned up whitespace
+
+2012-04-30 antolikjan
+
+	* [r12016] topo/analysis/vision.py: simplified
+
+2012-04-30 ceball
+
+	* [r12015] topo/misc/legacy.py: Added comment.
+
+	* [r12014] topo/command/__init__.py: Hack to support snapshots
+	  where legacy support object itself cannot be found.
+
+	* [r12013] topo/misc/legacy.py: Stop printing unnecessary
+	  message.
+
+	* [r12012] topo/misc/legacy.py: Added missing legacy support
+	  for topo.ep.basic.
+
+2012-04-29 ceball
+
+	* [r12011] topo/misc/legacy.py: Removed unused import.
+
+	* [r12010] topo/misc/legacy.py: Legacy support: added
+	  mechanism to allow changes in external packages to be
+	  supported.  Added legacy support for numpy.core.defmatrix
+	  having been moved.
+
+	* [r12009] topo/tests/runtests.py: Allow 'allsnapshottests'
+	  shortcut to work with other targets.
+
+	* [r12008] topo/misc/picklemain.py: Take account of IPython
+	  __mynamespace__ hack.  Previously, picklemain was missing
+	  classes/functions defined once IPython had started.
+
+	* [r12007] param/parameterized.py: Fixed bug in
+	  PicklableClassAttributes: was skipping a module in cases
+	  where that module was imported into multiple other modules.
+
+2012-04-27 ceball
+
+	* [r12006] external: Updated files to ignore.
+
+2012-04-25 jbednar
+
+	* [r12005] ChangeLog.txt: Fixed typo in log message.
+
+2012-04-20 jlstevens
+
+	* [r12004] topo/command/__init__.py: Reconsidered need for the
+	  new embed_scriptname parameter in run_batch (now removed).
+	  Probably best to always record ty filenames regardless (in
+	  case files are moved out of their original directory.)
+
+2012-04-17 jbednar
+
+	* [r12003] topo/analysis/featureresponses.py,
+	  topo/command/analysis.py, topo/command/pylabplot.py: Changes
+	  from Alessio to fix maptests -- Treat selectivity as always
+	  non-cyclic, pass preference_fn more consistently, added
+	  selectivity_scale where needed to preserve older results.
+	  
+	  Should make maptests work; have been broken since r11904.
+
+2012-04-17 jlstevens
+
+	* [r12002] doc/User_Manual/multicore_text.php,
+	  topo/misc/commandline.py: Added warning for when OpenMP is
+	  disabled on the commandline due to preceding -g flag
+	  (misc/commandline.py).  Updated the documentation to reflect
+	  this with a few other minor fixes.
+
+	* [r12001] topo/command/__init__.py: Added three new
+	  parameters to run_batch: timestamp, tag and
+	  embed_scriptname.  These parameters will be customised by
+	  the dispatch system (WIP) but otherwise the default
+	  behaviour should be the same as before.
+
+	* [r12000] topo/command/__init__.py: Reverted my changes in
+	  SVN revision 11993 where I added two new parameters to
+	  param_formatter in topo.command.  I have decided to
+	  implement a custom formatter separately and leave
+	  param_formatter with the old (simpler) default
+
+2012-04-16 antolikjan
+
+	* [r11999] contrib/JanA/topographica_diff.py: adding
+	  topographica_diff.py
+
+	* [r11998] contrib/JanA/STA.py,
+	  contrib/JanA/new_surround_modulation.py: changes to
+	  contrib/JanA
+
+2012-04-16 jlstevens
+
+	* [r11997] doc/User_Manual/multicore_text.php: Added missing
+	  slashes to multicore_php for the commandline examples.
+
+	* [r11996] doc/User_Manual/multicore.html,
+	  doc/User_Manual/multicore_text.php: Cleanup of
+	  multicore_text.php.  Fixed typos, now word wrapping at 70
+	  characters and use of rc file now recommended way of
+	  configuring OpenMP (avoids conflict with -g flag)
+
+2012-04-15 jlstevens
+
+	* [r11995] topo/command/__init__.py: Minor variable name
+	  change: renamed variable named file to f in _print_vc_info
+	  (topo.command) as shadowing a Python built-in is rarely
+	  helpful.
+
+	* [r11994] topo/command/__init__.py: Added fail_exception
+	  (optional) argument to load_kwargs so an exception can be
+	  raised if the file is of invalid format (if desired).
+
+	* [r11993] topo/command/__init__.py: Added two new parameters
+	  to param_formatter for use with dispatch system - map_only
+	  for cleaner directory names and separator to allow more
+	  custom format.
+
+	* [r11992] topo/command/__init__.py: Added function
+	  load_kwargs to topo.command.  This function is work in
+	  progress and is likely to change soon.
+
+	* [r11991] topo/command/__init__.py: Fixed race condition
+	  (mkdir) that occurs in run_batch when running multiple
+	  run_batch instances concurrently.
+
+	* [r11990] doc/User_Manual/multicore.html,
+	  doc/User_Manual/multicore_text.php: Added a note to
+	  multicore_text.php about specifying the number of OpenMP
+	  threads using the topographicarc file.
+
+2012-04-13 jlstevens
+
+	* [r11989] doc/News/changes_text.php,
+	  doc/User_Manual/index_text.php,
+	  doc/User_Manual/multicore.html,
+	  doc/User_Manual/multicore_text.php: Added user documentation
+	  for OpenMP (multicore_text.php).  Added note documenting
+	  OpenMP changes to joint normalization attributes to change
+	  log (changes_text.php)
+
+2012-04-12 jbednar
+
+	* [r11988] LICENSE.txt: Updated date
+
+	* [r11987] ChangeLog.txt: Updated Changelog.txt with recent
+	  changes, not yet in News.
+
 2012-04-04 jbednar
 
 	* [r11986] topo/tests/test_map_measurement.py: Keeps track of
