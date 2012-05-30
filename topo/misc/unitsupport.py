@@ -69,6 +69,8 @@ class Conversions(object):
 
     package = 'Quantities'
 
+    initialized = False
+
     def __init__(self,units=None):
         """
         Initialize this object first by storing the unit
@@ -76,8 +78,10 @@ class Conversions(object):
         specified unum unit objects and then restoring the backed up
         unit table.
         """
-        self._unit_objects = {}
-        self._unit_specs = {}
+        if not hasattr(self,'_unit_objects'):
+            self._unit_objects = {}
+        if not hasattr(self,'_unit_specs'):
+            self._unit_specs = {}
         
         if 'unit_conversions' not in sheet.Sheet.params():
             sheet.Sheet._add_parameter("unit_conversions",param.Parameter(None))
@@ -87,63 +91,56 @@ class Conversions(object):
             numbergen.NumberGenerator._add_parameter("unit_conversions",param.Parameter(None))
         
         self.initialize(units)
+        self.initialized = True
 
-
+        
     @bothmethod
-    def create_unit(obj,unit_key,conversion,name):
+    def declare_unit(obj,unit_key,conversion,name,base=False):
         """
         Create and return unit using specified package.
         """
         if obj.package == 'Quantities':
-            return pq.UnitQuantity(name, definition=conversion,symbol=unit_key)
+            unit_obj = pq.UnitQuantity(name, definition=conversion,symbol=unit_key)
+            
+            if base:
+                unit = [(unit_obj,unit_key,conversion,name)]
+                obj._set_base_units_pq(unit)
+            else:
+                unit = [(unit_obj,conversion)]
+                obj.initialize_units(unit)
+            
+            return unit_obj
+
         if obj.package == 'Unum':
-            if conversion == None:
+            if conversion is None:
                 conversion = 0
-            return unum.Unum.unit(unit_key,conversion,name)
+
+            obj.del_unit(unit_key)
+            unit_obj = unum.Unum.unit(unit_key,conversion,name)
+            
+            if base:
+                unit = [(unit_obj,unit_key,conversion,name)]
+                obj._set_base_units_unum(unit)
+            else:
+                unit = [(unit_obj,conversion)]
+                obj.initialize_units(unit)
+            
+            return unit_obj
 
 
-    def get_unit(self,unit_key,local=True,glob=True):
+    @bothmethod
+    def get_unit(obj,unit_key,local=True,glob=True):
         """
         Looks up and returns unit_key in local then global unit
         dictionary, if not in either returns None.
         """
-        if local:
-            local_unit = self.get_local_unit(unit_key)
-            if not local_unit: break
-            return local_unit
-        if glob:
-            return self.get_global_unit(unit_key)
-        else:
-            return None
+        unit = None
+        if local and obj.initialized:
+            unit = obj._get_local_unit(unit_key)
+        if glob and not unit:
+            unit = obj._get_global_unit(unit_key)
+        return unit
 
-
-    def get_local_unit(self,unit_key):
-        """
-        Returns local unit object or if nonexistent None.
-        """
-        if unit_key in self._unit_objects.keys():
-            return self._unit_objects[unit_key]
-        else:
-            return None
-
-
-    @bothmethod
-    def get_global_unit(obj,unit_key):
-        if obj.package == 'Unum': return getattr(unum.units,unit_key)
-        elif obj.package == 'Quantities': return pq.registry.unit_registry[unit_key]
-        else: return None
-
-
-    @bothmethod
-    def declare_base_units(obj,units):
-        """
-        Set base unit using specified unit package.
-        """
-        if obj.package == 'Unum':
-            obj._set_base_units_unum(units)
-        elif obj.package == 'Quantities':
-            obj._set_base_units_pq(units)
-  
 
     @classmethod
     def set_package(obj,package):
@@ -164,17 +161,6 @@ class Conversions(object):
         if obj.package =='Unum': selected = unum_methods
         else: selected = pq_methods
         [setattr(obj,pub,sel) for (sel,pub) in zip(selected, public_methods)]
-
-
-    @bothmethod
-    def del_unit(obj,unit_key):
-        """
-        Delete specified unit definition from global unum unit table.
-        """
-        unit_table = unum.Unum.getUnitTable()
-        if unit_key in unit_table.keys():
-            del unit_table[unit_key]
-        unum.Unum.reset(unit_table)
 
 
     def _convert_to_base_pq(self,val):
@@ -217,6 +203,35 @@ class Conversions(object):
         return val
 
 
+    @bothmethod
+    def _del_unit(obj,unit_key):
+        """
+        Delete specified unit definition from global unum unit table.
+        """
+        unit_table = unum.Unum.getUnitTable()
+        if unit_key in unit_table.keys():
+            del unit_table[unit_key]
+        unum.Unum.reset(unit_table)
+
+
+    @bothmethod
+    def _get_local_unit(self,unit_key):
+        """
+        Returns local unit object or if nonexistent None.
+        """
+        if unit_key in self._unit_objects.keys():
+            return self._unit_objects[unit_key]
+        else:
+            return None
+
+
+    @bothmethod
+    def _get_global_unit(obj,unit_key):
+        if obj.package == 'Unum': return getattr(unum.units,unit_key)
+        elif obj.package == 'Quantities': return pq.registry.unit_registry[unit_key]
+        else: return None  
+
+
     def _initialize_pq(self,units):
         """
         Initialize param and Topographica to deal with Quantities unit
@@ -241,24 +256,36 @@ class Conversions(object):
         self.initialize_units(units)
 
 
-    def _initialize_units_pq(self,units):
+    @bothmethod
+    def _initialize_units_pq(obj,units):
         """
         Initialize specified units using Quantities unit package.
         """
+        if not hasattr(obj,'_unit_objects'):
+            obj._unit_objects = {}
+        if not hasattr(obj,'_unit_specs'):
+            obj._unit_specs = {}
+
         for unit in units:
             unit_key = unit[0].symbol
-            self._unit_objects[unit_key] = unit[0]
-            self._unit_specs[unit_key] = (unit[1],unit[0].name)
+            obj._unit_objects[unit_key] = unit[0]
+            obj._unit_specs[unit_key] = (unit[1],unit[0].name)
 
 
-    def _initialize_units_unum(self,units):
+    @bothmethod
+    def _initialize_units_unum(obj,units):
         """
         Initialize specified units using Unum unit package.
         """
+        if not hasattr(obj,'_unit_objects'):
+            obj._unit_objects = {}
+        if not hasattr(obj,'_unit_specs'):
+            obj._unit_specs = {}
+
         for unit in units:
             unit_key = unit[0].strUnit()
-            self._unit_objects[unit_key] = unit[0]
-            self._unit_specs[unit_key] = (unit[1],unit[0].getUnitTable()[unit_key][2])
+            obj._unit_objects[unit_key] = unit[0]
+            obj._unit_specs[unit_key] = (unit[1],unit[0].getUnitTable()[unit_key][2])
 
 
     @bothmethod
@@ -270,8 +297,8 @@ class Conversions(object):
         if not hasattr(obj,'_base_units'):
             obj._base_units = []
         for unit in units:
-            base_unit = pq.UnitQuantity(unit[2], definition=unit[1], symbol=unit[0])
-            obj._base_units.append((base_unit,unit[0],unit[1],unit[2]))
+            obj._base_units.append((unit[0],unit[1],unit[2],unit[3]))
+
 
     @bothmethod
     def _set_base_units_unum(obj,units):
@@ -282,9 +309,7 @@ class Conversions(object):
         if not hasattr(obj,'_base_units'):
             obj._base_units = []
         for unit in units:
-            obj.del_unit(unit[0])
-            base_unit = unum.Unum.unit(unit[0],unit[1],unit[2])
-            obj._base_units.append((base_unit,unit[0],unit[1],unit[2]))
+            obj._base_units.append((unit[0],unit[1],unit[2],unit[3]))
 
 
     def _set_local_units_pq(self):
@@ -307,3 +332,7 @@ class Conversions(object):
             self.del_unit(unit_key)
             unit_spec = self._unit_specs[unit_key]
             self._unit_objects[unit_key] = unum.Unum.unit(unit_key,unit_spec[0],unit_spec[1])
+        for unit in self._base_units:
+            self.del_unit(unit[1])
+            unum.Unum.unit(unit[1],unit[2],unit[3])
+
