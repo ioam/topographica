@@ -11,17 +11,23 @@ Changes since 0.9.7. Fully updated 2011/10/09; some updates as of 2012/03/27.
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
-
   <li>r11906: OpenMP changes to the optimized learningfns and 
   transferfns mean that 'private' attributes _has_norm_total and 
   _norm_total are now implemented differently (with arrays). Any 
-  code directly accessing these attributes may break.
+  code directly accessing these attributes may break; as always
+  the right way to use norm_total from Python is through the
+  norm_total property, and to use 'del norm_total' to indicate that
+  the norm_total is stale.
   <li>r11904, r11916: Changed map measurement code to use an
   extensible hierarchy of objects for extracting the preference and
   selectivity values from a histogram.  Any custom map measurement
   code derived from those used in topo.command.analysis, or custom
   parameter values mentioning weighted_average, will 
-  need updating.
+  need updating.  Any .ty files that set featuremap selectivity scales and/or
+  cyclic ranges should be updated to set 
+  topo.misc.distribution.DSF_WeightedAverage.selectivity_scale instead
+  of topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier,
+  and SheetView.cylic_range instead of SheetView.norm_factor.
 <li>r11896: Changed interface of topo.command.activityplot (rarely
   used so far) and changed "Plot with axis labels" right-click option
   in plots to "Plot in matrix coords", to acknowledge new option
