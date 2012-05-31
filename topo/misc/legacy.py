@@ -280,9 +280,8 @@ def Number_and_BoundingRegion_add_set_hook():
             state['set_hook']=param.identity_hook
     preprocess_state(param.Number,_add_set_hook)
     preprocess_state(R.BoundingRegionParameter,_add_set_hook)
-
-# CEBALERT: change to actual revision            
-support[12058] = Number_and_BoundingRegion_add_set_hook    
+     
+support[12028] = Number_and_BoundingRegion_add_set_hook    
 
 
 ######################################################################
