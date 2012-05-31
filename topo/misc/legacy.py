@@ -293,8 +293,7 @@ def renamed_sheetview_norm_factor():
     sv_name_changes.update(
         {'norm_factor':'cyclic_range'})
     param.parameterized.PicklableClassAttributes.param_name_changes['topo.base.sheetview.SheetView']=sv_name_changes
-# CEBALERT: set to actual revision!
-support[12050] = renamed_sheetview_norm_factor
+support[r11904] = renamed_sheetview_norm_factor
 
 def moved_featuremaps_selectivity_multiplier():
     from topo import param
@@ -303,8 +302,7 @@ def moved_featuremaps_selectivity_multiplier():
     fm_moves.update(
         {'selectivity_multiplier':('topo.misc.distribution.DSF_WeightedAverage','selectivity_scale')})
     param.parameterized.PicklableClassAttributes.param_moves['topo.analysis.featureresponses.FeatureMaps'] = fm_moves
-# CEBALERT: set to actual revision!
-support[12051] = moved_featuremaps_selectivity_multiplier
+support[r11904] = moved_featuremaps_selectivity_multiplier
 
 ######################################################################
 ######################################################################
