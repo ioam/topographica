@@ -28,10 +28,6 @@ except ImportError:
 import param
 from param.parameterized import PicklableClassAttributes, ParameterizedFunction
 from param.parameterized import ParamOverrides
-# CEBALERT: This can only be temporary. Could have an OrderedDict in
-# topo. Or could say min Python 2.6 and use Python's own. Or is it
-# 2.7?
-from paramtk.odict import OrderedDict
 from param import normalize_path
 
 import topo
@@ -42,6 +38,10 @@ from topo.misc.util import MultiFile
 from topo.misc.picklemain import PickleMain
 from topo.misc.genexamples import generate as _generate
 from topo.base.functionfamily import PatternDrivenAnalysis
+
+# CEBALERT: Could say min Python 2.6 and use Python's own. Or is it
+# 2.7?
+from topo.misc.odict import OrderedDict
 
 
 def generate_example(target):
