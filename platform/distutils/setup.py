@@ -151,6 +151,7 @@ performance.
     # CEBALERT: do I have to list these? if I do, can I generate the list automatically?
     packages=['topo',
               'param',
+              'paramtk',
               'topo.analysis',
               'topo.base',
               'topo.command',
@@ -171,9 +172,9 @@ performance.
     package_data={
         # CB: These things are not data, but there's currently no
         # other mechanism in distutils/setuptools.
-        'param': ['externaltk/snit-2.2.1/*.tcl',
-                  'externaltk/scrodget-2.1/*.tcl',
-                  'externaltk/tooltip-1.4/*.tcl'],
+        'paramtk': ['tcl/snit-2.2.1/*.tcl',
+                    'tcl/scrodget-2.1/*.tcl',
+                    'tcl/tooltip-1.4/*.tcl'],
         'topo.tkgui': ['icons/*.*'],
         'topo.command':['*.png','*.pdf'],
         'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINSCRIPTS]+['*.data']+['*.typ']},
