@@ -267,6 +267,24 @@ def param_external_removed():
 support[12024] = param_external_removed
 
 
+# CEBALERT: slot removal/addition support could be extracted to its
+# own function, then there'd be less duplication and it'd be easier to
+# add new slot support.
+def Number_and_BoundingRegion_add_set_hook():
+    import param
+    import topo.base.boundingregion as R
+    def _add_set_hook(instance,state):
+        if 'set_hook' not in state and hasattr(instance.__class__,'set_hook'):
+            # have to add to state or else slot won't exist on instance, but will
+            # exist on class (consequence of using __slots__)
+            state['set_hook']=param.identity_hook
+    preprocess_state(param.Number,_add_set_hook)
+    preprocess_state(R.BoundingRegionParameter,_add_set_hook)
+
+# CEBALERT: change to actual revision            
+support[12058] = Number_and_BoundingRegion_add_set_hook    
+
+
 ######################################################################
 ######################################################################
 
