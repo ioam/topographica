@@ -6,4 +6,4 @@ recursive-include examples *.ty
 recursive-include models *.ty
 recursive-include topo/tkgui/icons *.*
 recursive-include topo/command *.png *.pdf
-recursive-include topo/tests *.txt *.jpg *.pgm *DATA *.data *.typ
+recursive-include topo/tests *.txt *.jpg *.pgm *DATA *.data *.typ *.pickle

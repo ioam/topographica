@@ -177,7 +177,7 @@ performance.
                     'tcl/tooltip-1.4/*.tcl'],
         'topo.tkgui': ['icons/*.*'],
         'topo.command':['*.png','*.pdf'],
-        'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINSCRIPTS]+['*.data']+['*.typ']},
+        'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINSCRIPTS]+['*.data']+['*.typ']+['*.pickle']},
 
     data_files=[('share/topographica/examples',examples),
                 ('share/topographica/models',models)],
