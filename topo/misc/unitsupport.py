@@ -30,33 +30,34 @@ except: pass
 if True not in [got_unum, got_pq]: raise ImportError('Could not find Quantities or Unum.')
 
 
-def strip_pq_hook(clas,obj,val):
-    """
-    Hook to convert units provided by the quantities package to the base
-    unit as defined in the QuantityConversions class and return a float.
-    """
-    if not hasattr(val,'units'):
-        return val
+class strip_pq_hook(param.ParameterizedFunction):
+    def __call__(self,obj,val):
+        """
+        Hook to convert units provided by the quantities package to the base
+        unit as defined in the QuantityConversions class and return a float.
+        """
+        if not hasattr(val,'units'):
+            return val
+        
+        if hasattr(obj,'unit_conversions'):
+            return obj.unit_conversions.convert_to_base(val)
+        elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
+            return obj.src.unit_conversions.convert_to_base(val)
 
-    if hasattr(obj,'unit_conversions'):
-        return obj.unit_conversions.convert_to_base(val)
-    elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
-        return obj.src.unit_conversions.convert_to_base(val)
 
-
-
-def strip_unum_hook(cls,obj, val):
-    """
-    Hook to convert unum unit objects to the specified base unit and
-    return as a float.
-    """
-    if not val.__class__.__name__ == 'Unum':
-        return val
-
-    if hasattr(obj,'unit_conversions'):
-        return obj.unit_conversions.convert_to_base(val)
-    elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
-        return obj.src.unit_conversions.convert_to_base(val)
+class strip_unum_hook(param.ParameterizedFunction):
+    def __call__(self,obj,val):
+        """
+        Hook to convert unum unit objects to the specified base unit and
+        return as a float.
+        """
+        if not val.__class__.__name__ == 'Unum':
+            return val
+        
+        if hasattr(obj,'unit_conversions'):
+            return obj.unit_conversions.convert_to_base(val)
+        elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
+            return obj.src.unit_conversions.convert_to_base(val)
 
 
 
@@ -129,7 +130,7 @@ class Conversions(object):
 
 
     @bothmethod
-    def get_unit(obj,unit_key,local=True,glob=True):
+    def get_unit(obj,unit_key,local=True,global_=True):
         """
         Looks up and returns unit_key in local then global unit
         dictionary, if not in either returns None.
@@ -137,7 +138,7 @@ class Conversions(object):
         unit = None
         if local and obj.initialized:
             unit = obj._get_local_unit(unit_key)
-        if glob and not unit:
+        if global_ and not unit:
             unit = obj._get_global_unit(unit_key)
         return unit
 
