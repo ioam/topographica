@@ -149,7 +149,7 @@ def module_redirect(name,parent,actual_module):
     setattr(sys.modules[parent.__name__],name,actual_module)
 
 # CEBALERT: adapted from topo.misc.util's version; need to merge and
-# clean up.
+# clean up. Also, needs a better name: used only for allow_import().
 class _ModuleFaker(object):
     def __init__(self,module):
         self.module = module
@@ -258,6 +258,13 @@ def pattern_basic_removed():
 
 support[11871] = pattern_basic_removed
 
+
+def param_external_removed():
+    # CB: From param/external.py, only odict should be relevant to snapshots.
+    import topo.misc.odict
+    allow_import(topo.misc.odict,'param.external')
+            
+support[12024] = param_external_removed
 
 
 ######################################################################
