@@ -284,6 +284,28 @@ def Number_and_BoundingRegion_add_set_hook():
 support[12028] = Number_and_BoundingRegion_add_set_hook    
 
 
+def renamed_sheetview_norm_factor():
+    from topo import param
+    # CEBALERT: stuff to avoid overwriting existing dict could be extracted and made reusable to avoid
+    # repeating it in all param_name_changes, param_moves
+    sv_name_changes = param.parameterized.PicklableClassAttributes.param_name_changes.get(
+        'topo.base.sheetview.SheetView',{})
+    sv_name_changes.update(
+        {'norm_factor':'cyclic_range'})
+    param.parameterized.PicklableClassAttributes.param_name_changes['topo.base.sheetview.SheetView']=sv_name_changes
+# CEBALERT: set to actual revision!
+support[12050] = renamed_sheetview_norm_factor
+
+def moved_featuremaps_selectivity_multiplier():
+    from topo import param
+    fm_moves = param.parameterized.PicklableClassAttributes.param_moves.get(
+        'topo.analysis.featureresponses.FeatureMaps',{})
+    fm_moves.update(
+        {'selectivity_multiplier':('topo.misc.distribution.DSF_WeightedAverage','selectivity_scale')})
+    param.parameterized.PicklableClassAttributes.param_moves['topo.analysis.featureresponses.FeatureMaps'] = fm_moves
+# CEBALERT: set to actual revision!
+support[12051] = moved_featuremaps_selectivity_multiplier
+
 ######################################################################
 ######################################################################
 
