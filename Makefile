@@ -436,8 +436,9 @@ UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
 deb:
 	cd ${DIST_TMPDIR}; cp topographica-${RELEASE}.tar.gz topographica_${UBUNTU_RELEASE}.orig.tar.gz
 	cd ${DIST_TMPDIR}; mv topographica-${RELEASE} topographica-${UBUNTU_RELEASE}
-	cp platform/debian ${UBUNTU_DIR}
-	cp -R platform/debian ${UBUNTU_DIR}/debian
+# CEBALERT: assumes platform/ already exists? Cleanup elsewhere might
+# break that?
+	cp -R platform/debian ${UBUNTU_DIR}/platform/debian
 	rm -rf ${UBUNTU_DIR}/debian/.svn
 	echo "topographica (${UBUNTU_RELEASE}~${UBUNTU_TARGET}) ${UBUNTU_TARGET}; urgency=low" > ${UBUNTU_CHANGELOG}
 	echo "" >> ${UBUNTU_CHANGELOG}
