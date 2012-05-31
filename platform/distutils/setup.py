@@ -5,6 +5,7 @@ from distutils.core import setup
 import glob
 
 examples = glob.glob('examples/*.ty')
+models = glob.glob('models/*.ty')
 scripts = ['topographica']
 
 ### TOPOGRAPHICA DEPENDENCIES ########################################
@@ -177,7 +178,8 @@ performance.
         'topo.command':['*.png','*.pdf'],
         'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINSCRIPTS]+['*.data']+['*.typ']},
 
-    data_files=[('share/topographica/examples',examples)],
+    data_files=[('share/topographica/examples',examples),
+                ('share/topographica/models',models)],
 
     scripts = scripts))
 

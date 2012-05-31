@@ -65,11 +65,18 @@ def install():
     file_created(os.path.join(desktop_folder, topographica_shortcut_name))
 
 
-    ### start menu: examples shortcut
+    ### start menu:
+    # ... examples shortcut
     start_menu_examples_shortcut = os.path.join(start_menu_folder,"Examples.lnk")
     create_shortcut(sys.prefix+r'\share\topographica\examples', 
                     'Examples', start_menu_examples_shortcut, '')
     file_created(start_menu_examples_shortcut)
+
+    # ... models shortcut
+    start_menu_models_shortcut = os.path.join(start_menu_folder,"Models.lnk")
+    create_shortcut(sys.prefix+r'\share\topographica\models', 
+                    'Models', start_menu_models_shortcut, '')
+    file_created(start_menu_models_shortcut)
 
 
     file_created(_create_association(python,
