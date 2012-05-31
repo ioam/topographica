@@ -141,7 +141,7 @@ pyflakes: # Everything except topo/tests (where we do lots of importing but not 
 	${PYFLAKES} topo param --ignore topo/tests --total
 
 lint-base: # topo.base and param 
-	${PYLINT} --ignore=param/tk.py --ignore=param/external.py topo.base param | cat
+	${PYLINT} topo.base param | cat
 #CEBALERT: how to get pylint's "ignore" options to work? Upgrade pylint (http://www.logilab.org/ticket/70493)?
 
 
@@ -162,7 +162,7 @@ clean-weave:
 	rm -rf ~/.python2*_compiled/ | cat
 
 clean-pyc:
-	rm -f *.pyc param/*.pyc topo/*.pyc topo/*/*.pyc topo/*/*/*.pyc examples/*.pyc models/*.pyc contrib/*.pyc
+	rm -f *.pyc param/*.pyc paramtk/*.pyc topo/*.pyc topo/*/*.pyc topo/*/*/*.pyc examples/*.pyc models/*.pyc contrib/*.pyc
 
 clean-doc:
 	make -C doc clean
