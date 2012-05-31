@@ -1517,6 +1517,8 @@ class PicklableClassAttributes(object):
     #
     # (not yet finished - do we need to add information about version numbers?)
 
+    # CEBALERT: same comments as above about doing this more cleanly
+    param_moves = {}
 
     # pylint: disable-msg=R0903
     
@@ -1553,7 +1555,10 @@ class PicklableClassAttributes(object):
         
         for cmd in self.startup_commands:
             exec cmd in __main__.__dict__
-            
+
+        to_restore = {}
+
+        ########## pre-processing (renames, moves, etc)
         for class_path,state in state['class_attributes'].items():
             # from e.g. "topo.base.parameter.Parameter", we want "topo.base.parameter"
 
@@ -1561,10 +1566,45 @@ class PicklableClassAttributes(object):
                 #print "Did not restore:",class_path
                 break
 
+            for p_name,p_obj in state.items():
+                if p_name in self.param_moves.get(class_path,{}):
+                    assert p_name not in self.param_name_changes.get(class_path,{})
+
+                    new_class_path,new_p_name = self.param_moves[class_path][p_name]
+
+                    if new_class_path not in to_restore:
+                        to_restore[new_class_path] = {}
+
+                    Parameterized().message("%s.%s has been moved to %s.%s"%(class_path,p_name,new_class_path,new_p_name))
+                    assert new_p_name not in to_restore[new_class_path]
+                    to_restore[new_class_path][new_p_name]=p_obj
+
+                    
+                elif p_name in self.param_name_changes.get(class_path,{}):                    
+                    new_p_name = self.param_name_changes[class_path][p_name]
+
+                    if class_path not in to_restore:
+                        to_restore[class_path] = {}
+
+                    Parameterized().message("%s's %s parameter has been renamed to %s."%(class_path,p_name,new_p_name))
+                    to_restore[class_path][new_p_name] = p_obj
+
+                else:
+                    if class_path not in to_restore:
+                        to_restore[class_path] = {}
+                    to_restore[class_path][p_name]= p_obj
+                        
+
+        ########## restoring
+        for class_path in to_restore:
             module_path = class_path[0:class_path.rindex('.')]
             class_name = class_path[class_path.rindex('.')+1::]
 
-            module = __import__(module_path,fromlist=[module_path])
+            try:
+                module = __import__(module_path,fromlist=[module_path])
+            except:
+                Parameterized().warning("Could not find module '%s' to restore parameter values of '%s' (module might have been moved or renamed; if you are using this module, please file a support request via topographica.org"%(module_path,class_path))
+                break
 
             try:
                 class_=getattr(module,class_name)
@@ -1572,14 +1612,7 @@ class PicklableClassAttributes(object):
                 Parameterized().warning("Could not find class '%s' to restore its parameter values (class might have been removed or renamed; if you are using this class, please file a support request via topographica.org)."%class_path)
                 break
 
-            # now restore class Parameter values
-            for p_name,p_obj in state.items():
-
-                if class_path in self.param_name_changes:
-                    if p_name in self.param_name_changes[class_path]:
-                        new_p_name = self.param_name_changes[class_path][p_name]
-                        Parameterized().message("%s's %s parameter has been renamed to %s."%(class_path,p_name,new_p_name))
-                        p_name = new_p_name
+            for p_name,p_obj in to_restore[class_path].items():
 
                 if p_name not in class_.params():
                     # CEBALERT: GlobalParams's source code never has
@@ -1592,7 +1625,6 @@ class PicklableClassAttributes(object):
                 else:
                     setattr(class_,p_name,p_obj)
                                         
-
 
     # CB: I guess this could be simplified
     def get_PO_class_attributes(self,module,class_attributes,processed_modules,exclude=()):
