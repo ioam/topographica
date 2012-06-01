@@ -188,6 +188,7 @@ def allow_import(module,location):
 
 # support[v]=fn : for snapshots saved before v, call fn
 
+# only ONE entry per svn revision
 support = {}
 
 def do_not_restore_paths():
@@ -293,7 +294,6 @@ def renamed_sheetview_norm_factor():
     sv_name_changes.update(
         {'norm_factor':'cyclic_range'})
     param.parameterized.PicklableClassAttributes.param_name_changes['topo.base.sheetview.SheetView']=sv_name_changes
-support[r11904] = renamed_sheetview_norm_factor
 
 def moved_featuremaps_selectivity_multiplier():
     from topo import param
@@ -302,7 +302,12 @@ def moved_featuremaps_selectivity_multiplier():
     fm_moves.update(
         {'selectivity_multiplier':('topo.misc.distribution.DSF_WeightedAverage','selectivity_scale')})
     param.parameterized.PicklableClassAttributes.param_moves['topo.analysis.featureresponses.FeatureMaps'] = fm_moves
-support[r11904] = moved_featuremaps_selectivity_multiplier
+
+def reorganized_analysis():
+    renamed_sheetview_norm_factor()
+    moved_featuremaps_selectivity_multiplier()
+    
+support[11904] = reorganized_analysis
 
 ######################################################################
 ######################################################################
