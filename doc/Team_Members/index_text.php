@@ -66,6 +66,12 @@ Other recent developers include:
       in the primary visual cortex) and is now a PhD student in
       Edinburgh working on temporal processing in V1 using
       Topographica models.
+
+  <p><dt>Philipp J. F. Rudiger, 2011 -</dt>
+  <dd>Philipp completed his MSc degree at the University of Edinburgh,
+      working on RF measurement protocols for two-photon Calcium imaging
+      in ferrets and is now pursuing his PhD on feedback, attention and
+      contextual processing in V1 using Topographica models.
 </dl>
 
 <P><BR><BR>
