@@ -479,6 +479,8 @@ def get_omp_num_threads(openmp_threads, openmp_min_threads, openmp_max_threads):
 
     if 'OMP_NUM_THREADS' in os.environ: return (None, None)
 
+    if 'NSLOTS' in os.environ: return ('NSLOTS', None)
+    
     try:  
         import multiprocessing
         total_cores = multiprocessing.cpu_count()
@@ -571,6 +573,10 @@ def process_argv(argv):
         
         if num_threads is None: 
             print "OpenMP: Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use."
+        elif num_threads == 'NSLOTS':
+            os.environ['OMP_NUM_THREADS'] =  os.environ['NSLOTS']
+            print "NSLOTS environment variable found. Assuming Grid Engine cluster and using N=%s threads" % os.environ['NSLOTS']
+
         elif total_cores is None: 
             print "OpenMP: Using %d threads" % num_threads
             os.environ['OMP_NUM_THREADS'] =  str(num_threads)
