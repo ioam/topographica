@@ -1236,7 +1236,22 @@ coverage-clean:
 coverage-uninstall:
 	rm -rf coverage ${COVERAGE} $(foreach f, ${COVERAGE_UNINSTALL}, ${PREFIX}/${f})
 
+##############################################################
+# Quantities (for Unit Support)
+#
+QUANTITIES = quantities-0.10.1
 
+QUANTITIES_UNINSTALL += ${PYTHON_LIB}/site-packages/quantities
+
+quantities:
+	tar -xzf ${QUANTITIES}.tar.gz
+	cd ${QUANTITIES}; ${PREFIX}/bin/python setup.py install
+	touch quantities
+
+quantities-clean:
+	rm -rf ${QUANTITIES}
+quantities-uninstall:
+	rm -rf quantities ${foreach f,${QUANTITIES_UNINSTALL}, ${PREFIX}/${f}}
 
 
 #############################################################################
