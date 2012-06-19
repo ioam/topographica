@@ -575,7 +575,7 @@ def process_argv(argv):
             print "OpenMP: Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use."
         elif num_threads == 'NSLOTS':
             os.environ['OMP_NUM_THREADS'] =  os.environ['NSLOTS']
-            print "NSLOTS environment variable found. Assuming Grid Engine cluster and using N=%s threads" % os.environ['NSLOTS']
+            print "NSLOTS environment variable found; overriding any other thread settings and using N=%s threads" % os.environ['NSLOTS']
 
         elif total_cores is None: 
             print "OpenMP: Using %d threads" % num_threads
