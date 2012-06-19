@@ -68,16 +68,16 @@ class PlotGroupSaver(param.Parameterized):
 
     def filename(self,label,**params):
         """Calculate a specific filename from the filename_format."""
-        vars = dict(self.get_param_values())
-        vars.update(self.__dict__)
-        vars['basename']= topo.sim.basename()
-        vars['sim_name']= topo.sim.name
-        vars['time']=topo.sim.time()
-        vars['plot_label']=label
-        vars['plotgroup_name']=self.plotgroup.name
-        vars.update(params)
+        varmap = dict(self.get_param_values())
+        varmap.update(self.__dict__)
+        varmap['basename']= topo.sim.basename()
+        varmap['sim_name']= topo.sim.name
+        varmap['time']=topo.sim.time()
+        varmap['plot_label']=label
+        varmap['plotgroup_name']=self.plotgroup.name
+        varmap.update(params)
         
-        return self.strip(self.filename_format % vars)
+        return self.strip(self.filename_format % varmap)
 
 
     def save_to_disk(self,**params):
