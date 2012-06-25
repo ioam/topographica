@@ -391,6 +391,11 @@ class FeatureMaps(FeatureResponses):
             doc=""" Function that will be used to analyze the distributions of unit responses.
             Note that this default is orverriden by specific functions for features, if
             specified in the Feature objects""" )
+
+
+    selectivity_multiplier = param.Number(default=17.0, doc="""
+            Scaling of the feature selectivity values applied in all feature dimensions.
+            The multiplier sets the output scaling.""")
     
     
     # CBENHANCEMENT: could allow full control over the generated names
@@ -434,6 +439,8 @@ class FeatureMaps(FeatureResponses):
                 cyclic              = fp.cyclic
                 cyclic_range        = ar    if cyclic   else 1.0
                 preference_fn       = fp.preference_fn if fp.preference_fn is not None else self.preference_fn
+                if self.selectivity_multiplier:
+                    preference_fn.selectivity_scale = (preference_fn.selectivity_scale[0], self.selectivity_multiplier)
                 fr                  = self._featureresponses[sheet][feature]
                 response            = fr.apply_DSF( preference_fn )
                 base_name           = self.sheet_views_prefix + feature.capitalize()
