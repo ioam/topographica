@@ -1085,7 +1085,7 @@ class measure_size_response(UnitCurveCommand):
     def _feature_list(self,p):
         return [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
                 Feature(name="frequency",values=p.frequencies),
-                Feature(name="size",range=(0.0,self.max_size),step=1.0/p.num_sizes,cyclic=False)]
+                Feature(name="size",range=(0.0,self.max_size),step=self.max_size/p.num_sizes,cyclic=False)]
 
 
 create_plotgroup(template_plot_type="curve",name='Size Tuning',category="Tuning Curves",
