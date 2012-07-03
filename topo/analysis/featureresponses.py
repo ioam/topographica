@@ -439,7 +439,7 @@ class FeatureMaps(FeatureResponses):
                 cyclic              = fp.cyclic
                 cyclic_range        = ar    if cyclic   else 1.0
                 preference_fn       = fp.preference_fn if fp.preference_fn is not None else self.preference_fn
-                if self.selectivity_multiplier:
+                if self.selectivity_multiplier is not None:
                     preference_fn.selectivity_scale = (preference_fn.selectivity_scale[0], self.selectivity_multiplier)
                 fr                  = self._featureresponses[sheet][feature]
                 response            = fr.apply_DSF( preference_fn )
