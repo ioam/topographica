@@ -11,6 +11,10 @@ import decimal # CEBALERT: when did decimal appear? too late to use?
     
 import param
 
+from snapshots import PicklableClassAttributes
+
+# CEBALERT: remove the extraneous "import param"s
+
 # CEB: Add note that snapshot can be re-saved, making updates
 # permanent. All functions in here should be written to support that.
 
@@ -194,9 +198,8 @@ support = {}
 def do_not_restore_paths():
     # For snapshots saved before 11323
     # Avoid restoring search_paths,prefix for resolve_path,normalize_path
-    # (For snapshots before r11323, these were included.)
-    import param.parameterized
-    param.parameterized.PicklableClassAttributes.do_not_restore+=[
+    # (For snapshots before r11323, these were included.)    
+    PicklableClassAttributes.do_not_restore+=[
         'param.normalize_path',
         'param.resolve_path']
 
@@ -286,28 +289,31 @@ support[12028] = Number_and_BoundingRegion_add_set_hook
 
 
 def renamed_sheetview_norm_factor():
-    from topo import param
     # CEBALERT: stuff to avoid overwriting existing dict could be extracted and made reusable to avoid
     # repeating it in all param_name_changes, param_moves
-    sv_name_changes = param.parameterized.PicklableClassAttributes.param_name_changes.get(
+    sv_name_changes = PicklableClassAttributes.param_name_changes.get(
         'topo.base.sheetview.SheetView',{})
     sv_name_changes.update(
         {'norm_factor':'cyclic_range'})
-    param.parameterized.PicklableClassAttributes.param_name_changes['topo.base.sheetview.SheetView']=sv_name_changes
+    PicklableClassAttributes.param_name_changes['topo.base.sheetview.SheetView']=sv_name_changes
 
 def moved_featuremaps_selectivity_multiplier():
-    from topo import param
-    fm_moves = param.parameterized.PicklableClassAttributes.param_moves.get(
+    fm_moves = PicklableClassAttributes.param_moves.get(
         'topo.analysis.featureresponses.FeatureMaps',{})
     fm_moves.update(
         {'selectivity_multiplier':('topo.misc.distribution.DSF_WeightedAverage','selectivity_scale')})
-    param.parameterized.PicklableClassAttributes.param_moves['topo.analysis.featureresponses.FeatureMaps'] = fm_moves
+    PicklableClassAttributes.param_moves['topo.analysis.featureresponses.FeatureMaps'] = fm_moves
 
 def reorganized_analysis():
     renamed_sheetview_norm_factor()
     moved_featuremaps_selectivity_multiplier()
     
 support[11904] = reorganized_analysis
+
+def moved_picklableclassattributes():
+    param.parameterized.PicklableClassAttributes = PicklableClassAttributes
+
+support[12088] = moved_picklableclassattributes
 
 ######################################################################
 ######################################################################

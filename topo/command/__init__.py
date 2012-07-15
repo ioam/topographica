@@ -26,8 +26,7 @@ except ImportError:
     pass
 
 import param
-from param.parameterized import PicklableClassAttributes, ParameterizedFunction
-from param.parameterized import ParamOverrides
+from param.parameterized import ParameterizedFunction, ParamOverrides
 from param import normalize_path
 
 import topo
@@ -36,6 +35,7 @@ from topo.base.projection import ProjectionSheet
 from topo.sheet import GeneratorSheet
 from topo.misc.util import MultiFile
 from topo.misc.picklemain import PickleMain
+from topo.misc.snapshots import PicklableClassAttributes
 from topo.misc.genexamples import generate as _generate
 from topo.base.functionfamily import PatternDrivenAnalysis
 

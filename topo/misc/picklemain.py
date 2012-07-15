@@ -2,6 +2,8 @@
 Extensions to pickle allowing items in __main__ to be saved.
 """
 
+# CEBALERT: move into snapshots.py?
+
 import new
 import pickle
 import types
