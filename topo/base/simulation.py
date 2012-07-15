@@ -55,7 +55,6 @@ $Id$
 __version__='$Revision$'
 
 import param
-from param.parameterized import OptionalSingleton
 
 from copy import copy, deepcopy
 import time
@@ -726,6 +725,72 @@ class SomeTimer(param.Parameterized):
         # default to 50 steps unless someone set otherwise
         step = self.step or fduration/50.0
         self.__measure(fduration,step)
+
+
+
+# CEBALERT: This singleton-producing mechanism is pretty complicated,
+# and it would be great if someone could simplify it. Getting all of
+# the behavior we want for e.g. Simulation is tricky, but there are
+# tests for it. Note that:
+# (1) There should only ever be one single Simulation instance for
+#     which register is True. Creating, copying, and unpickling
+#     need to take this into account.
+# (2) A Simulation instance for which register is False should
+#     behave the same as any normal Python object.
+#
+# For how to use, see topo.base.simulation.Simulation or
+# topo.misc.commandline.GlobalParams.
+class OptionalSingleton(object):
+
+    _inst = None
+
+    def __new__(cls,singleton):
+        """
+        Return the single instance stored in _inst if singleton is
+        True; otherwise, return a new instance.
+        """
+        if singleton:
+            if cls is not type(cls._inst):
+                cls._inst = object.__new__(cls) 
+                cls._inst._singleton = True
+            return cls._inst
+        else:
+            new_inst = object.__new__(cls) 
+            new_inst._singleton = False
+            return new_inst
+
+    def __getnewargs__(self):
+        return (self._singleton,)
+
+    def __copy__(self):
+        # An OptionalSingleton(singleton=False) instance is copied, while the
+        # OptionalSingleton(singleton=True) instance is not copied.
+        if self._singleton:
+            return self
+        else:
+            # Ideally we'd just call "object.__copy__", but apparently
+            # there's no such method.
+            
+            # CB: I *think* this is how to do a copy. Any better
+            # ideas?  Python's copy.copy() function calls an object's
+            # __reduce__ method and then reconstructs the object from
+            # that using copy._reconstruct().
+            new_obj = self.__class__(self._singleton)
+            new_obj.__dict__ = copy(self.__dict__)
+            return new_obj 
+
+    def __deepcopy__(self,m):
+        if self._singleton:
+            return self
+        else:
+            new_obj = self.__class__(self._singleton)
+            new_obj.__dict__ = deepcopy(self.__dict__,m)
+            return new_obj
+
+    # CB: I might have bound __copy__ (& __deepcopy__) just to the
+    # Simulation(singleton=True) instance to avoid the Simulation
+    # class having a __copy__ method at all, but copy() only checks
+    # the *class* for the existence of __copy__.
 
 
 

@@ -15,7 +15,8 @@ import sys, __main__, math, os, re
 
 import topo
 import param
-from param.parameterized import Parameterized,OptionalSingleton
+from param.parameterized import Parameterized
+from topo.base.simulation import OptionalSingleton
 
 
 try:

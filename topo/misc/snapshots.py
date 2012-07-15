@@ -1,8 +1,13 @@
 
+
 ###################################################################################
 # SNAPSHOT STUFF
 ###################################################################################
 
+import inspect
+import __main__
+
+from param.parameterized import Parameterized, Parameter
 
 # CEBALERT: Can't this stuff move to the ParameterizedMetaclass?
 class PicklableClassAttributes(object):
