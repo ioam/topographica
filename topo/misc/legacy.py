@@ -313,7 +313,7 @@ support[11904] = reorganized_analysis
 def moved_picklableclassattributes():
     param.parameterized.PicklableClassAttributes = PicklableClassAttributes
 
-support[12088] = moved_picklableclassattributes
+support[12089] = moved_picklableclassattributes
 
 ######################################################################
 ######################################################################
