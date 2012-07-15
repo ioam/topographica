@@ -6,7 +6,7 @@ simulation from figure 6.4 (Reduced) of Miikkulainen, Bednar, Choe, and Sirosh
 (2005), Computational Maps in the Visual Cortex, Springer.  Known
 differences include:
 
- - The default_density is smaller for practicality (142 in the book).
+ - The cortex_density is smaller for practicality (142 in the book).
  - The matching is not yet perfect at different densities
  - The lateral inhibitory radius is up to 0.5 matrix units greater
    than in the book, because Topographica enforces good
