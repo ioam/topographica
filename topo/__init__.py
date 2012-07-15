@@ -243,6 +243,14 @@ except ImportError:
 sim = Simulation() 
 
 
+# numbergen used to be part of topo; import it there for backwards compatibility 
+# and set the time function to be topo.sim.time()
+import sys,numbergen
+sys.modules['topo.numbergen']=numbergen
+sys.modules['topo.numbergen.basic']=numbergen
+numbergen.ExponentialDecay.time_fn = sim.time
+
+
 
 def about(display=True):
     """Print release and licensing information."""

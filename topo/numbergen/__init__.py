@@ -109,7 +109,7 @@ class RandomDistribution(NumberGenerator):
     numbers from any of several different random distributions
     (e.g. uniform, Gaussian).
 
-    To make it easier to use these, Topographica provides here a
+    To make it easier to use these, Numbergen provides here a
     hierarchy of classes, each tied to a particular random
     distribution. This allows setting parameters on creation rather
     than passing them each call, and allows pickling to work properly.
@@ -240,11 +240,20 @@ class VonMisesRandom(RandomDistribution):
         return self.random_generator.vonmisesvariate(self.mu,self.kappa)
 
 
-import topo
+
+def constanttime(): 
+    """
+    Dummy time function for use as a default; always returns zero.
+    For actual use, will need to supply a more useful time function.
+    """
+    return 0
+
+
+
 class ExponentialDecay(NumberGenerator):
     """
     Function object that provides a value that decays according to an
-    exponential function, based on topo.sim.time().
+    exponential function, based on a given time function.
 
     Returns starting_value*base^(-time/time_constant).
     
@@ -261,9 +270,7 @@ class ExponentialDecay(NumberGenerator):
         Another popular choice of base is 2, which allows the
         time_constant to be interpreted as a half-life.""")
 
-    # CEBALERT: default should be more like 'lambda:0', but that would
-    # confuse GUI users.
-    time_fn = param.Callable(default=topo.sim.time,doc="""
+    time_fn = param.Callable(default=constanttime,doc="""
         Function to generate the time used for the decay.""")
 
     def __call__(self):
