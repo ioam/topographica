@@ -326,9 +326,9 @@ class SheetCoordinateSystem(object):
 
 # Needs cleanup/rename:
 #
-# since it's different from slice.  It's our special slice that's an
-# array specifying row_start,row_stop,col_start,col_stop for a
-# Sheet (2d array).
+# since it's different from a Python slice.  It's our special slice
+# that's an array specifying row_start,row_stop,col_start,col_stop for
+# a Sheet (2d array).
 # 
 # In python, a[slice(0,2)] (where a is a list/array/similar) is
 # equivalent to a[0:2].

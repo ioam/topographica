@@ -228,8 +228,8 @@ PatternGenerator.params('mask_shape').class_=PatternGenerator
 
 
 # Trivial example of a PatternGenerator, provided for when a default is
-# needed.  The other concrete PatternGenerator classes are stored in
-# patterns/, to be imported as needed.
+# needed.  The other concrete PatternGenerator classes are stored 
+# elsewhere, to be imported as needed.
 from numpy.oldnumeric import ones, Float
 
 class Constant(PatternGenerator):
