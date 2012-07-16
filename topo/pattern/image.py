@@ -1,13 +1,15 @@
 """
 PatternGenerators based on bitmap images stored in files.
 
+Requires the Python Imaging Library (PIL).
+
 $Id$
 """
 
 import Image
 import ImageOps
-import numpy
 
+import numpy
 from numpy.oldnumeric import array, Float, sum, ravel, ones
 
 import param
@@ -352,7 +354,7 @@ class FileImage(GenericImage):
     """
 
     filename = param.Filename(default='images/ellen_arthur.pgm',precedence=0.9,doc="""
-        File path (can be relative to Topographica's base path) to a bitmap image.
+        File path (can be relative to Param's base path) to a bitmap image.
         The image can be in any format accepted by PIL, e.g. PNG, JPG, TIFF, or PGM.
         """)
 
