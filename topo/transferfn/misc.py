@@ -163,6 +163,8 @@ class HalfRectify(TransferFn):
         clip_lower(x,0)
         x *= self.gain
 
+
+
 class HomeostaticResponse(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
@@ -284,6 +286,8 @@ class HomeostaticResponse(TransferFnWithState):
         (self.t, self.y_avg, self.first_call, self._next_update_timestamp, 
         self._y_avg_prev, self._x_prev) = self.__current_state_stack.pop()
         super(HomeostaticResponse, self).state_pop()
+
+
 
 class AttributeTrackingTF(TransferFnWithState):
     """
