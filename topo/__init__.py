@@ -250,8 +250,15 @@ sys.modules['topo.numbergen']=numbergen
 sys.modules['topo.numbergen.basic']=numbergen
 numbergen.ExponentialDecay.time_fn = sim.time
 
-# Set the time function for Translator to be topo.sim.time()
-from topo import pattern
+# imagen used to be part of topo; import its files at their former locations
+# for backwards compatibility and set the time function to be topo.sim.time()
+import imagen as pattern
+sys.modules['topo.base.boundingregion']=pattern.boundingregion
+sys.modules['topo.base.sheetcoords']=pattern.sheetcoords
+sys.modules['topo.base.patterngenerator']=pattern.patterngenerator
+sys.modules['topo.misc.patternfn']=pattern.patternfn
+sys.modules['topo.pattern']=pattern
+sys.modules['topo.pattern.basic']=pattern
 pattern.Translator.time_fn = sim.time
 
 

@@ -1,14 +1,15 @@
 """
-Miscellaneous functions used by Topographica files outside topo.base.
+Miscellaneous functions used by Topographica code outside of topo.base.
 
-This package is intended to be self-contained, i.e., should not refer to any
-other part of Topographica.  For instance, files should not generally include an
-import statement like 'from topo.package.module import' or 'import
-topo.package.module'.  Those that follow this convention will be
-easily available for anyone to copy and use in their own unrelated
-projects; they are not specific to Topographica in any way.
+Several of these files are completely self-contained, not importing
+anything from Topographica, and can thus be copied and used in
+unrelated projects.
 
 $Id$
 """
+
+# For backwards compatibility; this file used to be in misc/
+from imagen import patternfn # pyflakes:ignore (API import)
+
 __version__='$Revision$'
 

@@ -11,7 +11,10 @@ Changes since 0.9.7. Fully updated 2011/10/09; some updates as of 2012/03/27.
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
-  
+  <li>r12105: Moved base.boundingregion, base.sheetcoords,
+  base.patterngenerator, misc.patternfn, and topo.pattern/* into
+  imagen package, though all will continue to be usable in their
+  original locations.
   <li>r12103: Moved TransferFn and IdentityTF out of
   functionfamily.py, and *Threshold and DivisiveNormalize* out of
   topo.transferfn, into new file imagen.transferfn for use in ImaGen,
