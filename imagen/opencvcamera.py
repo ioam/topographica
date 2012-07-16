@@ -12,7 +12,7 @@ __version__ = "$Revision$"
 
 
 import ImageOps
-from topo.pattern.image import GenericImage
+from image import GenericImage
 import param
 
 try:

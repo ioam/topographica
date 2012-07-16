@@ -15,10 +15,10 @@ from numpy.oldnumeric import array, Float, sum, ravel, ones
 import param
 from param.parameterized import overridable_property
 
-from topo.base.boundingregion import BoundingBox
-from topo.base.patterngenerator import PatternGenerator
-from topo.base.sheetcoords import SheetCoordinateSystem
-from imagen.transferfn import DivisiveNormalizeLinf,TransferFn
+from boundingregion import BoundingBox
+from patterngenerator import PatternGenerator
+from sheetcoords import SheetCoordinateSystem
+from transferfn import DivisiveNormalizeLinf,TransferFn
 
 
 class ImageSampler(param.Parameterized):
