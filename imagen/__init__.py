@@ -1466,7 +1466,7 @@ class Spectrogram(PowerSpectrum):
 
 
 _public = list(set([_k for _k,_v in locals().items() if isinstance(_v,type) and issubclass(_v,PatternGenerator)]))
-
+del _k,_v
 __all__ = _public + ["image","random"]
 
 # Avoids loading the audio and opencvcamera modules, which rely on external 
