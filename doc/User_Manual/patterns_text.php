@@ -62,11 +62,11 @@ Topographica&gt; matrixplot(input_pattern())
 <P>There are many other types of patterns available already defined in
 the <A HREF="../Reference_Manual/topo.pattern-module.html">
 topo/pattern</A> directory, and adding new patterns is
-straightforward.  Just find one from that directory to use as a
-starting point, then copy it to a new file, modify it, and put the new
-file in the pattern/ directory.  The new pattern should then show up
-in the Test Pattern window of the GUI automatically, and can be used
-in scripts the same way.
+straightforward.  Just create a new class inheriting from
+PatternGenerator or one of its subclasses, make sure it is loaded
+before you start the GUI, and it will then show up in the Test Pattern
+window of the GUI automatically, and can be used in scripts the same
+way.
 
 <H2>Composite patterns</H2>
 
