@@ -24,13 +24,12 @@ import param
 
 import numpy, numpy.random
 import numpy.oldnumeric as Numeric
-from numpy import exp,zeros,ones,power
+from numpy import exp,zeros,ones,power,sqrt,dot
 
 import topo
 import topo.base.functionfamily
 from topo.base.sheet import activity_type
-from topo.base.arrayutil import clip_lower,clip_upper
-from topo.base.arrayutil import L2norm, norm
+from topo.base.arrayutil import clip_lower
 from topo.base.functionfamily import TransferFn
 # Imported here so that all TransferFns will be in the same package
 from topo.base.functionfamily import IdentityTF  # pyflakes:ignore (API import)
@@ -188,7 +187,8 @@ class DivisiveNormalizeL2(TransferFn):
     norm_value = param.Number(default=1.0)
     
     def __call__(self,x):
-        tot = 1.0*L2norm(x.ravel())
+        xr = x.ravel()
+        tot = 1.0*sqrt(dot(xr,xr))
         if tot != 0:
             factor = (self.norm_value/tot)
             x *= factor
@@ -217,6 +217,14 @@ class DivisiveNormalizeLinf(TransferFn):
 
 
     
+def norm(v,p=2):
+    """
+    Returns the Lp norm of v, where p is an arbitrary number defaulting to 2.
+    """
+    return (abs(v)**p).sum()**(1.0/p)
+
+
+
 class DivisiveNormalizeLp(TransferFn):
     """
     TransferFn to divide an array by its Lp-Norm, where p is specified.
@@ -321,6 +329,7 @@ class BinaryThreshold(TransferFn):
         x += above_threshold
 
 
+
 class Threshold(TransferFn):
     """
     Forces all values below a threshold to zero, and leaves others unchanged.
@@ -330,8 +339,7 @@ class Threshold(TransferFn):
         Decision point for determining values to clip.""")
 
     def __call__(self,x):
-        clip_upper(x,self.threshold)
-        
+        minimum(x,self.threshold,x)
 
 # JAALERT: rename to something like PlasticTransferFn
 class TransferFnWithState(TransferFn):
@@ -540,6 +548,7 @@ class ActivityAveragingTF(TransferFnWithState):
                 self.x_avg = (1.0-self.smoothing)*x + self.smoothing*self.x_avg
 
 
+
 class HomeostaticMaxEnt(TransferFnWithRandomState):
     """
     Implementation of homeostatic intrinsic plasticity from Jochen Triesch,
@@ -632,6 +641,7 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
         super(HomeostaticMaxEnt,self).state_pop()
         
 
+
 class ScalingTF(TransferFnWithState):
     """
     Scales input activity based on the current average activity (x_avg).
@@ -682,8 +692,6 @@ class ScalingTF(TransferFnWithState):
         
         x *= self.sf
               
-
-
 
 
 class Hysteresis(TransferFnWithState):

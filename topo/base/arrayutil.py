@@ -39,13 +39,6 @@ def L2norm(v):
     return sqrt(dot(v,v))
 
 
-def norm(v,p=2):
-    """
-    Returns the Lp norm of v, where p is arbitrary and defaults to 2.
-    """
-    return (abs(v)**p).sum()**(1.0/p)
-
-
 def divisive_normalization(weights):
     """Divisively normalize an array to sum to 1.0"""
     s = weights.sum()
