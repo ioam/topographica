@@ -10,7 +10,7 @@ coordinates.
 
 <P>User-accessible quantities are always expressed in Sheet
 coordinates, which are resolution independent.  A ImaGen <?php
-classref('imagen.sheetcoords,'SheetCoordinateSystem') ?> is a rectangularly
+classref('imagen.sheetcoords','SheetCoordinateSystem') ?> is a rectangularly
 bounded region of a continuous two-dimensional plane.  The default
 SheetCoordinateSystem has a square area of 1.0 centered at (0.0,0.0):
 
