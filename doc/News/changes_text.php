@@ -11,6 +11,16 @@ Changes since 0.9.7. Fully updated 2011/10/09; some updates as of 2012/03/27.
 
 <H4>Changes that might require attention in your code or workflow</H4>
 <ul>
+  
+  <li>r12103: Moved TransferFn and IdentityTF out of
+  functionfamily.py, and *Threshold and DivisiveNormalize* out of
+  topo.transferfn, into new file imagen.transferfn for use in ImaGen,
+  though all will continue to be usable in their original locations.
+  <li>r12102: Moved RandomDotStereogram from topo.pattern.rds to
+  topo.pattern.random, and deleted rds.py.
+  <li>r12095: Moved topo.numbergen to a separate numbergen directory
+  for use in ImaGen, though it will continue to be usable as
+  topo.numbergen for the time being.  
   <li>r11906: OpenMP changes to the optimized learningfns and 
   transferfns mean that 'private' attributes _has_norm_total and 
   _norm_total are now implemented differently (with arrays). Any 

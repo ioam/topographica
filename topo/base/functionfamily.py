@@ -15,45 +15,7 @@ import numpy
 
 import param
 
-
-class TransferFn(param.Parameterized):
-    """
-    Function object to modify a matrix in place, e.g. for normalization.
-
-    Used for transforming an array of intermediate results into a
-    final version, by cropping it, normalizing it, squaring it, etc.
-    
-    Objects in this class must support being called as a function with
-    one matrix argument, and are expected to change that matrix in place.
-    """
-    __abstract = True
-    
-    # CEBALERT: can we have this here - is there a more appropriate
-    # term for it, general to output functions?  JAB: Please do rename it!
-    norm_value = param.Parameter(default=None)
-
-
-    def __call__(self,x):
-        raise NotImplementedError
-    
-# Trivial example of a TransferFn, provided for when a default
-# is needed.  The other concrete OutputFunction classes are stored
-# in transferfn/, to be imported as needed.
-class IdentityTF(TransferFn):
-    """
-    Identity function, returning its argument as-is.
-
-    For speed, calling this function object is sometimes optimized
-    away entirely.  To make this feasible, it is not allowable to
-    derive other classes from this object, modify it to have different
-    behavior, add side effects, or anything of that nature.
-    """
-
-    def __call__(self,x,sum=None):
-        pass
-
-
-
+from imagen.transferfn import TransferFn, IdentityTF # pyflakes:ignore (API import)
 
 class LearningFn(param.Parameterized):
     """
