@@ -469,7 +469,7 @@ def exec_startup_files():
 
 def get_omp_num_threads(openmp_threads, openmp_min_threads, openmp_max_threads):
     """ Helper function to implement sensible OpenMP behaviour where
-        possible.  Returns a integer tuple (OpenMP threads, CPUs detected).  
+        possible.  Returns a integer tuple (OpenMP threads, CPUs detected).
 
         CPUs detected may be None if multiprocessing is not available (ie
         Python 2.5) and consequently OpenMP threads may be None if the user
@@ -481,15 +481,13 @@ def get_omp_num_threads(openmp_threads, openmp_min_threads, openmp_max_threads):
     if 'OMP_NUM_THREADS' in os.environ: return (None, None)
 
     if 'NSLOTS' in os.environ: return ('NSLOTS', None)
-    
-    try:  
+
+    try:
         import multiprocessing
         total_cores = multiprocessing.cpu_count()
         if total_cores == 1: return (1, 1)
-        if total_cores == 2: 
-            print "Two CPUs detected, using both with OpenMP"
-            return (2, 2)
-    except: 
+        if total_cores == 2: return (2, 2)
+    except:
         print "Cannot import multiprocessing to determine number of cores."
         total_cores = None
 
@@ -510,7 +508,7 @@ def get_omp_num_threads(openmp_threads, openmp_min_threads, openmp_max_threads):
     if (openmp_max_threads is None): return (openmp_threads, total_cores)
 
     elif (openmp_max_threads < openmp_min_threads):
-        print"OpenMP: Maximum allowed threads lower than minimum allowed threads. Ignoring maximum limit." 
+        print"OpenMP: Maximum allowed threads lower than minimum allowed threads. Ignoring maximum limit."
         return (openmp_threads, total_cores)
     elif (openmp_threads > openmp_max_threads):
         print "OpenMP: Using maximum number of allowed threads."
@@ -529,7 +527,7 @@ def process_argv(argv):
     import __main__
     for (k,v) in global_constants.items():
         exec '%s = %s' % (k,v) in __main__.__dict__
-    
+
     exec_startup_files()
 
     # Repeatedly process options, if any, followed by filenames, if any, until nothing is left
@@ -551,7 +549,7 @@ def process_argv(argv):
 
             execfile(filename,__main__.__dict__)
             something_executed=True
-            
+
         if not args:
             break
 
@@ -560,34 +558,34 @@ def process_argv(argv):
     # OpenMP settings and defaults
     openmp_threads = __main__.__dict__.get('openmp_threads')
     if (openmp_threads is None): openmp_threads=-1
-    
+
     openmp_min_threads = __main__.__dict__.get('openmp_min_threads')
     if (openmp_min_threads is None): openmp_min_threads=2
-    
+
     openmp_max_threads = __main__.__dict__.get('openmp_max_threads')
 
     if (openmp_threads != 1): # OpenMP is disabled if openmp_threads == 1
 
-        (num_threads, total_cores) = get_omp_num_threads(openmp_threads, 
-                                                         openmp_min_threads, 
+        (num_threads, total_cores) = get_omp_num_threads(openmp_threads,
+                                                         openmp_min_threads,
                                                          openmp_max_threads)
-        
-        if num_threads is None: 
+
+        if num_threads is None:
             print "OpenMP: Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use."
         elif num_threads == 'NSLOTS':
             os.environ['OMP_NUM_THREADS'] =  os.environ['NSLOTS']
             print "NSLOTS environment variable found; overriding any other thread settings and using N=%s threads" % os.environ['NSLOTS']
 
-        elif total_cores is None: 
+        elif total_cores is None:
             print "OpenMP: Using %d threads" % num_threads
             os.environ['OMP_NUM_THREADS'] =  str(num_threads)
-        else: 
+        else:
             print "OpenMP: Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores)
             os.environ['OMP_NUM_THREADS'] =  str(num_threads)
 
     # If no scripts and no commands were given, pretend -i was given.
     if not something_executed: interactive()
-     
+
     if option.gui: topo.guimain.title(topo.sim.name)
 
     ## INTERACTIVE SESSION BEGINS HERE (i.e. can't have anything but
