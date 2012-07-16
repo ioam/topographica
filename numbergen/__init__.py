@@ -304,8 +304,5 @@ class BoundedNumber(NumberGenerator):
 
 
 _public = list(set([_k for _k,_v in locals().items() if isinstance(_v,type) and issubclass(_v,NumberGenerator)]))
+__all__ = _public
 
-# Automatically discover all .py files in this directory.
-import os,fnmatch
-__all__ = _public + [f.split('.py')[0] for f in os.listdir(__path__[0]) if fnmatch.fnmatch(f,'[!._]*.py')]
-del f,os,fnmatch
