@@ -4,80 +4,10 @@ Topographica allows simulation parameters to be specified in units
 that are independent of the level of detail used in any particular run
 of the simulation.  To achieve this, Topographica provides multiple
 spatial coordinate systems, called <i>Sheet</i> and <i>matrix</i>
-coordinates.
-
-
-<H2><A NAME="sheet-coords">Sheet coordinates</A></H2>
-
-<P>Quantities in the user interface are expressed in Sheet
-coordinates.  A Topographica <?php classref('topo.base.sheet','Sheet')
-?> is a continuous abstraction of a finite, two-dimensional array of
-neural units.  A Sheet corresponds to a rectangular portion of a
-continuous two-dimensional plane.  The default Sheet has a square area
-of 1.0 centered at (0.0,0.0):
-
-<P><CENTER><IMG BORDER="2" WIDTH="324" HEIGHT="325" SRC="images/sheet_coords.png"></CENTER>
-
-<P>Locations in a Sheet are specified using floating-point Sheet
-coordinates (x,y) contained within the Sheet's <?php
-classref('topo.base.boundingregion','BoundingBox') ?>.  The thick
-black line in the figure above shows the BoundingBox of the default
-Sheet, which extends from (-0.5,-0.5) to (0.5,0.5) in Sheet
-coordinates.  Any coordinate within the BoundingBox is a valid Sheet
-coordinate.
-
-
-<H2><A NAME="matrix-coords">Matrix coordinates</A></H2>
-
-<P>Although it is possible to do some computations using analytic
-representations of the continuous Sheet, in practice, Sheets are
-typically implemented using some finite matrix of units.  Each Sheet
-has a parameter called its <i>density</i>, which specifies how many
-units (matrix elements) in the matrix correspond to a unit length in
-Sheet coordinates.  For instance, the default Sheet above
-with a density of 5 corresponds to the matrix on the
-left below:
-
-<P><CENTER>
-<IMG BORDER="2" WIDTH="324" HEIGHT="325" SRC="images/matrix_coords.png">
-<IMG BORDER="2" WIDTH="324" HEIGHT="325" SRC="images/sheet_coords_-0.2_0.4.png">
-</CENTER>
-
-<P>Here, the 1.0x1.0 area of Sheet coordinates is represented by a 5x5
-matrix, whose BoundingBox (represented by a thick black outline)
-corresponds exactly to the BoundingBox of the Sheet to which it
-belongs.  Each floating-point location (x,y) in Sheet coordinates
-corresponds uniquely to a floating-point location (r,c) in
-floating-point matrix coordinates, and vice versa.  Individual units
-or elements in this array are accessed using integer <i>matrix
-index</i> coordinates, which can be calculated from the matrix
-coordinate <code>(r,c)</code> as
-(<code>floor(int(r))</code>,<code>floor(int(c))</code>).
-
-<P>For the example shown, the center of the unit with matrix index
-(0,1) is at location (0.5,1.5) in matrix coordinates and (-0.2,0.4) in
-Sheet coordinates.  Notice that matrix and matrix index coordinates
-start at (0.0,0.0) in the upper left and increase down and to the
-right (as is the accepted convention for matrices), while Sheet
-coordinates start at the center and increase up and to the right (as
-is the accepted convention for Cartesian coordinates).
-
-<P>The reason for having multiple sets of coordinates is that the same
-Sheet can at another time be implemented using a different matrix
-specified by a different density.  For instance, if this Sheet had a
-density of 10 instead, the corresponding matrix would be:
-
-<P><CENTER>
-<IMG BORDER="2" WIDTH="324" HEIGHT="325" SRC="images/matrix_coords_hidensity.png">
-<IMG BORDER="2" WIDTH="324" HEIGHT="325" SRC="images/sheet_coords_-0.2_0.4.png">
-</CENTER>
-
-
-<P>Using this higher density, Sheet coordinate (-0.2,0.4) now
-corresponds to the matrix coordinate (1.0,3.0).  As long as the user
-interface specifies all units in Sheet coordinates and converts these
-to matrix coordinates appropriately, the user can use different
-densities at different times without changing any other parameters.
+coordinates.  These coordinate systems are primarily described in the
+<a href="coords.html">ImaGen package</a>, which should be examined
+before going further on this page.  Here we describe only the
+Topographica-specific aspects of the coordinate systems.
 
 
 <H2><A NAME="connection-fields">Connection fields</A></H2>
@@ -156,43 +86,26 @@ cannot be rendered properly on a torus.
 
 <H3><A NAME="coord-details">Technical details</A></H3>
 
-<P>In some cases, the details of representing a Sheet with a matrix of
-a certain density can be more complex than described above, because it
-is possible to specify a bounds and density combination that cannot be
-realized exactly.  For this reason, the quantities set by the user are
-called <code>nominal_density</code> and <code>nominal_bounds</code>,
-and the true bounds and density are calculated from these.
-
-<P>For instance, consider requesting that a Sheet have bounds of
-<code>BoundingBox(radius=0.3)</code>, and density of <code>7</code>.
-Such an area (a 0.6 x 0.6 square) cannot be tiled exactly by 7 units
-per 1.0 length. When a sheet is created, the density will be adjusted
-so that the requested sheet bounds (and thus the overall area) is
-respected. In this example, the Sheet would have an actual density of
-6.67 (the closest value to tile the plane exactly; see <?php
-classref('topo.base.sheetcoords','SheetCoordinateSystem')?>).  This
-approach was chosen so that whenever the density is changed, the
-simulation remains the best possible approximation of the requested
-area.
-
-<P> However, because the bounds do not have to be square, there can be
-an additional complication for certain bounds and densities.
-Consider the example above, but instead with rectangular bounds given
-by <code>BoundingBox(points=((-0.3,-0.5),(0.3,0.5)))</code>. This time,
+<P> In addition to the details discussed with the
+<a href="coords.html#coord-details">ImaGen package</a>, Topographica
+Sheets have an additional complication for certain bounds and
+densities when using non-square sheets.  Consider the example from
+ImaGen, but instead with rectangular bounds given by
+<code>BoundingBox(points=((-0.3,-0.5),(0.3,0.5)))</code>. This time,
 the y dimension would be tiled exactly by a density of 7, but the x
 dimension would not. This problem could be solved by allowing a Sheet
 to have different densities in each dimension (i.e. an xdensity and a
-ydensity); indeed, the 
-<?php classref('topo.base.sheetcoords','SheetCoordinateSystem')?> 
-underlying
-a Sheet does not require that the xdensity and ydensity are
+ydensity); indeed, the <?php
+classref('imagen.sheetcoords','SheetCoordinateSystem')?> underlying a
+Sheet does not require that the xdensity and ydensity are
 equal. However, for a Sheet itself, it is simpler for the density to
-be equal in both dimensions. To solve the problem above, then, we take
-the bounds's x-width and calculate an xdensity from this (as described
-for the previous example), and make the ydensity exactly equal to this by
-adjusting the top and bottom bounds. In our example, the top bound
-would be adjusted to 0.525, and the bottom to -0.525---the closest
-bounds allowing a density of 6.67 to tile the dimension exactly.
+be equal in both dimensions. To solve the problem above, then,
+Topographica takes the bounds's x-width and calculate an xdensity from
+this (as described for the previous example), and makes the ydensity
+exactly equal to this by adjusting the top and bottom bounds. In our
+example, the top bound would be adjusted to 0.525, and the bottom to
+-0.525---the closest bounds allowing a density of 6.67 to tile the
+dimension exactly.
 
 <P>In summary, the bounds specified for a Sheet are respected, but the
 density may be adjusted so that the plane is tiled exactly. 
@@ -201,7 +114,4 @@ the same density in the y direction as in the x direction with the specified
 bounds, the top and bottom bounds are adjusted so that the densities can 
 remain equal. This is an
 "x-bounds-master" approach; futher discussion of this and alternatives
-is available in <?php classref('topo.base.sheetcoords','SheetCoordinateSystem')?>.
-
-
-
+is available in <?php classref('imagen.sheetcoords','SheetCoordinateSystem')?>.

@@ -16,6 +16,15 @@ details of how these patterns are generated.  ImaGen can easily
 provide such patterns, often without needing any modification to the
 target code, as long as it can accept a Numpy array.
 
+<H2>Coordinate systems</H2>
+
+In each of the examples below, the parameters are given in what ImaGen
+calls Sheet coordinates, which are independent of the resolution of
+the rendered matrix.  This feature allows the patterns to be
+resolution indepdenent (as in a vector drawing program).  See
+<A HREF="coords.html">ImaGen spatial coordinate systems</A> for more
+details.
+
 <H2>Simple patterns</H2>
 
 <P>The basic types of patterns supported by ImaGen include:
@@ -165,4 +174,7 @@ pattern generators:
 <center>
 <img src="images/fourclassweights.png" width="390" height="371">
 </center>
+
+
+
 
