@@ -250,6 +250,10 @@ sys.modules['topo.numbergen']=numbergen
 sys.modules['topo.numbergen.basic']=numbergen
 numbergen.ExponentialDecay.time_fn = sim.time
 
+# Set the time function for Translator to be topo.sim.time()
+from topo import pattern
+pattern.Translator.time_fn = sim.time
+
 
 
 def about(display=True):

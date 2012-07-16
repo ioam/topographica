@@ -25,7 +25,6 @@ import param
 from param.parameterized import ParamOverrides
 from param import ClassSelector
 
-import topo
 # Imported here so that all PatternGenerators will be in the same package
 from topo.base.patterngenerator import Constant, PatternGenerator
 
@@ -35,7 +34,7 @@ from topo.misc.patternfn import gaussian,exponential,gabor,line,disk,ring,\
     sigmoid,arc_by_radian,arc_by_center,smooth_rectangle,float_error_ignore, \
     log_gaussian
 
-from topo import numbergen
+import numbergen
 from topo.transferfn import DivisiveNormalizeL1
 
 
@@ -807,7 +806,7 @@ class Translator(PatternGenerator):
     
     speed = param.Number(default=0.01,bounds=(0.0,None),doc="""
         The speed with which the pattern should move,
-        in sheet coordinates per simulation time unit.""")
+        in sheet coordinates per time_fn unit.""")
 
     reset_period = param.Number(default=1,bounds=(0.0,None),doc="""
         Period between generating each new translation episode.""")
@@ -816,7 +815,7 @@ class Translator(PatternGenerator):
         Interval between successive translation episodes.
         
         If nonzero, the episode_separator pattern is presented for
-        this amount of simulation time after each episode, e.g. to
+        this amount of time_fn time after each episode, e.g. to
         allow processing of the previous episode to complete.""")
 
     episode_separator = param.ClassSelector(default=Constant(scale=0.0),
@@ -824,6 +823,8 @@ class Translator(PatternGenerator):
          Pattern to display during the episode_interval, if any.
          The default is a blank pattern.""")
                                                                               
+    time_fn = param.Callable(default=numbergen.constanttime,doc="""
+        Function to generate the time used as a base for translation.""")
 
     def _advance_params(self):
         """
@@ -832,7 +833,7 @@ class Translator(PatternGenerator):
         """
         for param in ['x','y','direction']:
             self.force_new_dynamic_value(param)
-        self.last_time = topo.sim.time()
+        self.last_time = self.time_fn()
 
        
     def __init__(self,**params):
@@ -843,9 +844,9 @@ class Translator(PatternGenerator):
     def __call__(self,**params_to_override):
         p=ParamOverrides(self,params_to_override)
         
-        if topo.sim.time() >= self.last_time + p.reset_period:
+        if self.time_fn() >= self.last_time + p.reset_period:
             ## Returns early if within episode interval
-            if topo.sim.time()<self.last_time+p.reset_period+p.episode_interval:
+            if self.time_fn()<self.last_time+p.reset_period+p.episode_interval:
                 return p.episode_separator(xdensity=p.xdensity,
                                            ydensity=p.ydensity,
                                            bounds=p.bounds)
@@ -867,7 +868,7 @@ class Translator(PatternGenerator):
 
         # compute how much time elapsed from the last reset
         # float(t) required because time could be e.g. gmpy.mpq
-        t = float(topo.sim.time()-self.last_time)
+        t = float(self.time_fn()-self.last_time)
 
         ## CEBALERT: mask gets applied twice, both for the underlying
         ## generator and for this one.  (leads to redundant
