@@ -15,7 +15,7 @@ from param.parameterized import ParamOverrides
 
 from boundingregion import BoundingBox, BoundingRegionParameter
 from sheetcoords import SheetCoordinateSystem
-from functionfamily import TransferFn
+from imagen.transferfn import TransferFn
 
 
 # CEBALERT: PatternGenerator has become a bit of a monster abstract

@@ -35,7 +35,7 @@ from topo.misc.patternfn import gaussian,exponential,gabor,line,disk,ring,\
     log_gaussian
 
 import numbergen
-from topo.transferfn import DivisiveNormalizeL1
+from imagen.transferfn import DivisiveNormalizeL1
 
 
 # Could add a Gradient class, where the brightness varies as a
