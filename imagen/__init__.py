@@ -1,10 +1,11 @@
 """
 Objects capable of generating a two-dimensional array of values.
 
-Such patterns can be used as input to a Sheet, as initial or fixed
-weight patterns, or for any other purpose where a two-dimensional
-pattern may be needed.  Any new PatternGenerator classes added to this
-directory will automatically become available for any model.
+Such patterns can be used as input to machine learning, neural
+network, or compuatational neuroscience algorithms, or for any other
+purpose where a two-dimensional pattern may be needed.  Any new
+PatternGenerator classes can be derived from these, and can then be
+combined with the existing classes easily.
 
 $Id$
 """
