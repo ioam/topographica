@@ -9,7 +9,7 @@ __version__='$Revision$'
 import param
 import os
 
-from topo.pattern import TimeSeries, Spectrogram, PowerSpectrum
+from . import TimeSeries, Spectrogram, PowerSpectrum
 
 from numpy import arange, array, ceil, complex64, cos, exp, fft, flipud, \
         float64, floor, hanning, hstack, log, log10, logspace, multiply, \
@@ -32,7 +32,7 @@ class AudioFile(TimeSeries):
     sample_rate = param.Number(precedence=(-1))
     
     filename = param.Filename(default='sounds/complex/daisy.wav', doc="""
-        File path (can be relative to Topographica's base path) to an audio file. 
+        File path (can be relative to Param's base path) to an audio file. 
         The audio can be in any format accepted by audiolab, e.g. WAV, AIFF, or FLAC.""")
     
     precision = param.Parameter(default=float64, doc="""
@@ -64,7 +64,7 @@ class AudioFolder(AudioFile):
     filename = param.Filename(precedence=(-1))
 
     folderpath = param.Foldername(default='sounds/sine_waves/normalized', 
-        doc="""Folder path (can be relative to Topographica's base path) to a
+        doc="""Folder path (can be relative to Param's base path) to a
         folder containing audio files. The audio can be in any format accepted 
         by audiolab, i.e. WAV, AIFF, or FLAC.""")
          
@@ -525,17 +525,3 @@ class LyonsCochleogram(LyonsCochlearModel):
     def __call__(self, **params_to_override):
         self._update_cochleogram(self._get_row_amplitudes())
         return self._cochleogram           
-
-
-        
-        
-if __name__=='__main__' or __name__=='__mynamespace__':
-
-    from topo import sheet
-    import topo
-
-    topo.sim['C']=sheet.GeneratorSheet(
-        input_generator=AudioFile(filename='sounds/complex/daisy.wav',sample_window=0.3,
-            seconds_per_timestep=0.3,min_frequency=20,max_frequency=20000),
-            nominal_bounds=sheet.BoundingBox(points=((-0.1,-0.5),(0.0,0.5))),
-            nominal_density=10,period=1.0,phase=0.05)
