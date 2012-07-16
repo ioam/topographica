@@ -45,7 +45,7 @@ Home/index.html: Home/news_text.php
 
 # Can also add --graph=callgraph to show who called what, but only for a specific simulation run
 reference-manual: Reference_Manual/toc.html
-Reference_Manual/toc.html: ../topo/*.py ../topo/*/*.py ../param/*.py Reference_Manual/index_text.php
+Reference_Manual/toc.html: ../topo/*.py ../topo/*/*.py ../param/*.py ../numbergen/*.py ../imagen/*.py Reference_Manual/index_text.php
 	-mv ../topo/tests ../topo-tests-tmp
 	cd .. ; ${EPYDOC} --graph=classtree --inheritance=listed --docformat=ReStructuredText --show-sourcecode --html -o doc/Reference_Manual --name=Topographica --url=http://topographica.org topo param
 	mv ../topo-tests-tmp ../topo/tests 
