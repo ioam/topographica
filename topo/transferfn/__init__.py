@@ -23,8 +23,7 @@ import copy
 import param
 
 import numpy, numpy.random
-import numpy.oldnumeric as Numeric
-from numpy import exp,zeros,ones,power,sqrt,dot
+from numpy import exp,zeros,ones,power
 
 import topo
 import topo.base.functionfamily
@@ -32,10 +31,10 @@ from topo.base.sheet import activity_type
 from topo.base.arrayutil import clip_lower
 
 # Imported here so that all TransferFns will be in the same package
-from imagen.transferfn import TransferFn,IdentityTF,Threshold, \
-BinaryThreshold,DivisiveNormalizeL1,DivisiveNormalizeL2, \
-DivisiveNormalizeLinf,DivisiveNormalizeLp  # pyflakes:ignore (API import)
-
+from imagen.transferfn import TransferFn,IdentityTF,Threshold  # pyflakes:ignore (API import)
+from imagen.transferfn import BinaryThreshold,DivisiveNormalizeL1  # pyflakes:ignore (API import)
+from imagen.transferfn import DivisiveNormalizeL2,DivisiveNormalizeLinf # pyflakes:ignore (API import)
+from imagen.transferfn import DivisiveNormalizeLp # pyflakes:ignore (API import)
 
 # CEBHACKALERT: these need to respect the mask - which will be passed in.
 

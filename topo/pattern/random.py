@@ -7,8 +7,7 @@ __version__='$Revision$'
 
 import numpy
 
-from numpy.oldnumeric import zeros,floor,where,choose,less,greater,Int
-from numpy.oldnumeric.random_array import random,seed
+from numpy.oldnumeric import zeros,floor,where,choose,less,greater,Int,random_array 
 
 import param
 from param.parameterized import ParamOverrides
@@ -207,14 +206,14 @@ class RandomDotStereogram(PatternGenerator):
         # Choose random colors and locations of square dots
         random_seed = p.random_seed
 
-        seed(random_seed*12,random_seed*99)
-        col=where(random((ndots))>=0.5, 1.0, -1.0)
+        random_array.seed(random_seed*12,random_seed*99)
+        col=where(random_array.random((ndots))>=0.5, 1.0, -1.0)
 
-        seed(random_seed*122,random_seed*799)
-        xpos=floor(random((ndots))*(bigxsize+2*dotsize)) - halfdot
+        random_array.seed(random_seed*122,random_seed*799)
+        xpos=floor(random_array.random((ndots))*(bigxsize+2*dotsize)) - halfdot
     
-        seed(random_seed*1243,random_seed*9349)
-        ypos=floor(random((ndots))*(bigysize+2*dotsize)) - halfdot
+        random_array.seed(random_seed*1243,random_seed*9349)
+        ypos=floor(random_array.random((ndots))*(bigysize+2*dotsize)) - halfdot
       
         # Construct arrays of points specifying the boundaries of each
         # dot, cropping them by the big image size (0,0) to (bigxsize,bigysize)
