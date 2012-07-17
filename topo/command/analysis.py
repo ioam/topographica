@@ -40,7 +40,7 @@ from topo.base.cf import Projection
 from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
 from topo.base.sheetview import SheetView
-from topo.misc.distribution import Distribution
+from topo.misc.distribution import Distribution, DistributionStatisticFn
 from topo.misc.distribution import DSF_MaxValue, DSF_BimodalPeaks
 from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit, DSF_BimodalVonMisesFit
 from topo.pattern import GaussiansCorner, Gaussian, RawRectangle, Composite, Constant
@@ -492,6 +492,11 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
     """Measure an orientation preference map by collating the response to patterns."""
 
     subplot = param.String("Orientation")
+
+    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(value_scale=(0.0,1.0/pi)),
+            doc=""" Function that will be used to analyze the distributions of unit responses.
+            Note that this default is orverriden by specific functions for features, if
+            specified in the Feature objects""" )
     
     def _feature_list(self,p):
 
