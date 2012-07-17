@@ -493,10 +493,11 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
 
     subplot = param.String("Orientation")
 
-    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(value_scale=(0.0,1.0/pi)),
-            doc=""" Function that will be used to analyze the distributions of unit responses.
-            Note that this default is orverriden by specific functions for features, if
-            specified in the Feature objects""" )
+    preference_fn = param.ClassSelector( DistributionStatisticFn, 
+        default=DSF_WeightedAverage(value_scale=(0.0,1.0/pi)), doc=""" 
+        Function that will be used to analyze the distributions of unit
+        responses. Sets value_scale to normalize orientation preference
+        values.""" )
     
     def _feature_list(self,p):
 
