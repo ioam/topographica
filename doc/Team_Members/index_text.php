@@ -1,6 +1,5 @@
 <P>Topographica is developed by a distributed team of researchers in
-the United Kingdom, the United States, and Europe.  The most active
-current developers are:
+the United Kingdom, the United States, and Europe, most recently including:
 
 <dl>
   <p><dt><a target="_top" href="http://homepages.inf.ed.ac.uk/jbednar">James
@@ -13,21 +12,6 @@ current developers are:
       reviews all code and is the last word on the design and
       features.
 
-  <p><dt>Dobromir Stefanov, 2011 -</dt>
-  <dd>As part of Dobromir's undergraduate project at the University of
-      Edinburgh, he is preparing Topographica's next major release.
-</dl>
-
-<P><BR><BR>
-Other recent developers include:
-
-<dl>
-  <p><dt>Jan Antolik, 2006 - </dt>
-  <dd>Jan completed his University of Edinburgh PhD thesis in Autumn
-      2010, focusing on complex cells and surround modulation in V1.
-      He continues to use Topographica in his postdoctoral work and
-      has contributed a variety of related code.
-
   <p><dt><a target="_top"
   href="http://homepages.inf.ed.ac.uk/s0454615">Chris Ball</a>, 2005 -
   </dt>
@@ -35,6 +19,12 @@ Other recent developers include:
       every part of Topographica.  Since January 2009 he has been a
       PhD student in Edinburgh, working on the formation of color maps
       in V1.
+
+  <p><dt>Jan Antolik, 2006 - </dt>
+  <dd>Jan completed his University of Edinburgh PhD thesis in Autumn
+      2010, focusing on complex cells and surround modulation in V1.
+      He continues to use Topographica in his postdoctoral work and
+      has contributed a variety of related code.
 
   <p><dt>Gautham Ganapathy, May - Dec 2011</dt>
   <dd>Gautham completed his MSc at the University of Edinburgh,
@@ -60,7 +50,12 @@ Other recent developers include:
       on GP-GPU support, and has previously contributed Cython and code
       coverage support.
 
-  <p><dt>Jean-Luc Stevens, 2011 -</dt>
+  <p><dt>Dobromir Stefanov, 2011 - 2012</dt>
+  <dd>As part of Dobromir's undergraduate project at the University of
+      Edinburgh, he performed major reorganization and cleanup of
+      Topographica's structure.
+
+    <p><dt>Jean-Luc Stevens, 2011 -</dt>
   <dd>Jean-Luc received an MSc degree from the University of Edinburgh
       (project: A temporal model of neural activity and VSD response
       in the primary visual cortex) and is now a PhD student in
@@ -88,10 +83,6 @@ Previous contributors include:
   <dd>Andy completed his undergraduate degree at the
       University of Edinburgh, including a project of
       building Matlab interfaces for Topographica.
-
-  <p><dt>Celia Fillion, 2010 </dt>
-  <dd>Celia contributed real-time OpenCV camera support
-      as part of a work-placement program from ISEN-Brest (France).
 
   <p><dt><a target="_top" href="http://faculty.cs.tamu.edu/choe/">Yoonsuck Choe</a>, 2002 - </dt>
   <dd>Yoonsuck is an Assistant Professor at Texas A&amp;M University.
@@ -122,7 +113,8 @@ Previous contributors include:
 
   <p><dt>C&eacute;lia Fillion, May - September 2010</dt>
   <dd>In an undergraduate project in collaboration with ISEN Brest
-      (France), C&eacute;lia implemented real-time web camera support.
+      (France), C&eacute;lia implemented real-time OpenCV web camera
+      support.
 
   <p><dt>Kateryna Gerasymova, May - September 2008</dt>
   <dd>In a MSc-level project in collaboration with Humboldt University
