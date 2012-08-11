@@ -19,7 +19,7 @@ __version__='$Revision$'
 import numpy
 from numpy.oldnumeric import around, bitwise_and, bitwise_or
 from numpy import abs, add, alltrue, array, ceil, clip, cos, fft, flipud, \
-        floor, exp, hstack, Infinity, linspace, multiply, nonzero, pi, \
+        floor, fmod, exp, hstack, Infinity, linspace, multiply, nonzero, pi, \
         repeat, sin, sqrt, subtract, tile, zeros, sum, max
 
 import param
