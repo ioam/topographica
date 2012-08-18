@@ -677,7 +677,7 @@ NUMEXPR = numexpr-2.0.1
 
 NUMEXPR_UNINSTALL += ${PYTHON_LIB}/site-packages/numexpr
 
-numexpr: ${NUMEXPR} python
+numexpr: ${NUMEXPR}.tar.gz python
 	tar -xzf ${NUMEXPR}.tar.gz
 	cd ${NUMEXPR}; ${PREFIX}/bin/python setup.py install
 	touch numexpr
