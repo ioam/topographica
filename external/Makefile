@@ -654,7 +654,7 @@ pyrex-uninstall:
 ##############################################################
 # HDF5 library (required by PyTables)
 #
-HDF5 = hdf5-1.6.6
+HDF5 = hdf5-1.8.9
 
 HDF5_UNINSTALL += 
 
@@ -671,15 +671,33 @@ hdf5-uninstall:
 
 
 ##############################################################
+# Numexpr
+#
+NUMEXPR = numexpr-2.0.1
+
+NUMEXPR_UNINSTALL += ${PYTHON_LIB}/site-packages/numexpr
+
+numexpr: ${NUMEXPR} python
+	tar -xzf ${NUMEXPR}.tar.gz
+	cd ${NUMEXPR}; ${PREFIX}/bin/python setup.py install
+	touch numexpr
+
+numexpr-clean:
+	rm -rf ${NUMEXPR}
+
+numexpr-uninstall:
+	rm -rf numexpr ${foreach f,${NUMEXPR_UNINSTALL}, ${PREFIX}/${f}}
+
+##############################################################
 # PyTables
 #
-PYTABLES = pytables
+PYTABLES = tables
 
 PYTABLES_UNINSTALL += ${PYTHON_LIB}/site-packages/tables
 
-pytables: ${PYTABLES}-20070518.tar.gz pyrex hdf5
-	tar -xzf ${PYTABLES}-20070518.tar.gz
-	cd ${PYTABLES}; ${PREFIX}/bin/python setup.py install --hdf5=${PREFIX}
+pytables: ${PYTABLES}-2.4.0.tar.gz hdf5 numexpr cython
+	tar -xzf ${PYTABLES}-2.4.0.tar.gz
+	cd ${PYTABLES}-2.4.0; ${PREFIX}/bin/python setup.py install --hdf5=${PREFIX}
 	touch pytables
 
 pytables-clean:
@@ -971,7 +989,7 @@ termcap-uninstall:
 
 #############################################################
 # CYTHON
-CYTHON = Cython-0.13
+CYTHON = Cython-0.16
 
 CYTHON_UNINSTALL += ${PYTHON_LIB}/site-packages/Cython*
 CYTHON_UNINSTALL += ${PYTHON_LIB}/site-packages/pyximport
