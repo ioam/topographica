@@ -1,0 +1,9 @@
+[submodule "external/param"]
+	path = external/param
+	url = https://github.com/ioam/param.git
+[submodule "external/paramtk"]
+	path = external/paramtk
+	url = https://github.com/ioam/paramtk.git
+[submodule "external/imagen"]
+	path = external/imagen
+	url = https://github.com/ioam/imagen.git
