@@ -876,13 +876,13 @@ mxnumber-uninstall:
 ##############################################################
 # wraps GMP
 #
-GMPY = gmpy-sources-101
+GMPY = gmpy
 
 GMPY_UNINSTALL += ${PYTHON_LIB}/site-packages/gmpy-1.01-py2.5.egg-info
 GMPY_UNINSTALL += ${PYTHON_LIB}/site-packages/gmpy.so
 
-gmpy: ${GMPY}.tar.gz python gmp
-	tar -xzf ${GMPY}.tar.gz
+gmpy: ${GMPY}-sources-101.tar.gz python gmp
+	tar -xzf ${GMPY}-sources-101.tar.gz
 	cd ${GMPY}; ${PREFIX}/bin/python setup.py build_ext --include-dirs='${PREFIX}/include' --library-dirs='${PREFIX}/lib'; ${PREFIX}/bin/python setup.py install
 	touch gmpy
 
