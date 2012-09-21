@@ -343,6 +343,18 @@ class measure_rfs(SingleInputResponseCommand):
     some of the time there is a pattern on the input.
     """  
     static_parameters = param.List(default=["offset","size"])
+    
+    sampling = param.Number(default=1.0,bounds=(1.0,None),doc="""
+    	The sampling value determines the size of the input pattern and
+    	the number of presentations required to fully sample the input sheet.
+    	The higher the value the coarser the receptive field measurement 
+    	will be.""")
+    
+    area_ratio = param.Number(default=1.0,bounds=(0.0,1.0),doc="""
+    	Ratio defining the area in the input sheet that is sampled during
+    	the reverse correlation procedure. Reducing this value below 1.0
+    	will invalidate the RFs of all neurons outside the specified area.""")
+
     __abstract = True
     
     def __call__(self,**params):
@@ -360,13 +372,14 @@ class measure_rfs(SingleInputResponseCommand):
     def _feature_list(self,p):
     
         left, bottom, right, top = p.input_sheet.nominal_bounds.lbrt()
+        left *= p.area_ratio; bottom *= p.area_ratio; right *= p.area_ratio; top *= p.area_ratio
         sheet_density = float(p.input_sheet.nominal_density)
         
         # Cannot assume square sheet.
-        vertical_divisions = (sheet_density * (top - bottom)) - 1
-        horizontal_divisions = (sheet_density * (right - left)) - 1
+        vertical_divisions = ((sheet_density * (top - bottom)) - 1) / p.sampling
+        horizontal_divisions = ((sheet_density * (right - left)) - 1) / p.sampling
 
-        unit_size = 1.0 / sheet_density
+        unit_size = 1.0 / sheet_density * p.sampling
         half_unit_size = unit_size / 2.0 # saves repeated calculation.
         p['size'] = unit_size
         
