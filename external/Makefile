@@ -1261,7 +1261,7 @@ QUANTITIES = quantities-0.10.1
 
 QUANTITIES_UNINSTALL += ${PYTHON_LIB}/site-packages/quantities
 
-quantities: quantities-0.10.1.tar.gz
+quantities: ${QUANTITIES}.tar.gz
 	tar -xzf ${QUANTITIES}.tar.gz
 	cd ${QUANTITIES}; ${PREFIX}/bin/python setup.py install
 	touch quantities
