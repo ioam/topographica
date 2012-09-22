@@ -691,13 +691,13 @@ numexpr-uninstall:
 ##############################################################
 # PyTables
 #
-PYTABLES = tables
+PYTABLES = tables-2.4.0
 
 PYTABLES_UNINSTALL += ${PYTHON_LIB}/site-packages/tables
 
-pytables: ${PYTABLES}-2.4.0.tar.gz hdf5 numexpr cython
-	tar -xzf ${PYTABLES}-2.4.0.tar.gz
-	cd ${PYTABLES}-2.4.0; ${PREFIX}/bin/python setup.py install --hdf5=${PREFIX}
+pytables: ${PYTABLES}.tar.gz hdf5 numexpr cython
+	tar -xzf ${PYTABLES}.tar.gz
+	cd ${PYTABLES}; ${PREFIX}/bin/python setup.py install --hdf5=${PREFIX}
 	touch pytables
 
 pytables-clean:
@@ -1261,7 +1261,7 @@ QUANTITIES = quantities-0.10.1
 
 QUANTITIES_UNINSTALL += ${PYTHON_LIB}/site-packages/quantities
 
-quantities:
+quantities: quantities-0.10.1.tar.gz
 	tar -xzf ${QUANTITIES}.tar.gz
 	cd ${QUANTITIES}; ${PREFIX}/bin/python setup.py install
 	touch quantities
