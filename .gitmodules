@@ -7,6 +7,3 @@
 [submodule "external/imagen"]
 	path = external/imagen
 	url = https://github.com/ioam/imagen.git
-[submodule "lancet"]
-	path = lancet
-	url = https://github.com/jlstevens/lancet.git
