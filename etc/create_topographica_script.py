@@ -42,6 +42,7 @@ def write(python_bin,release,version,usersite):
 
 import os
 
+(basepath, _) = os.path.split(os.path.abspath(__file__))
 sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
