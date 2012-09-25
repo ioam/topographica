@@ -40,13 +40,13 @@ def write(python_bin,release,version,usersite):
     script = """#!%s
 # Startup script for Topographica
 
-import topo
-topo.release='%s'
-topo.version='%s'
-
 sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
+
+import topo
+topo.release='%s'
+topo.version='%s'
 
 # Process the command-line arguments
 from sys import argv
