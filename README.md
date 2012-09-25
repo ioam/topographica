@@ -9,13 +9,15 @@ This document describes how to start with Topographica from the complete set of 
 
 ## CLONING TOPOGRAPHICA
 
-Topographica on GitHub uses submodules. Please clone using the ``--recursive`` option if you want to pull in submodules right away. For example, using the git protocol:
+Topographica on GitHub uses submodules. Please clone as follows:
 
-```git clone --recursive git://github.com/ioam/topographica.git```
+```bash
+git clone git://github.com/ioam/topographica.git
+git submodule update --init
+```
 
-If you clone normally and encounter import errors, you can fetch the necessary submodules using:
+If dependencies are missing (numpy, PIL) are missing, try running ```pip install numpy PIL```.
 
-```git submodule update --init```
 
 ## BUILDING DOCUMENTATION
 
