@@ -40,6 +40,8 @@ def write(python_bin,release,version,usersite):
     script = """#!%s
 # Startup script for Topographica
 
+import os
+
 sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
