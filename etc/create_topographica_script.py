@@ -41,6 +41,7 @@ def write(python_bin,release,version,usersite):
 # Startup script for Topographica
 
 import os
+import sys
 
 (basepath, _) = os.path.split(os.path.abspath(__file__))
 sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
