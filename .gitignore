@@ -11,3 +11,4 @@
 *.lock
 bin
 lib
+local/*
