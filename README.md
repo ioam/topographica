@@ -44,6 +44,11 @@ As long as all the dependencies have been installed as described above, no separ
 
 Alternatively, the dependencies can all be built from source, by changing to the "external" directory and typing ```make default```.  All non-standard external libraries will be fetched automatically and for most platforms will be built from source.  This approach makes the initial compilation time longer and the simulator directory larger, but it minimizes the changes necessary for specific platforms and operating system versions.  For specific instructions, see the "Build all Topographica's dependencies" and "Building Topographica" sections in doc/Developer_Manual/installation.html.
 
+If you use this Makefile, you will need to prepend the absolute path of ```./topographica/bin/python``` to your ```PATH```environment variable in order to make use of the packages you have built. 
+
+```bash
+export PATH=$PATH:<PATH TO ./topographica/bin/python>
+```
 
 ## RUNNING TOPOGRAPHICA
 
