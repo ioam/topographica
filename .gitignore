@@ -12,3 +12,4 @@
 bin
 lib
 local/*
+external/*
