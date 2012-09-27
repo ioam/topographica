@@ -17,6 +17,14 @@ cd topographica
 git submodule update --init
 ```
 
+The clone command above is read-only, to push changes set up your [SSH key](https://help.github.com/articles/generating-ssh-keys) and clone with:
+
+```bash
+git clone git@github.com:ioam/topographica.git
+cd topographica
+git submodule update --init
+```
+
 If dependencies are missing, you can install them using pip.  Pip is available on most systems already, but if it is missing or if the installed version is old, you
 can install it using "easy_install pip" or the equivalent for your package manager.  The only required dependencies are numpy and PIL, which can be installed using
 ```pip install numpy PIL```, but other highly recommended packages include scipy, ipython, and matplotlib, which can be installed in the same way.
