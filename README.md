@@ -5,7 +5,7 @@ Topographica is a general-purpose neural simulator focusing on topographic maps.
 This program is free, open-source software available under the BSD license (see LICENSE.txt).
 
 
-This document describes how to start with Topographica from the complete set of source code, which includes source code packages for all its dependencies.  Most users will instead want to start with the pre-packaged distributions available for most platforms; see ioam/topographica [Downloads](http://github.com/ioam/topographica/downloads) for links and instructions.
+This document describes how to start with Topographica from the complete set of source code, which includes source code packages for all its dependencies.  Most users will instead want to start with the pre-packaged distributions available for most platforms; see ioam/topographica [Downloads](http://github.com/ioam/topographica/downloads) for links.
 
 ## CLONING TOPOGRAPHICA
 
@@ -13,28 +13,31 @@ Topographica on GitHub uses submodules. Please clone as follows:
 
 ```bash
 git clone git://github.com/ioam/topographica.git
+cd topographica
 git submodule update --init
 ```
 
-If dependencies are missing (numpy, PIL) are missing, try running ```pip install numpy PIL```.
+If dependencies are missing, you can install them using pip.  Pip is available on most systems already, but if it is missing or if the installed version is old, you
+can install it using "easy_install pip" or the equivalent for your package manager.  The only required dependencies are numpy and PIL, which can be installed using
+```pip install numpy PIL```, but other highly recommended packages include scipy, ipython, and matplotlib, which can be installed in the same way.
 
 
 ## BUILDING DOCUMENTATION
 
-To read more about Topographica before trying to build it, you can build the documentation separately from compiling Topographica itself. If PHP4, m4, bibtex, convert, and fig2dev are installed on your system (as in most Linux distributions), just change to the topographica directory and type "make doc reference-manual".  (This step is only necessary when building from SVN; released versions include the documentation already built.)
+To read more about Topographica before trying to build it, you can build the documentation separately from compiling Topographica itself. If PHP4, m4, bibtex, convert, and fig2dev are installed on your system (as in most Linux distributions), just change to the doc subdirectory of the topographica directory and type "make default reference-manual". (This step is only necessary when building from Git; released versions include the documentation already built.)
 
 Once the documentation has been built, load doc/index.html into your web browser.  If there are any problems generating or reading the local copy, you can instead use the web-based documentation at [topographica.org](http://topographica.org).  (The doc/ directory is just a copy of the website, although the web site will not necessarily match this particular copy of Topographica.)
 
 Alternatively, for each <file>.html you can simply read the corresponding source file <file>_text.php in a text editor.
 
-## BUILDING TOPOGRAPHICA
+## BUILDING TOPOGRAPHICA (OPTIONAL)
 
-The topographica directory includes the files necessary to build Topographica from source code on most platforms.  All non-standard external libraries are fetched automatically and for most platforms are built from source.  This approach makes the initial compilation time longer and the simulator directory larger, but it minimizes the changes necessary for specific platforms and operating system versions.
+As long as all the dependencies have been installed as described above, no separate build step is needed -- all core Topographica files are pure Python, and any optimized C files will be compiled on the fly as needed by Topographica.
 
-For specific instructions, see the "Build all Topographica's dependencies" and "Building Topographica" sections in doc/Developer_Manual/installation.html.
+Alternatively, the dependencies can all be built from source, by changing to the "external" directory and typing ```make default```.  All non-standard external libraries will be fetched automatically and for most platforms will be built from source.  This approach makes the initial compilation time longer and the simulator directory larger, but it minimizes the changes necessary for specific platforms and operating system versions.  For specific instructions, see the "Build all Topographica's dependencies" and "Building Topographica" sections in doc/Developer_Manual/installation.html.
 
 
-## USING TOPOGRAPHICA
+## RUNNING TOPOGRAPHICA
 
-See doc/Tutorials/index.html for examples of getting started with Topographica, and doc/index.html for all of the documentation.  You can also get online help from the Topographica command line using help(), or from the shell command line using "./bin/pydoc some-text".
+Once installed as described above, Topographica can be launched by running the "topographica" script in the main directory.  See doc/Tutorials/index.html for examples of getting started with Topographica, and doc/index.html for all of the documentation.  You can also get online help from the Topographica command line using help(), or from the shell command line using "./bin/pydoc some-text".
 
