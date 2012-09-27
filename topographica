@@ -1,0 +1,20 @@
+#!/usr/bin/python
+# Startup script for Topographica
+
+import os
+import sys
+
+(basepath, _) = os.path.split(os.path.abspath(__file__))
+sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
+sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
+sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
+sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
+
+import topo
+topo.release='0.9.7'
+topo.version='12130'
+
+# Process the command-line arguments
+from sys import argv
+from topo.misc.commandline import process_argv
+process_argv(argv[1:])
