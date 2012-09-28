@@ -30,7 +30,7 @@ can install it using "easy_install pip" or the equivalent for your package manag
 ```pip install numpy PIL```, but other highly recommended packages include scipy, ipython, and matplotlib, which can be installed in the same way.
 
 
-## BUILDING DOCUMENTATION
+## BUILDING DOCUMENTATION (OPTIONAL)
 
 To read more about Topographica before trying to build it, you can build the documentation separately from compiling Topographica itself. If PHP4, m4, bibtex, convert, and fig2dev are installed on your system (as in most Linux distributions), just change to the doc subdirectory of the topographica directory and type "make default reference-manual". (This step is only necessary when building from Git; released versions include the documentation already built.)
 
