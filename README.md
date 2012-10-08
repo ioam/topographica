@@ -47,7 +47,7 @@ Alternatively, the dependencies can all be built from source, by changing to the
 If you use this Makefile, you will need to append the absolute path of ```./topographica/bin/python``` to your ```PATH```environment variable in order to make use of the packages you have built. 
 
 ```bash
-export PATH=<PATH TO ./topographica/bin/python>:$PATH
+export PATH=<PATH TO ./topographica/bin/>:$PATH
 ```
 
 ## RUNNING TOPOGRAPHICA
