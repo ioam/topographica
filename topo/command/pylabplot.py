@@ -578,6 +578,9 @@ class tuning_curve(PylabPlotCommand):
     unit = param.String(default="",doc="""
         String to use in labels to specify the units in which curves are plotted.""")
 
+    legend=param.Boolean(default=True, doc="""
+        Whether or not to include a legend in the plot.""")
+
     __abstract = True
 
 
@@ -636,7 +639,7 @@ class tuning_curve(PylabPlotCommand):
                 self.first_curve=False
                  
             if isint: pylab.ion()
-            pylab.legend(loc=2)
+            if p.legend: pylab.legend(loc=2)
             self._generate_figure(p)
 
 
