@@ -1152,6 +1152,31 @@ class Simulation(param.Parameterized,OptionalSingleton):
         for obj in self.objects(): yield obj
 
 
+    def __dir__(self):
+        """
+        Extend dir() to include simulation objects as well.  Useful
+        for software that examines the list of possible objects, such
+        as tab completion in IPython.
+        """
+        default_dir = dir(type(self)) + list(self.__dict__)
+        return sorted(set(default_dir + self.objects().keys()))
+
+
+    def __getattr__(self, name):
+        """
+        Provide a simpler attribute-like syntax for accessing objects
+        within a Simulation (e.g. sim.obj1, for an EventProcessor
+        "obj1" in sim).
+        """
+        if name=='_event_processors':
+            raise AttributeError
+
+        try:
+            return self.objects()[name]
+        except:
+            raise AttributeError
+
+
     def time(self):
         """
         Return the current simulation time.
