@@ -492,7 +492,7 @@ start a new run of Topographica:
   </code></blockquote>
 <p></p>
 
-From the Simulation menu, select Run Script. Then from the <code>examples</code> directory, open <code>lissom_oo_or.ty</code>.
+From the Simulation menu, select Run Script. Then from the <code>models</code> directory, open <code>lissom_oo_or.ty</code>.
 <p></p></li><li>Next, open an <span class='w_title'>Activity</span> window 
 and make sure that it has <span class='t_item'>Auto-refresh</span> enabled.  Unless your machine is 
 very slow, also enable <span class='t_item'>Auto-refresh</span> in a
