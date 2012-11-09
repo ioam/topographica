@@ -1,31 +1,59 @@
-This reference manual contains detailed documentation of each
+<P>This reference manual contains detailed documentation of each
 component making up Topographica, assuming that the user is already
-familiar with basic Topographica usage.  See the <A
+familiar with basic Topographica usage.  (See the <A
 HREF="../User_Manual/index.html">User Manual</A> and <A
-HREF="../Tutorials/index.html">Tutorials</A> for such an introduction.
-Note that the documentation of these components is gradually being
-improved, and not every component is properly documented yet.
-Moreover, the documentation is often much more verbose than necessary,
-because many little-used yet often duplicated methods are included for
-each class.  Still, the reference for a given component does
-provide a comprehensive listing of all attributes and methods,
-inherited or otherwise, which is difficult to obtain from the
-source code.
+HREF="../Tutorials/index.html">Tutorials</A> for such an introduction.)
+The reference manual is generated directly from documentation and
+declarations in the source code, and is often much more verbose than
+necessary, because many little-used yet often-duplicated methods are
+listed for each class.  Still, the reference for a given component
+does provide a comprehensive listing of all attributes and methods,
+inherited or otherwise, which is difficult to obtain from the source
+code directly and is not covered by the User Manual or Tutorials.
+
+<P>Topographica's components can be categorized into subprojects
+(available separately), core packages (required for Topographica),
+library packages (useful families of components not required for
+Topographica itself), and other
+<a href="../Downloads/dependencies.html">external dependencies</a>
+(documented separately).  Everything but the external dependencies is
+documented at the <A href="hierarchy.html"><strong>main reference manual
+page</strong></A>, but the different categories of objects are broken
+down here in a way that's easier to follow.
 
 
-<H2><A NAME="core">Core packages</A></H2>
 
-<P>Topographica is designed as a collection of packages from which
-elements can be selected to model specific neural systems.  For more
-information, see the individual subpackages of the <A
-href="topo.html"><strong>topo</strong></A> package.  The most 
-essential of these are:
+<H2><A NAME="core">Subprojects</A></H2>
+
+<P><DL COMPACT>
+<P><DT><A href="param-module.html"><strong>param</strong></A></DT>
+<DD>Support for objects with user-controllable attributes</DD>
+<P><DT><A href="paramtk-module.html"><strong>paramtk</strong></A></DT>
+<DD>Optional Tk GUI support for param</DD>
+<P><DT><A href="numbergen-module.html"><strong>numbergen</strong></A></DT>
+<DD>Support for generating streams of scalars, e.g. random
+  distributions; currently available through the imagen module (below)</DD>
+<P><DT><A href="imagen-module.html"><strong>imagen</strong></A></DT>
+<DD>Support for generating 1D, and 2D patterns, and for defining
+  mappings between continuous 2D space and finite matrices</DD>
+</dl>
+
+The param, paramtk, numbergen, and imagen modules are each developed
+and maintained separately from Topographica, because they are
+general-purpose packages that can be useful for a wide variety of
+Python programs.  However, they are documented together with
+Topographica because they were developed alongside Topographica and
+are used extensively within Topographica.
+
+
+<H2><A NAME="core">Core Topographica packages</A></H2>
+
+<P>The Topographica simulator itself is implemented in a set of
+interrelated packages:
 
 <P><DL COMPACT>
 <P><DT><A href="topo.base-module.html"><strong>base</strong></A></DT>
 <DD>Core Topographica-specific functions and classes</DD>
-<P><DT><A href="param-module.html"><strong>param</strong></A></DT>
-<DD>Support for objects with user-controllable attributes</DD>
 <P><DT><A href="topo.plotting-module.html"><strong>plotting</strong></A></DT>
 <DD>Visualization functions and classes</DD>
 <P><DT><A href="topo.analysis-module.html"><strong>analysis</strong></A></DT>
@@ -42,23 +70,22 @@ Topographica classes, implementing basic functionality such as Sheets
 Sheets), ConnectionFields (spatially localized groups of connections
 to one unit), and the event-driven Simulation.  It relies heavily on
 the generic support for Parameters (user-controllable attributes) from
-the <strong>param</strong> directory.  Together these files are
-independent of the rest of the files in topo/, and act as the primary
-programming interface on which Topographica is built.  The rest of the
-directories add components used in specific models, or add graphical
-interfaces.
+the <strong>param</strong> subproject.  Together the files in
+<tt>base</tt> are independent of the rest of the files in
+<tt>topo/</tt>, and act as the primary programming interface on which
+Topographica is built.  The rest of the directories add components
+used in specific models, or add graphical interfaces.
+
+
 
 <H2><A NAME="library">Library</A></H2>
 
-<P>The Topographica primitives library consists of an extensible
-family of classes that can be used with the above functions and
-classes:
+<P>Beyond the basic simulator implemented in the core packages,
+Topographica provides an extensive and extensible library of 
+classes that can be used to implement models of various neural
+systems: 
 
 <P><DL COMPACT>
-<P><DT><A href="topo.pattern-module.html"><strong>pattern</strong></A></DT>
-<DD>PatternGenerator classes: 2D input or weight patterns</DD>
-<P><DT><A href="topo.numbergen-module.html"><strong>numbergen</strong></A></DT>
-<DD>NumberGenerator classes: scalars drawn from some distribution</DD>
 <P><DT><A href="topo.sheet-module.html"><strong>sheet</strong></A></DT>
 <DD>Sheet classes: 2D arrays of processing units</DD>
 <P><DT><A href="topo.projection-module.html"><strong>projection</strong></A></DT>
@@ -79,18 +106,17 @@ classes:
 
 <P>All of the library components are optional, in the sense that they
 can be deleted or ignored or replaced with custom versions without
-affecting the code in any of the main packages.  (Of course, any
+affecting the code in any of the core packages.  (Of course, any
 specific model that depends on the component would not be able to
-function without it.)
+function without it!)
 
-<P>Each of the library directories can be extended with new classes
-of the appropriate type, just by adding a new .py file to that
-directory.  E.g. a file of new PatternGenerator classes can be copied
-into pattern/, and will then show up in the GUI menus as potential
-input patterns.  The GUI will also show any class derived from those
-in the library directories, even if it is defined in your own files,
-as long as that file has been run or imported before the GUI window 
-is opened.
+<P>Each of the library directories can be extended with new classes by
+simply defining them in your own files, and then making sure that your
+file has been run or imported before you start the GUI or use the new
+class in your .ty file.  I.e., user-defined classes of these types
+have the same status as those shipped with Topographica -- just make
+sure they have been defined, and Topographica will find them and use
+them just like its own classes.
 
 <P>Many of the components come in multiple varieties, to be used at
 different levels in a model.  For instance, there are learning
@@ -106,272 +132,7 @@ same to each unit individually.
 written in C for speed.  The fastest, but least flexible, components
 will be high-level components written in C, such as CFPLF_Hebbian_opt.
 
-
-<!-- JABALERT! This should probably move to its own page. -->
-<H2>Required external Packages</H2>
-
-<P>Topographica makes extensive use of the following external
-packages that must be installed to use Topographica:
-
-<!-- Should we make these point to the local copy instead? -->
-<P><DL COMPACT>
-
-<P><DT><A href="http://python.org/doc/">Python</A></DT>
-<DD>Topographica command and scripting language (essential!).
-Topographica is built on an unmodified copy of Python, so anything
-that Python can do is also valid for Topographica. For a good basic
-introduction, check out
-the <A HREF="http://docs.python.org/tut/tut.html">Python
-tutorial</A>. Those already familiar with programming might find
-<A href="http://wiki.python.org/moin/BeginnersGuide/Programmers">Python
-for Programmers</A>
-or <A href="http://python.net/~goodger/projects/pycon/2007/idiomatic/handout.html">Idiomatic
-Python</A> useful.
-<BR>
-
-</DD>
-
-<P><DT><A href="http://numpy.scipy.org/">NumPy</A></DT>
-<DD>Topographica makes heavy use of NumPy arrays and math functions;
-these provide high-level operations for dealing with matrix data.  The
-interface and options
-are <A href="http://www.scipy.org/NumPy_for_Matlab_Users">similar to
-Matlab</A> and other high-level array languages.  These operations are
-generally much higher performance than explicitly manipulating each
-matrix element, as well as being simpler, and so they should be used
-whenever possible. See
-the <A href="http://www.scipy.org/Documentation">NumPy documentation
-list</A> (especially the Guide to Numpy, NumPy Example List, and NumPy
-Functions by Category) to learn about the full range of available
-functions.
-</DD>
-
-<P><DT><A href="http://www.pythonware.com/products/pil/">PIL</A></DT>
-<DD>Topographica uses the Python Imaging Library for reading and
-writing bitmap images of various types.  PIL also provides a variety
-of <A HREF="http://www.pythonware.com/library/pil/handbook/index.htm">image
-processing and graphics routines</A>, which are available for use in
-Topographica components and scripts.</DD>
-</DL>
-
-<P>Installation of these packages is covered on
-the <a href="../Downloads/index.html">Downloads</a> page. 
-
-<H2>Typical external Packages</H2>
-
-Most Topographica users will also want these additional packages:
-
-<P><DL COMPACT>
-
-<P><DT><A href="http://matplotlib.sourceforge.net/">MatPlotLib</A></DT>
-<DD>Matplotlib is used for generating 1D (line) and 2D (plane) plots,
-such as topographic grid plots.  It
-provides <A href="http://matplotlib.sourceforge.net/matplotlib.pylab.html">PyLab</A>,
-a very general Matlab-like interface for creating plots of any
-quantities one might wish to visualize, including any array or vector
-in the program.
-</DD>
-
-<P><DT><A href="http://ipython.scipy.org/">IPython</A></DT>
-<DD>IPython provides Topographica with an enhanced Python shell,
-allowing efficient interactive work. The 
-<A href="http://ipython.scipy.org/doc/manual/html/interactive/tutorial.html">
-IPython tutorial</A> explains the most immediately useful features;
-see
-<A href="http://ipython.scipy.org/moin/Documentation">IPython's
-documentation</A> for more detailed information.
-</DD>
-
-<P><DT><A href="http://www.scipy.org/Weave">Weave</A></DT>
-<DD>Topographica uses weave to allow snippets of C or C++ code to be
-included within Python functions, usually for a specific speed optimization.
-This functionality is available for any user-defined library function, 
-for cases when speed is crucial.</DD>
-
-<P><DT><A href="http://code.google.com/p/gmpy/">gmpy</A></DT>
-<DD>A C-coded Python extension module that wraps the GMP library to
-provide Python with fast multiprecision arithmetic. Topographica uses
-gmpy's rational type as its default simulation time. Since gmpy
-requires GMP to be built, Topographica will fall back to a slower,
-purely Python implementation of fixed-point numbers (<A
-HREF="http://fixedpoint.sourceforge.net/">fixedpoint</A>).
-
-</DL>
-
-<P>Again, installation of these packages is covered on
-the <a href="../Downloads/index.html">Downloads</a> page.
- 
-<H3>Optional External Packages</H3>
-
-<P>A number of other packages are also useful with Topographica, but
-are not necessarily required.  Packages listed below are therefore not
-part of the default Topographica installation, but many are in use by
-Topographica users and/or developers.
-
-<P>In most cases, these packages are included in Python distributions
-such
-as <a href="http://enthought.com/products/epd.php">EPD</a>/<a href="http://pythonxy.com">Python(x,y)</a>,
-or are available via package managers such as
-apt-get/MacPorts. Alternatively, the packages are available for
-easy_install/pip install/standard Python installation
-via <a href="http://pypi.python.org/pypi">PyPI</a>. We also include
-many of the packages in the fat distribution of Topographica.  Note
-that, however you choose to install any of these packages, if your
-system has more than one copy Python <em>you must install the package
-using the same copy of Python that you are using for
-Topographica</em>.
-
-<P>If you encounter problems using these packages, feel free
-to <a href="http://sourceforge.net/projects/topographica/forums/forum/178312">ask
-the Topographica community for help</a>.
-
-<P><DL COMPACT>
-
-<P><DT><A href="http://www.scipy.org/">SciPy</A></DT>
-<DD>
-SciPy includes many, many functions useful in scientific research,
-such as statistics, linear algebra, integration and differential
-equation solvers, etc. 
-<!--
-SciPy is included in many Python distributions
-(e.g. <a href="http://enthought.com/products/epd.php">EPD</a>), and is
-usually available via package managers (e.g. "sudo apt-get install
-python-scipy"). If using the fat distribution of Topographica, "make
--C external scipy" will build SciPy (but note that building SciPy is
-not always straightforward).
--->
-</DD>
-
-<!--CEBALERT: I need to update mlabwrap/check the bug I had on jupiter-->
-<P><DT><A name="mlabwrap" href="http://mlabwrap.sourceforge.net/">mlabwrap</A></DT>
-<DD>mlabwrap is a high-level Python-to-Matlab bridge, allowing Matlab to look like
-a normal Python library:
-<PRE>
-from mlabwrap import mlab  # start a Matlab session
-mlab.plot([1,2,3],'-o')
-</PRE>
-
-mlabwrap is transitioning to SciKits (see above), but installation can
-be tricky so we describe it further here. First, check you can run
-<code>matlab -nodesktop -nosplash</code> successfully, then build from 
-source (e.g. from Topographica's fat distribution with
-<code>make -C external mlabwrap</code>, or download and build the
-source yourself).  If the matlab libraries are not in
-your <code>LD_LIBRARY_PATH</code>, there will be a note during the
-build telling you to add the libraries to your path. For example:
-<pre>
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/matlab-7.5/bin/glnx86
-</pre>
-You can either add that permanently to your path, or add it each time
-before using mlabwrap.
-</DD>
-
-<!--CEBALERT: now a scikit, and called audiolab:
-http://scikits.appspot.com/audiolab? What version did Bilal use?-->
-<P><DT><A href="http://www.ar.media.kyoto-u.ac.jp/members/david/softwares/pyaudiolab/index.html">pyaudiolab</A></DT>
-<DD>
-pyaudiolab provides an easy way to read from and write to sound files
-(it wraps
-<A href="http://www.mega-nerd.com/libsndfile/">libsndfile</A>).  In
-the fat distribtion, building should be simple: <code>make -C external
-pyaudiolab</code>.
-</DD>
-
-<P><DT><a href="http://scikits-image.org/">scikits-image</a></DT>
-<DD>
-A collection of algorithms for image processing.
-</DD>
-
-<!--
-<P><DT><A HREF="http://gnuplot-py.sourceforge.net">gnuplotpy</A></DT>
-<DD>
-You can use the external <code>gnuplot</code> command to generate plots on
-some platforms (at least UNIX, and also probably Mac OS X).  To build
-it on Linux or Mac, first install Numeric (which you can download <A HREF="http://sourceforge.net/project/showfiles.php?group_id=1369&package_id=1351">here</A>),
-and then do <code>make -C external gnuplotpy</code>.  At that point 
-you can e.g. use <code>matrixplot3d_gnuplot()</code> in place of 
-<A href="../User_Manual/commandline.html#gnuplotpy"><code>matrixplot3d()</code></A>
-or <code>matrixplot()</code>, or modify
-  <code>matrixplot3d_gnuplot()</code> to create any other gnuplot visualization.
-</DD>
-  Currently: untested on OSX, not present on Windows
--->
-
-<P><DT><A HREF="http://playerstage.sf.net">Player/Stage/Gazebo</A></DT>
-<DD>
-The Player/Stage/Gazebo project provides interfaces for a large
-variety of external hardware and simulation software, such as cameras,
-digitizers, and robots. The Gazebo and Stage simulators that support
-the Player interface can also be used, as described on the Player
-site. Note that a connection to Player is provided in
-topo/misc/robotics.py (last tested with player-2.0.4.tar.bz2 from
-playerstage.sf.net).
-<!--
-To install it, just download
-player-2.0.4.tar.bz2 from , put it in the externals/
-subdirectory, and do <code>make -C external player</code>.  
--->
-</DD>
-
-<P><DT><A HREF="http://pypi.python.org/pypi/processing">Processing</A></DT>
-<DD>
-Because of the "global interpreter lock" it is not possible to do true
-multiprocessing in Python using the language's built-in threads.
-The <i>processing</i> module provides support for multiprocessing
-using an API similar to that of Python's <i>threading</i> module.
-(Although, unlike threads, processes don't share memory.)  The module
-also provides a number of other useful features including process-safe
-queues, worker pools, and factories ("managers") that allow the
-creation of python objects in other processes that communicate through
-proxies. 
-</DD>
-
-<!--CEBALERT: need to link to Cython tutorial when that's finished.-->
-<P><DT><A HREF="http://cython.org">Cython</A></DT>
-<DD>
-Cython is a language that is very similar to Python, but supports
-calling C functions and declaring C types, and will produce and
-compile C code. Therefore, the performance benefit of C is available
-from a much simpler language. Because Cython can compile almost any
-Python code to C, one can start with a component written entirely in
-Python and then optimize it step by step (by adding types, for
-example). See the Cython documentation for more information.  
-</DD>
-<!--To
-install Cython for Topographica, just enter <code>make -C external
-cython</code> from your Topographica directory.-->
-
-<!--CEBENHANCEMENT: I'll add mpi stuff and opencv-->
-
-<!--CEBENHANCEMENT: mention things used in projects (e.g. blender)?-->
-
-</DL>
-
-<P>Topographica runs on an unmodified version of the Python language,
-and so it can be used with any Python package that you install
-yourself. A good list of potentially useful software is located at 
-<A href="http://www.scipy.org/Topical_Software">SciPy.org</A>.  Some
-packages of note:
-
-<P><DL COMPACT>
-
-<P><DT><A href="http://scikits.appspot.com/scikits">SciKits</A></DT>
-<DD>SciKits provide many useful extensions to SciPy, e.g. for machine
-learning and numerical optimization.
-</DD>
-
-<P><DT><A href="http://rpy.sourceforge.net/">RPy</A></DT>
-<DD>The language R (a free implementation of the S statistical
-language) has a nice interface to Python that allows any R
-function to be called from Python.  Nearly any statistical
-function you might ever need is in R.
-</DD>
-
-<!-- theano -->
-
-</DL>
-
-<P>As above, note that if your system has more than one copy Python,
-you must install the package using the same copy of Python that you
-are using for Topographica.
-
+<P>Apart from the Topographica-specific modules described above,
+Topographica also uses many
+<a href="../Downloads/dependencies.html">external libraries</a>, each
+documented separately.
