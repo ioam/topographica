@@ -173,6 +173,27 @@ class EventProcessor(param.Parameterized):
         self.in_connections.append(conn)
 
 
+    def __dir__(self):
+        """
+        Extend dir() to include in_connections of an EventProcessor.
+        Useful for software that examines the list of possible
+        in_connections, such as tab completion in IPython.
+        """
+        default_dir = dir(type(self)) + list(self.__dict__)
+        return sorted(set(default_dir + [conn.name for conn in self.in_connections]))
+
+
+    def __getattr__(self, name):
+        """
+        Provide a simpler attribute-like syntax for accessing the
+        in_connections of an EventProcessor (e.g. obj.conn, for
+        in_connection "conn" of EventProcessor obj).
+        """
+        for conn in self.in_connections:
+            if conn.name == name: return conn
+        raise AttributeError
+
+
     def start(self):
         """        
         Called by the simulation when the EventProcessor is added to

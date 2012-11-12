@@ -63,7 +63,7 @@ p.add(
 
 
 if p.coverage:
-    coverage_cmd = "bin/coverage run --rcfile=doc/buildbot/coveragerc -a -p"
+    coverage_cmd = "coverage run --rcfile=doc/buildbot/coveragerc -a -p"
 else:
     coverage_cmd = ""
 

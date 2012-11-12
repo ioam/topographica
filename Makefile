@@ -213,8 +213,8 @@ clean-coverage-html:
 	${RM} -r ~/Documents/Topographica/tests/coverage_html
 
 coverage-html:
-	bin/coverage combine 
-	bin/coverage html --rcfile=doc/buildbot/coveragerc -d ~/Documents/Topographica/tests/coverage_html
+	coverage combine 
+	coverage html --rcfile=doc/buildbot/coveragerc -d ~/Documents/Topographica/tests/coverage_html
 #############################################################################
 
 
