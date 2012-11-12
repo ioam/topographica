@@ -5,11 +5,6 @@
 
 <P>
 <TABLE WIDTH="100%"><TR>
-  <td align="left">
- 	<font size="-1">Hosted by:</font>
-	<A target="_top" href="http://sourceforge.net"><IMG src="http://sourceforge.net/sflogo.php?group_id=53602&amp;type=5"
-     	width="105" height="31" border="0" alt="SourceForge Logo" align="middle"></A>
-  </td>
   <TD ALIGN="LEFT"><SMALL>
   <I><a target="_top" href="http://homepages.inf.ed.ac.uk/jbednar">James
       A. Bednar</a>

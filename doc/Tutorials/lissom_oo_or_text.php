@@ -2,9 +2,9 @@
 
 <p>
 This tutorial shows how to use the
-<a href="http://topographica.org/">Topographica</a> software package to explore a
+<a target="_top" href="http://topographica.org/">Topographica</a> software package to explore a
 simple orientation map simulation using test patterns and weight
-plots.  This particular example uses a <a
+plots.  This particular example uses a <a target="_top" 
 href="http://homepages.inf.ed.ac.uk/jbednar/research.html">LISSOM model</a>
 cortex.   Although we focus on one model in this tutorial,
 Topographica provides support for many other models and is easily
@@ -13,10 +13,10 @@ extensible for models not yet supported.
 </p>
 
 <p>This tutorial assumes that you have already followed the
-instructions for <a href="../Downloads/index.html">obtaining and
+instructions for <a target="_top" href="../Downloads/index.html">obtaining and
 installing</a> Topographica. Also, you will need to generate a saved
 orientation map network (a .typ file), which can be done from a
-Unix or Mac  terminal or Windows <A HREF="../Downloads/win32notes.html">command
+Unix or Mac  terminal or Windows <A target="_top" HREF="../Downloads/win32notes.html">command
 prompt</A> by running
 <!-- JABALERT: Should simplify this command to look like:
 topographica -a -c "generate_example('lissom_oo_or')" -->
@@ -112,9 +112,9 @@ turn on <span class='t_item'>Strength only</span>; it is usually off by default.
 <P>As you move your mouse over the plots, information about the
 location of the mouse cursor is displayed in the status bar at the
 bottom of the window. For these plots, you can see the
-<a href="../User_Manual/space.html#matrix-coords">matrix
+<a target="_top" href="../User_Manual/space.html#matrix-coords">matrix
 coordinates</a> (labeled "Unit"),
-<a href="../User_Manual/space.html#sheet-coords">sheet coordinates</a>
+<a target="_top" href="../User_Manual/space.html#sheet-coords">sheet coordinates</a>
 (labeled "Coord"), and the activity level of the unit currently under
 the pointer.
 
@@ -142,8 +142,8 @@ explained below.
 <li> To help understand the response patterns in V1, we can look at
 the weights to V1 neurons.  These weights were learned previously, 
 as a result of presenting 10000 pairs of oriented Gaussian patterns at random angles
-and positions.  To plot a single neuron, select <a
-name="ConnectionFields-plot"><span class='t_item'>Connection
+and positions.  To plot a single neuron, select 
+<a name="ConnectionFields-plot"><span class='t_item'>Connection
 Fields</span></a> from the <span class='t_item'>Plots</span>
 menu. This will plot the synaptic strengths of connections to the
 neuron in the center of the cortex (by default):
@@ -383,7 +383,7 @@ controls the ratio between width and height; will be scaled by the
 that this relatively simple model is very sensitive to the scale, and
 scales higher than about 1.2 will result in a broad,
 orientation-unselective response, while low scales will give no
-response.  More <a href="gcal.html">complex models</a> (and actual brains!)
+response.  More <a target="_top" href="gcal.html">complex models</a> (and actual brains!)
 are less sensitive to the scale or contrast.
 </dd><dt><span class='t_item'>offset</span></dt><dd> is added to every pixel
 </dd><dt><span class='t_item'>frequency</span>
@@ -424,7 +424,7 @@ have an extra "buffer" region around the outside so that no V1 neuron
 will have its CF cut off, and the result is that V1 sees only the
 central region of the image in the LGN, and the LGN sees only the
 central region of the retina.  
-(<a href="../User_Manual/space.html#sheet-coords">Sheet coordinates</a>
+(<a target="_top" href="../User_Manual/space.html#sheet-coords">Sheet coordinates</a>
 are normally turned off because they make the cortical plots smaller, but they can
 be very helpful for understanding how the sheets relate to each
 other.)  </p></li>
@@ -492,7 +492,7 @@ start a new run of Topographica:
   </code></blockquote>
 <p></p>
 
-From the Simulation menu, select Run Script. Then from the <code>examples</code> directory, open <code>lissom_oo_or.ty</code>.
+From the Simulation menu, select Run Script. Then from the <code>models</code> directory, open <code>lissom_oo_or.ty</code>.
 <p></p></li><li>Next, open an <span class='w_title'>Activity</span> window 
 and make sure that it has <span class='t_item'>Auto-refresh</span> enabled.  Unless your machine is 
 very slow, also enable <span class='t_item'>Auto-refresh</span> in a

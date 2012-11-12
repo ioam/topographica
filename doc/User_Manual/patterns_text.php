@@ -4,6 +4,10 @@
 two-dimensional patterns of various sorts.  These patterns can be used
 for generating training or testing inputs, generating initial or fixed
 weight patterns, neighborhood kernels, or any similar application.
+Pattern support is provided by the
+<A HREF="../Reference_Manual/imagen-module.html">ImaGen</A> package,
+which was developed alongside Topographica but is completely
+independent and usable for any simulator.
 
 <H2>Simple patterns</H2>
 

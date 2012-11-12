@@ -67,7 +67,7 @@ that links a sheet to itself, hover the mouse over the
 representation. If it is not obvious which name is linked with an
 item, right click on the representation and select Properties. The
 name is displayed at the top of the window. To view other properties
-of a component refer to section <a href="#parameters">The
+of a component refer to section <a target="_top" href="#parameters">The
 Parameters</A>, which describes the properties window.
 
 <p>In this image you can see the representations used in the model

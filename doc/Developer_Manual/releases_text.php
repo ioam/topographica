@@ -1,26 +1,28 @@
 <H1>Making Releases</H1>
 
-<P>The latest version of Topographica is always available by SVN, but
+<P>The latest version of Topographica is always available by Git, but
 we also make more stable versions available periodically.  To make
 such a release, the steps we generally follow are:
 
 <ol>
 <li><P>Ensure that no one besides yourself has any modified files checked
-  out in SVN; if they do, make sure all of it gets checked in or
+  out in Git; if they do, make sure all of it gets checked in or
   does not need to be included in the release, and ensure that none
   of it will be checked in until the release is complete.
 
 <li><P>Increment the RELEASE number in ./Makefile, and do "make
 new-version".
    
-<li><P>Update the documentation files, especially README.txt and
+<li><P>Update the documentation files, especially README.txt,
+  doc/News/index_text.php, doc/Home/news_text.php and
   doc/Downloads/index_text.php (check the download links will be
   correct).  The rest should be read through, making sure that the
-  auto-generated pages are working properly, and that those written by
+  auto-generated pages are working properly, that the citations in the
+  User Manual work, and that pages written by
   hand match the current version of the code.  In particular,
   doc/Reference_Manual/index_text.php needs to match the current
   version of the reference manual (don't forget to <code>make
-  reference-manual</code>).
+  reference-manual</code> and check the dot graphs).
 
 <li><P>Update the tutorials to match changes to the GUI, if necessary.
   A simple way to get updated versions of each image is to:
@@ -44,14 +46,14 @@ new-version".
   copy (so that any fixes to the old items are preserved).  Also
   summarize major changes in it for the release notes in News/.
 
-<li><P>Update the remaining work lists in
+<li><P>Update the issues trackers and the remaining work lists in
   Future_Work/index_text.php and Future_Work/current_text.php to
   reflect completed tasks and changes in priority.
 
-<li><P>Check any modified files into SVN.
+<li><P>Check any modified files into Git.
 
 <li><P>Are all the buildbot tests still passing? You might need to
-trigger new builds to check all platforms are ok. 
+ trigger new builds to check all platforms are ok. 
 
 <li><P>Save all open files from within any editor, and do a "make dist"
   to create a candidate distribution archive.  (To ensure that
@@ -74,7 +76,7 @@ trigger new builds to check all platforms are ok.
 include those present in release-->
 
 
-    <li><P>Compile the source on various platforms, ensuring that
+    <li><P>Try out the source on various platforms, ensuring that
       there are no errors.  Also perform a self-test on the various
       platforms ("make tests; make slow-tests").
 <!-- now done by buildbot, so probably no need to try on all platforms at this point -->
@@ -87,40 +89,38 @@ dist-setup.py-sdist</code>) and check its contents in the same way as
 above.
 
 <li><P>At this point, it is a good idea to test the packages. Buildbot
-does not yet check that the packages it generates (deb, rpm, exe,
-mpkg) work on all platforms. You should use clean virtual machines to
-test the process of installing and using the packages it has
-generated.
-   
-<li><P>When the package is ready for release, create an SVN branch:
-<code>make tag-release</code>. Notify the other
-developers that they may once again commit new code to the SVN
+does not yet check that the packages it generates work on all
+platforms. You should use clean virtual machines to test the process
+of installing and using the packages it has generated.
+
+<!-- JAB: is anything else necessary to make a release, e.g. git tag? -->
+<li><P>When the package is ready for release, make a commit stating
+the version number (e.g. 'git commit -m "Version 0.9.8"'). Notify the other
+developers that they may once again commit new code to the Git
 repository.
 
-<li><P>Switch your working copy to the release branch, e.g. <code>svn
-switch
-https://topographica.svn.sourceforge.net/svnroot/topographica/releases/0.9.7/topographica</code>
-(assuming you have only topographica/ and not also facespace/ checked
-out).
-
 <li><P>Now do <code>make dist</code> to generate a zip file, and then
-copy that to SourceForge using their admin interface.
+copy that to GitHub.
 
-<!--upload to pypi requires pypi account-->
-<li><P>Create tar.gz and exe, and upload them to pypi: <code>make
+<!--upload to pypi requires pypi account; needs updating for github? -->
+<li><P>Create tar.gz and upload them to pypi: <code>make
 dist-setup.py; make dist-pypi-upload</code>.
 
 <!--upload requires account on opensuse build service-->
+<!--    
 <li><P>Create rpm: <code>make dist-rpm</code>; upload spec file and
 tar.gz manually to opensuse build service.
+-->
 
 <!--CEBALERT: currently only as ceball@fiver.inf-->
+<!--    
 <li><P>Create .deb and upload to launchpad: <code>make DEBSTATUS= deb
 deb-backports deb-ppa</code>
 
-<li><P>Create mpkg and upload to SourceForge using their admin
+<li><P>Create mpkg and upload to GitHub using their admin
 interface: <code>make dist-setup.py-bdist_mpkg</code>. (This step must
 be done on a Mac.)
+-->
 
 <li><P>update the public web site. Change to the copy of Topographica
     you created for distribution so that no stray files from doc/ are

@@ -1,11 +1,13 @@
 <P>Topographica is under very active development, but there are always
-more features that we have not yet been able to implement.  These will
-be listed in our SourceForge
-<a href="https://sourceforge.net/tracker/?words=tracker_browse&sort=priority&sortdir=desc&group_id=53602&atid=470932&status=1&limit=100">Feature
-Request tracker</a>.  Feel free to add suggestions of your own to that
-list, or to <A HREF="../Developer_Manual/index.html#joining">
-tackle one of the problems on the list</A> if you need that
-feature for your work.  Other general, ongoing tasks include:
+more features that we have not yet been able to implement or bugs that
+we have not been able to address.  These will be listed in our GitHub
+<a target="_top" href="https://github.com/ioam/topographica/issues">Issues</a> list,
+or or in the issues for a specific
+<a target="_top" href="https://github.com/ioam">subproject</a> if appropriate.  Feel
+free to add suggestions of your own to those lists, or to
+<A HREF="../Developer_Manual/index.html#joining">tackle one of the
+existing problems listed</A> if you need that feature for your work.
+Other general, ongoing tasks include:
 
 <!--  
 <H2>Most urgent (Summer 2010):</H2>
@@ -159,22 +161,24 @@ classes and functions without corresponding tests.  Eventually, there
 should be tests for everything.
 
 <P><DT>Pycheck/pylint</DT><DD>
-It would be helpful to go through the output from the pycheck and
-pylint programs (included with Topographica), fixing any suspicious
-things, and disabling the remaining warnings.  That way, new code
-could be automatically checked with those programs and the warnings
-would be likely to be meaningful.
+Topographica code is automatically checked using pyflakes, and
+should but more stringent tests can be performed by the pycheck and
+pylint programs.  It would be very useful to fix any suspicious items
+reported by those programs, and to disable the remaining warnings.
+That way, new code could be automatically checked with those programs
+and the warnings would be likely to be meaningful.  (Right now,
+the real issues detected by those programs are buried in a sea of
+spurious warnings.)
 
 <P><DT>More non-visual modalities</DT><DD>
-Most of the specific support in Topographica is designed with visual
-areas in mind, but is written generally so that it applies to any
-topographically organized region.  We are implementing specific
-models of non-visual areas, providing input generation, models of
-subcortical processing, and appropriate visualizations.  For instance,
-there are now models of somatosensory areas, such as hand surfaces and
-rat whisker barrels, motor areas controlling eye movements, and auditory inputs. 
-Additional contributions from Topographica users with experience in
-these domains will be particularly helpful.
+Much of the neural-specific code in Topographica was designed with
+visual areas in mind, but it is written generally so that it applies
+  to any topographically organized region.  Examples are provided for
+somatosensory inputs (e.g. rodent whisker barrels), auditory inputs,
+and motor outputs (for controlling eye movements) that show how to
+work with those modalities, but additional contributions for other
+types of sensory inputs or motor outputs would be very welcome from
+Topographica users with experience in these domains.
 
 <P><DT>More library components</DT><DD>
 Topographica currently includes examples of each type of library

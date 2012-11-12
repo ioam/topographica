@@ -26,47 +26,35 @@ the United Kingdom, the United States, and Europe, most recently including:
       He continues to use Topographica in his postdoctoral work and
       has contributed a variety of related code.
 
-  <p><dt>Gautham Ganapathy, May - Dec 2011</dt>
-  <dd>Gautham completed his MSc at the University of Edinburgh,
-      including a project on realistic lateral connectivity in V1.
-    
-  <p><dt>Bilal Khan, 2009 - 2011 </dt>
-  <dd>Bilal developed audio file support and auditory system models
-      for Topographica, first as part of his undergraduate project and
-      then as part of his MSc project at the University of Edinburgh.
+  <p><dt>Wiktor Brodlo, 2012 - 2013</dt>
+  <dd>Wiktor is supervising the split of Topographica into independent
+      subprojects, as part of his undergraduate project. 
 
-  <p><dt>Konstantin Kudryavtsev, 2009 - 2011 </dt>
-  <dd>Konstantin implemented MPI support for Topographica as part of
-      his undergraduate and MSc theses at the University of Edinburgh.
-      
+  <p><dt>Boris Hristov, 2012 - 2013</dt>
+  <dd>Boris is building an improved test suite for Topographica, as
+      part of his undergraduate project. 
+
   <p><dt>Alessio Plebe, 2010 -</dt>
   <dd>Alessio teaches at the University of Messina, Italy,
       and contributes code for analyzing higher-order
       feature maps.
 
-  <p><dt>Aistis Stankevicius, 2010 -</dt>
-  <dd>Aistis completed his undergraduate degree at the University of
-      Edinburgh, and is now an MSc/PhD student in Edinburgh. He is working
-      on GP-GPU support, and has previously contributed Cython and code
-      coverage support.
-
-  <p><dt>Dobromir Stefanov, 2011 - 2012</dt>
-  <dd>As part of Dobromir's undergraduate project at the University of
-      Edinburgh, he performed major reorganization and cleanup of
-      Topographica's structure.
-
-    <p><dt>Jean-Luc Stevens, 2011 -</dt>
-  <dd>Jean-Luc received an MSc degree from the University of Edinburgh
-      (project: A temporal model of neural activity and VSD response
-      in the primary visual cortex) and is now a PhD student in
-      Edinburgh working on temporal processing in V1 using
-      Topographica models.
+  <p><dt>Keith Robertson, 2012 - 2013</dt>
+  <dd>Keith is expanding the Tk GUI support for Topographica, focusing
+      on the Model Editor, as part of his undergraduate project.
 
   <p><dt>Philipp J. F. Rudiger, 2011 -</dt>
   <dd>Philipp completed his MSc degree at the University of Edinburgh,
       working on RF measurement protocols for two-photon Calcium imaging
       in ferrets and is now pursuing his PhD on feedback, attention and
       contextual processing in V1 using Topographica models.
+
+  <p><dt>Jean-Luc Stevens, 2011 -</dt>
+  <dd>Jean-Luc received an MSc degree from the University of Edinburgh
+      (project: A temporal model of neural activity and VSD response
+      in the primary visual cortex) and is now a PhD student in
+      Edinburgh working on temporal processing in V1 using
+      Topographica models.
 </dl>
 
 <P><BR><BR>
@@ -116,6 +104,10 @@ Previous contributors include:
       (France), C&eacute;lia implemented real-time OpenCV web camera
       support.
 
+  <p><dt>Gautham Ganapathy, May - Dec 2011</dt>
+  <dd>Gautham completed his MSc at the University of Edinburgh,
+      including a project on realistic lateral connectivity in V1.
+    
   <p><dt>Kateryna Gerasymova, May - September 2008</dt>
   <dd>In a MSc-level project in collaboration with Humboldt University
       (Berlin), Kateryna implemented numerous separate and joint maps
@@ -127,6 +119,15 @@ Previous contributors include:
       University of Edinburgh, including a project of implementing the
       compute-intensive portions of Topographica on a GP-GPU.
 
+  <p><dt>Bilal Khan, 2009 - 2011</dt>
+  <dd>Bilal developed audio file support and auditory system models
+      for Topographica, first as part of his undergraduate project and
+      then as part of his MRes project at the University of Edinburgh.
+
+  <p><dt>Konstantin Kudryavtsev, 2009 - 2011 </dt>
+  <dd>Konstantin implemented MPI support for Topographica as part of
+      his undergraduate and MSc theses at the University of Edinburgh.
+      
   <p><dt>Veldri Kurniawan, Jan - Aug 2006</dt>
   <dd>Veldri completed his MSc degree at the
       University of Edinburgh, including a project of
@@ -191,6 +192,17 @@ Previous contributors include:
       responsible for making the first Topographica implementation of
       LISSOM match the previous C++ version, and for writing C code to
       optimize key Topographica functions.
+
+  <p><dt>Aistis Stankevicius, 2010 - 2011</dt>
+  <dd>Aistis completed his undergraduate degree at the University of
+      Edinburgh, and is now an MSc/PhD student in Edinburgh. He 
+      worked on GP-GPU support and contributed Cython and code
+      coverage support.
+
+  <p><dt>Dobromir Stefanov, 2011 - 2012</dt>
+  <dd>As part of Dobromir's undergraduate project at the University of
+      Edinburgh, he performed major reorganization and cleanup of
+      Topographica's structure.
 
   <p><dt>Stuart Wilson, 2007 - 2010</dt>
   <dd>Stuart completed his MSc degree at the

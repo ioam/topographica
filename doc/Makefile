@@ -16,7 +16,10 @@ M4BASE = ${wildcard */*_text.php.m4}
 PHPBASE = ${wildcard */*_text.php} ${subst .php.m4,.php,${M4BASE}}
 PHPHTML = ${subst _text.php,.html,${PHPBASE}}
 
+# Can also add --graph=callgraph to show who called what, but only for a specific simulation run
+# or --graph=all
 EPYDOC = bin/epydoc
+CALLEPYDOC = env PYTHONPATH=external/param:external/imagen:external/paramtk: ${EPYDOC} --dotpath=/usr/bin/dot --graph=classtree --inheritance=listed --docformat=ReStructuredText --show-sourcecode --html 
 
 # General rule based only on target filename and location
 
@@ -43,16 +46,27 @@ all: ${PHPHTML}
 # Extra dependency
 Home/index.html: Home/news_text.php
 
-# Can also add --graph=callgraph to show who called what, but only for a specific simulation run
-reference-manual: Reference_Manual/toc.html
-Reference_Manual/toc.html: ../topo/*.py ../topo/*/*.py ../param/*.py ../numbergen/*.py ../imagen/*.py Reference_Manual/index_text.php
-	-mv ../topo/tests ../topo-tests-tmp
-	cd .. ; ${EPYDOC} --graph=classtree --inheritance=listed --docformat=ReStructuredText --show-sourcecode --html -o doc/Reference_Manual --name=Topographica --url=http://topographica.org topo param
-	mv ../topo-tests-tmp ../topo/tests 
-# CEBALERT: shoud topo.html be topographica.html or maybe hierarchy.html?
-	mv Reference_Manual/index.html Reference_Manual/topo.html
+reference-manual: Param_Reference/index.html ParamTk_Reference/index.html Imagen_Reference/index.html Lancet_Reference/index.html Reference_Manual/toc.html
+
+Reference_Manual/toc.html: ../topo/*.py ../topo/*/*.py ../external/param/param/*.py ../external/paramtk/paramtk/*.py ../external/imagen/numbergen/*.py  ../external/imagen/imagen/*.py Reference_Manual/index_text.php
+	cd .. ; ${CALLEPYDOC} -o doc/Reference_Manual --exclude=topo.tests --name=IOAM --url=http://ioam.github.com topo external/param/param external/paramtk/paramtk external/imagen/numbergen external/imagen/imagen
+	mv Reference_Manual/index.html Reference_Manual/hierarchy.html
 	make Reference_Manual/index.html
-# 	--graph=all
+
+Param_Reference/index.html: ../external/param/param/*.py
+	cd .. ; ${CALLEPYDOC} -o doc/Param_Reference --name=Param --url=http://ioam.github.com/param external/param/param
+
+ParamTk_Reference/index.html: ../external/paramtk/paramtk/*.py
+	cd .. ; ${CALLEPYDOC} -o doc/ParamTk_Reference --name=ParamTk --url=http://ioam.github.com/paramtk external/paramtk/paramtk
+
+Imagen_Reference/index.html: ../external/imagen/numbergen/*.py  ../external/imagen/imagen/*.py
+	cd .. ; ${CALLEPYDOC} -o doc/ImaGen_Reference --name=ImaGen --url=http://ioam.github.com/imagen external/imagen/imagen
+
+Lancet_Reference/index.html: ../external/lancet/lancet/*.py
+	cd .. ; ${CALLEPYDOC} -o doc/Lancet_Reference --name=Lancet --url=http://github.com/ioam/lancet external/lancet/lancet
+
+
+
 
 imagedirs:
 	${MAKE} -C User_Manual/images/
@@ -68,6 +82,7 @@ clean_php:
 	${RM} ${PHPHTML}
 	${RM} .??*~ *~ */*~ */.??*~ reference-manual
 	${RM} Reference_Manual/*.html Reference_Manual/*.css Reference_Manual/*.png Reference_Manual/*.js
+	${RM} -r *_Reference/
 
 .PHONY: default all clean clean-php
 

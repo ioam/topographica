@@ -58,7 +58,7 @@ what they are actually simulating.
 <H2><A NAME='programming-tkgui'>Programming with tkgui</H2>
 
 <P>tkgui
-uses <a href="http://wiki.python.org/moin/TkInter">Tkinter</a> to draw
+uses <a target="_top" href="http://wiki.python.org/moin/TkInter">Tkinter</a> to draw
 the GUI components, but simplifies GUI implementation by handling
 linkage of Parameters with their representations in the GUI.
 
@@ -67,8 +67,8 @@ is required to keep track of variables and display components
 ('widgets') ).-->
 
 <P>The
-classes <a href="../Reference_Manual/param.tk.TkParameterized-class.html">TkParameterized</a>
-and <a href="../Reference_Manual/param.tk.ParametersFrame-class.html">ParametersFrame</a>
+classes <a target="_top" href="../Reference_Manual/param.tk.TkParameterized-class.html">TkParameterized</a>
+and <a target="_top" href="../Reference_Manual/param.tk.ParametersFrame-class.html">ParametersFrame</a>
 are the ones most often used for creating a new GUI representation of
 some Topographica component. Which to use depends on how much you wish
 to customize the display: a ParametersFrame displays all of a

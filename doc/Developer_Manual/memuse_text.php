@@ -225,7 +225,7 @@ Python and Topographica allocate memory in specific cases.  <?php
 fnref('topo.misc.asizeof','asizeof') ?> can be useful in this
 respect, but much more detailed information is available from
 an external program
-<a href="http://guppy-pe.sourceforge.net/#Heapy">Heapy</a>, which can
+<a target="_top" href="http://guppy-pe.sourceforge.net/#Heapy">Heapy</a>, which can
 be installed using:
 
 <pre>
@@ -321,13 +321,13 @@ taken by Slice objects, and thus the obvious place to begin
 optimization is on the Slice class.  Using this information, we can
 start examining Slice to determine how its memory usage can be
 reduced.  This process is similar to that for
-<a href="optimization.html">performance optimization</a>, but focusing
+<a target="_top" href="optimization.html">performance optimization</a>, but focusing
 on memory rather than speed.
 
-<P>Note that <a href="http://guppy-pe.sourceforge.net/heapy_Use.html">
+<P>Note that <a target="_top" href="http://guppy-pe.sourceforge.net/heapy_Use.html">
 documentation for Heapy</a> is sparse and difficult to follow; it may
 be easier to start with some
-<a href="http://www.pkgcore.org/trac/pkgcore/doc/dev-notes/heapy.rst">notes
+<a target="_top" href="http://www.pkgcore.org/trac/pkgcore/doc/dev-notes/heapy.rst">notes
 from another developer</a>.
 
 

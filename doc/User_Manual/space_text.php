@@ -5,7 +5,7 @@ that are independent of the level of detail used in any particular run
 of the simulation.  To achieve this, Topographica provides multiple
 spatial coordinate systems, called <i>Sheet</i> and <i>matrix</i>
 coordinates.  These coordinate systems are primarily described in the
-<a href="coords.html">ImaGen package</a>, which should be examined
+<a target="_top" href="coords.html">ImaGen package</a>, which should be examined
 before going further on this page.  Here we describe only the
 Topographica-specific aspects of the coordinate systems.
 
@@ -87,7 +87,7 @@ cannot be rendered properly on a torus.
 <H3><A NAME="coord-details">Technical details</A></H3>
 
 <P> In addition to the details discussed with the
-<a href="coords.html#coord-details">ImaGen package</a>, Topographica
+<a target="_top" href="coords.html#coord-details">ImaGen package</a>, Topographica
 Sheets have an additional complication for certain bounds and
 densities when using non-square sheets.  Consider the example from
 ImaGen, but instead with rectangular bounds given by

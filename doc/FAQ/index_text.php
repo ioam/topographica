@@ -19,9 +19,9 @@ HREF="../Forums/index.html">forums</A>, or by email). <!-- address?-->
 The main objects in the simulation can be accessed through the
 <code>topo.sim</code> attribute.  For instance, if you have a sheet
 named <code>'V1'</code>, it can be accessed as
-<code>topo.sim['V1']</code>.  From there the projections, weights,
+<code>topo.sim.V1</code>.  From there the projections, weights,
 etc. for that unit can be obtained.  See the
-<a href="../User_Manual/commandline.html">Command line</A> section of
+<a target="_top" href="../User_Manual/commandline.html">Command line</A> section of
 the user manual for more information, including how to plot such data
 manually.
 
@@ -39,30 +39,11 @@ Whenever possible, we provide legacy snapshot support that maps from
 the old definition into the new one, and so snapshots <em>should</em>
 continue to be loadable.  However, if you have trouble with a
 particular file, please file a bug report so that we can extend the
-legacy support to be able to load it.  In the long run we plan to set
-up an archival storage format, probably based on XML and/or HDF5, to
-work around these issues.
+legacy support to be able to load it.  We may eventually set up an XML
+or HDF5-based archival storage format, but this is difficult to
+achieve with the fast pace of Topographica development.
   
 
-<!--CEBALERT: this is out of date, isn't it? -->
-  
-
-<!----------------------------------------------------------------------------->
-<LI><B>Q:</B> <i>Topographica seems to build fine, but when I run the
-GUI or the tests, I get an "ImportError: No module named _tkagg".</i>
-
-<P><B>A:</B> As of 10/2007, if Topographica was built on a machine
-without a functioning Xwindows DISPLAY, e.g. via a remote login using
-ssh, the build process would complete but Matplotlib would have failed
-silently because it could not find the current display to extract some
-parameters.  As of 9/2008 (version 0.9.5), we can no longer reproduce
-this problem, and thus it appears to have been fixed by Matplotlib's
-maintainers.  However, if you do encounter something like this, you
-can try rebuilding Topographica while logged in rather than remotely.
-If that works, please let us know that we should continue to suggest
-that people avoid building in a remote session.
-
-  
 <!----------------------------------------------------------------------------->
 <LI><B>Q:</B> <i>What models or algorithms does Topographica support?</i>
 
@@ -86,15 +67,19 @@ SOM network like examples/som_retinotopy.ty is simply built from:
 <li>A specialized transfer function 
   (<?php classref('topo.transferfn.misc','KernelMax')?>) that picks a
   winning unit and activates the rest according to a user-specified
-  kernel function.
+  kernel function (also implemented as a
+  <?php classref('topo.base.patterngenerator','PatternGenerator')?>).
 </ol>
 
 <P>This approach makes it simple to change specific aspects of a model
-(e.g. the specific kernel function) without necessarily requiring any
+(e.g. to choose a different
+<?php classref('topo.base.patterngenerator','PatternGenerator')?> for
+the kernel function) without necessarily requiring any
 new code, as long as the new function has already been written for any
 previous model.  For this example, only the KernelMax function (about
 50 lines of Python code) was added specifically for supporting SOM;
-the other components are all used in a wide variety of other models.
+the other components were all already used in a wide variety of other
+models.
 <BR>
 
 
@@ -106,22 +91,21 @@ the other components are all used in a wide variety of other models.
 Topographica is continuously changing to support active research, so
 problems can occur. To be sure you have found a problem with
 Topographica itself, and to help us fix it quickly, please follow our
-guidelines for <a href="../Forums/problems.html">Reporting specific
+guidelines for <a target="_top" href="../Forums/problems.html">Reporting specific
 problems with Topographica</a>.
   
 <!----------------------------------------------------------------------------->
 
 
 <!----------------------------------------------------------------------------->
-<LI><B>Q:</B> <A NAME="easyinstall"></A><i>easy_install/pip failed while processing
-dependencies. What can I do now?</i>
+<LI><B>Q:</B> <i>pip failed while processing dependencies. What can I do now?</i>
 
 <P><B>A:</B> 
 
-easy_install and pip can sometimes encounter problems while processing
+pip can sometimes encounter problems while processing
 dependencies. In such cases, installation will stop at the failed
 dependency, so it is usually straightforward to identify and fix the
-problem. Below we list some possibilities for solving easy_install/pip
+problem. Below we list some possibilities for solving pip
 problems:
 
 <ul>
@@ -135,9 +119,13 @@ other recommended dependencies). Once these are installed, repeat the
 
 <li>Binaries of Topographica's required dependencies (NumPy and PIL)
 as well as optional dependencies (MatPlotLib, gmpy, SciPy) are
-available for many platforms. Once installed, repeat the
-<code>easy_install topographica</code> or <code>pip install
-topographica</code> command.</li>
+available for many platforms, using the native package manager for
+your platform (if available) or self-installing .exe files (for
+Windows). Once installed, repeat the <code>pip install
+topographica</code> command.  Note that it's not always obvious how to
+make sure that separate installations like this all use the same
+copy of Python as Topographica is using, but doing so is necessary for
+this approach to work.</li>  
 
 <li>If a binary is not available for your platform, you should check
 the dependency's installation instructions for your platform. Usually,

@@ -15,9 +15,10 @@ HREF="../Forums/problems.html">filing a bug report</A>.
 support (i.e. by passing <code>-l</code> to Topographica at startup).
 Usually, however, it is better simply to update the script, so that
 Topographica does not need to be used with legacy support (which is
-not as well tested as current code). As of 0.9.4, we provide a utility
+not as well tested as current code). For some versions, we provide a utility
 to update scripts to run with newer versions, though it is not
-guaranteed to convert every script properly.
+guaranteed to convert every script properly, and isn't available for
+all versions.
 
 
 <H3>Upgrading from 0.9.5 to 0.9.6</H3>

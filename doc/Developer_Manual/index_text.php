@@ -1,7 +1,7 @@
 <P>This manual gives guidelines for developers working on the source
 code for the Topographica simulator. Users will not usually need to
 refer to this material, unless they plan to submit significant blocks
-of code to the project (which is, of course, strongly <a href="#joining">encouraged</a>!).
+of code to the project (which is, of course, strongly <a target="_top" href="#joining">encouraged</a>!).
 
 <P>By default, all the text in this manual refers to program code
 written in the Python language. There are also some bits of C/C++ code
@@ -13,7 +13,7 @@ built copy of the documentation, or the online <A
 HREF="http://buildbot.topographica.org/doc/Developer_Manual/index.html">
 nightly documentation build</A>. The documentation at topographica.org
 applies to the previous release, so may be out of date with respect to
-the current version of Topographica in SVN.</em>
+the current version of Topographica in Git.</em>
 
 <P><DL COMPACT>
 
@@ -60,11 +60,12 @@ about how to set up tests</DD>
 interested in Topographica is welcome to join as a Topographica
 developer to get read/write access, so that your changes can become
 part of the main distribution.  Just sign up for a free account at <A
-HREF="http://sourceforge.net/"> SourceForge.net</A>, then email <A
+HREF="http://github.com/">GitHub.com</A>, then email <A
 HREF="mailto:&#106&#98&#101&#100&#110&#97&#114&#64&#105&#110&#102&#46&#101&#100&#46&#97&#99&#46&#117&#107?subject=Request%20to%20be%20a%20Topographica%20developer">Jim</a>
 your username and what you want to do, and he'll tell you how to
-proceed from there. Alternatively, you can start immediately by using
-any version control system that can interact with SVN. We ourselves <A
-HREF="git.html">use and support Git</A>, but many version
-control systems also interact with SVN. 
-</DD> </DL>
+proceed from there. Alternatively, you can start immediately by
+cloning Topographica, developing your feature, and 
+<A HREF="git.html#pullrequest">submitting it as a public pull request</A> only
+once it's done.
+</DD>
+</DL>

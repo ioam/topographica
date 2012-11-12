@@ -30,7 +30,7 @@ base Sheet class level, we can add a method there that then gets
 overridden in the subclass with the special purpose code.  That way
 all optimization will be local (and thus maintainable).  If it's not
 clear how to optimize something cleanly, first do it uncleanly to see
-if it will have any effect, but don't check it in to SVN.  If it looks
+if it will have any effect, but don't check it in to Git.  If it looks
 like the optimization is worthwhile, brainstorm with other team
 members to figure out a way to do it cleanly and check in the clean
 version instead.
@@ -53,8 +53,7 @@ possibly substantially.
 below, sometimes all you need is minor tweaks to Python code to get it
 to have reasonable performance.  Usually this involves avoiding
 unnecessary attribute lookup, as described in various collections of
-<a
-href="http://wiki.python.org/moin/PythonSpeed/PerformanceTips">Python
+<a target="_top" href="http://wiki.python.org/moin/PythonSpeed/PerformanceTips">Python
 performance tips</a>.
 
 <P>What is usually more important to ensure is that anything that can

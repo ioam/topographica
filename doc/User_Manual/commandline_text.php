@@ -552,6 +552,6 @@ to the end of it...-->
 This gives a ParametersFrame representing the Parameters
 of <code>topo.sim['V1']</code>, allowing values to be inspected and
 changed. (This is the same editing window as is available through
-the <a href="modeleditor.html#parameters">model editor</a>.)
+the <a target="_top" href="modeleditor.html#parameters">model editor</a>.)
 
 

@@ -12,7 +12,7 @@ them for use in any particular model.
 
 <P>In this section, we outline the basic hierarchies of object types
 used by Topographica.  All of these are available to the user when
-designing a model, but as the <a href="#implementation-levels">
+designing a model, but as the <a target="_top" href="#implementation-levels">
 next section</a> indicates, not all of them need to be used for any
 particular model, and anything not used can be ignored.  These lists
 are only representative of the object 
@@ -372,7 +372,7 @@ developer.
 <P>Topographica levels:
 
 <ol>
-<p><li>Python with C interface (ignoring <i>everything</i> in topo/ and param/): 
+<p><li>Python with C interface (ignoring <i>everything</i> in topo/): 
 <dl><dt>Supports:</dt><dd>Anything is possible, with no performance or 
 	programming limitations (since anything can be written
 	efficiently in C, and the rest can be written in Python).
@@ -383,7 +383,7 @@ developer.
 </dl>    
 <p><li>Everything in 1., plus event-driven simulator with parameterizable objects, debugging 
        output, etc. (using just simulation.py from topo/base/ in addition to Parameter 
-       support from param/):
+       support from the Param package):
 
 <dl><dt>Supports:</dt><dd>Running simulations of any physical system, with 
 	good semantics for object parameter specification with inheritance.

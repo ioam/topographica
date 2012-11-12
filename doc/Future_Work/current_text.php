@@ -4,10 +4,10 @@ within each section are also ordered approximately by priority.
 
 <DL COMPACT>
 <P>Most of our current tasks have been moved to
-sourceforge's <a href="http://sourceforge.net/tracker/?group_id=53602">trackers</a>;
+GitHub's issue trackers;
 those are our primary record of outstanding tasks, so please
 check there first. In particular, <em>new tasks should be submitted to
-a tracker rather than added to this list</em>.
+GitHub rather than added to this list</em>.
 
 <P><DT>Tasks to be addressed for the upcoming 1.0 release</DT><DD>
 What the developers are working on most actively right now.
@@ -205,8 +205,8 @@ We need a test with non-square input sheets, non-square LISSOM sheets,
 etc., with both types of non-squareness...and we also need to test
 whatever map measurement that we can (e.g. or maps).  Could also add
 coverage testing, e.g. using
-<a href="http://darcs.idyll.org/~t/projects/figleaf/doc/">figleaf</a>
-or <a href="http://nedbatchelder.com/code/modules/rees-coverage.html">coverage.py</a>.
+<a target="_top" href="http://darcs.idyll.org/~t/projects/figleaf/doc/">figleaf</a>
+or <a target="_top" href="http://nedbatchelder.com/code/modules/rees-coverage.html">coverage.py</a>.
 
 <H4>2007/02/26: consider an alternative debugger</H4>
 http://www.digitalpeers.com/pythondebugger/.

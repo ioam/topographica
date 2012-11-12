@@ -16,11 +16,11 @@ discussion.
 
 <P><DT><A HREF="http://lists.sourceforge.net/lists/listinfo/topographica-cvs">topographica-cvs</A></DT> 
 <DD>Mailing list announcing changes made to any Topographica file in
-the SVN repository.  Extremely high traffic (often several emails per
+the Git repository.  Very high traffic (sometimes several emails per
 day), and likely to be of interest only for active developers.</DD>
 </DL>
 
-There are also discussion forums (web boards) and item trackers available:
+There are also discussion forums (web boards) and issue trackers available:
 
 <DL>
 <P><DT><A HREF="http://sourceforge.net/forum/forum.php?forum_id=178312">Help</A></DT>
@@ -29,14 +29,11 @@ There are also discussion forums (web boards) and item trackers available:
 <P><DT><A HREF="http://sourceforge.net/forum/forum.php?forum_id=178311">Open Discussion</A></DT>
 <DD>Forum for discussion of any topic related to Topographica.</DD>
 
-<P><DT><A HREF="https://sourceforge.net/tracker/?words=tracker_browse&sort=priority&sortdir=desc&offset=0&group_id=53602&atid=470929&assignee=&status=1&category=&artgroup=&keyword=&submitter=&artifact_id=">Bug reports</A></DT>
-<DD>Please file bug reports using this interface rather than emailing
-  the developers directly.  For information on how to track down
-  problems and how to file effective bug reports, please see our guidelines for
+<P><DT><A HREF="https://github.com/ioam/topographica/issues?state=open">Issues</A></DT>
+<DD>Please file bug reports or feature requests using this interface
+  rather than emailing the developers directly.  For information on
+  how to track down problems and how to file effective bug reports,
+  please see our guidelines for
   <A HREF="problems.html">Reporting specific problems with Topographica</A>.
-
-<P><DT><A HREF="https://sourceforge.net/tracker/?words=tracker_browse&sort=priority&sortdir=desc&offset=0&group_id=53602&atid=470932&assignee=&status=1&category=&artgroup=&keyword=&submitter=&artifact_id=">Request for enhancement</A></DT>
-<DD>If you have ideas for features you would like to see, please enter them here.
-
 
 </DL>
