@@ -1,3 +1,7 @@
+<p><b>12 Nov 2012:</b>Topographica web site updated to reflect current
+  Git version; see the documentation distributed with each release if
+  you want the description of that version of the code.<br><br>
+
 <p><b>3 Oct 2012:</b>Topographica development moved from
   <a target="_top" href="http://sourceforge.net/projects/topographica">SourceForge
   SVN</a> to <a target="_top" href="http://github.com/ioam/topographica">
