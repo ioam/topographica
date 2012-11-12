@@ -249,9 +249,6 @@ new-version: FORCE
 
 TOPOROOT=https://topographica.svn.sourceforge.net/svnroot/topographica
 
-tag-release: 
-	svn copy ${TOPOROOT}/trunk ${TOPOROOT}/releases/${RELEASE} -m "Create release ${RELEASE}"
-
 # Update Topographica.org web site
 sf-web-site: reference-manual doc
 	rsync -v -arHz --rsh=ssh doc/. web.sf.net:/home/groups/t/to/topographica/htdocs/.
