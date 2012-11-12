@@ -1,5 +1,44 @@
-<p><b>30 Nov 2011:</b> New release in preparation.  Changes already available in <A target="_top"
-  href="../Downloads/cvs.html">SVN</A> include:
+<p><b>3 Oct 2012:</b>Topographica development moved from <a
+  href="http://sourceforge.net/projects/topographica">SourceForge
+  SVN</a> to <a href="http://github.com/ioam/topographica">
+  GitHub git</a>.
+
+  <P>SVN write access has now been disabled.  See the
+  <a href="https://git.wiki.kernel.org/index.php/GitSvnCrashCourse">Git
+  Crash Course</a> to translate your SVN commands to Git.  All
+  features since 0.9.7 are now available from
+  <a href="https://github.com/ioam/topographica">github</a>, and all
+  sf.net bugs and feature requests have been converted to GitHub issues.
+  The Param and ImaGen subprojects now accompany Topographica as git
+  submodules, allowing easy editing while leaving them as separate
+  projects.  Installation is now via either git (for developers) or
+  pip (for users); see 
+  <a href="https://github.com/ioam/topographica">github.com</a>.<BR><BR> 
+  
+<p><b>18 Jul 2012:</b> New subprojects at GitHub have been created for
+  elements of Topographica that are widely reusable in other projects:
+  <DL>
+  <P><DT><A href="http://ioam.github.com/param/">Param</A> and
+  <A href="http://ioam.github.com/paramtk/">ParamTk</A> </DT>
+  <DD>General-purpose support for full-featured Parameters, extending
+    Python attributes to have documentation, bounds, types, etc., with
+    optional Tk support.</DD>
+
+  <P><DT><A href="http://ioam.github.com/imagen/">ImaGen</A></DT>
+  <DD>General-purpose support for generating 0D (scalar), 1D (vector),
+    and 2D (image) patterns, starting from mathematical functions,
+    geometric shapes, random distributions, images, etc.</DD>
+  </DL>
+
+  <P>These subprojects contain code still used in Topographica, but
+  can now be downloaded and installed separately.  Both projects were
+  introduced at SciPy 2012 (Austin, TX); the 
+  <a href="http://www.youtube.com/watch?v=7_ELWwzFCi0">talk on
+  Param</a> is available online.<BR><BR>
+
+<p><b><a name="30-nov-2011">30 Nov 2011:</a></b> New features available, enough to constitute a
+  new release, but with release waiting on plans for changing hosting
+  sites. These changes are available in the SVN source code repository:
 
 <!-- TimeSeries - generic container for sequential data -->
 <!-- Legacy support can now be tied to particular releases/versions, so we can control what support is installed.-->
@@ -34,6 +73,11 @@
 <dd>
   <div class="i2">- --pdb calls debugger after every unhandled exception</div>
 </dd>
+<br>
+<dt>Example scripts:</dt>
+<dd>
+  <div class="i2">- ptztracker.ty: example of controlling a pan/tilt/zoom camera to track objects in real time</div>
+</dd>
 </font>
 </dl>
 </td>
@@ -62,11 +106,6 @@
   <?php classref('topo.pattern.opencvcamera','CameraImage')?> (OpenCV live camera import) pattern families
   </div>
   <div class="i2">- <?php classref('param','Array')?> parameter</div>
-</dd>
-<br>
-<dt>Example scripts:</dt>
-<dd>
-  <div class="i2">- ptztracker.ty: example of controlling a pan/tilt/zoom camera to track objects in real time</div>
 </dd>
 </font>
 </dl>
@@ -253,7 +292,7 @@
 <dt>Example scripts:</dt>
 <dd>
   <div class="i2">- example file for
-  <a href="../User_Manual/interfacing.html">interfacing to external simulators</a>
+  <a target="_top" href="../User_Manual/interfacing.html">interfacing to external simulators</a>
   (examples/perrinet_retina.ty)</div>
   <div class="i2">- removed outdated or in-progress examples</div>
   <div class="i2">- greatly simplified remaining example scripts</div>

@@ -94,20 +94,18 @@ scaling equations that underlie Sheet coordinates
   <dt><A TARGET="_top" HREF="http://www.nest-initiative.org">NEST</A></dt>
   <dd>NEST (formerly called BLISS) is a general-purpose simulator for
     large networks of neurons, but without an explicit focus on
-    topography.  NEST is based on a custom stack-based scripting
+    topography.  Much of NEST is based on a custom stack-based scripting
     language (like RPN calculators or PostScript) that is not nearly
     as friendly as Python, and requires much more of the simulation
     code to be written in C.  On the other hand, NEST does provide
     many useful, high-performance primitives, has good parallel
     computer support, and can be particularly useful for models that
-    do not fit Topographica's abstractions closely.  NEST now has a
+    do not fit Topographica's abstractions closely.  NEST now offers a 
     Python interface, which can be used to wrap a spiking NEST
-    simulation as a Topographica sheet.  Thus it is possible to use
-    the NEST primitives to develop a model that is then controlled
-    at a higher level by Topographica.  Until such an example has
-    been put into the Topographica release, contact 
-    <A HREF="mailto:&#106&#98&#101&#100&#110&#97&#114&#64&#105&#110&#102&#46&#101&#100&#46&#97&#99&#46&#117&#107?subject=Interface%20from%20NEST%20to%20Topographica">Jim</a>
-    for more details if you are interested.
+    simulation as a Topographica sheet.  See 
+    <a href="http://dx.doi.org/10.3389/neuro.11.008.2009">Bednar,
+    Frontiers in Neuroinformatics 2009</a> for an example of such an
+    interface.
     <BR><BR>
 
   <dt><A TARGET="_top" HREF="http://brain.unr.edu/ncsDocs/">NCS</A></dt>

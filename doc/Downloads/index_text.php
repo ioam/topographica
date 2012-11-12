@@ -15,7 +15,8 @@ Topographica on a 64-bit platform.
 
 <P>Linux and Mac users can run <code>topographica -g</code> from a
 terminal to start Topographica. Windows users can double click on the
-Topographica icon on the desktop.
+Topographica icon on the desktop if a icon is present, or else
+run <code>topographica -g</code> from a cmd terminal window.
 
 <P>Running Topographica interactively is described in detail in
 the <A HREF="../User_Manual/scripts.html">User Manual</A>. If you want
