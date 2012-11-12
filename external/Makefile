@@ -808,7 +808,7 @@ progressbar-uninstall:
 
 
 #############################################################
-# GNU MP
+# GNU M4
 M4 = m4-1.4.9
 
 M4_UNINSTALL += share/info/m4*
