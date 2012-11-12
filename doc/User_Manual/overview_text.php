@@ -12,7 +12,7 @@ them for use in any particular model.
 
 <P>In this section, we outline the basic hierarchies of object types
 used by Topographica.  All of these are available to the user when
-designing a model, but as the <a href="#implementation-levels">
+designing a model, but as the <a target="_top" href="#implementation-levels">
 next section</a> indicates, not all of them need to be used for any
 particular model, and anything not used can be ignored.  These lists
 are only representative of the object 

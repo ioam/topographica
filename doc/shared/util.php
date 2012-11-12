@@ -100,7 +100,7 @@ function menu_side($fname) {
 		if ($link == "Home") {
 			$link = "../index.html";
 		}
-		print '    <tr><td bgcolor="'.$button_color.'"><a href="'.$link.'" class="button"><font face="sans-serif"><b>'.$key.'</b></font></a></td></tr>';
+		print '    <tr><td bgcolor="'.$button_color.'"><a target="_top" href="'.$link.'" class="button"><font face="sans-serif"><b>'.$key.'</b></font></a></td></tr>';
 	}
 	print '  </table>';
 	print '</table>
@@ -110,21 +110,21 @@ function menu_side($fname) {
 # Refer and link to a class in a specific module in the Reference Manual
 function classref($module,$class) {
   # Epydoc version:
-  print "<a href=\"../Reference_Manual/$module.$class-class.html\">$class</a>";
+  print "<a target=\"_top\" href=\"../Reference_Manual/$module.$class-class.html\">$class</a>";
   # Pydoc version:
-#  print "<a href=\"../Reference_Manual/$module.html#$class\">$class</a>";
+#  print "<a target=\"_top\" href=\"../Reference_Manual/$module.html#$class\">$class</a>";
 }
 
 # Refer and link to a function in a specific module in the Reference Manual
 function fnref($module,$fn) {
   # Epydoc version:
-  print "<a href=\"../Reference_Manual/$module-module.html#$fn\">$fn</a>";
+  print "<a target=\"_top\" href=\"../Reference_Manual/$module-module.html#$fn\">$fn</a>";
 }
 
 # Refer and link to a function in a specific module in the Reference Manual
 function moduleref($module) {
   # Epydoc version:
-  print "<a href=\"../Reference_Manual/$module-module.html\">$module</a>";
+  print "<a target=\"_top\" href=\"../Reference_Manual/$module-module.html\">$module</a>";
 }
 	
 ?>

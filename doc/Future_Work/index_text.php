@@ -1,9 +1,9 @@
 <P>Topographica is under very active development, but there are always
 more features that we have not yet been able to implement or bugs that
 we have not been able to address.  These will be listed in our GitHub
-<a href="https://github.com/ioam/topographica/issues">Issues</a> list,
+<a target="_top" href="https://github.com/ioam/topographica/issues">Issues</a> list,
 or or in the issues for a specific
-<a href="https://github.com/ioam">subproject</a> if appropriate.  Feel
+<a target="_top" href="https://github.com/ioam">subproject</a> if appropriate.  Feel
 free to add suggestions of your own to those lists, or to
 <A HREF="../Developer_Manual/index.html#joining">tackle one of the
 existing problems listed</A> if you need that feature for your work.

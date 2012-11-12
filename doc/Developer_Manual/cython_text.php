@@ -3,7 +3,7 @@
 <P>This is draft documentation! Needs checking and editing, at
 least.
 
-<p><a href="http://www.cython.org/">Cython</a> language is very close
+<p><a target="_top" href="http://www.cython.org/">Cython</a> language is very close
 to the Python language, but Cython
 additionally supports calling C functions and declaring C types on
 variables and class attributes. This allows the compiler to generate
@@ -22,8 +22,8 @@ important when doing optimizations - you first <strong>must</strong>
 have a test written to ensure the output is still correct, and that
 test should be run every time you do any changes to the code. Color
 space
-conversion functions are taken directly from <a
- href="http://docs.python.org/library/colorsys.html"><code>colorsys</code></a>
+conversion functions are taken directly from
+<a target="_top" href="http://docs.python.org/library/colorsys.html"><code>colorsys</code></a>
 Python module (which can usually be found in
 /usr/lib/python2.X/colorsys.py).</p>
 
@@ -304,7 +304,7 @@ locals(), "Profile.prof")</span><br style="font-weight: bold;">
 <span style="font-weight: bold;">s.strip_dirs().sort_stats("time").print_stats()</span></code><br>
 <br>
 As an alternative to cProfile, you could also use any other tool that
-profiles C code e.g. <a href="http://valgrind.org/">Valgrind</a>.<br>
+profiles C code e.g. <a target="_top" href="http://valgrind.org/">Valgrind</a>.<br>
 
 <h2>Recap and conclusion<br>
 </h2>
@@ -329,8 +329,8 @@ which are built-in Python functions (avoid using them if possible!).<br>
  alt="Running time decrease at each step"> </p>
 <p>In this short Cython guide, we discussed only the basic principles
 of using Cython to improve the performance of your code. Many more
-topics were left untouched, and can be found in <a
- href="http://docs.cython.org/">Cython documentation</a>. Nevertheless,
+topics were left untouched, and can be found in
+<a target="_top" href="http://docs.cython.org/">Cython documentation</a>. Nevertheless,
 we hope that this guide will give an idea on how to
 start using Cython for (pretty much effortless) performance boosting of
 your own code.<br>

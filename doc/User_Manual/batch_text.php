@@ -279,8 +279,8 @@ that used parameters matching any specifications made in the
 
 Once you get used to run_batch, you'll often want to run a large
 number of coordinated run_batch runs, e.g. to do a parameter search.
-Topographica works well with <a
-href="https://github.com/ioam/lancet/">Lancet</a>, which provides
+Topographica works well with
+<a target="_top" href="https://github.com/ioam/lancet/">Lancet</a>, which provides
 these features and many more.  Lancet allows you to specify parameter
 spaces to cover, launch multiple jobs (on single machines or computing
 clusters), collate the results, generate figures and analyses from the

@@ -108,5 +108,5 @@ V1 at time 0.5, so that V1's response will be ready for visualization
 by time 1.0.
 
 <P>To study the individual events that are generated during the
-simulation, you can <a href="commandline.html#min_print_level">enable verbose
+simulation, you can <a target="_top" href="commandline.html#min_print_level">enable verbose
 messaging</a>.

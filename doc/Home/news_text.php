@@ -5,9 +5,9 @@ print '<table width="100%" cellpadding="5"><tr><td bgcolor="'.$banner_bg_color.'
 <i>
 <b>Recent <A target="_top" href="../News/index.html">news:</A></b>
 
-<p><b>3 Oct 2012:</b>Topographica development moved from <a
-  href="http://sourceforge.net/projects/topographica">SourceForge
-  Subversion</a> to <a href="http://github.com/ioam/topographica">
+<p><b>3 Oct 2012:</b>Topographica development moved from
+  <a target="_top" href="http://sourceforge.net/projects/topographica">SourceForge
+  Subversion</a> to <a target="_top" href="http://github.com/ioam/topographica">
   GitHub Git</a>.
 
 <p><b>18 Jul 2012:</b> Talk and poster at SciPy 2012 introduce the new 

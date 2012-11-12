@@ -51,7 +51,7 @@ a copy of your repository elsewhere, but you can solve (a) and (b) by
 obtaining a git repository of your own on github. To do so, please
 visit github.com. You can then clone the Topographica repository
 using the instructions on the 
-<a href="https://github.com/ioam/topographica">Topographica page at GitHub</a>.  
+<a target="_top" href="https://github.com/ioam/topographica">Topographica page at GitHub</a>.  
 
 You can then push your local repository to the remote one as often as
 you want by doing e.g. 
@@ -103,8 +103,8 @@ branch): <code>git checkout -b feature</code></li>
 iterations, potentially over a long period).</li>
 
 <li><i>(Optional)</i> If you have made a lot of commits and they do
-not form a coherent story, collapse them using git's <a
-href="http://book.git-scm.com/4_rebasing.html">rebase</a>. The safest
+not form a coherent story, collapse them using git's
+<a target="_top" href="http://book.git-scm.com/4_rebasing.html">rebase</a>. The safest
 way to do this is to first create a new branch of <code>feature</code>
 (<code>git checkout -b feature_clean</code>); this way, what you
 actually did is preserved in the <code>feature</code> branch. In the

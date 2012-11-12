@@ -69,7 +69,7 @@ is a very bad choice for screenshots, as it will introduce the
 above-mentioned artifacts, and PNG works well for those.
 
 <P>Overuse of JPEG is probably the most common mistake; see the
-<a href="http://www.faqs.org/faqs/jpeg-faq/part1/section-3.html">JPEG
+<a target="_top" href="http://www.faqs.org/faqs/jpeg-faq/part1/section-3.html">JPEG
 FAQ</a> for more information about when <strong>not</strong> to use
 it.  Note that the most important time to consider the format is when
 you first create the file.  Once a file is in JPEG format, it will
@@ -123,7 +123,7 @@ support will be necessary.
 <P>These sections describe how to generate publication-quality figures
 from each of the various Topographica plots and display windows.  Note
 that in most cases, it is best to automate these commands by doing
-them in <a href="batch.html">batch mode</a>, so that you have a permanent
+them in <a target="_top" href="batch.html">batch mode</a>, so that you have a permanent
 record of all of the commands and options used to generate your
 results, and so that they will be stored in a uniquely identifiable
 directory that you can access reliably later.
@@ -153,7 +153,7 @@ can convert it to PDF for use in a document using
 clicking on one and selecting <code>Save as PNG</code>.  A unique
 filename is generated automatically.  You can also save these images
 from a script, e.g. in batch mode, using
-<a href="commandline.html#saving-bitmaps">save_plotgroup</a>.
+<a target="_top" href="commandline.html#saving-bitmaps">save_plotgroup</a>.
 
 <H4>Color keys</H4>
 
@@ -172,7 +172,7 @@ PDF file is 'topo/command/or_key_white_vert.pdf'.
 
 <P>Plots in these windows can be saved just as for Preference Map
 plots, using
-<a href="commandline.html#saving-bitmaps">save_plotgroup</a>.
+<a target="_top" href="commandline.html#saving-bitmaps">save_plotgroup</a>.
 
 <p> Note that if you plan to show plots from different Sheets in your
 paper (e.g. multiple ConnectionFields side by side, or Activity in
@@ -191,7 +191,7 @@ plot corresponds to the others.
 
 <P>The GUI does not yet support saving Projection plots from the
 right-click menu.  However, they can be saved in PNG format from the
-command line using <a href="commandline.html#saving-bitmaps">save_plotgroup</a>.
+command line using <a target="_top" href="commandline.html#saving-bitmaps">save_plotgroup</a>.
 
 <P>Alternatively, they can be selected by taking a screenshot using
 your favorite such utility.

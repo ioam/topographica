@@ -1,6 +1,6 @@
 <P>This page gives information about the external packages that are
 required or useful for Topographica; installation of these packages is
-described on the main <a href="index.html">Downloads</a> page.
+described on the main <a target="_top" href="index.html">Downloads</a> page.
 
 
 <H2>Required External Packages</H2>
@@ -72,7 +72,7 @@ are also required for Topographica:
 </DL>
 
 <P>Again, installation of these packages is described on the main
-<a href="../Downloads/index.html">Downloads</a> page.
+<a target="_top" href="../Downloads/index.html">Downloads</a> page.
 
 
 
@@ -135,21 +135,21 @@ Topographica users and/or developers.
 
 <P>In most cases, these packages are included in Python distributions
 such
-as <a href="http://enthought.com/products/epd.php">EPD</a>/<a href="http://pythonxy.com">Python(x,y)</a>,
+as <a target="_top" href="http://enthought.com/products/epd.php">EPD</a>/<a target="_top" href="http://pythonxy.com">Python(x,y)</a>,
 or are available via package managers such as
 apt-get/MacPorts. Alternatively, the packages are available for
 easy_install/pip install/standard Python installation
-via <a href="http://pypi.python.org/pypi">PyPI</a>. Many of these 
+via <a target="_top" href="http://pypi.python.org/pypi">PyPI</a>. Many of these 
 packages can also be installed using the external directory of
 Topographica; see the 
-<a href="http://pypi.python.org/pypi">github installation instructions</a>. 
+<a target="_top" href="http://pypi.python.org/pypi">github installation instructions</a>. 
 Note that, however you choose to install any of these packages, if your
 system has more than one copy of Python <em>you must install the package
 using the same copy of Python that you are using for
 Topographica</em>.
 
 <P>If you encounter problems using these packages, feel free
-to <a href="http://sourceforge.net/projects/topographica/forums/forum/178312">ask
+to <a target="_top" href="http://sourceforge.net/projects/topographica/forums/forum/178312">ask
 the Topographica community for help</a>.
 
 
@@ -162,7 +162,7 @@ such as statistics, linear algebra, integration and differential
 equation solvers, etc. 
 <!--
 SciPy is included in many Python distributions
-(e.g. <a href="http://enthought.com/products/epd.php">EPD</a>), and is
+(e.g. <a target="_top" href="http://enthought.com/products/epd.php">EPD</a>), and is
 usually available via package managers (e.g. "sudo apt-get install
 python-scipy"). If using the fat distribution of Topographica, "make
 -C external scipy" will build SciPy (but note that building SciPy is
@@ -205,7 +205,7 @@ the fat distribtion, building should be simple: <code>make -C external
 pyaudiolab</code>.
 </DD>
 
-<P><DT><a href="http://scikits-image.org/">scikits-image</a></DT>
+<P><DT><a target="_top" href="http://scikits-image.org/">scikits-image</a></DT>
 <DD>
 A collection of algorithms for image processing.
 </DD>

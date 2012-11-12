@@ -273,7 +273,7 @@ subplot from Activity plots using:
 several other types of plots).
 
 <P>You can also put lines like these into your
-<a href="scripts.html#toporc">user configuration file</a>, if you find
+<a target="_top" href="scripts.html#toporc">user configuration file</a>, if you find
 that you always want different defaults than Topographica's, for all
 scripts that you run.
 

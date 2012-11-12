@@ -1,19 +1,19 @@
-<p><b>3 Oct 2012:</b>Topographica development moved from <a
-  href="http://sourceforge.net/projects/topographica">SourceForge
-  SVN</a> to <a href="http://github.com/ioam/topographica">
+<p><b>3 Oct 2012:</b>Topographica development moved from
+  <a target="_top" href="http://sourceforge.net/projects/topographica">SourceForge
+  SVN</a> to <a target="_top" href="http://github.com/ioam/topographica">
   GitHub git</a>.
 
   <P>SVN write access has now been disabled.  See the
-  <a href="https://git.wiki.kernel.org/index.php/GitSvnCrashCourse">Git
+  <a target="_top" href="https://git.wiki.kernel.org/index.php/GitSvnCrashCourse">Git
   Crash Course</a> to translate your SVN commands to Git.  All
   features since 0.9.7 are now available from
-  <a href="https://github.com/ioam/topographica">github</a>, and all
+  <a target="_top" href="https://github.com/ioam/topographica">github</a>, and all
   sf.net bugs and feature requests have been converted to GitHub issues.
   The Param and ImaGen subprojects now accompany Topographica as git
   submodules, allowing easy editing while leaving them as separate
   projects.  Installation is now via either git (for developers) or
   pip (for users); see 
-  <a href="https://github.com/ioam/topographica">github.com</a>.<BR><BR> 
+  <a target="_top" href="https://github.com/ioam/topographica">github.com</a>.<BR><BR> 
   
 <p><b>18 Jul 2012:</b> New subprojects at GitHub have been created for
   elements of Topographica that are widely reusable in other projects:
@@ -33,7 +33,7 @@
   <P>These subprojects contain code still used in Topographica, but
   can now be downloaded and installed separately.  Both projects were
   introduced at SciPy 2012 (Austin, TX); the 
-  <a href="http://www.youtube.com/watch?v=7_ELWwzFCi0">talk on
+  <a target="_top" href="http://www.youtube.com/watch?v=7_ELWwzFCi0">talk on
   Param</a> is available online.<BR><BR>
 
 <p><b><a name="30-nov-2011">30 Nov 2011:</a></b> New features available, enough to constitute a

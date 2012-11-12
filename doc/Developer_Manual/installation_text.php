@@ -32,8 +32,8 @@ best-supported option.
 <H3><A NAME="installing">Installing Topographica</A></H3>
 
 <P><A NAME="downloading"></a>First, clone the public Topographica
-repository as described at <a
-href="https://github.com/ioam/topographica">github</a>.  You can then
+repository as described at
+<a target="_top" href="https://github.com/ioam/topographica">github</a>.  You can then
 either install the dependencies as described there and then skip to
 the <A HREF="#postinstall">after installation</A> instructions, or
 you can build them all yourself (described below).

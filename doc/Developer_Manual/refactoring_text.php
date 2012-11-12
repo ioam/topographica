@@ -1,5 +1,5 @@
 <H1>Refactoring</H1>
-(From <a href="http://www.refactoring.com/">refactoring.com</A>):
+(From <a target="_top" href="http://www.refactoring.com/">refactoring.com</A>):
 
 <blockquote>
 Refactoring is a disciplined technique for restructuring an existing

@@ -175,7 +175,7 @@ different:
      <P>If you want to include structured text in your docstrings such as
      italics, bold, bulleted or numbered lists, hyperlinks, etc.,
      please use the
-     <a href="http://docutils.sourceforge.net/docs/user/rst/quickstart.html">
+     <a target="_top" href="http://docutils.sourceforge.net/docs/user/rst/quickstart.html">
      ReStructuredText</A> format.  That way the strings will be interpreted
      correctly when we generate the reference manual.<BR><BR>
 

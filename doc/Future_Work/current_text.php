@@ -205,8 +205,8 @@ We need a test with non-square input sheets, non-square LISSOM sheets,
 etc., with both types of non-squareness...and we also need to test
 whatever map measurement that we can (e.g. or maps).  Could also add
 coverage testing, e.g. using
-<a href="http://darcs.idyll.org/~t/projects/figleaf/doc/">figleaf</a>
-or <a href="http://nedbatchelder.com/code/modules/rees-coverage.html">coverage.py</a>.
+<a target="_top" href="http://darcs.idyll.org/~t/projects/figleaf/doc/">figleaf</a>
+or <a target="_top" href="http://nedbatchelder.com/code/modules/rees-coverage.html">coverage.py</a>.
 
 <H4>2007/02/26: consider an alternative debugger</H4>
 http://www.digitalpeers.com/pythondebugger/.

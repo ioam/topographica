@@ -1,7 +1,7 @@
 <H2><A NAME="installing-topographica">Installing Topographica</A></H2>
 
-<P>See Topographica's <a
-href="https://github.com/ioam/topographica">github</a> page for
+<P>See Topographica's
+<a target="_top" href="https://github.com/ioam/topographica">github</a> page for
 instructions on obtaining and installing current versions of
 Topographica. 
 

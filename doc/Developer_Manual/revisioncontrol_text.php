@@ -1,8 +1,8 @@
 <H1>Revision control</H1>
 
 <P>Topographica source code and development is managed using
-<a href="https://git-scm.com">Git</a> hosting services provided by
-<a href="https://github.com/ioam/topographica">GitHub</a>.  Git is a
+<a target="_top" href="https://git-scm.com">Git</a> hosting services provided by
+<a target="_top" href="https://github.com/ioam/topographica">GitHub</a>.  Git is a
 distributed version control system, providing support for a wide range
 of ways of interacting with other developers.  In particular, it
 allows you to keep track of your own changes locally, without
@@ -139,6 +139,6 @@ kept clean so that we can focus on the files that matter.
 <H2>Suggested Git Workflows</H2>
 
 The information above is primarily policies that apply to official
-Topographica developers.  We also have <a href="git.html">specific
+Topographica developers.  We also have <a target="_top" href="git.html">specific
 suggestions</a> for useful workflows using Git, but these are just
 suggestions rather than policies such as the above.

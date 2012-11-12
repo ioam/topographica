@@ -15,7 +15,7 @@ code directly and is not covered by the User Manual or Tutorials.
 (available separately), core packages (required for Topographica),
 library packages (useful families of components not required for
 Topographica itself), and other
-<a href="../Downloads/dependencies.html">external dependencies</a>
+<a target="_top" href="../Downloads/dependencies.html">external dependencies</a>
 (documented separately).  Everything but the external dependencies is
 documented at the <A href="hierarchy.html"><strong>main reference manual
 page</strong></A>, but the different categories of objects are broken
@@ -134,5 +134,5 @@ will be high-level components written in C, such as CFPLF_Hebbian_opt.
 
 <P>Apart from the Topographica-specific modules described above,
 Topographica also uses many
-<a href="../Downloads/dependencies.html">external libraries</a>, each
+<a target="_top" href="../Downloads/dependencies.html">external libraries</a>, each
 documented separately.

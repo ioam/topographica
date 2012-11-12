@@ -2,7 +2,7 @@
 
 <p>
 This tutorial shows how to use the
-<a href="http://topographica.org/">Topographica</a> simulator to explore a
+<a target="_top" href="http://topographica.org/">Topographica</a> simulator to explore a
 simple retinotopic map simulation.  This particular example, taken
 from Chapter 3 of the book <A
 href="http://computationalmaps.org">Computational Maps in the Visual
@@ -12,7 +12,7 @@ extensible for models not yet supported.
 </p>
 
 <p>This tutorial assumes that you have already followed the
-instructions for <a href="../Downloads/index.html">obtaining and
+instructions for <a target="_top" href="../Downloads/index.html">obtaining and
 installing</a> Topographica. 
 
 
@@ -25,7 +25,7 @@ develops a mapping of the dimensions of variance in the input space.
 <p></p>
 
 <li>First, 
-  <A HREF="../User_Manual/scripts.html#copy_examples">get a copy of the
+  <A target="_top" HREF="../User_Manual/scripts.html#copy_examples">get a copy of the
   example files to work with</A> if you do not have them already, and
   open a terminal in the examples directory (the path of the examples directory is 
   printed by Topographica when you are getting a copy of the example files).

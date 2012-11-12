@@ -12,7 +12,7 @@ please try the following:
 
 <P><li> If you are using a version that is more than a few weeks old,
 consider trying the most up to date ("bleeding-edge") version via
-<a href="https://github.com/ioam/topographica">Git</a>.  The code is updated nearly
+<a target="_top" href="https://github.com/ioam/topographica">Git</a>.  The code is updated nearly
 every day, so by the end of a few weeks many changes will have
 accumulated.  Often, bugs will have been fixed and new features will
 have been added already in the Git repository, even though they are
@@ -21,13 +21,13 @@ a certain date by looking at ... -->
 
 <p><li>If the problem is still present in the current version, you can
 search the list of
-<a href="https://github.com/ioam/topographica/issues?state=open">bug
+<a target="_top" href="https://github.com/ioam/topographica/issues?state=open">bug
 reports</a> on our project pages at GitHub to see if we already
 know about the problem. If you find the problem, please feel free to
 add additional comments to the report.</li>
 
-<p><li>We also have a <a
-href="../Future_Work/current.html">task list</a>,
+<p><li>We also have a
+<a target="_top" href="../Future_Work/current.html">task list</a>,
 used by the developers to keep track of tasks. Try searching this list
 for information about your problem. If you find a related task, please
 send an e-mail to the developer listed as being in charge of that item
@@ -43,7 +43,7 @@ fixing the problem is urgent, and/or suggest fixes for the offending
 code. </li>
 
 <p><li>Otherwise, please
-<a href="https://github.com/ioam/topographica/issues/new">
+<a target="_top" href="https://github.com/ioam/topographica/issues/new">
 file a bug report</a>. If possible, please include:
 
 <p>

@@ -2,13 +2,13 @@
 
 <p>
 This tutorial shows how to use the
-<a href="http://topographica.org/">Topographica</a> software package
+<a target="_top" href="http://topographica.org/">Topographica</a> software package
 to explore a simple orientation map simulation using test patterns and
 weight plots. 
 
 <P>We will use the <!--CEBALERT: need to link to publication when it comes out-->
 GCAL model (paper to appear), which is related to the
-<a href="http://homepages.inf.ed.ac.uk/jbednar/research.html">LISSOM
+<a target="_top" href="http://homepages.inf.ed.ac.uk/jbednar/research.html">LISSOM
 model</a> but works more robustly with fewer parameters thanks to 
 including contrast gain control (GC) in the LGN and homeostatic
 adaptation (A) in V1. Although we focus on one model in this tutorial,
@@ -17,7 +17,7 @@ extensible for models not yet supported.
 </p>
 
 <p>This tutorial assumes that you have already followed the
-instructions for <a href="../Downloads/index.html">obtaining and
+instructions for <a target="_top" href="../Downloads/index.html">obtaining and
 installing</a> Topographica. Also, you will need to generate a saved
 orientation map network (a .typ file), which can be done from a
 Unix or Mac  terminal or Windows <A HREF="../Downloads/win32notes.html">command
@@ -118,9 +118,9 @@ default).
 <P>As you move your mouse over the plots, information about the
 location of the mouse cursor is displayed in the status bar at the
 bottom of the window. For these plots, you can see the
-<a href="../User_Manual/space.html#matrix-coords">matrix
+<a target="_top" href="../User_Manual/space.html#matrix-coords">matrix
 coordinates</a> (labeled "Unit"),
-<a href="../User_Manual/space.html#sheet-coords">sheet coordinates</a>
+<a target="_top" href="../User_Manual/space.html#sheet-coords">sheet coordinates</a>
 (labeled "Coord"), and the activity level of the unit currently under
 the pointer.
 
@@ -148,8 +148,8 @@ explained below.
 <li> To help understand the response patterns in V1, we can look at
 the weights to V1 neurons.  These weights were learned previously, 
 as a result of presenting 10000 pairs of oriented Gaussian patterns at random angles
-and positions.  To plot a single neuron, select <a
-name="ConnectionFields-plot"><span class='t_item'>Connection
+and positions.  To plot a single neuron, select
+<a name="ConnectionFields-plot"><span class='t_item'>Connection
 Fields</span></a> from the <span class='t_item'>Plots</span>
 menu. This will plot the synaptic strengths of connections to the
 neuron in the center of the cortex (by default):
@@ -389,7 +389,7 @@ controls the ratio between width and height; will be scaled by the
 </dd><dt><span class='t_item'>scale</span>
 </dt><dd> controls the brightness (try 1.0 for a sine grating).  Note
 how this model is insensitive to the scale; the response remains orientation
-selective even as the scale is varied substantially. (If you try the <a href="lissom_oo_or.html">lissom_oo_or
+selective even as the scale is varied substantially. (If you try the <a target="_top" href="lissom_oo_or.html">lissom_oo_or
 tutorial</a>, you can see the effect of contrast gain control operating in this 
 model.)
 </dd><dt><span class='t_item'>offset</span></dt><dd> is added to every pixel
@@ -429,7 +429,7 @@ have an extra "buffer" region around the outside so that no V1 neuron
 will have its CF cut off, and the result is that V1 sees only the
 central region of the image in the LGN, and the LGN sees only the
 central region of the retina.  
-(<a href="../User_Manual/space.html#sheet-coords">Sheet coordinates</a>
+(<a target="_top" href="../User_Manual/space.html#sheet-coords">Sheet coordinates</a>
 are normally turned off because they make the cortical plots smaller, but they can
 be very helpful for understanding how the sheets relate to each
 other.)  </p></li>

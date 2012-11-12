@@ -53,8 +53,7 @@ possibly substantially.
 below, sometimes all you need is minor tweaks to Python code to get it
 to have reasonable performance.  Usually this involves avoiding
 unnecessary attribute lookup, as described in various collections of
-<a
-href="http://wiki.python.org/moin/PythonSpeed/PerformanceTips">Python
+<a target="_top" href="http://wiki.python.org/moin/PythonSpeed/PerformanceTips">Python
 performance tips</a>.
 
 <P>What is usually more important to ensure is that anything that can

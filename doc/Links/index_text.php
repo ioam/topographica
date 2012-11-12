@@ -103,7 +103,7 @@ scaling equations that underlie Sheet coordinates
     do not fit Topographica's abstractions closely.  NEST now offers a 
     Python interface, which can be used to wrap a spiking NEST
     simulation as a Topographica sheet.  See 
-    <a href="http://dx.doi.org/10.3389/neuro.11.008.2009">Bednar,
+    <a target="_top" href="http://dx.doi.org/10.3389/neuro.11.008.2009">Bednar,
     Frontiers in Neuroinformatics 2009</a> for an example of such an
     interface.
     <BR><BR>

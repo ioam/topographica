@@ -1,7 +1,7 @@
 <P>This manual gives guidelines for developers working on the source
 code for the Topographica simulator. Users will not usually need to
 refer to this material, unless they plan to submit significant blocks
-of code to the project (which is, of course, strongly <a href="#joining">encouraged</a>!).
+of code to the project (which is, of course, strongly <a target="_top" href="#joining">encouraged</a>!).
 
 <P>By default, all the text in this manual refers to program code
 written in the Python language. There are also some bits of C/C++ code
