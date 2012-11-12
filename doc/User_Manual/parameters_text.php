@@ -11,8 +11,8 @@ values, documentation strings, default values, etc., each of which
 is inherited from parent classes if not specified in a subclass.
 Parameter support is provided by the
 <A HREF="../Reference_Manual/param-module.html">param</A> package,
-which is distributed with Topographica but is actually completely
-indepenent and usable directly for any Python project.
+which was developed alongside Topographica but is completely
+independent and usable for any Python project.
 
 <P>Objects that can contain Parameters are called
 <?php classref('param.parameterized','Parameterized')?> objects.
