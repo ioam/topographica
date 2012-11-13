@@ -9,7 +9,7 @@ This program is free, open-source software available under the BSD license (see 
 This document describes how to get and edit the Topographica source code.  Most first-time users will instead want to use the pre-packaged distributions available for most platforms; see ioam/topographica `Downloads <http://github.com/ioam/topographica/downloads>`_  for links.
 
 CLONING TOPOGRAPHICA
-====================
+--------------------
 
 Topographica on GitHub uses submodules, e.g. for the Param and ImaGen libraries. Please clone as follows::
 
@@ -28,7 +28,7 @@ can install it using ``easy_install pip`` or the equivalent for your package man
 ``pip install numpy PIL``, but other highly recommended packages include scipy, ipython, and matplotlib, which can each be installed in the same way.
 
 MAKING DOCUMENTATION (OPTIONAL)
-===============================
+-------------------------------
 
 If you want a local copy of the documentation, usually to ensure that the documentation matches the precise version of the code that you are using, you can build the documentation from your Git clone directory. If PHP4, m4, bibtex, convert, and fig2dev are installed on your system (as in most Linux distributions), just change to the doc subdirectory of the topographica directory and type ``make default reference-manual``. (This step is only necessary when building from Git; released versions include the documentation already built.)
 
@@ -37,7 +37,7 @@ Once the documentation has been built, load doc/index.html into your web browser
 As a last resort, for each <file>.html you can simply read the corresponding source file <file>_text.php in a text editor.
 
 BUILDING FROM SOURCE (OPTIONAL)
-===============================
+-------------------------------
 
 As long as all the dependencies have been installed as described above, no separate build step is needed -- all core Topographica files are pure Python, and any optimized C files will be compiled on the fly as needed by Topographica.
 
@@ -48,6 +48,6 @@ If you use this Makefile, you will need to append the absolute path of ``./topog
    export PATH=<PATH TO ./topographica/bin/>:$PATH
 
 RUNNING TOPOGRAPHICA
-====================
+--------------------
 
 Once installed as described above, Topographica can be launched by running the ``topographica`` script in the main directory; e.g. ``topographica -g`` for the GUI version.  See doc/Tutorials/index.html for examples of getting started with Topographica, and doc/index.html for all of the documentation.  You can also get online help from the Topographica command line using ``help()``, or from the shell command line using ``pydoc some-text``.
