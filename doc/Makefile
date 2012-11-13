@@ -46,7 +46,8 @@ all: ${PHPHTML}
 # Extra dependency
 Home/index.html: Home/news_text.php
 
-reference-manual: Param_Reference/index.html ParamTk_Reference/index.html Imagen_Reference/index.html Lancet_Reference/index.html Reference_Manual/toc.html
+# Doesn't currently build Lancet manual by default
+reference-manual: Param_Reference/index.html ParamTk_Reference/index.html Imagen_Reference/index.html Reference_Manual/toc.html
 
 Reference_Manual/toc.html: ../topo/*.py ../topo/*/*.py ../external/param/param/*.py ../external/paramtk/paramtk/*.py ../external/imagen/numbergen/*.py  ../external/imagen/imagen/*.py Reference_Manual/index_text.php
 	cd .. ; ${CALLEPYDOC} -o doc/Reference_Manual --exclude=topo.tests --name=IOAM --url=http://ioam.github.com topo external/param/param external/paramtk/paramtk external/imagen/numbergen external/imagen/imagen
