@@ -24,13 +24,13 @@ The clone command above is read-only.  To push changes set up your `SSH key <htt
    git submodule update --init
 
 If dependencies are missing, you can install them using pip.  Pip is available on most systems already, but if it is missing or if the installed version is old, you
-can install it using "easy_install pip" or the equivalent for your package manager, or install virtualenv instead.  The only required dependencies are numpy and PIL, which can be installed using
+can install it using ``easy_install pip`` or the equivalent for your package manager, or install virtualenv instead.  The only required dependencies are numpy and PIL, which can be installed using
 ``pip install numpy PIL``, but other highly recommended packages include scipy, ipython, and matplotlib, which can each be installed in the same way.
 
 MAKING DOCUMENTATION (OPTIONAL)
 ===============================
 
-If you want a local copy of the documentation, usually to ensure that the documentation matches the precise version of the code that you are using, you can build the documentation from your Git clone directory. If PHP4, m4, bibtex, convert, and fig2dev are installed on your system (as in most Linux distributions), just change to the doc subdirectory of the topographica directory and type "make default reference-manual". (This step is only necessary when building from Git; released versions include the documentation already built.)
+If you want a local copy of the documentation, usually to ensure that the documentation matches the precise version of the code that you are using, you can build the documentation from your Git clone directory. If PHP4, m4, bibtex, convert, and fig2dev are installed on your system (as in most Linux distributions), just change to the doc subdirectory of the topographica directory and type ``make default reference-manual``. (This step is only necessary when building from Git; released versions include the documentation already built.)
 
 Once the documentation has been built, load doc/index.html into your web browser.  If there are any problems generating or reading the local copy, you can instead use the web-based documentation at `topographica.org <http://topographica.org>`_.  (The doc/ directory is just a copy of the website, although the web site will not necessarily match this particular copy of Topographica.)
 
