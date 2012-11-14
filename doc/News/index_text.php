@@ -1,8 +1,8 @@
-<p><b>12 Nov 2012:</b>Topographica web site updated to reflect current
+<p><b>12 Nov 2012:</b> Topographica web site updated to reflect current
   Git version; see the documentation distributed with each release if
   you want the description of that version of the code.<br><br>
 
-<p><b>3 Oct 2012:</b>Topographica development moved from
+<p><b>3 Oct 2012:</b> Topographica development moved from
   <a target="_top" href="http://sourceforge.net/projects/topographica">SourceForge
   SVN</a> to <a target="_top" href="http://github.com/ioam/topographica">
   GitHub git</a>.
@@ -15,9 +15,10 @@
   sf.net bugs and feature requests have been converted to GitHub issues.
   The Param and ImaGen subprojects now accompany Topographica as git
   submodules, allowing easy editing while leaving them as separate
-  projects.  Installation is now via either git (for developers) or
-  pip (for users); see 
-  <a target="_top" href="https://github.com/ioam/topographica">github.com</a>.<BR><BR> 
+  projects.  Installation is now via either
+  <a target="_top" href="https://github.com/ioam/topographica">git
+  (for developers)</a> or
+  <a target="_top" href="../Downloads/index.html">pip (for users)</a>.<BR> 
   
 <p><b>18 Jul 2012:</b> New subprojects at GitHub have been created for
   elements of Topographica that are widely reusable in other projects:

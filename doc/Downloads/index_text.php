@@ -130,7 +130,7 @@ Topographica on a 64-bit platform.
 -->
 
 
-<H3><A NAME="postinstall">Running Topographica</A></H3>
+<H2><A NAME="postinstall">Running Topographica</A></H2>
 
 <P>Because there are many ways a user might install Topographica (or
 any other Python package), the next step is to figure out where the
