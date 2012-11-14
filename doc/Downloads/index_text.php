@@ -3,8 +3,8 @@
 <P>Topographica is platform-independent, and all instructions below
 apply to Linux, UNIX, Mac, or Windows, unless otherwise specified.  In
 Windows, to get a command prompt, you can use the Run command from the
-Start menu and type <kbd>cmd</kbd>; on other systems you can start a Terminal
-or similar application.
+Start menu and enter <kbd>cmd</kbd>; on other systems you can start a
+Terminal or similar application.
 
 <P>The instructions below explain how to install Topographica using
 <A HREF="#installing-via-pip">pip</a> (for most users),
@@ -18,21 +18,23 @@ version, or need to track our files using revision control).
 
 <P>Topographica is written in Python, which is available for nearly
 all operating systems and is usually already installed (try running
-<kbd>python --version</kbd> from the command prompt).  If Python version 2.5 or
+<kbd>python --version</kbd> from the command prompt).  If Python version 2.6 or
 later is not installed, you can download the latest version for your
 system from 
 <a target="_top" href="http://www.python.org/download">python.org</A>.  Note that we do
 not yet support Python3, so if only python3 is installed you will need
 to install python2 as well (e.g. Python 2.7).
 
-<P>Particularly on Windows, it may be convenient to get Python from
-one of the integrated scientific Python distributions like
+<P>If Python isn't already installed, it may be convenient to get
+it from one of the integrated scientific Python distributions like
 <a target="_top" href="http://www.pythonxy.com">Python(X,Y)</A>,
 <a target="_top" href="http://www.enthought.com/products/epd.php">EPD</A>, or
 <a target="_top" href="https://store.continuum.io">Anaconda CE</A>.
-These distributions already provide most of the packages you need,
-including a C compiler, which is important for good performance in
-Topographica.
+These distributions are particularly useful for Windows and Mac users,
+who might not otherwise have a C compiler (necessary for good
+performance in Topographica) and optimized math and matrix libraries.
+On any system, the integrated distributions also provide a lot of
+useful related packages, including most of Topographica's dependencies.
 
 
 <H3><A NAME="installing-via-pip">Install via pip</A></H3>
@@ -44,11 +46,16 @@ from the command prompt:
 
 <PRE>pip install --user topographica</PRE>
 
-<P>This will fetch Topographica and its required dependencies 
-(i.e., param, numpy, and PIL, for the 0.9.7 release) from
-<a target="_top" href="http://pypi.python.org/pypi/topographica">PyPI</A>
-and install them into the <kbd>.local</kbd> folder in your home directory.
-Beyond these absolutely required packages, you will probably also want
+<P>This will fetch Topographica and its required dependencies (i.e.,
+param, numpy, and PIL, for the 0.9.7 release) from 
+<a target="_top" href="http://pypi.python.org/pypi/topographica">PyPI</A> 
+and install them into your home directory.  The files will be stored
+in a subdirectory called <code>.local</code> on Linux and Mac, and
+into the user's <code>%APPDATA%</code> subdirectory on Windows (typically
+named <code>Application Data</code>).
+<!-- See http://www.python.org/dev/peps/pep-0370/ for details -->
+
+<P>Beyond these absolutely required packages, you will probably also want
 to install others necessary for good performance (by at least a factor
 of 100), to provide some optional types of plotting, and to improve
 the command-line interface:
@@ -123,13 +130,35 @@ Topographica on a 64-bit platform.
 -->
 
 
-<H3><A NAME="postinstall">After installation</A></H3>
+<H3><A NAME="postinstall">Running Topographica</A></H3>
 
-<P>You can start the GUI version of Topographica from the command
-prompt using something like <kbd>topographica -g
-examples/tiny.ty</kbd>, where you give a path to the example file that
-was installed with Topographica (usually in .local or VENV, if you
-follow the instructions above).
+<P>Because there are many ways a user might install Topographica (or
+any other Python package), the next step is to figure out where the
+<kbd>topographica</kbd> script (used for launching Topographica) and
+the example and model files (used as starting points for your
+modelling) ended up.
+
+<P>If you follow the instructions above, the <kbd>topographica</kbd>
+script is usually <kbd>~/.local/bin/topographica</kbd> or
+<kbd>~/VENV/bin/topographica</kbd> on Linux, UNIX, and Mac.  On
+Windows it is usually
+<kbd>%APPDATA%\topographica\bin\topographica</kbd> or
+<kbd>%HOME%\VENV\bin\topographica</kbd>.  To save typing, it's useful
+to put the location of the <kbd>topographica</kbd> script onto your
+command prompt path, instructions for which differ by platform, or to
+first change to the directory where the <kbd>topographica</kbd> is
+stored.
+
+<P>Similarly, the example files files are usually in
+<kbd>~/.local/share/topographica/examples/</kbd> on Linux, UNIX, and
+Mac systems, and in
+<kbd>%APPDATA%/share/topographica/examples/</kbd> on Windows, or in
+the corresponding <kbd>VENV</kbd> directories.
+
+<P>Once you've located the script and the examples, you can start the
+GUI version of Topographica from the command prompt using something like:
+<kbd>topographica -g ~/.local/share/topographica/examples/tiny.ty</kbd> or
+<kbd>topographica -g %APPDATA%/share/topographica/examples/tiny.ty</kbd>
 
 <P>Running Topographica interactively is described in detail in
 the <A HREF="../User_Manual/scripts.html">User Manual</A>. If you want
