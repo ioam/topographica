@@ -154,8 +154,9 @@ script is usually <kbd>~/.local/bin/topographica</kbd> or
 Windows pip installations it is usually
 <kbd>%APPDATA%\Python\scripts\topographica</kbd> (where
 <kbd>%APPDATA%</kbd> is something like
-<kbd>C:\Users\jbednar\AppData\Roaming</kbd>; AppData is often hidden
-in the filesystem so you may need to enable display of hidden files).
+<kbd>C:\Users\jbednar\AppData\Roaming</kbd>; <kbd>AppData</kbd> is
+often hidden in the filesystem so you may need to enable display of
+hidden files).
 
 <P>Once you've located the <kbd>topographica</kbd> script, it will
 save typing if you make sure that the location of that script is in
@@ -181,7 +182,7 @@ the corresponding <kbd>VENV</kbd> directories.<BR>
 <P>Once you've located the script and the examples, you can start the
 GUI version of Topographica from the command prompt using something like:
 <kbd>topographica -g ~/.local/share/topographica/examples/tiny.ty</kbd> or
-<kbd>python %APPDATA%\Python\scripts\topographica -g %APPDATA%\Python\share\topographica\examples\gcal.ty</kbd> (on Windows). 
+<kbd>python %APPDATA%\Python\scripts\topographica -g %APPDATA%\Python\share\topographica\examples\tiny.ty</kbd> (on Windows). 
 
 <P>Running Topographica interactively is described in detail in
 the <A HREF="../User_Manual/scripts.html">User Manual</A>. If you want
