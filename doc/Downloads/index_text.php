@@ -94,15 +94,25 @@ includes pip and into which you can install Topographica and its
 dependencies:
 
 <PRE>
-$ python virtualenv.py VENV
-$ VENV/bin/pip install topographica
-$ VENV/bin/topographica -g
+> python virtualenv.py VENV
+> VENV/bin/pip install topographica
+> VENV/bin/topographica -g
 </PRE>
 
-<P>You can then install any other dependencies using 
-<A HREF="#installing-via-pip">pip</a> as described above.
-Of course, instead of VENV you can use any name you like for your
-virtual environment, and you can have multiple different virtual
+<!--
+or in Windows:
+
+<PRE>
+> python virtualenv.py VENV
+> VENV\Scripts\pip.exe install topographica
+> VENV\Scripts\topographica.exe -g
+</PRE>
+-->
+
+<P>(Not tested under Windows.)  You can then install any other
+dependencies using <A HREF="#installing-via-pip">pip</a> as described
+above.  Of course, instead of VENV you can use any name you like for
+your virtual environment, and you can have multiple different virtual
 environments for different purposes.
 
 <P>Many people use 
@@ -136,29 +146,42 @@ Topographica on a 64-bit platform.
 any other Python package), the next step is to figure out where the
 <kbd>topographica</kbd> script (used for launching Topographica) and
 the example and model files (used as starting points for your
-modelling) ended up.
+modelling) ended up.<BR>
 
 <P>If you follow the instructions above, the <kbd>topographica</kbd>
 script is usually <kbd>~/.local/bin/topographica</kbd> or
 <kbd>~/VENV/bin/topographica</kbd> on Linux, UNIX, and Mac.  On
-Windows it is usually
-<kbd>%APPDATA%\topographica\bin\topographica</kbd> or
-<kbd>%HOME%\VENV\bin\topographica</kbd>.  To save typing, it's useful
-to put the location of the <kbd>topographica</kbd> script onto your
-command prompt path, instructions for which differ by platform, or to
-first change to the directory where the <kbd>topographica</kbd> is
-stored.
+Windows pip installations it is usually
+<kbd>%APPDATA%\Python\scripts\topographica</kbd> (where
+<kbd>%APPDATA%</kbd> is something like
+<kbd>C:\Users\jbednar\AppData\Roaming</kbd>; AppData is often hidden
+in the filesystem so you may need to enable display of hidden files).
 
-<P>Similarly, the example files files are usually in
+<P>Once you've located the <kbd>topographica</kbd> script, it will
+save typing if you make sure that the location of that script is in
+your command prompt path.  Instructions for doing so differ by
+platform, but should be easily obtainable.  On Windows one convenient
+way to put the script on the path is to create a file called
+<kbd>topographica.bat</kbd> containing a single line like:
+
+<pre>@C:\Python27\python.exe %APPDATA%\Python\scripts\topographica %*</pre>
+
+(where you use the appropriate path to both Python and your
+<kbd>topographica</kbd> script) and put it somewhere in your path
+(e.g. <kbd>C:\Windows\System32</kbd>).<BR>
+
+
+<P>The example files are usually in
 <kbd>~/.local/share/topographica/examples/</kbd> on Linux, UNIX, and
 Mac systems, and in
-<kbd>%APPDATA%/share/topographica/examples/</kbd> on Windows, or in
-the corresponding <kbd>VENV</kbd> directories.
+<kbd>%APPDATA%\Python\Share\Topographica\examples</kbd> on Windows, or in
+the corresponding <kbd>VENV</kbd> directories.<BR>
+
 
 <P>Once you've located the script and the examples, you can start the
 GUI version of Topographica from the command prompt using something like:
 <kbd>topographica -g ~/.local/share/topographica/examples/tiny.ty</kbd> or
-<kbd>topographica -g %APPDATA%/share/topographica/examples/tiny.ty</kbd>
+<kbd>python %APPDATA%\Python\scripts\topographica -g %APPDATA%\Python\share\topographica\examples\gcal.ty</kbd> (on Windows). 
 
 <P>Running Topographica interactively is described in detail in
 the <A HREF="../User_Manual/scripts.html">User Manual</A>. If you want
