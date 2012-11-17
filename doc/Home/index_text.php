@@ -10,8 +10,8 @@ at the
 <a target="_top" href="http://www.cs.utexas.edu/users/nn">Neural Networks Research
 Group</a> at the 
 <a target="_top" href="http://www.utexas.edu">University of Texas at Austin</a>.  
-The project is funded by the 
-<a target="_top" href="http://www.nimh.nih.gov/neuroinformatics/index.cfm">NIMH Human Brain Project</a> 
+Development of Topographica has been funded by the 
+<a target="_top" href="http://grants.nih.gov/grants/guide/pa-files/PAR-03-035.html">NIMH Human Brain Project</a> 
 under grant 1R01-MH66991.  The goal is to help researchers understand
 brain function at the level of the topographic maps that make up
 sensory and motor systems.
