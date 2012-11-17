@@ -119,6 +119,8 @@ m4_dnl Example: m4_bib2html_bibliography(nnstrings,nn)
 m4_dnl 
 m4_define([[m4_bib2html_bibliography]], [[m4_bib2html_bibliography_base([[$*]],References,)]])
 
+m4_define([[m4_bib2html_default_bib_files]], [[[[nnstrings,nnvita,nn]]]])m4_dnl
+
 m4_dnl Macro for generating an entire section consisting of a list of
 m4_dnl bibliography entries.  E.g.:
 m4_dnl
@@ -130,7 +132,7 @@ m4_dnl
 m4_define([[m4_bib2html_section]],[[m4_dnl
 m4_bib2html_init[[]]
 m4_bib2html_nocite($2)
-m4_bib2html_bibliography_base([[nnstrings,nnvita,nn]],[[$1]],-r -c)]])m4_dnl
+m4_bib2html_bibliography_base(m4_bib2html_default_bib_files,[[$1]],-r -c)]])m4_dnl
 m4_dnl 
 m4_dnl Other possible formats:
 m4_dnl m4_bib2html_bibliography(nnstrings,nn)
