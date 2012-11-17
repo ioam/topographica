@@ -87,6 +87,7 @@ function menu_side($fname) {
 		"Future Work" => "../Future_Work/index.html",
 		"FAQ" => "../FAQ/index.html",
 		"Links" => "../Links/index.html",
+		"Publications" => "../Home/pubs.html",
 		);
 
 	# 1. black border (using table)
