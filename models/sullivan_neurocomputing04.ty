@@ -12,7 +12,6 @@ Input line thickness.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from math import exp,sqrt,fmod,pi,radians,sin,cos

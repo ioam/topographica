@@ -1,7 +1,6 @@
 """
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 

@@ -5,7 +5,6 @@ a sheet class, but can also be useful.
 
 $Id$
 """
-__version__='$Revision$'
 
 from numpy.oldnumeric import zeros
 

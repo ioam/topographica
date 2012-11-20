@@ -3,7 +3,6 @@ Unit tests for sheet and sheetcoords.
 
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 from numpy import array

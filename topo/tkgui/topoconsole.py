@@ -4,7 +4,6 @@ TopoConsole class file.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 # CB: does the status bar need to keep saying 'ok'? Sometimes

@@ -3,7 +3,6 @@ SOM-based learning functions for CFProjections.
 
 $Id$
 """
-__version__ = "$Revision$"
 
 
 from math import ceil

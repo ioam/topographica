@@ -4,7 +4,6 @@ Unit test for Parameterized.
 
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 

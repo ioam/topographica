@@ -15,7 +15,6 @@ $ ./topographica examples/lissom_whisker_barrels.ty
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from math import pi, sqrt

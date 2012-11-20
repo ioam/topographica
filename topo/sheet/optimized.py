@@ -3,7 +3,6 @@ Inline-optimized Sheet classes
 
 $Id$
 """
-__version__='$Revision$'
 
 import param
 

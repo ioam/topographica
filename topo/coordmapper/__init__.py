@@ -12,7 +12,6 @@ CoordinateMapperFn.
 
 $Id$
 """
-__version__='$Revision$'
 
 from math import atan,pi,atan2
 

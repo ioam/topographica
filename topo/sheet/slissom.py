@@ -3,7 +3,6 @@ The SLISSOM class.
 
 $Id$
 """
-__version__='$Revision$'
 
 from math import exp
 

@@ -11,7 +11,6 @@ originating source object.
 
 $Id$
 """
-__version__='$Revision$'
 
 import types
 import operator

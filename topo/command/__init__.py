@@ -11,7 +11,6 @@ no matter what the context from which they are called.
 
 $Id$
 """
-__version__='$Revision$'
 
 import cPickle as pickle
 

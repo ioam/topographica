@@ -51,7 +51,6 @@ All but the first two of these need to be fixed eventually.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 

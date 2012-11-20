@@ -31,7 +31,6 @@ then show up in the GUI menus as potential input patterns.
 
 $Id$
 """
-__version__ = "$Revision$"
 
 # The tests and the GUI are omitted from this list, and have to be
 # imported explicitly if desired.

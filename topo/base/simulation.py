@@ -52,7 +52,6 @@ special dest_port.
 
 $Id$
 """
-__version__='$Revision$'
 
 import param
 

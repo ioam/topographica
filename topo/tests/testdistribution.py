@@ -3,7 +3,6 @@ Tests of distribution.py
 
 $Id$
 """
-__version__='$Revision$'
 
 # CEBALERT: almost finished. Clean up redundant tests, comment,
 # and test selectivity for non-cyclic quantities once that has been

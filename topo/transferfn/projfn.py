@@ -5,7 +5,6 @@ CFs and applying an output function to each set of weights in turn.
 
 $Id$
 """
-__version__='$Revision$'
 
 from topo.base.cf import CFPOutputFn
 

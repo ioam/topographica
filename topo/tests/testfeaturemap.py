@@ -4,7 +4,6 @@ TestFeatureMap
 $Id$
 
 """
-__version__='$Revision$'
 
 
 

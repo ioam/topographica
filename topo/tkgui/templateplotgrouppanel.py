@@ -4,7 +4,6 @@ Panel for displaying preference maps and activity plot groups.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import copy

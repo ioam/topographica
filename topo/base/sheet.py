@@ -19,7 +19,6 @@ simply by changing e.g. Sheet.nominal_density.
 $Id$
 """
 
-__version__ = '$Revision$'
 
 
 from numpy import zeros,array,arange,meshgrid

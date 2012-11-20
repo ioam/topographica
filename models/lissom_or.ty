@@ -27,7 +27,6 @@ compared exhaustively to the original simulations.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from math import pi, sqrt

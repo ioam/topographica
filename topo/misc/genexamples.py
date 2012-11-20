@@ -18,7 +18,6 @@ for groups of targets, add to the group_targets dictionary.
 $Id$
 """
 
-__version__='$Revision$'
 
 # JABALERT: Should be cut down and simplified; most of what it does is
 # for historical rather than functional reasons.  E.g. the quick

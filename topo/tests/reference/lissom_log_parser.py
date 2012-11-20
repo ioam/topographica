@@ -8,7 +8,6 @@ give the base filename path of the C++ LISSOM files, e.g.
 
 $Id$
 """
-__version__='$Revision$'
 
 # CEBHACKALERT: filename should change
 

@@ -11,5 +11,4 @@ $Id$
 # For backwards compatibility; this file used to be in misc/
 from imagen import patternfn # pyflakes:ignore (API import)
 
-__version__='$Revision$'
 

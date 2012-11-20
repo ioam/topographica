@@ -2,7 +2,6 @@
 Unit test for SheetView
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 

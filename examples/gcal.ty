@@ -22,7 +22,6 @@ GCAL is described fully in:
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from math import pi

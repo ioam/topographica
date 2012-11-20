@@ -3,7 +3,6 @@ Plot class.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import copy

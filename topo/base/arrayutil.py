@@ -3,7 +3,6 @@ General utility functions and classes for Topographica that require numpy.
 
 $Id$
 """
-__version__ = "$Revision$"
 
 import re
 

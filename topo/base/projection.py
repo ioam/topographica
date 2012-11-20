@@ -3,7 +3,6 @@ Projection and related classes.
 
 $Id$
 """
-__version__='$Revision$'
 
 import numpy
 from numpy import array,asarray,ones,sometrue, logical_and, logical_or
