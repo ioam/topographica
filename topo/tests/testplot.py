@@ -3,7 +3,6 @@ Test for the Plot class.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import unittest

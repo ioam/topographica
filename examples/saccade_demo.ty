@@ -12,7 +12,6 @@ Saccade Demo example.  This script defines three sheets:
 
 $Id$
 """
-__version__='$Revision$'
 
 import pdb
 

@@ -6,7 +6,6 @@ objects can also be instantiated explicitly, to save a series of plots.
 
 $Id$
 """
-__version__='$Revision$'
 
 import Image
 import numpy

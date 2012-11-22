@@ -5,7 +5,6 @@ packages to interact with Topographica.
 $Id$
 """
 
-__version__ = "$Revision$"
 
 import param
 from param.parameterized import bothmethod

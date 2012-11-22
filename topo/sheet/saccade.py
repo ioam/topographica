@@ -19,7 +19,6 @@ controlling a ShiftingGeneratorSheet.
 
 $Id$
 """
-__version__ = '$Revision$'
 
 from numpy import sin,cos,pi,array,asarray,argmax,zeros,\
      nonzero,take,random

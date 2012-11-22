@@ -4,7 +4,6 @@ Analysis tools for Topographica, other than plotting tools.
 $Id$
 """
 
-__version__='$Revision$'
 
 # Automatically discover all .py files in this directory.
 import os,fnmatch

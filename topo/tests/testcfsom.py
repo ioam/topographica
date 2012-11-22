@@ -4,7 +4,6 @@ the PlotEngine system from a simulation.
 
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 import random

@@ -2,7 +2,6 @@
 Test for the PlotGroup class
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 import topo.base.simulation

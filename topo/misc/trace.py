@@ -9,7 +9,6 @@ aligned axes.
 
 $Id$
 """
-__version__ = '$Revision$'
 
 import os
 import bisect

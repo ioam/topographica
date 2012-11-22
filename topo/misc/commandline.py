@@ -6,7 +6,6 @@ Topographica files within a separate Python.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from optparse import OptionParser

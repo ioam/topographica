@@ -7,7 +7,6 @@ LearningFns: accept two 2d arrays and a scalar, return one of the arrays modifie
 
 $Id$
 """
-__version__='$Revision$'
 
 # CEBALERT: Documentation is just draft.
 

@@ -2,7 +2,6 @@
 
 $Id$
 """
-__version__='$Revision$'
 
 # CEBALERT: incomplete!
 

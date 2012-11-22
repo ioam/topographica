@@ -13,7 +13,6 @@ high-level communications with Player robots.
 
 $Id$
 """
-__version__ = '$Revision$'
 
 
 import Image,ImageOps

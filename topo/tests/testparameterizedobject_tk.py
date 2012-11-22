@@ -3,7 +3,6 @@ Tests for the tkParameterized classes.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 ## CB: add test for change of po

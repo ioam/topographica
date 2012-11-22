@@ -4,7 +4,6 @@ LISSOM simulation designed to match C++ LISSOM's FSA simulation.
 
 $Id$
 """
-__version__='$Revision$'
 
 # CEBERRORALERT: need to remove DynamicNumber
 

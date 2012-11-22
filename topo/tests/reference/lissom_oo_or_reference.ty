@@ -8,7 +8,6 @@ Please see the comments for lissom_or_reference.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 # CB: the plan is to make this file more and more general while

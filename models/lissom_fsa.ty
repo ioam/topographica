@@ -9,7 +9,6 @@ as the input patterns.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from math import pi, sqrt

@@ -16,7 +16,6 @@ Known differences from the reference simulation:
 
 $Id$
 """
-__version__='$Revision$'
 
 from math import sqrt, pi
 

@@ -11,7 +11,6 @@ SVN for additional versions.
 
 $Id$
 """
-__version__='$Revision$'
 
 # Current weave vs cython timings (lissom_or, no scheduled events)
 

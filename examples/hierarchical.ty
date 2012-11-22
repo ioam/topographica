@@ -7,7 +7,6 @@ be modified to do so in the future.
 
 $Id$
 """
-__version__='$Revision$'
 
 from math import pi
 

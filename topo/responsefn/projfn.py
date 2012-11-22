@@ -6,7 +6,6 @@ when given an input pattern and a set of ConnectionField objects.
 
 $Id$
 """
-__version__='$Revision$'
 
 from numpy import sum,exp,zeros,ravel
 from numpy.oldnumeric import Float

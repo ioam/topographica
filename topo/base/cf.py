@@ -19,7 +19,6 @@ CFProjection.
 $Id$
 """
 
-__version__ = '$Revision$'
 
 from copy import copy
 
