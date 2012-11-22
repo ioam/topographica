@@ -17,7 +17,6 @@ become available for any model.
 
 $Id$
 """
-__version__='$Revision$'
 
 from topo.base.functionfamily import ResponseFn
 

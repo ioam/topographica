@@ -22,7 +22,6 @@ superclasses for the rest of the parameters and code.
 
 $Id$
 """
-__version__='$Revision$'
 
 import Image,ImageDraw
     

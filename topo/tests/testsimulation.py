@@ -2,7 +2,6 @@
 Unit test for Simulation
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 import copy

@@ -16,7 +16,6 @@ become available for any model.
 
 $Id$
 """
-__version__='$Revision$'
 
 import copy
 

@@ -7,7 +7,6 @@ database, plus weight plots for one unit, and projections.
 
 $Id$
 """
-__version__='$Revision$'
 
 import copy
 import Image

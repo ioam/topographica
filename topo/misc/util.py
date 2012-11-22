@@ -3,7 +3,6 @@ General utility functions and classes.
 
 $Id$
 """
-__version__='$Revision$'
 
 import re
 import random

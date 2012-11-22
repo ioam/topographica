@@ -9,7 +9,6 @@ NOT YET TESTED.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from numpy.oldnumeric import *

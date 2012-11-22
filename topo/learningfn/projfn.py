@@ -8,7 +8,6 @@ ConnectionField objects.
 
 $Id$
 """
-__version__ = "$Revision$"
 
 from numpy import ones,zeros
 import numpy.oldnumeric as Numeric

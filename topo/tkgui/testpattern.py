@@ -3,7 +3,6 @@ The Test Pattern window allows input patterns to be previewed.
 
 $Id$
 """
-__version__='$Revision$'
 
 ## Notes:
 # * need to remove audigen pgs

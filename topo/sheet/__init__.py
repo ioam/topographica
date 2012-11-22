@@ -8,7 +8,6 @@ automatically become available for any model.
 
 $Id$
 """
-__version__='$Revision$'
 
 # Imported here so that all Sheets will be in the same package
 from topo.base.sheet import Sheet

@@ -3,7 +3,6 @@ Simple framework to run a set of tests and report the results.
 
 $Id$
 """
-__version__='$Revision$'
 
 import traceback,sys,inspect
 

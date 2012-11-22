@@ -6,7 +6,6 @@ which are currently displayed separately from the gui.
 
 $Id$
 """
-__version__='$Revision$'
 
 import topo
 

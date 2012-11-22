@@ -3,7 +3,6 @@ LISSOM and related sheet classes.
 
 $Id$
 """
-__version__='$Revision$'
 
 from numpy import zeros,ones
 import copy

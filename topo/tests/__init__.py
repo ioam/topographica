@@ -115,7 +115,6 @@ doctest
 
 $Id$
 """
-__version__='$Revision$'
 
 # CEBALERT: It might be good if tests/ were a directory at the top
 # level, with a subdirectory structure mirroring that of topo/. Then

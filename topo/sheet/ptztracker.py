@@ -5,7 +5,6 @@ This class also gives instructions to move the camera.
 
 $Id$
 """
-__version__ = "$Revision$"
 
 
 

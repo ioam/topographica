@@ -16,7 +16,6 @@ the Visual Cortex, Springer.  Known differences include:
 
 $Id$
 """
-__version__='$Revision$'
 
 
 from math import exp, sqrt

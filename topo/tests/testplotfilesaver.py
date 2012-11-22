@@ -3,7 +3,6 @@ Tests for the PlotFileSaver classes. Also tests analysis commands.
 
 $Id$
 """
-__version__='$Revision$'
 
 import unittest
 import os

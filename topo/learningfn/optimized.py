@@ -6,7 +6,6 @@ Requires the weave package; without it unoptimized versions are used.
 
 $Id$
 """
-__version__ = "$Revision$"
 
 from numpy import zeros, ones
 

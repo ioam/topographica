@@ -6,7 +6,6 @@ on measuring responses while varying features of an input pattern.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import copy

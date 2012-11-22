@@ -13,7 +13,6 @@ available in the Python path.
 
 $Id$
 """
-__version__='$Revision$'
 
 # For backwards compatibility; these files used to be in base/
 from imagen import boundingregion,sheetcoords,patterngenerator # pyflakes:ignore (API import)

@@ -3,7 +3,6 @@ KeyedList sorted dictionary class.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 # CEBALERT: Do most uses of KeyedList look like they would be better

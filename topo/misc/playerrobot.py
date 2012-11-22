@@ -9,7 +9,6 @@ This is a temporary home for this file until it finds a permanent home
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import time,array

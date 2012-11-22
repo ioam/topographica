@@ -4,7 +4,6 @@ to be displayed.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import copy

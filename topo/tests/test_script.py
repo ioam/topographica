@@ -6,7 +6,6 @@ Buildbot shows how to run all these tests.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import pickle, copy, __main__, timeit, os, os.path, socket, cPickle, inspect, traceback, tempfile, shutil

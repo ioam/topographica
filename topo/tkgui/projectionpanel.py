@@ -3,7 +3,6 @@ PlotgroupPanels for displaying ProjectionSheet plotgroups.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import ImageTk

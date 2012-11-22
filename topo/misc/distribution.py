@@ -3,7 +3,6 @@ Distribution class
 
 $Id$
 """
-__version__='$Revision$'
 # To do:
 #
 # - wrap bins for cyclic histograms

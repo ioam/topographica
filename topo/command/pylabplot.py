@@ -13,7 +13,6 @@ different GUI or non-GUI uses.
 
 $Id$
 """
-__version__='$Revision$'
 
 import param
     

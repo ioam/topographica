@@ -8,7 +8,6 @@ This class was tested with uvcdynctrl and Ubuntu 10.04 LTS.
 
 $Id$
 """
-__version__ = "$Revision$"
 
 
 

@@ -19,7 +19,6 @@ The encapsulated PIL Image is accessible through the .bitmap attribute.
 
 $Id$
 """
-__version__='$Revision$'
 
 import os
 import Image

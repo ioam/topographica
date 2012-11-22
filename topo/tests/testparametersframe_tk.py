@@ -3,7 +3,6 @@ Tests for the ParametersFrame classes.
 
 $Id$
 """
-__version__='$Revision$'
 
 
 import __main__

@@ -3,7 +3,6 @@ Test cases for the numbergen module.
 
 $Id$
 """
-__version__ = '$Revision$'
 
 import unittest
 from topo import numbergen

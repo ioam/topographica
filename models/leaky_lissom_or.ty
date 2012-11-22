@@ -5,7 +5,6 @@ Work in progress.
 
 $Id$
 """
-__version__='$Revision$'
 
 from math import pi, sqrt
 

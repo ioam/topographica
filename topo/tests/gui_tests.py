@@ -3,7 +3,6 @@ Functional GUI tests: run_basic() and run_detailed().
 
 $Id$
 """
-__version__='$Revision$'
 
 import copy
 
