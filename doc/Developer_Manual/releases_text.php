@@ -84,8 +84,8 @@ include those present in release-->
     
 <li><P>If you find problems, go back to step 6 and start over.
 
-<li><P>Now generate the tar.gz (<code>make dist-setup.py; make
-dist-setup.py-sdist</code>) and check its contents in the same way as
+<li><P>Now generate the tar.gz (<code>make dist-pysource
+dist-pysource-sdist</code>) and check its contents in the same way as 
 above.
 
 <li><P>At this point, it is a good idea to test the packages. Buildbot
@@ -99,12 +99,9 @@ the version number (e.g. 'git commit -m "Version 0.9.8"'). Notify the other
 developers that they may once again commit new code to the Git
 repository.
 
-<li><P>Now do <code>make dist</code> to generate a zip file, and then
-copy that to GitHub.
-
 <!--upload to pypi requires pypi account; needs updating for github? -->
 <li><P>Create tar.gz and upload them to pypi: <code>make
-dist-setup.py; make dist-pypi-upload</code>.
+dist-pysource-sdist; make dist-pypi-upload</code>.
 
 <!--upload requires account on opensuse build service-->
 <!--    
