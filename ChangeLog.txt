@@ -1,12 +1,447 @@
-2012-05-30 philippjfr
+2012-11-22
+	* jlstevens: Merge pull request #491 from
+	wiktr/svn_version_removal
 
-	* [r12048] contrib/PhilippJFR/gcal_units.ty,
-	  topo/misc/unitsupport.py: Cleaned up syntax and code in
-	  unitsupport.py and gcal_units.ty
 
-	* [r12047] topo/misc/unitsupport.py: Fixed overloaded
-	  reference to keyword global in unitsupport.py causing
-	  pyflakes error
+2012-11-20
+	* jbednar: Merge pull request #492 from wiktr/etc_removal
+
+	* wiktor: Removed all SVN-style __version__="$Revision$" logic in
+	preparation for the new git-based versioning; files that store a
+	specific __version__ (not just "$Revision$"), or actually do
+	anything with __version__, or are external files get to keep their
+	__version__ property (FOR NOW!).
+
+
+2012-11-19
+	* wiktor: Removed pipecap; not used by anything at all
+
+	* wiktor: Removed replaceall, this script is likely useless now
+
+	* wiktor: Removed toporename, this script won't even run any more
+
+	* wiktor: Removed toporoot, this is *CVS* cruft!
+
+	* wiktor: Removed old update scripts, nobody will ever need to run
+	them in 2012 and beyond
+
+	* wiktor: Removed topographica.el; it does nothing at all and, to
+	quote "customizations are likely in the future", yet this file has
+	not changed in two years.
+
+	* wiktor: Removed fliterlog.py; it's impossible to even run the
+	file any more
+
+	* wiktor: Removed useless create_topographica_script.py
+
+
+2012-11-17
+	* jbednar: Added publications about or using Topographica
+
+	* jbednar: Added ability to specify .bib file names
+
+	* jbednar: Fixed broken link and outdated text
+
+
+2012-11-15
+	* jbednar: Minor fixes
+
+	* jbednar: Updated based on eey
+
+
+2012-11-14
+	* jbednar: Minor cleanup
+
+	* jbednar: Cleaned up platform-specific instructions
+
+
+2012-11-13
+	* jbednar: Updated
+
+	* jbednar: Omit unneeded manual
+
+	* jbednar: Added platform and Python instructions
+
+	* philippjfr: Updated param submodule reference
+
+	* philippjfr: Update README.rst
+
+	* philippjfr: Updated submodule references
+
+	* philippjfr: Further syntax changes to README.rst
+
+	* philippjfr: Updated README syntax to reStructuredText
+
+	* philippjfr: Changed README from .md to .rst
+
+
+2012-11-12
+	* jbednar: Merge branch 'master' of github.com:ioam/topographica
+
+	* jbednar: Fixed typo
+
+	* jbednar: Added instructions for using pip and virtualenv
+
+	* jbednar: Minor cleanups, fixes, and clarifications.
+
+	* bhristov: coverage-related change to Makefile and runtests
+
+	* jlstevens: Updated reference to param submodule
+
+	* jlstevens: Merge branch 'master' of github.com:ioam/topographica
+
+	* jlstevens: Added __dir__ and __getattr__ methods to
+	EventProcessors
+
+	* jbednar: Announced update to web site
+
+	* jbednar: Fixed typo
+
+	* jbednar: Put target=_top into hrefs consistently
+
+	* jbednar: Updated for git, github and submodules, and fixed other
+	outdated documentation
+
+	* jbednar: Removed tag-release target; not valid for git
+
+
+2012-11-11
+	* jbednar: Now points to github documentation for downloading, and
+	fixed other outdated docs
+
+
+2012-11-09
+	* jbednar: Updated Reference Manual to match split into multiple
+	subprojects
+
+
+2012-11-07
+	* jbednar: Made GCAL be default tutorial, and fixed
+	examples->models in tutorial
+
+
+2012-11-01
+	* jlstevens: Added __dir__ and __getattr__ methods to Simulation
+	class
+
+
+2012-10-31
+	* jlstevens: Added legend parameter to tuning_curve
+
+
+2012-10-08
+	* jlstevens: Disambiguated instructions for setting PATH
+
+	* jlstevens: Python needs to be at start of PATH, not appended
+
+
+2012-10-04
+	* philippjfr: Fixed wrong submodule reference for paramtk
+
+
+2012-10-03
+	* jbednar: Fixed typo
+
+
+2012-09-30
+	* philippjfr: Updated paramtk
+
+
+2012-09-28
+	* jbednar: Clarified instructions
+
+	* jbednar: Marked doc build optional
+
+
+2012-09-27
+	* jlstevens: Updated shebang to allow work with compiled python
+
+	* jlstevens: Updated instructions for using external/Makefile
+
+	* philippjfr: Updated submodules with .gitignore files
+
+	* philippjfr: Added lancet submodule and hardcoded topographica script
+
+	* philippjfr: Update .gitignore
+
+	* philippjfr: Update README.md
+
+	* jbednar: Updated for current git version
+
+
+2012-09-25
+	* jlstevens: Updated cloning instructions.
+
+	* jlstevens: This script will be deleted soon.
+
+	* jlstevens: Missing line reintroduced.
+
+	* jlstevens: Missing os import fixed.
+
+	* jlstevens: Moved sys path changes above topo import
+
+	* jlstevens: Adding submodules to sys.path
+
+	* philippjfr: Deleted symbolic links pointing to submodules.
+
+	* jlstevens: Update .gitignore
+
+
+2012-09-24
+	* jlstevens: Removed lancet as a submodule. Submodule test over.
+
+	* jlstevens: Testing use of nested submodules with lancet
+
+	* jlstevens: Update .gitignore
+
+
+2012-09-22
+	* jlstevens: Update .gitignore
+
+	* jlstevens: Update external/Makefile
+
+
+2012-09-21
+	* philippjfr: Update .gitignore
+
+	* philippjfr: Update topo/command/analysis.py
+
+
+2012-09-20
+	* philippjfr: Added .gitignore
+
+	* philippjfr: Update external/Makefile
+
+	* philippjfr: Added symbolic links to submodules.
+
+	* philippjfr: Exchanged param, paramtk, imagen and numbergen
+	subdirectories with submodules.
+
+
+2012-08-18
+	* jlstevens: Fixed a mistake in external Makefile relating to
+	Numexpr installation
+
+	* jlstevens: Updated Pytables from 2.0rc2.dev (2007) to latest
+	version (2.40). This includes corresponding updates to the hdf5
+	and Cython dependencies
+
+
+2012-08-11
+	* philippjfr: Missing fmod import in imagen __init__.py
+
+
+2012-07-18
+	* jbednar: Updated team list
+
+
+2012-07-17
+	* ceball: d2da2ec from github.com/ioam/param: avoid param
+	depending on numpy.
+
+	* philippjfr: Fixed preference_fn docstring in measure_or_pref.
+
+	* philippjfr: Set value_scale for the preference_fn in
+	measure_or_pref to ensure usage of measure_or_pref at the command
+	line is equivalent to saving an OR plotgroup or using the GUI
+	(values between 0.0 and 1.0).
+
+
+2012-07-16
+	* jlstevens: Fixed redundant OpenMP messages on dual-core machines
+	in /misc/commandline.py. Whitespace fixes.
+
+	* jbednar: Fixed bogus class name in docs
+
+	* jbednar: Removed reference to Topographica
+
+	* jbednar: Fixed up commments
+
+	* jbednar: Fixed typo
+
+	* jbednar: Added page for ImaGen coordinates and
+
+	* jbednar: Added an unlinked page for ImaGen
+
+	* jbednar: Added numbergen and imagen to the reference manual
+
+	* jbednar: Removed dependency on topo for files that have moved to
+	imagen
+
+	* jbednar: Added legacy support for the old location of rds;
+	should move to legacy.py.  Fixed pattern.random and pattern.image
+	support.
+
+	* jbednar: Removed auto-discovery of files in numbergen directory
+
+	* jbednar: Removed unused topo.pattern directory.  Removed
+	auto-discovery of files in imagen directory
+
+	* jbednar: Moved
+	base.boundingregion,base.sheetcoords,base.patterngenerator,misc.patternfn,
+	and topo.pattern/* into imagen package, using monkey-patching to
+	make them continue to appear in their original locations
+
+	* jbednar: Removed dependency on functionfamily and
+	topo.transferfn
+
+	* jbednar: Fixed pyflakes warnings from previous commit
+
+	* jbednar: Moved TransferFn and IdentityTF out of
+	functionfamily.py, and *Threshold and DivisiveNormalize* out of
+	topo.transferfn, into new file imagen.transferfn for use in
+	ImaGen.  Should still work just as before, due to reimporting in
+	the old locations.
+
+	* jbednar: Moved RandomDotStereogram from topo.pattern.rds to
+	topo.pattern.random.  Cleaned up whitespace
+
+	* jbednar: Removed dependency on topo. Mentioned dependency on PIL
+
+	* jbednar: Removed dependency on topo
+
+	* jbednar: Removed dependency on topo.base.arrayutil from
+	DivisiveNormalize*.  Cleaned up whitespace
+
+	* jbednar: Clarified comment
+
+	* jbednar: Removed dependency on topo from Translator by adding a
+	time_fn parameter
+
+	* jbednar: Cleaned up whitespace
+
+
+2012-07-15
+	* jbednar: Moved numbergen out of topo
+
+	* jbednar: Made topo.numbergen ready to be a separate package, by
+	changing ExponentialDecay to have a non-Topographica-specific
+	default value, and by monkey-patching topo/__init__.py to put
+	numbergen and numbergen.basic into topo regardless of where they
+	were found.
+
+	* jbednar: Avoid building examples by default; no longer useful.
+	Updated revision number for ChangeLog refreshing
+
+	* jbednar: Minor fix
+
+	* ceball: Fixed version number.
+
+	* ceball: Moved OptionalSingleton from param.parameterized to
+	topo.base.simulation.
+
+	* ceball: Moved PicklableClassAttributes from param.parameterized
+	to topo.misc.snapshots.
+
+
+2012-07-11
+	* jantolik: adapted vision.py to correctly use the changes in map
+	measurment code
+
+
+2012-07-03
+	* philippjfr: Fixed faulty step size calculation in
+	measure_size_response of command/pylabplot.py
+
+	* philippjfr: Introduced explicit check if selectivity_multiplier
+	is not None before overriding default selectivity scale.
+
+
+2012-06-25
+	* philippjfr: Reintroduced selectivity_multiplier parameter in
+	FeatureMaps and removed hardcoded selectivity_scale of 17.0 in
+	DSF_ functions in command/analysis.py
+
+
+2012-06-19
+	* jlstevens: Updated message about NSLOTS to reflect environments
+	other than Grid Engine
+
+	* jlstevens: Changed variable name from vars to varmap in
+	plotfilesaver.py. Was overriding Python built-in function without
+	good reason
+
+
+2012-06-12
+	* philippjfr: Added quantities to external directory and included
+	it in the Makefile
+
+
+2012-06-08
+	* jlstevens: Topographica now uses NSLOTS environment variable to
+	automatically use the appropriate number of OpenMP threads when
+	running on GridEngine
+
+
+2012-06-02
+	* philippjfr: Added entry for Philipp Rudiger in the Team Members
+	documentation.
+
+
+2012-06-01
+	* ceball: Fixed undefined names and accidentally overwritten
+	entry.
+
+
+2012-05-31
+	* jbednar: Set revison numbers for recent additions
+
+	* ceball: Added legacy support for renaming of
+	SheetView.norm_factor and moving of
+	FeatureMaps.selectivity_multiplier.
+
+	* ceball: For snapshots, support moving of parameters.
+
+	* jbednar: Added more changes
+
+	* ceball: Various changes that have been running on buildbot for a
+	while. Fix speed tests. Changes for buildbot upgrade to 0.8.6.
+
+	* philippjfr: Updated revision number for legacy support for
+	set_hook in param.Number and BoundingRegionParameter
+
+	* philippjfr: Converted unit conversion hooks to classes to avoid
+	problems when loading snapshots.
+
+	* ceball: Added legacy support for new set_hook slot in Number and
+	BoundingRegionParameter. Needs finalizing by PFR.
+
+	* ceball: Added test data file missing from pysource
+	distributions.
+
+	* ceball: Added legacy support for removal of param/external.py
+	(r12024).
+
+	* ceball: Copied odict.py from paramtk into topo/misc/.
+
+	* ceball: More updates that should have been part of creating
+	paramtk.
+
+	* ceball: Updates that should have been part of creating paramtk.
+
+	* ceball: Support for new models/ directory.
+
+	* ceball: Fix error in previous commit.
+
+	* ceball: Fixed error in 'make deb' (introduced during directory
+	reorganization).
+
+	* ceball: Fixed error in exe generation (introduced during
+	directory reorganization.
+
+
+2012-05-30
+	* jbednar: Updated with current changes
+
+	* philippjfr: Cleaned up syntax and code in unitsupport.py and
+	gcal_units.ty
+
+	* philippjfr: Fixed overloaded reference to keyword global in
+	unitsupport.py causing pyflakes error
+
+
+	[ChangeLog format changed because older entries managed by svn,
+	not git; still need to find a good way to get full data from git.]
 
 2012-05-29 philippjfr
 
