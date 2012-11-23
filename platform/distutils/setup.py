@@ -10,7 +10,10 @@ scripts = ['topographica']
 
 ### TOPOGRAPHICA DEPENDENCIES ########################################
 required = {'PIL':">=1.1.6",
-            'numpy':">=1.0"} 
+            'numpy':">=1.0",
+            'param':">=1.0",
+            'paramtk':">=1.0",
+            'imagen':">=1.0"}
 
 optional = {'gmpy':'>=1.0', 
             'matplotlib':'>=0.8',
@@ -88,27 +91,26 @@ Please see http://topographica.org/ for more information.
 Installation
 ============
 
-Topographica is already packaged for a number of platforms, including
-Linux, Mac, and Windows. Please see http://topographica.org/Downloads
-for links to packages. Below is a brief summary for installation into
-an existing Python environment.
+Please see http://topographica.org/Downloads for more complete
+instructions; a briefl summary for installation into an existing
+Python environment is given here.
 
-If you have `easy_install`_ or `pip`_ (or similar), you can use one of
+If you have `pip`_, you can use one of
 those to install Topographica and its dependencies automatically
-(e.g. ``easy_install topographica`` or ``pip install topographica``).
+(e.g. ``pip install topographica``).
 
 Alternatively, you can download and unpack the archive below, and then
 install Topographica with a command like ``python setup.py install``
 (e.g. ``sudo python setup.py install`` for a site-wide installation,
 or ``python setup.py install --user`` to install into
-``~/.local``). You will need to install at least `NumPy`_ and `PIL`_
-before running Topographica. We also recommend that you install
-`MatPlotLib`_ so you can access all Topographica's plots, as well as
-`Gmpy`_ and Weave (available as part of `SciPy`_) for optimum
-performance.
+``~/.local``). You will need to install at least `NumPy`_, `PIL`_, 
+`Param`_, `ParamTk`_, and `ImaGen`_, before running Topographica. We
+also recommend that you install `MatPlotLib`_ so you can access all
+Topographica's plots, as well as `GmPy`_ and Weave (available as part
+of `SciPy`_) for optimum performance.
 
 .. _Topographica:
-   http://topographica.org/Home/index.html
+   http://topographica.org/Home/
 .. _NumPy: 
    http://pypi.python.org/pypi/numpy
 .. _Gmpy: 
@@ -119,11 +121,8 @@ performance.
    http://pypi.python.org/pypi/matplotlib
 .. _PIL: 
    http://pypi.python.org/pypi/PIL
-.. _easy_install:
-   http://peak.telecommunity.com/DevCenter/EasyInstall
 .. _pip:
    http://pip.openplans.org/
-
 """,
 
     author= _topographica_devs,
@@ -139,8 +138,8 @@ performance.
         "License :: OSI Approved :: BSD License",
 # (until packaging tested)
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
         "Operating System :: OS Independent",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
@@ -150,8 +149,6 @@ performance.
 
     # CEBALERT: do I have to list these? if I do, can I generate the list automatically?
     packages=['topo',
-              'param',
-              'paramtk',
               'topo.analysis',
               'topo.base',
               'topo.command',
@@ -159,22 +156,18 @@ performance.
               'topo.ep',
               'topo.learningfn',
               'topo.misc',
-              'topo.numbergen',
-              'topo.transferfn',
-              'topo.pattern',
               'topo.plotting',
               'topo.projection',
               'topo.responsefn',
               'topo.sheet',
               'topo.tests',
-              'topo.tkgui'],
+              'topo.tkgui',
+              'topo.transferfn'],
 
     package_data={
         # CB: These things are not data, but there's currently no
         # other mechanism in distutils/setuptools.
-        'paramtk': ['tcl/snit-2.2.1/*.tcl',
-                    'tcl/scrodget-2.1/*.tcl',
-                    'tcl/tooltip-1.4/*.tcl'],
+        '': ['topographica'],
         'topo.tkgui': ['icons/*.*'],
         'topo.command':['*.png','*.pdf'],
         'topo.tests':['*.txt','*.jpg','*.pgm']+[s+"_DATA" for s in TRAINSCRIPTS]+['*.data']+['*.typ']+['*.pickle']},

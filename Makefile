@@ -223,6 +223,7 @@ MODELS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^leaky_lissom_or.ty ^lissom.ty ^l
 #
 #@@distclean: FORCE clean
 #@@	   ${RM} .#* */.#* */*/.#* */*~ 
+#@@	   ${RM} README.rst
 #@@	   ${RM} etc/topographica.elc ImageSaver*.ppm countalerts* annotate.out emacslog
 #@@	   ${RM} current_profile script timing*
 #@@	   ${RM} examples/*.typ models/*.typ
@@ -238,8 +239,9 @@ MODELS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^leaky_lissom_or.ty ^lissom.ty ^l
 #@@	   ${CD} topo/tests/reference ; make clean
 #@@	   ${RM} -r doc/buildbot/
 #@@	   ${RM} -r platform/debian/
-#@@	   find examples/*.ty -maxdepth 1 ${subst ^,! -name ,${SCRIPTS_TO_KEEP_IN_DIST}} -exec rm {} \;
-#@@	   find models/*.ty -maxdepth 1 ${subst ^,! -name ,${SCRIPTS_TO_KEEP_IN_DIST}} -exec rm {} \;
+#@@	   ${RM} -r external/
+#@@	   find examples/*.ty -maxdepth 1 ${subst ^,! -name ,${EXAMPLES_TO_KEEP_IN_DIST}} -exec rm {} \;
+#@@	   find models/*.ty -maxdepth 1 ${subst ^,! -name ,${MODELS_TO_KEEP_IN_DIST}} -exec rm {} \;
 
 
 # Make public distribution archive
@@ -251,13 +253,15 @@ distdir: FORCE
 	${RM} -r ${DIST_DIR}
 	${MKDIR} ${DIST_DIR}
 	${CP} -r -d . ${DIST_DIR}
+	${CP} ${DIST_DIR}/platform/distutils/README.setup.txt README.txt
 	${RM} ${DIST_DIR}/Makefile 
 	${SED} \
 	-e 's|^#@@||' \
 	Makefile > ${DIST_DIR}/Makefile 
 
 # Create public distribution subdirectory and archive
-dist: doc distdir reference-manual FORCE
+#dist: doc distdir reference-manual FORCE
+dist: doc distdir FORCE
 	${CD} ${DIST_DIR}; ${MAKE} distarc
 
 
