@@ -23,7 +23,9 @@
   <div class="i2">- support for Python 2.7, NumPy 1.6, IPython 0.11-0.12, and Matplotlib 1.1.0</div>
   <div class="i2">- Mac OS X: right click supported on more platforms, automatic .ty file syntax colouring in Xcode 3</div>
   <div class="i2">- snapshots created by version 0.9.7 and above will be supported</div>
-  <div class="i2">- default output path now ~/Documents/Topographica on all platforms</div>
+  <div class="i2">- default output path now in a Topographica subfolder of
+  your system's Documents directory (often ~ on Linux; typically
+  Documents elsewhere)</div>
   <div class="i2">- simpler installation using pip on all platforms</div>
   <div class="i2">- no longer need to build <kbd>topographica</kbd> script on installation</div>
 <!--  <div class="i2">- support for real-world units using Quantities</div> -->

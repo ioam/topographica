@@ -47,7 +47,7 @@ from the command prompt:
 <PRE>pip install --user topographica</PRE>
 
 <P>This will fetch Topographica and its required dependencies (i.e.,
-param, numpy, and PIL, for the 0.9.7 release) from 
+param, paramtk, imagen, numpy, and PIL, for the 0.9.8 release) from 
 <a target="_top" href="http://pypi.python.org/pypi/topographica">PyPI</A> 
 and install them into your home directory.  The files will be stored
 in a subdirectory called <code>.local</code> on Linux and Mac, and
@@ -126,10 +126,8 @@ installation, with no effect on your system.
 
 <H3><a name="git">Install via Git</a></H3>
 
-<P>If you want the most current version of Topographica (as many users
-will as of 11/2012, given how long it has been since a formal
-release), or if you want to track Topographica development over time,
-you'll want the 
+<P>If you want the most current version of Topographica, or if you
+want to track Topographica development over time, you'll want the 
 <a target="_top" href="https://github.com/ioam/topographica">github</a> version of
 Topographica instead of installing it via pip.
 
