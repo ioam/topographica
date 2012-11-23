@@ -240,6 +240,7 @@ MODELS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^leaky_lissom_or.ty ^lissom.ty ^l
 #@@	   ${RM} -r doc/buildbot/
 #@@	   ${RM} -r platform/debian/
 #@@	   ${RM} -r external/
+#@@	   ${RM} -r doc/bib*.blg doc/bib*.bbl doc/bib*.aux
 #@@	   find examples/*.ty -maxdepth 1 ${subst ^,! -name ,${EXAMPLES_TO_KEEP_IN_DIST}} -exec rm {} \;
 #@@	   find models/*.ty -maxdepth 1 ${subst ^,! -name ,${MODELS_TO_KEEP_IN_DIST}} -exec rm {} \;
 
@@ -260,7 +261,7 @@ distdir: FORCE
 	Makefile > ${DIST_DIR}/Makefile 
 
 # Create public distribution subdirectory and archive
-#dist: doc distdir reference-manual FORCE
+dist: doc distdir reference-manual FORCE
 dist: doc distdir FORCE
 	${CD} ${DIST_DIR}; ${MAKE} distarc
 
