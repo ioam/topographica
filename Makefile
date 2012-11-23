@@ -223,7 +223,7 @@ MODELS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^leaky_lissom_or.ty ^lissom.ty ^l
 #
 #@@distclean: FORCE clean
 #@@	   ${RM} .#* */.#* */*/.#* */*~ 
-#@@	   ${RM} README.rst
+#@@	   ${RM} README.rst ; ${CP} platform/distutils/README.setup.txt README.txt
 #@@	   ${RM} etc/topographica.elc ImageSaver*.ppm countalerts* annotate.out emacslog
 #@@	   ${RM} current_profile script timing*
 #@@	   ${RM} examples/*.typ models/*.typ
@@ -254,7 +254,6 @@ distdir: FORCE
 	${RM} -r ${DIST_DIR}
 	${MKDIR} ${DIST_DIR}
 	${CP} -r -d . ${DIST_DIR}
-	${CP} ${DIST_DIR}/platform/distutils/README.setup.txt README.txt
 	${RM} ${DIST_DIR}/Makefile 
 	${SED} \
 	-e 's|^#@@||' \
