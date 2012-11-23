@@ -49,10 +49,10 @@ __all__ = ['analysis',
            'responsefn',
            'sheet']
 
-# These values should be set by the topographica script
-release = ''
-version = ''
 
+# The version number will eventually need to be set automatically from git
+release='0.9.8'
+version='12131'
 
 import param 
 import os

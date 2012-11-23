@@ -4,39 +4,14 @@ PYLINT = bin/pylint --rcfile=doc/buildbot/pylintrc
 
 PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
-# CEBALERT: this is duplicated in etc/create_topographica_script.py
-RELEASE = 0.9.7
+RELEASE = 0.9.8
 
 PYTHON = ${PREFIX}/bin/python
 
-SVNVERSION = ${shell svnversion}
-
 PYFLAKES = ${PYTHON} etc/pyflakes-ignore.py
 
-# If SVNVERSION is "exported", form a new SVNVERSION xyz:abc where xyz
-# is the svn version from git svn, and abc is the git id of the HEAD
-# commit.
-
-# CEBALERT: originally had $ at end of each regular expression below,
-# but not sure how to do that in makefile.  Also, could it be one grep
-# command? Needs to work for this kind of thing:
-# $ git svn info
-# Path: .
-# URL: https://topographica.svn.sourceforge.net/svnroot/topographica/trunk/topographica
-# Repository Root: https://topographica.svn.sourceforge.net/svnroot/topographica
-# Repository UUID: 0ce056cd-c842-0410-9ff1-d0633a95805a
-# Revision: 11384
-# Node Kind: directory
-# Schedule: normal
-# Last Changed Author: ceball
-# Last Changed Rev: 11384
-# Last Changed Date: 2010-10-02 11:58:56 +0100 (Sat, 02 Oct 2010)
-ifeq ("${SVNVERSION}","exported")
-# CEBALERT: svnversion is probably 'exported' in other situations, too. How to make the command
-# below fail gracefully if "git svn" not available?
-	SVNVERSION = ${shell git svn info | sed -n 's/^Revision: \([0-9]*\)/\1/p'}:${shell git rev-parse HEAD}
-endif
-
+# Currently hard-coded; needs to fetch correct value from git
+SVNVERSION = 12131
 
 # if 0, skips building tk and related external packages
 GUI = 1
@@ -86,7 +61,7 @@ all: default reference-manual doc tests
 clean: clean-doc clean-ext-packages clean-compiled clean-coverage-output
 	${RM} .??*~ *~ */*~ */.??*~ */*/*~ */*/.??*~ */*/*/*~ */*/*/.??*~ *.bak
 	${RM} .#??*.* */.#??*.* */*/.#??*.* */*/*/.#??*.* current_profile ./topo/tests/testsnapshot.typ ./topo/tests/testplotfilesaver*.png
-	${RM} -r bin include share lib man topographica ImageSaver*.jpeg python_topo
+	${RM} -r bin include share lib man ImageSaver*.jpeg python_topo
 
 
 uninstall:
@@ -103,23 +78,6 @@ clean-ext-packages:
 	make -C external clean
 	make -C external uninstall
 
-
-# Build the Python startup script.  Rebuilt whenever a file changes in
-# topo/ or examples/ or models/, to make sure that topo.version is up to date.
-topographica: external Makefile topo/*/*.py examples/*.ty models/*.ty
-# site.USER_SITE is ignored to stop Python finding packages in
-# ~/.local instead of Topographica's own packages.
-	${PYTHON} ${PREFIX}/etc/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 0
-
-# CEBALERT: We can remove this target - see developer manual
-# installation page for direct python command. Not all platforms have
-# make.
-topographica-external-python:
-ifeq ("${PYTHON}","${PREFIX}/bin/python")
-	$(error "Must specify external Python (via PYTHON=/path/to/external/python)")
-else
-	${PYTHON} ${PREFIX}/etc/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
-endif
 
 # CB: experimental
 topographicagui: 
@@ -238,7 +196,7 @@ v_lissom:
 #############################################################################
 # For maintainer only; be careful with these commands
 
-## Subversion-only code release, without making new binaries
+## Git-only code release, without making new binaries
 ## Run these from a relatively clean copy of the topographica directory 
 ## (without stray files, especially in doc/).
 
@@ -254,7 +212,8 @@ sf-web-site: reference-manual doc
 	rsync -v -arHz --rsh=ssh doc/. web.sf.net:/home/groups/t/to/topographica/htdocs/.
 
 
-SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_or.ty ^lissom_fsa.ty ^lissom_oo_or.ty ^lissom_or_movie.ty ^lissom_or.ty ^lissom.ty ^lissom_whisker_barrels.ty ^obermayer_pnas90.ty ^som_retinotopy.ty ^sullivan_neurocomputing04.ty ^tiny.ty ^gcal.ty
+EXAMPLES_TO_KEEP_IN_DIST= ^gcal.ty ^hierarchical.ty ^lissom_audio.ty ^perrinet_retina.ty ^ptztracker.ty ^saccade_demo.ty ^som_retinotopy.ty ^tiny.ty 
+MODELS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^leaky_lissom_or.ty ^lissom.ty ^lissom_fsa.ty ^lissom_oo_or.ty ^lissom_oo_or_cr.ty ^lissom_or.ty ^lissom_or_movie.ty ^lissom_whisker_barrels.ty ^obermayer_pnas90.ty ^sullivan_neurocomputing04.ty 
 
 
 # Clear out everything not intended for the public distribution
@@ -275,10 +234,12 @@ SCRIPTS_TO_KEEP_IN_DIST= ^goodhill_network90.ty ^hierarchical.ty ^leaky_lissom_o
 #@@	   ${RM} -r tmp/
 #@@	   ${RM} -r contrib/
 #@@	   ${RM} -r .svn */.svn */*/.svn */*/*/.svn */*/*/*/.svn
+#@@	   ${RM} -r .git* */.git* */*/.git* */*/*/.git* */*/*/*/.git*
 #@@	   ${CD} topo/tests/reference ; make clean
 #@@	   ${RM} -r doc/buildbot/
 #@@	   ${RM} -r platform/debian/
 #@@	   find examples/*.ty -maxdepth 1 ${subst ^,! -name ,${SCRIPTS_TO_KEEP_IN_DIST}} -exec rm {} \;
+#@@	   find models/*.ty -maxdepth 1 ${subst ^,! -name ,${SCRIPTS_TO_KEEP_IN_DIST}} -exec rm {} \;
 
 
 # Make public distribution archive
@@ -313,7 +274,6 @@ ChangeLog.txt: FORCE
 
 dist-pysource: doc distdir reference-manual
 	${CD} ${DIST_DIR}; make distclean
-	${CD} ${DIST_DIR}; ${PYTHON} etc/create_topographica_script.py "${PYTHON}" ${RELEASE} ${SVNVERSION} 1
 	${CD} ${DIST_DIR}; ${CP} platform/distutils/README.setup.txt README.txt
 	${CD} ${DIST_DIR}; ${CP} platform/distutils/setup.py setup.py
 	${CD} ${DIST_DIR}; ${CP} platform/distutils/MANIFEST.in MANIFEST.in
@@ -422,7 +382,7 @@ UBUNTU_DIR = ${DIST_TMPDIR}/topographica-${UBUNTU_RELEASE}
 UBUNTU_CHANGELOG = ${UBUNTU_DIR}/debian/changelog
 
 # You must first have run make dist-pysource. (Not a dependency
-# because buildbot runs these targets separately.
+# because buildbot runs these targets separately.)
 deb:
 	cd ${DIST_TMPDIR}; cp topographica-${RELEASE}.tar.gz topographica_${UBUNTU_RELEASE}.orig.tar.gz
 	cd ${DIST_TMPDIR}; mv topographica-${RELEASE} topographica-${UBUNTU_RELEASE}

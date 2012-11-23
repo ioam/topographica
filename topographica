@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Startup script for Topographica
+# Typical way to launch Topographica; simply extends module search
+# path and processes command-line arguments
 
-import os
-import sys
-
+# Make sure submodules can be found (only needed for git installation)
+import os,sys
 (basepath, _) = os.path.split(os.path.abspath(__file__))
 sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
@@ -11,8 +11,6 @@ sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
 
 import topo
-topo.release='0.9.7'
-topo.version='12130'
 
 # Process the command-line arguments
 from sys import argv
