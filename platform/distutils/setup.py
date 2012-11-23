@@ -12,7 +12,7 @@ scripts = ['topographica']
 required = {'PIL':">=1.1.6",
             'numpy':">=1.0",
             'param':">=1.0",
-            'paramtk':">=1.0",
+            'paramtk':">=0.8",
             'imagen':">=1.0"}
 
 optional = {'gmpy':'>=1.0', 
