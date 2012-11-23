@@ -254,6 +254,12 @@ example). See the Cython documentation for more information.
 install Cython for Topographica, just enter <code>make -C external
 cython</code> from your Topographica directory.-->
 
+<P><DT><A href="http://packages.python.org/quantities">Quantities</A></DT>
+<DD>Quantities allows you to use real-world units in your .ty scripts,
+such as mm or degrees of visual field, converting them to
+Topographica's units.
+</DD>
+
 <P><DT><A href="http://scikits.appspot.com/scikits">SciKits</A></DT>
 <DD>SciKits provide many useful extensions to SciPy, e.g. for machine
 learning and numerical optimization.
