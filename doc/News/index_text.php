@@ -1,6 +1,98 @@
-<p><b>12 Nov 2012:</b> Topographica web site updated to reflect current
-  Git version; see the documentation distributed with each release if
-  you want the description of that version of the code.<br><br>
+<!-- TimeSeries - generic container for sequential data -->
+<!-- Legacy support can now be tied to particular releases/versions, so we can control what support is installed.-->
+<!-- Removed apparently unmaintained Gnosis Utils.  Removed experimental xml snapshot saving.-->
+<!-- multiprocessor support (via MPI) ADD DOC LINK -->
+<!--
+  <div class="i2">- Added <A target="_top" href="../Developer_Manual/cython.html">Cython tutorial</A> for writing fast components more easily</div>
+-->
+
+<!-- Updated to Fri Nov 23 00:45:31 GMT 2012 version -->
+<p><b><a name="23-nov-2012">23 Nov 2012:</a></b> Version 0.9.8 released, including:
+
+<center>
+<table width="100%" cellpadding="5">
+<tr>
+<td width="50%">
+<dl COMPACT>
+<font size="-1">
+<dt>General improvements:</dt>
+<dd>
+  <div class="i2">- now uses native Python by default, making it much
+  easier to integrate Topographica into your scientific workflow</div> 
+  <div class="i2">- <A target="_top" href="../User_Manual/multicore.html">shared-memory multiple-core support (via OpenMP)</A></div>
+  <div class="i2">- support for Python 2.7, NumPy 1.6, IPython 0.11-0.12, and Matplotlib 1.1.0</div>
+  <div class="i2">- Mac OS X: right click supported on more platforms, automatic .ty file syntax colouring in Xcode 3</div>
+  <div class="i2">- snapshots created by version 0.9.7 and above will be supported</div>
+  <div class="i2">- default output path now ~/Documents/Topographica on all platforms</div>
+  <div class="i2">- simpler installation using pip on all platforms</div>
+  <div class="i2">- no longer need to build <kbd>topographica</kbd> script on installation</div>
+<!--  <div class="i2">- support for real-world units using Quantities</div> -->
+  <div class="i2">- minor bugfixes</div>
+</dd>
+<br>
+<dt>Command-line and batch:</dt>
+<dd>
+  <div class="i2">- --pdb calls debugger after every unhandled exception</div>
+</dd>
+<br>
+<dt>Example scripts:</dt>
+<dd>
+  <div class="i2">- ptztracker.ty: example of controlling a pan/tilt/zoom camera to track objects in real time</div>
+  <div class="i2">- new "models" subdirectory for published work; "examples" is now meant only for simpler starting points</div>
+</dd>
+</font>
+</dl>
+</td>
+<td width="50%">
+<dl COMPACT>
+<font size="-1">
+<dt>GUI:</dt>
+<dd>
+  <div class="i2">- Model Editor allows text labels to be suppressed so that .eps output can be labeled in an illustration program (e.g. Inkscape) for use in publications</div>
+  <div class="i2">- New plot options for right-clicking: plot in sheet
+  coords, plot in matrix coords, autocorrelation (requires SciPy)</div>
+</dd>
+<br>
+<dt>Component library:</dt>
+<dd>
+  <div class="i2">- PatternGenerators:
+<!--  <?php classref('imagen','SpiralGrating')?>, -->
+<!--  <?php classref('imagen','HyperbolicGrating')?>, -->
+<!--  <?php classref('imagen','RadialGrating')?>, -->
+<!--  <?php classref('imagen','ConcentricRings')?>, -->
+<!--  <?php classref('imagen','ArcCentered')?>, -->
+  <?php classref('imagen','Sigmoid')?> (half plane with sigmoidal border),
+  <?php classref('imagen','LogGaussian')?> (Gaussian with skew),
+  <?php classref('imagen','SigmoidedDoG')?> (auditory RF with a DoG multiplied by a sigmoid),
+  <?php classref('imagen','SigmoidedDoLG')?> (auditory RF with two DoLGs multiplied by a sigmoid),
+  <?php classref('imagen.opencvcamera','CameraImage')?> (OpenCV live camera import) pattern families
+  </div>
+  <div class="i2">- <?php classref('topo.misc.distribution','DistributionStatisticFn')?>
+  classes for controlling map and tuning curve measurement:
+  <?php classref('topo.misc.distribution','DSF_MaxValue')?>
+  (preference is peak value)
+  <?php classref('topo.misc.distribution','DSF_WeightedAverage')?>
+  (pref is weighted average)
+  <?php classref('topo.misc.distribution','DSF_VonMisesFit')?>, (from von
+  Mises circular normal fit), 
+  <?php classref('topo.misc.distribution','DSF_BimodalVonMisesFit')?>
+  (bimodal distribution fit; also see 
+  <?php classref('topo.misc.distribution','DSF_TopTwoValues')?> and
+  <?php classref('topo.misc.distribution','DSF_BimodalPeaks')?>).
+  </div>
+  <div class="i2">- <?php classref('param','Array')?> parameter</div>
+  <div class="i2">- Simulation and EventProcessors now support tab completion and "."
+access to their Sheets and EPConnections (e.g. "topo.sim.V1.Afferent")</div>
+  <div class="i2">- greatly expanded support for auditory input; see
+  <A HREF="../Reference_Manual/imagen.audio-module.html">imagen.audio</a></div>
+</dd>
+</font>
+</dl>
+</td>
+</tr>
+</table>
+</center>
+
 
 <p><b>3 Oct 2012:</b> Topographica development moved from
   <a target="_top" href="http://sourceforge.net/projects/topographica">SourceForge
@@ -35,90 +127,12 @@
     geometric shapes, random distributions, images, etc.</DD>
   </DL>
 
-  <P>These subprojects contain code still used in Topographica, but
+  <P>These subprojects contain code still used in Topographica (with
+  imagen visible as topo.pattern for backwards compatibility), but
   can now be downloaded and installed separately.  Both projects were
   introduced at SciPy 2012 (Austin, TX); the 
   <a target="_top" href="http://www.youtube.com/watch?v=7_ELWwzFCi0">talk on
   Param</a> is available online.<BR><BR>
-
-<p><b><a name="30-nov-2011">30 Nov 2011:</a></b> New features available, enough to constitute a
-  new release, but with release waiting on plans for changing hosting
-  sites. These changes are available in the SVN source code repository:
-
-<!-- TimeSeries - generic container for sequential data -->
-<!-- Legacy support can now be tied to particular releases/versions, so we can control what support is installed.-->
-<!-- Removed apparently unmaintained Gnosis Utils.  Removed experimental xml snapshot saving.-->
-
-<!-- Updated to r11793 -->
-<center>
-<table width="100%" cellpadding="5">
-<tr>
-<td width="50%">
-<dl COMPACT>
-<font size="-1">
-<dt>General improvements:</dt>
-<dd>
-  <div class="i2">- support for NumPy 1.3, IPython 0.11, and Matplotlib 1.1.0</div>
-  <div class="i2">- minor bugfixes</div>
-  <div class="i2">- greatly expanded support for auditory input; see topo.pattern.audio</div>
-  <div class="i2">- default output path now ~/Documents/Topographica on all platforms</div>
-  <div class="i2">- Mac OS X: right click supported on more platforms, automatic .ty file syntax colouring in Xcode 3</div>
-  <div class="i2">- snapshots created by version 0.9.7 and above will be supported</div>
-<!--
-  <div class="i2">- Added <A target="_top" href="../Developer_Manual/cython.html">Cython tutorial</A> for writing fast components more easily</div>
--->
-  <!--
-  <div class="i2">- shared-memory multiprocessing support ADD DOC LINK</div>
-  <div class="i2">- multiprocessor support (via MPI) ADD DOC LINK</div>
-  <div class="i2">- better package and native-Python support; should now be easier to integrate Topographica into your workflow</div>
-  -->
-</dd>
-<br>
-<dt>Command-line and batch:</dt>
-<dd>
-  <div class="i2">- --pdb calls debugger after every unhandled exception</div>
-</dd>
-<br>
-<dt>Example scripts:</dt>
-<dd>
-  <div class="i2">- ptztracker.ty: example of controlling a pan/tilt/zoom camera to track objects in real time</div>
-</dd>
-</font>
-</dl>
-</td>
-<td width="50%">
-<dl COMPACT>
-<font size="-1">
-<dt>GUI:</dt>
-<dd>
-  <div class="i2">- Model Editor allows text labels to be suppressed so that .eps output can be labeled in an illustration program (e.g. Inkscape) for use in publications</div>
-  <div class="i2">- New plot options for right-clicking: plot in sheet
-  coords, plot in matrix coords, autocorrelation (requires SciPy)</div>
-</dd>
-<br>
-<dt>Component library:</dt>
-<dd>
-  <div class="i2">- PatternGenerators:
-<!--  <?php classref('topo.pattern.basic','SpiralGrating')?>, -->
-<!--  <?php classref('topo.pattern.basic','HyperbolicGrating')?>, -->
-<!--  <?php classref('topo.pattern.basic','RadialGrating')?>, -->
-<!--  <?php classref('topo.pattern.basic','ConcentricRings')?>, -->
-<!--  <?php classref('topo.pattern.basic','ArcCentered')?>, -->
-  <?php classref('topo.pattern.basic','Sigmoid')?> (half plane with sigmoidal border),
-  <?php classref('topo.pattern.basic','LogGaussian')?> (Gaussian with skew),
-  <?php classref('topo.pattern.basic','SigmoidedDoGs')?> (auditory RF with two DoGs multiplied by a sigmoid),
-  <?php classref('topo.pattern.basic','SigmoidedDoLG')?> (auditory RF with two DoLGs multiplied by a sigmoid),
-  <?php classref('topo.pattern.opencvcamera','CameraImage')?> (OpenCV live camera import) pattern families
-  </div>
-  <div class="i2">- <?php classref('param','Array')?> parameter</div>
-</dd>
-</font>
-</dl>
-</td>
-</tr>
-</table>
-</center>
-
 
 <p><b>18 July 2010:</b> Version 0.9.7 released, including:
 
@@ -151,12 +165,12 @@
 <dd>
   <!--CEBALERT: dirname_prefix might be changed. We had email discussion but I haven't
   done anything about it yet.-->
-  <div class="i2">- <?php classref('topo.command.basic','run_batch')?> accept
+  <div class="i2">- <?php classref('topo.command','run_batch')?> accept
   new name_time_format and dirname_prefix parameters</div>
   <div class="i2">-
-  <?php fnref('topo.command.basic','n_bytes')?>,
-  <?php fnref('topo.command.basic','n_conns')?>,
-  <?php fnref('topo.command.basic','print_sizes')?>:
+  <?php fnref('topo.command','n_bytes')?>,
+  <?php fnref('topo.command','n_conns')?>,
+  <?php fnref('topo.command','print_sizes')?>:
   display size and memory usage of current network</div>
 </dd>
 <br>
@@ -184,16 +198,16 @@
 <dt>Component library:</dt>
 <dd>
   <div class="i2">- PatternGenerators:
-  <?php classref('topo.pattern.basic','ExponentialDecay')?>,
-  <?php classref('topo.pattern.basic','HalfPlane')?>,
-  <?php classref('topo.pattern.basic','Arc')?>,
-  <?php classref('topo.pattern.basic','Curve')?>, 
-  <?php classref('topo.pattern.basic','Rectangle')?> (now with smoothing),
-  <?php classref('topo.pattern.basic','RawRectangle')?> (no smoothing),
-  <?php classref('topo.pattern.basic','Sigmoid')?>,
-  <?php classref('topo.pattern.basic','SigmoidedDoG')?> (for audio STRFs),
-  <?php classref('topo.pattern.basic','PowerSpectrum')?> (for frequency decomposition),
-  <?php classref('topo.pattern.basic','Spectrogram')?> (for frequency decomposition over time),
+  <?php classref('topo.pattern','ExponentialDecay')?>,
+  <?php classref('topo.pattern','HalfPlane')?>,
+  <?php classref('topo.pattern','Arc')?>,
+  <?php classref('topo.pattern','Curve')?>, 
+  <?php classref('topo.pattern','Rectangle')?> (now with smoothing),
+  <?php classref('topo.pattern','RawRectangle')?> (no smoothing),
+  <?php classref('topo.pattern','Sigmoid')?>,
+  <?php classref('topo.pattern','SigmoidedDoG')?> (for audio STRFs),
+  <?php classref('topo.pattern','PowerSpectrum')?> (for frequency decomposition),
+  <?php classref('topo.pattern','Spectrogram')?> (for frequency decomposition over time),
   <?php classref('topo.pattern.audio','Audio')?> (for audio files),
   <?php classref('topo.pattern.audio','AudioFolder')?> (for directories of audio files)
   </div>
@@ -232,8 +246,8 @@
 <font size="-1">
 <!--CB: surely these divs should be some kind of li?-->
 <!--  <div class="i2">- optional XML snapshot
-  <A HREF="../Reference_Manual/topo.command.basic-module.html#save_snapshot">saving</A> and
-  <A HREF="../Reference_Manual/topo.command.basic-module.html#load_snapshot">loading</A></div>
+  <A HREF="../Reference_Manual/topo.command-module.html#save_snapshot">saving</A> and
+  <A HREF="../Reference_Manual/topo.command-module.html#load_snapshot">loading</A></div>
 -->
 <!-- incomplete <A HREF="../Downloads/git.html">Instructions</A> for checking out Git version of repository<BR> -->
 <!--  mouse model (examples/lissom_oo_or_species.ty)<BR> -->
@@ -256,7 +270,7 @@
 <dd>
   <div class="i2">- -v and -d options to print verbose and debugging messages</div>
   <div class="i2">- new options to
-  <?php classref('topo.command.basic','run_batch')?> and better progress messages</div>
+  <?php classref('topo.command','run_batch')?> and better progress messages</div>
   <div class="i2">- replaced most commands with
   <?php classref('param.parameterized','ParameterizedFunction')?>s,
   which have documented, type and bound-checked arguments and allow
@@ -314,15 +328,15 @@
 <dt>Component library:</dt>
 <dd>
   <div class="i2">- PatternGenerators:
-  <?php classref('topo.pattern.basic','Translator')?>;
+  <?php classref('topo.pattern','Translator')?>;
     mask_shape parameter also now makes it easy to specify a mask
     for any pattern, e.g. in the GUI</div>
   <div class="i2">- TransferFns (formerly called OutputFns):
-  <?php classref('topo.transferfn.basic','HalfRectifyAndPower')?>,
-  <?php classref('topo.transferfn.basic','Hysteresis')?>, and
-  <?php classref('topo.transferfn.basic','HomeostaticResponse')?></div>
+  <?php classref('topo.transferfn','HalfRectifyAndPower')?>,
+  <?php classref('topo.transferfn','Hysteresis')?>, and
+  <?php classref('topo.transferfn','HomeostaticResponse')?></div>
   <div class="i2">- Sheets:
-  <?php classref('topo.sheet.basic','ActivityCopy')?></div>
+  <?php classref('topo.sheet','ActivityCopy')?></div>
   <div class="i2">- LearningFns:
   <?php classref('topo.learningfn.optimized','CFPLF_BCMFixed_opt')?>,
   <?php classref('topo.learningfn.optimized','CFPLF_Scaled_opt')?></div>
@@ -433,17 +447,17 @@ that were written for version 0.9.5.</small> </td></tr>
 <dt>Component library:</dt>
 <dd>
   <div class="i2">- OutputFns:
-  <?php classref('topo.outputfn.basic','PoissonSample')?>,<BR>
-  <?php classref('topo.outputfn.basic','ScalingOF')?> (for homeostatic plasticity),<BR>
-  <?php classref('topo.outputfn.basic','NakaRushton')?> (for contrast gain control)<BR>
-  <?php classref('topo.outputfn.basic','AttributeTrackingOF')?> (for analyzing or plotting values over time)</div>
+  <?php classref('topo.outputfn','PoissonSample')?>,<BR>
+  <?php classref('topo.outputfn','ScalingOF')?> (for homeostatic plasticity),<BR>
+  <?php classref('topo.outputfn','NakaRushton')?> (for contrast gain control)<BR>
+  <?php classref('topo.outputfn','AttributeTrackingOF')?> (for analyzing or plotting values over time)</div>
 <!-- &nbsp;&nbsp;&nbsp;('x=HalfRectify() ; y=Square() ; z=x+y' gives 'z==PipelineOF(output_fns=x,y)')<BR> -->
 <div class="i2">- PatternGenerator: <?php classref('topo.misc.robotics','CameraImage')?> (for real-time camera inputs)</div>
 <!--  allowed <?php classref('topo.sheet.lissom','LISSOM')?>  normalization to be
   <A HREF="../Reference_Manual/topo.sheet.lissom.LISSOM-class.html#post_initialization_weights_output_fn">changed</A>
   after initialization<BR> -->
 
-  <div class="i2">- CoordMapper: <?php classref('topo.coordmapper.basic','Jitter')?></div>
+  <div class="i2">- CoordMapper: <?php classref('topo.coordmapper','Jitter')?></div>
   <div class="i2">- SheetMasks: <?php classref('topo.base.projection','AndMask')?>,
   <?php classref('topo.base.projection','OrMask')?>,
   <?php classref('topo.base.projection','CompositeSheetMask')?></div>
@@ -452,7 +466,7 @@ that were written for version 0.9.5.</small> </td></tr>
   (e.g. for calculating aftereffects)</div>
   <div class="i2">- functions for analyzing V1 complex cells</div>
   <div class="i2">- <?php classref('topo.base.functionfamily','PipelineOF')?> OutputFns can now be constructed easily using +</div>
-  <div class="i2">- <?php classref('topo.numbergen.basic','NumberGenerator')?>s
+  <div class="i2">- <?php classref('topo.numbergen','NumberGenerator')?>s
   can now be constructed using +,-,/,*,abs etc.
 <!-- (e.g. abs(2*UniformRandom()-5) is now a NumberGenerator too).--></div>
 <!-- provide stop_updating and restore_updating to allow functions with state to freeze their state<BR> -->
