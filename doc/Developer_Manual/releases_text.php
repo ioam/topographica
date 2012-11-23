@@ -93,15 +93,20 @@ does not yet check that the packages it generates work on all
 platforms. You should use clean virtual machines to test the process
 of installing and using the packages it has generated.
 
-<!-- JAB: is anything else necessary to make a release, e.g. git tag? -->
 <li><P>When the package is ready for release, make a commit stating
-the version number (e.g. 'git commit -m "Version 0.9.8"'). Notify the other
-developers that they may once again commit new code to the Git
-repository.
+the version number (e.g. <kbd>git commit -m "Version 0.9.8"</kbd> and
+tag this release <kbd>git tag -a v0.9.8 -m "Version 0.9.8 release
+candidate"</kbd> Notify the other developers that they may once again
+commit new code to the Git repository.
 
-<!--upload to pypi requires pypi account; needs updating for github? -->
-<li><P>Create tar.gz and upload them to pypi: <code>make
-dist-pysource-sdist; make dist-pypi-upload</code>.
+<li><P>Create tar.gz and upload them to pypi (requires ioam pypi account
+    password, under Jim's email address):
+<pre>
+make dist-pysource
+make dist-pysource-sdist
+python setup.py register
+python setup.py sdist upload 
+</pre>
 
 <!--upload requires account on opensuse build service-->
 <!--    
