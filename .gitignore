@@ -13,3 +13,8 @@ bin
 lib
 local/*
 external/*
+emacslog
+include
+info
+man
+share
