@@ -17,7 +17,7 @@ From the Makefile (Tabs have been stripped)::
 
     cleandocs:
         - rm -r docs
-        
+
     docs: topo/*.py
         mkdir -p docs
         ./topographica topo/gendocs.py
@@ -82,7 +82,7 @@ def filename_to_packagename(f):
         f = sub('.py$','',f)
     return f
 
-    
+
 def generate_docs():
     """
     Generate all pydoc documentation files within a docs directory under
@@ -102,9 +102,9 @@ def generate_docs():
         if glob.glob(f):
             cline = 'mv -f ' + f + ' ' + DOCS + '/'
             os.system(cline)
-        else:                   
-            filelist.remove(i)  
-        
+        else:
+            filelist.remove(i)
+
 
 if __name__ == '__main__':
     generate_docs()

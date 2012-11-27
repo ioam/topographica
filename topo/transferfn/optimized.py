@@ -33,12 +33,12 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
     """
     single_cf_fn = param.ClassSelector(
         TransferFn,DivisiveNormalizeL1(norm_value=1.0),readonly=True)
-    
+
     def __call__(self, iterator, **params):
         cf_type=iterator.cf_type  # pyflakes:ignore (passed to weave C code)
         cfs = iterator.flatcfs  # pyflakes:ignore (passed to weave C code)
         num_cfs = len(iterator.flatcfs)  # pyflakes:ignore (passed to weave C code)
-        
+
         # CB: for performance, it is better to process the masks in
         # the C code (rather than combining them before).
         active_units_mask = iterator.get_active_units_mask()  # pyflakes:ignore (passed to weave C code)
@@ -51,7 +51,7 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
             DECLARE_SLOT_OFFSET(_norm_total,cf_type);
             DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
             DECLARE_SLOT_OFFSET(mask,cf_type);
-            
+
             %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
                 if (active_units_mask[r] != 0 && sheet_mask[r] != 0) {
@@ -79,7 +79,7 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
                         }
                         _norm_total[0] = total; // Get new normalized total
                     }
-    
+
                     // normalize the weights
                     double factor = 1.0/_norm_total[0];
                     int rc = (rr2-rr1)*(cc2-cc1);
@@ -89,10 +89,10 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
 
                     // Indicate that norm_total is stale
                     _has_norm_total[0]=0;
-                }                
+                }
             }
-        """%c_decorators    
-        inline(code, ['sheet_mask','active_units_mask','cfs','cf_type','num_cfs'], 
+        """%c_decorators
+        inline(code, ['sheet_mask','active_units_mask','cfs','cf_type','num_cfs'],
                local_dict=locals(),
                headers=['<structmember.h>'])
 
@@ -118,7 +118,7 @@ class CFPOF_DivisiveNormalizeL1(CFPOutputFn):
         """
         # CEBALERT: fix this here and elsewhere
         if type(self.single_cf_fn) is not IdentityTF:
-            norm_value = self.single_cf_fn.norm_value                
+            norm_value = self.single_cf_fn.norm_value
             for cf,i in iterator():
                 current_sum=cf.norm_total
 		if current_sum > 0.0000000000001:

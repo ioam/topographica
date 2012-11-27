@@ -8,7 +8,7 @@ __version__='$Revision: 8021 $'
 
 import sys
 import decimal # CEBALERT: when did decimal appear? too late to use?
-    
+
 import param
 
 from snapshots import PicklableClassAttributes
@@ -48,18 +48,18 @@ releases = {"0.9.7": 11275}
 def _get_version(snapshot_release,snapshot_version):
 
     found_version = False
-    
+
     if snapshot_version is not None:
         snapshot_version = snapshot_version.split(":")[0]
         snapshot_version = snapshot_version.split("M")[0]
-        
+
         if len(snapshot_version)>0:
             try:
                 snapshot_version = int(snapshot_version)
                 found_version = True
             except ValueError:
                 pass
-        
+
     if not found_version:
         snapshot_version = releases[snapshot_release]
         param.Parameterized().debug("No version could be detected for this snapshot; assuming version of release %s (i.e. %s)."%(snapshot_release,snapshot_version))
@@ -67,7 +67,7 @@ def _get_version(snapshot_release,snapshot_version):
     return snapshot_version
 
 
-        
+
 class SnapshotSupport(object):
 
     @staticmethod
@@ -102,7 +102,7 @@ class SnapshotSupport(object):
     @staticmethod
     def apply_support(version_to_support):
         global support
-        
+
         # apply oldest to newest
         for version in sorted(support.keys())[::-1]:
             if version_to_support < version:
@@ -126,7 +126,7 @@ def _setstate(inst,state):
     for k,v in state.items():
         setattr(inst,k,v)
 
-def preprocess_state(class_,state_mod_fn): 
+def preprocess_state(class_,state_mod_fn):
     """
     Allow processing of state with state_mod_fn before
     class_.__setstate__(instance,state) is called.
@@ -139,7 +139,7 @@ def preprocess_state(class_,state_mod_fn):
 
     old_setstate = class_.__setstate__
     def new_setstate(instance,state):
-        state_mod_fn(instance,state) 
+        state_mod_fn(instance,state)
         old_setstate(instance,state)
     class_.__setstate__ = new_setstate
 
@@ -157,7 +157,7 @@ def module_redirect(name,parent,actual_module):
 class _ModuleFaker(object):
     def __init__(self,module):
         self.module = module
-        
+
     def load_module(self,name):
         if name not in sys.modules:
             self.module.__file__ = self.path
@@ -166,12 +166,12 @@ class _ModuleFaker(object):
                 parent_name, child_name = name.rsplit('.', 1)
                 setattr(sys.modules[parent_name], child_name, self.module)
         return sys.modules[name]
-    
+
 class _ModuleImporter(object):
     def __init__(self,module,fullname):
         self.fullname = fullname
         self.module = module
-    
+
     def find_module(self, fullname, path=None):
         if fullname == self.fullname:
             param.Parameterized().message("%s imported as %s"%(self.module.__name__,self.fullname))
@@ -198,14 +198,14 @@ support = {}
 def do_not_restore_paths():
     # For snapshots saved before 11323
     # Avoid restoring search_paths,prefix for resolve_path,normalize_path
-    # (For snapshots before r11323, these were included.)    
+    # (For snapshots before r11323, these were included.)
     PicklableClassAttributes.do_not_restore+=[
         'param.normalize_path',
         'param.resolve_path']
 
 support[11323] = do_not_restore_paths
 
-    
+
 def param_add_pickle_default_value():
     # For snapshots saved before 11321
     # pickle_default_value attribute added to Parameter in r11321
@@ -267,7 +267,7 @@ def param_external_removed():
     # CB: From param/external.py, only odict should be relevant to snapshots.
     import topo.misc.odict
     allow_import(topo.misc.odict,'param.external')
-            
+
 support[12024] = param_external_removed
 
 
@@ -284,8 +284,8 @@ def Number_and_BoundingRegion_add_set_hook():
             state['set_hook']=param.identity_hook
     preprocess_state(param.Number,_add_set_hook)
     preprocess_state(R.BoundingRegionParameter,_add_set_hook)
-     
-support[12028] = Number_and_BoundingRegion_add_set_hook    
+
+support[12028] = Number_and_BoundingRegion_add_set_hook
 
 
 def renamed_sheetview_norm_factor():
@@ -307,7 +307,7 @@ def moved_featuremaps_selectivity_multiplier():
 def reorganized_analysis():
     renamed_sheetview_norm_factor()
     moved_featuremaps_selectivity_multiplier()
-    
+
 support[11904] = reorganized_analysis
 
 def moved_picklableclassattributes():

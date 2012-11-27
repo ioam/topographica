@@ -34,7 +34,7 @@ from topo.misc.commandline import sim_name_from_filename
 import topo.misc.genexamples
 import topo.command
 
-import topo.tkgui 
+import topo.tkgui
 
 from templateplotgrouppanel import TemplatePlotGroupPanel
 from featurecurvepanel import FeatureCurvePanel
@@ -60,14 +60,14 @@ refman = "Reference_Manual/index.html"
 plotman = "User_Manual/plotting.html"
 
 # for deb on ubuntu; will need to check others
-pkgdoc = "/usr/share/doc/topographica/doc/" 
+pkgdoc = "/usr/share/doc/topographica/doc/"
 
 # Documentation locations: locally built and web urls.
 user_manual_locations      = ('doc/'+userman,
                               pkgdoc+userman,
                               turl+userman)
 tutorials_locations        = ('doc/'+tuts,
-                              pkgdoc+tuts,  
+                              pkgdoc+tuts,
                               turl+tuts)
 reference_manual_locations = ('doc/'+refman,
                               pkgdoc+refman,
@@ -104,9 +104,9 @@ def open_plotgroup_panel(class_,plotgroup=None,**kw):
 
         panel.pack(expand='yes',fill='both')
         win.sizeright()
-        
+
         #frame.sizeright()
-        
+
         #topo.guimain.messageBar.message('state', 'OK')
         return panel
     else:
@@ -115,7 +115,7 @@ def open_plotgroup_panel(class_,plotgroup=None,**kw):
 
 
 
-        
+
 
 class PlotsMenuEntry(param.Parameterized):
     """
@@ -143,7 +143,7 @@ class PlotsMenuEntry(param.Parameterized):
             class_ = plotpanel_classes.get(self.plotgroup.name,FeatureCurvePanel)
 
         self.class_ = plotpanel_classes.get(self.plotgroup.name,class_)
-        
+
 
     def __call__(self,event=None,**kw):
         """
@@ -267,13 +267,13 @@ def _tkinter_report_exception(widget):
         stat.error('%s'%msg)
     else:
         topo.guimain.messageBar.error('%s'%msg)
-    
+
     # BK-NOTE: Default is now to display full trace always. Any user
-    # errors should be caught as special exception cases 
-    
+    # errors should be caught as special exception cases
+
     # BK-ALERT: Want to raise errors vs print, however this currently crashes ipython.
     #raise
-    
+
     param.Parameterized().warning(msg)
     import traceback
     traceback.print_exc()
@@ -314,7 +314,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         # catch click on the 'x': offers choice to quit or not
         self.protocol("WM_DELETE_WINDOW",self.quit_topographica)
 
-        
+
         ##########
         ### Make cascade menus open automatically on linux when the mouse
         ### is over the menu title.
@@ -330,7 +330,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         ##########
 
         # Install warning and message handling
-        from param.parameterized import Parameterized        
+        from param.parameterized import Parameterized
         self.__orig_P_warning = Parameterized.warning
         self.__orig_P_message = Parameterized.message
         type.__setattr__(Parameterized,'warning',self.gui_warning)
@@ -353,10 +353,10 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         newtitle = "Topographica"
         if t: newtitle+=": %s" % t
         tk.AppWindow.title(self,newtitle)
-        
+
 
     def _init_widgets(self):
-        
+
         ## CEBALERT: now we can have multiple operations at the same time,
         ## status bar could be improved to show all tasks?
 
@@ -370,7 +370,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         self.balloon = tk.Balloon(self.content)
 
         ### Top-level (native) menu bar
-        #self.menubar = tk.ControllableMenu(self.content)       
+        #self.menubar = tk.ControllableMenu(self.content)
         self.configure(menu=self.menubar)
 
         #self.menu_balloon = Balloon(topo.tkgui.root)
@@ -383,15 +383,15 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         self.refresh_plots_menu()
         self.__help_menu()
 
-        
+
         ### Running the simulation
         run_frame = Frame(self.content)
         run_frame.pack(side='top',fill='x',padx=4,pady=8)
 
         self.run_frame = run_frame
-        
+
         Label(run_frame,text='Run for: ').pack(side=LEFT)
-        
+
         self.run_for_var=DoubleVar()
         self.run_for_var.set(1.0)
 
@@ -411,13 +411,13 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         go_button = Button(run_frame,text="Go",
                            command=self.run_simulation)
         go_button.pack(side=LEFT)
-        
+
         self.balloon.bind(go_button,"Run the simulation for the specified duration.")
 
         self.step_button = Button(run_frame,text="Step",command=self.run_step)
         self.balloon.bind(self.step_button,"Run the simulation through the time at which the next events are processed.")
         self.step_button.pack(side=LEFT)
-        
+
         self.sizeright()
 
 
@@ -437,14 +437,14 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         simulation_menu.add_command(label='Model Editor',command=self.open_model_editor)
         simulation_menu.add_command(label='Quit',command=self.quit_topographica)
 
-        
+
 
     def open_test_pattern(self):
         return open_plotgroup_panel(TestPattern)
 
 
-    
-    
+
+
 
 
     def __create_plots_menu(self):
@@ -454,7 +454,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         """
         plots_menu = ControllableMenu(self.menubar,tearoff=0)
         self.menubar.add_cascade(label='Plots',menu=plots_menu)
-        
+
 
     # CEBALERT: should split other menus in same way as plots (create/refresh)
     def refresh_plots_menu(self):
@@ -469,17 +469,17 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             categories.append(plotgroup.category)
         categories = sorted(set(categories))
 
-        
+
         # The Basic category items appear on the menu itself.
         assert 'Basic' in categories, "'Basic' is the category for the standard Plots menu entries."
         for label,entry in entries:
             if entry.plotgroup.category=='Basic':
                     plots_menu.add_command(label=label,command=entry.__call__)
-                    
+
         categories.remove('Basic')
 
         plots_menu.add_separator()
-        
+
         # Add the other categories to the menu as cascades, and the plots of each category to
         # their cascades.
         for category in categories:
@@ -491,7 +491,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
                 if entry.plotgroup.category==category:
                     category_menu.add_command(label=label,command=entry.__call__)
 
-            
+
         plots_menu.add_separator()
 
         plots_menu.add_command(label="Help",command=(lambda x=plotting_help_locations: self.open_location(x)))
@@ -512,10 +512,10 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
 
         help_menu.add_command(label="Examples",
                               command=self.run_example_script)
-        
+
         help_menu.add_command(label="Reference Manual",
                               command=(lambda x=reference_manual_locations: self.open_location(x)))
-        
+
         help_menu.add_command(label="Topographica.org",
                               command=(lambda x=topo_www_locations: self.open_location(x)))
 
@@ -524,11 +524,11 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
 
 
 
-            
+
     def quit_topographica(self,check=True,exit_status=0):
         """Quit topographica."""
         if not check or (check and tk.askyesno("Quit Topographica","Really quit?")):
-            self.destroy() 
+            self.destroy()
 
             # matplotlib's tk backend starts its own Tk instances; we
             # need to close these ourselves (at least to avoid error
@@ -539,11 +539,11 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
                     figman.destroy()
             except:
                 pass
-                
+
             print "Quit selected; exiting"
 
             # Workaround for obscure problem on some UNIX systems
-            # as of 4/2007, probably including Fedora Core 5.  
+            # as of 4/2007, probably including Fedora Core 5.
             # On these systems, if Topographica is started from a
             # bash prompt and then quit from the Tkinter GUI (as
             # opposed to using Ctrl-D in the terminal), the
@@ -559,7 +559,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             # output of "stty --save" before starting the gui, then
             # ensure that when the gui exits (however badly it
             # happens) run "stty saved_settings"?
-                
+
             # CEBALERT: there was no call to self.master.destroy()
             sys.exit(exit_status)
 
@@ -582,7 +582,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
     # CEBALERT: duplicates most of run_script()
     def run_example_script(self):
 
-        
+
         script = askopenfilename(initialdir=topo.misc.genexamples.find_examples(),
                                  filetypes=SCRIPT_FILETYPES)
 
@@ -594,18 +594,18 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             sim_name_from_filename(script)
             self.title(topo.sim.name)
 
-        
+
 
     def save_script_repr(self):
         script_name = asksaveasfilename(filetypes=SCRIPT_FILETYPES,
                                         initialdir=normalize_path(),
                                         initialfile=topo.sim.basename()+"_script_repr.ty")
-        
+
         if script_name:
             topo.command.save_script_repr(script_name)
             self.messageBar.response('Script saved to ' + script_name)
-            
-    
+
+
     def load_snapshot(self):
         """
         Dialog to load a user-selected snapshot (see topo.command.load_snapshot() ).
@@ -616,7 +616,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             self.messageBar.response('No snapshot loaded.')
         else:
             self.messageBar.dynamicinfo('Loading snapshot (may take some time)...')
-            self.update_idletasks()            
+            self.update_idletasks()
             topo.command.load_snapshot(snapshot_name)
             self.messageBar.response('Loaded snapshot ' + snapshot_name)
             self.title(topo.sim.name)
@@ -627,29 +627,29 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
     def save_snapshot(self):
         """
         Dialog to save a snapshot (see topo.command.save_snapshot() ).
-        
+
         Adds the file extension .typ if not already present.
         """
         snapshot_name = asksaveasfilename(filetypes=SAVED_FILETYPES,
                                           initialdir=normalize_path(),
                                           initialfile=topo.sim.basename()+".typ")
-        
+
         if snapshot_name in ('',(),None):
             self.messageBar.response('No snapshot saved.')
         else:
             if not snapshot_name.endswith('.typ'):
                 snapshot_name = snapshot_name + SAVED_FILE_EXTENSION
-                
+
             self.messageBar.dynamicinfo('Saving snapshot (may take some time)...')
-            self.update_idletasks()            
+            self.update_idletasks()
             topo.command.save_snapshot(snapshot_name)
             self.messageBar.response('Snapshot saved to ' + snapshot_name)
-    
+
 
     def auto_refresh(self):
         """
         Refresh all windows in auto_refresh_panels.
-        
+
         Panels can add and remove themselves to the list; those in the list
         will have their refresh() method called whenever this console's
         autorefresh() is called.
@@ -660,7 +660,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         self.set_step_button_state()
         self.update_idletasks()
 
-        
+
 
     ### CEBERRORALERT: why doesn't updatecommand("display=True") for an
     ### orientation preference map measurement work with the
@@ -679,7 +679,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
                 self.update_idletasks()
 
 
-        
+
 
     def open_model_editor(self):
         """Start the Model editor."""
@@ -696,7 +696,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         text.pack(side=LEFT)
         win.deiconify()
         #self.messageBar.message('state', 'OK')
-            
+
     def open_location(self, locations):
         """
         Try to open one of the specified locations in a new window of the default
@@ -734,11 +734,11 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
     def status_message(self,m):
         self.messageBar.response(m)
 
-    
+
     def run_simulation(self,event=None): # event=None allows use as callback
         """
         Run the simulation for the duration specified in the
-        'run for' taggedslider.        
+        'run for' taggedslider.
         """
         fduration = self.run_for_var.get()
         self.open_progress_window(timer=topo.sim.timer)
@@ -790,7 +790,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         #print "GUI INTERNAL WARNING: failed to determine window on which to display message."
         return self.messageBar
 
-        
+
     def open_progress_window(self,timer,title=None):
         """
         Provide a convenient link to progress bars.
@@ -821,7 +821,7 @@ class ControllableMenu(tk.Menu):
 if __name__ != '__main__':
     plotpanel_classes['Connection Fields'] = ConnectionFieldsPanel
     plotpanel_classes['RF Projection'] = RFProjectionPanel
-    plotpanel_classes['Projection'] = CFProjectionPanel 
+    plotpanel_classes['Projection'] = CFProjectionPanel
     plotpanel_classes['Projection Activity'] = ProjectionActivityPanel
 
 

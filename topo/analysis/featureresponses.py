@@ -44,7 +44,7 @@ class DistributionMatrix(param.Parameterized):
     """
     Maintains a matrix of Distributions (each of which is a dictionary
     of (feature value: activity) pairs).
-    
+
     The matrix contains one Distribution for each unit in a
     rectangular matrix (given by the matrix_shape constructor
     argument).  The contents of each Distribution can be updated for a
@@ -71,8 +71,8 @@ class DistributionMatrix(param.Parameterized):
         ### not yet been done.  Alternatively, it could use a different
         ### function name altogether (e.g. update(x,y)).
         self.distribution_matrix + fromfunction(vectorize(lambda i,j: {bin:new_values[i,j]}),
-                                                new_values.shape)  
-        
+                                                new_values.shape)
+
     def apply_DSF( self, dsf ):
         """
         Apply the given dsf DistributionStatisticFn on each element of the distribution_matrix
@@ -157,11 +157,11 @@ class FeatureResponses(PatternDrivenAnalysis):
     The resulting data can then be used to plot feature maps and
     tuning curves, or for similar types of feature-based analyses.
     """
-    
+
     # CEB: we might want to measure the map on a sheet due
     # to a specific projection, rather than measure the map due
     # to all projections.
-    
+
     repetitions = param.Integer(default=1,bounds=(1,None),doc="""
         How many times each stimulus will be presented.
 
@@ -172,7 +172,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         intrinsic noise), then this parameter can be increased
         so that results will be an average over the specified
         number of repetitions.""")
-    
+
     _fullmatrix = {}
 
     def __init__(self,features,**params):
@@ -180,7 +180,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         self.initialize_featureresponses(features)
         self.pre_analysis_session_hooks.append(save_input_generators)
         self.post_analysis_session_hooks.append(restore_input_generators)
-        
+
     def initialize_featureresponses(self,features):
         """Create an empty DistributionMatrix for each feature and each sheet."""
         self._featureresponses = {}
@@ -193,23 +193,23 @@ class FeatureResponses(PatternDrivenAnalysis):
                 # CEBERRORALERT: line below is missing at least
                 # "keep_peak=f.keep_peak". Couldn't these things be
                 # passed around in a less fragile way?
-                self._featureresponses[sheet][f.name]=DistributionMatrix(sheet.shape,axis_range=f.range,cyclic=f.cyclic) 
+                self._featureresponses[sheet][f.name]=DistributionMatrix(sheet.shape,axis_range=f.range,cyclic=f.cyclic)
             FeatureResponses._fullmatrix[sheet] = FullMatrix(sheet.shape,features)
 
     def sheets_to_measure(self):
         """Return a list of the Sheets in the current simulation for which to collect responses."""
         return  [x for x in topo.sim.objects(Sheet).values()
                  if hasattr(x,'measure_maps') and x.measure_maps]
-        
+
     def measure_responses(self,pattern_presenter,param_dict,features,display):
         """Present the given input patterns and collate the responses."""
-        
+
         # Run hooks before the analysis session
         for f in self.pre_analysis_session_hooks: f()
 
         self.param_dict=param_dict
         self.pattern_presenter = pattern_presenter
-        
+
         features_to_permute = [f for f in features if f.compute_fn is None]
         self.features_to_compute = [f for f in features if f.compute_fn is not None]
 
@@ -217,7 +217,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         values_lists=[f.values for f in features_to_permute]
         self.permutations = cross_product(values_lists)
         values_description=' * '.join(["%d %s" % (len(f.values),f.name) for f in features_to_permute])
-        
+
         self.refresh_act_wins=False
         if display:
             if hasattr(topo,'guimain'):
@@ -238,7 +238,7 @@ class FeatureResponses(PatternDrivenAnalysis):
             self.verbose("Presenting %d test patterns (%s)." % (len(self.permutations),values_description))
 
         timer.call_fixed_num_times(self.permutations)
-        
+
         # Run hooks after the analysis session
         for f in self.post_analysis_session_hooks: f()
 
@@ -265,7 +265,7 @@ class FeatureResponses(PatternDrivenAnalysis):
             #self.message("Presenting pattern %s" % valstring)
             self.pattern_presenter(dict(permuted_settings),self.param_dict)
             for f in self.post_presentation_hooks: f()
-    
+
             if self.refresh_act_wins:topo.guimain.refresh_activity_windows()
             for sheet in self.sheets_to_measure():
                 self._activities[sheet]+=sheet.activity
@@ -273,9 +273,9 @@ class FeatureResponses(PatternDrivenAnalysis):
 
         for sheet in self.sheets_to_measure():
             self._activities[sheet]=self._activities[sheet] / self.repetitions
-        
+
         self._update(complete_settings)
-         
+
     def _update(self,current_values):
         # Update each DistributionMatrix with (activity,bin)
         for sheet in self.sheets_to_measure():
@@ -299,16 +299,16 @@ class ReverseCorrelation(FeatureResponses):
 
         self._featureresponses = {}
         assert hasattr(self.input_sheet,'shape')
-        
+
         # surely there's a way to get an array of 0s for each element without
         # looping? (probably had same question for distributionmatrix).
         for sheet in self.sheets_to_measure():
-            self._featureresponses[sheet]= numpy.ones(sheet.activity.shape,dtype=object) 
+            self._featureresponses[sheet]= numpy.ones(sheet.activity.shape,dtype=object)
             rows,cols = sheet.activity.shape
             for r in range(rows):
                 for c in range(cols):
                     self._featureresponses[sheet][r,c] = numpy.zeros(self.input_sheet.shape) # need to specify dtype?
-        
+
 
     def collect_feature_responses(self,pattern_presenter,param_dict,display,feature_values):
         self.measure_responses(pattern_presenter,param_dict,feature_values,display)
@@ -326,8 +326,8 @@ class ReverseCorrelation(FeatureResponses):
                     key = ('RFs',sheet.name,x,y)
                     input_sheet_views[key]=view
 
-                    
-    
+
+
 
     def measure_responses(self,pattern_presenter,param_dict,features,display):
         """Present the given input patterns and collate the responses."""
@@ -336,11 +336,11 @@ class ReverseCorrelation(FeatureResponses):
         # normally duplicate calls (e.g. gets called by __init__ and then gets called
         # here for no reason except maybe the input_sheet got changed). Would be better
         # to have the input_sheet fixed.
-        self.initialize_featureresponses(features) 
+        self.initialize_featureresponses(features)
 
         super(ReverseCorrelation,self).measure_responses(pattern_presenter,param_dict,
                                                          features,display)
-                                                         
+
     def present_permutation(self,permutation):
         """Present a pattern with the specified set of feature values."""
 
@@ -360,21 +360,21 @@ class ReverseCorrelation(FeatureResponses):
         #self.message("Presenting pattern %s" % valstring)
         self.pattern_presenter(dict(permuted_settings),self.param_dict)
         for f in self.post_presentation_hooks: f()
-    
+
         if self.refresh_act_wins:topo.guimain.refresh_activity_windows()
 
         self._update(complete_settings)
-         
+
         topo.sim.state_pop()
 
     # Ignores current_values; they simply provide distinct patterns on the retina
     def _update(self,current_values):
         for sheet in self.sheets_to_measure():
             rows,cols = sheet.activity.shape
-            for ii in range(rows): 
+            for ii in range(rows):
                 for jj in range(cols):
                     self._featureresponses[sheet][ii,jj]+=sheet.activity[ii,jj]*self.input_sheet.activity
-                    
+
 
 class FeatureMaps(FeatureResponses):
     """
@@ -395,8 +395,8 @@ class FeatureMaps(FeatureResponses):
     selectivity_multiplier = param.Number(default=17.0, doc="""
             Scaling of the feature selectivity values applied in all feature dimensions.
             The multiplier sets the output scaling.""")
-    
-    
+
+
     # CBENHANCEMENT: could allow full control over the generated names
     # using a format parameter. The default would be
     # ${prefix}${feature}${type} (where type is Preference or
@@ -407,7 +407,7 @@ class FeatureMaps(FeatureResponses):
     def __init__(self,features,**params):
         super(FeatureMaps,self).__init__(features,**params)
         self.features=features
-        
+
     def collect_feature_responses(self,pattern_presenter,param_dict,display):
         """
         Present the given input patterns and collate the responses.
@@ -417,14 +417,14 @@ class FeatureMaps(FeatureResponses):
         be specified in each feature with the preference_fn parameter, otherwise the
         default in self.preference_fn is used.
         """
-        self.measure_responses(pattern_presenter,param_dict,self.features,display)    
+        self.measure_responses(pattern_presenter,param_dict,self.features,display)
 
         for sheet in self.sheets_to_measure():
             bounding_box    = sheet.bounds
             sn              = sheet.name
             sp              = sheet.precedence
             sr              = sheet.row_precedence
-            
+
             for feature in self._featureresponses[sheet].keys():
             ### JCHACKALERT! This is temporary to avoid the positionpref plot to shrink
             ### Nevertheless we should think more about this (see alert in bitmap.py)
@@ -457,10 +457,10 @@ class FeatureMaps(FeatureResponses):
                         view.cyclic_range           = cyclic_range
                         sheet.sheet_views[ name ]   = view
 
-                
+
 class FeatureCurves(FeatureResponses):
     """
-    Measures and collects the responses to a set of features, for calculating tuning and similar curves.    
+    Measures and collects the responses to a set of features, for calculating tuning and similar curves.
 
     These curves represent the response of a Sheet to patterns that
     are controlled by a set of features.  This class can collect data
@@ -555,7 +555,7 @@ class Feature( param.Parameterized ):
         If a list of values is supplied, the range can be omitted unless the
         default of the min and max in the list of values is not appropriate.
 
-        If non-None, the compute_fn should be a function that when given a list 
+        If non-None, the compute_fn should be a function that when given a list
         of other parameter values, computes and returns the value for this feature.
 
         If supplied, the offset is added to the given or computed values to allow
@@ -564,7 +564,7 @@ class Feature( param.Parameterized ):
         """
 
         super( Feature, self ).__init__( **params )
-                 
+
         if len( self.values ):
             self.values = self.values if self.offset == 0 else [v+self.offset for v in self.values]
             if self.range == ( 0, 0 ):
@@ -590,7 +590,7 @@ class PatternPresenter(param.Parameterized):
     Subclasses can provide additional mechanisms for doing this in
     different ways.
     """
-    
+
     # JABALERT: Needs documenting, and probably also a clearer name
     contrast_parameter = param.Parameter('michelson_contrast')
 
@@ -620,7 +620,7 @@ class PatternPresenter(param.Parameterized):
     # actually getting all the generator sheets.
     generator_sheets = param.List(default=[], doc="""
         The set of GeneratorSheets onto which patterns will be drawn.
-        
+
         By default (i.e. for an empty list), all GeneratorSheets in
         the simulation will be used.
         """)
@@ -634,28 +634,28 @@ class PatternPresenter(param.Parameterized):
         super(PatternPresenter,self).__init__(**params)
         self.gen = pattern_generator # Why not a Parameter?
 
-        
+
     def __call__(self,features_values,param_dict):
         for param,value in param_dict.iteritems():
             # CEBALERT: why not setattr(self.gen,param,value)
             #if ('_'+param+'_param_value') not in self.gen.__dict__:
-            self.gen.__setattr__(param,value)                                
-                              
+            self.gen.__setattr__(param,value)
+
         for feature,value in features_values.iteritems():
             self.gen.__setattr__(feature,value)
-        
+
         all_input_sheet_names = topo.sim.objects(GeneratorSheet).keys()
 
         if len(self.generator_sheets)>0:
             input_sheet_names = [sheet.name for sheet in self.generator_sheets]
         else:
             input_sheet_names = all_input_sheet_names
-        
+
         # Copy the given generator once for every GeneratorSheet
         inputs = dict.fromkeys(input_sheet_names)
         for k in inputs.keys():
             inputs[k]=copy.deepcopy(self.gen)
-        
+
         ### JABALERT: Should replace these special cases with general
         ### support for having meta-parameters controlling the
         ### generation of different patterns for each GeneratorSheet.
@@ -669,7 +669,7 @@ class PatternPresenter(param.Parameterized):
         ### should be able to provide general support for manipulating
         ### both pattern parameters and parameters controlling
         ### interaction between or differences between patterns.
-        
+
         if 'direction' in features_values:
             import __main__
             if '_new_motion_model' in __main__.__dict__ and __main__.__dict__['_new_motion_model']:
@@ -679,12 +679,12 @@ class PatternPresenter(param.Parameterized):
                     inputs[name] = Translator(generator=inputs[name],
                                               direction=features_values['direction'],
                                               speed=features_values['speed'],
-                                              reset_period=self.duration) 
+                                              reset_period=self.duration)
             ##########################
             else:
             #### old motion model ####
                 orientation = features_values['direction']+pi/2
-                from topo.pattern import Sweeper            
+                from topo.pattern import Sweeper
                 for name in inputs.keys():
                     speed=features_values['speed']
                     try:
@@ -698,7 +698,7 @@ class PatternPresenter(param.Parameterized):
                     inputs[name] = Sweeper(generator=inputs[name],step=step,speed=speed)
                     setattr(inputs[name],'orientation',orientation)
             ##########################
-        
+
         if features_values.has_key('hue'):
 
             # could be three retinas (R, G, and B) or a single RGB
@@ -706,7 +706,7 @@ class PatternPresenter(param.Parameterized):
             # 'Red' or 'Green' or 'Blue' in its name, then three
             # retinas for color are assumed
 
-            rgb_retina = False 
+            rgb_retina = False
             for name in input_sheet_names:
                 if not ('Red' in name or 'Green' in name or 'Blue' in name):
                     rgb_retina=True
@@ -720,7 +720,7 @@ class PatternPresenter(param.Parameterized):
                         inputs[name].scale=g
                     elif (name.count('Blue')):
                         inputs[name].scale=b
-                    else: 
+                    else:
                         if not hasattr(self,'hue_warned'):
                             self.warning('Unable to measure hue preference, because hue is defined only when there are different input sheets with names with Red, Green or Blue substrings.')
                             self.hue_warned=True
@@ -731,11 +731,11 @@ class PatternPresenter(param.Parameterized):
                     inputs[name] = rgbimages.ExtendToRGB(generator=inputs[name],
                                                          relative_channel_strengths=[r,g,b])
                 # CEBALERT: should warn as above if not a color network
-        
+
         #JL: This is only used for retinotopy measurement in jude laws contrib/jsldefs.py
         #Also needs cleaned up
         if features_values.has_key('retinotopy'):
-            #Calculates coordinates of the center of each patch to be presented 
+            #Calculates coordinates of the center of each patch to be presented
             coordinate_x=[]
             coordinate_y=[]
             coordinates=[]
@@ -759,17 +759,17 @@ class PatternPresenter(param.Parameterized):
                 for x in coordinate_x:
                     for y in coordinate_y:
                         coordinates.append((x,y))
-               
+
                 x_coord=coordinates[features_values['retinotopy']][0]
                 y_coord=coordinates[features_values['retinotopy']][1]
                 inputs[name].x = x_coord
                 inputs[name].y = y_coord
-          
+
         if features_values.has_key('retx'):
             for name,i in zip(inputs.keys(),range(len(input_sheet_names))):
                 inputs[name].x = features_values['retx']
-                inputs[name].y = features_values['rety']           
-                
+                inputs[name].y = features_values['rety']
+
         if features_values.has_key("phasedisparity"):
             temp_phase1=features_values['phase']-features_values['phasedisparity']/2.0
             temp_phase2=features_values['phase']+features_values['phasedisparity']/2.0
@@ -782,7 +782,7 @@ class PatternPresenter(param.Parameterized):
                     if not hasattr(self,'disparity_warned'):
                         self.warning('Unable to measure disparity preference, because disparity is defined only when there are inputs for Right and Left retinas.')
                         self.disparity_warned=True
-                
+
         ## Not yet used; example only
         #if features_values.has_key("xdisparity"):
         #    if len(input_sheet_names)!=2:
@@ -821,7 +821,7 @@ class PatternPresenter(param.Parameterized):
                 for g in inputs.itervalues():
                     g.offsetcenter=0.5
                     g.scalecenter=2*g.offsetcenter*g.contrastcenter/100.0
-        
+
             elif self.contrast_parameter=='weber_contrast':
                 # Weber_contrast is currently only well defined for
                 # the special case where the background offset is equal
@@ -830,7 +830,7 @@ class PatternPresenter(param.Parameterized):
                 for g in inputs.itervalues():
                     g.offsetcenter=0.5   #In this case this is the offset of both the background and the sine grating
                     g.scalecenter=2*g.offsetcenter*g.contrastcenter/100.0
-            
+
             elif self.contrast_parameter=='scale':
                 for g in inputs.itervalues():
                     g.offsetcenter=0.0
@@ -841,7 +841,7 @@ class PatternPresenter(param.Parameterized):
                 for g in inputs.itervalues():
                     g.offsetsurround=0.5
                     g.scalesurround=2*g.offsetsurround*g.contrastsurround/100.0
-        
+
             elif self.contrast_parameter=='weber_contrast':
                 # Weber_contrast is currently only well defined for
                 # the special case where the background offset is equal
@@ -850,18 +850,18 @@ class PatternPresenter(param.Parameterized):
                 for g in inputs.itervalues():
                     g.offsetsurround=0.5   #In this case this is the offset of both the background and the sine grating
                     g.scalesurround=2*g.offsetsurround*g.contrastsurround/100.0
-                
+
             elif self.contrast_parameter=='scale':
                 for g in inputs.itervalues():
                     g.offsetsurround=0.0
                     g.scalesurround=g.contrastsurround
-        
+
         if features_values.has_key("contrast") or param_dict.has_key("contrast"):
             if self.contrast_parameter=='michelson_contrast':
                 for g in inputs.itervalues():
                     g.offset=0.5
                     g.scale=2*g.offset*g.contrast/100.0
-        
+
             elif self.contrast_parameter=='weber_contrast':
                 # Weber_contrast is currently only well defined for
                 # the special case where the background offset is equal
@@ -870,7 +870,7 @@ class PatternPresenter(param.Parameterized):
                 for g in inputs.itervalues():
                     g.offset=0.5   #In this case this is the offset of both the background and the sine grating
                     g.scale=2*g.offset*g.contrast/100.0
-                
+
             elif self.contrast_parameter=='scale':
                 for g in inputs.itervalues():
                     g.offset=0.0
@@ -879,7 +879,7 @@ class PatternPresenter(param.Parameterized):
         # blank patterns for unused generator sheets
         for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
             inputs[sheet_name]=pattern.Constant(scale=0)
-                
+
         pattern_present(inputs, self.duration, plastic=False,
                      apply_output_fns=self.apply_output_fns)
 
@@ -890,20 +890,20 @@ class Subplotting(param.Parameterized):
     Only needed for avoiding typing, as plots can be declared with their own
     specific subplots without using these functions.
     """
-    
+
     plotgroups_to_subplot=param.List(default=
         ["Activity", "Connection Fields", "Projection", "Projection Activity"],
         doc="List of plotgroups for which to set subplots.")
 
     subplotting_declared = param.Boolean(default=False,
         doc="Whether set_subplots has previously been called")
-    
+
     _last_args = param.Parameter(default=())
-    
-    @staticmethod    
+
+    @staticmethod
     def set_subplots(prefix=None,hue="",confidence="",force=True):
         """
-        Define Hue and Confidence subplots for each of the plotgroups_to_subplot.  
+        Define Hue and Confidence subplots for each of the plotgroups_to_subplot.
         Typically used to make activity or weight plots show a
         preference value as the hue, and a selectivity as the
         confidence.
@@ -927,7 +927,7 @@ class Subplotting(param.Parameterized):
         be changed easily.
 
         Examples::
-        
+
            Subplotting.set_subplots("Orientation")
              - Set the default subplots to OrientationPreference and OrientationSelectivity
 
@@ -939,14 +939,14 @@ class Subplotting(param.Parameterized):
         """
 
         Subplotting._last_args=(prefix,hue,confidence,force)
-        
+
         if Subplotting.subplotting_declared and not force:
             return
 
         if prefix:
             hue=prefix+"Preference"
             confidence=prefix+"Selectivity"
-        
+
         for name in Subplotting.plotgroups_to_subplot:
             if plotgroups.has_key(name):
                 pg=plotgroups[name]
@@ -962,7 +962,7 @@ class Subplotting(param.Parameterized):
         Subplotting.subplotting_declared=True
 
 
-    @staticmethod    
+    @staticmethod
     def restore_subplots():
         args=Subplotting._last_args
         if args != (): Subplotting.set_subplots(*(Subplotting._last_args))
@@ -973,7 +973,7 @@ class Subplotting(param.Parameterized):
 ###############################################################################
 ###############################################################################
 #
-# 20081017 JABNOTE: This implementation could be improved.  
+# 20081017 JABNOTE: This implementation could be improved.
 #
 # It currently requires every subclass to implement the feature_list
 # method, which constructs a list of features using various parameters
@@ -986,7 +986,7 @@ class Subplotting(param.Parameterized):
 # appropriate Feature directly, so that they could e.g. supply a
 # specific list of orientations instead of being limited to a fixed
 # spacing.
-# 
+#
 # However, when we implemented this, we ran into two problems:
 #
 # 1. It's difficult for users to modify an open-ended list of
@@ -1004,8 +1004,8 @@ class Subplotting(param.Parameterized):
 #    affect only that call, whereas looking up the item in a
 #    dictionary would only make permanent changes easy, not
 #    single-call changes.
-#    
-#    Alternatively, one could make each feature into a separate     
+#
+#    Alternatively, one could make each feature into a separate
 #    parameter, and then collect them using a naming convention like:
 #
 #     def feature_list(self,p):
@@ -1015,9 +1015,9 @@ class Subplotting(param.Parameterized):
 #             if re.match('^[^_].*_feature$',n):
 #                 fs+=[v]
 #         return fs
-#    
+#
 #    But that's quite hacky, and doesn't solve problem 2.
-# 
+#
 # 2. Even if the users can somehow access each Feature, the same
 #    problem occurs for the individual parts of each Feature.  E.g.
 #    using the separate feature parameters above, Spatial Frequency
@@ -1029,9 +1029,9 @@ class Subplotting(param.Parameterized):
 #         frequency_feature=Feature(name="frequency",values=frange(1.0,6.0,0.2)), \
 #         phase_feature=Feature(name="phase",range=(0.0,2*pi),step=2*pi/15,cyclic=True), \
 #         orientation_feature=Feature(name="orientation",range=(0.0,pi),step=pi/4,cyclic=True)])
-#   
+#
 #    rather than the current, much more easily controllable implementation:
-#   
+#
 #      pre_plot_hooks=[measure_or_pref.instance(frequencies=frange(1.0,6.0,0.2),\
 #         num_phase=15,num_orientation=4)]
 #
@@ -1047,10 +1047,10 @@ class Subplotting(param.Parameterized):
 
 class MeasureResponseCommand(ParameterizedFunction):
     """Parameterized command for presenting input patterns and measuring responses."""
-      
+
     scale = param.Number(default=1.0,softbounds=(0.0,2.0),doc="""
         Multiplicative strength of input pattern.""")
-    
+
     offset = param.Number(default=0.0,softbounds=(-1.0,1.0),doc="""
         Additive offset to input pattern.""")
 
@@ -1069,7 +1069,7 @@ class MeasureResponseCommand(ParameterizedFunction):
         set of Sheets.  Needs to be supplied by a subclass or in the call.
         The attributes duration and apply_output_fns (if non-None) will
         be set on this object, and it should respect those if possible.""")
-    
+
     static_parameters = param.List(class_=str,default=["scale","offset"],doc="""
         List of names of parameters of this class to pass to the
         pattern_presenter as static parameters, i.e. values that
@@ -1129,11 +1129,11 @@ class MeasureResponseCommand(ParameterizedFunction):
         """Return the list of features to vary; must be implemented by each subclass."""
         raise NotImplementedError
 
-    
+
 
 class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
     """Parameterized command for presenting sine gratings and measuring responses."""
-    
+
     pattern_presenter = param.Callable(instantiate=True,
         default=PatternPresenter(pattern_generator=SineGrating()),doc="""
         Callable object that will present a parameter-controlled pattern to a
@@ -1144,7 +1144,7 @@ class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
         models that do not follow that convention.""")
 
     frequencies = param.List(class_=float,default=[2.4],doc="Sine grating frequencies to test.")
-    
+
     num_phase = param.Integer(default=18,bounds=(1,None),softbounds=(1,48),
                               doc="Number of phases to test.")
 
@@ -1157,7 +1157,7 @@ class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
             doc="""Function that will be used to analyze the distributions of unit responses.""" )
 
     __abstract = True
-    
+
 
 
 class PositionMeasurementCommand(MeasureResponseCommand):
@@ -1165,7 +1165,7 @@ class PositionMeasurementCommand(MeasureResponseCommand):
 
     divisions=param.Integer(default=6,bounds=(1,None),doc="""
         The number of different positions to measure in X and in Y.""")
-    
+
     x_range=param.NumericTuple((-0.5,0.5),doc="""
         The range of X values to test.""")
 
@@ -1174,7 +1174,7 @@ class PositionMeasurementCommand(MeasureResponseCommand):
 
     size=param.Number(default=0.5,bounds=(0,None),doc="""
         The size of the pattern to present.""")
-    
+
     pattern_presenter = param.Callable(
         default=PatternPresenter(Gaussian(aspect_ratio=1.0)),doc="""
         Callable object that will present a parameter-controlled
@@ -1183,10 +1183,10 @@ class PositionMeasurementCommand(MeasureResponseCommand):
         to activate the appropriate neurons reliably.""")
 
     static_parameters = param.List(default=["scale","offset","size"])
-  
+
     __abstract = True
 
-        
+
 
 
 class SingleInputResponseCommand(MeasureResponseCommand):
@@ -1199,7 +1199,7 @@ class SingleInputResponseCommand(MeasureResponseCommand):
     """
     # CBERRORALERT: Need to alter PatternPresenter to accept an input sheet,
     # to allow it to be presented on only one sheet.
-    
+
     input_sheet = param.ObjectSelector(
         default=None,doc="""
         Name of the sheet where input should be drawn.""")
@@ -1231,7 +1231,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
 
     units = param.String(default='%',doc="""
         Units for labeling the curve_parameters in figure legends.
-        The default is %, for use with contrast, but could be any 
+        The default is %, for use with contrast, but could be any
         units (or the empty string).""")
 
     # Make constant in subclasses?
@@ -1245,7 +1245,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
     # the crossproduct of them?
     curve_parameters=param.Parameter([{"contrast":30},{"contrast":60},{"contrast":80},{"contrast":90}],doc="""
         List of parameter values for which to measure a curve.""")
-    
+
     __abstract = True
 
     def __call__(self,**params):
@@ -1275,7 +1275,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
         return [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
                 Feature(name="orientation",range=(0,pi),step=pi/p.num_orientation,cyclic=True),
                 Feature(name="frequency",values=p.frequencies)]
-        
+
 
     def _sheetview_unit(self,sheet,sheet_coord,map_name,default=0.0):
         """Look up and return the value of a SheetView for a specified unit."""
@@ -1285,7 +1285,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
             pref = sheet.sheet_views[map_name].view()[0]
             val = pref[matrix_coords]
         else:
-            self.warning(("%s should be measured before plotting this tuning curve -- " + 
+            self.warning(("%s should be measured before plotting this tuning curve -- " +
                           "using default value of %s for %s unit (%d,%d).") % \
                          (map_name,default,sheet.name,sheet_coord[0],sheet_coord[1]))
             val = default
@@ -1304,7 +1304,7 @@ class UnitCurveCommand(FeatureCurveCommand):
 
     size=param.Number(default=0.5,bounds=(0,None),doc="""
         The size of the pattern to present.""")
-    
+
     coords = param.List(default=[(0,0)],doc="""
         List of coordinates of units to measure.""")
 

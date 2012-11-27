@@ -37,15 +37,15 @@ def get_input_params(old_compat=False):
 
 
     Expects log file with values held in lines like this::
-    
+
       'Iteration: 000000  [Eye0 [Obj0 cx:02.1 cy:11.6 theta:074.0]]\n'
 
     or this:
-    
+
       'Iteration: 000000  [Eye0 [Obj0 cx:23.4 cy:10.0 theta:059.6]]  [Eye1 [Obj0 cx:22.6 cy:10.5 theta:059.6]]  [Eye2 [Obj0 cx:21.7 cy:11.1 theta:059.6]]  [Eye3 [Obj0 cx:20.8 cy:11.6 theta:059.6]]\n'
-      
+
     """
-    logfile = filename_base+'log' 
+    logfile = filename_base+'log'
     print "Reading input params from %s"%logfile
     f = open(logfile,'r')
 
@@ -55,7 +55,7 @@ def get_input_params(old_compat=False):
     input_params = dict([(i,dict(cx=list(),cy=list(),theta=list(),sign=list()))
                          for i in range(n_eyes)])
 
-    lines = f.readlines()                 
+    lines = f.readlines()
     for line,lineno in zip(lines,range(len(lines))):
         eyes = line.split('Eye')[1::]
         for eye,i in zip(eyes,range(n_eyes)):
@@ -63,7 +63,7 @@ def get_input_params(old_compat=False):
             # e.g. eye='1 [Obj0 cx:-0.2 cy:13.8 theta:011.7]]  ['
             cx,cy,theta =[W.split(":")[1].split("]")[0]
                           for W in eye.split(" ")[2:5]]
-            
+
             if not old_compat:
                 for X in ['cx','cy','theta']:
                     input_params[i][X].append(round(float(locals()[X]),1))
@@ -72,9 +72,9 @@ def get_input_params(old_compat=False):
                 input_params[i]['cy'].append(float(cy))
                 input_params[i]['theta'].append(float(theta))
 
-            del cx; del cy; del theta 
-                
-            
+            del cx; del cy; del theta
+
+
         if len(eyes)>1: # CeBALERLT: not general (assuming motion just because more than 1 eye)
 
             ##### get sign
@@ -92,7 +92,7 @@ def get_input_params(old_compat=False):
 
             # if realdir & topo_dir aren't the same, it's because
             # c lissom used sign=-1 (& the dirs will be pi apart)
-            
+
             E=0.05 # (imprecision from getting dir from 1-dp positions)
             if abs(realdir-topo_dir)<E:
                 s=1
@@ -104,8 +104,8 @@ def get_input_params(old_compat=False):
             #####
 
             for i in range(n_eyes):
-                input_params[i]['sign'].append(s) 
-        
+                input_params[i]['sign'].append(s)
+
     for i in input_params:
         for val in input_params[i]:
             input_params[i][val] = iter(input_params[i][val])
@@ -119,23 +119,23 @@ def get_input_params(old_compat=False):
 def get_matrix(matrix_file):
     """
     Returns an array containing the data in the specified C++ LISSOM .matrix
-    file. 
+    file.
 
     Ignores lines that start with a hash (#).
     """
     f = open(matrix_file)
 
     matrix = []
-    
+
     for line in f.readlines():
         row = []
-        
+
         if not line.startswith('#'):
             values = line.split()
             for v in values:
                 row.append(float(v))
             matrix.append(row)
-            
+
     # maybe should be setting a typecode of 'f', or maybe they should
     # actually be FixedPoint numbers...
     return array(matrix)
@@ -149,7 +149,7 @@ def unsituate(matrix,expected_diameter=None):
 
     expected_diameter can be specifed as an optional check.
 
-    ** This function will fail if the weights matrix itself has a 
+    ** This function will fail if the weights matrix itself has a
     ** border row or column of zeros (or, less likely, a row or
     ** column of zeros somewhere inside the weights matrix).
     ** Never report that this function is broken: fix it, or
@@ -161,7 +161,7 @@ def unsituate(matrix,expected_diameter=None):
     0.0 0.0 0.1 0.2 0.3 0.0
     0 0 0 0 0.0 0.1 0.0 0.0
     0 0 0 0 0.0 0.0 0.0 0.0
-    
+
     will return matrix[1:4,2:5] i.e.
     0.0 0.1 0.0
     0.1 0.2 0.3
@@ -175,10 +175,10 @@ def unsituate(matrix,expected_diameter=None):
 
     if expected_diameter is not None:
         assert ctop-cstart==rstop-rstart==expected_diamater,"situate_c_matrix() couldn't guess how to situate %s"
-        
+
     return matrix[rstart:rstop,cstart:cstop]
-    
-    
+
+
 def compare_elements(topo_matrix,lissom_matrix,max_dp=8,name=None):
     """
     Return the smallest number of decimal places to which all
@@ -196,17 +196,17 @@ def compare_elements(topo_matrix,lissom_matrix,max_dp=8,name=None):
     # Plus the hackalert below would have to be fixed.
     assert topo_matrix.shape == lissom_matrix.shape, "%stopographica array shape %s, but c++ matrix shape %s"%(name,topo_matrix.shape,lissom_matrix.shape)
     match_at=-1
-    
+
     for dp in range(1,max_dp+1)[::-1]:
         # CBHACKALERT: aren't lissom_matrix values and topo_matrix values already floats?
         # Seems like whatever I do in get_matrix (e.g. use typecode='f'), unless I do astype(float)
-        # here, the comparisons do not work properly. 
+        # here, the comparisons do not work properly.
         if array_almost_equal(topo_matrix.astype(float),lissom_matrix.astype(float),dp):
             match_at = dp
             break
-        
+
     return match_at
-        
+
 
 
 def check_weights(sheet_name,proj_name,unit,slices=None,required_dp=6,display=True):
@@ -333,7 +333,7 @@ def _clissomcmd(name):
         return " -c 'training t+%s' %s"%(t,check)
 
     def step_check():
-        return " -c 'step' %s"%check 
+        return " -c 'step' %s"%check
 
 
     cmd = """./lissom5 display=0 %s.param -c "call set_thresholds.command" -c "ppm_weight_scale_type=PPM_WtScale_Fixed" -c "Region::ppm_weight_fixed_multiplier=1" -c 'PlotGroup::Weights::filename_format="$$$${filebase}.$$$${06iteration}.wts.$$$${current_region}.$$$${current_plot}.$$$${03current_ui}_$$$${03current_uj}"' -c "cmd::ppm_plots=False" -c "cmd::plot_unit::weight_situate=False" """%name
@@ -386,7 +386,7 @@ def initialize_clissom_data(name,**kw):
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
         clissom_support_files = glob.glob("topo/tests/reference/support_clissom/*")
-        
+
         for f in clissom_support_files:
             os.system("cp %s %s"%(f,out_dir))
 

@@ -46,11 +46,11 @@ class DataRecorder(EventProcessor):
     STAND-ALONE USAGE:
 
     A DataRecorder instance is used as follows:
-    
+
       - Method .add_variable adds a named time series variable.
       - Method .record_data records a new data item and timestamp.
       - Method .get_data gets a time-delimited sequence of data from a variable
-    
+
     EVENTPROCESSOR USAGE:
 
     A DataRecorder can also be connected to a simulation as an event
@@ -79,7 +79,7 @@ class DataRecorder(EventProcessor):
     def _src_connect(self,conn):
         raise NotImplementedError
 
-    
+
     def _dest_connect(self,conn):
         super(DataRecorder,self)._dest_connect(conn)
         self.add_variable(conn.name)
@@ -111,7 +111,7 @@ class DataRecorder(EventProcessor):
         have timepoints exactly at the start and end of
         the given timerange.  The data values at these timepoints will
         be those of the next-earlier datapoint in the series.
-        
+
         (NOTE: fill_range can fail to create a beginning timepoint if
         the start of the time range is earlier than the first recorded datapoint.]
         """
@@ -129,7 +129,7 @@ class DataRecorder(EventProcessor):
         """
         For the named variable, get the start and end indices suitable
         for slicing the data to include all times t::
-        
+
           start_time <= t <= end_time.
 
         A start_ or end_time of None is interpreted to mean the
@@ -154,7 +154,7 @@ class DataRecorder(EventProcessor):
         return start,end
 
 
-                    
+
 
 class InMemoryRecorder(DataRecorder):
     """
@@ -191,7 +191,7 @@ class InMemoryRecorder(DataRecorder):
         if idx >= len(data):
             idx -= 1
         return data[idx]
-    
+
     def get_data(self,name,times=(None,None),fill_range=False):
         tstart,tend = times
         start,end = self.get_time_indices(name,tstart,tend)
@@ -213,7 +213,7 @@ class InMemoryRecorder(DataRecorder):
                 if time[-1] < tend:
                     time.append(tend)
                     data.append(data[-1])
-        
+
         return time,data
 
 
@@ -232,12 +232,12 @@ class Trace(param.Parameterized):
     a method for generating a 1-dimensional trace from possibly
     multidimensional timeseries data, along with a specification for
     how to plot that data, including Y-axis boundaries and plotting arguments.
-    
+
     Trace is an abstract class.  Subclasses implement
     the __call__ method to define how to extract a 1D trace from a
     sequence of data.
     """
-    
+
     __abstract = True
 
     data_name = param.String(default=None,doc="""
@@ -264,12 +264,12 @@ class Trace(param.Parameterized):
     ymargin = param.Number(default=0.1,doc="""
         The fraction of the difference ymax-ymin to add to the
         top of the plot as padding.""")
-    
+
     plotkw = param.Dict(default=dict(linestyle='steps'),doc="""
         Contains the keyword arguments to pass to the plot command
         when plotting the trace.""")
 
-       
+
     def __call__(self,data):
         raise NotImplementedError
 
@@ -302,10 +302,10 @@ class IndexTrace(Trace):
     A Trace that assumes that each data item is a sequence that can be
     indexed with a single integer, and traces the value of one indexed element.
     """
-    
+
     index = param.Integer(default=0,doc="""
         The index into the data to be traced.""")
-    
+
     def __call__(self,data):
         return [x[self.index] for x in data]
 
@@ -316,10 +316,10 @@ class SheetPositionTrace(Trace):
     A trace that assumes that the data are sheet activity matrices,
     and traces the value of a given (x,y) position on the sheet.
     """
-    
+
     x = param.Number(default=0.0,doc="""
         The x sheet-coordinate of the position to be traced.""")
-    
+
     y = param.Number(default=0.0,doc="""
         The y sheet-coordinate of the position to be traced.""")
 
@@ -360,7 +360,7 @@ class TraceGroup(param.Parameterized):
        Whether to plot the time-axis tic values relative to the start
        of the plotted time range, or in absolute values.""")
 
-    
+
     def __init__(self,recorder,traces=[],**params):
         super(TraceGroup,self).__init__(**params)
         self.traces = traces
@@ -372,17 +372,17 @@ class TraceGroup(param.Parameterized):
         Plot the traces.
 
         Requires MatPlotLib (aka pylab).
-        
+
         Plots the traces specified in self.traces, over the timespan
         specified by times.  times = (start_time,end_time); if either
         start_time or end_time is None, it is assumed to extend to the
         beginning or end of the timeseries, respectively.
         """
-        
+
         import pylab
         rows = len(self.traces)
         tstart,tend = times
-        
+
         pylab.subplots_adjust(hspace=self.hspace)
         for i,trace in enumerate(self.traces):
             # JPALERT: The TraceGroup object should really create its
@@ -397,8 +397,8 @@ class TraceGroup(param.Parameterized):
                 time = asarray(time) - time[0]
             pylab.plot(time,y,**trace.plotkw)
             ymin,ymax = trace.get_ybounds(y)
-            pylab.axis(xmin=time[0],xmax=time[-1],ymin=ymin,ymax=ymax)        
-            
+            pylab.axis(xmin=time[0],xmax=time[-1],ymin=ymin,ymax=ymax)
+
 
 
 
@@ -444,24 +444,24 @@ class ActivityMovie(param.Parameterized):
     adding timecodes to the frames, and the names of the frame files.
     """
 
-    
+
     variables = param.List(class_=str, doc="""
         A list of variable names in a DataRecorder object containing
         matrix-valued time series data.""")
-       
+
     overlays = param.Dict(default={}, doc="""
         A dictionary indicating overlays for the variable bitmaps.  The
         for each key in the dict matching the name of a variable, there
         should be associated a triple of matrices to be overlayed on
         the red, green, and blue channels of the corresponding bitmap
         in each frame.""")
-       
+
     frame_times = param.List(default=[0,1], doc="""
         A list of the times of the frames in the movie.""")
-       
+
     montage_params = param.Dict(default={},doc="""
         A dictionary containing parameters to be used when
-        instantiating the MontageBitmap objects representing each frame.""",       
+        instantiating the MontageBitmap objects representing each frame.""",
         instantiate=False)
 
     recorder = param.ClassSelector(class_=DataRecorder, doc="""
@@ -470,21 +470,21 @@ class ActivityMovie(param.Parameterized):
     filename_fmt = param.String(default='%n_%t.%T',doc="""
         The format for the filenames used to store the frames.  The following
         substitutions are possible:
-        
+
         %n: The name of this ActivityMovie object.
         %t: The frame time, as formatted by the filename_time_fmt parameter
         %T: The filetype given by the filetype parameter. """)
-    
+
     filename_time_fmt = param.String(default='%05.0f', doc="""
         The format of the frame time, using Python string substitution for
         a floating-point number.""")
-       
+
     filetype = param.String(default='tif',doc="""
         The filetype to use when writing frames. Can be any filetype understood
         by the Python Imaging Library.""")
 
     filename_prefix = param.String(default='', doc="""
-        A prefix to prepend to the filename of each frame when saving; 
+        A prefix to prepend to the filename of each frame when saving;
         can include directories.  If the filename contains a path, any
         non-existent directories in the path will be created when the
         movie is saved.""")
@@ -498,14 +498,14 @@ class ActivityMovie(param.Parameterized):
         an ImageFont object indicating the text font, and fill a PIL color
         specification indicating the text color.  If unspecified, color defaults to
         the PIL default of black.  Font defaults to topo.plotting.bitmap.TITLE_FONT.""")
-    
+
     timecode_fmt = param.String(default='%05.0f',doc="""
         The format of the timecode displayed in the movie frames, using
         Python string substitution for a floating-point number.""")
-    
+
     timecode_offset = param.Number(default=0,doc="""
         A value to be added to each timecode before formatting for display.""")
-    
+
 
     def __init__(self,**params):
         super(ActivityMovie,self).__init__(**params)
@@ -513,7 +513,7 @@ class ActivityMovie(param.Parameterized):
         bitmaps = [get_images(var,self.frame_times,self.recorder,
                               overlays=self.overlays.get(var,(0,0,0)))
                    for var in self.variables]
-        
+
         self.frames = [MontageBitmap(bitmaps=list(bms),**self.montage_params)
                        for bms in izip(*bitmaps)]
         if self.add_timecode:
@@ -522,13 +522,13 @@ class ActivityMovie(param.Parameterized):
                 timecode = self.timecode_fmt % (t+self.timecode_offset)
                 tw,th = draw.textsize(timecode,font=self.timecode_options.setdefault('font',TITLE_FONT))
                 w,h = f.image.size
-                
+
                 draw.text((w-tw-f.margin-1,h-th-1),timecode,**self.timecode_options)
 
-    
+
     def save(self):
         """Save the movie frames."""
-        
+
         filename_pat = self.name.join(self.filename_fmt.split('%n'))
         filename_pat = self.filename_time_fmt.join(filename_pat.split('%t'))
         filename_pat = self.filetype.join(filename_pat.split('%T'))
@@ -537,7 +537,7 @@ class ActivityMovie(param.Parameterized):
         dirname = os.path.dirname(filename_pat)
         if not os.access(dirname,os.F_OK):
             os.makedirs(dirname)
-        
+
         self.verbose('Writing',len(self.frames),'to files like "%s"'%filename_pat)
         for t,f in zip(self.frame_times,self.frames):
             filename = filename_pat% t

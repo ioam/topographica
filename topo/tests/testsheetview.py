@@ -39,11 +39,11 @@ class TestSheetView(unittest.TestCase):
                                  src_name=self.s.name)
         # s.sheet_view() returns a SheetView
         self.s.sheet_views['sv2']=sv2
-        
+
         # Define a type 1 SheetView, with matrix and bounding box.
         sv3 = SheetView((self.s.activity, self.s.bounds))
         sv4 = SheetView((self.s2.activity,self.s2.bounds))
-        # Define a type 2 SheetView, 
+        # Define a type 2 SheetView,
         sv5 = SheetView((ADD,((sv3,None),(sv4,None))))
         sv6 = SheetView((ADD,[(sv3,None),
                               (sv4,None),
@@ -64,7 +64,7 @@ class TestSheetView(unittest.TestCase):
 ##     def test_view(self):
 ##         ImageGenerator.nominal_bounds = BoundingBox(points=((-0.8,-0.8),(0.8,0.8)))
 ##         ImageGenerator.nominal_density = 100
-        
+
 ##         input = ImageGenerator(filename='topo/tests/testsheetview.ppm')
 ##      sv = SheetView((input.activity,input.bounds),
 ##                           src_name=input.name)
@@ -77,7 +77,7 @@ class TestSheetView(unittest.TestCase):
 #     def test_generate_coords(self):
 #         sv = UnitViewArray((self.s.activity, self.s.bounds))
 #         print sv.generate_coords(1,self.s.bounds)
-#         
+#
 
 
     def test_sum_maps(self):
@@ -118,7 +118,7 @@ class TestSheetView(unittest.TestCase):
 
 ##     """
 ##     filename = param.Parameter(None)
-    
+
 ##     def __init__(self,**params):
 
 ##         super(ImageGenerator,self).__init__(**params)

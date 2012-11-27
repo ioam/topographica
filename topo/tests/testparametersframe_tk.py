@@ -43,13 +43,13 @@ class TestParametersFrameWithApply(unittest.TestCase):
 
         self.some_pos = [param.Parameterized(),param.Parameterized(),
                          param.Parameterized()]
-        
+
         self.testpo1 = TestPO()
         self.testpo1.params()['osp'].objects = self.some_pos
 
         self.testpo2 = TestPO()
         self.testpo1.params()['osp'].objects = self.some_pos
-        
+
         self.toplevel = Tkinter.Toplevel()
         self.f = tk.ParametersFrameWithApply(self.toplevel,self.testpo1)
 
@@ -59,7 +59,7 @@ class TestParametersFrameWithApply(unittest.TestCase):
         self.assertEqual(self.f._extraPO,self.testpo1)
         self.f.set_PO(self.testpo2)
         self.assertEqual(self.f._extraPO,self.testpo2)
-        
+
 
 
     def test_apply_button_1(self):
@@ -78,17 +78,17 @@ class TestParametersFrameWithApply(unittest.TestCase):
         for param_name,val in orig_values.items():
             self.assertEqual(self.f._tkvars[param_name].get(),val)
 
-        ## and check that *displayed* values don't change 
+        ## and check that *displayed* values don't change
         orig_values = {}
         for param_name,representation in self.f.representations.items():
             widget = representation['widget']
-            
+
             # button-type widgets don't have a value
             widget_has_value = not 'command' in widget.config()
-                            
+
             if widget_has_value:
                 orig_values[param_name] = widget.get()
-        
+
         self.f.Apply()
 
         for param_name,val in orig_values.items():
@@ -123,7 +123,7 @@ class TestParametersFrameWithApply(unittest.TestCase):
 
         # Now check that pressing apply over and over does not
         # create a new object each time when the same string remains
-        # in the widget 
+        # in the widget
         testpo_id = id(self.f.pa)
         self.f.Apply()
         self.assertEqual(id(self.f.pa),testpo_id)
@@ -145,16 +145,16 @@ class TestParametersFrameWithApply(unittest.TestCase):
         e.Apply()
         self.assertEqual(topo.sim['S'].precedence,7)
         # problem with Simulation no longer being singleton?
-        
-        
+
+
 
 # CEBALERT: need test for defaults button. Check that works ok
 # for non-instantiated params etc
 
-            
+
 # test apply disabling etc
-    
-        
+
+
 
 
 

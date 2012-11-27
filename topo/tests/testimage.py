@@ -55,17 +55,17 @@ class TestImage(unittest.TestCase):
  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,]],Float)
 
-        
+
         image = FileImage(filename = resolve_path('tests/testimage.pgm'),
                       xdensity=8,
                       ydensity=8,
                       bounds=BoundingBox(radius=0.5),
                       output_fns=[])
-              
+
         ps = image.pattern_sampler
         ps.size_normalization='original'
         ps.whole_pattern_output_fns=[]
-        
+
         assert_array_almost_equal(image_array,image())
 
 
@@ -100,7 +100,7 @@ class TestImage(unittest.TestCase):
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
 ##          96.59090909,  96.59090909,  96.59090909,  96.59090909,]],Float)
 
-        
+
 ##         image = FileImage(filename = resolve_path('tests/testimage.pgm'),
 ##                       xdensity=9,
 ##                       ydensity=9,
@@ -271,7 +271,7 @@ class TestImage(unittest.TestCase):
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,]])
-        
+
 
         image = FileImage(filename = resolve_path('tests/testimage.pgm'),
                       xdensity=8,
@@ -359,7 +359,7 @@ class TestImage(unittest.TestCase):
 ##          96.59090909,  96.59090909,  96.59090909,],
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
 ##          96.59090909,  96.59090909,  96.59090909,]],Float)
-        
+
 ##         image = FileImage(filename = resolve_path('tests/testimage.pgm'),
 ##                       density=8,
 ##                       bounds=BoundingBox(radius=0.5),
@@ -371,8 +371,8 @@ class TestImage(unittest.TestCase):
 ##         assert_array_almost_equal(rot90(image_array,-1),image(orientation=-pi/2))
 
 
-        
-        
+
+
 
 suite = unittest.TestSuite()
 suite.addTest(unittest.makeSuite(TestImage))

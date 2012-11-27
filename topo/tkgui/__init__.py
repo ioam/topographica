@@ -117,7 +117,7 @@ else:
     # everywhere else (I think) it's Button-3
     right_click_events = ['<Button-3>']
     right_click_release_events = ['ButtonRelease-3']
-    
+
 
 global TK_SUPPORTS_DOCK
 TK_SUPPORTS_DOCK = True
@@ -158,10 +158,10 @@ def start(mainloop=False,banner=True):
     paramtk.initialize()
     paramtk.root.menubar = ControllableMenu(paramtk.root)
     paramtk.root.configure(menu=paramtk.root.menubar)
-    
+
     # default,clam,alt,classic
     try:
-        paramtk.root.tk.call("ttk::style","theme","use","classic")  
+        paramtk.root.tk.call("ttk::style","theme","use","classic")
     except:
         pass
 
@@ -180,7 +180,7 @@ def start(mainloop=False,banner=True):
     # Provide a way for other code to access the GUI when necessary
     topo.guimain=console
 
-    
+
     # This alows context menus to work on the Mac.  Widget code should bind
     # contextual menus to the virtual event <<right-click>>, not
     # <Button-3>.
@@ -202,7 +202,7 @@ def start(mainloop=False,banner=True):
 
 
 
-####################### 
+#######################
 
 if __name__ == '__main__':
     start(mainloop=True)

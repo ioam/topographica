@@ -42,7 +42,7 @@ from topo.base.arrayutil import arg, wrap
 class Distribution(object):
     """
     Holds a distribution of the values f(x) associated with a variable x.
-    
+
     A Distribution is a histogram-like object that is a dictionary of
     samples.  Each sample is an x:f(x) pair, where x is called the bin
     and f(x) is called the value(). Each bin's value is typically
@@ -81,19 +81,19 @@ class Distribution(object):
     # e.g. calls to vector_direction() or vector_selectivity() when no
     # value is non-zero.  Useful for warning users when the values are
     # not meaningful.
-    undefined_vals  = 0 
+    undefined_vals  = 0
 
     def __init__(self, axis_bounds=(0.0, 2*pi), cyclic=False, keep_peak=False):
         self._data = {}
         self._counts = {}
-            
+
         # total_count and total_value hold the total number and sum
         # (respectively) of values that have ever been provided for
         # each bin.  For a simple distribution these will be the same as
         # sum_counts() and sum_values().
         self.total_count = 0
         self.total_value = 0.0
-        
+
         self.axis_bounds = axis_bounds
         self.axis_range = axis_bounds[1] - axis_bounds[0]
         self.cyclic = cyclic
@@ -112,13 +112,13 @@ class Distribution(object):
         """
         self.add(a)
         return None
-    
+
 
     def get_value(self, bin):
         """
         Return the value of the specified bin.
 
-        (Return None if there is no such bin.)        
+        (Return None if there is no such bin.)
         """
         return self._data.get(bin)
 
@@ -127,17 +127,17 @@ class Distribution(object):
         """
         Return the count from the specified bin.
 
-        (Return None if there is no such bin.)        
+        (Return None if there is no such bin.)
         """
         return self._counts.get(bin)
-    
+
 
     def values(self):
         """
         Return a list of values.
 
         Various statistics can then be calculated if desired:
-        
+
           sum(vals)  (total of all values)
           max(vals)  (highest value in any bin)
 
@@ -195,7 +195,7 @@ class Distribution(object):
             # CEBALERT: Neet to support wrapping of bin values
             # else:  new_bin = wrap(self.axis_bounds[0], self.axis_bounds[1], bin)
             new_bin = bin
-            
+
             if new_bin not in self._data:
                 self._data[new_bin] = 0.0
                 self._counts[new_bin] = 0
@@ -209,7 +209,7 @@ class Distribution(object):
                 if new_value > self._data[new_bin]: self._data[new_bin] = new_value
             else:
                 self._data[new_bin] += new_value
-               
+
 
     def sub_distr( self, distr ):
         """
@@ -225,7 +225,7 @@ class Distribution(object):
             if b in self.bins():
                 v   = distr._data.get( b )
                 if v is not None:   self._data[ b ] -= v
-               
+
 
     def max_value_bin(self):
         """Return the bin with the largest value."""
@@ -233,7 +233,7 @@ class Distribution(object):
 
     def weighted_sum(self):
         """Return the sum of each value times its bin."""
-        return innerproduct(self._data.keys(), self._data.values()) 
+        return innerproduct(self._data.keys(), self._data.values())
 
 
     def value_mag(self, bin):
@@ -254,7 +254,7 @@ class Distribution(object):
         Works for NumPy arrays of bin numbers, returning
         an array of directions.
         """
-        return (2*pi)*bin/self.axis_range 
+        return (2*pi)*bin/self.axis_range
 
 
     def _radians_to_bins(self, direction):
@@ -319,7 +319,7 @@ class DistributionStatisticFn( param.Parameterized ):
             Scaling of the resulting measure of the distribution peakedness,
             typically the selectivity of a unit to its preferred feature value.
             The tuple specifies (offset, multiplier) of the output scaling""" )
-    
+
     __abstract = True
 
     def __call__(self, distribution):
@@ -346,7 +346,7 @@ class DescriptiveStatisticFn( DistributionStatisticFn ):
         a direction corresponding to the bin number.  Specifically,
         the total bin number range is mapped into a direction range
         [0,2pi].
-        
+
         For a cyclic distribution, the avgbinnum will be a continuous
         measure analogous to the max_value_bin() of the distribution.
         But this quantity has more precision than max_value_bin()
@@ -365,9 +365,9 @@ class DescriptiveStatisticFn( DistributionStatisticFn ):
         """
         # vectors are represented in polar form as complex numbers
         h   = d._data
-        r   = h.values()                                  
+        r   = h.values()
         theta = d._bins_to_radians(array( h.keys() ))
-        v_sum = innerproduct(r, exp(theta*1j))                  
+        v_sum = innerproduct(r, exp(theta*1j))
 
         magnitude = abs(v_sum)
         direction = arg(v_sum)
@@ -379,15 +379,15 @@ class DescriptiveStatisticFn( DistributionStatisticFn ):
 
         # wrap the direction because arctan2 returns principal values
         wrapped_direction = wrap(d.axis_bounds[0], d.axis_bounds[1], direction_radians)
-        
-        return (magnitude, wrapped_direction) 
+
+        return (magnitude, wrapped_direction)
 
 
     def _weighted_average(self, d ):
         """
         Return the weighted_sum divided by the sum of the values
         """
-        return d._safe_divide(d.weighted_sum(),sum(d._data.values())) 
+        return d._safe_divide(d.weighted_sum(),sum(d._data.values()))
 
 
     def selectivity(self, d):
@@ -427,7 +427,7 @@ class DescriptiveStatisticFn( DistributionStatisticFn ):
         """
         # A single bin is considered fully selective (but could also
         # arguably be considered fully unselective)
-        if len(d._data) <= 1: 
+        if len(d._data) <= 1:
             return 1.0
 
         proportion = d._safe_divide( max(d._data.values()),
@@ -435,7 +435,7 @@ class DescriptiveStatisticFn( DistributionStatisticFn ):
         offset = 1.0/len(d._data)
         scaled = (proportion-offset)/(1.0-offset)
 
-        # negative scaled is possible 
+        # negative scaled is possible
         # e.g. 2 bins, with values that sum to less than 0.5
         # this probably isn't what should be done in those cases
         if scaled >= 0.0:
@@ -464,7 +464,7 @@ class DescriptiveStatisticFn( DistributionStatisticFn ):
         """
         return d._safe_divide(self.vector_sum( d )[0], sum(d._data.values()))
 
-    
+
     __abstract = True
 
 
@@ -484,7 +484,7 @@ class DescriptiveBimodalStatisticFn( DescriptiveStatisticFn ):
         to 0.0
         """
         h   = d._data
-        if len( h ) <= 1: 
+        if len( h ) <= 1:
             return h.keys()[ 0 ]
 
         k       = self.max_value_bin()
@@ -504,7 +504,7 @@ class DescriptiveBimodalStatisticFn( DescriptiveStatisticFn ):
         Selectivity is computed in two ways depending on whether the variable is
         a cyclic, as in selectivity()
         """
-        if len( d._data ) <= 1: 
+        if len( d._data ) <= 1:
             return 0.0
         if d.cyclic == True:
             return self._vector_second_selectivity( d )
@@ -557,7 +557,7 @@ class DescriptiveBimodalStatisticFn( DescriptiveStatisticFn ):
         """
         h   = d._data
         l   = len( h )
-        if l <= 1: 
+        if l <= 1:
             return h.keys()[ 0 ]
 
         ks  = h.keys()
@@ -605,7 +605,7 @@ class DescriptiveBimodalStatisticFn( DescriptiveStatisticFn ):
             ik  += 1
             if ik >= l:
                 ik  = 0
-        
+
         return ks[ im ]
 
 
@@ -617,7 +617,7 @@ class DescriptiveBimodalStatisticFn( DescriptiveStatisticFn ):
         also usefl to discriminate the validity of second_peak_bin()
         """
         h   = d._data
-        if len( h ) <= 1: 
+        if len( h ) <= 1:
             return 0.0
 
         p1  = d.max_value_bin()
@@ -643,7 +643,7 @@ class DescriptiveBimodalStatisticFn( DescriptiveStatisticFn ):
         and selectivity, as often is the case.
         """
         h   = d._data
-        if len( h ) <= 1: 
+        if len( h ) <= 1:
             return ( h.keys()[ 0 ], 0.0 )
 
         p1  = d.max_value_bin()
@@ -658,7 +658,7 @@ class DescriptiveBimodalStatisticFn( DescriptiveStatisticFn ):
 
         return ( p2, max( scaled, 0.0 ) )
 
-    
+
     __abstract = True
 
 
@@ -837,7 +837,7 @@ class VonMisesStatisticFn( DistributionStatisticFn ):
     def norm_sel( self, k, n ):
         m   = ( self.vm_kappa_fit[ 0 ] + n * self.vm_kappa_fit[ 1 ] ) ** 2
         return log( 1 + k ) / log( 1 + m )
-        
+
     def fit_vm( self, distribution ):
         """
         computes the best fit of the monovariate von Mises function in the
@@ -901,7 +901,7 @@ class VonMisesStatisticFn( DistributionStatisticFn ):
         if bandwith < 0:
             self.fit_exit_code  = 1
             return 0, 0, 0
-            
+
         if jacobian is None:
             self.fit_exit_code  = 2
             return 0, 0, 0

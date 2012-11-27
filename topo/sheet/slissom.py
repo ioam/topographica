@@ -32,15 +32,15 @@ class SLISSOM(LISSOM):
     # configurable parameters
     threshold = param.Number(default=0.3,bounds=(0,None), doc="Baseline threshold")
 
-    threshold_decay_rate = param.Number(default=0.01,bounds=(0,None), 
+    threshold_decay_rate = param.Number(default=0.01,bounds=(0,None),
         doc="Dynamic threshold decay rate")
-    
+
     absolute_refractory = param.Number(default=1.0,bounds=(0,None),
         doc="Absolute refractory period")
-    
+
     dynamic_threshold_init = param.Number(default=2.0,bounds=(0,None),
         doc="Initial value for dynamic threshold when spike occurs")
-    
+
     spike_amplitude = param.Number(default=1.0,bounds=(0,None),
         doc="Amplitude of spike at the moment of spiking")
 
@@ -68,19 +68,19 @@ class SLISSOM(LISSOM):
     def __init__(self,**params):
         """
         SLISSOM-specific init, where dynamic threshold stuff
-        gets initialized. 
+        gets initialized.
         """
         super(SLISSOM,self).__init__(**params)
         self.dynamic_threshold = \
-            Numeric.zeros(self.activity.shape).astype(activity_type)    
-        self.spike = Numeric.zeros(self.activity.shape) 
+            Numeric.zeros(self.activity.shape).astype(activity_type)
+        self.spike = Numeric.zeros(self.activity.shape)
         self.spike_history = Numeric.zeros(self.activity.shape)
         self.membrane_potential = \
             Numeric.zeros(self.activity.shape).astype(activity_type)
 
         num_traces = len(self.trace_coords)
         self.membrane_potential_trace = \
-            Numeric.zeros((num_traces,self.trace_n)).astype(activity_type)      
+            Numeric.zeros((num_traces,self.trace_n)).astype(activity_type)
 
     def activate(self):
         """
@@ -88,9 +88,9 @@ class SLISSOM(LISSOM):
         fixed+dynamic thresholding. Overloading was necessary to
         avoid self.send_output() being invoked before thresholding.
         This function also updates and maintains internal values such as
-        membrane_potential, spike, etc. 
+        membrane_potential, spike, etc.
         """
-        
+
         self.activity *= 0.0
 
         for proj in self.in_connections:
@@ -105,7 +105,7 @@ class SLISSOM(LISSOM):
             self.activity = self.activity * (1.0-self.noise_rate) \
                 + RandomArray.random(self.activity.shape) * self.noise_rate
 
-        # Thresholding: baseline + dynamic threshold + absolute refractory 
+        # Thresholding: baseline + dynamic threshold + absolute refractory
         # period
         rows,cols = self.activity.shape
 
@@ -145,7 +145,7 @@ class SLISSOM(LISSOM):
             self.activity *= 0.0
             for proj in self.in_connections:
                 proj.activity *= 0.0
-            self.mask.reset()        
+            self.mask.reset()
         super(LISSOM,self).input_event(conn,data)
 
     def plot_trace(self):

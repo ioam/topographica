@@ -69,7 +69,7 @@ class TestTkParameterized(unittest.TestCase):
         f.pack()
 
         f.pack_param('const')
-        
+
         f.pack_param('boo',on_set=f.upboocount)
 
         self.assertEqual(f.boo,True); self.assertEqual(f.boocount,0)
@@ -85,8 +85,8 @@ class TestTkParameterized(unittest.TestCase):
         self.assertEqual(f.boo,True) # check that f.boo was actually set
         self.assertEqual(f._tkvars['boo'].get(),True) # simulate GUI get
 
-          
-        
+
+
     def test_basic_shadow(self):
         """
         Check shadowing of a PO's parameters.
@@ -96,7 +96,7 @@ class TestTkParameterized(unittest.TestCase):
         f.pack()
 
         f.pack_param('bool_param') # (from the TestPO)
-        
+
         # test that setting f.bool_param (where bool_param is
         # shadow of t.bool_param) actually sets t.bool_param
         self.assertEqual(t.bool_param,False) # so we know start state
@@ -106,15 +106,15 @@ class TestTkParameterized(unittest.TestCase):
         # simulate a GUI set (typing then Return) & then and check
         # g.bool_param is set
         f._tkvars['bool_param'].set(False)
-        self.assertEqual(t.bool_param,False) 
+        self.assertEqual(t.bool_param,False)
 
         # check that up-to-date value is returned when g got changed elsewhere
         t.bool_param=True
-        self.assertEqual(f.bool_param,True) 
+        self.assertEqual(f.bool_param,True)
 
         # simulate a GUI get & check up-to-date value returned
         t.bool_param=False
-        self.assertEqual(f._tkvars['bool_param'].get(),False) 
+        self.assertEqual(f._tkvars['bool_param'].get(),False)
 
 
         # CEB: the following doesn't work:
@@ -127,7 +127,7 @@ class TestTkParameterized(unittest.TestCase):
             pass
         else:
             raise("Failed to raise AttributeError on looking up non-existent attribute 'does_not_exist'")
-            
+
         f.did_not_exist = 9
         assert 'did_not_exist' in f.__dict__ # check that new attribute added to f's dict...
         self.assertEqual(f.did_not_exist,9)  # ...and that it was set
@@ -144,7 +144,7 @@ class TestTkParameterized(unittest.TestCase):
         f.pack_param('boo',on_set=self.upzcount)
         f.boo=True
         self.assertEqual(self.z,1)
-        
+
         f._tkvars['boo'].set(True)
         self.assertEqual(self.z,2)
 
@@ -158,22 +158,22 @@ class TestTkParameterized(unittest.TestCase):
 
         f._tkvars['boo'].set(True)
         self.assertEqual(self.z,0)
-        
+
         f._tkvars['boo'].set(False)
         self.assertEqual(self.z,1)
-        
+
 
     def upzcount(self): self.z+=1  # minor helper method
-        
+
 
 
     def test_direct_getting_and_setting(self):
         """
         Test the methods used to set and get Parameter values.
         """
-        
+
         g = Gaussian()
-        f = SomeFrame(Toplevel(),extraPO=g) 
+        f = SomeFrame(Toplevel(),extraPO=g)
 
         g.size=0.95
         self.assertNotEqual(f.size,g.size)
@@ -214,11 +214,11 @@ class TestParameterTypeRepresentations(unittest.TestCase):
     def test_number_parameter(self):
 
         self.f.pack_param('nu')
-        
+
         nu_param = self.f.get_parameter_object('nu')
         nu_tkvar = self.f._tkvars['nu']
         nu_widget = self.f.representations['nu']['widget']
-        
+
         # check standard gui setting (includes resolution test)
         self.f.nu = 0.1
         nu_tkvar.set(0.9999999)
@@ -235,13 +235,13 @@ class TestParameterTypeRepresentations(unittest.TestCase):
         # slider with the mouse...
         nu_widget.slider.set(0.8)
         nu_widget._slider_used()
-        self.assertEqual(self.f.nu,0.8)        
+        self.assertEqual(self.f.nu,0.8)
         self.assertEqual(nu_widget.slider.get(),0.8)
         self.assertEqual(eval(nu_widget.tag.get()),eval('0.8'))
         self.assertEqual(eval(nu_tkvar.get()),eval('0.8'))
 
         # now make immediate and test that
-        self.f.param_immediately_apply_change[param.Number]=True        
+        self.f.param_immediately_apply_change[param.Number]=True
         self.f.nu = 0.1
         nu_tkvar.set(0.4)
         self.assertEqual(self.f.nu,0.4)
@@ -272,12 +272,12 @@ class TestParameterTypeRepresentations(unittest.TestCase):
         nu_widget._tag_press_return()
         from math import sin,pi
         self.assertAlmostEqual(self.f.nu,sin(pi))
-        
-        
+
+
 
     def test_object_selector_parameter(self):
         """
-        Test that ObjectSelectorParameter representation works.        
+        Test that ObjectSelectorParameter representation works.
         """
         some_pos = [param.Parameterized(name='cat'),
                     param.Parameterized(name='rat'),
@@ -289,7 +289,7 @@ class TestParameterTypeRepresentations(unittest.TestCase):
 
         self.f.pack_param('osp')  # have to pack AFTER populating range for OptionMenu widget to work (see ALERT in tkparameterizedobject.py)
 
-        
+
         # (otherwise, could do the following:
 ##         f = SomeFrame(Toplevel())
 ##         f.pack_param('r')
@@ -334,16 +334,16 @@ class TestParameterTypeRepresentations(unittest.TestCase):
         csp_tkvar.set('Ring')
         self.assertEqual(type(self.f.csp),Ring)
         ring_id = id(self.f.csp)
-        
+
         csp_tkvar.set('Rectangle')
         self.assertEqual(type(self.f.csp),Rectangle)
         rectangle_id = id(self.f.csp)
-        
+
         csp_tkvar.set('Ring')
         self.assertEqual(id(self.f.csp),ring_id)
         csp_tkvar.set('Rectangle')
         self.assertEqual(id(self.f.csp),rectangle_id)
-        
+
         # test sorting
         # CB: add instantiation test, switching test, etc
 
@@ -359,7 +359,7 @@ class TestParameterTypeRepresentations(unittest.TestCase):
             w.delete(0,"end")
             w.insert(0,test_string)
             self.f._update_param_from_tkvar(param_name,force=True)
-            
+
             self.assertEqual(getattr(self.f,param_name),test_string)
             self.assertEqual(w.get(),test_string)
 
@@ -382,8 +382,8 @@ class TestParameterTypeRepresentations(unittest.TestCase):
 ##     def test_boolean_parameter(self):
 
 ##         self.f.pack_param('boo')
-        
-        
+
+
 
 
     def test_parameter(self):

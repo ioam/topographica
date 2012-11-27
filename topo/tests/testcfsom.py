@@ -56,7 +56,7 @@ class ImageSaver(EventProcessor):
                      activity. Used as parameter to PIL's Image.putdata().
       pixel_offset = (default 0) The zero-offset for each pixel. Used as
                      parameter to PIL's Image.putdata()
-                     
+
     """
 
     file_prefix = param.Parameter('')
@@ -80,7 +80,7 @@ class ImageSaver(EventProcessor):
         filename += "." + self.file_format
 
         self.verbose("filename = '%s'" % filename)
-        
+
         # make and populate the image
         im = Image.new('L',(data.shape[1],data.shape[0]))
         self.verbose("image size = %s" % NxN(im.size))
@@ -112,22 +112,22 @@ class TestCFSom(unittest.TestCase):
 ##         of running a cfsom simulation.
 ##         """
 ##         from testsheetview import ImageGenerator
-        
+
 ##         s = Simulation(step_mode=True)
 
 ##         ImageGenerator.nominal_density = 100
 ##         ImageGenerator.nominal_bounds = BoundingBox(points=((-0.8,-0.8),(0.8,0.8)))
 ##         input = ImageGenerator(filename='images/ellen_arthur.pgm')
-    
-    
+
+
 ##         save = ImageSaver(pixel_scale=1.5)
 ##         som = CFSheet()
-        
+
 ##         s.add(som,input,save)
 ##         s.connect(input,som,connection_type=CFProjection,learning_fn=CFPLF_Hebbian_opt())
 ##         s.connect(som,save)
 ##         s.run(duration=10)
-    
+
 
 
     def test_cfsom(self):
@@ -145,25 +145,25 @@ class TestCFSom(unittest.TestCase):
             y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=200),
             orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=300))
 
-        
+
         # input generation params
         GeneratorSheet.period = 1.0
         GeneratorSheet.nominal_density = 5
         GeneratorSheet.print_level = param.parameterized.WARNING
-        
+
 
         # cf som parameters
         CFSheet.nominal_density = 5
 
         ###########################################
         # build simulation
-        
+
         param.parameterized.min_print_level = param.parameterized.WARNING
-      
+
         s = Simulation()
         s.verbose("Creating simulation objects...")
         s['retina']=GeneratorSheet(input_generator=input_pattern)
-        
+
         s['V1'] = CFSheet()
         s['V1'].print_level = param.parameterized.WARNING
 

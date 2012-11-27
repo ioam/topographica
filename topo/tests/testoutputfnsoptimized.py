@@ -14,10 +14,10 @@ cases = []
 
 suite = unittest.TestSuite()
 suite.addTests(unittest.makeSuite(case) for case in cases)
-              
+
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=1).run(suite)
-    
 
 
-        
+
+

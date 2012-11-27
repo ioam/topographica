@@ -22,7 +22,7 @@ def _check_proj(s,p,N):
     except AssertionError, st:
         return "%s: %s\n"%(s,st)
 
-    
+
     try:
         for i in range(0,N,step):
             for j in range(0,N,step):
@@ -30,7 +30,7 @@ def _check_proj(s,p,N):
         return 0
     except AssertionError, st:
         return "%s: %s\n"%(s,st)
-        
+
 
 def check(weights=True,activities=True):
 
@@ -50,8 +50,8 @@ def check(weights=True,activities=True):
 
     if len(errs)>0:
         raise AssertionError("\n"+errs)
-            
-        
+
+
 
 def check_all_weights():
     print "t=%s: Checking weights..."%topo.sim.time()
@@ -93,10 +93,10 @@ def check_all_activities():
 ##                 print "Checking %s."%pr.name
 ##                 o =_check_proj(s.name,pr.name,BaseN)
 ##                 if o!=0:e+=o
-                
+
 ##             raise AssertionError("%s  (If any incoming projection did not match, it will be listed below.)\n%s\n"%(st,e))
 
-        
+
 # hack
 L = locals()
 
@@ -108,33 +108,33 @@ def run_comparisons(l):
 
 
     # * times mark scheduled actions
-    
+
     L.update(l)
 
     check(activities=False) #0 *
 
     for i in range(5):
         topo.sim.run(1)
-        check()    
+        check()
 
     topo.sim.run(95) #100
     check()
 
-    topo.sim.run(98) #198 
-    check() 
+    topo.sim.run(98) #198
+    check()
 
     topo.sim.run(2) #200 *
-    check() 
+    check()
 
     topo.sim.run(150) #350
-    check() 
+    check()
 
     topo.sim.run(150) #500 *
-    check() 
-    
+    check()
+
     topo.sim.run(300) #800
     check()
-        
+
     topo.sim.run(200) # 1000 *
     check()
 
@@ -153,11 +153,11 @@ def run_comparisons(l):
         topo.sim.run(1500) # 8000 *
         check()
 
-        topo.sim.run(5000) # 13000 
+        topo.sim.run(5000) # 13000
         check()
 
         topo.sim.run(3000) # 16000
         check()
-        
+
         topo.sim.run(4000) # 20000 *
         check()

@@ -35,7 +35,7 @@ True
 >>> a_t3 = copy.deepcopy(R.activity)
 
 # check that dyn params are advancing
->>> x_t2==x_t3 
+>>> x_t2==x_t3
 False
 >>> assert_array_not_equal(a_t2,a_t3)
 

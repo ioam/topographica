@@ -44,9 +44,9 @@ class PatternCombine(TransferFn):
         Any binary Numeric array "ufunc" returning the same type of
         array as the operands and supporting the reduce operator is
         allowed here.  See topo.pattern.Composite.operator for more
-        details.              
+        details.
         """)
-    
+
     def __call__(self,x):
         ###JABHACKALERT: Need to set it up to be independent of
         #density; right now only things like random numbers work
@@ -79,31 +79,31 @@ class KernelMax(TransferFn):
 
     kernel_radius = param.Number(default=0.0,bounds=(0,None),doc="""
         Kernel radius in Sheet coordinates.""")
-    
+
     neighborhood_kernel_generator = param.ClassSelector(PatternGenerator,
         default=Gaussian(x=0.0,y=0.0,aspect_ratio=1.0),
         doc="Neighborhood function")
 
-    crop_radius_multiplier = param.Number(default=3.0,doc="""        
+    crop_radius_multiplier = param.Number(default=3.0,doc="""
         Factor by which the radius should be multiplied, when deciding
         how far from the winner to keep evaluating the kernel.""")
-    
+
     density=param.Number(1.0,bounds=(0,None),doc="""
         Density of the Sheet whose matrix we act on, for use
         in converting from matrix to Sheet coordinates.""")
-    
+
 
     def __call__(self,x):
         rows,cols = x.shape
         radius = self.density*self.kernel_radius
         crop_radius = int(max(1.25,radius*self.crop_radius_multiplier))
-        
+
         # find out the matrix coordinates of the winner
         wr,wc = array_argmax(x)
-        
+
         # convert to sheet coordinates
         wy = rows-wr-1
-        
+
         # Optimization: Calculate the bounding box around the winner
         # in which weights will be changed
         cmin = max(wc-crop_radius,  0)
@@ -113,7 +113,7 @@ class KernelMax(TransferFn):
         ymin = max(wy-crop_radius,  0)
         ymax = min(wy+crop_radius+1,rows)
         bb = BoundingBox(points=((cmin,ymin), (cmax,ymax)))
-        
+
         # generate the kernel matrix and insert it into the correct
         # part of the output array
         kernel = self.neighborhood_kernel_generator(bounds=bb,xdensity=1,ydensity=1,
@@ -130,14 +130,14 @@ class HalfRectify(TransferFn):
 
     t_init = param.Number(default=0.0,doc="""
         The initial value of threshold at which output becomes non-zero..""")
-    
-    
+
+
     gain = param.Number(default=1.0,doc="""
         The neuronal gain""")
-    
+
     randomized_init = param.Boolean(False,doc="""
         Whether to randomize the initial t parameter.""")
-    
+
     noise_magnitude =  param.Number(default=0.1,doc="""
         The magnitude of the additive noise to apply to the t_init
         parameter at initialization.""")
@@ -147,7 +147,7 @@ class HalfRectify(TransferFn):
         super(TransferFn,self).__init__(**params)
         self.first_call = True
 
-    
+
     def __call__(self,x):
         if self.first_call:
             self.first_call = False
@@ -158,7 +158,7 @@ class HalfRectify(TransferFn):
                  self.noise_magnitude*2
             else:
                 self.t = ones(x.shape, x.dtype.char) * self.t_init
-        
+
         x -= self.t
         clip_lower(x,0)
         x *= self.gain
@@ -168,9 +168,9 @@ class HalfRectify(TransferFn):
 class HomeostaticResponse(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
-    constant desired average activity. Details can be found in the report 
+    constant desired average activity. Details can be found in the report
     'Mechanisms for Stable and Robust Development of Orientation Maps
-    and Receptive Fields', by Judith S. Law, Jan Antolik, and James A. 
+    and Receptive Fields', by Judith S. Law, Jan Antolik, and James A.
     Bednar, 2011 (http://www.inf.ed.ac.uk/publications/report/1404.html).
     """
 
@@ -188,28 +188,28 @@ class HomeostaticResponse(TransferFnWithState):
 
     linear_slope = param.Number(default=1.0,doc="""
         Slope of the linear portion above threshold.""")
-        
+
     learning_rate = param.Number(default=0.01,doc="""
         Learning rate for homeostatic plasticity.""")
-    
+
     smoothing = param.Number(default=0.991,doc="""
-        Weighting of previous activity vs. current activity when 
+        Weighting of previous activity vs. current activity when
         calculating the average activity.""")
-        
+
     noise_magnitude =  param.Number(default=0.1,doc="""
         The magnitude of the additive noise to apply to the t_init
         parameter at initialization.""")
-    
+
     period = param.Number(default=1.0, constant=True, doc="""
         How often the threshold should be adjusted.
 
-        If the period is 0, the threshold is adjusted continuously, each 
+        If the period is 0, the threshold is adjusted continuously, each
         time this TransferFn is called.
 
         For nonzero periods, adjustments occur only the first time
         this TransferFn is called after topo.sim.time() reaches an
-        integer multiple of the period.  
- 
+        integer multiple of the period.
+
         For example, if period is 2.5 and the TransferFn is evaluated
         every 0.05 simulation time units, the threshold will be
         adjusted at times 2.55, 5.05, 7.55, etc.""")
@@ -221,7 +221,7 @@ class HomeostaticResponse(TransferFnWithState):
         self.__current_state_stack=[]
         self.t=None     # To allow state_push at init
         self.y_avg=None # To allow state_push at init
-        
+
         self._next_update_timestamp = topo.sim.time_type(topo.sim.time()+self.period)
         self._y_avg_prev = None
         self._x_prev = None
@@ -238,7 +238,7 @@ class HomeostaticResponse(TransferFnWithState):
                      (xdensity=x.shape[0],ydensity=x.shape[1]) \
                      -0.5)*self.noise_magnitude*2
         else:
-            self.t = ones(x.shape, x.dtype.char) * self.t_init    
+            self.t = ones(x.shape, x.dtype.char) * self.t_init
         self.y_avg = ones(x.shape, x.dtype.char) * self.target_activity
 
 
@@ -252,7 +252,7 @@ class HomeostaticResponse(TransferFnWithState):
         Applies exponential smoothing to the given current activity and previous
         smoothed value following the equations given in the report cited above.
         """
-        y_avg = (1.0-smoothing)*x + smoothing*prev_avg 
+        y_avg = (1.0-smoothing)*x + smoothing*prev_avg
         t = prev_t + learning_rate * (y_avg - target_activity)
         return (y_avg, t)
 
@@ -264,7 +264,7 @@ class HomeostaticResponse(TransferFnWithState):
         if (topo.sim.time() > self._next_update_timestamp):
             self._next_update_timestamp += self.period
             # Using activity matrix and and smoothed activity from *previous* call.
-            (self.y_avg, self.t) = self._update_threshold(self.t, self._x_prev, self._y_avg_prev, 
+            (self.y_avg, self.t) = self._update_threshold(self.t, self._x_prev, self._y_avg_prev,
                                                           self.smoothing, self.learning_rate,
                                                           self.target_activity)
             self._y_avg_prev = self.y_avg   # Copy only if not in continuous mode
@@ -281,9 +281,9 @@ class HomeostaticResponse(TransferFnWithState):
                                            copy.copy(self._y_avg_prev),
                                            copy.copy(self._x_prev)))
         super(HomeostaticResponse, self).state_push()
-        
+
     def state_pop(self):
-        (self.t, self.y_avg, self.first_call, self._next_update_timestamp, 
+        (self.t, self.y_avg, self.first_call, self._next_update_timestamp,
         self._y_avg_prev, self._x_prev) = self.__current_state_stack.pop()
         super(HomeostaticResponse, self).state_pop()
 
@@ -295,12 +295,12 @@ class AttributeTrackingTF(TransferFnWithState):
 
     Useful objects to track include sheets (e.g. "topo.sim['V1']"),
     projections ("topo.sim['V1'].projections['LateralInhibitory']"),
-    or an output_function.  
+    or an output_function.
 
     Any attribute whose value is a matrix the same size as the
     activity matrix can be tracked.  Only specified units within this
     matrix will be tracked.
-    
+
     If no object is specified, this function will keep track of the
     incoming activity over time.
 
@@ -327,13 +327,13 @@ class AttributeTrackingTF(TransferFnWithState):
         script_repr()).""")
     # There may be some way to achieve the above without using eval(), which would be better.
     #JLALERT When using this function snapshots cannot be saved because of problem with eval()
-    
+
     attrib_names = param.List(default=[], doc="""
         List of names of the function object's parameters that should be stored.""")
-    
+
     units = param.List(default=[(0.0,0.0)], doc="""
         Sheet coordinates of the unit(s) for which parameter values will be stored.""")
-    
+
     step = param.Number(default=1, doc="""
         How often to update the tracked values.
 
@@ -359,16 +359,16 @@ class AttributeTrackingTF(TransferFnWithState):
             self.values[p]={}
             for u in self.units:
                 self.values[p][u]=[]
-         
-        
+
+
     def __call__(self,x):
-    
+
         if self._object==None:
             if isinstance(self.object,str):
                 self._object=eval(self.object)
             else:
                 self._object=self.object
-            
+
         if self._coordframe == None:
             if isinstance(self.coordframe,str) and isinstance(self._object,SheetCoordinateSystem):
                 raise ValueError(str(self._object)+"is already a coordframe, no need to specify coordframe")
@@ -378,10 +378,10 @@ class AttributeTrackingTF(TransferFnWithState):
                 self._coordframe=eval(self.coordframe)
             else:
                 raise ValueError("A coordinate frame (e.g. coordframe=topo.sim['V1']) must be specified in order to track"+str(self._object))
-                
+
         #collect values on each appropriate step
         self.n_step += 1
-        
+
         if self.n_step == self.step:
             self.n_step = 0
             if self.plastic:
@@ -390,11 +390,11 @@ class AttributeTrackingTF(TransferFnWithState):
                         value_matrix=x
                     else:
                         value_matrix= getattr(self._object, p)
-                        
+
                     for u in self.units:
                         mat_u=self._coordframe.sheet2matrixidx(u[0],u[1])
                         self.values[p][u].append((topo.sim.time(),value_matrix[mat_u]))
-          
+
 
 
 __all__ = list(set([k for k,v in locals().items() if isinstance(v,type) and issubclass(v,TransferFn)]))

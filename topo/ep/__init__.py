@@ -25,14 +25,14 @@ class PulseGenerator(EventProcessor):
     frequency and phase.  Period and phase are in units of simulation
     time.
     """
-    
+
     dest_ports=None # Allows connections to come in on any port
 
     amplitude = param.Number(1.0,doc="The size of the pulse to generate.")
-    
+
     period    = param.Number(1.0,bounds=(0.0,None),doc=
         "The period with which to repeat the pulse. Must be greater than zero.")
-    
+
     phase     = param.Number(0.0,doc=
         "The time after starting the simulation to wait before sending the first pulse.")
 
@@ -55,7 +55,7 @@ class ThresholdUnit(EventProcessor):
     generates a pulse of a given amplitude and resets the accumulator
     to zero.
     """
-    
+
     dest_ports=None # Allows connections to come in on any port
 
     threshold     = param.Number(default=1.0,doc="The threshold at which to fire.")
@@ -78,7 +78,7 @@ class ThresholdUnit(EventProcessor):
 
 class SumUnit(EventProcessor):
     """A simple unit that outputs the running sum of input received thus far."""
-    
+
     dest_ports=None # Allows connections to come in on any port
 
     def __init__(self,**params):
@@ -102,6 +102,6 @@ __all__ = list(set(k for k,v in locals().items()
                     and issubclass(v, EventProcessor)
                     and v is not EventProcessor
                     and not v.__name__.startswith('_')))
-# Automatically discover all .py files in this directory. 
+# Automatically discover all .py files in this directory.
 __all__ += [re.sub('\.py$','',f) for f in os.listdir(__path__[0])
            if re.match('^[^_].*\.py$',f)]

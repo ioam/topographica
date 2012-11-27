@@ -61,7 +61,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
             true bounds may be found from the 'bounds' attribute
             of this object.
             """)
-    
+
     nominal_density = param.Number(default=10,constant=True,doc="""
             User-specified number of processing units per 1.0 distance
             horizontally or vertically in Sheet coordinates. The actual
@@ -72,7 +72,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
             may be obtained from either the xdensity or ydensity attribute
             (since these are identical for a Sheet).
             """)
-    
+
     plastic = param.Boolean(True,doc="""
             Setting this to False tells the Sheet not to change its
             permanent state (e.g. any connection weights) based on
@@ -109,7 +109,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
 
         sheet_views is a dictionary that stores SheetViews,
         i.e. representations of the sheet for use by analysis or plotting
-        code.    
+        code.
         """
         EventProcessor.__init__(self,**params)
 
@@ -128,8 +128,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
 
         # For non-plastic inputs
         self.__saved_activity = []
-        self._plasticity_setting_stack = []  
-        self.sheet_views = {}        
+        self._plasticity_setting_stack = []
+        self.sheet_views = {}
 
 
     ### JABALERT: This should be deleted now that sheet_views is public
@@ -142,7 +142,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Delete the dictionary entry with key entry 'view_name' to save
         memory.
         """
-        if self.sheet_views.has_key(view_name):   
+        if self.sheet_views.has_key(view_name):
             del self.sheet_views[view_name]
 
 
@@ -159,7 +159,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
 
         X,Y = self.matrixidx2sheet(R,C)
         return X,Y
-        
+
 
     # CB: check whether we need this function any more.
     def row_col_sheetcoords(self):
@@ -188,15 +188,15 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
     def activate(self):
         """
         Collect activity from each projection, combine it to calculate
-        the activity for this sheet, and send the result out. 
+        the activity for this sheet, and send the result out.
 
         Subclasses will need to override this method to whatever it
         means to calculate activity in that subclass.
-        """        
+        """
         if self.apply_output_fns:
             for of in self.output_fns:
                 of(self.activity)
-    
+
         self.send_output(src_port='Activity',data=self.activity)
 
 

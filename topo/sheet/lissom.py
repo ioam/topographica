@@ -29,11 +29,11 @@ class LISSOM(JointNormalizingCFSheet):
     been reached, an external input is required before the sheet will
     activate again.
     """
-    
+
     strict_tsettle = param.Parameter(default = None,doc="""
         If non-None, delay sending output until activation_count reaches this value.""")
-    
-    mask_init_time=param.Integer(default=5,bounds=(0,None),doc=""" 
+
+    mask_init_time=param.Integer(default=5,bounds=(0,None),doc="""
         Determines when a new mask is initialized in each new iteration.
 
         The mask is reset whenever new input comes in.  Once the
@@ -42,7 +42,7 @@ class LISSOM(JointNormalizingCFSheet):
 
     tsettle=param.Integer(default=8,bounds=(0,None),doc="""
         Number of times to activate the LISSOM sheet for each external input event.
-       
+
         A counter is incremented each time an input is received from any
         source, and once the counter reaches tsettle, the last activation
         step is skipped so that there will not be any further recurrent
@@ -54,7 +54,7 @@ class LISSOM(JointNormalizingCFSheet):
         If false, waits until settling is completed before doing learning.""")
 
     output_fns = param.HookList(default=[PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
-    
+
     precedence = param.Number(0.6)
 
     post_initialization_weights_output_fns = param.HookList([],doc="""
@@ -63,11 +63,11 @@ class LISSOM(JointNormalizingCFSheet):
 
     beginning_of_iteration = param.HookList(default=[],instantiate=False,doc="""
         List of callables to be executed at the beginning of each iteration.""")
-    
+
     end_of_iteration = param.HookList(default=[],instantiate=False,doc="""
         List of callables to be executed at the end of each iteration.""")
 
-    
+
     def __init__(self,**params):
         super(LISSOM,self).__init__(**params)
         self.__counter_stack=[]
@@ -93,7 +93,7 @@ class LISSOM(JointNormalizingCFSheet):
             self.activity *= 0.0
             for proj in self.in_connections:
                 proj.activity *= 0.0
-            self.mask.reset()        
+            self.mask.reset()
         super(LISSOM,self).input_event(conn,data)
 
 
@@ -112,15 +112,15 @@ class LISSOM(JointNormalizingCFSheet):
         """
         if self.new_input:
             self.new_input = False
-            
+
             if self.activation_count == self.mask_init_time:
                 self.mask.calculate()
-            
+
             if self.tsettle == 0:
                 # Special case: behave just like a CFSheet
                 self.activate()
                 self.learn()
-                
+
             elif self.activation_count == self.tsettle:
                 # Once we have been activated the required number of times
                 # (determined by tsettle), reset various counters, learn
@@ -137,7 +137,7 @@ class LISSOM(JointNormalizingCFSheet):
                 self.activation_count += 1
                 if (self.plastic and self.continuous_learning):
                    self.learn()
-                   
+
 
     # print the weights of a unit
     def printwts(self,x,y):
@@ -157,7 +157,7 @@ class LISSOM(JointNormalizingCFSheet):
 
     def send_output(self,src_port=None,data=None):
         """Send some data out to all connections on the given src_port."""
-        
+
         out_conns_on_src_port = [conn for conn in self.out_connections
                                  if self._port_match(conn.src_port,[src_port])]
 
@@ -175,7 +175,7 @@ class LISSOM(JointNormalizingCFSheet):
 class JointScaling(LISSOM):
     """
     LISSOM sheet extended to allow joint auto-scaling of Afferent input projections.
-    
+
     An exponentially weighted average is used to calculate the average
     joint activity across all jointly-normalized afferent projections.
     This average is then used to calculate a scaling factor for the
@@ -194,7 +194,7 @@ class JointScaling(LISSOM):
     # groups of projections. Currently only works for the joint
     # scaling of projections named "Afferent", grouped together by
     # JointNormalize in dest_port.
-    
+
     target = param.Number(default=0.045, doc="""
         Target average activity for jointly scaled projections.""")
 
@@ -203,10 +203,10 @@ class JointScaling(LISSOM):
         Target average activity for jointly scaled projections.
 
         Used for calculating a learning rate scaling factor.""")
-    
+
     smoothing = param.Number(default=0.999, doc="""
         Influence of previous activity, relative to current, for computing the average.""")
-    
+
     apply_scaling = param.Boolean(default=True, doc="""Whether to apply the scaling factors.""")
 
     precedence = param.Number(0.65)
@@ -227,7 +227,7 @@ class JointScaling(LISSOM):
         Keeps track of the scaled average for debugging. Could be
         overridden by a subclass to calculate the factors differently.
         """
-      
+
         if self.plastic:
             self.sf *=0.0
             self.lr_sf *=0.0
@@ -247,23 +247,23 @@ class JointScaling(LISSOM):
         scaling factor.
         """
         joint_total = zeros(self.shape, activity_type)
-        
+
         for key,projlist in self._grouped_in_projections('JointNormalize'):
             if key is not None:
                 if key =='Afferent':
                     for proj in projlist:
                         joint_total += proj.activity
                     self.calculate_joint_sf(joint_total)
-                    if self.apply_scaling:   
+                    if self.apply_scaling:
                         for proj in projlist:
                             proj.activity *= self.sf
                             if hasattr(proj.learning_fn,'learning_rate_scaling_factor'):
                                 proj.learning_fn.update_scaling_factor(self.lr_sf)
                             else:
                                 raise ValueError("Projections to be joint scaled must have a learning_fn that supports scaling, such as CFPLF_PluginScaled")
-                   
+
                 else:
-                    raise ValueError("Only Afferent scaling currently supported")                  
+                    raise ValueError("Only Afferent scaling currently supported")
 
 
     def activate(self):
@@ -276,13 +276,13 @@ class JointScaling(LISSOM):
         projection, combined to calculate the activity for this sheet,
         and the result is sent out.
         """
-        
+
         self.activity *= 0.0
 
         if self.x_avg is None:
             self.x_avg=self.target*ones(self.shape, activity_type)
         if self.scaled_x_avg is None:
-            self.scaled_x_avg=self.target*ones(self.shape, activity_type) 
+            self.scaled_x_avg=self.target*ones(self.shape, activity_type)
         if self.sf is None:
             self.sf=ones(self.shape, activity_type)
         if self.lr_sf is None:
@@ -290,16 +290,16 @@ class JointScaling(LISSOM):
 
         #Afferent projections are only activated once at the beginning of each iteration
         #therefore we only scale the projection activity and learning rate once.
-        if self.activation_count == 0: 
-            self.do_joint_scaling()   
+        if self.activation_count == 0:
+            self.do_joint_scaling()
 
         for proj in self.in_connections:
             self.activity += proj.activity
-        
+
         if self.apply_output_fns:
             for of in self.output_fns:
                 of(self.activity)
-          
+
         self.send_output(src_port='Activity',data=self.activity)
 
 
@@ -352,7 +352,7 @@ def schedule_events(sheet_str="topo.sim['V1']",st=0.5,aff_name="Afferent",
     # Lateral excitatory bounds changes
     # Convenience variable: excitatory projection
     LE=sheet_str+".projections()['LateralExcitatory']"
-    
+
     topo.sim.schedule_command(  200*st,LE+'.change_bounds(sheet.BoundingBox(radius=0.06250))')
     topo.sim.schedule_command(  500*st,LE+'.change_bounds(sheet.BoundingBox(radius=0.04375))')
     topo.sim.schedule_command( 1000*st,LE+'.change_bounds(sheet.BoundingBox(radius=0.03500))')
@@ -363,11 +363,11 @@ def schedule_events(sheet_str="topo.sim['V1']",st=0.5,aff_name="Afferent",
     topo.sim.schedule_command( 6500*st,LE+'.change_bounds(sheet.BoundingBox(radius=0.00484))')
     topo.sim.schedule_command( 8000*st,LE+'.change_bounds(sheet.BoundingBox(radius=0.00290))')
     topo.sim.schedule_command(20000*st,LE+'.change_bounds(sheet.BoundingBox(radius=0.00174))')
-    
+
     # Lateral excitatory learning rate changes
     idss=("" if ids==1 else "/%3.1f"%ids)
     estr='%s.learning_rate=%%s%s*%s.n_units'%(LE,idss,LE)
-    
+
     topo.sim.schedule_command(  200*st,estr%'0.12168')
     topo.sim.schedule_command(  500*st,estr%'0.06084')
     topo.sim.schedule_command( 1000*st,estr%'0.06084')
@@ -378,16 +378,16 @@ def schedule_events(sheet_str="topo.sim['V1']",st=0.5,aff_name="Afferent",
     topo.sim.schedule_command( 6500*st,estr%'0.06084')
     topo.sim.schedule_command( 8000*st,estr%'0.06084')
     topo.sim.schedule_command(20000*st,estr%'0.06084')
-    
+
     ### Lateral inhibitory learning rate and strength changes
     if increase_inhibition:
         LI=sheet_str+".projections()['LateralInhibitory']"
         istr='%s.learning_rate=%%s%s'%(LI,idss)
-    
+
         topo.sim.schedule_command( 1000*st,istr%'1.80873/5.0*2.0')
         topo.sim.schedule_command( 2000*st,istr%'1.80873/5.0*3.0')
         topo.sim.schedule_command( 5000*st,istr%'1.80873/5.0*5.0')
-    
+
         topo.sim.schedule_command( 1000*st,LI+'.strength=-2.2')
         topo.sim.schedule_command( 2000*st,LI+'.strength=-2.6')
 
@@ -404,13 +404,13 @@ def schedule_events(sheet_str="topo.sim['V1']",st=0.5,aff_name="Afferent",
         topo.sim.schedule_command( 2000*st,ps%('0.5480'))
         topo.sim.schedule_command( 4000*st,ps%('0.4110'))
         topo.sim.schedule_command(20000*st,ps%('0.2055'))
-    
+
     # Activation function threshold changes
     bstr = sheet_str+'.output_fns[0].lower_bound=%5.3f;'+\
            sheet_str+'.output_fns[0].upper_bound=%5.3f'
     lbi=sheet_.output_fns[0].lower_bound
     ubi=sheet_.output_fns[0].upper_bound
-    
+
     topo.sim.schedule_command(  200*st,bstr%(lbi+0.01,ubi+0.01))
     topo.sim.schedule_command(  500*st,bstr%(lbi+0.02,ubi+0.02))
     topo.sim.schedule_command( 1000*st,bstr%(lbi+0.05,ubi+0.03))
@@ -421,11 +421,11 @@ def schedule_events(sheet_str="topo.sim['V1']",st=0.5,aff_name="Afferent",
     topo.sim.schedule_command( 6500*st,bstr%(lbi+0.12,ubi+0.17))
     topo.sim.schedule_command( 8000*st,bstr%(lbi+0.13,ubi+0.20))
     topo.sim.schedule_command(20000*st,bstr%(lbi+0.14,ubi+0.23))
-    
+
     # Just to get more progress reports
     topo.sim.schedule_command(12000*st,'pass')
     topo.sim.schedule_command(16000*st,'pass')
-    
+
     # Settling steps changes
     topo.sim.schedule_command( 2000*st,sheet_str+'.tsettle=10')
     topo.sim.schedule_command( 5000*st,sheet_str+'.tsettle=11')

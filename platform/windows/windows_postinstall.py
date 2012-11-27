@@ -22,7 +22,7 @@ def _create_association(python,scriptloc,ico_path):
     # Link '.ty' file extension to  "topographica.bat -g"
     os.system('assoc .ty=Topographica.Script')
     os.system('ftype Topographica.Script="' + bat_path + '" -g "%1"')
-    
+
     # and add the Topographica icon to the registry.
     namepathkey = OpenKey(HKEY_CLASSES_ROOT,'Topographica.Script',0,KEY_SET_VALUE)
     SetValue(namepathkey,None,REG_SZ,'Topographica Script')
@@ -51,7 +51,7 @@ def install():
                                                     topographica_shortcut_name)
     args = sys.prefix + r'\scripts\topographica -g'
 
-    create_shortcut(python, 'Topographica', start_menu_topographica_shortcut, 
+    create_shortcut(python, 'Topographica', start_menu_topographica_shortcut,
                     args, '', sys.prefix + r'\scripts\topographica.ico')
     file_created(start_menu_topographica_shortcut)
 
@@ -68,13 +68,13 @@ def install():
     ### start menu:
     # ... examples shortcut
     start_menu_examples_shortcut = os.path.join(start_menu_folder,"Examples.lnk")
-    create_shortcut(sys.prefix+r'\share\topographica\examples', 
+    create_shortcut(sys.prefix+r'\share\topographica\examples',
                     'Examples', start_menu_examples_shortcut, '')
     file_created(start_menu_examples_shortcut)
 
     # ... models shortcut
     start_menu_models_shortcut = os.path.join(start_menu_folder,"Models.lnk")
-    create_shortcut(sys.prefix+r'\share\topographica\models', 
+    create_shortcut(sys.prefix+r'\share\topographica\models',
                     'Models', start_menu_models_shortcut, '')
     file_created(start_menu_models_shortcut)
 
@@ -82,8 +82,8 @@ def install():
     file_created(_create_association(python,
                                      sys.prefix + r'\scripts',
                                      sys.prefix + r'\scripts\topographica.ico'))
-                       
-   
+
+
 def remove():
     pass
 

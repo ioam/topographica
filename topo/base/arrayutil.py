@@ -46,7 +46,7 @@ def divisive_normalization(weights):
 
 
 def add_border(matrix,width=1,value=0.0):
-    """   
+    """
     Returns a new matrix consisting of the given matrix with a border
     or margin of the given width filled with the given value.
     """
@@ -56,7 +56,7 @@ def add_border(matrix,width=1,value=0.0):
     vborder = array([ [value]*width ] * rows)
 
     temp = concatenate( (vborder,matrix,vborder), axis=1)
-    return concatenate( (hborder,temp,hborder) )     
+    return concatenate( (hborder,temp,hborder) )
 
 
 def arg(z):
@@ -102,12 +102,12 @@ def centroid(array_2D):
         row_sum = array_2D[r,:].sum()
         rsum += r*row_sum
         rmass_sum += row_sum
-    
+
     for c in xrange(cols):
         col_sum = array_2D[:,c].sum()
         csum += c*col_sum
         cmass_sum += col_sum
-        
+
     row_centroid= rsum/rmass_sum
     col_centroid= csum/cmass_sum
 
@@ -162,6 +162,6 @@ class DivideWithConstant(param.Parameterized):
     to ensure that it has only positive values.
     """
     c = param.Number(default=1.0)
-    
+
     def __call__(self, x, y):
         return divide(x,maximum(y,0)+self.c)

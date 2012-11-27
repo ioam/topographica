@@ -66,7 +66,7 @@ class TestCFIter(unittest.TestCase):
             self.failUnlessEqual(i,24)
             self.failUnless(cf is proj.flatcfs[24])
         self.failUnlessEqual(total,1)
-        
+
 
 
 ####

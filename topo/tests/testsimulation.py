@@ -25,43 +25,43 @@ class TestSimulation(unittest.TestCase):
     def test_register_is_true(self):
         sim1 = new_simulation(name="test_singleton")
         assert sim1 is topo.sim
-        
+
         sid = id(topo.sim['S'])
 
         sim2 = copy.copy(topo.sim)
         assert sim2 is sim1
 
-        sim3 = copy.deepcopy(topo.sim)        
+        sim3 = copy.deepcopy(topo.sim)
         assert sim3 is sim1
 
         self.assertEqual(id(sim3['S']),sid)
 
         topo.sim['S'].precedence=111
-        p = pickle.dumps(topo.sim,2)        
+        p = pickle.dumps(topo.sim,2)
         topo.sim['S'].precedence=5
 
         Simulation.register=False # to ensure the object's own register is being used
         sim4 = pickle.loads(p)
         Simulation.register=True
-        
+
         assert sim4 is sim1
         assert topo.sim['S'].precedence==111,"%s"%topo.sim['S'].precedence
 
-        
-        
+
+
 
 
     def test_register_is_false(self):
         sim1 = new_simulation(register=False)
         assert sim1 is not topo.sim
-        
+
         sid = id(sim1['S'])
 
         sim2 = copy.copy(sim1)
         assert sim2 is not sim1
-        assert sim2 is not topo.sim 
-        
-        sim3 = copy.deepcopy(sim1)        
+        assert sim2 is not topo.sim
+
+        sim3 = copy.deepcopy(sim1)
         assert sim3 is not sim1
         assert sim3 is not topo.sim
 
@@ -69,7 +69,7 @@ class TestSimulation(unittest.TestCase):
 
         new_simulation(register=True)
         sim1['S'].precedence=111
-        p = pickle.dumps(sim1,2)        
+        p = pickle.dumps(sim1,2)
         topo.sim['S'].precedence=5
         sim4 = pickle.loads(p)
 
@@ -78,8 +78,8 @@ class TestSimulation(unittest.TestCase):
         assert topo.sim['S'].precedence==5
 
 
-        
-    
+
+
     def test_event_copy(self):
         """
         Test to make sure that EPConnectionEvent copies the underlying data
@@ -106,7 +106,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(len(s._events_stack),1)
         s.state_pop()
         self.assertEqual(len(s._events_stack),0)
-        
+
 
     def test_event_cmp(self):
 
@@ -122,7 +122,7 @@ class TestSimulation(unittest.TestCase):
         assert e2 == e2
         assert e1 != e2
         assert e2 != e1
-        
+
     def test_event_insert(self):
         s = Simulation()
 
@@ -145,7 +145,7 @@ class TestSimulation(unittest.TestCase):
         assert s.events[3] == e2
         assert s.events[4] == e2a
 
-        
+
     def test_get_objects(self):
         s = Simulation()
 

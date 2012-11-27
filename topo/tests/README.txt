@@ -29,8 +29,8 @@ tests, typically by doing:
 
 To run only a subset of the tests, you can specify the module names
 explicitly:
-    
-  ./topographica -c 'import topo.tests.testimage; topo.tests.run(test_modules=[topo.tests.testimage])'    
+
+  ./topographica -c 'import topo.tests.testimage; topo.tests.run(test_modules=[topo.tests.testimage])'
 
 
 To add new tests modules.

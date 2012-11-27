@@ -53,7 +53,7 @@ class PlotGroupSaver(param.Parameterized):
 
     def __init__(self,plotgroup,**params):
         super(PlotGroupSaver,self).__init__(**params)
-        self.plotgroup = plotgroup 
+        self.plotgroup = plotgroup
 
 
     def strip(self,filename):
@@ -75,7 +75,7 @@ class PlotGroupSaver(param.Parameterized):
         varmap['plot_label']=label
         varmap['plotgroup_name']=self.plotgroup.name
         varmap.update(params)
-        
+
         return self.strip(self.filename_format % varmap)
 
 
@@ -95,9 +95,9 @@ class PlotGroupSaver(param.Parameterized):
 def make_contact_sheet(imgs, (marl,mart,marr,marb), padding):
     """
     Make a contact sheet (image grid) from a 2D array of PIL images::
-    
+
       imgs     2D array of images
-               
+
       marl     The left margin in pixels
       mart     The top margin in pixels
       marr     The right margin in pixels
@@ -108,7 +108,7 @@ def make_contact_sheet(imgs, (marl,mart,marr,marb), padding):
     Returns a PIL image object.
     """
     # should make sure imgs is numpy array
-    
+
     # CB: *** should do this in numpy without the conversion to list and back! ***
     nrows,ncols = imgs.shape
     i_widths  = numpy.array([i.size[0] for i in imgs.ravel()]).reshape(nrows,ncols)
@@ -116,7 +116,7 @@ def make_contact_sheet(imgs, (marl,mart,marr,marb), padding):
 
     col_widths = i_widths.max(axis=0)
     row_heights = i_heights.max(axis=1)
-    
+
     marw = marl+marr
     marh = mart+ marb
 
@@ -129,7 +129,7 @@ def make_contact_sheet(imgs, (marl,mart,marr,marb), padding):
     white = (255,255,255)
     inew = Image.new('RGB',isize,white)
 
-    # CB: should be replaced with a more numpy technique.        
+    # CB: should be replaced with a more numpy technique.
     for irow in range(nrows):
         for icol in range(ncols):
             # if different widths in a col, or different heights in a
@@ -139,7 +139,7 @@ def make_contact_sheet(imgs, (marl,mart,marr,marb), padding):
             left = marl+col_widths[0:icol].sum()+icol*padding
             right = left+i_widths[irow,icol]
             upper = mart+row_heights[0:irow].sum()+irow*padding
-            lower = upper+i_heights[irow,icol] 
+            lower = upper+i_heights[irow,icol]
             inew.paste(imgs[irow,icol],(left,upper,right,lower))
     return inew
 

@@ -703,7 +703,7 @@
 	  from Alessio to fix maptests -- Treat selectivity as always
 	  non-cyclic, pass preference_fn more consistently, added
 	  selectivity_scale where needed to preserve older results.
-	  
+	
 	  Should make maptests work; have been broken since r11904.
 
 2012-04-17 jlstevens
@@ -3452,7 +3452,7 @@
 	  topo/base/simulation.py:
 	  Changed default connection delay to be nonzero, and made
 	  negative values illegal.
-	  
+	
 	  Fixes long-standing problem with the Model Editor that when
 	  adding feedback projections, the network eventually goes
 	  into an endless loop, due to never-ending streams of event
@@ -3586,7 +3586,7 @@
 	  correcting the result (which required adding missing
 	  brackets to output_fns and changing the explicity output_fn
 	  manipulations to output_fns[0].
-	  
+	
 	  Runs but has not been tested for a complete simulation
 
 2011-02-10 ceball
@@ -4917,7 +4917,7 @@
 	  topo/command/analysis.py:
 	  Minor cleanup of organization
 
-	* [r11153] 
+	* [r11153]
           examples/lissom_whisker_barrels.ty:
 	  Minor cleanup
 
@@ -13340,7 +13340,7 @@
 	  Minor parameter changes
 
 	* [r9422] contrib/sparse_connectivity_model.ty:
-	  
+	
 
 2008-10-09  jbednar
 
@@ -14363,7 +14363,7 @@
 	  /trunk/topographica-win/create_python_topo/matplotlib-0.90.1.win32-py2.4.exe,
 	  /trunk/topographica-win/create_python_topo/matplotlib-0.91.4.win32-py2.5.exe,
 	  /trunk/topographica-win/create_python_topo/setup.bat:
-	  
+	
 
 	* [r9200]
 	  /trunk/topographica-win/create_python_topo/matplotlib-0.90.0.win32-py2.4.exe:
@@ -14727,10 +14727,10 @@
 	  Added the HalfRectifyAndPower output function
 
 	* [r9125] topo/learningfn/optimized.py:
-	  
+	
 
 	* [r9124] topo/command/analysis.py:
-	  
+	
 
 2008-09-04  ceball
 
@@ -15234,18 +15234,18 @@
 2008-08-26  antolikjan
 
 	* [r9009] contrib/jacommands.py:
-	  
+	
 
 	* [r9008]
 	  examples/gc_lissom_oo_or_homeostatic_new.ty:
-	  
+	
 
 	* [r9007]
 	  examples/gc_lissom_oo_or_homeostatic_new.ty:
-	  
+	
 
 	* [r9006] contrib/jacommands.py:
-	  
+	
 2008-08-25  ceball
 
 	* [r9005] topo/tkgui/editor.py,
@@ -17747,7 +17747,7 @@
 	  improved axis scaling for activity histograms
 
 	* [r8735] contrib/jacommands.py:
-	  
+	
 
 	* [r8734] contrib/jacommands.py:
 	  A corrected minor bug
@@ -17771,7 +17771,7 @@
 
 	* [r8730]
 	  examples/cc_lissom_oo_or_simple_rv.ty:
-	  
+	
 
 	* [r8729]
 	  examples/cc_lissom_oo_or_simple_rv.ty:
@@ -17850,7 +17850,7 @@
 
 	* [r8711]
 	  examples/gc_lissom_oo_or_homeostatic.ty:
-	  
+	
 
 	* [r8710]
 	  examples/cc_lissom_oo_or_simple_rv.ty:
@@ -18443,46 +18443,46 @@
 
 	* [r8599]
 	  examples/cc_lissom_oo_or_simple_rv.ty:
-	  
+	
 
 	* [r8598]
 	  examples/cc_lissom_oo_or_simple_rv.ty:
-	  
+	
 
 	* [r8597] examples/cc_lissom_oo_or_pokus.ty:
-	  
+	
 
 	* [r8596]
 	  examples/cc_lissom_oo_or_simple_rv.ty:
-	  
+	
 
 	* [r8595] topo/tkgui/testpattern.py:
-	  
+	
 
 	* [r8594] topo/sheets/lissom.py:
-	  
+	
 
 	* [r8593] topo/patterns/basic.py:
-	  
+	
 
 	* [r8592] topo/commands/analysis.py:
-	  
+	
 
 	* [r8591] topo/base/projection.py:
-	  
+	
 
 	* [r8590] topo/base/simulation.py:
-	  
+	
 
 	* [r8589] topo/base/cf.py:
-	  
+	
 
 	* [r8588] examples/cc_lissom_oo_or_pokus.ty:
-	  
+	
 
 	* [r8587]
 	  examples/cc_lissom_oo_or_simple_rv.ty:
-	  
+	
 
 2008-06-02  gerasymo
 
@@ -18502,20 +18502,20 @@
 2008-06-02  antolikjan
 
 	* [r8583] topo/analysis/featureresponses.py:
-	  
+	
 
 	* [r8582] topo/analysis/vision.py:
-	  
+	
 
 	* [r8581] contrib/jaanalysis.py:
-	  
+	
 
 	* [r8580] contrib/jaanalysis.py:
-	  
+	
 
 	* [r8579] contrib/jansanalyzisfunctions.py,
 	  contrib/modelfit.py:
-	  
+	
 
 2008-05-30  jbednar
 
@@ -19912,58 +19912,58 @@
 	  topo/tkgui/topowidgets.py,
 	  topo/tkgui/widgets.py:
 	  Multiple changes from broken Git repository:
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Thu Feb 21 01:08:12 2008 +0000
-	  
+	
 	  Switched from OptionMenu to read-only Combobox.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Thu Feb 21 01:07:38 2008 +0000
-	  
+	
 	  Switch to use 'classic' theme so that any themed widgets do not
 	  stand out too much for the moment.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Thu Feb 21 01:06:33 2008 +0000
-	  
+	
 	  Added hack to work round strange parsing of list for Combobox's
 	  values.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Wed Feb 20 23:09:32 2008 +0000
-	  
+	
 	  Updated ProgressWindow with changes to TkguiWindow.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Wed Feb 20 19:05:39 2008 +0000
-	  
+	
 	  Hacks to deal with the fact that users of ScrolledFrame must use
 	  its content attribute as their master.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Wed Feb 20 18:11:35 2008 +0000
-	  
+	
 	  FrameManager deals with ScrolledFrames instead of Frames.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Wed Feb 20 18:00:59 2008 +0000
-	  
+	
 	  Made ScrolledWindow use ScrolledFrame.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Wed Feb 20 17:48:37 2008 +0000
-	  
+	
 	  Added ScrolledFrame.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Wed Feb 20 17:36:27 2008 +0000
-	  
+	
 	  Upgraded tcl/tk to 8.5.1.
-	  
+	
 	  Author: C. E. Ball <ceball@users.sf.net>
 	  Date: Mon Feb 18 07:06:45 2008 +0800
-	  
+	
 	  Imported launchpad.net bzr r7822, plus minor alterations to some
 	  docstrings.
 
@@ -20225,7 +20225,7 @@
 2008-04-10  antolikjan
 
 	* [r8350] contrib/mycommands.py:
-	  
+	
 
 2008-04-09  jprovost
 
@@ -20624,7 +20624,7 @@
 
 	* [r8267]
 	  examples/gc_lissom_oo_or_homeostatic_new.ty:
-	  
+	
 
 	* [r8266] examples/cc_lissom_oo_or_new.ty:
 	  made core_size work properly
@@ -20633,10 +20633,10 @@
 	  made core_size work properly
 
 	* [r8264] contrib/mycommands.py:
-	  
+	
 
 	* [r8263] contrib/jansanalyzisfunctions.py:
-	  
+	
 
 	* [r8262] topo/outputfns/basic.py:
 	  Added new output function CascadeHomeostatic
@@ -20645,17 +20645,17 @@
 	  Deleting
 
 	* [r8260] examples/cc_lissom_oo_or.ty:
-	  
+	
 
 	* [r8259]
 	  examples/gc_lissom_oo_or_homeostatic_new.ty:
-	  
+	
 
 	* [r8258] topo/patterns/basic.py:
 	  Modified Translator to allow zero stimuly between sweeps
 
 	* [r8257] contrib/mycommands.py:
-	  
+	
 
 	* [r8256] examples/cc_lissom_oo_or_new.ty:
 	  changed loads of things
@@ -20774,7 +20774,7 @@
 	  changed default analysis parameters
 
 	* [r8230] contrib/mycommands.py:
-	  
+	
 
 	* [r8229] contrib/jansanalyzisfunctions.py:
 	  corrected few import bugs
@@ -20972,7 +20972,7 @@
 2008-03-14  antolikjan
 
 	* [r8198] examples/cc_lissom_oo_or_new.ty:
-	  
+	
 
 2008-03-14  judelaw
 
@@ -21041,10 +21041,10 @@
 2008-03-13  antolikjan
 
 	* [r8187] examples/cc_lissom_oo_or_new.ty:
-	  
+	
 
 	* [r8186] examples/cc_lissom_oo_or_new.ty:
-	  
+	
 
 2008-03-13  jbednar
 
@@ -21186,10 +21186,10 @@
 	  Enlarged LGN to get rid of border effects
 
 	* [r8154] contrib/mycommands.py:
-	  
+	
 
 	* [r8153] contrib/jansanalyzisfunctions.py:
-	  
+	
 
 2008-03-08  ceball
 
@@ -21681,7 +21681,7 @@
 2008-02-21  jbednar
 
 	* [r8050] doc/Downloads/git_text.php:
-	  
+	
 
 2008-02-21  ceball
 
@@ -22001,10 +22001,10 @@
 
 	* [r7990] /branches/tkgui-tk85/topographica:
 	  Restore topographica-tkgui_with_tile from r7944
-	  
+	
 	  --This line, and those below, will be
 	  ignored--
-	  
+	
 	  A
 	  https://topographica.svn.sourceforge.net/svnroot/topographica/branches/tkgui-tk85/topographica
 
@@ -26124,7 +26124,7 @@
 
 	* [r7083] topo/tkgui/tkparameterizedobject.py:
 	  Improvements to Parameter-Tkinter linkage.
-	  
+	
 	  Major:
 	  - unapplied changes to parameter values are indicated with blue
 	  labels
@@ -26132,12 +26132,12 @@
 	  label background
 	  - an error in a parameter value is indicated with red labels
 	  (note that the above indication styles are temporary)
-	  
+	
 	  Minor:
 	  - fixed _get_tk_val to return gui variable value
 	  - no attempt to set Parameter if string-to-value translation
 	  fails
-	  
+	
 	  Internal:
 	  - simplified handling of GUI editing of variables
 	  - translation code moved from TkParameterizedObjectBase to
@@ -35862,7 +35862,7 @@
 	  on OS X 10.4.8 (intel and ppc) even though that platform does not
 	  have or need the -rpath option
 
-	* [r4868] 
+	* [r4868]
 	  examples/cfsom_or.ty,
 	  examples/hierarchical.ty,
 	  examples/joublin_bc96.ty,
