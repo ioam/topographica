@@ -26,7 +26,7 @@ class TestPlotGroup(unittest.TestCase):
 
     def setUp(self):
         pass
-    
+
 #         pgt = PlotGroupTemplate([('Activity',
 #                                   PlotTemplate({'Strength'   : 'Activity',
 #                                                 'Hue'        : None,
@@ -64,7 +64,7 @@ class TestPlotGroup(unittest.TestCase):
 #         tuples = self.pg1.plots()
 #         self.pg1.release_sheetviews()
 #         self.assertEqual(len(self.s.sheet_views.keys()),0)
-        
+
 
 
 #     def test_plotgroup(self):
@@ -116,7 +116,7 @@ class TestPlotGroup(unittest.TestCase):
 #         self.assertEqual(len(kl),3)
 #         kl.append((3,8))
 #         l = list(kl)
-        
+
 
 #     def test_plotgrouptemplate(self):
 #         pgt = PlotGroupTemplate()
@@ -134,11 +134,11 @@ class TestPlotGroup(unittest.TestCase):
 #                                  ('HuePrefAndSel', pt2),
 #                                  ('HueSelect', pt3)])
 
-#         pgt2 = PlotGroupTemplate( 
+#         pgt2 = PlotGroupTemplate(
 #             [('HuePref', PlotTemplate({'Strength'   : None,
 #                                        'Hue'        : 'HueP',
 #                                        'Confidence' : None})),
-#              ('HuePrefAndSel', PlotTemplate({'Strength'   : 'HueSel',  
+#              ('HuePrefAndSel', PlotTemplate({'Strength'   : 'HueSel',
 #                                              'Hue'        : 'HueP',
 #                                              'Confidence' : None})),
 #              ('HueSelect', PlotTemplate({'Strength'   : 'HueSel',
@@ -170,7 +170,7 @@ from topo.base.patterngenerator import BoundingBox
 #           self.sim = Simulation()
 
 #           CFSheet.nominal_density = 10
-          
+
 #           V1 = CFSheet(name='V1')
 #           V2 = CFSheet(name='V2')
 #           V3 = CFSheet(name='V3')
@@ -196,7 +196,7 @@ from topo.base.patterngenerator import BoundingBox
 
 #           ### JCALERT! HOW TO TEST THAT TWO PLOTGROUP ARE THE SAME?
 #           #self.assertEqual(test_plot_group,test)
-          
+
 #           ### Orientation Preference PlotGroup
 #           pgt2 = plotgroup_templates['Orientation Preference']
 
@@ -214,7 +214,7 @@ from topo.base.patterngenerator import BoundingBox
 #           self.pe.make_plot_group(pg_key1,pgt3,'UnitWeightsPlotGroup','V1')
 #           self.pe.make_plot_group(pg_key2,pgt3,'UnitWeightsPlotGroup','V2')
 #           self.pe.make_plot_group(pg_key3,pgt3,'UnitWeightsPlotGroup','V3')
-          
+
 #           test_plot_group1 = UnitWeightsPlotGroup(self.sim,pgt3,pg_key1,'V1',None)
 #           test_lambda = lambda s: s.name == 'V2'
 #           test_plot_group2 = UnitWeightsPlotGroup(self.sim,pgt3,pg_key2,test_lambda,None)
@@ -229,7 +229,7 @@ from topo.base.patterngenerator import BoundingBox
 
 #           test3 = self.pe.plot_group_dict.get(pg_key3,None)
 #           #self.assertEqual(test_plot_group3,test3)
-          
+
 #           pgt4 = plotgroup_templates['Projection']
 
 

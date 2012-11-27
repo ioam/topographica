@@ -36,7 +36,7 @@ class TestSomething(unittest.TestCase):
 
     def extra(self):
         ...
-        
+
 
 suite = unittest.TestSuite()
 suite.addTest(unittest.makeSuite(TestSomething))
@@ -98,7 +98,7 @@ Additionally, unittest files should:
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    
+
 (b) set suite.requires_display=True if the tests require a DISPLAY.
 
 (c) call topo.tests.start_tkgui() before running tests (e.g. in
@@ -159,7 +159,7 @@ except ImportError:
         __all__.remove(t)
     for t in tk_doctests:
         all_doctest.remove(t)
-    
+
 
 try:
     import gmpy
@@ -177,7 +177,7 @@ if not gmpy_imported:
 
 # CEBALERT: we need to rename these/reorganize the tests
 __all__.remove('test_script')
-__all__.remove('test_map_measurement')   
+__all__.remove('test_map_measurement')
 
 try:
     import scikits.audiolab
@@ -217,7 +217,7 @@ def all_suite():
         exec 'import '+test_name
 
         test_module = locals()[test_name]
-        try:        
+        try:
             print 'Loading suite from module %s ...' % test_name,
             new_test = getattr(test_module,'suite')
 
@@ -226,7 +226,7 @@ def all_suite():
                 suite.addTest(new_test)
             else:
                 print 'skipped: No $DISPLAY.'
-                
+
         except AttributeError,err:
             print err
 
@@ -250,7 +250,7 @@ def _check_for_display(suite):
     elif os.getenv('DISPLAY'):
         return True
     else:
-        return False    
+        return False
 
 
 def run(verbosity=1,test_modules=None):
@@ -260,7 +260,7 @@ def run(verbosity=1,test_modules=None):
     E.g. to run all tests:
       ./topographica -c 'from topo.tests import run; run()'
 
-    
+
     verbosity specifies the level of information printed during the
     tests (see unittest.TextTestRunner).
 
@@ -271,14 +271,14 @@ def run(verbosity=1,test_modules=None):
       ./topographica -c 'from topo.tests import run, testimage, testsheet; run(test_modules=[testimage,testsheet,"testDynamicParameter.txt"])'
     """
     import types
-         
+
     if not test_modules:
         run_suite = all_suite()
     else:
         assert isinstance(test_modules,list), 'test_modules argument must be a list of test modules or doctest filenames.'
-        
+
         run_suite = unittest.TestSuite()
-        
+
         for test_module in test_modules:
             if isinstance(test_module,types.ModuleType):
                 if _check_for_display(test_module.suite):
@@ -292,7 +292,7 @@ def run(verbosity=1,test_modules=None):
                     raise ValueError, '"%s" is not an available doctest file.' % test_module
             else:
                 raise ValueError, '%s is not a valid test module' % str(test_module)
-                                 
+
 
     return unittest.TextTestRunner(verbosity=verbosity).run(run_suite)
 
@@ -316,5 +316,5 @@ def run_named(name,verbosity=2):
         test_module = eval(module_name,__main__.__dict__)
     else:
         test_module = name
-    
+
     run(verbosity,test_modules=[test_module])

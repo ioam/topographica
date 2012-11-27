@@ -42,12 +42,12 @@ class TestPlotGroupSaverBase(unittest.TestCase):
         self.sim = Simulation(register=True,name="testplotfilesaver")
         self.sim['A'] = GeneratorSheet(nominal_density=2)
         self.sim['B'] = CFSheet(nominal_density=2)
-        self.sim.connect('A','B',connection_type=CFProjection,name='Afferent')        
+        self.sim.connect('A','B',connection_type=CFProjection,name='Afferent')
 
     def tearDown(self):
         shutil.rmtree(normalize_path.prefix)
         normalize_path.prefix = self.original_output_path
-        
+
 
 class TestPlotGroupSaver(TestPlotGroupSaverBase):
 
@@ -67,7 +67,7 @@ class TestPlotGroupSaver(TestPlotGroupSaverBase):
         save_plotgroup("Connection Fields",sheet=self.sim['B'])
         self.exists("testplotfilesaver_000000.00_Afferent_(from_A).png")
 
-        
+
 class TestCFProjectionPlotGroupSaver(TestPlotGroupSaverBase):
 
     def test_cfprojection_saving(self):

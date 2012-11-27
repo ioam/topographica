@@ -6,9 +6,9 @@ that specify various commands to run.
 
 E.g.
 
-  topographica -c 'from topo.misc.genexamples import generate; generate(targets=["all_quick","saved_examples"])' 
+  topographica -c 'from topo.misc.genexamples import generate; generate(targets=["all_quick","saved_examples"])'
 
-Runs the 'all_quick' target if called without any arguments: 
+Runs the 'all_quick' target if called without any arguments:
 
   topographica -c 'from topo.misc.genexamples import generate; generate()'
 
@@ -44,7 +44,7 @@ from param import ParamOverrides
 def snapshot(filename):
     """Return a command for saving a snapshot named filename."""
     return "from topo.command import save_snapshot ; save_snapshot('%s')"%filename
-    
+
 def or_analysis():
     """Return a command for orientation analysis."""
     return """
@@ -71,7 +71,7 @@ def run(examples,script_name,density=None,commands=["topo.sim.run(1)"]):
     example script (i.e. a script in the examples/ directory) at the
     given density, along with any additional commands.
     """
-    
+
     if density:
         density_cmd = ' -c "default_density='+`density`+'" '
     else:
@@ -129,7 +129,7 @@ def find_examples(specified_examples=None,dirs=None):
     if not specified_examples:
         # CEBALERT: hack!
         specified_examples = ["hierarchical","som_retinotopy"]
-        
+
 
     if not dirs:
         # CEBALERT: is there any significance to the order? E.g. if I have ~/Documents/Topographica/examples
@@ -151,7 +151,7 @@ def find_examples(specified_examples=None,dirs=None):
             os.path.join(topo._package_path,"../share/topographica/examples"),
             # expected bdist_mpkg location...
             "/usr/local/share/topographica/examples",
-            # ...but actually this; not sure why 
+            # ...but actually this; not sure why
             "/usr/local/share/share/topographica/examples"]
     else:
         candidate_example_dirs = dirs
@@ -171,7 +171,7 @@ def find_examples(specified_examples=None,dirs=None):
 
                 if examples is False:
                     break
-    
+
     return examples
 
 
@@ -196,7 +196,7 @@ def _stuff(specified_targets):
         if a in group_targets:
             command_labels+=group_targets[a]
         else:
-            command_labels.append(a)    
+            command_labels.append(a)
 
     examples = find_examples(specified_examples=command_labels)
 
@@ -263,4 +263,4 @@ class generate(param.ParameterizedFunction):
             c = available_targets[cmd]
             print c
             system(c)
-        
+

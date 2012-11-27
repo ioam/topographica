@@ -31,7 +31,7 @@ class CameraImage(GenericImage):
     An image pattern generator that gets its image from a Player
     camera device.
     """
-    
+
     camera = param.ClassSelector(CameraDevice,default=None,doc="""
        An instance of playerrobot.CameraDevice to be used
        to generate images.""")
@@ -54,7 +54,7 @@ class CameraImage(GenericImage):
             rgb_im = Image.new('RGB',(w,h))
             rgb_im.fromstring(data,'raw')
             self._image = ImageOps.grayscale(rgb_im)
-        
+
 
 
 class CameraImageQueued(CameraImage):
@@ -70,7 +70,7 @@ class CameraImageQueued(CameraImage):
     def _get_image(self,params):
 
         im_spec = None
-        
+
         if self._image is None:
             # if we don't have an image then block until we get one
             im_spec = self.camera.image_queue.get()
@@ -104,7 +104,7 @@ class PTZ(EventProcessor):
 
     ptz = param.ClassSelector(PTZDevice,default=None,doc="""
        An instance of playerrobot.PTZDevice to be controlled.""")
-    
+
     zoom = param.Number(default=120,bounds=(0,None),doc="""
        Desired FOV width in degrees.""")
 
@@ -119,7 +119,7 @@ class PTZ(EventProcessor):
     src_ports = ["State"]
 
     def start(self):
-        pass 
+        pass
     def input_event(self,conn,data):
         if conn.dest_port == "Saccade":
             # the data should be (amplitude,direction)
@@ -137,7 +137,7 @@ class PTZ(EventProcessor):
             direction *= -1
         angle = direction * pi/180
 
-        pan,tilt,zoom = self.ptz.state_deg       
+        pan,tilt,zoom = self.ptz.state_deg
         pan += amplitude * cos(angle)
         tilt += amplitude * sin(angle)
 
@@ -148,5 +148,5 @@ class PTZ(EventProcessor):
 
 
 
-    
-        
+
+

@@ -3,7 +3,7 @@ The GUI model editor.
 
 Tools:   for the editor menu bar
 Objects: that can be manipulated in the canvas
-Window:  window and canvas 
+Window:  window and canvas
 
 Originally written by Alan Lindsay.
 
@@ -52,12 +52,12 @@ canvas_region = (0, 0, canvas_width, canvas_width)
 
 class EditorCanvas(Canvas):
 
-    """ 
+    """
     EditorCanvas extends the Tk Canvas class.
     There are 3 modes that determine the effect of mouse events in the Canvas
-    A Canvas can accept new objects, move objects and make connections 
+    A Canvas can accept new objects, move objects and make connections
     between them. The intended use of this class is as the main
-    canvas in a Topographica model-editing GUI. 
+    canvas in a Topographica model-editing GUI.
     """
 
     def __init__(self, root = None, width = 600, height = 600):
@@ -68,7 +68,7 @@ class EditorCanvas(Canvas):
         # Top bar of the canvas, allowing changes in size, display and to force refresh.
         Button(self.panel,text="Refresh", command=self.refresh).pack(side=LEFT)
         Button(self.panel,text="Reduce", command=self.reduce_scale).pack(side=LEFT)
-        Button(self.panel,text="Enlarge", command=self.enlarge_scale).pack(side=LEFT)        
+        Button(self.panel,text="Enlarge", command=self.enlarge_scale).pack(side=LEFT)
         self.auto_refresh = False
         self.console = topo.guimain
         self.auto_refresh_checkbutton = Checkbutton(self.panel,text="Auto-refresh",
@@ -98,7 +98,7 @@ class EditorCanvas(Canvas):
         self.current_object = None
         self.current_connection = None
         self.focus = None
-        # list holding references to all the objects in the canvas      
+        # list holding references to all the objects in the canvas
         self.object_list = []
         # set the initial mode.
         self.display_mode = 'video'
@@ -108,20 +108,20 @@ class EditorCanvas(Canvas):
         self.simulation = topo.sim
 
         # create the menu widget used as a popup on objects and connections
-        self.option_add("*Menu.tearOff", "0") 
+        self.option_add("*Menu.tearOff", "0")
         self.item_menu = Menu(self)
         self.view = Menu(self.item_menu)
         # add property, toggle activity drawn on sheets, object draw ordering and delete entries to the menu.
-        self.item_menu.insert_command(END, label = 'Properties', 
+        self.item_menu.insert_command(END, label = 'Properties',
             command = lambda: self.show_properties(self.focus))
         self.item_menu.add_cascade(label = 'Change View', menu = self.view, underline = 0)
-        self.item_menu.insert_command(END, label = 'Move Forward', 
+        self.item_menu.insert_command(END, label = 'Move Forward',
             command = lambda: self.move_forward(self.focus))
-        self.item_menu.insert_command(END, label = 'Move to Front', 
+        self.item_menu.insert_command(END, label = 'Move to Front',
             command = lambda: self.move_to_front(self.focus))
-        self.item_menu.insert_command(END, label = 'Move to Back', 
+        self.item_menu.insert_command(END, label = 'Move to Back',
             command = lambda: self.move_to_back(self.focus))
-        self.item_menu.insert_command(END, label = 'Delete', 
+        self.item_menu.insert_command(END, label = 'Delete',
             command = lambda: self.delete_focus(self.focus))
         # the indexes of the menu items that are for objects only
         self.object_indices = [2,3,4]
@@ -133,10 +133,10 @@ class EditorCanvas(Canvas):
         self.canvas_menu.add_cascade(label = 'Select Mode', menu = mode_options)
         mode_options.add_command(label = 'Video', command = lambda: self.set_display_mode('video'))
         mode_options.add_command(label = 'Normal', command = lambda: self.set_display_mode('normal'))
-        mode_options.add_command(label = 'Printing', command = lambda: 
+        mode_options.add_command(label = 'Printing', command = lambda:
             self.set_display_mode('printing'))
         self.canvas_menu.add_cascade(label = 'Sheet options', menu = self.sheet_options, underline = 0)
-        self.sheet_options.add_command(label = 'Toggle Density Grid', command = 
+        self.sheet_options.add_command(label = 'Toggle Density Grid', command =
             self.toggle_object_density)
         self.sheet_options.add_command(label = 'Toggle Activity', command = self.toggle_object_activity)
 
@@ -150,7 +150,7 @@ class EditorCanvas(Canvas):
         # bind the possible right button events to the canvas.
         self.bind('<<right-click>>', self.right_click)
         # because right-click opens menu, a release event can only be flagged by the menu.
-        self.item_menu.bind('<<right-click-release>>', self.right_release)   
+        self.item_menu.bind('<<right-click-release>>', self.right_release)
 
         # add scroll bar; horizontal and vertical
         self.config(scrollregion = canvas_region)
@@ -162,35 +162,35 @@ class EditorCanvas(Canvas):
         self.config(xscrollcommand=horizontal_scrollbar.set)
         vertical_scrollbar.pack(side = RIGHT, fill = Y)
         horizontal_scrollbar.pack(side = BOTTOM, fill = X)
-    
+
     def key_press(self, event):
         "What happens when a key is pressed."
         self.change_mode(event.char)
 
 
     #   Left mouse button event handlers
-        
+
     def left_click(self, event):
         "What is to happen if the left button is pressed."
-        
+
         x,y = self.canvasx(event.x), self.canvasy(event.y)
         {"ARROW" : self.init_move,           # case Arrow mode
          "MAKE" : self.none,                 # case Make mode
          "CONNECTION" : self.init_connection # case Connection mode.
         }[self.mode](x,y)                    # select function depending on mode
-    
+
     def left_click_drag(self, event):
         "What is to happen if the mouse is dragged while the left button is pressed."
-        
+
         x,y = self.canvasx(event.x), self.canvasy(event.y)
         {"ARROW" : self.update_move,              # case Arrow mode
          "MAKE" : self.none,                   # case Make mode
          "CONNECTION" : self.update_connection # case Connection mode.
         }[self.mode](x,y)                      # select function depending on mode
-        
+
     def left_release(self, event):
         "What is to happen when the left mouse button is released."
-        
+
         x,y = self.canvasx(event.x), self.canvasy(event.y)
         {"ARROW" : self.end_move,            # case Arrow mode
          "MAKE" : self.create_object,        # case Make mode
@@ -203,13 +203,13 @@ class EditorCanvas(Canvas):
         The same for all modes - show the properties for the clicked item.
         Gets object or connection at this point and gives it the focus.
         """
-        focus = self.get_xy(event.x, event.y) 
+        focus = self.get_xy(event.x, event.y)
         if (focus != None):
             focus.set_focus(True)
         # show the object or connection's properties.
-        self.show_properties(focus)         
+        self.show_properties(focus)
 
-    
+
     #   Right mouse button event handlers
 
     def right_click(self, event):
@@ -223,10 +223,10 @@ class EditorCanvas(Canvas):
 
 
     #   Mode Methods
-    
+
     def change_mode(self, char):
         "Changes the mode of the canvas, i.e., what mouse events will do."
-        
+
         if not char in ('c', 'm', 'a') : return
         # remove the focus from the previous toolbar item
         {"ARROW" : self.arrow_tool.set_focus,     # arrow toolbar item
@@ -239,7 +239,7 @@ class EditorCanvas(Canvas):
             mode = "CONNECTION"
             bar = self.connection_tool
         elif (char == 'm'):
-            mode = "MAKE" 
+            mode = "MAKE"
             bar = self.object_tool
         elif (char == 'a'):
             mode = "ARROW"
@@ -250,7 +250,7 @@ class EditorCanvas(Canvas):
 
 
     #   Panel methods
-    
+
     def refresh(self):
         for obj in self.object_list:
             obj.set_focus(True)
@@ -264,7 +264,7 @@ class EditorCanvas(Canvas):
     def enlarge_scale(self):
         self.scaling_factor *= enlarging_factor
         self.refresh()
- 
+
     def reduce_scale(self):
         self.scaling_factor /= enlarging_factor
         self.refresh()
@@ -297,21 +297,21 @@ class EditorCanvas(Canvas):
 
     def init_move(self, x, y):
         "Determine if click was on an object."
-        
+
         self.current_object = self.get_object_xy(x, y)
-        if (self.current_object != None) : 
+        if (self.current_object != None) :
             # if it was, give it the focus
             self.current_object.set_focus(True)
 
     def update_move(self, x, y):
         "If dragging an object, refresh its position"
-        
+
         if (self.current_object != None):
             self.current_object.move(x, y)
 
     def end_move(self, x, y):
         "If dropping an object, remove focus and refresh."
-        
+
         if (self.current_object != None):
             self.current_object.set_focus(False)
             self.current_object.move(x, y)
@@ -325,7 +325,7 @@ class EditorCanvas(Canvas):
 
     def init_connection(self, x, y):
         "Determine if click was on an object, and retain if so."
-        
+
         current_object = self.get_object_xy(x, y)
         if (current_object == None) : # if not change to ARROW mode
             self.change_mode('a')
@@ -336,10 +336,10 @@ class EditorCanvas(Canvas):
     def update_connection(self, x, y):
         "Update connection's position."
         self.current_connection.update_position((x, y))
-        
+
     def end_connection(self, x, y):
         "Determine if the connection has been dropped on an object."
-        
+
         obj = self.get_object_xy(x, y)
         if (obj != None) : # if an object, connect the objects and remove focus
             if (self.current_connection != None):
@@ -357,7 +357,7 @@ class EditorCanvas(Canvas):
 
     def get_connection_xy(self, x, y):
         "Return connection at given x, y (None if no connection)."
-        
+
         for obj in self.object_list:
             connection_list = obj.from_connections[:]
             connection_list.reverse()
@@ -368,24 +368,24 @@ class EditorCanvas(Canvas):
 
     #   Object Methods
 
-    def create_object(self, x, y) : 
+    def create_object(self, x, y) :
         "Create a new object."
         self.add_object(self.object_tool.create_node(x, y))
 
-    def add_object(self, obj) : 
+    def add_object(self, obj) :
         "Add a new object to the Canvas."
-        
+
         self.object_list = [obj] + self.object_list
 
-    def add_object_to_back(self, obj) : 
+    def add_object_to_back(self, obj) :
         "Add a new object to the Canvas at back of the list."
-        
+
         self.object_list =  self.object_list + [obj]
 
-    def remove_object(self, obj) : 
+    def remove_object(self, obj) :
         "Remove an object from the canvas."
-        
-        for i in range(len(self.object_list)) : 
+
+        for i in range(len(self.object_list)) :
             if (obj == self.object_list[i]) : break
         else : return # object was not found
         del self.object_list[i]
@@ -396,7 +396,7 @@ class EditorCanvas(Canvas):
             EditorSheet.show_density = False
         else:
             EditorSheet.show_density = True
-        self.refresh() 
+        self.refresh()
 
     def toggle_object_activity(self):
         if EditorSheet.view == 'activity':
@@ -405,10 +405,10 @@ class EditorCanvas(Canvas):
             EditorSheet.view = 'activity'
         self.refresh()
 
-    def get_object_xy(self, x, y) : 
+    def get_object_xy(self, x, y) :
         "Return object at given x, y (or None if no object)."
-        
-        # search through the bounds of each object in the canvas. 
+
+        # search through the bounds of each object in the canvas.
         # returns the first (nearest to front) object, None if no object at x,y
         for obj in self.object_list:
             if (obj.in_bounds(x, y)):
@@ -419,15 +419,15 @@ class EditorCanvas(Canvas):
 
     def show_properties(self, focus):
         "Show properties of an object or connection, and remove the focus."
-        
+
         if (focus != None):
             focus.show_properties()
             focus.set_focus(False)
-        
+
     def delete_focus(self, focus):
         "Tell a connection or object to delete itself."
-        
-        if (focus == None) : 
+
+        if (focus == None) :
             pass
         else:
             focus.remove()
@@ -449,7 +449,7 @@ class EditorCanvas(Canvas):
         if (index == None or index < 0) : index = len(self.object_list)
         for i in range(index ,0, -1):
             self.object_list[i-1].draw()
-    
+
     def move_to_front(self, obj):
         index = self.remove_object(obj)
         self.add_object(obj)
@@ -505,7 +505,7 @@ class EditorCanvas(Canvas):
             self.item_menu.tk_popup(event.x_root, event.y_root)
         else:
             self.canvas_menu.tk_popup(event.x_root, event.y_root)
-        
+
     #   Utility methods
 
     def save_snapshot(self):
@@ -514,7 +514,7 @@ class EditorCanvas(Canvas):
         snapshot_name = asksaveasfilename(filetypes=POSTSCRIPT_FILETYPES,
                                           initialdir=normalize_path(),
                                           initialfile=topo.sim.basename()+".ps")
-        
+
         if snapshot_name:
             self.postscript(file=snapshot_name)
 
@@ -539,7 +539,7 @@ class EditorCanvas(Canvas):
 
     def get_xy(self, x, y):
         "Returns the connection or object at this x, y position or None if there is not one."
-        
+
         # check for a connection
         focus = self.get_connection_xy(x, y)
         if (focus == None):
@@ -561,7 +561,7 @@ class ModelEditor(parameterized.Parameterized):
 
     def __init__(self,master,**params):
         parameterized.Parameterized.__init__(self,**params)
-        
+
         # create editor window and set title
         root = tk.AppWindow(master)
         root.title("Model Editor")
@@ -570,14 +570,14 @@ class ModelEditor(parameterized.Parameterized):
         canvas_frame.pack(side='right',fill = BOTH, expand = YES)
 
         toolbar_frame = Frame(root, bg = 'light grey', bd = 2)
-        toolbar_frame.pack(side=LEFT,fill=Y) 
+        toolbar_frame.pack(side=LEFT,fill=Y)
 
         self.canvas = EditorCanvas(canvas_frame)
-        self.canvas.pack(fill = BOTH, expand = YES)     
+        self.canvas.pack(fill = BOTH, expand = YES)
 
 
         # object/node = sheet
-        
+
         parameters_tool = ParametersTool(toolbar_frame)
         arrow_tool=ArrowTool(self.canvas,toolbar_frame,parameters_tool)
         object_tool=NodeTool(self.canvas,toolbar_frame,parameters_tool)
@@ -590,7 +590,7 @@ class ModelEditor(parameterized.Parameterized):
 
 
         # give the canvas a reference to the toolbars
-        self.canvas.set_tool_bars(arrow_tool, connection_tool, object_tool) 
+        self.canvas.set_tool_bars(arrow_tool, connection_tool, object_tool)
 
         # give the canvas focus and import any objects and connections already in the simulation
         self.canvas.focus_set()
@@ -634,12 +634,12 @@ class ModelEditor(parameterized.Parameterized):
                 editor_node = EditorSheet(self.canvas, node, (x, y), node.name)
             else:
                 editor_node = EditorEP(self.canvas, node, (x, y), node.name)
-                
+
             node.layout_location=(x,y)
             self.canvas.add_object(editor_node)
 
         # create the editor covers for the connections
-        
+
         for editor_node in self.canvas.object_list:
             for con in editor_node.simobj.out_connections:
                 # Could handle more EditorConnection subclasses here
@@ -647,7 +647,7 @@ class ModelEditor(parameterized.Parameterized):
                     editor_connection = EditorProjection("", self.canvas, editor_node)
                 else:
                     editor_connection = EditorEPConnection("", self.canvas, editor_node)
-                
+
                 # find the EditorNode that the proj connects to
                 for dest in self.canvas.object_list:
                     if (dest.simobj == con.dest):
@@ -657,9 +657,9 @@ class ModelEditor(parameterized.Parameterized):
                 else:
                     self.warning("The model editor cannot draw connection", con.name,
                                  "because", con.dest.name, "is not drawn in the editor.")
-                           
-                    
-                    
+
+
+
         self.canvas.redraw_objects()
 
 
@@ -691,8 +691,8 @@ class ModelEditor(parameterized.Parameterized):
 class ArrowTool(Frame):
     """
     ArrowTool is a selectable frame containing an arrow icon and a label. It is a
-    toolbar item in a ModelEditor that allows the user to change the GUICanvas to 
-    'ARROW' mode. 
+    toolbar item in a ModelEditor that allows the user to change the GUICanvas to
+    'ARROW' mode.
     """
 
     def __init__(self, canvas,  parent = None, parambar = None):
@@ -706,21 +706,21 @@ class ArrowTool(Frame):
         self.doc = 'Use the arrow tool to select and\nmove objects in the canvas around'
         # arrow icon
         self.icon = Canvas(self, width = 35, height = 30,bg = 'light grey')
-        self.icon.create_polygon(10,0, 10,22, 16,17, 22,29, 33,22, 25,13, 33,8, 
+        self.icon.create_polygon(10,0, 10,22, 16,17, 22,29, 33,22, 25,13, 33,8,
             fill = 'black', outline = 'white')
         self.icon.pack()
         self.icon.bind('<Button-1>', self.change_mode) # icon sets canvas mode
         # pack in toolbar at top and fill out in X direction; click changes canvas mode
         self.pack(side = TOP, fill = X)
         self.bind('<Button-1>', self.change_mode)
-        
-        
+
+
     def change_mode(self, event):
         self.canvas.change_mode('a') # (ARROW)
 
     def set_focus(self, focus):
         "Change the background highlight to reflect whether this toolbar item is selected."
-        
+
         if (focus):
              col = 'dark grey'; relief = GROOVE
              if not(self.parameter_tool == None):
@@ -740,7 +740,7 @@ class ArrowTool(Frame):
 def names_sorted_by_precedence(classes):
     classes.sort(lambda x, y: cmp(-x.precedence,-y.precedence))
     return [class_.__name__ for class_ in classes]
-    
+
 
 class NodeTool(Frame):
     """
@@ -751,9 +751,9 @@ class NodeTool(Frame):
     """
     # hack: we can do this properly when converting to a plotgrouppanel
     default_sheet = 'CFSheet'
-    
+
     def __init__(self, canvas,  parent = None, parambar = None):
-        
+
         Frame.__init__(self, parent,bg = 'light grey', bd = 4, relief = RAISED)
         self.canvas = canvas # hold canvas reference.
         self.parameter_tool = parambar # To display class properties and name
@@ -765,7 +765,7 @@ class NodeTool(Frame):
         # CebAlerT: make these 'move' 'add sheet of type' things etc
         # look like buttons again, or -better - clean up the whole
         # interface!
-        
+
         self.title_label = Label(self, text="Add sheet of type:",bg ='light grey')
         self.title_label.bind('<Button-1>', self.change_mode)
         self.title_label.pack()
@@ -774,7 +774,7 @@ class NodeTool(Frame):
         self.sheet_list = param.concrete_descendents(Sheet)
 
         sheet_list = names_sorted_by_precedence(self.sheet_list.values())
-        
+
         ## menu with list of available sheets
         self.option_var = StringVar()
         self.option_var.set(self.default_sheet)
@@ -784,21 +784,21 @@ class NodeTool(Frame):
                                     values=sheet_list,state='readonly')
         self.option_menu.pack()
         self.option_menu.bind('<Button-1>', self.change_mode)
-        
+
         self.option_var.trace_variable('w',self.set_option)
-        
-        
+
+
 
 
 
     #   Focus Methods
-        
+
     def change_mode(self, option):
         self.canvas.change_mode('m') # ('MAKE')
 
     def set_focus(self, focus):
         "Change the background highlight to reflect whether this toolbar item is selected."
-        
+
         if (focus):
             col = 'dark grey'; relief = GROOVE
             if not(self.parameter_tool == None):
@@ -833,7 +833,7 @@ class NodeTool(Frame):
             simobj = self.sheet_list[self.current_option](name=name)
         else:
             simobj = self.sheet_list[self.current_option]()
-            
+
         sim = self.canvas.simulation # get the current simulation
         sim[simobj.name] = simobj
         # create the cover for the simobj and return it.
@@ -841,9 +841,9 @@ class NodeTool(Frame):
 
 
     #   Util Methods
-    
+
     def set_option(self,*args):
-        """ """ 
+        """ """
         self.current_option = self.option_var.get()
         self.change_mode(None)
 
@@ -852,7 +852,7 @@ class NodeTool(Frame):
 
 # JABHACKALERT: Currently only searches for topo.projection (connections have not been implemented yet).
 class ConnectionTool(Frame):
-    """ 
+    """
     ConnectionTool extends Frame. It is expected to be included in a topographica
     model development GUI and functions as a self populating Connection toolbar.
     The available Connection types are listed and the user can select one.
@@ -883,13 +883,13 @@ class ConnectionTool(Frame):
         self.option_var = StringVar()
         self.option_var.set(proj_list[0])
         self.current_option = self.option_var.get()
-    
+
         self.option_menu = Combobox(self,textvariable=self.option_var,
                                     values=proj_list,state='readonly')
 
         self.option_menu.pack()
         self.option_menu.bind("<Button-1>",self.change_mode)
-        
+
         self.option_var.trace_variable('w',self.set_option)
 
 
@@ -928,25 +928,25 @@ class ConnectionTool(Frame):
             param.Parameterized().warning("Unable to connect these sheets with the given "+ self.current_option + " (" + str(e) +").")
             editor_connection.remove()
             return False
-        
+
         editor_connection.connect(node, con)
         return True
 
 
     def set_option(self,*args):
-        """ """ 
+        """ """
         self.current_option = self.option_var.get()
         self.change_mode(None)
 
 
     #   Focus Methods
-    
+
     def change_mode(self, option):
         self.canvas.change_mode('c') # ('CONNECTION')
 
     def set_focus(self, focus):
         "Change the background highlight to reflect whether this toolbar item is selected."
-        
+
         if (focus):
             col = 'dark grey'; relief = GROOVE
             if not(self.parameter_tool == None):
@@ -979,7 +979,7 @@ class ParametersTool(Frame):
         # on the canvas to get the new object?
         self.parameter_frame = tk.ParametersFrameWithApply(self)#,buttons_to_remove=['Close','Defaults'])
         self.parameter_frame.hide_param('Close')
-        self.parameter_frame.hide_param('Defaults')         
+        self.parameter_frame.hide_param('Defaults')
         self.parameter_frame.pack(side=BOTTOM)
 
     def update_parameters(self):
@@ -987,17 +987,17 @@ class ParametersTool(Frame):
 
 
     def set_focus(self, name, focus_class, doc = ''):
-        
+
         self.focus = name
-            
+
         self.title_label.config(text = name)
         self.doc_label.config(text = doc)
 
         if focus_class:
             self.parameter_frame.set_PO(focus_class)
-            
 
-        
+
+
 ###########################################################################
 ## OBJECTS
 ###########################################################################
@@ -1006,7 +1006,7 @@ class ParametersTool(Frame):
 class EditorObject(object):
     """
     Anything that can be added and manipulated in an EditorCanvas. Every EditorCanvas
-    has a corresponding Topo object associated with it. An instance of this class can 
+    has a corresponding Topo object associated with it. An instance of this class can
     have the focus.
     """
     FROM = 0
@@ -1033,11 +1033,11 @@ class EditorObject(object):
 
     def show_properties(self):
         "Show parameters frame for object."
-        
+
         parameter_window = tk.AppWindow(topo.guimain,status=True)
         #status=tk.StatusBar(parameter_window)
         #status.pack(side="bottom",fill='x',expand='yes')
-        
+
         parameter_window.title(self.name)
         balloon = tk.Balloon(parameter_window)
 
@@ -1048,7 +1048,7 @@ class EditorObject(object):
             parameter_window,
             msg_handler=parameter_window.status)
         parameter_window.sizeright()
-        
+
         balloon.bind(title,self.objdoc())
         self.parameter_window = parameter_window
 
@@ -1068,9 +1068,9 @@ class EditorObject(object):
 
     def remove(self):
         "Remove this object from the canvas and from the Topographica simulation."
-        pass    
+        pass
 
-    def in_bounds(self, x, y) : 
+    def in_bounds(self, x, y) :
         "Return true if x,y lies within this gui object's boundary."
         pass
 
@@ -1080,8 +1080,8 @@ class EditorNode(EditorObject):
     """
     An EditorNode is used to cover any topographica node, presently this can only be a sheet.
     It is a sub class of EditorObject and supplies the methods required by any node to be used
-    in a EditorCanvas. Extending classes will supply a draw method and other type specific 
-    attributes. 
+    in a EditorCanvas. Extending classes will supply a draw method and other type specific
+    attributes.
     """
     show_label= param.Boolean(default=True,
         doc="Whether to show a textual label for this object")
@@ -1108,7 +1108,7 @@ class EditorNode(EditorObject):
                 self.to_connections = [con] + self.to_connections
             else:
                 self.to_connections = self.to_connections + [con]
-        
+
     def remove_connection(self, con, from_to) : # remove a connection to or from this node
         if (from_to):
             l = len(self.to_connections)
@@ -1125,7 +1125,7 @@ class EditorNode(EditorObject):
 
 
     #   Util methods
-    
+
     def get_pos(self):
         return (self.x, self.y) # return center point of node
 
@@ -1138,22 +1138,22 @@ class EditorNode(EditorObject):
 
         self.connection_var = StringVar()
         self.connection_var.set(connection_list[0])
-        
+
         connection_menu = OptionMenu(self.parameter_window,self.connection_var,*connection_list)
 
         self.connection_var.trace_variable('w',self.view_connection_parameters)
 
         connection_menu.pack(side = TOP)
-        
+
     def view_connection_parameters(self, *args):
         con_sel = self.connection_var.get()
         for con in self.to_connections + self.from_connections:
             if con.name == con_sel:
                 break
-        else : 
+        else :
             return
         con.show_properties()
-        
+
 
 
 # JABALERT: Should probably combine this with EditorNode
@@ -1178,7 +1178,7 @@ class EditorEP(EditorNode):
     def set_focus(self, focus):
         for id in self.id:
             self.canvas.delete(id)
-        self.canvas.delete(self.label) # remove label   
+        self.canvas.delete(self.label) # remove label
         EditorNode.set_focus(self, focus) # call to super's set focus
         col = self.colour[not focus]
         self.init_draw(col, focus) # create new one with correct colour
@@ -1228,7 +1228,7 @@ class EditorEP(EditorNode):
         if (self.show_label):
             self.canvas.tag_raise(self.label)
         # redraw the connections
-        for con in self.to_connections : 
+        for con in self.to_connections :
             if (con.from_node == con.to_node):
                 con.move()
         for con in self.to_connections:
@@ -1277,7 +1277,7 @@ class EditorEP(EditorNode):
             if (node == connection.to_node and connection.draw_index >= index):
                 connection.decrement_draw_index()
             if connection.to_node == connection.from_node : return
-        for connection in self.to_connections :       
+        for connection in self.to_connections :
             if (node == connection.from_node and connection.draw_index >= index):
                 connection.decrement_draw_index()
 
@@ -1296,7 +1296,7 @@ class EditorEP(EditorNode):
     #   Util methods
 
     def in_bounds(self, pos_x, pos_y):
-        return ((pos_x> self.x-self.width)  and (pos_x<= self.x+self.width) and 
+        return ((pos_x> self.x-self.width)  and (pos_x<= self.x+self.width) and
                 (pos_y> self.y-self.height) and (pos_y<= self.y+self.height))
 
 
@@ -1332,7 +1332,7 @@ class EditorSheet(EditorEP):
     normalize = param.Boolean(default=False)
     show_density = param.Boolean(default=False)
     view = param.ObjectSelector(default='activity',objects=['normal','activity'])
-    
+
     def __init__(self, canvas, simobj, pos, name):
         # Should call EditorEP's constructor instead
         EditorNode.__init__(self, canvas, simobj, pos, name)
@@ -1354,7 +1354,7 @@ class EditorSheet(EditorEP):
     def set_focus(self, focus):
         for id in self.id:
             self.canvas.delete(id)
-        self.canvas.delete(self.label) # remove label   
+        self.canvas.delete(self.label) # remove label
         EditorNode.set_focus(self, focus) # call to super's set focus
         col = self.colour[not focus]
         self.init_draw(col, focus) # create new one with correct colour
@@ -1396,7 +1396,7 @@ class EditorSheet(EditorEP):
         x2,y2 = (x - w + h, y - h)
         x3,y3 = x2 + (w * 2), y2
         x4,y4 = x1 + (w * 2), y1
-        self.id = self.id + [self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, 
+        self.id = self.id + [self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4,
             fill = colour , outline = "black")]
         dX = w + 5
         if (self.show_label):
@@ -1419,7 +1419,7 @@ class EditorSheet(EditorEP):
                 self.id = self.id + [self.canvas.create_line(x1, y1, x2, y2, fill = 'slate blue')]
 
     def normalize_plot(self,a):
-        """ 
+        """
         Normalize an array s.
         In case of a constant array, ones is returned for value greater than zero,
         and zeros in case of value inferior or equal to zero.
@@ -1440,7 +1440,7 @@ class EditorSheet(EditorEP):
     #   Util methods
 
     def in_bounds(self, pos_x, pos_y) : # returns true if point lies in a bounding box
-        # if the coord is pressed within the parallelogram representation this 
+        # if the coord is pressed within the parallelogram representation this
         # returns true.
         # Get the parallelogram points and centers them around the given point
         x = self.x - pos_x; y = self.y - pos_y
@@ -1450,7 +1450,7 @@ class EditorSheet(EditorEP):
         B = (x - w + h, y - h)
         C = B[0] + (2 * w), B[1]
         D = A[0] + (2 * w), A[1]
-        # calculate the line constants  
+        # calculate the line constants
         # As the gradient of the lines is 1 the calculation is simple.
         a_AB = A[1] + A[0]
         a_CD = C[1] + C[0]
@@ -1469,13 +1469,13 @@ class EditorSheet(EditorEP):
         l,b,r,t = self.simobj.bounds.aarect().lbrt()
         density = self.simobj.xdensity
         return int(density * (r - l)), int(density * (t - b))
-    
+
     def set_bounds(self):
         # Use the default sheet bounds as to set the "normal" size
         # of SheetObject in the GUI, so simulations using very large
         # sheets still look normal.
         dl,db,dr,dt = self.simobj.__class__.nominal_bounds.aarect().lbrt()
-        width_fact = 120.0 / (dr - dl) 
+        width_fact = 120.0 / (dr - dl)
         height_fact = 60.0 / (dt - db)
         l,b,r,t = self.simobj.bounds.aarect().lbrt()
         self.width = width_fact * (r - l) * self.canvas.scaling_factor
@@ -1488,7 +1488,7 @@ class EditorConnection(EditorObject):
 
     """
     A connection formed between 2 EditorNodes on a EditorCanvas. A EditorConnection is used
-    to cover any topographica connection (connection / projection), and extending 
+    to cover any topographica connection (connection / projection), and extending
     classes will supply a draw method and other type specific attributes.
     """
 
@@ -1512,10 +1512,10 @@ class EditorConnection(EditorObject):
 
 
     #   Update methods
-    
+
     def move(self):
-        # if one of the nodes connected by this connection move, then move by redrawing 
-        self.draw() 
+        # if one of the nodes connected by this connection move, then move by redrawing
+        self.draw()
 
     def update_position(self, pos) : # update the temporary point
         self.to_position = pos
@@ -1541,7 +1541,7 @@ class EditorConnection(EditorObject):
 
 
     #   Util methods
-    
+
     def show_properties(self):
         EditorObject.show_properties(self)
         self.parameter_frame.set_PO(self.simobj)
@@ -1551,11 +1551,11 @@ class EditorConnection(EditorObject):
 class EditorEPConnection(EditorConnection):
     """
     Represents any topo EPConnection using a line with an arrow head in the middle.
-    """ 
+    """
 
     def __init__(self, name, canvas, from_node):
         EditorConnection.__init__(self, name, canvas, from_node)
-        # if more than one connection between nodes, 
+        # if more than one connection between nodes,
         # this will reflect how to draw this connection
         self.draw_index = 0
         self.deviation = 0
@@ -1569,11 +1569,11 @@ class EditorEPConnection(EditorConnection):
         self.update_factor()
 
     #   Draw methods
-    
+
     def select_view(self, view_choice):
         self.view = view_choice
         self.move()
-        self.set_focus(False)  
+        self.set_focus(False)
 
     def set_colours(self):
         colours = {'video' : ('dark red', 'blue', 'yellow'),
@@ -1596,7 +1596,7 @@ class EditorEPConnection(EditorConnection):
 
     def draw_line(self,from_position, to_position):
         # set the colour to be used depending on whether connection has the focus.
-        if (self.focus) : 
+        if (self.focus) :
             text_col = col = self.colour[0]
         else:
             text_col = 'black'
@@ -1608,16 +1608,16 @@ class EditorEPConnection(EditorConnection):
             x1 = to_position[0] - ((20 * factor) + deviation)
             y2 = to_position[1]
             x2 = x1 + (40 * factor) + (2 * deviation)
-            y1 = y2 - ((30 * factor) + deviation) 
+            y1 = y2 - ((30 * factor) + deviation)
             midX = self.get_middle((x1,0),(x2,0))[0]
             # create oval and an arrow head.
-            self.id = (self.canvas.create_oval(x1, y1, x2, y2, outline = col), 
+            self.id = (self.canvas.create_oval(x1, y1, x2, y2, outline = col),
             self.canvas.create_line(midX, y1, midX+1, y1, arrow = FIRST, fill = col))
             # draw name label beside arrow head
             if (self.show_label):
-                self.label = self.canvas.create_text(middle[0] - 
+                self.label = self.canvas.create_text(middle[0] -
                     (20 + len(self.name)*3), middle[1] - (30 + deviation) , text = self.name)
-        else :    
+        else :
             # create a line between the nodes - use 2 to make arrow in center.
             dev = self.deviation
             from_pos = from_position[0] + self.deviation, from_position[1]
@@ -1643,33 +1643,33 @@ class EditorEPConnection(EditorConnection):
 
         # CEBALERT: see earlier alert about EditorObject not inheriting from object.
         EditorConnection.remove(self) #super(EditorProjection,self).remove()
-        
+
 
     def move(self):
-        # if one of the nodes connected by this connection move, then move by redrawing 
+        # if one of the nodes connected by this connection move, then move by redrawing
         self.gradient = self.calculate_gradient()
         self.update_factor()
-        self.draw() 
+        self.draw()
 
     def decrement_draw_index(self):
         self.draw_index -= 1
         if self.to_node == self.from_node:
             self.update_factor()
-        else: 
+        else:
             self.connect_to_coord((self.from_node.width / 2) - 10)
 
     def connect(self, to_node, con):
         EditorConnection.connect(self, to_node, con)
         self.draw_index = self.from_node.get_connection_count(to_node)-1
         if (self.from_node == to_node):
-            self.update_factor() 
+            self.update_factor()
         else:
             self.connect_to_coord((self.from_node.width / 2) - 10)
         self.gradient = self.calculate_gradient()
         self.radius = self.get_radius()
 
     #   Util methods
-    
+
     def get_middle(self, pos1, pos2) : # returns the middle of two points
         return (pos1[0] + (pos2[0] - pos1[0])*0.5, pos1[1] + (pos2[1] - pos1[1])*0.5)
 
@@ -1685,7 +1685,7 @@ class EditorEPConnection(EditorConnection):
         sign = math.pow(-1, n)
         self.deviation = sign * width + (-sign) * math.pow(0.5, math.ceil(0.5 * (n))) * width
 
-    # returns the gradients of the two lines making the opening 'v' part of the receptive field. 
+    # returns the gradients of the two lines making the opening 'v' part of the receptive field.
     # this depends on the draw_index, as it determines where the projection's representation begins.
     def calculate_gradient(self):
         """Not implemented in this class"""
@@ -1716,18 +1716,18 @@ class EditorEPConnection(EditorConnection):
 
 class EditorProjection(EditorEPConnection):
     """
-    Represents any topo CFProjection. It is a subclass of EditorEPConnection and fills 
+    Represents any topo CFProjection. It is a subclass of EditorEPConnection and fills
     in the methods that are not defined. Can be represented by a representation of a
     projection's receptive field or by a line with an arrow head in the middle;
     lateral projections are represented by a dotted ellipse around the center.
     Can determine if x,y coord is within the triangular receptive field or within an
-    area around the arrow head. The same can be determined for a lateral projection 
+    area around the arrow head. The same can be determined for a lateral projection
     ellipse.
     """
-    
+
     def __init__(self, name, canvas, from_node, receptive_field = True):
         EditorEPConnection.__init__(self, name, canvas, from_node)
-        # if more than one connection between nodes, 
+        # if more than one connection between nodes,
         # this will reflect how to draw this connection
         self.normal_radius = 15
         self.radius = self.get_radius()
@@ -1751,7 +1751,7 @@ class EditorProjection(EditorEPConnection):
 
     def draw_radius(self, from_position, to_position):
          # set the colour to be used depending on whether connection has the focus.
-        if (self.focus) : 
+        if (self.focus) :
             text_col = col = self.colour[0]
             lateral_colour = self.from_node.colour[0]
         else:
@@ -1766,11 +1766,11 @@ class EditorProjection(EditorEPConnection):
             y1 = to_position[1] + b
             x2 = to_position[0] + a
             y2 = to_position[1] - b
-            self.id = (self.canvas.create_oval(x1, y1, x2, y2, fill = lateral_colour, 
+            self.id = (self.canvas.create_oval(x1, y1, x2, y2, fill = lateral_colour,
                 dash = (2,2), outline = self.colour[2], width = 2), None)
 
 # CEBALERT: as far as I know, this balloon binding never worked.
-#            self.balloon.tagbind(self.canvas, self.id[0], self.name)       
+#            self.balloon.tagbind(self.canvas, self.id[0], self.name)
 
         else :  # connection between distinct nodes
             x1, y1 = to_position
@@ -1779,7 +1779,7 @@ class EditorProjection(EditorEPConnection):
             radius_x, radius_y = self.get_radius()
             self.id = (self.canvas.create_line(x1, y1, x2 - radius_x, y2, fill = col),
                 self.canvas.create_line(x1, y1, x2 + radius_x, y2, fill = col),
-                self.canvas.create_oval(x2 - radius_x, y2 - radius_y, 
+                self.canvas.create_oval(x2 - radius_x, y2 - radius_y,
                     x2 + radius_x, y2 + radius_y, outline = col))
             # draw name label
             dX = 20
@@ -1791,7 +1791,7 @@ class EditorProjection(EditorEPConnection):
 
     def draw_normal(self, from_position, to_position):
         # set the colour to be used depending on whether connection has the focus.
-        if (self.focus) : 
+        if (self.focus) :
             text_col = col = self.colour[0]
             lateral_colour = self.from_node.colour[0]
         else:
@@ -1806,7 +1806,7 @@ class EditorProjection(EditorEPConnection):
             y1 = to_position[1] + b
             x2 = to_position[0] + a
             y2 = to_position[1] - b
-            self.id = (self.canvas.create_oval(x1, y1, x2, y2, fill = lateral_colour, 
+            self.id = (self.canvas.create_oval(x1, y1, x2, y2, fill = lateral_colour,
                 dash = (2,2), outline = self.colour[2], width = 2), None)
 
 #            self.balloon.tagbind(self.canvas, self.id[0], self.name)
@@ -1818,7 +1818,7 @@ class EditorProjection(EditorEPConnection):
             radius = self.normal_radius
             self.id = (self.canvas.create_line(x1, y1, x2 - radius, y2, fill = col),
                 self.canvas.create_line(x1, y1, x2 + radius, y2, fill = col),
-                self.canvas.create_oval(x2 - radius, y2 - (0.5 * radius), 
+                self.canvas.create_oval(x2 - radius, y2 - (0.5 * radius),
                 x2 + radius, y2 + (0.5 * radius), outline = col))
             # draw name label
             dX = 20
@@ -1826,14 +1826,14 @@ class EditorProjection(EditorEPConnection):
             if (self.show_label):
                 self.label = self.canvas.create_text(middle[0] - dX,
                     middle[1] - dY, fill = text_col, text = self.name, anchor = E)
-        
+
 
     #   Util methods
-    
+
     def get_radius(self):
         factor = self.canvas.scaling_factor
         if self.to_node == None:
-            return (factor * self.normal_radius, factor * self.normal_radius * 
+            return (factor * self.normal_radius, factor * self.normal_radius *
                 self.from_node.height / self.from_node.width)
         node = self.from_node
         node_bounds = node.simobj.bounds.aarect().lbrt()
@@ -1841,13 +1841,13 @@ class EditorProjection(EditorEPConnection):
         try:
             bounds = self.simobj.bounds_template.lbrt()
         except AttributeError:
-            return (factor * self.normal_radius, factor * self.normal_radius * 
+            return (factor * self.normal_radius, factor * self.normal_radius *
                 self.from_node.height / self.from_node.width)
         radius_x = factor * (node.width / 2) * (bounds[2] - bounds[0]) / (node_bounds[2] - node_bounds[0])
         radius_y = radius_x * node.height / node.width
         return radius_x, radius_y
 
-    # returns the size of the semimajor and semiminor axis of the ellipse representing 
+    # returns the size of the semimajor and semiminor axis of the ellipse representing
     # the draw_index-th lateral projection.
     def get_factor(self):
         factor = self.canvas.scaling_factor
@@ -1861,7 +1861,7 @@ class EditorProjection(EditorEPConnection):
     def update_factor(self):
         self.factor = self.get_factor()
 
-    # returns the gradients of the two lines making the opening 'v' part of the receptive field. 
+    # returns the gradients of the two lines making the opening 'v' part of the receptive field.
     # this depends on the draw_index, as it determines where the projection's representation begins.
     def calculate_gradient(self):
         factor = self.canvas.scaling_factor
@@ -1878,12 +1878,12 @@ class EditorProjection(EditorEPConnection):
         den_BA = (A[0] - B[0])
         if not(den_BA == 0):
             m_BA = (A[1] - B[1]) / den_BA
-        else : 
+        else :
             m_BA = 99999 # AL - this should be a big number
         den_CA = (A[0] - C[0])
         if not(den_CA == 0):
             m_CA = (A[1] - C[1]) / den_CA
-        else : 
+        else :
             m_CA = 99999 # AL - this should be a big number
         return (m_BA, m_CA)
 
@@ -1922,7 +1922,7 @@ class EditorProjection(EditorEPConnection):
                 B = (T[0] - (self.normal_radius * factor), T[1])
                 #C = (T[0] + (self.normal_radius * factor), T[1])
             # if the y coords lie outwith the boundaries, return false
-            if (((A[1] < B[1]) and (B[1] < 0 or A[1] > 0)) or 
+            if (((A[1] < B[1]) and (B[1] < 0 or A[1] > 0)) or
                 ((A[1] >= B[1]) and (B[1] > 0 or A[1] < 0))):
                 return False
             # calculate the constant for the lines of the triangle

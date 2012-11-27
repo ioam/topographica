@@ -25,14 +25,14 @@ def run(tests,title=None):
     errs = {}
     for test in tests:
         test_info = "%s (%s)"%(test.__name__,inspect.getdoc(test))
-        error = _run_test(test) 
+        error = _run_test(test)
         if error is None:
             print "PASS: %s"%test_info
         else:
             print "FAIL: %s"%test_info
             errs[(test.__name__,test.__doc__)]=error
 
-    for t,e in errs.items(): print "\n** Error from %s (%s):\n%s\n"%(t[0],t[1],e) 
+    for t,e in errs.items(): print "\n** Error from %s (%s):\n%s\n"%(t[0],t[1],e)
     print "\nNumber of tests: %s"%len(tests)
     print "Number of errors: %s\n"%len(errs)
     return len(errs)
@@ -53,7 +53,7 @@ def _run_test(test):
         X=None
     except:
         X=traceback.format_exc()
-        
+
     # there's some thing to have bit of code always executed,
     # but can't remember what it is. with it, could make this
     # code cleaner.
@@ -62,7 +62,7 @@ def _run_test(test):
 
     if stderr.getvalue(): X = stderr.getvalue()
     stderr.close()
-    
+
     return X
 
-        
+

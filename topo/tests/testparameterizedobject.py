@@ -37,7 +37,7 @@ class TestAbstractPO(param.Parameterized):
 
 class TestParamInstantiation(AnotherTestPO):
     instPO = param.Parameter(default=AnotherTestPO(),instantiate=False)
-    
+
 
 class TestParameterized(unittest.TestCase):
 
@@ -75,7 +75,7 @@ class TestParameterized(unittest.TestCase):
 
         # check that instantiate was ignored for readonly
         self.assertEqual(testpo.params()['ro2'].instantiate,False)
-        
+
 
 
     def test_basic_instantiation(self):
@@ -88,7 +88,7 @@ class TestParameterized(unittest.TestCase):
 
         TestPO.inst[1]=7
         TestPO.notinst[1]=7
-        
+
         self.assertEqual(testpo.notinst,[1,7,3])
         self.assertEqual(testpo.inst,[1,2,3])
 
@@ -113,7 +113,7 @@ class TestParameterized(unittest.TestCase):
         t = TestParamInstantiation()
         assert t.params('instPO').instantiate is True
         assert isinstance(t.instPO,AnotherTestPO)
-        
+
 
     def test_abstract_class(self):
         """Check that a class declared abstract actually shows up as abstract."""
@@ -169,7 +169,7 @@ class some_fn(param.ParameterizedFunction):
        return scale,num_phase,frequencies
 
 
-instance = some_fn.instance() 
+instance = some_fn.instance()
 
 class TestParameterizedFunction(unittest.TestCase):
 
@@ -177,7 +177,7 @@ class TestParameterizedFunction(unittest.TestCase):
         self.assertEqual(fn(),(0.3,18,[99]))
         self.assertEqual(fn(frequencies=[1,2,3]),(0.3,18,[1,2,3]))
         self.assertEqual(fn(),(0.3,18,[99]))
-        
+
         fn.frequencies=[10,20,30]
         self.assertEqual(fn(frequencies=[1,2,3]),(0.3,18,[1,2,3]))
         self.assertEqual(fn(),(0.3,18,[10,20,30]))
@@ -195,7 +195,7 @@ class TestParameterizedFunction(unittest.TestCase):
         i = pickle.loads(s)
         self.assertEqual(i(),(0.3,18,[10,20,30]))
 
-        
+
 suite = unittest.TestSuite()
 cases = [TestParameterized,TestParameterizedFunction]
 suite.addTests([unittest.makeSuite(case) for case in cases])

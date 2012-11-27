@@ -99,13 +99,13 @@ def write_page():
         key_text+="<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"%(event,version,performance,description)
 
     key_text+="</table>"
-        
+
     s = "<html><body><p><img src='%s' /></p><p>%s</p></body></html>"%(imgfile,key_text)
 
     f = open(locn+"running.html",'w')
     f.write(s)
     f.close()
-    
+
 
 V=re.compile(r'[0-9]*-log')
 def get_build_no(logfilename):
@@ -126,7 +126,7 @@ def create_startups(i_am_sure=False):
         pickle.dump(startups,f,0)
         f.close()
 
-    
+
 
 def save_timings(timings):
     f = open('/home/ceball/buildbot/timings.pkl','w')
@@ -153,29 +153,29 @@ exclusions.append(425) # ran with wrong no. of iterations
 def get_date_version_time(logfile,timings=None,startups=None):
 
     build = get_build_no(logfile)
-    
+
     f = open(logfile)
     all_lines = f.readlines()
     f.close()
 
     ok = ok2 = False
-    
+
     datei=versioni=timingi=startupi=None
-    
+
     i = 0;
     for line in all_lines:
         if line.find("Running at")>=0:
-            
+
             datei=i
         elif line.find("svnversion")>=0:
-            
+
             versioni=i
         elif line.startswith("[examples/%s]"%script):
             timingi=i
-            
+
         elif line.find("[examples/%s startup]"%script)>=0:
             startupi=i
-            
+
         elif line.find("Results from examples/%s have not changed."%script)>=0:
             ok2=True
         elif line.find('program finished')>=0:
@@ -233,7 +233,7 @@ def get_date_version_time(logfile,timings=None,startups=None):
         startcpusage = float(startcpusel[start:stop])
     except ValueError:
         startcpusage = 99  # HACK: for cases where it's missing, assume 99!
-    
+
     if timings:
 
         if cpu_usage>95:
@@ -253,7 +253,7 @@ def get_date_version_time(logfile,timings=None,startups=None):
     return (build,date,version,timing,startup,cpu_usage)
 
 
-MIN_BUILD=153 # where to start analysis 
+MIN_BUILD=153 # where to start analysis
 filename_pattern = '*-log-shell_3-stdio'
 def update_timings(location="/home/ceball/buildbot/buildmaster/slow-tests_x86_ubuntu7.04/"):
 
@@ -274,16 +274,16 @@ def update_timings(location="/home/ceball/buildbot/buildmaster/slow-tests_x86_ub
         build = get_build_no(filename)
 
         if build>=MIN_BUILD:
-            
+
 	    do_timings=do_startups=False
 
-            if build not in timings[script] and build not in exclusions: 
+            if build not in timings[script] and build not in exclusions:
                 #print "Adding timing for build...",build
 		do_timings=True
             elif build in exclusions and build not in timings[script]:
                 #print "Build %s excluded; timing skipped."%build
                 timings[script][build]=None
-            
+
             if build not in startups[script] and build not in exclusions:
                 #print "Adding startup time for build...",build
             	do_startups=True
@@ -301,7 +301,7 @@ def update_timings(location="/home/ceball/buildbot/buildmaster/slow-tests_x86_ub
     save_timings(timings)
     save_startups(startups)
     #print timings
-    
+
 
 
 def plot_timings():
@@ -318,7 +318,7 @@ def plot_startups():
     filename="/home/ceball/buildbot/buildmaster/public_html/p/lissom_oo_or_startup"
     plott(t,tytle,filename)
 
-import matplotlib;matplotlib.use('Agg')    
+import matplotlib;matplotlib.use('Agg')
 
 def sgn(x):
     return +1 if x>=0.0 else -1
@@ -326,7 +326,7 @@ def sgn(x):
 def plott(t,tytle,filename):
 
     from pylab import title,xlabel,ylabel,savefig,figure,annotate,figtext
-    
+
     builds=[]
     versions=[]
     times=[]
@@ -341,7 +341,7 @@ def plott(t,tytle,filename):
     figure()
     vectorplot(times,versions,style='bx')
 
-    
+
     title(tytle)
     xlabel("svnversion")
     ylabel("time /s")
@@ -365,15 +365,15 @@ def plott(t,tytle,filename):
     title("lissom_oo_or.ty, 250 iterations")
     xlabel("build")
     ylabel("time /s")
-        
+
     savefig(filename+"_buildno.png")
 
 
 
 
-    
+
 ## if __name__=='__main__':
-    
+
 ##     if len(sys.argv)>1:
 ##         if sys.argv[1]=='update':
 ##             update_timings()

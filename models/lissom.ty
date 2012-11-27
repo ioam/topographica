@@ -11,7 +11,7 @@ when orientation is included.  The training dataset (e.g. natural
 images or artificial inputs) can be selected using the dataset
 parameter below.
 
-For example, 
+For example,
 
   ./topographica -p "dims=['or','od']" -p "dataset='Gaussian'" examples/lissom.ty
 
@@ -50,7 +50,7 @@ Known differences include:
 There may be other small differences, as this file has not yet been
 compared exhaustively to the original simulations.
 
-Furthermore, some combinations of dimensions can approximately replicate 
+Furthermore, some combinations of dimensions can approximately replicate
 various map simulations in:
 
  - Tikesh Ramtohul. A self-organizing model of disparity maps in the
@@ -91,11 +91,11 @@ from topo.misc.util import linearly_interpolate
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
 import topo.learningfn.optimized
-import topo.learningfn.projfn 
-import topo.transferfn.optimized 
+import topo.learningfn.projfn
+import topo.transferfn.optimized
 import topo.pattern.random
 import topo.pattern.image
-import topo.responsefn.optimized 
+import topo.responsefn.optimized
 import topo.sheet.lissom
 import topo.sheet.optimized
 
@@ -143,7 +143,7 @@ p.add(
 
     dims=param.List(default=['or','od','dr','dy'],class_=str,doc="""
         Stimulus dimensions to include, out of the possible list::
-        
+
           :'or': Orientation
           :'od': Ocular dominance
           :'dr': Direction of motion
@@ -154,7 +154,7 @@ p.add(
 
         Each additional dimension increases the realism, but adds
         significant complexity, computation time, and memory
-        requirements.  If an empty list is supplied, all 
+        requirements.  If an empty list is supplied, all
         available dimensions are used."""),
 
     retina_density=param.Number(default=24.0,bounds=(0,None),
@@ -187,7 +187,7 @@ p.add(
 # Convenient shortcut:
 if p.dims==[]:
     p.dims=['or','od','dr','dy','cr','sf']
-   
+
 if p.dataset in natural_image_sets or 'dy' in p.dims:
     p.set_default('retina_density',48.0)
 
@@ -198,7 +198,7 @@ center_polarities=['On','Off']      # oo
 rg_cone_types=['']                  # rg
 cone_types=['']                     # rg,cr
 opponent_types=['']                 # rg
-basic_opponent_types=['']           # rg 
+basic_opponent_types=['']           # rg
 eyes=['']                           # od,dy
 lags=['']                           # dr
 speed=0.0                           # dr
@@ -213,29 +213,29 @@ lgnaff_radius=0.375                 # sf
 topo.sim.name = "lissom_oo_" + '_'.join(p.dims)
 if 'od' in p.dims or 'dy' in p.dims:
     eyes=['Left','Right']
-    
-if 'dr' in p.dims: 
+
+if 'dr' in p.dims:
     lags=['0','1','2','3']
     if p.speed == 0:
         speed=2.0/24.0 # Useful speeds range from 0.0 - 3.0/24.0.
     else:
         speed=p.speed
 
-if 'dy' in p.dims: 
+if 'dy' in p.dims:
     disparity_bound = p.max_disparity*0.041665/2.0
     if p.max_disparity > 0.0: position_bound = 0.70833
 
 if 'rg' in p.dims:
     rg_cone_types=['Red','Green']
     cone_types=['Red','Green']
-    opponent_types=['Red-Green ','Green-Red ','Luminosity ']    
-    basic_opponent_types=['Red-Green ','Green-Red ']  
+    opponent_types=['Red-Green ','Green-Red ','Luminosity ']
+    basic_opponent_types=['Red-Green ','Green-Red ']
 
 if 'cr' in p.dims:
     rg_cone_types=['Red','Green']
     cone_types=['Red','Green','Blue']
     opponent_types=['Red-Green ','Green-Red ','Blue-RedGreen ','Luminosity ']
-    basic_opponent_types=['Red-Green ','Green-Red '] 
+    basic_opponent_types=['Red-Green ','Green-Red ']
     p.dims.append('rg')
 
 if 'sf' in p.dims:
@@ -249,14 +249,14 @@ sf_relative_sizes=[sf_spacing**(channel-1) for channel in sf_channel_nums]
 
 ### Input patterns and LGN sheets
 num_inputs=1
-    
+
 if p.dataset=="Gaussian":
     input_type=pattern.Gaussian
     ids=1.0
 elif p.dataset in natural_image_sets:
     input_type=pattern.image.FileImage
     ids=4.0
-        
+
 
 # helper fns for synthesizing a specified hue
 
@@ -295,7 +295,7 @@ for e in eyes:
                     orientation=0 if n != '' else numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=input_seed+3+6*i),
                     size=0.088388*(3**('or' not in p.dims)) * \
                       numbergen.UniformRandom(lbound=1,ubound=sf_spacing**(sf_channels-1),
-                                              seed=input_seed+4+6*i)**('sf' in p.dims), 
+                                              seed=input_seed+4+6*i)**('sf' in p.dims),
                     aspect_ratio=4.66667 if 'or' in p.dims else 1.0,
                     scale=1.0 if 'od' not in p.dims else \
                      (2.0-2*(r*(cone=='Red')+g*(cone=='Green')+b*(cone=='Blue')) - \
@@ -364,7 +364,7 @@ for e in eyes:
                     nominal_bounds=sheet.BoundingBox(radius=0.5+v1aff_radius*sf_spacing**(channel-1)),
                     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)],
                     measure_maps=False)
-                
+
 
 topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
                                      tsettle=9,nominal_bounds=sheet.BoundingBox(radius=0.5))
@@ -385,7 +385,7 @@ if p.dataset in natural_image_sets:
 
 strength_scale=linearly_interpolate(strength,speed*24.0)
 
-     
+
 # Convenience variable: number of afferent connections to V1
 num_aff=len(center_polarities)*len(eyes)*len(lags)*len(opponent_types)
 
@@ -396,44 +396,44 @@ for e in eyes:
             basic_opponent_types_tmp.reverse()
             for (cone,opponentcenter,opponentsurround) in zip(rg_cone_types,basic_opponent_types,basic_opponent_types_tmp):
                 topo.sim.connect(
-                    e+cone+'Retina'+n, e+opponentcenter+'LGN'+l+n, name='AfferentCenter', 
+                    e+cone+'Retina'+n, e+opponentcenter+'LGN'+l+n, name='AfferentCenter',
                     connection_type=projection.SharedWeightCFProjection, delay=0.05,
-                    strength=strength_scale*(-1)**center_polarities.index(l), 
+                    strength=strength_scale*(-1)**center_polarities.index(l),
                     nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius),
                     weights_generator=centerg)
 
                 topo.sim.connect(
                     e+cone+'Retina'+n, e+opponentsurround+'LGN'+l+n, name='AfferentSurround',
                     connection_type=projection.SharedWeightCFProjection, delay=0.05,
-                    strength=strength_scale*(-1)**(1+center_polarities.index(l)), 
+                    strength=strength_scale*(-1)**(1+center_polarities.index(l)),
                     nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius),
                     weights_generator=surroundg)
 
-                if 'sf' in p.dims and 'rg' not in p.dims: 
+                if 'sf' in p.dims and 'rg' not in p.dims:
                     for channel in xrange(2,sf_channels+1):
                         topo.sim.connect(
-                            e+cone+'Retina'+n, e+opponentcenter+'LGN'+l+n+'SF'+str(channel), 
+                            e+cone+'Retina'+n, e+opponentcenter+'LGN'+l+n+'SF'+str(channel),
                             name='AfferentCenter'+str(channel),
                             delay=0.05,connection_type=projection.SharedWeightCFProjection,
-                            strength=strength_scale*(-1)**center_polarities.index(l), 
+                            strength=strength_scale*(-1)**center_polarities.index(l),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
-                            
+
                             weights_generator=pattern.Gaussian(size=0.07385*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
                         topo.sim.connect(
-                            e+cone+'Retina'+n, e+opponentsurround+'LGN'+l+n+'SF'+str(channel), 
+                            e+cone+'Retina'+n, e+opponentsurround+'LGN'+l+n+'SF'+str(channel),
                             name='AfferentSurround'+str(channel),
                             delay=0.05,connection_type=projection.SharedWeightCFProjection,
-                            strength=strength_scale*(-1)**(1+center_polarities.index(l)), 
+                            strength=strength_scale*(-1)**(1+center_polarities.index(l)),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
-                            
+
                             weights_generator=pattern.Gaussian(size=0.29540*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
                 if 'cr' in p.dims:
                     topo.sim.connect(
-                        e+cone+'Retina'+n, e+'Blue-RedGreen'+' LGN'+l+n, 
+                        e+cone+'Retina'+n, e+'Blue-RedGreen'+' LGN'+l+n,
                         name='AfferentCenter'+cone,
                         delay=0.05,connection_type=projection.SharedWeightCFProjection,
                         strength=4.7*(-1)**(1+center_polarities.index(l))/2,
@@ -442,8 +442,8 @@ for e in eyes:
 
             if 'cr' in p.dims:
                 topo.sim.connect(
-                    e+'Blue'+'Retina'+n, e+'Blue-RedGreen'+' LGN'+l+n, 
-                    name='AfferentCenter'+'Blue', 
+                    e+'Blue'+'Retina'+n, e+'Blue-RedGreen'+' LGN'+l+n,
+                    name='AfferentCenter'+'Blue',
                     delay=0.05,connection_type=projection.SharedWeightCFProjection,
                     strength=4.7*(-1)**center_polarities.index(l),
                     nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius),
@@ -452,7 +452,7 @@ for e in eyes:
             for cone in cone_types:
                 if 'Luminosity ' in opponent_types:
                     topo.sim.connect(
-                        e+cone+'Retina'+n, e+'Luminosity LGN'+l+n, 
+                        e+cone+'Retina'+n, e+'Luminosity LGN'+l+n,
                         name='AfferentCenter'+cone,
                         delay=0.05,connection_type=projection.SharedWeightCFProjection,
                         strength=strength_scale*(-1)**center_polarities.index(l)/len(cone_types),
@@ -460,8 +460,8 @@ for e in eyes:
                         weights_generator=centerg)
 
                     topo.sim.connect(
-                        e+cone+'Retina'+n, e+'Luminosity LGN'+l+n, 
-                        name='AfferentSurround'+cone, 
+                        e+cone+'Retina'+n, e+'Luminosity LGN'+l+n,
+                        name='AfferentSurround'+cone,
                         delay=0.05,connection_type=projection.SharedWeightCFProjection,
                         strength=strength_scale*(-1)**(1+center_polarities.index(l))/len(cone_types),
                         nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius),
@@ -469,22 +469,22 @@ for e in eyes:
 
                     for channel in xrange(2,sf_channels+1):
                         topo.sim.connect(
-                            e+cone+'Retina'+n, e+'LGN'+l+n+'SF'+str(channel), 
+                            e+cone+'Retina'+n, e+'LGN'+l+n+'SF'+str(channel),
                             name='AfferentCenter'+cone+str(channel),
                             delay=0.05,connection_type=projection.SharedWeightCFProjection,
                             strength=strength_scale*(-1)**center_polarities.index(l)/len(cone_types),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
-                            
+
                             weights_generator=pattern.Gaussian(size=0.07385*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
                         topo.sim.connect(
-                            e+cone+'Retina'+n, e+'LGN'+l+n+'SF'+str(channel), 
+                            e+cone+'Retina'+n, e+'LGN'+l+n+'SF'+str(channel),
                             name='AfferentSurround'+cone+str(channel),
                             delay=0.05,connection_type=projection.SharedWeightCFProjection,
                             strength=strength_scale*(-1)**(1+center_polarities.index(l))/len(cone_types),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
-                            
+
                             weights_generator=pattern.Gaussian(size=0.29540*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
@@ -497,7 +497,7 @@ for e in eyes:
                     connection_type=projection.CFProjection,
                     weights_generator=pattern.random.GaussianCloud(gaussian_size=2*v1aff_radius),
                     nominal_bounds_template=sheet.BoundingBox(radius=v1aff_radius),
-                    learning_rate=0.9590/num_aff/ids) 
+                    learning_rate=0.9590/num_aff/ids)
 
             for channel in xrange(2,sf_channels+1):
                 topo.sim.connect(
@@ -507,7 +507,7 @@ for e in eyes:
                     connection_type=projection.CFProjection,
                     weights_generator=pattern.random.GaussianCloud(gaussian_size=2*v1aff_radius*sf_spacing**(channel-1)),
                     nominal_bounds_template=sheet.BoundingBox(radius=v1aff_radius*sf_spacing**(channel-1)),
-                    learning_rate=0.9590/num_aff/ids) 
+                    learning_rate=0.9590/num_aff/ids)
 
 
 topo.sim.connect('V1','V1',delay=0.05,name='LateralExcitatory',
@@ -515,11 +515,11 @@ topo.sim.connect('V1','V1',delay=0.05,name='LateralExcitatory',
                  strength=1.2 if p.dataset in natural_image_sets else 0.9,
                  weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.10417),
                  nominal_bounds_template=sheet.BoundingBox(radius=0.10417),
-                 learning_rate=2.55528/ids) 
-            
+                 learning_rate=2.55528/ids)
+
 topo.sim.connect('V1','V1',delay=0.05,name='LateralInhibitory',
                  connection_type=projection.CFProjection,
-                 strength=-1.75 if p.dataset in natural_image_sets else -0.9, 
+                 strength=-1.75 if p.dataset in natural_image_sets else -0.9,
                  weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.22917),
                  nominal_bounds_template=sheet.BoundingBox(radius=0.22917),
                  learning_rate=1.80873/ids/5 if p.dataset in natural_image_sets else 1.80873/ids)
@@ -550,7 +550,7 @@ for e in eyes:
     ss += [None]
 
 lslist=[]
-for opponent in opponent_types: 
+for opponent in opponent_types:
     ls=[None]
     for n in lags:
         for e in eyes:
@@ -578,7 +578,7 @@ for e in eyes:
                 topo.sim[e+opponent+'LGN'+l+n].row_precedence=0.35+0.01*pol_precedence
             for channel in xrange(2,sf_channels+1):
                 topo.sim[e+'LGN'+l+n+'SF'+str(channel)].row_predecence=0.35+0.01*pol_precedence
-topo.sim['V1'].row_precedence=0.9    
+topo.sim['V1'].row_precedence=0.9
 
 
 ### Set up appropriate defaults for analysis
@@ -599,7 +599,7 @@ preference_maps=[
 pgs = [x for y in [m for n,m in preference_maps if n in p.dims] for x in y] + \
       ['Position Preference','Activity']
 topo.command.default_analysis_plotgroups=pgs
-    
+
 
 wide_relative_sizes=[0.5*sf_relative_sizes[0]] + sf_relative_sizes + [2.0*sf_relative_sizes[-1]]
 relative_sizes=(wide_relative_sizes if p.expand_sf_test_range else sf_relative_sizes)
@@ -675,7 +675,7 @@ combined_preference_maps = {
     }
 
 
-## Create appropriate combined plots 
+## Create appropriate combined plots
 from topo.plotting.plotgroup import create_plotgroup
 for combined_dimensions,plotgroup_spec in combined_preference_maps.items():
     plotgroup_spec['category']="Combined Preference Maps"

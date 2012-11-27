@@ -62,7 +62,7 @@ playerc.PLAYERC_OPEN_MODE = 1
 
 class PlayerException(Exception):
     pass
-    
+
 
 def player_fn(error_op=ne,error_val=0):
     """
@@ -118,7 +118,7 @@ def synched_method(f):
         finally:
             self._lock.release()
     return newFunction
-    
+
 
 
 class PlayerObject(object):
@@ -219,10 +219,10 @@ class PTZDevice(PlayerDevice):
                self.proxy.tilt*180/pi, \
                self.proxy.zoom*180/pi
     state_deg = property(get_state_deg)
-    
+
     def set_deg(self,pan,tilt,zoom):
         self.set(pan*pi/180, tilt*pi/180, zoom*pi/180)
-        
+
     def set_ws_deg(self,pan,tilt,zoom,pan_speed,tilt_speed):
         self.set_ws(pan*pi/180, tilt*pi/180, zoom*pi/180,pan_speed*pi/180,tilt_speed*pi/180)
 
@@ -249,7 +249,7 @@ class CameraDevice(PlayerDevice):
             self.image_queue.put(im)
         super(CameraDevice,self).process_queues()
 
-        
+
 #    @synched_method
     def get_image(self):
         """
@@ -269,10 +269,10 @@ class CameraDevice(PlayerDevice):
                im_array
 
     image = property(get_image)
-    
 
 
-##################                    
+
+##################
 # DEVICE TABLE
 #
 # This table contains the mapping from device type names
@@ -323,7 +323,7 @@ class PlayerRobot(object):
       # disconnecting the client
       robot.stop()
     """
-    
+
     def __init__(self,host='localhost',port=6665,speed=20,
                  devices=[]):
 
@@ -344,12 +344,12 @@ class PlayerRobot(object):
         self._thread = Thread(target=self.run_loop,name="PlayerRobot Run Loop")
         self._thread.setDaemon(True)
         self._thread.start()
-        
+
     def stop(self):
         self._running = False
         self._thread.join()
         self._thread = None
-        
+
     def run_loop(self):
         self._client.connect()
         self._running = True
@@ -372,7 +372,7 @@ class PlayerRobot(object):
         data for a while.
         """
         self._queues_running = run_state
-        
+
     def process_queues(self):
         for d in self._devices:
             d.process_queues()
@@ -391,15 +391,15 @@ class PlayerRobot(object):
 
         proxy_constr =  getattr(playerc,'playerc_'+devname)
         devtype = device_table.get(devname,PlayerDevice)
-        
+
         try:
             self._lock.acquire()
             dev = devtype(proxy_constr(self._client.proxy,devnum),self._lock)
         finally:
             self._lock.release()
-            
+
         self._devices.append(dev)
         getattr(self,devname)[devnum] = dev
         if self._running:
             dev.subscribe()
-            
+

@@ -25,4 +25,4 @@ class BottomRowMask(SheetMask):
     def reset(self):
         self._data = zeros(self.sheet.shape)
         self._data[-1,:] += 1
-        
+

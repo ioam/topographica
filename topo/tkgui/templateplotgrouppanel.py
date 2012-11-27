@@ -26,7 +26,7 @@ from plotgrouppanel import SheetPanel
 # If I open an Activity plot and then measure an orientation map,
 # the plot only shows Activity, but the dynamic info includes the or
 # pref and selectivity.  That makes sense, given that the plot would
-# show that if it were refreshed, but it's confusing. 
+# show that if it were refreshed, but it's confusing.
 
 
 
@@ -73,21 +73,21 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
                     if c in template:
                         del template[c]
         return original_templates
-        
+
     def refresh_plots(self):
         # same as superclass, except that if strength only is true
         # it temporarily removes hue&conf from plot_templates
         original_templates = self._strength_only_hack()
         super(TemplatePlotGroupPanel,self).refresh_plots()
         self.plotgroup.plot_templates = original_templates
-        
+
     def redraw_plots(self):
         # same as superclass, except that if strength only is true
         # it temporarily removes hue&conf from plot_templates
         original_templates = self._strength_only_hack()
         super(TemplatePlotGroupPanel,self).redraw_plots()
         self.plotgroup.plot_templates = original_templates
-            
+
 
     ## CB: update init args now we have no pgts.
     def __init__(self,master,plotgroup,**params):
@@ -96,7 +96,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
 
         self.pack_param('strength_only',parent=self.control_frame_1,
                         on_set=self.redraw_plots,side='right')
-        
+
         # Display any plots that can be done with existing data, but
         # don't regenerate the SheetViews unless requested
         if self.plotgroup.plot_immediately:
@@ -111,11 +111,11 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         self._sheet_menu.add_command(label="Save image as PNG",
                                      command=self.__save_to_png)
 
-        
+
         self._sheet_menu.add_command(label="Save image as EPS",
                                      command=self.__save_to_postscript)
 
-        
+
         self._unit_menu.add_command(label="Print info",
                                     command=self.__print_info)
 
@@ -137,7 +137,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
             newmenu.add_command(label="Gradient",              command=lambda c=chan: self.__gradient(c))
             channel_menus[chan]=newmenu
 
-        
+
         #self._sheet_menu.add_command(label="Print matrix values",
         #                             command=self.__print_matrix)
         #################################################################
@@ -148,7 +148,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
 
     ### JABALERT: Should remove the assumption that the plot will be
     ### SHC (could e.g.  be RGB).
-    ### 
+    ###
     ### Should add the ability to turn off any of the channels
     ### independently (just as the Strength-only button does), and
     ### eventually should allow the user to type in the name of any
@@ -161,11 +161,11 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         Make whichever of the SHC channels is present in the plot available on the menu.
         """
         super(TemplatePlotGroupPanel,self)._canvas_right_click(event_info,show_menu=False)
-        
+
         if 'plot' in event_info:
             plot = event_info['plot']
-            
-            available_channels =available_plot_channels(plot) 
+
+            available_channels =available_plot_channels(plot)
 
             for channel in ('Strength','Hue','Confidence'):
                 if channel in available_channels:
@@ -274,7 +274,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         else:
             m=plot._get_matrix(channel)
             channels_info+="%s:%f"%(plot.channels[channel],m[r,c])
-            
+
         print "%s %s" % (description, channels_info)
 
 
@@ -287,15 +287,15 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         """
         plot = event_info['plot']
         r,c = event_info['coords'][0]
-        
+
         info_string = basic_text
 
         for channel,channel_name in available_plot_channels(plot).items():
             info_string+=" %s: % 1.3f"%(channel_name,plot._get_matrix(channel)[r,c])
-                                        
+
         return info_string
 
-    
+
 
 
 

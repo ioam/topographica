@@ -28,14 +28,14 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
     active_units_mask = iterator.get_active_units_mask()
     sheet_mask = iterator.get_sheet_mask()  # pyflakes:ignore (passed to weave C code)
     cf_type = iterator.cf_type  # pyflakes:ignore (passed to weave C code)
-    
+
     # CEBALERT: Not consistent with other C code. E.g. could be
-    # simplified to use active_units_mask[] and sheet_mask[]? 
+    # simplified to use active_units_mask[] and sheet_mask[]?
 
     code = c_header + """
         DECLARE_SLOT_OFFSET(_norm_total,cf_type);
         DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
-        
+
         npfloat *x = active_units_mask;
         npfloat *m = sheet_mask;
         for (int r=0; r<num_cfs; ++r) {
@@ -63,14 +63,14 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
                     _norm_total[0] = nt;
                     LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
                     _has_norm_total[0] = 1;
-                    
+
                     Py_DECREF(cfs);
                 }
             }
 
         }
-    """    
-    inline(code, ['projlist','active_units_mask','sheet_mask','num_cfs','length','cf_type'], 
+    """
+    inline(code, ['projlist','active_units_mask','sheet_mask','num_cfs','length','cf_type'],
            local_dict=locals(),
            headers=['<structmember.h>'])
 
@@ -97,7 +97,7 @@ class LISSOM_Opt(LISSOM):
     JointNormalizingCFSheet.__compute_joint_norm_totals with
     C-optimized code for LISSOM sheets.
     """
-    
+
     joint_norm_fn = param.Callable(default=compute_joint_norm_totals_opt)
 
     def __init__(self,**params):
@@ -110,7 +110,7 @@ provide_unoptimized_equivalent("LISSOM_Opt","LISSOM",locals())
 
 
 class NeighborhoodMask_Opt(NeighborhoodMask):
-    
+
     def calculate(self):
         rows,cols = self.data.shape
         ignore1,matradius = self.sheet.sheet2matrixidx(self.radius,0)
@@ -119,11 +119,11 @@ class NeighborhoodMask_Opt(NeighborhoodMask):
         thr = self.threshold  # pyflakes:ignore (passed to weave C code)
         activity = self.sheet.activity  # pyflakes:ignore (passed to weave C code)
         mask = self.data  # pyflakes:ignore (passed to weave C code)
-        
+
         code = c_header + """
             #define min(x,y) (x<y?x:y)
             #define max(x,y) (x>y?x:y)
-            
+
             npfloat *X = mask;
             npfloat *A = activity;
             for (int r=0; r<rows; ++r) {
@@ -132,7 +132,7 @@ class NeighborhoodMask_Opt(NeighborhoodMask):
                     int lby = max(0,l-matradius);
                     int hbx = min(r+matradius+1,rows);
                     int hby = min(l+matradius+1,cols);
-                    
+
                     *X = 0.0;
                     int breakFlag = 0;
                     for(int k=lbx;k<hbx;k++)
@@ -150,11 +150,11 @@ class NeighborhoodMask_Opt(NeighborhoodMask):
                         }
                         if(breakFlag)break;
                     }
-                    
+
                     X++;
                 }
             }
-        """    
+        """
         inline(code, ['thr','activity','matradius','mask','rows','cols'], local_dict=locals())
 
 provide_unoptimized_equivalent("NeighborhoodMask_Opt","NeighborhoodMask",locals())

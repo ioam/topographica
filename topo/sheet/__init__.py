@@ -41,7 +41,7 @@ class ActivityCopy(Sheet):
 
     dest_ports=['Activity']
     src_ports=['Activity']
-    
+
     def input_event(self,conn,data):
         self.input_data=data
 
@@ -64,7 +64,7 @@ class SequenceGeneratorSheet(GeneratorSheet):
     self.period, a warning is issued and the sequence repeats
     immediately after completion.
     """
-    
+
     input_sequence = param.List(default=[],
           doc="""The sequence of patterns to generate.  Must be a list of
           (onset,generator) tuples. An empty list defaults to the
@@ -76,7 +76,7 @@ class SequenceGeneratorSheet(GeneratorSheet):
         super(SequenceGeneratorSheet,self).__init__(**params)
         if not self.input_sequence:
             self.input_sequence = [(0,self.input_generator)]
-            
+
     def start(self):
         assert self.simulation
 
@@ -141,17 +141,17 @@ class JointNormalizingCFSheet(CFSheet):
     # JABALERT: Should check that whenever a connection is added to a
     # group, it has the same no of cfs as the existing connections.
     def start(self):
-        self._normalize_weights(active_units_mask=False)        
+        self._normalize_weights(active_units_mask=False)
 
 
     # CEBALERT: rename active_units_mask and default to False
     def _normalize_weights(self,active_units_mask=True):
         """
         Apply the weights_output_fns for every group of Projections.
-        
+
         If active_units_mask is True, only active units will have
         their weights normalized.
-        """    
+        """
         for key,projlist in self._grouped_in_projections('JointNormalize'):
             if key == None:
                 normtype='Individually'
@@ -181,12 +181,12 @@ class JointNormalizingCFSheet(CFSheet):
         # Apply output function in groups determined by dest_port
         self._normalize_weights()
 
-        
+
 
 class JointNormalizingCFSheet_Continuous(JointNormalizingCFSheet):
     """
     CFSheet that runs continuously, with no 'resting' periods between pattern presentations.
-    
+
     Note that learning occurs only when the time is a whole number.
     """
     def process_current_time(self):

@@ -12,10 +12,10 @@ $Id$
 # ordered dictionaries instead.
 # http://cheeseshop.python.org/pypi/Ordered%20Dictionary/0.2.2
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/496761
-# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747 
+# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
 #
 # Sometimes having a KeyedList is confusing, because you can't use
-# natural syntax such as "x in y" when y is a KeyedList. 
+# natural syntax such as "x in y" when y is a KeyedList.
 #
 # JB: Sure, we could use one of those instead; no good reason to
 # maintain our own not-quite-full-featured version.
@@ -32,14 +32,14 @@ class KeyedList(list):
     [] does not return the name tuple.
 
     Redefined functions::
-    
+
         __getitem__ ([,])
         __setitem__ ([,])
         append  --  Now takes a tuple (key,value) so that value
                     can be later accessed by [key].
-    
+
     New functions modeled from dictionaries::
-    
+
         get
         set
         has_key
@@ -57,7 +57,7 @@ class KeyedList(list):
         for (name,value) in self:
             if name == key:
                 return value
-            
+
         # Though not often useful for this class, the list interface
         # provides for access by an integer key:
         if isinstance(key,int):
@@ -92,13 +92,13 @@ class KeyedList(list):
     def get(self, key, default=None):
         """
         Get the value with the specified key.
-        
+
         Returns None if no value with that key exists.
         """
         for (name,value) in self:
             if name == key:
                 return value
-            
+
         return default
 
 
@@ -127,7 +127,7 @@ class KeyedList(list):
 
     def items(self):
         """
-        Provide the item function supported by dictionaries.  
+        Provide the item function supported by dictionaries.
         A keyed list already is stored in this format, so just returns
         the actual underlying list.
         """

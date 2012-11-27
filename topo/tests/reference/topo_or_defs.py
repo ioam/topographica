@@ -106,7 +106,7 @@ def add_scheduled_exc_bounds_changes(sim):
     change_bounds = "LE.change_bounds(BoundingBox(radius=half_odd_array(exc_rad)/BaseN,min_radius=min_exc_rad/BaseN));LE.learning_rate=alpha_exc*LE.n_units"
 ##     times = [199,499,999,1999,2999,3999,4999,6499,7999,19999]
     e =     [0.6,0.7,0.8, 0.8, 0.8, 0.6, 0.6, 0.6, 0.6,  0.6]
-    
+
 ##     for t,i in zip(times,range(times)):
 ##         sim.schedule_command(t,'exc_rad=half_odd_array(exc_rad*%s);%s'%(e[i],change_bounds))
 
@@ -141,4 +141,4 @@ def add_scheduled_aff_Lrate_changes(sim,pname="Af"):
 
 
 
-    
+

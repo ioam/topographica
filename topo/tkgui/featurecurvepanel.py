@@ -1,7 +1,7 @@
 """
 Panels for displaying tuning curves.
 
-Uses a PlotGroup to generate the pylab plots 
+Uses a PlotGroup to generate the pylab plots
 which are currently displayed separately from the gui.
 
 $Id$
@@ -52,7 +52,7 @@ class FeatureCurvePanel(PlotGroupPanel):
         self.sheet_change()
 
 
-        
+
     def sheet_change(self):
         s = self.sheet
         l,b,r,t = s.bounds.lbrt()
@@ -70,7 +70,7 @@ class FeatureCurvePanel(PlotGroupPanel):
             w1,w2=self.representations['x']['widget'],self.representations['y']['widget']
             w1.set_bounds(*x.bounds)
             w2.set_bounds(*y.bounds)
-            
+
             w1.tag_set();w2.tag_set()
 
 
@@ -81,7 +81,7 @@ class FeatureCurvePanel(PlotGroupPanel):
 
 
     def populate_sheet_param(self):
-        sheets = topo.sim.objects(self.sheet_type).values() 
+        sheets = topo.sim.objects(self.sheet_type).values()
         self.plotgroup.params()['sheet'].objects = sheets
         self.plotgroup.sheet = sheets[0] # CB: necessary?
 

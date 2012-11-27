@@ -20,13 +20,13 @@ $Id$
 #--- examples/lissom_or.ty	(revision 11402)
 #+++ examples/lissom_or.ty	(working copy)
 #@@ -123,7 +123,7 @@
-# 
-# 
+#
+#
 # ### Actions scheduled to occur as the simulation proceeds.
 #-sheet.lissom.schedule_events("topo.sim['V1']",st=1.0/num_inputs,aff_name="Afferent")
 #+#sheet.lissom.schedule_events("topo.sim['V1']",st=1.0/num_inputs,aff_name="Afferent")
 
-# $ diff examples/lissom_or.ty examples/cylissom_or.ty 
+# $ diff examples/lissom_or.ty examples/cylissom_or.ty
 # 65c65
 # < projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 # ---
@@ -61,7 +61,7 @@ class CFPRF_DotProduct_cyopt(CFPResponseFn):
     single_cf_fn = param.ClassSelector(ResponseFn,DotProduct(),readonly=True)
 
 
-    def __call__(self, object iterator, np.ndarray[np.double_t,  ndim=2] input_activity, 
+    def __call__(self, object iterator, np.ndarray[np.double_t,  ndim=2] input_activity,
                  np.ndarray[np.double_t,  ndim=2] activity, np.double_t strength):
 
         cdef np.ndarray[np.int32_t] input_sheet_slice
@@ -74,7 +74,7 @@ class CFPRF_DotProduct_cyopt(CFPResponseFn):
 
         cfs = iterator.flatcfs
         mask = iterator.mask.data
-        
+
         for i in range(len(cfs)):
 
             # index into 2D activity and mask arrays
@@ -105,7 +105,7 @@ class CFPRF_DotProduct_cyopt(CFPResponseFn):
                     for col in range(c1,c2):
                         total += (input_activity[row,col] * weights[p,q])
                         q+=1
-                    p+=1                
+                    p+=1
                 activity[iR,iC]=total*strength
                 #####
 

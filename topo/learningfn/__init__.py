@@ -33,7 +33,7 @@ class Oja(LearningFn):
     weights toward a constant sum-squared value over time.  Thus this
     function does not normally need a separate output_fn for normalization.
     """
-    
+
     alpha=param.Number(default=0.1,bounds=(0,None))
     def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
         weights += single_connection_learning_rate * (unit_activity * input_activity -
@@ -55,10 +55,10 @@ class Covariance(LearningFn):
     input_threshold to some positive value instead.  When both
     thresholds are zero this rule degenerates to the standard Hebbian
     rule.
-    
+
     Requires some form of output_fn normalization for stability.
     """
-    
+
     unit_threshold =param.Number(default=0.5,bounds=(0,None),
         doc="Threshold between LTD and LTP, applied to the activity of this unit.")
     input_threshold=param.Number(default=0.0,bounds=(0,None),
@@ -66,29 +66,29 @@ class Covariance(LearningFn):
     def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
         weights += single_connection_learning_rate * (unit_activity - self.unit_threshold) * (input_activity - self.input_threshold)
 
-        
+
 class CPCA(LearningFn):
     """
     CPCA (Conditional Principal Component Analysis) rule.
 
-    (See O'Reilly and Munakata, Computational Explorations in 
+    (See O'Reilly and Munakata, Computational Explorations in
     Cognitive Neuroscience, 2000, equation 4.12.)
 
     Increases each weight in proportion to the product of this
     neuron's activity, input activity, and connection weights.
- 
+
     Has built-in normalization, and so does not require output_fn
     normalization for stability.  Intended to be a more biologically
     plausible version of the Oja rule.
 
     Submitted by Veldri Kurniawan and Lewis Ng.
     """
-   
+
     def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
         """
         Update the value of the given weights matrix based on the
         input_activity matrix (of the same size as the weights matrix),
-        the response of this unit (the unit_activity), and the previous weights 
+        the response of this unit (the unit_activity), and the previous weights
         matrix governed by a per-connection learning rate.
         """
 

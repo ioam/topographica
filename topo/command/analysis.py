@@ -24,7 +24,7 @@ $Id$
 """
 
 import Image,ImageDraw
-    
+
 import copy
 
 from numpy.oldnumeric import array, maximum
@@ -59,10 +59,10 @@ from topo.misc.patternfn import line
 def _equivalent_for_plotgroup_update(p1,p2):
     """
     Helper function for save_plotgroup.
-    
+
     Comparison operator for deciding whether make_plots(update==False) is
     safe for one plotgroup if the other has already been updated.
-    
+
     Treats plotgroups as the same if the specified list of attributes
     (if present) match in both plotgroups.
     """
@@ -85,7 +85,7 @@ class save_plotgroup(ParameterizedFunction):
       save_plotgroup("Activity")
       save_plotgroup("Orientation Preference")
       save_plotgroup("Projection",projection=topo.sim['V1'].projections('Afferent'))
-                                  
+
     Some plotgroups accept optional parameters, which can be passed
     like projection above.
     """
@@ -114,7 +114,7 @@ class save_plotgroup(ParameterizedFunction):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
 
         plotgroup = copy.deepcopy(plotgroups[name])
-    
+
         # JABALERT: Why does a Projection plot need a Sheet parameter?
         # CB: It shouldn't, of course, since we know the sheet when we have
         # the projection object - it's just leftover from when we passed the
@@ -122,9 +122,9 @@ class save_plotgroup(ParameterizedFunction):
         # in projectionpanel.py or plotgroup.py (both need to be changed).
         if 'projection' in params:
             setattr(plotgroup,'sheet',params['projection'].dest)
-    
+
         plotgroup._set_name(name)
-        
+
         # Specified parameters that aren't parameters of
         # save_plotgroup() are set on the plotgroup
         for n,v in p.extra_keywords().items():
@@ -135,7 +135,7 @@ class save_plotgroup(ParameterizedFunction):
             del self.previous_time[:]
             del self.previous_plotgroups[:]
             self.previous_time.append(topo.sim.time())
-            
+
         # Skip update step if equivalent to prior command at this sim time
         update=True
         if p.use_cached_results:
@@ -160,20 +160,20 @@ class save_plotgroup(ParameterizedFunction):
 def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=(0.0,1.0), cyclic=True, weighted_average=True, cropfn=lambda(x):x):
     """
     Estimate the value of a feature from the current activity pattern on a sheet.
-    
+
     The specified preference_map should be measured before this
     function is called.
-    
+
     If weighted_average is False, the feature value returned is the
     value of the preference_map at the maximally active location.
-    
+
     If weighted_average is True, the feature value is estimated by
     weighting the preference_map by the current activity level, and
     averaging the result across all units in the sheet.  The
     axis_bounds specify the allowable range of the feature values in
     the preference_map.  If cyclic is true, a vector average is used;
     otherwise an arithmetic weighted average is used.
-    
+
     For instance, if preference_map is OrientationPreference (a cyclic
     quantity), then the result will be the vector average of the
     activated orientations.  For an orientation map this value should
@@ -185,9 +185,9 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
     decoding.  Examples:
 
     Decode whole area:
- 
+
        decode_feature(topo.sim["V1"])
-    
+
     Decode left half only:
 
        r,c = topo.sim["V1"].activity.shape
@@ -195,27 +195,27 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
        righthalf = lambda(x): x[:,c/2:]
 
        decode_feature(topo.sim["V1"], cropfn=lefthalf)
-    
+
     """
 
     d = Distribution(axis_bounds, cyclic)
-    
+
     if not (preference_map in sheet.sheet_views):
         topo.sim.warning(preference_map + " should be measured before calling decode_feature.")
     else:
         v = sheet.sheet_views[preference_map]
-        d.add(dict(zip(cropfn(v.view()[0]).ravel(), 
+        d.add(dict(zip(cropfn(v.view()[0]).ravel(),
                        cropfn(sheet.activity).ravel())))
-    
+
     res = DSF_WeightedAverage()(d) if weighted_average else DSF_MaxValue()(d)
     return res['']['preference']
-    
+
 
 
 def update_activity():
     """
     Make a map of neural activity available for each sheet, for use in template-based plots.
-    
+
     This command simply asks each sheet for a copy of its activity
     matrix, and then makes it available for plotting.  Of course, for
     some sheets providing this information may be non-trivial, e.g. if
@@ -240,13 +240,13 @@ def update_rgb_activities():
     """
     for sheet in topo.sim.objects(Sheet).values():
         for c in ['Red','Green','Blue']:
-            # should this ensure all of r,g,b are present? 
-            if hasattr(sheet,'activity_%s'%c.lower()): 
+            # should this ensure all of r,g,b are present?
+            if hasattr(sheet,'activity_%s'%c.lower()):
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
                 new_view = SheetView((activity_copy,sheet.bounds),
                                      sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
                 sheet.sheet_views['%sActivity'%c]=new_view
-            
+
 
 pg = create_plotgroup(name='RGB',category='Other',
              doc='Combine and plot the red, green, and blue activity for all appropriate Sheets.', auto_refresh=True,
@@ -287,10 +287,10 @@ class update_projectionactivity(ProjectionSheetMeasurementCommand):
     Add SheetViews for all of the Projections of the ProjectionSheet
     specified by the sheet parameter, for use in template-based plots.
     """
-    
+
     def __call__(self,**params):
         p=ParamOverrides(self,params)
-        self.params('sheet').compute_default()        
+        self.params('sheet').compute_default()
         s = p.sheet
         if s is not None:
             for conn in s.in_connections:
@@ -340,40 +340,40 @@ class measure_rfs(SingleInputResponseCommand):
     very effective way to drive the unit to activate.  The value
     should be set high enough that the target units activate at least
     some of the time there is a pattern on the input.
-    """  
+    """
     static_parameters = param.List(default=["offset","size"])
-    
+
     sampling = param.Number(default=1.0,bounds=(1.0,None),doc="""
     	The sampling value determines the size of the input pattern and
     	the number of presentations required to fully sample the input sheet.
-    	The higher the value the coarser the receptive field measurement 
+    	The higher the value the coarser the receptive field measurement
     	will be.""")
-    
+
     area_ratio = param.Number(default=1.0,bounds=(0.0,1.0),doc="""
     	Ratio defining the area in the input sheet that is sampled during
     	the reverse correlation procedure. Reducing this value below 1.0
     	will invalidate the RFs of all neurons outside the specified area.""")
 
     __abstract = True
-    
+
     def __call__(self,**params):
         p=ParamOverrides(self,params)
         self.params('input_sheet').compute_default()
         x=ReverseCorrelation(self._feature_list(p),input_sheet=p.input_sheet)
         static_params = dict([(s,p[s]) for s in p.static_parameters])
-    
+
         if p.duration is not None:
             p.pattern_presenter.duration=p.duration
         if p.apply_output_fns is not None:
             p.pattern_presenter.apply_output_fns=p.apply_output_fns
         x.collect_feature_responses(p.pattern_presenter,static_params,p.display,self._feature_list(p))
-          
+
     def _feature_list(self,p):
-    
+
         left, bottom, right, top = p.input_sheet.nominal_bounds.lbrt()
         left *= p.area_ratio; bottom *= p.area_ratio; right *= p.area_ratio; top *= p.area_ratio
         sheet_density = float(p.input_sheet.nominal_density)
-        
+
         # Cannot assume square sheet.
         vertical_divisions = ((sheet_density * (top - bottom)) - 1) / p.sampling
         horizontal_divisions = ((sheet_density * (right - left)) - 1) / p.sampling
@@ -381,28 +381,28 @@ class measure_rfs(SingleInputResponseCommand):
         unit_size = 1.0 / sheet_density * p.sampling
         half_unit_size = unit_size / 2.0 # saves repeated calculation.
         p['size'] = unit_size
-        
+
         # Set the x and y max values down by half a unit so patterns are presented in the centre of each unit.
         y_range = (top - half_unit_size, bottom)
         x_range = (right - half_unit_size, left)
 
-        return [Feature(name="x", range=x_range, step=float(x_range[1]-x_range[0])/horizontal_divisions), 
+        return [Feature(name="x", range=x_range, step=float(x_range[1]-x_range[0])/horizontal_divisions),
                 Feature(name="y", range=y_range, step=float(y_range[1]-y_range[0])/vertical_divisions),
                 Feature(name="scale", range=(-p.scale, p.scale), step=p.scale*2)]
-        
+
 pg = create_plotgroup(name='RF Projection',category='Other',
     doc='Measure receptive fields.',
-    pre_plot_hooks=[measure_rfs.instance(display=True, 
+    pre_plot_hooks=[measure_rfs.instance(display=True,
     pattern_presenter=PatternPresenter(RawRectangle(size=0.01,aspect_ratio=1.0)))],
     normalize='Individually')
 
 pg.add_plot('RFs',[('Strength','RFs')])
- 
-               
+
+
 # Helper function for measuring direction maps
 def compute_orientation_from_direction(current_values):
-    """ 
-    Return the orientation corresponding to the given direction. 
+    """
+    Return the orientation corresponding to the given direction.
 
     Wraps the value to be in the range [0,pi), and rounds it slightly
     so that wrapped values are precisely the same (to avoid biases
@@ -445,7 +445,7 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
         Number of hues to test; set to 1 to disable or e.g. 8 to enable.""")
 
     num_direction = param.Integer(default=0,bounds=(0,None),softbounds=(0,48),doc="""
-        Number of directions to test.  If nonzero, overrides num_orientation, 
+        Number of directions to test.  If nonzero, overrides num_orientation,
         because the orientation is calculated to be perpendicular to the direction.""")
 
     num_speeds = param.Integer(default=4,bounds=(0,None),softbounds=(0,10),doc="""
@@ -457,7 +457,7 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
 
     subplot = param.String("Orientation")
 
-    
+
     def _feature_list(self,p):
         # Always varies frequency and phase; everything else depends on parameters.
 
@@ -481,10 +481,10 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
 
         if p.num_hue>1: features += \
             [Feature(name="hue",range=(0.0,1.0),step=1.0/p.num_hue,cyclic=True)]
-            
+
         if p.num_direction>0 and p.num_speeds==0: features += \
             [Feature(name="speed",values=[0],cyclic=False)]
-        
+
         if p.num_direction>0 and p.num_speeds>0: features += \
             [Feature(name="speed",range=(0.0,p.max_speed),step=float(p.max_speed)/p.num_speeds,cyclic=False)]
 
@@ -505,12 +505,12 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
 
     subplot = param.String("Orientation")
 
-    preference_fn = param.ClassSelector( DistributionStatisticFn, 
-        default=DSF_WeightedAverage(value_scale=(0.0,1.0/pi)), doc=""" 
+    preference_fn = param.ClassSelector( DistributionStatisticFn,
+        default=DSF_WeightedAverage(value_scale=(0.0,1.0/pi)), doc="""
         Function that will be used to analyze the distributions of unit
         responses. Sets value_scale to normalize orientation preference
         values.""" )
-    
+
     def _feature_list(self,p):
 
         return [Feature(name="frequency",values=p.frequencies),
@@ -561,7 +561,7 @@ pg.add_plot('Second Orientation Preference&Selectivity',
 pg.add_plot('Second Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
 pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
 
-        
+
 pg = create_plotgroup(name='Two Orientation Preferences',category='Preference Maps',
     doc='Display the two most preferred orientations for each units, using bimodal von Mises fit.',
     pre_plot_hooks=[measure_sine_pref.instance(
@@ -611,7 +611,7 @@ class measure_phasedisparity(SinusoidalMeasureResponseCommand):
     orientation = param.Number(default=pi/2,softbounds=(0.0,2*pi),doc="""
         Orientation of the test pattern; typically vertical to measure
         horizontal disparity.""")
-    
+
     static_parameters = param.List(default=["orientation","scale","offset"])
 
     def _feature_list(self,p):
@@ -636,7 +636,7 @@ class measure_dr_pref(SinusoidalMeasureResponseCommand):
     """Measure a direction preference map by collating the response to patterns."""
 
     num_phase = param.Integer(default=12)
-    
+
     num_direction = param.Integer(default=6,bounds=(1,None),softbounds=(1,48),
                                   doc="Number of directions to test.")
 
@@ -679,7 +679,7 @@ class measure_hue_pref(SinusoidalMeasureResponseCommand):
     """Measure a hue preference map by collating the response to patterns."""
 
     num_phase = param.Integer(default=12)
-    
+
     num_hue = param.Integer(default=8,bounds=(1,None),softbounds=(1,48),
                             doc="Number of hues to test.")
 
@@ -717,10 +717,10 @@ class measure_second_or_pref(SinusoidalMeasureResponseCommand):
                                     doc="Number of orientations to test.")
     true_peak 	 	= param.Boolean( default=True, doc="""If set the second
 	    orientation response is computed on the true second mode of the
-	    orientation distribution, otherwise is just the second maximum response""" ) 
+	    orientation distribution, otherwise is just the second maximum response""" )
 
     subplot		= param.String("Second Orientation")
-    
+
     def _feature_list(self, p):
     	fs	= [ Feature(name="frequency", values=p.frequencies) ]
     	if p.true_peak:
@@ -755,7 +755,7 @@ pg.add_plot('Second Peak Orientation Preference&Selectivity',
 pg.add_plot('Second Peak Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
 pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
 
-        
+
 pg = create_plotgroup(name='Two Peaks Orientation Preferences',category='Preference Maps',
     doc="""Display the two most preferred orientations for all units with a
     multimodal orientation preference distribution.""",
@@ -772,7 +772,7 @@ pg.add_static_image('Color Key','command/two_or_key_vert.png')
 
 class measure_corner_or_pref(PositionMeasurementCommand):
     """Measure a corner preference map by collating the response to patterns."""
-    
+
     scale = param.Number(default=1.0)
 
     divisions=param.Integer(default=10)
@@ -813,7 +813,7 @@ pg.add_plot('Corner Orientation Selectivity',[('Strength','OrientationSelectivit
 
 class measure_corner_angle_pref(PositionMeasurementCommand):
     """Generate the preference map for angle shapes, by collating the response to patterns."""
-    
+
     scale = param.Number(default=1.0)
 
     size = param.Number(default=0.2)
@@ -826,7 +826,7 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
 
     num_or = param.Integer(default=4,bounds=(1,None),softbounds=(1,24),doc=
         "Number of orientations to test.")
-    
+
     angle_0 = param.Number(default=0.25*pi,bounds=(0.0,pi),softbounds=(0.0,0.5*pi),doc=
         "First angle to test.")
 
@@ -839,11 +839,11 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
     key_img_fname=param.Filename(default='command/key_angles.png',doc=
         "Name of the file with the image used to code angles with hues.")
 
-    pattern_presenter=PatternPresenter(GaussiansCorner(aspect_ratio=4.0,cross=0.85),apply_output_fns=False,duration=1.0) 
+    pattern_presenter=PatternPresenter(GaussiansCorner(aspect_ratio=4.0,cross=0.85),apply_output_fns=False,duration=1.0)
 
     static_parameters = param.List( default=[ "size", "scale", "offset" ] )
 
-    
+
 
     def _feature_list( self, p ):
     	"""Return the list of features to vary, generate hue code static image"""
@@ -925,21 +925,21 @@ pg.add_static_image( 'Hue Code', measure_corner_angle_pref.instance().key_img_fn
 
 class PatternPresenter2(param.Parameterized):
 
-    apply_output_fns = param.Boolean(default = True, 
-        doc = """When presenting a pattern, whether to apply each 
-        sheet's output function.  If False, for many networks the 
-        response will be linear, which requires fewer test patterns to 
-        measure a meaningful response, but it may not correspond to the 
-        actual preferences of each neuron under other conditions. If 
-        True, callers will need to ensure that the input patterns are 
+    apply_output_fns = param.Boolean(default = True,
+        doc = """When presenting a pattern, whether to apply each
+        sheet's output function.  If False, for many networks the
+        response will be linear, which requires fewer test patterns to
+        measure a meaningful response, but it may not correspond to the
+        actual preferences of each neuron under other conditions. If
+        True, callers will need to ensure that the input patterns are
         in a suitable range to drive the neurons to generate meaningful
         output, because e.g. a threshold-based output function might
         result in no activity for inputs that are too weak..""")
 
     duration = param.Number(default = 1.0,
-        doc = """Amount of simulation time for which to present each 
-        test pattern. By convention, most Topographica example files 
-        are 
+        doc = """Amount of simulation time for which to present each
+        test pattern. By convention, most Topographica example files
+        are
         designed to have a suitable activity pattern computed by the
         default time, but the duration will need to be changed for
         other models that do not follow that convention or if a
@@ -947,45 +947,45 @@ class PatternPresenter2(param.Parameterized):
 
     # CEBALERT: generator_sheets=[] is probably a surprising way of
     # actually getting all the generator sheets.
-    generator_sheets = param.List(default = [], 
-        doc="""The set of GeneratorSheets onto which patterns will be 
-        drawn. By default (i.e. for an empty list), all GeneratorSheets 
+    generator_sheets = param.List(default = [],
+        doc="""The set of GeneratorSheets onto which patterns will be
+        drawn. By default (i.e. for an empty list), all GeneratorSheets
         in the simulation will be used.""")
-        
+
     pattern_generator = param.Parameter(default=Constant(),
-        doc = """The PatternGenerator that will be drawn on the generator 
-        sheets (the parameters of the pattern_generator are specified 
+        doc = """The PatternGenerator that will be drawn on the generator
+        sheets (the parameters of the pattern_generator are specified
         during calls).""")
 
 
     def __call__(self, features_values, param_dict):
-        
+
         for param, value in param_dict.iteritems():
-            setattr(self.pattern_generator, param, value)                               
-                              
+            setattr(self.pattern_generator, param, value)
+
         for feature, value in features_values.iteritems():
-            setattr(self.pattern_generator, feature, value)                               
-        
+            setattr(self.pattern_generator, feature, value)
+
         all_input_sheet_names = topo.sim.objects(GeneratorSheet).keys()
 
         if len(self.generator_sheets) > 0:
             input_sheet_names = [sheet.name for sheet in self.generator_sheets]
         else:
             input_sheet_names = all_input_sheet_names
-        
+
         # Copy the given generator once for every GeneratorSheet
         inputs = dict.fromkeys(input_sheet_names)
         for key in inputs.keys():
             inputs[key] = copy.deepcopy(self.pattern_generator)
-            
+
         self._custom_presenter(inputs, input_sheet_names)
-        
+
         # blank patterns for unused generator sheets
         for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
             inputs[sheet_name] = Constant(scale=0)
-                
-        pattern_present(inputs, self.duration, plastic=False, apply_output_fns=self.apply_output_fns)                
-                        
+
+        pattern_present(inputs, self.duration, plastic=False, apply_output_fns=self.apply_output_fns)
+
 
     def _custom_presenter(self, inputs, input_sheet_names):
         """This method provides a minimum overload for performing custom actions
@@ -997,47 +997,47 @@ class frequency_mapper(PatternGenerator):
     """Activates a generator sheet at the specified frequency (for all latencies).
     It does so by translating from a frequency to a y position and presenting a line
     at that y position (of the specified size)."""
-    
+
     __abstract = True
-            
-    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
+
+    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0),
         doc="Thickness (width) of the frequency band for every presentation.")
-        
+
     frequency_spacing = param.Array(default=None,
         doc="""The spacing of the available frequency range, this allows us to define
         (and hence map) a non linear spacing by specifying the frequency value at each
         sheet unit.""")
-    
-    
+
+
     def __init__(self, **params):
-        super(frequency_mapper, self).__init__(**params) 
+        super(frequency_mapper, self).__init__(**params)
         self.frequency_spacing = round(self.frequency_spacing)
 
-            
+
     def getFrequency(self):
         sheet_range = self.bounds.lbrt()
         y_range = sheet_range[3] - sheet_range[1]
-        
+
         index = ((self.y - sheet_range[1]) / y_range) * (len(self.frequency_spacing) - 1)
 
         return self.frequency_spacing[index]
-        
-        
+
+
     def setFrequency(self, new_frequency):
         index = nonzero(self.frequency_spacing >= new_frequency)[0][0]
-        
+
         sheet_range = self.bounds.lbrt()
         y_range = sheet_range[3] - sheet_range[1]
-        
+
         ratio = (len(self.frequency_spacing) - 1) / y_range
-        
+
         y = (index / ratio) + sheet_range[1]
         setattr(self, 'y', y)
 
 
     frequency = property(getFrequency, setFrequency, "The frequency at which to present.")
-    
-    
+
+
     def function(self, p):
         return line(self.pattern_y, p.size, 0.001)
 
@@ -1045,21 +1045,21 @@ class frequency_mapper(PatternGenerator):
 
 class measure_frequency_preference(MeasureResponseCommand):
     """Measure a best frequency preference and selectivity map for auditory neurons."""
-        
-    display = param.Boolean(True) 
-    static_parameters = param.List(default=["scale", "offset"])        
-    
-    
+
+    display = param.Boolean(True)
+    static_parameters = param.List(default=["scale", "offset"])
+
+
     def _feature_list(self,p):
         input_sheets = topo.sim.objects(GeneratorSheet).values()
-        
+
         # BK-NOTE: if anyone wants to generalise this method for heterogeneous sheets, by all means do so,
         # for my personal use the additional code required to generalise was overkill.
         for sheet in range(1, len(input_sheets)-1):
             assert input_sheets[sheet].bounds == input_sheets[sheet-1].bounds
             assert input_sheets[sheet].xdensity == input_sheets[sheet-1].xdensity
             assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
-        
+
         divisions = float(input_sheets[0].ydensity)
 
         try:
@@ -1074,7 +1074,7 @@ class measure_frequency_preference(MeasureResponseCommand):
 
         generator = frequency_mapper(size=1.0/divisions, frequency_spacing=frequency_spacing)
         self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
-        
+
         return [Feature(name="frequency", range=(min_frequency,max_frequency), step=1)]
 
 
@@ -1093,60 +1093,60 @@ class log_frequency_mapper(PatternGenerator):
         at that y position (of the specified size)."""
 
     __abstract = True
-    
-    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
+
+    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0),
         doc="Thickness (width) of the frequency band for every presentation.")
-    
+
     frequency_spacing = param.Array(default=None,
         doc="""The spacing of the available frequency range, this allows us to define
             (and hence map) a non linear spacing by specifying the frequency value at each
             sheet unit.""")
-    
-    
+
+
     def __init__(self, **params):
-        super(log_frequency_mapper, self).__init__(**params) 
+        super(log_frequency_mapper, self).__init__(**params)
         self.frequency_spacing = round(self.frequency_spacing)
-    
-    
+
+
     def getFrequency(self):
         sheet_min = (self.bounds.lbrt())[1]
         index = (self.y - sheet_min) * (self.frequency_spacing.size - 1.0)
         return self.frequency_spacing[index]
-    
-    
+
+
     def setFrequencyBand(self, new_frequency_band):
         sheet_min = (self.bounds.lbrt())[1]
         y = sheet_min + (new_frequency_band / (self.frequency_spacing.size - 1.0))
         setattr(self, 'y', y)
-    
-    
+
+
     frequency = property(getFrequency, setFrequencyBand, "The log frequency band at which to present.")
-    
-    
+
+
     def function(self, p):
         return line(self.pattern_y, p.size, 0.001)
-        
-        
-        
+
+
+
 class measure_log_frequency_preference(MeasureResponseCommand):
     """Measure a best frequency preference and selectivity map for auditory neurons."""
-    
-    display = param.Boolean(True) 
-    static_parameters = param.List(default=["scale", "offset"])        
-    
-    
+
+    display = param.Boolean(True)
+    static_parameters = param.List(default=["scale", "offset"])
+
+
     def _feature_list(self,p):
         input_sheets = topo.sim.objects(GeneratorSheet).values()
-        
+
         # BK-NOTE: if anyone wants to generalise this method for heterogeneous sheets, by all means do so,
         # for my personal use the additional code required to generalise was overkill.
         for sheet in range(1, len(input_sheets)-1):
             assert input_sheets[sheet].bounds == input_sheets[sheet-1].bounds
             assert input_sheets[sheet].xdensity == input_sheets[sheet-1].xdensity
             assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
-        
+
         divisions = float(input_sheets[0].ydensity)
-        
+
         try:
             min_frequency = input_sheets[0].input_generator.min_frequency
             max_frequency = input_sheets[0].input_generator.max_frequency
@@ -1156,10 +1156,10 @@ class measure_log_frequency_preference(MeasureResponseCommand):
             max_frequency = int(divisions) + 1
             frequency_spacing = linspace(min_frequency, max_frequency, num=divisions+1, endpoint=True)
             self.warning("Input generator is missing min_frequency, max_frequency, or frequency_spacing - will present linearly from", str(min_frequency), "to", str(max_frequency), "instead.")
-        
+
         generator = log_frequency_mapper(size=1.0/divisions, frequency_spacing=frequency_spacing)
-        self.pattern_presenter = PatternPresenter2(pattern_generator=generator)        
-        
+        self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
+
         return [Feature(name="frequency", range=(0,divisions), step=1)]
 
 
@@ -1176,12 +1176,12 @@ class latency_mapper(PatternGenerator):
     """Activates a generator sheet at the specified latency (for all frequencies).
     It does so by translating from a latency to an x position and presenting a line
     at that x position (of the specified size)."""
-    
+
     __abstract = True
 
-    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0), 
+    size = param.Number(default=0.01, bounds=(0.0,None), softbounds=(0.0,1.0),
         doc="Thickness (width) of the latency band for every presentation.")
-        
+
     min_latency = param.Integer(default=0, bounds=(0,None), inclusive_bounds=(True,False),
         doc="""Smallest latency on the generator sheet.""")
 
@@ -1189,32 +1189,32 @@ class latency_mapper(PatternGenerator):
         doc="""Largest latency on the generator sheet.""")
 
 
-    def getLatency(self):    
+    def getLatency(self):
         latency_range = self.max_latency - self.min_latency
-        
+
         sheet_range = self.bounds.lbrt()
         x_range = sheet_range[2] - sheet_range[0]
-        
+
         ratio = latency_range / x_range
-        
+
         return ((self.x - sheet_range[0]) * ratio) + self.min_latency
-        
-        
+
+
     def setLatency(self, new_latency):
         latency_range = self.max_latency - self.min_latency
-        
+
         sheet_range = self.bounds.lbrt()
         x_range = sheet_range[2] - sheet_range[0]
-        
+
         ratio = latency_range / x_range
-        
+
         x = ((new_latency-self.min_latency) / ratio) + sheet_range[0]
         setattr(self, 'x', x)
 
 
-    latency = property(getLatency, setLatency, "The latency at which to present.")           
-    
-    
+    latency = property(getLatency, setLatency, "The latency at which to present.")
+
+
     def function(self, p):
         return line(self.pattern_x, p.size, 0.001)
 
@@ -1222,20 +1222,20 @@ class latency_mapper(PatternGenerator):
 
 class measure_latency_preference(MeasureResponseCommand):
     """Measure a best onset latency preference and selectivity map for auditory neurons."""
-        
-    display = param.Boolean(True) 
-    static_parameters = param.List(default=["scale", "offset"])        
+
+    display = param.Boolean(True)
+    static_parameters = param.List(default=["scale", "offset"])
 
     def _feature_list(self,p):
         input_sheets = topo.sim.objects(GeneratorSheet).values()
-        
+
         # BK-NOTE: if anyone wants to generalise this method for heterogeneous sheets, by all means do so,
         # for my personal use the additional code required to generalise was overkill.
         for sheet in range(1, len(input_sheets)-1):
             assert input_sheets[sheet].bounds == input_sheets[sheet-1].bounds
             assert input_sheets[sheet].xdensity == input_sheets[sheet-1].xdensity
             assert input_sheets[sheet].ydensity == input_sheets[sheet-1].ydensity
-        
+
         divisions = float(input_sheets[0].xdensity)
 
         try:
@@ -1248,7 +1248,7 @@ class measure_latency_preference(MeasureResponseCommand):
 
         generator = latency_mapper(size=1.0/divisions, min_latency=min_latency, max_latency=max_latency)
         self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
-        
+
         return [Feature(name="latency", range=(min_latency,max_latency), step=1)]
 
 
@@ -1263,7 +1263,7 @@ pg.add_plot('[Latency Selectivity]', [('Strength','LatencySelectivity')])
 
 import types
 __all__ = list(set([k for k,v in locals().items()
-                    if isinstance(v,types.FunctionType) or 
+                    if isinstance(v,types.FunctionType) or
                     (isinstance(v,type) and issubclass(v,ParameterizedFunction))
                     and not v.__name__.startswith('_')]))
 __all__ += [

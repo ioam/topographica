@@ -61,7 +61,7 @@ class CommandMetaclass(ParameterizedMetaclass):
     automatically wrapped so that any exception occurring inside
     __call__() will be passed to the class's _except() method.
     """
-    def __new__(mcs,classname,bases,classdict):        
+    def __new__(mcs,classname,bases,classdict):
         if '__call__' in classdict:
             classdict['__call__'] = mcs._safecall(classdict['__call__'])
             #assert '_except' in classdic
@@ -92,7 +92,7 @@ class CommandMetaclass(ParameterizedMetaclass):
                     # so I guess just re-raise
                     raise
         return caller
-                
+
 
 
 class Command(ParameterizedFunction):
@@ -107,7 +107,7 @@ class Command(ParameterizedFunction):
         # import traceback
         # print traceback.print_exc()
         self.warning("%s failed: %s"%(self,e)) # or traceback.format_exc()))
-        
+
     def __call__(self,*args,**params):
         return super(Command,self).__call__(*args,**params)
 
@@ -119,7 +119,7 @@ class ImportErrorObject(object):
 
     Useful to delay an ImportError until the point of use, thus
     allowing e.g. a class attribute to contain something from a
-    non-core external module (e.g. pylab). 
+    non-core external module (e.g. pylab).
 
     Delaying an ImportError until the point of use allows users to be
     informed of the possibility of having various extra functions on
@@ -166,7 +166,7 @@ class ImportErrorRaisingFakeModule(object):
 def save_input_generators():
     """Save a copy of the active_sim's current input_generators for all GeneratorSheets."""
     # ensure EPs get started (if save_input_generators is called before the simulation is run())
-    topo.sim.run(0.0) 
+    topo.sim.run(0.0)
 
     generator_sheets = topo.sim.objects(GeneratorSheet).values()
     for sheet in generator_sheets:
@@ -198,7 +198,7 @@ def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=Fals
 
     As a special case, if 'inputs' is just a single pattern, and not
     a dictionary, it is presented to all GeneratorSheets.
-    
+
     If a simulation is not provided, the active simulation, if one
     exists, is requested.
 
@@ -210,15 +210,15 @@ def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=Fals
 
     If plastic is False, overwrites the existing values of Sheet.plastic
     to disable plasticity, then reenables plasticity.
-    
-    In order to to see the sequence of values presented, use the back arrow 
-    history mechanism in the GUI. Note that the GUI's Activity window must 
+
+    In order to to see the sequence of values presented, use the back arrow
+    history mechanism in the GUI. Note that the GUI's Activity window must
     be open and the display parameter set to true (display=True).
     """
     # ensure EPs get started (if pattern_present is called before the simulation is run())
-    topo.sim.run(0.0) 
-    
-       
+    topo.sim.run(0.0)
+
+
     if not overwrite_previous:
         save_input_generators()
 
@@ -230,7 +230,7 @@ def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=Fals
     if not apply_output_fns:
         for each in topo.sim.objects(Sheet).values():
             if hasattr(each,'measure_maps'):
-               if each.measure_maps: 
+               if each.measure_maps:
                    each.apply_output_fns = False
 
     # Register the inputs on each input sheet
@@ -248,7 +248,7 @@ def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=Fals
 
     topo.sim.event_push()
     # CBENHANCEMENT: would be nice to break this up for visualizing motion
-    topo.sim.run(duration) 
+    topo.sim.run(duration)
     topo.sim.event_pop()
 
     # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
@@ -256,12 +256,12 @@ def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=Fals
     if not plastic:
         for sheet in topo.sim.objects(Sheet).values():
             sheet.restore_plasticity_state()
-          
+
     if not apply_output_fns:
         for each in topo.sim.objects(Sheet).values():
             each.apply_output_fns = True
- 
-        
+
+
     if not overwrite_previous:
         restore_input_generators()
 
@@ -335,7 +335,7 @@ def save_snapshot(snapshot_name=None):
 
     pickle.dump(to_save,snapshot_file,2)
 
-    
+
     snapshot_file.close()
 
 
@@ -355,7 +355,7 @@ def load_snapshot(snapshot_name):
         snapshot.seek(0)
     except (IOError,NameError):
         snapshot = open(snapshot_name,'r')
-    
+
     try:
         pickle.load(snapshot)
     except ImportError:
@@ -370,7 +370,7 @@ def load_snapshot(snapshot_name):
         # we currently do), but I'm reluctant to mess with cPickle's
         # default way of finding things. (Also it would be specific to
         # cPickle; would be different for pickle.)
-        
+
         snapshot.seek(0)
         try:
             pickle.load(snapshot)
@@ -393,7 +393,7 @@ Loading error:
 
     # Restore subplotting prefs without worrying if there is a
     # problem (e.g. if topo/analysis/ is not present)
-    try: 
+    try:
         from topo.analysis.featureresponses import Subplotting
         Subplotting.restore_subplots()
     except:
@@ -421,11 +421,11 @@ def save_script_repr(script_name=None):
     """
     if not script_name:
         script_name = topo.sim.basename() + "_script_repr.ty"
-        
+
     header = ("# Generated by Topographica %s on %s\n\n" %
               (topo.release,time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())))
     script = header+topo.sim.script_repr()
-    
+
     script_file = open(normalize_path(script_name),'w')
     script_file.write(script)
 
@@ -481,7 +481,7 @@ def _print_vc_info(filename):
         vctype,commands = _get_vc_commands()
         for cmd in commands:
             fullcmd = [vctype,cmd] if isinstance(cmd,str) else [vctype]+cmd
-        
+
             # Note that we do not wait for the process below to finish
             # (by calling e.g. wait() on the Popen object). Although
             # this was probably done unintentionally, for a slow svn
@@ -499,7 +499,7 @@ def _print_vc_info(filename):
 
 def _save_parameters(p,filename):
     from topo.misc.commandline import global_params
-    
+
     g = {'global_params_specified':p,
          'global_params_all':dict(global_params.get_param_values())}
 
@@ -510,7 +510,7 @@ def _save_parameters(p,filename):
             del d['print_level']
 
     pickle.dump(g,open(normalize_path(filename),'w'))
-     
+
 # I'd expect your personal name_replacements to be set in some file
 # you use to create batch runs, but it can alsp be set on the
 # commandline. Before calling run_batch(), include something like the
@@ -580,10 +580,10 @@ def default_analysis_function():
 
 
 def load_kwargs(fname, glob, loc, fail_exception=False):
-    """ 
+    """
     Helper function to allow keyword arguments (dictionary format)
     to be  loaded from a file 'fname'. The intended use is to allow a callable
-    (specifically run_batch) to obtain its settings and parameters from file. 
+    (specifically run_batch) to obtain its settings and parameters from file.
 
     This is useful when dispatching jobs on a cluster as you can then queue
     run_batch jobs (eg. using qsub) before all the settings are known. This
@@ -593,14 +593,14 @@ def load_kwargs(fname, glob, loc, fail_exception=False):
 
     Variable glob should be provided as globals() and loc should be provided
     as locals(). Either a dictionary is returned or an exception is raised
-    (conditioned on fail_exception). If fail_exception=False and eval does 
+    (conditioned on fail_exception). If fail_exception=False and eval does
     not evaluateas expected, an empty dictionary is returned. Eval is used
     as it allows classes, objects and other complex datastructures to load.
     """
     with open(fname,'r') as f: lines = f.readlines()
     expression = "".join([l.strip() for l in lines])
     kwargs = eval(expression, glob, loc)
-    if not isinstance(kwargs,dict): 
+    if not isinstance(kwargs,dict):
         if fail_exception: raise Exception('Invalid settings file.')
         else:              return {}
     else:                        return kwargs
@@ -629,11 +629,11 @@ class run_batch(ParameterizedFunction):
         to monitor the simulation as it progresses.
 
       - Stores commandline output (stdout) in the output directory
-        
+
     A typical use of this function is for remote execution of a large
     number of simulations with different parameters, often on remote
     machines (such as clusters).
-    
+
     The script_file parameter defines the .ty script we want to run in
     batch mode. The output_directory defines the root directory in
     which a unique individual directory will be created for this
@@ -673,7 +673,7 @@ class run_batch(ParameterizedFunction):
     output_directory=param.String("Output")
 
     analysis_fn = param.Callable(default_analysis_function)
-    
+
     times = param.Parameter(1.0)
 
     snapshot=param.Boolean(True)
@@ -699,14 +699,14 @@ class run_batch(ParameterizedFunction):
         String format for the time included in the output directory
         and file names.  See the Python time module library
         documentation for codes.
-        
+
         E.g. Adding '%S' to the default would include seconds.""")
 
     timestamp = param.NumericTuple(default=(0,0), doc="""
-        Optional override of timestamp in Python struct_time 8-tuple format. 
+        Optional override of timestamp in Python struct_time 8-tuple format.
         Useful when running many run_batch commands as part of a group with
         a shared timestamp. By default, the timestamp used is the time when
-        run_batch is started.""") 
+        run_batch is started.""")
 
     save_global_params = param.Boolean(default=True,doc="""
         Whether to save the script's global_parameters to a pickle in
@@ -724,14 +724,14 @@ class run_batch(ParameterizedFunction):
         (and indicate that it has been truncated).
         """
         # '___' at the end is supposed to represent '...'
-        return s if len(s)<=p.max_name_length else s[0:p.max_name_length-3]+'___' 
-                
+        return s if len(s)<=p.max_name_length else s[0:p.max_name_length-3]+'___'
+
     def __call__(self,script_file,**params_to_override):
         p=ParamOverrides(self,params_to_override,allow_extra_keywords=True)
 
         import os
         import shutil
-    
+
         # Construct simulation name, etc.
         scriptbase= re.sub('.ty$','',os.path.basename(script_file))
         prefix = ""
@@ -752,29 +752,29 @@ class run_batch(ParameterizedFunction):
         # Set provided parameter values in main namespace
         from topo.misc.commandline import global_params
         global_params.set_in_context(**p.extra_keywords())
-    
+
         # Create output directories
         if not os.path.isdir(normalize_path(p['output_directory'])):
-            try: os.mkdir(normalize_path(p['output_directory'])) 
+            try: os.mkdir(normalize_path(p['output_directory']))
             except OSError: pass   # Catches potential race condition (simultaneous run_batch runs)
-        
+
         dirname = self._truncate(p,p.dirname_prefix+prefix)
         normalize_path.prefix = normalize_path(os.path.join(p['output_directory'],dirname))
-        
+
         if os.path.isdir(normalize_path.prefix):
             print "Batch run: Warning -- directory already exists!"
             print "Run aborted; wait one minute before trying again, or else rename existing directory: \n" + \
                   normalize_path.prefix
-    
+
             sys.exit(-1)
         else:
             os.mkdir(normalize_path.prefix)
             print "Batch run output will be in " + normalize_path.prefix
-    
-    
+
+
         if p['vc_info']:
             _print_vc_info(simname+".diffs")
-    
+
         hostinfo = "Host: " + " ".join(platform.uname())
         topographicalocation = "Topographica: " + os.path.abspath(sys.argv[0])
         topolocation = "topo package: " + os.path.abspath(topo.__file__)
@@ -790,11 +790,11 @@ class run_batch(ParameterizedFunction):
             # versions of python include it (I checked python 2.6 and
             # 2.7 on linux; they both have it).
             import pipes
-            quotefn = pipes.quote            
+            quotefn = pipes.quote
         except (ImportError,AttributeError):
             # command will need a human to insert quotes before it can be re-used
             quotefn = lambda x: x
-            
+
         command_used_to_start = string.join([quotefn(arg) for arg in sys.argv])
 
         # CBENHANCEMENT: would be nice to separately write out a
@@ -806,7 +806,7 @@ class run_batch(ParameterizedFunction):
         batch_output = open(normalize_path(simname+".out"),'w')
         batch_output.write(command_used_to_start+"\n")
         sys.stdout = MultiFile(batch_output,sys.stdout)
-    
+
         print
         print hostinfo
         print topographicalocation
@@ -814,25 +814,25 @@ class run_batch(ParameterizedFunction):
         print scriptlocation
         print
         print startnote
-    
+
         from topo.misc.commandline import auto_import_commands
         auto_import_commands()
-        
+
         # Ensure that saved state includes all parameter values
         from topo.command import save_script_repr
         param.parameterized.script_repr_suppress_defaults=False
-    
+
         # Save a copy of the script file for reference
         shutil.copy2(script_file, normalize_path.prefix)
         shutil.move(normalize_path(scriptbase+".ty"),
                     normalize_path(simname+".ty"))
-    
-        
+
+
         # Default case: times is just a number that scales a standard list of times
         times=p['times']
         if not isinstance(times,list):
             times=[t*times for t in [0,50,100,500,1000,2000,3000,4000,5000,10000]]
-    
+
         # Run script in main
         error_count = 0
         initial_warning_count = param.parameterized.warning_count
@@ -843,7 +843,7 @@ class run_batch(ParameterizedFunction):
                 _save_parameters(p.extra_keywords(),simname+".global_params.pickle")
             print_sizes()
             topo.sim.name=simname
-    
+
             # Run each segment, doing the analysis and saving the script state each time
             for run_to in times:
                 topo.sim.run(run_to - topo.sim.time())
@@ -852,28 +852,28 @@ class run_batch(ParameterizedFunction):
                 elapsedtime=time.time()-starttime
                 param.Parameterized(name="run_batch").message(
                     "Elapsed real time %02d:%02d." % (int(elapsedtime/60),int(elapsedtime%60)))
-    
+
             if p['snapshot']:
                save_snapshot()
-                
+
         except:
             error_count+=1
             import traceback
             traceback.print_exc(file=sys.stdout)
             sys.stderr.write("Warning -- Error detected: execution halted.\n")
-    
-    
+
+
         print "\nBatch run completed at %s." % time.strftime("%a %d %b %Y %H:%M:%S +0000",
                                                              time.gmtime())
         print "There were %d error(s) and %d warning(s)%s." % \
               (error_count,(param.parameterized.warning_count-initial_warning_count),
                ((" (plus %d warning(s) prior to entering run_batch)"%initial_warning_count
                  if initial_warning_count>0 else "")))
-        
+
         # restore stdout
         sys.stdout = sys.__stdout__
         batch_output.close()
-    
+
 
 
 def wipe_out_activity():
@@ -905,8 +905,8 @@ def n_bytes():
 
 def n_conns():
     """
-    Count the number of connections in all ProjectionSheets in the current Simulation.  
-    """     
+    Count the number of connections in all ProjectionSheets in the current Simulation.
+    """
     return sum([s.n_conns() for s in topo.sim.objects(ProjectionSheet).values()])
 
 
@@ -915,15 +915,15 @@ def print_sizes():
     print "Defined %d-connection network; %0.0fMB required for weight storage." % \
     (n_conns(),max(n_bytes()/1024.0/1024.0,1.0))
 
-# added these two function to the PatternDrivenAnalysis hooks 
+# added these two function to the PatternDrivenAnalysis hooks
 PatternDrivenAnalysis.pre_presentation_hooks.append(wipe_out_activity)
 PatternDrivenAnalysis.pre_presentation_hooks.append(clear_event_queue)
 
-            
+
 # maybe an explicit list would be better?
 import types
 _public = list(set([_k for _k,_v in locals().items()
-                    if isinstance(_v,types.FunctionType) or 
+                    if isinstance(_v,types.FunctionType) or
                     (isinstance(_v,type) and issubclass(_v,ParameterizedFunction))
                     and not _v.__name__.startswith('_')]))
 _public += [

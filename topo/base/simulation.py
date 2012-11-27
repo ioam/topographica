@@ -1,5 +1,5 @@
 """
-A general-purpose Simulation class for discrete events.  
+A general-purpose Simulation class for discrete events.
 
 The Simulation object is the central object of a simulation.  It
 handles the simulation clock time and maintains communication between
@@ -96,7 +96,7 @@ class EventProcessor(param.Parameterized):
     dest_ports=[None]
 
     src_ports=[None]
-    
+
 
     def __init__(self,**params):
         """
@@ -151,7 +151,7 @@ class EventProcessor(param.Parameterized):
 ##         for existing_connection in self.out_connections:
 ##             if existing_connection.name==conn.name:
 ##                 raise ValueError('A connection out of an EventProcessor must have a unique name; "%s" out of %s already exists'%(conn.name,self.name))
-  
+
         self.out_connections.append(conn)
 
 
@@ -194,7 +194,7 @@ class EventProcessor(param.Parameterized):
 
 
     def start(self):
-        """        
+        """
         Called by the simulation when the EventProcessor is added to
         the simulation.
 
@@ -212,7 +212,7 @@ class EventProcessor(param.Parameterized):
         future changes to the data are not reflected in events from
         the past.
         """
-        
+
         out_conns_on_src_port = [conn for conn in self.out_connections
                                  if self._port_match(conn.src_port,[src_port])]
 
@@ -221,7 +221,7 @@ class EventProcessor(param.Parameterized):
             #self.verbose("Sending output on src_port %s via connection %s to %s" % (str(src_port), conn.name, conn.dest.name))
             e=EPConnectionEvent(self.simulation.convert_to_time_type(conn.delay)+self.simulation.time(),conn,data,deep_copy=False)
             self.simulation.enqueue_event(e)
-            
+
 
     def input_event(self,conn,data):
         """
@@ -241,7 +241,7 @@ class EventProcessor(param.Parameterized):
         violated. (By default, does nothing.)
         """
         pass
-    
+
     def script_repr(self,imports=[],prefix="    "):
         """Generate a runnable command for creating this EventProcessor."""
         return _simulation_path+"['"+self.name+"']="+\
@@ -249,13 +249,13 @@ class EventProcessor(param.Parameterized):
 
 
 
-        
+
 class EventProcessorParameter(param.Parameter):
     """Parameter whose value can be any EventProcessor instance."""
-     
+
     def __init__(self,default=EventProcessor(),**params):
         super(EventProcessorParameter,self).__init__(default=default,**params)
-        
+
     def __set__(self,obj,val):
         if not isinstance(val,EventProcessor):
             raise ValueError("Parameter must be an EventProcessor.")
@@ -284,19 +284,19 @@ class EPConnection(param.Parameterized):
 ##     no reason that those objects have to be EPs, per se.  IMO,
 ##     excessive type checking removes much of the power of using a
 ##     dynamic language like Python.
-    
+
 ##     src = EventProcessorParameter(default=None,constant=True,precedence=0.10,doc=
 ##        """The EventProcessor from which messages originate.""")
-    
+
 ##     dest = EventProcessorParameter(default=None,constant=True,precedence=0.11,doc=
 ##        """The EventProcessor to which messages are delivered.""")
 
     src = param.Parameter(default=None,constant=True,precedence=0.10,doc=
        """The EventProcessor from which messages originate.""")
-    
+
     dest = param.Parameter(default=None,constant=True,precedence=0.11,doc=
        """The EventProcessor to which messages are delivered.""")
-    
+
     src_port = param.Parameter(default=None,precedence=0.20,doc=
        """
        Identifier that can be used to distinguish different types of outgoing connections.
@@ -308,7 +308,7 @@ class EPConnection(param.Parameterized):
        to the src EventProcessor to deliver appropriate data to each
        port, and to declare what will be sent over that port.
        """)
-    
+
     dest_port = param.Parameter(default=None,precedence=0.21,doc=
        """
        Identifier that can be used to distinguish different types of incoming connections.
@@ -367,7 +367,7 @@ class EPConnection(param.Parameterized):
 
         if self.private:
             return ""
-        
+
         settings=[]
         for name,val in self.get_param_values():
             try: # There may be a better way to figure out which parameters specify classes
@@ -407,7 +407,7 @@ class Event(object):
         """
         Cause some computation to be performed, deliver a message, etc.,
         as appropriate for each subtype of Event.  Should be passed the
-        simulation object, to allow access to .time() etc.        
+        simulation object, to allow access to .time() etc.
         """
         raise NotImplementedError
 
@@ -445,7 +445,7 @@ class EPConnectionEvent(Event):
     identical messages), then you can pass deep_copy=False
     to avoid the copy.
     """
-    
+
     def __init__(self,time,conn,data=None,deep_copy=True):
         super(EPConnectionEvent,self).__init__(time)
         assert isinstance(conn,EPConnection)
@@ -472,7 +472,7 @@ class CommandEvent(Event):
         self.command_string = command_string
         self.__test()
         super(CommandEvent,self).__init__(time)
-        
+
     def __repr__(self):
         return "CommandEvent(time="+`self.time`+", command_string='"+self.command_string+"')"
 
@@ -486,7 +486,7 @@ class CommandEvent(Event):
     def __call__(self,sim):
         """
         exec's the command_string in __main__.__dict__.
-        
+
         Be sure that any required items will be present in
         __main__.__dict__; in particular, consider what will be present
         after the network is saved and restored. For instance, results of
@@ -504,17 +504,17 @@ class CommandEvent(Event):
         except:
             print "Error in scheduled command:"
             raise
-            
+
     def __test(self):
         """
         Check for SyntaxErrors in the command.
         """
         try:
-            compile(self.command_string,"CommandString","single") 
+            compile(self.command_string,"CommandString","single")
         except SyntaxError:
             print "Error in scheduled command:"
             raise
-        
+
 
 class FunctionEvent(Event):
     """
@@ -575,13 +575,13 @@ class PeriodicEventSequence(EventSequence):
     ## change the behavior if the sequence length is longer than the
     ## period, but I'm not sure how important that is, and it might
     ## actually be useful the other way.
-    
+
 
     def __init__(self,time,period,sequence):
         super(PeriodicEventSequence,self).__init__(time,sequence)
         self.period = period
-        
-    def __call__(self,sim):        
+
+    def __call__(self,sim):
         super(PeriodicEventSequence,self).__call__(sim)
 
         # Find the timed length of the sequence
@@ -605,7 +605,7 @@ class PeriodicEventSequence(EventSequence):
 # together. The original timing code was not properly tested, and the
 # current code has not been tested either: needs writing cleanly and
 # testing. This whole class is pretty difficult to follow.
-#  
+#
 ### JP: Is it possible that some or all of this can be more cleanly
 ### implemented using PeriodicEvents?
 
@@ -613,7 +613,7 @@ from math import floor
 class SomeTimer(param.Parameterized):
     """
     Provides a countdown timer for functions that run repeatedly.
-    
+
     There are two distinct ways to use the timer.
 
     The first, via call_and_time(), is for calling some function every
@@ -633,18 +633,18 @@ class SomeTimer(param.Parameterized):
     # * parameters to control formatting?
     # * the parameter types for some of the following could be more specific
     step = param.Parameter(default=2,doc=
-        """Only relevant with call_and_time(), not call_fixed_num_times(). 
-        
+        """Only relevant with call_and_time(), not call_fixed_num_times().
+
            Each iteration, func is called as func(step).
-    
+
            For example, step=1 with func set to topo.sim.time would cause
            the simulation time to advance once per iteration.
 
            The default value (None) gives 50 iterations for any value of simulation_duration
            passed to call_and_time(simulation_duration).""")
-    
+
     estimate_interval = param.Number(default=50,doc=
-        """Interval in simulation time between estimates.""") 
+        """Interval in simulation time between estimates.""")
 
     func = param.Parameter(default=None,instantiate=True,doc=
         """Function to be timed.""")
@@ -661,7 +661,7 @@ class SomeTimer(param.Parameterized):
     receive_info = param.Parameter(default=[],instantiate=True,doc=
         """List of objects that will receive timing information.
         Each must have a timing_info() method.""")
-                                 
+
     stop = param.Boolean(default=False,doc=
         """If set to True, execution of func (and timing) will cease at the end of
         the current iteration.""")
@@ -679,13 +679,13 @@ class SomeTimer(param.Parameterized):
             fixed_num_calls = False
         else:
             fixed_num_calls = True
-            
+
         iters  = int(floor(fduration/step))
 
         recenttimes=[]
 
         if not fixed_num_calls: arg_list=[step]*iters
-        
+
         simulation_starttime = self.simulation_time_fn()
 
         self.stop = False
@@ -706,9 +706,9 @@ class SomeTimer(param.Parameterized):
                                  name=self.func.__name__,
                                  duration=fduration,
                                  remaining=estimate)
-            
+
             ## HACK refresh windows for camera in simulation time
-            import topo 
+            import topo
             if hasattr(topo, 'guimain'):
                 topo.guimain.refresh_activity_windows()
             ##
@@ -722,7 +722,7 @@ class SomeTimer(param.Parameterized):
                 # complete specified duration (integer number of iterations)
                 leftover = fduration+simulation_starttime-self.simulation_time_fn()
                 if leftover>0: self.func(leftover)
-            percent = 100   
+            percent = 100
         self.__pass_out_info(time=self.simulation_time_fn(),
                              percent=percent,
                              name=self.func.__name__,
@@ -730,14 +730,14 @@ class SomeTimer(param.Parameterized):
                              remaining=0)
 
 
-              
+
     def call_fixed_num_times(self,args_for_iterations):
         """
         Call self.func(args_for_iterations[i]) for all i in args_for_iterations.
         """
         self.__measure(len(args_for_iterations),1.0,arg_list=args_for_iterations)
-        
-    
+
+
     def call_and_time(self,fduration):
         """
         Call self.func(self.step or fduration/50.0) for fduration.
@@ -771,11 +771,11 @@ class OptionalSingleton(object):
         """
         if singleton:
             if cls is not type(cls._inst):
-                cls._inst = object.__new__(cls) 
+                cls._inst = object.__new__(cls)
                 cls._inst._singleton = True
             return cls._inst
         else:
-            new_inst = object.__new__(cls) 
+            new_inst = object.__new__(cls)
             new_inst._singleton = False
             return new_inst
 
@@ -790,14 +790,14 @@ class OptionalSingleton(object):
         else:
             # Ideally we'd just call "object.__copy__", but apparently
             # there's no such method.
-            
+
             # CB: I *think* this is how to do a copy. Any better
             # ideas?  Python's copy.copy() function calls an object's
             # __reduce__ method and then reconstructs the object from
             # that using copy._reconstruct().
             new_obj = self.__class__(self._singleton)
             new_obj.__dict__ = copy(self.__dict__)
-            return new_obj 
+            return new_obj
 
     def __deepcopy__(self,m):
         if self._singleton:
@@ -836,14 +836,14 @@ class Simulation(param.Parameterized,OptionalSingleton):
     time_type = param.Parameter(default=float,constant=True,doc="""
         Callable for converting user-specified times into the numeric
         type to be used for Simulation's time values.
-        
+
         Simulation's time can be set to any numeric type that supports
         the usual Python numeric operations, including at least
         multiplication, addition, and subtraction.  Most of the code
         assumes that fractional values are supported, as they are for
         floats, but it may be possible to use an integer type instead
         if various default fractional values are overridden.
-        
+
         For instance, one might wish to use arbitrary precision
         floating-point time to avoid accumulating rounding errors.  If
         stepping through a simulation every 0.05 time units, after 20
@@ -855,7 +855,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         to happen a certain number of times in a given interval, even
         if the ratio cannot be expressed as an even decimal or binary
         fraction.
-                
+
         time_type determines how the user can specify times. For
         instance, if the user specifies a time as 0.05 (a float), this
         will be represented in floating point as something like
@@ -876,14 +876,14 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
 
         Some potentially useful number classes::
-        
+
         - gmpy.mpq: gmpy provides Python with access to the fast GNU
           Multi-Precision library (which requires GMP to be built);
           gmpy.mpq is gmpy's rational type.
-        
+
         - fixedpoint.FixedPoint: pure Python fixed-point number, but
           quite slow.
-        
+
         - Python's decimal.Decimal and fractions.Fraction classes.
         """)
 
@@ -930,7 +930,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         time_printing_format will be available as the attribute
         'timestr'.
         """)
-    
+
     eps_to_start = []
 
     name = param.Parameter(constant=False)
@@ -943,7 +943,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
     # This instance is stored in the '_inst' attribute; when __new__
     # is called and register is True, this instance is created if it
     # doesn't already exist, and returned otherwise. copying or
-    # deepcopying this instance returns the instance.  
+    # deepcopying this instance returns the instance.
     #
     # For a Simulation with register False, calling __new__ results in
     # a new object as usual for Python objects. copying and
@@ -964,12 +964,12 @@ class Simulation(param.Parameterized,OptionalSingleton):
             register = args[0]
         else:
             register = cls.register
-            
+
         n = OptionalSingleton.__new__(cls,register)
 
         # CEBALERT: without removing references to the Sheets from
         # from instances of Slice, those instances of Slice and the
-        # Sheets they refer to are never garbage collected. 
+        # Sheets they refer to are never garbage collected.
         #
         # This temporary implementation of cleanup code explicitly
         # removes references to Sheets from Slice instances for
@@ -1010,7 +1010,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # so are still in the list
         if hasattr(self,'eps_to_start'):
             self.eps_to_start[:]=[]
-            
+
         if hasattr(self,'_event_processors'):
             for name,EP in self._event_processors.items():
                 for c in EP.in_connections:
@@ -1022,8 +1022,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
                 # adding sheets e.g. sim['x']=sheet could first set
                 # sim['x'] to None if there is already a sheet with
                 # name x...)
-                
-                
+
+
     # CEBALERT: if we're keeping this, should have a better name
     def convert_to_time_type(self,time):
         """
@@ -1072,7 +1072,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         self._events_stack = []
         self.eps_to_start = []
         self.item_scale=1.0 # this variable determines the size of each item in a diagram
-            
+
         # CB (this comment applies to SomeTimer!): make this a
         # parameter for documentation? Otherwise nobody will know
         # about being able to adjust step.
@@ -1128,7 +1128,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
             # deletes and overwrites any existing EP with the same name,
             # silently, as if a dictionary
             if ep.name in self._event_processors: del self[ep.name]
-                
+
             self._event_processors[ep_name] = ep
             ep.simulation = self
             self.eps_to_start.append(ep)
@@ -1156,7 +1156,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         an event processor from the simulation.)
         """
         ep = self[ep_name]
-        
+
         # remove from simulation list of eps
         del self._event_processors[ep_name]
 
@@ -1200,7 +1200,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
     def time(self):
         """
         Return the current simulation time.
-        
+
         If the time returned will be used in the computation of a
         floating point variable, it should be cast into a floating
         point number by float().
@@ -1244,7 +1244,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         all_vars = dict(self.get_param_values())
         all_vars.update(self.__dict__)
         all_vars['timestr']=self.timestr()
-        
+
         return self.basename_format % all_vars
 
 
@@ -1269,7 +1269,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         Process simulation events for the specified duration or until the specified time.
 
         Arguments:
-        
+
           duration = length of simulation time to run. Default: run
           indefinitely while there are still events in the
           event_queue.
@@ -1290,16 +1290,16 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # CEBALERT: calls to topo.sim.run() within topo should use a
         # string to specify the time rather than a float (since float
         # is not compatible with all number types).
-        
+
         duration = self.convert_to_time_type(duration)
         until = self.convert_to_time_type(until)
-        
-        
+
+
         # CEBHACKALERT: If I do topo.sim.run(10), then topo.sim.run(until=3),
         # topo.sim._time returns to 3 (i.e. the simulation time can jump backwards).
         # JP: This because of the weird sim._time = stop_time line at the end of this method.
         # see my HACKALERT below.
-        
+
         # Initialize any EPs that haven't been started yet
         #
         # Anything that manipulates the event stack in some way
@@ -1314,25 +1314,25 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         self.eps_to_start=[]
 
-        
+
         # Complicated expression for min(time+duration,until)
         if duration == Forever:
             stop_time = until
         elif until == Forever:
             stop_time = self._time + duration
         else:
-            stop_time = min(self._time+duration,until) 
-            
+            stop_time = min(self._time+duration,until)
+
         did_event = False
 
         while self.events and (stop_time == Forever or self._time <= stop_time):
             # Loop while there are events and it's not time to stop.
-            
+
             if self.events[0].time < self._time:
                 # Warn and then discard events scheduled *before* the current time
                 self.warning('Discarding stale (unprocessed) event',repr(self.events[0]))
                 self.events.pop(0)
-                
+
             elif self.events[0].time > self._time:
                 # Before moving on to the next time, do any processing
                 # necessary for the current time.  This is necessary only
@@ -1343,13 +1343,13 @@ class Simulation(param.Parameterized,OptionalSingleton):
                     #self.debug("Time to sleep; next event time: %s",self.timestr(self.events[0].time))
                     for ep in self._event_processors.values():
                         ep.process_current_time()
-                    
+
                 # Set the time to the frontmost event.  Bear in mind
                 # that the front event may have been changed by the
                 # .process_current_time() calls.
                 if self.events[0].time > self._time:
                     self.sleep(self.events[0].time-self._time)
-                
+
             else:
                 # Pop and call the event at the head of the queue.
                 event = self.events.pop(0)
@@ -1386,7 +1386,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         if not self.events or event >= self.events[-1]:
             # The new event goes at the end of the event queue if there
             # isn't a queue right now, or if it's later than the last
-            # event's time. 
+            # event's time.
             self.events.append(event)
         elif event < self.events[0]:
             # If it's earlier than the first item it goes at the beginning.
@@ -1408,7 +1408,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         """
         event = CommandEvent(time=self.convert_to_time_type(time),command_string=command_string)
         self.enqueue_event(event)
-        
+
 
     def state_push(self):
         """
@@ -1458,7 +1458,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         Same as state_pop(), but does not restore EventProcessors' state.
         """
-        self._time, self.events = self._events_stack.pop()        
+        self._time, self.events = self._events_stack.pop()
 
 
     def event_clear(self,event_type=EPConnectionEvent):
@@ -1466,9 +1466,9 @@ class Simulation(param.Parameterized,OptionalSingleton):
         Clear out all scheduled events of the specified type.
 
         For instance, with event_type=EPConnectionEvent, this function can be used to ensure
-        that no pending EPConnectionEvents will remain on the queue during some analysis 
+        that no pending EPConnectionEvents will remain on the queue during some analysis
         or measurement operation.  One will usually want to do a state_push before using this
-        function, then clear out the events that should be deleted, do the measurement or 
+        function, then clear out the events that should be deleted, do the measurement or
         analysis, and then do state_pop to restore the original state.
         """
         events_temp = []
@@ -1479,7 +1479,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
 
 
-    # Could just process src and dest in conn_params.  
+    # Could just process src and dest in conn_params.
     # Also could accept the connection already created, rather than
     # creating one.
     def connect(self,src,dest,connection_type=EPConnection,**conn_params):
@@ -1490,7 +1490,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         Returns the connection that was created.  If the connection
         hasn't been given a name, it defaults to 'srcTodest'.
         """
-        
+
         if 'name' not in conn_params:
             # Might want to have a way of altering the name if this one's
             # already in use. At the moment, an error is raised (correctly).
@@ -1501,7 +1501,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         self[src]._src_connect(conn)
         self[dest]._dest_connect(conn)
         return conn
-    
+
 
     def objects(self,baseclass=EventProcessor):
         """
@@ -1572,23 +1572,23 @@ class Simulation(param.Parameterized,OptionalSingleton):
                '\n\n\n\n# Objects:\n\n'            + '\n\n\n'.join(objs)  + \
                '\n\n\n\n# Connections:\n\n'        + '\n\n\n'.join(conns) + \
                '\n\n\n\n# Scheduled commands:\n\n' +     '\n'.join(cmds)
-    
+
 
     # Convenience function for use in graphical editors of the simulation
     def grid_layout(self,objgrid,xstart=100,xstep=150,ystart=100,ystep=150,item_scale=1.0):
         """
         Set the layout_location of simulation objects in a grid pattern.
-    
+
         Takes a list of lists of simulation objects, or names of
         simulation objects, and positions them with layout_locations
         left-to-right, top-to-bottom, starting at (xstart,ystart) and
         advancing by xstep and ystep.
-    
+
         The object None can be placed in the grid to skip a grid space.
         """
-        
+
         self.item_scale=item_scale
-        
+
         y = ystart
         for row in objgrid:
             x = xstart
@@ -1631,23 +1631,23 @@ class RealTimeSimulation(Simulation):
     real-time devices that might use resources while the simulation is
     not running.
     """
-    
+
     timescale = param.Number(default=1.0,bounds=(0,None),doc="""
        The desired real length of one simulation time unit, in milliseconds.""")
 
     run_start_hooks = param.HookList(default=[],doc="""
        A list of callable objects to be called on entry to .run(),
        before any events are processed.""")
-    
-    
+
+
     run_stop_hooks = param.HookList(default=[],doc="""
        A list of callable objects to be called on exit from .run()
-       after all events are processed.""") 
+       after all events are processed.""")
 
     def __init__(self,**params):
         super(RealTimeSimulation,self).__init__(**params)
         self._real_timestamp = 0.0
-        
+
     def run(self,*args,**kw):
         for h in self.run_start_hooks:
             h()
@@ -1658,7 +1658,7 @@ class RealTimeSimulation(Simulation):
 
     def real_time(self):
         return time.time() * 1000
-    
+
     def sleep(self,delay):
         """
         Sleep for the number of real milliseconds seconds corresponding to the
@@ -1677,4 +1677,4 @@ class RealTimeSimulation(Simulation):
         self._time += delay
 
 
-        
+

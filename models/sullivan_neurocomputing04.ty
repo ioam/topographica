@@ -21,9 +21,9 @@ import param
 from topo import coordmapper,learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 from topo.misc import patternfn
 
-import topo.learningfn.projfn 
+import topo.learningfn.projfn
 import topo.pattern.random
-import topo.responsefn.optimized 
+import topo.responsefn.optimized
 import topo.transferfn.misc
 
 
@@ -41,7 +41,7 @@ p.add(
 
 
 # CEBALERT: keep old behavior until we investigate why changing
-# to time-controlled dynamic parameters alters the results. 
+# to time-controlled dynamic parameters alters the results.
 param.Dynamic.time_fn = None
 
 
@@ -49,7 +49,7 @@ param.Dynamic.time_fn = None
 # separate sheets for the different orientations.
 class XYModulo(coordmapper.CoordinateMapperFn):
     """Return the x coordinate of the given coordinate, modulo the specified step distance."""
- 
+
     grid_element_width = param.Number(1.0/5.0,
         doc="Length in Sheet coordinates of one large grid element.")
 
@@ -68,13 +68,13 @@ class OrientedLine(pattern.PatternGenerator):
     thickness = param.Number(
         default=0.006,bounds=(0.0,None),softbounds=(0.0,1.0),precedence=0.60,
         doc="Thickness (width) of the solid central part of the line.")
-    
+
     smoothing = param.Number(
         default=0.05,bounds=(0.0,None),softbounds=(0.0,0.5),precedence=0.61,
         doc="Width of the Gaussian fall-off.")
 
     angle = param.Number(default=0.0,doc="")
-    
+
     # 1 if previous line has gone off edge of grid, 0 otherwise
     offEdge=1
 
@@ -115,7 +115,7 @@ class OrientedLine(pattern.PatternGenerator):
                 self.deltaY *= -1;
             else:
                 startPointx = 0.5
-                startPointy = -0.5 
+                startPointy = -0.5
                 self.deltaX*= -1
 
             self.x=startPointx
@@ -144,7 +144,7 @@ topo.sim['Retina'] = sheet.GeneratorSheet(input_generator=input_pattern,
 # Note that the learning rates from the original paper must be scaled
 # by the number of units in a typical ConnectionField, either 5x5 or 40x40
 topo.sim['V1'] = sheet.CFSheet(nominal_density=p.cortex_density,
-                         #RPHACKALERT Find correct radius value 
+                         #RPHACKALERT Find correct radius value
                          output_fns = [transferfn.misc.KernelMax(density=p.cortex_density,kernel_radius=3.5)])
 
 topo.sim.connect('Retina','V1',delay=0.05,connection_type=projection.CFProjection,

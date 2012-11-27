@@ -54,11 +54,11 @@ class CFPRF_ActivityBased(CFPResponseFn):
     and a strength that is a function of the input activity. This
     allows connections to have either an excitatory or inhibitory
     effect, depending on the activity entering the unit in question.
-    
+
     The strength function is a generalized logistic curve (Richards'
     curve), a flexible function for specifying a nonlinear growth
     curve::
-    
+
     y = l + ( u /(1 + b exp(-r (x - 2m)) ^ (1 / b)) )
 
     This function has five parameters::
@@ -81,11 +81,11 @@ class CFPRF_ActivityBased(CFPResponseFn):
     b = param.Number(default=2,doc="Controls position of maximum growth")
     single_cf_fn = param.ClassSelector(ResponseFn,default=DotProduct(),doc="""
         ResponseFn to apply to each CF individually.""")
-  
+
     def __call__(self, iterator, input_activity, activity, strength):
         single_cf_fn = self.single_cf_fn
         normalize_factor=max(input_activity.flat)
-        
+
         for cf,r,c in iterator():
             r1,r2,c1,c2 = cf.input_sheet_slice
             X = input_activity[r1:r2,c1:c2]

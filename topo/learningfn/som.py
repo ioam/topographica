@@ -13,7 +13,7 @@ from topo.base.arrayutil import L2norm, array_argmax
 from topo.base.boundingregion import BoundingBox
 from topo.base.cf import CFPLearningFn
 from topo.base.patterngenerator import PatternGenerator
-    
+
 from topo.pattern import Gaussian
 
 
@@ -38,7 +38,7 @@ class CFPLF_SOM(CFPLearningFn):
 
     def __init__(self,**params):
         self.warning("CFPLF_SOM is deprecated -- see the example in cfsom_or.ty for how to build a SOM")
-    
+
     def __call__(self, proj, input_activity, output_activity, learning_rate, **params):
         raise NotImplementedError
 
@@ -55,17 +55,17 @@ class CFPLF_HebbianSOM(CFPLF_SOM):
     """
 
     learning_radius = param.Number(default=0.0)
-    
+
     crop_radius_multiplier = param.Number(default=3.0,doc=
         """
         Factor by which the radius should be multiplied,
         when deciding how far from the winner to keep updating the weights.
         """)
-    
+
     neighborhood_kernel_generator = param.ClassSelector(PatternGenerator,
         default=Gaussian(x=0.0,y=0.0,aspect_ratio=1.0),
         doc="Neighborhood function")
-    
+
 
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         cfs = iterator.proj.cfs.tolist() # CEBALERT: convert to use flatcfs
@@ -74,17 +74,17 @@ class CFPLF_HebbianSOM(CFPLF_SOM):
         # This learning function does not need to scale the learning
         # rate like some do, so it does not use constant_sum_connection_rate()
         single_connection_learning_rate = learning_rate
-        
+
         ### JABALERT: The learning_radius is normally set by
         ### the learn() function of CFSOM, so it doesn't matter
-        ### much that the value accepted here is in matrix and 
+        ### much that the value accepted here is in matrix and
         ### not sheet coordinates.  It's confusing that anything
         ### would accept matrix coordinates, but the learning_fn
         ### doesn't have access to the sheet, so it can't easily
         ### convert from sheet coords.
         radius = self.learning_radius
         crop_radius = max(1.25,radius*self.crop_radius_multiplier)
-        
+
         # find out the matrix coordinates of the winner
         #
         # NOTE: when there are multiple projections, it would be
@@ -95,7 +95,7 @@ class CFPLF_HebbianSOM(CFPLF_SOM):
         # winner to be passed in would make it harder to mix and match
         # Projections and learning rules with different Sheets.
         wr,wc = array_argmax(output_activity)
-        
+
         # Optimization: Calculate the bounding box around the winner
         # in which weights will be changed, to avoid considering those
         # units below.
@@ -119,8 +119,8 @@ class CFPLF_HebbianSOM(CFPLF_SOM):
 
         for r in range(rmin,rmax):
             for c in range(cmin,cmax):
-                cwc = c - wc 
-                rwr = r - wr 
+                cwc = c - wc
+                rwr = r - wr
                 lattice_dist = L2norm((cwc,rwr))
                 if lattice_dist <= crop_radius:
                     cf = cfs[r][c]

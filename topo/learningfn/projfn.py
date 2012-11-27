@@ -43,7 +43,7 @@ class CFPLF_EuclideanHebbian(CFPLearningFn):
                 flati = r*cols+c
                 out = output_activity.flat[flati]
                 if out !=0:
-                    rate = learning_rate * out                    
+                    rate = learning_rate * out
                     cf = cfs[flati]
                     X = cf.get_input_matrix(input_activity)
                     cf.weights += rate * (X - cf.weights)
@@ -57,14 +57,14 @@ class CFPLF_EuclideanHebbian(CFPLearningFn):
 ##class CFPLF_BCM(CFPLearningFn):
 ##    """
 ##    Bienenstock, Cooper, and Munro (1982) learning rule with sliding threshold.
-##    
+##
 ##    (See Dayan and Abbott, 2001, equation 8.12, 8.13).
 ##
 ##    Activities change only when there is both pre- and post-synaptic activity.
 ##    Threshold is adjusted based on recent firing rates.
 ##    """
 ##    single_cf_fn = param.ClassSelector(LearningFn,default=BCMFixed())
-##    
+##
 ##    unit_threshold_0=param.Number(default=0.5,bounds=(0,None),
 ##        doc="Initial value of threshold between LTD and LTP; actual value computed based on recent history.")
 ##    unit_threshold_learning_rate=param.Number(default=0.1,bounds=(0,None),
@@ -92,7 +92,7 @@ class CFPLF_EuclideanHebbian(CFPLearningFn):
 ##                #print cf.weights, type(cf.weights)
 ##                #print input_act, type(input_act)
 ##                #print single_connection_learning_rate,unit_activity,threshold, (unit_activity-threshold)
-##                cf.weights += (single_connection_learning_rate * unit_activity * (unit_activity-threshold)) * input_act 
+##                cf.weights += (single_connection_learning_rate * unit_activity * (unit_activity-threshold)) * input_act
 ##                self.unit_thresholds[r,c] += self.unit_threshold_learning_rate*(unit_activity*unit_activity-threshold)
 ##
 ##                # CEBHACKALERT: see ConnectionField.__init__()
@@ -112,22 +112,22 @@ class CFPLF_Trace(CFPLearningFn):
     Incorporates a decay term to keep the weight vector bounded, and
     so it does not normally require any output_fn normalization for
     stability.
-       
+
     NOT YET TESTED.
     """
 
     trace_strength=param.Number(default=0.5,bounds=(0.0,1.0),
-       doc="How much the learning is dominated by the activity trace, relative to the current value.")     
+       doc="How much the learning is dominated by the activity trace, relative to the current value.")
 
     single_cf_fn = param.ClassSelector(LearningFn,default=Hebbian(),
-        doc="LearningFn that will be applied to each CF individually.")              
+        doc="LearningFn that will be applied to each CF individually.")
 
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         ##Initialise traces to zero if they don't already exist
         if not hasattr(self,'traces'):
             self.traces=zeros(output_activity.shape,activity_type)
-        for cf,i in iterator():                       
+        for cf,i in iterator():
             unit_activity = output_activity.flat[i]
             #   print "unit activity is",unit_activity
         #    print "self trace is",self.traces[r,c]
@@ -136,19 +136,19 @@ class CFPLF_Trace(CFPLearningFn):
             self.traces.flat[i] = new_trace
             cf.weights += single_connection_learning_rate * new_trace * \
                               (cf.get_input_matrix(input_activity) - cf.weights)
-                
+
             #CEBHACKALERT: see ConnectionField.__init__()
             cf.weights *= cf.mask
-      
+
 
 
 class CFPLF_OutstarHebbian(CFPLearningFn):
     """
-    CFPLearningFunction applying the specified (default is Hebbian) 
+    CFPLearningFunction applying the specified (default is Hebbian)
     single_cf_fn to each CF, where normalization is done in an outstar-manner.
 
     Presumably does not need a separate output_fn for normalization.
-    
+
     NOT YET TESTED.
     """
     single_cf_fn = param.ClassSelector(LearningFn,default=Hebbian(),
@@ -178,7 +178,7 @@ class CFPLF_OutstarHebbian(CFPLearningFn):
 
 class HomeoSynaptic(CFPLearningFn):
     """
-    Learning function using homeostatic synaptic scaling from 
+    Learning function using homeostatic synaptic scaling from
     Sullivan & de Sa, "Homeostatic Synaptic Scaling in Self-Organizing Maps",
     Neural Networks (2006), 19(6-7):734-43.
 
@@ -199,12 +199,12 @@ class HomeoSynaptic(CFPLearningFn):
     #debug = param.Boolean(default=False,doc="Print average activity values")
     #beta_n = param.Number(default=0.00033,bounds=(0,None),doc="Homeostatic learning rate") #Too small?
     #beta_c = param.Number(default=0.000033,bounds=(0,None),doc="Time window over which the neuron's firing rate is averaged")
-    
+
     def __init__(self,**params):
         super(HomeoSynaptic,self).__init__(**params)
         self.temp_hist = []
         self.ave_hist = []
-        
+
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         """
         Update the value of the given weights matrix based on the
@@ -214,8 +214,8 @@ class HomeoSynaptic(CFPLearningFn):
         """
         if not hasattr(self,'averages'):
             self.averages = ones(output_activity.shape,Float) * 0.1
-            
-                            
+
+
             # normalize initial weights to 1.0
             for cf,i in iterator():
                 current_norm_value = 1.0*Numeric.sum(abs(cf.weights.ravel()))
@@ -241,7 +241,7 @@ class HomeoSynaptic(CFPLearningFn):
 
             # CEBHACKALERT: see ConnectionField.__init__()
             cf.weights *= cf.mask
-         
+
         # For analysis only; can be removed (in which case also remove the initializations above)
 # CEBALERT: I changed [0][7] to [0]!
         self.ave_hist.append(self.averages.flat[0])
@@ -264,23 +264,23 @@ class CFPLF_PluginScaled(CFPLearningFn):
     learning_rate_scaling_factor = param.Parameter(default=None,
         doc="Matrix of scaling factors for scaling the learning rate of each CF individually.")
 
-    
+
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         """Apply the specified single_cf_fn to every CF."""
-       
+
         if self.learning_rate_scaling_factor is None:
             self.learning_rate_scaling_factor = ones(output_activity.shape)
-            
+
         single_cf_fn = self.single_cf_fn
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
-        
+
         for cf,i in iterator():
-            sc_learning_rate = self.learning_rate_scaling_factor.flat[i] * single_connection_learning_rate 
+            sc_learning_rate = self.learning_rate_scaling_factor.flat[i] * single_connection_learning_rate
             single_cf_fn(cf.get_input_matrix(input_activity),
                          output_activity.flat[i], cf.weights, sc_learning_rate)
             # CEBHACKALERT: see ConnectionField.__init__() re. mask & output fn
-            cf.weights *= cf.mask   
-      
+            cf.weights *= cf.mask
+
 
     def update_scaling_factor(self, new_scaling_factor):
         """Update the single-connection learning rate scaling factor."""

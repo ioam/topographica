@@ -7,7 +7,7 @@ large-scale spiking model of cortical columns in V1:
 
   Kremkow, J., Perrinet, L., Kumar, A., Aertsen, A., and Masson, G. (2007).
   Synchrony in thalamic inputs enhances propagation of
-  activity through cortical layers. 
+  activity through cortical layers.
   BMC Neuroscience, vol. 8(Suppl 2), P206.
   http://dx.doi.org/10.1186/1471-2202-8-S2-P180
 
@@ -23,12 +23,12 @@ $Id$
 """
 
 import datetime
-try: 
+try:
     import pyNN.nest as pyNN
 except:
     print "Warning -- could not import pyNN; continuing anyway..."
 
-    
+
 import os, tempfile
 import numpy
 
@@ -37,7 +37,7 @@ def tmpfile2spikelist(filename,dt):
     """
     Returns a spike list from the tmp file saved by PyNN-NEST (a line
     commented, then one line per event: absolute time in ms, GID)
-    
+
     The spike list is represented as a list of events. Events are
     tuples (relative time since last event, neuron_id); neuron_id and
     time are integers.
@@ -57,16 +57,16 @@ def tmpfile2spikelist(filename,dt):
         rel_spike_time = float(spike_time) - spike_time_
         spike_time_    = float(spike_time)
         spike_list.append((int(rel_spike_time),int(neuron_id)))
-        
+
     return spike_list
 
 
 def spikelist2spikematrix(DATA, N, N_time, dt):
     """
     Returns a matrix of the number of spikes during simulation.
-    
+
     Is of the shape of N x N.
-    
+
     The spike list is a list of tuples (rel time, neuron_id) where the
     location of each neuron_id is given by the NEURON_ID matrix, which
     is in a standardized way [[ (N*i+j) ]] where i and j are line and
@@ -136,7 +136,7 @@ def retina_default():
         'q_relref': 3214.0,
         'Tau_relref': 1.97,
         'python':True}
-    
+
     params['u'] = params['parameters_gc']['Vinit'] + \
                   numpy.random.rand(N,N)* (params['parameters_gc']['Theta'] - \
                                            params['parameters_gc']['Vreset'])
@@ -156,11 +156,11 @@ def retina_debug():
 
 def run_retina(params):
     """Run the retina using the specified parameters."""
-    
+
     tmpdir = tempfile.mkdtemp()
-    
+
     print "Setting up simulation"
-    
+
     pyNN.Timer.start() # start timer on construction
     pyNN.setup(timestep=params['dt'],max_delay=params['syn_delay'])
     pyNN.pynest.setDict([0],{'threads' : params['threads']})

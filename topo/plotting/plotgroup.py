@@ -56,7 +56,7 @@ class PlotGroup(param.Parameterized):
 
     pre_plot_hooks = param.HookList(default=[],doc="""
         Commands to execute before updating this plot, e.g. to calculate sheet views.
-        
+
         The commands can be any callable Python objects, i.e. any x for
         which x() is valid.  The initial value is determined by the
         template for this plot, but various arguments can be passed, a
@@ -69,7 +69,7 @@ class PlotGroup(param.Parameterized):
         sheet or unit at at time, this command will be called whenever
         the sheet or coordinate of unit to be plotted (or the
         simulator time) has changed.
-        
+
         The commands can be any callable Python objects, i.e. any x for
         which x() is valid.  The initial value is determined by the
         template for this plot, but various arguments can be passed, a
@@ -77,10 +77,10 @@ class PlotGroup(param.Parameterized):
 
     # I guess the interface for users of the class (I just mean methods
     # likely to be used) is:
-    # make_plots()   
-    # scale_images()  
+    # make_plots()
+    # scale_images()
     # + parameters
-    
+
     # And the interface for subclasses (I mean methods likely to be
     # overridden) is:
     # _generate_plots()      - return the list of plots
@@ -110,7 +110,7 @@ class PlotGroup(param.Parameterized):
 
     ###################################
     ########## interface for subclasses
-    
+
     def _generate_plots(self):
         """Return the list of Plots"""
         # subclasses may have dynamically generated Plots to add
@@ -130,7 +130,7 @@ class PlotGroup(param.Parameterized):
         super(PlotGroup,self).__init__(**params)
         self._static_plots = []
         self.plots = []
-        self.labels = [] 
+        self.labels = []
         self.time = None
         self.filesaver = PlotGroupSaver(self)
 
@@ -142,7 +142,7 @@ class PlotGroup(param.Parameterized):
         # would have the first row with 3, the second row with 2, the
         # third row with 4, etc.  The default left-to-right ordering
         # in one row could perhaps be represented as (None, Inf).
-        # 
+        #
         # Alternatively, we could add another precedence value, so
         # that the usual precedence value controls where the plot
         # appears left to right, while a rowprecedence value would
@@ -150,15 +150,15 @@ class PlotGroup(param.Parameterized):
         # same rowprecedence would go on the same row, and the actual
         # value of the rowprecedence would determine which row goes
         # first.
-        
+
 
     def _exec_pre_plot_hooks(self,**kw):
-        for f in self.pre_plot_hooks: 
+        for f in self.pre_plot_hooks:
             f(**kw)
 
 
     def _exec_plot_hooks(self,**kw):
-        for f in self.plot_hooks: 
+        for f in self.plot_hooks:
             f(**kw)
 
 
@@ -169,7 +169,7 @@ class PlotGroup(param.Parameterized):
         """
         self.plots = [plot for plot in self._generate_plots() if plot is not None]
 
-        # Suppress plots in the special case of plots not being updated 
+        # Suppress plots in the special case of plots not being updated
         # and having no resizable images, to suppress plotgroups that
         # have nothing but a color key
         resizeable_plots = [plot for plot in self.plots if plot.resize]
@@ -185,7 +185,7 @@ class PlotGroup(param.Parameterized):
                 self.warning("Combining Plots from different times (%s,%s)" %
                              (min(timestamps),max(timestamps)))
 
-        self._sort_plots()      
+        self._sort_plots()
         self.labels = self._generate_labels()
 
 
@@ -221,9 +221,9 @@ class SheetPlotGroup(PlotGroup):
                                      objects=['None','Individually'],
                                   doc="""
         'Individually': scale each plot so that the peak value will be white
-        and the minimum value black.  
+        and the minimum value black.
 
-        'None': no scaling - 0.0 will be black and 1.0 will be white.  
+        'None': no scaling - 0.0 will be black and 1.0 will be white.
 
         Normalization has the advantage of ensuring that any data that
         is present will be visible, but the disadvantage that the
@@ -257,7 +257,7 @@ class SheetPlotGroup(PlotGroup):
         matrix, which is the most efficient size for saving plots
         directly to disk.  Larger values (e.g. 150) are suitable when
         displaying plots on screen.""")
-        
+
     enforce_minimum_plot_height = param.Boolean(default=True,doc="""
         If true, ensure that plots are never shown smaller than their
         native size, i.e. with fewer than one pixel per matrix unit.
@@ -269,7 +269,7 @@ class SheetPlotGroup(PlotGroup):
     # For users, adds:
     # sheets()
     # update_maximum_plot_height()
-    # scale_images() 
+    # scale_images()
 
     #########################
     ########## adds for users
@@ -283,12 +283,12 @@ class SheetPlotGroup(PlotGroup):
         Determine which plot will be the largest, based on the
         settings for minimum plot heights, the specified zoom factor
         (if not None), etc.
-        
+
         A minimum size (and potentially a maximum size) are enforced,
         as described below.
 
         If the scaled sizes would be outside of the allowed range,
-        False is returned.  
+        False is returned.
 
         For matrix coordinate plots (sheet_coords=False), the minimum
         size is calculated as the native size of the largest bitmap to
@@ -307,7 +307,7 @@ class SheetPlotGroup(PlotGroup):
         # Apply optional scaling to the overall size
         if zoom_factor:
             self.desired_maximum_plot_height*=zoom_factor
-            
+
         self.maximum_plot_height=self.desired_maximum_plot_height
 
         if (self.enforce_minimum_plot_height):
@@ -320,13 +320,13 @@ class SheetPlotGroup(PlotGroup):
             if not self.sheet_coords:
                 bitmap_heights = [p._orig_bitmap.height() for p in resizeable_plots]
                 minimum_height_of_tallest_plot = max(bitmap_heights)
-                
-            else:           
+
+            else:
                 ### JABALERT: Should take the plot bounds instead of the sheet bounds
                 ### Specifically, a weights plot with situate=False
                 ### doesn't use the Sheet bounds, and so the
                 ### minimum_height is significantly overstated.
-                
+
                 sheets = topo.sim.objects(Sheet)
                 max_sheet_height = max([(sheets[p.plot_src_name].bounds.lbrt()[3]-
                                          sheets[p.plot_src_name].bounds.lbrt()[1])
@@ -335,7 +335,7 @@ class SheetPlotGroup(PlotGroup):
                                          for p in resizeable_plots])
                 minimum_height_of_tallest_plot = max_sheet_height*max_sheet_density
                 self.max_sheet_height=max_sheet_height
-                    
+
             if (self.maximum_plot_height < minimum_height_of_tallest_plot):
                 self.maximum_plot_height = minimum_height_of_tallest_plot
                 # Return failure if trying to reduce but hit the minimum
@@ -344,7 +344,7 @@ class SheetPlotGroup(PlotGroup):
 
 #       print zoom_factor, self.maximum_plot_height, self.desired_maximum_plot_height
         return True
-            
+
 
     ### CEB: At least some of this scaling would be common to all
     ### plotgroups, if some (e.g. featurecurve) didn't open new
@@ -358,7 +358,7 @@ class SheetPlotGroup(PlotGroup):
 
         The calculated sizes will be multiplied by the given
         zoom_factor, if it is not None.
-        
+
         If the scaled sizes would be outside of the allowed range, no
         scaling is done, and False is returned.  (One might
         conceivably instead want the scaling to reach the actual
@@ -375,7 +375,7 @@ class SheetPlotGroup(PlotGroup):
         # Calculate maximum_plot_height, and abort if not feasible
         if not self.update_maximum_plot_height(zoom_factor) and zoom_factor:
             return False
-            
+
         # Scale the images so that each has a size up to the self.maximum_plot_height
         for plot in resizeable_plots:
             if self.sheet_coords:
@@ -383,12 +383,12 @@ class SheetPlotGroup(PlotGroup):
                 scaling_factor=self.maximum_plot_height/float(s.xdensity)/self.max_sheet_height
             else:
                 scaling_factor=self.maximum_plot_height/float(plot._orig_bitmap.height())
-            
+
             if self.integer_scaling:
                 scaling_factor=max(1,int(scaling_factor))
-                
+
             plot.set_scale(scaling_factor)
-            
+
             #print "Scaled %s %s: %d->%d (x %f)" % (plot.plot_src_name, plot.name, plot._orig_bitmap.height(), plot.bitmap.height(), scaling_factor)
 
         return True
@@ -423,13 +423,13 @@ class TemplatePlotGroup(SheetPlotGroup):
     A TemplatePlotGroup is constructed from a plot_templates list, an
     optional command to run to generate the data, and other optional
     parameters.
-    
+
     The plot_templates list should contain tuples (plot_name,
     plot_template).  Each plot_template is a list of (name, value)
     pairs, where each name specifies a plotting channel (such as Hue
     or Confidence), and the value is the name of a SheetView (such as
     Activity or OrientationPreference).
-        
+
     Various types of plots support different channels.  An SHC
     plot supports Strength, Hue, and Confidence channels (with
     Strength usually being visualized as luminance, Hue as a color
@@ -439,13 +439,13 @@ class TemplatePlotGroup(SheetPlotGroup):
 
     For instance, one could define an Orientation-colored Activity
     plot as::
-        
+
       plotgroups['Activity'] =
           TemplatePlotGroup(name='Activity', category='Basic',
               pre_plot_hooks=[measure_activity],
               plot_templates=[('Activity',
                   {'Strength': 'Activity', 'Hue': 'OrientationPreference', 'Confidence': None})])
-    
+
     This specifies that the final TemplatePlotGroup will contain up to
     one Plot named Activity per Sheet, although there could be no
     plots at all if no Sheet has a SheetView named Activity once
@@ -455,7 +455,7 @@ class TemplatePlotGroup(SheetPlotGroup):
     SheetView Activity.  This plot will be listed in the category
     'Basic' anywhere such categories are relevant (e.g. in the GUI).
 
-    
+
     Here's a more complicated example specifying two different plots
     in the same PlotGroup::
 
@@ -474,7 +474,7 @@ class TemplatePlotGroup(SheetPlotGroup):
 
     The function create_plotgroup provides a convenient way to define plots using
     TemplatePlotGroups; search for create_plotgroup elsewhere in the code to see
-    examples. 
+    examples.
     """
 
     doc = param.String(default="",doc="""
@@ -482,10 +482,10 @@ class TemplatePlotGroup(SheetPlotGroup):
 
     plot_immediately=param.Boolean(False,doc="""
         Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
- 
+
         Should be set to true for quick plots, but false for those that take a long time
         to calculate, so that the user can change the hooks if necessary.""")
-    
+
     prerequisites=param.List([],doc="""
         List of preference maps that must exist before this plot can be calculated.""")
 
@@ -496,7 +496,7 @@ class TemplatePlotGroup(SheetPlotGroup):
     # CB: also, documentation for normalization types needs cleaning up.
     normalize = param.ObjectSelector(default='None',
                                      objects=['None','Individually','AllTogether'],doc="""
-        
+
         'Individually': scale each plot so that its maximum value is
         white and its minimum value black.
 
@@ -505,7 +505,7 @@ class TemplatePlotGroup(SheetPlotGroup):
         'AllTogether': scale each plot so that the highest maximum value is
         white, and the lowest minimum value is black.
 
-    
+
         Normalizing 'Individually' has the advantage of ensuring that
         any data that is present will be visible, but the disadvantage
         that the absolute scale will be obscured.  Non-normalized
@@ -522,8 +522,8 @@ class TemplatePlotGroup(SheetPlotGroup):
     # add_static_image()
 
     # For subclasses, adds:
-    # _template_plots()             - 
-    # _make_template_plot()         - 
+    # _template_plots()             -
+    # _make_template_plot()         -
     # _kw_for_make_template_plots() -
 
 
@@ -553,7 +553,7 @@ class TemplatePlotGroup(SheetPlotGroup):
     # 'Python-like' by using keyword argument to specify each
     # channel and then get the dictionnary of all remaining
     # arguments.
-    # 
+    #
     # JABALERT: We should also be able to store a documentation string
     # describing each plot (for hovering help text) within each
     # plot template.
@@ -574,7 +574,7 @@ class TemplatePlotGroup(SheetPlotGroup):
         image = Image.open(resolve_path(file_path))
         plot = Plot(image,name=name)
         self._static_plots.append(plot)
-            
+
 
 
     ##############################
@@ -613,7 +613,7 @@ class TemplatePlotGroup(SheetPlotGroup):
                                   range_=kw['range_'])
 
 
-    
+
 def default_measureable_sheet():
     """Returns the first sheet for which measure_maps is True (if any), or else the first sheet, for use as a default value."""
 
@@ -636,7 +636,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
     # Class attribute; forms part of the key for sheet_views (see
     # the _key() method).
-    keyname = "ProjectionSheet" 
+    keyname = "ProjectionSheet"
 
     sheet = param.ObjectSelector(default=None,
                                  compute_default_fn=default_measureable_sheet,
@@ -648,7 +648,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
         'Individually': scale each plot so that the peak value will be white
         and the minimum value black.
 
-        'None': no scaling - 0.0 will be black and 1.0 will be white.  
+        'None': no scaling - 0.0 will be black and 1.0 will be white.
 
         'AllTogether': scale each plot so that the peak value of all the plots
         is white, and the minimum value of all the plots will be
@@ -657,7 +657,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
         'JointProjections': as 'Individually', except that plots produced from
         projections whose weights are jointly normalized will be
         jointly normalized.
-        
+
         Normalization has the advantage of ensuring that any data that
         is present will be visible, but the disadvantage that the
         absolute scale will be obscured.  Non-normalized plots are
@@ -670,19 +670,19 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
     # Overrides:
     # _exec*plot_hooks()           - passes sheet to hooks
     # sheet()                      - returns only a single sheet
-    # _kw_for_make_template_plot() - adds projections (+ assumes one sheet) 
+    # _kw_for_make_template_plot() - adds projections (+ assumes one sheet)
     # _template_plots()            - support joint normalization
     # _make_template_plot()        -
-    # _generate_labels()           - 
+    # _generate_labels()           -
 
     # Adds for users:
-    # projections() - 
+    # projections() -
 
     # Adds for subclasses:
-    # _key() - 
-    # _kw_for_one_proj() - 
-    # _check_sheet_type() - 
-    # _check_data_exist() - 
+    # _key() -
+    # _kw_for_one_proj() -
+    # _check_sheet_type() -
+    # _check_data_exist() -
 
 
     #########################
@@ -741,7 +741,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
                     plotlist = super(ProjectionSheetPlotGroup,self)._template_plots(range_=None)
                     self._kw_for_make_template_plot = _orig
-                    ranges[group_key] = _get_value_range(plotlist) 
+                    ranges[group_key] = _get_value_range(plotlist)
 
             for key,proj in self.__keyed_projections():
                 named_ranges[proj.name] = ranges[key]
@@ -770,7 +770,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
     ########## adds for subclasses
 
     def _key(self,**kw):
-        # the key for sheet_views 
+        # the key for sheet_views
         return (self.keyname,self.sheet.name,kw['proj'].name)
 
 
@@ -788,7 +788,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
         if self.sheet is not None and not isinstance(self.sheet,self.sheet_type):
             raise TypeError(
                 "%s's sheet Parameter must be set to a %s instance (currently %s, type %s)." \
-                %(self,self.sheet_type,self.sheet,type(self.sheet))) 
+                %(self,self.sheet_type,self.sheet,type(self.sheet)))
 
 
     def _check_data_exist(self,projlist):
@@ -842,7 +842,7 @@ class ProjectionSheetMeasurementCommand(param.ParameterizedFunction):
 class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
     """Visualize the activity of all Projections into a ProjectionSheet."""
 
-    keyname='ProjectionActivity' 
+    keyname='ProjectionActivity'
 
     #####################
     ########## overridden
@@ -858,7 +858,7 @@ class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
 
 
 # CEBALERT: Total mess. should be a mix-in class, or something like
-# that.  
+# that.
 class GridPlotGroup(ProjectionSheetPlotGroup):
     """
     A ProjectionSheetPlotGroup capable of generating coordinates on a 2D grid.
@@ -867,7 +867,7 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
     ### is specified in, say, visual angle coordinates (e.g., -60 to +60 degrees), then
     ### the soft min of 5.0/unit will still give a 600x600 array of CFs!
     ### Density should probably be specified WRT to sheet bounds,
-    ### instead of per-unit-of-sheet.    
+    ### instead of per-unit-of-sheet.
     density = param.Number(default=10.0,
                      softbounds=(5.0,50.0),doc="""
                      Number of units to plot per 1.0 distance in sheet coordinates""")
@@ -877,7 +877,7 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
 
 
     # Adds for subclasses:
-    # generate_coords() - 
+    # generate_coords() -
 
     # Overrides:
     # _sort_plots()
@@ -934,7 +934,7 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
         def rev(x): y = x; y.reverse(); return y
 
         (l,b,r,t) = self.sheet.bounds.lbrt()
-        x = float(r - l) 
+        x = float(r - l)
         y = float(t - b)
         x_step = x / (int(x * self.density) + 1)
         y_step = y / (int(y * self.density) + 1)
@@ -971,7 +971,7 @@ class RFProjectionPlotGroup(GridPlotGroup):
 
     # Overrides:
     # _template_plots()      - no projection
-    # _exec_pre_plot_hooks() - 
+    # _exec_pre_plot_hooks() -
 
 
     #####################
@@ -1038,7 +1038,7 @@ class ProjectionPlotGroup(GridPlotGroup):
     # _key()                       - restores projection
     # _kw_for_make_template_plot() - restores projection
     # _exec_pre_plot_hooks()       - pass coords to hooks
-    # _check_data_exist() - check for data from other jointly normalized projections 
+    # _check_data_exist() - check for data from other jointly normalized projections
 
 
     #####################
@@ -1106,16 +1106,16 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
     If True, plots the weights on the entire source sheet, using zeros
     for all weights outside the ConnectionField.  If False, plots only
     the actual weights that are stored.""")
-                     
+
     sheet_type = CFSheet
 
     # Overrides:
     # _make_template_plot()  - add bounds
     # _kw_for_one_proj()     - add bounds
-    # _exec_pre_plot_hooks() - check proj type 
+    # _exec_pre_plot_hooks() - check proj type
 
     # Adds for subclasses:
-    # _check_projection_type() - 
+    # _check_projection_type() -
 
 
     #####################
@@ -1133,7 +1133,7 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
 
     def _kw_for_one_proj(self,proj):
         args = []
-        for x,y in self.generate_coords():            
+        for x,y in self.generate_coords():
             if self.situate:
                 bounds = proj.src.bounds
             else:
@@ -1144,13 +1144,13 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
         return args
 
 
-    def _exec_pre_plot_hooks(self,**kw): 
+    def _exec_pre_plot_hooks(self,**kw):
         self._check_projection_type()
         super(CFProjectionPlotGroup,self)._exec_pre_plot_hooks(**kw)
 
 
     def __init__(self,**params):
-        super(CFProjectionPlotGroup,self).__init__(**params)    
+        super(CFProjectionPlotGroup,self).__init__(**params)
         self.filesaver = CFProjectionPlotGroupSaver(self)
 
 
@@ -1162,10 +1162,10 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
         if not isinstance(self.projection,CFProjection):
             raise TypeError(
                 "%s's projection Parameter must be set to a %s instance (currently %s, type %s)." \
-                %(self,CFProjection,self.projection,type(self.projection))) 
+                %(self,CFProjection,self.projection,type(self.projection)))
 
 
-# a mix-in? 
+# a mix-in?
 class UnitPlotGroup(ProjectionSheetPlotGroup):
     """
     Visualize anything related to a unit.
@@ -1179,7 +1179,7 @@ class UnitPlotGroup(ProjectionSheetPlotGroup):
 
     # Overrides:
     # _key()        - removes projection, adds coords
-    # _exec*hooks() - includes coords 
+    # _exec*hooks() - includes coords
 
     #####################
     ########## overridden
@@ -1303,7 +1303,7 @@ def create_plotgroup(template_plot_type='bitmap',**params):
             pg_type = plotgroup_types[name]
         elif template_plot_type=='curve':
             pg_type = FeatureCurvePlotGroup
-                
+
     pg = pg_type(**params)
     plotgroups[pg.name]=pg
     return pg

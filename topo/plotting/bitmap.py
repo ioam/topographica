@@ -63,7 +63,7 @@ class Bitmap(param.Parameterized):
     clipped_pixels attribute.
     """
     clipped_pixels = 0
-    
+
     def __init__(self,image):
         self.image = image
 
@@ -99,7 +99,7 @@ class Bitmap(param.Parameterized):
         import StringIO
         state['image'] = Image.open(StringIO.StringIO(state['image']))
         super(Bitmap,self).__setstate__(state)
-        
+
 
     def show(self):
         """
@@ -127,7 +127,7 @@ class Bitmap(param.Parameterized):
             x,y = self.image.size
             zx, zy = int(x*factor), int(y*factor)
             zoomed = self.image.resize((zx,zy))
-            
+
         return zoomed
 
 
@@ -142,7 +142,7 @@ class Bitmap(param.Parameterized):
         Values larger than 1.0 are clipped, after adding them to the total
         clipped_pixels.  Returns a one-channel (monochrome) Image.
         """
-        
+
         # PIL 'L' Images use a range of 0 to 255, so we scale the
         # input array to match.  The pixels are scaled by 255, not
         # 256, so that 1.0 maps to fully white.
@@ -163,12 +163,12 @@ class Bitmap(param.Parameterized):
         newImage = Image.new('L',(c,r),None)
         newImage.putdata(inArray.ravel())
         return newImage
-        
+
 
 class PaletteBitmap(Bitmap):
     """
     Bitmap constructed using a single 2D array.
- 
+
     The image is monochrome by default, but more colorful images can
     be constructed by specifying a Palette.
     """
@@ -176,10 +176,10 @@ class PaletteBitmap(Bitmap):
     def __init__(self,inArray,palette=None):
         """
         inArray should have values in the range from 0.0 to 1.0.
-        
+
         Palette can be any color scale depending on the type of ColorMap
         desired.  Examples:
-        
+
         [0,0,0 ... 255,255,255] = grayscale
         [0,0,0 ... 255,0,0] = grayscale but through a Red filter.
 
@@ -230,14 +230,14 @@ class HSVBitmap(Bitmap):
         ch = hue.clip(0.0,1.0)
         cs = sat.clip(0.0,1.0)
         cv = val.clip(0.0,1.0)
-        
+
         for i in range(shape[0]):
             for j in range(shape[1]):
                 r,g,b = hsv_to_rgb(ch[i,j],cs[i,j],cv[i,j])
                 rmat[i,j] = r
                 gmat[i,j] = g
                 bmat[i,j] = b
-        
+
         rImage = self._arrayToImage(rmat)
         gImage = self._arrayToImage(gmat)
         bImage = self._arrayToImage(bmat)
@@ -276,7 +276,7 @@ class MontageBitmap(Bitmap):
     rows = param.Integer(default=2, doc="""
         The number of rows in the montage.""")
     cols = param.Integer(default=2, doc="""
-        The number of columns in the montage.""")    
+        The number of columns in the montage.""")
     shape = param.Composite(attribs=['rows','cols'], doc="""
         The shape of the montage. Same as (self.rows,self.cols).""")
 
@@ -311,7 +311,7 @@ class MontageBitmap(Bitmap):
        The filter used for resizing the images.  Defaults
        to NEAREST.  See PIL Image module documentation for other
        options and their meanings.""")
-    
+
     bg_color = param.NumericTuple(default=(0,0,0), doc="""
        The background color for the montage, as (r,g,b).""")
 
@@ -328,12 +328,12 @@ class MontageBitmap(Bitmap):
         bgr,bgg,bgb = self.bg_color
 
         width  = tilew*cols + self.margin*(cols*2)
-        height = tileh*rows + self.margin*(rows*2) 
+        height = tileh*rows + self.margin*(rows*2)
         self.image = Image.new('RGB',(width,height),
                                (bgr*255,bgg*255,bgb*255))
 
         self.title_options.setdefault('font',TITLE_FONT)
-        
+
         for r in xrange(rows):
             for c in xrange(cols):
                 i = r*self.cols+c
@@ -358,7 +358,7 @@ class MontageBitmap(Bitmap):
                     self.image.paste( new_bm.image,
                                       (c * width/cols + tilew/2 - bmw/2 + self.margin,
                                        r * height/rows + tileh/2 - bmh/2 + self.margin) )
-                        
+
                 else:
                     break
 
@@ -404,7 +404,7 @@ class DrawBitmap(Bitmap):
 		    opts	= val[ 1 ]
 		    getattr( dr_img, p_name )( arg, **opts )
 
-        
+
 
     def __in_box( self, coordinates, box_corner, seg_len ):
         """convert normalized coordinates into image coordinates in the given

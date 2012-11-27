@@ -37,7 +37,7 @@ class CFPOF_SharedWeight(CFPOutputFn):
     Applies the single_cf_fn to the single shared CF's weights.
     """
     single_cf_fn = param.ClassSelector(TransferFn,default=IdentityTF())
-    
+
     # CEBALERT: remove norm_values?
     def __call__(self, cfs, norm_values=None, **params):
         """Apply the specified single_cf_fn to every CF."""
@@ -48,9 +48,9 @@ class CFPOF_SharedWeight(CFPOutputFn):
 from topo.base.cf import _create_mask
 
 class SharedWeightCF(ConnectionField):
-    
+
     __slots__ = []
-        
+
     def __init__(self,cf,input_sheet,x=0.0,y=0.0,template=BoundingBox(radius=0.1),
                  mask=patterngenerator.Constant(),
                  min_matrix_radius=1):
@@ -60,7 +60,7 @@ class SharedWeightCF(ConnectionField):
         template CF.  Copies all the properties of CF to stay
         identical except the weights variable that actually contains
         the data.
-        
+
         The only difference from a normal CF is that the weights of
         the CF are implemented as a numpy view into the single master
         copy of the weights stored in the CF template.
@@ -77,15 +77,15 @@ class SharedWeightCF(ConnectionField):
         if not hasattr(mask,'view'):
             mask = _create_mask(patterngenerator.Constant(),
                                template.compute_bounds(input_sheet),
-                               input_sheet,True,0.5) 
+                               input_sheet,True,0.5)
 
 
 
         self._has_norm_total=False
-        self.mask=mask 
+        self.mask=mask
         weights_slice = self._create_input_sheet_slice(input_sheet,x,y,template,min_matrix_radius=min_matrix_radius)
         self.weights = weights_slice.submatrix(cf.weights)
-        
+
         # JAHACKALERT the TransferFn cannot be applied in SharedWeightCF
         # - another inconsistency in the class tree design - there
         # should be nothing in the parent class that is ignored in its
@@ -94,10 +94,10 @@ class SharedWeightCF(ConnectionField):
         # We have agreed to make this right by adding a constant property that
         # will be set true if the learning should be active
         # The SharedWeightCFProjection class and its anccestors will
-        # have this property set to false which means that the 
+        # have this property set to false which means that the
         # learning will be deactivated
 
-        
+
 
 class SharedWeightCFProjection(CFProjection):
     """
@@ -125,12 +125,12 @@ class SharedWeightCFProjection(CFProjection):
         # We want the sharedcf to be located on the grid, so use the
         # center of a unit
         sheet_rows,sheet_cols=self.src.shape
-        # arbitrary (e.g. could use 0,0) 
+        # arbitrary (e.g. could use 0,0)
         center_row,center_col = sheet_rows/2,sheet_cols/2
         center_unitxcenter,center_unitycenter=self.src.matrixidx2sheet(center_row,
                                                                        center_col)
 
-        
+
         self.__sharedcf=self.cf_type(self.src,
                                      x=center_unitxcenter,
                                      y=center_unitycenter,
@@ -154,8 +154,8 @@ class SharedWeightCFProjection(CFProjection):
                             mask=self.mask_template)
 
         return CF
-            
-    
+
+
     def learn(self):
         """
         Because of how output functions are applied, it is not currently
@@ -163,8 +163,8 @@ class SharedWeightCFProjection(CFProjection):
         SharedWeightCFProjections, so we disable them here.
         """
         pass
-    
-    
+
+
     def apply_learn_output_fns(self,active_units_mask=True):
         """
         Because of how output functions are applied, it is not currently
@@ -178,7 +178,7 @@ class SharedWeightCFProjection(CFProjection):
         return self.activity.nbytes + self.__sharedcf.weights.nbytes + \
                sum([cf.input_sheet_slice.nbytes
                     for cf,i in CFIter(self)()])
-                   
+
 
 
 
@@ -196,7 +196,7 @@ class LeakyCFProjection(ResizableCFProjection):
                         doc="Input decay rate for each leaky synapse")
 
     precedence = param.Number(default=0.4)
-    
+
     def __init__(self,**params):
         super(LeakyCFProjection,self).__init__(**params)
         self.leaky_input_buffer = zeros(self.src.activity.shape)
@@ -204,10 +204,10 @@ class LeakyCFProjection(ResizableCFProjection):
     def activate(self,input_activity):
         """
         Retain input_activity from the previous step in leaky_input_buffer
-        and add a leaked version of it to the current input_activity. This 
+        and add a leaked version of it to the current input_activity. This
         function needs to deal with a finer time-scale.
         """
-        self.leaky_input_buffer = input_activity + self.leaky_input_buffer*exp(-self.decay_rate) 
+        self.leaky_input_buffer = input_activity + self.leaky_input_buffer*exp(-self.decay_rate)
         super(LeakyCFProjection,self).activate(self.leaky_input_buffer)
 
     def n_bytes(self):
@@ -218,7 +218,7 @@ class LeakyCFProjection(ResizableCFProjection):
 class ScaledCFProjection(CFProjection):
     """
     Allows scaling of activity based on a specified target average activity.
-    
+
     An exponentially weighted average is used to calculate the average
     activity.  This average is then used to calculate scaling factors
     for the current activity and for the learning rate.
@@ -231,7 +231,7 @@ class ScaledCFProjection(CFProjection):
 
     target_lr = param.Number(default=0.045, doc="""
         Target average activity for scaling the learning rate.""")
-    
+
     smoothing = param.Number(default=0.999, doc="""
         Influence of previous activity, relative to current, for computing the average.""")
     precedence = param.Number(default=0.4)
@@ -253,7 +253,7 @@ class ScaledCFProjection(CFProjection):
         Keeps track of the scaled average for debugging. Could be
         overridden by a subclass to calculate the factors differently.
         """
-      
+
         if self.plastic:
             self.sf *=0.0
             self.lr_sf *=0.0
@@ -273,7 +273,7 @@ class ScaledCFProjection(CFProjection):
         else:
             raise ValueError("Projections to be called must have learning function which supports scaling (e.g. CFPLF_PluginScaled).")
 
-                   
+
     def activate(self,input_activity):
         """Activate using the specified response_fn and output_fn."""
         self.input_buffer = input_activity
@@ -282,12 +282,12 @@ class ScaledCFProjection(CFProjection):
         if self.x_avg is None:
             self.x_avg=self.target*ones(self.dest.shape, activity_type)
         if self.scaled_x_avg is None:
-            self.scaled_x_avg=self.target*ones(self.dest.shape, activity_type) 
+            self.scaled_x_avg=self.target*ones(self.dest.shape, activity_type)
         if self.sf is None:
             self.sf=ones(self.dest.shape, activity_type)
         if self.lr_sf is None:
             self.lr_sf=ones(self.dest.shape, activity_type)
-        
+
         self.response_fn(MaskedCFIter(self), input_activity, self.activity, self.strength)
         for of in self.output_fns:
             of(self.activity)
@@ -323,12 +323,12 @@ class OneToOneProjection(Projection):
 
     learning_rate = param.Number(default=0)
 
-    
+
     def __init__(self,**kw):
         super(OneToOneProjection,self).__init__(**kw)
 
         self.input_buffer = None
-        
+
         dx,dy = self.dest.bounds.centroid()
 
         # JPALERT: Not sure if this is the right way to generate weights.
@@ -344,10 +344,10 @@ class OneToOneProjection(Projection):
         # could give great speedups, esp for AffineTransform mappings,
         # which can be applied to many points with a single matrix
         # multiplication.
-        srccoords = [self.coord_mapper(x,y) 
+        srccoords = [self.coord_mapper(x,y)
                      for y in reversed(self.dest.sheet_rows())
                      for x in self.dest.sheet_cols()]
-        
+
         self.src_idxs = array([rowcol2idx(r,c,self.src.activity.shape)
                                for r,c in (self.src.sheet2matrixidx(u,v)
                                            for u,v in srccoords)])
@@ -385,12 +385,12 @@ class OneToOneProjection(Projection):
     def n_conns(self):
         rows,cols=self.activity.shape
         return rows*cols
-    
+
     def n_bytes(self):
         return super(OneToOneProjection,self).n_bytes() + \
                self.activity.nbytes
 
-            
+
 _public = list(set([_k for _k,_v in locals().items()
                     if isinstance(_v,type) and issubclass(_v,Projection)]))
 _public += [

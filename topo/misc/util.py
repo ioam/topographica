@@ -14,7 +14,7 @@ import functools
 def NxN(tuple):
     """
     Converts a tuple (X1,X2,...,Xn) to a string 'X1xX2x...xXn'
-    """    
+    """
     return 'x'.join([`N` for N in tuple])
 
 
@@ -27,7 +27,7 @@ class Struct:
     A simple structure class, taking keyword args and assigning them to attributes.
 
     For instance:
-    
+
     s = Struct(foo='a',bar=1)
     >>> s.foo
     'a'
@@ -40,7 +40,7 @@ class Struct:
     def __init__(self, **entries): self.__dict__.update(entries)
 
     def __repr__(self):
-        # 
+        #
         args = ['%s=%s' % (k, repr(v)) for (k,v) in vars(self).items()]
         return 'Struct(%s)' % ', '.join(args)
 
@@ -58,13 +58,13 @@ def flat_indices(shape):
     else:
         rows,cols = shape
         return [(r,c) for r in range(rows) for c in range(cols)]
-        
-    
+
+
 
 def flatten(l):
     """
     Flattens a list.
-    
+
     Written by Bearophile as published on the www.python.org newsgroups.
     Pulled into Topographica 3/5/2005.
     """
@@ -88,7 +88,7 @@ def flatten(l):
                     sequence, j = sequence[j], 0
         return result
 
-    
+
 
 """
 Return the cross-product of a variable number of lists (e.g. of a list of lists).
@@ -96,7 +96,7 @@ Return the cross-product of a variable number of lists (e.g. of a list of lists)
 Use to obtain permutations, e.g.
 l1=[a,b]
 l2=[c,d]
-cross_product([l1,l2]) = 
+cross_product([l1,l2]) =
 [[a,c], [a,d], [b,c], [b,d]]
 
 
@@ -119,7 +119,7 @@ def frange(start, end=None, inc=1.0, inclusive=False):
     inclusive is False, as in the default, the range is exclusive (not
     including the end value), as in the inbuilt range(). If inclusive
     is true, the range may include the end value.
-        
+
     'All theoretic restrictions apply, but in practice this is
     more useful than in theory.'
 
@@ -132,7 +132,7 @@ def frange(start, end=None, inc=1.0, inclusive=False):
     # Increments of zero would lead to an infinite loop, which can happen if
     # this is mistakenly called with a integer-based rational expression like 1/2.
     assert ((inc>0 and start<=end) or (inc<0 and start>=end))
-    
+
     L = []
     while 1:
         next = start + len(L) * inc
@@ -143,7 +143,7 @@ def frange(start, end=None, inc=1.0, inclusive=False):
           if inc > 0 and next >= end: break
           elif inc < 0 and next <= end: break
         L.append(next)
-        
+
     return L
 
 
@@ -199,7 +199,7 @@ def profile(command,n=50,sorting=('cumulative','time'),strip_dirs=False):
     prof_stats = pstats.Stats('filename')
 
     if strip_dirs:prof_stats.strip_dirs()
-    
+
     prof_stats.sort_stats(*sorting).print_callees(n)
     ### the above lets us see which times are due to which calls
     ### unambiguously, while the version below only reports total time
@@ -207,13 +207,13 @@ def profile(command,n=50,sorting=('cumulative','time'),strip_dirs=False):
     ### call.
     prof_stats.sort_stats(*sorting).print_stats(n)
 
-    
+
 
 
 def weighted_sample(seq,weights=[]):
     """
     Select randomly from the given sequence.
-    
+
     The weights, if given, should be a sequence the same length as
     seq, as would be passed to weighted_sample_idx().
     """
@@ -270,7 +270,7 @@ def rowcol2idx(r,c,shape):
     return r * cols + c
 
 
-    
+
 def centroid(pts,weights):
     """
     Return the centroid of a weighted set of points as an array.
@@ -303,9 +303,9 @@ def linearly_interpolate(table,value):
     """
     Interpolate an appropriate value from the given list of values, by number.
 
-    Assumes the table is a list of items to be returned for integer values, 
+    Assumes the table is a list of items to be returned for integer values,
     and interpolates between those items for non-integer values.
-    """ 
+    """
 
     lower_index=int(value)
     upper_index=lower_index+1
@@ -313,7 +313,7 @@ def linearly_interpolate(table,value):
     # Intermediate value; interpolate or return exact value as appropriate
     if lower_index+1<len(table):
        lookup=table[lower_index]+(value%1.0)*(table[upper_index]-table[lower_index])
-    
+
     # Upper bound -- return largest value
     elif lower_index+1==len(table):
        lookup=table[len(table)-1]
@@ -384,7 +384,7 @@ class MultiFile(object):
 # topo.misc.legacy because importing topo.misc.legacy causes various
 # pieces of code to run that depend on topo.sim existing.)
 
-############################################################        
+############################################################
 # Alternative module faking using import hooks (see
 # http://www.python.org/dev/peps/pep-0302/).
 # Based on http://orestis.gr/blog/2008/12/20/python-import-hooks/.
@@ -399,7 +399,7 @@ class ModuleFaker(object):
                 parent_name, child_name = name.rsplit('.', 1)
                 setattr(sys.modules[parent_name], child_name, module)
         return sys.modules[name]
-    
+
     def create_module(self,name):
         raise NotImplementedError
 

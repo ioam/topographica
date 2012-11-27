@@ -46,7 +46,7 @@ class TestDistributionMatrix(unittest.TestCase):
         self.a1 = array([[1,1], [1,1], [1,1]])
         self.a2 = array([[3,3], [3,3], [3,3]])
         self.a3 = array([[0,1], [0,1], [0,1]])
-        
+
         # object to test for non-cyclic distributions
         self.fm1 = DistributionMatrix(test_sheet.shape, axis_range=(0.0,1.0), cyclic=False)
         self.fm1.update(self.a1,0.5)
@@ -56,31 +56,31 @@ class TestDistributionMatrix(unittest.TestCase):
         self.fm2.update(self.a1,0.5)
 
 
-    # need to add a test_update()    
+    # need to add a test_update()
 
 
     def test_preference(self):
-        
+
         for i in range(3):
             for j in range(2):
                 self.assertAlmostEqual( weighted_average( self.fm1 )[i,j], 0.5)
                 self.assertAlmostEqual( weighted_average( self.fm2 )[i,j], 0.5)
 
 
-        # To test the update function     
+        # To test the update function
         self.fm1.update(self.a1,0.7)
         self.fm2.update(self.a1,0.7)
 
         for i in range(3):
             for j in range(2):
                 self.assertAlmostEqual( weighted_average( self.fm1 )[i,j], 0.6)
-                vect_sum = wrap(0,1,arg(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/(2*pi)) 
-                self.assertAlmostEqual( weighted_average( self.fm2 )[i,j],vect_sum) 
-                                      
-                                      
+                vect_sum = wrap(0,1,arg(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/(2*pi))
+                self.assertAlmostEqual( weighted_average( self.fm2 )[i,j],vect_sum)
 
-        
-        # To test the keep_peak=True 
+
+
+
+        # To test the keep_peak=True
         self.fm1.update(self.a1,0.7)
         self.fm2.update(self.a1,0.7)
 
@@ -89,7 +89,7 @@ class TestDistributionMatrix(unittest.TestCase):
                 self.assertAlmostEqual( weighted_average( self.fm1 )[i,j], 0.6)
                 vect_sum =wrap(0,1,arg(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/(2*pi))
                 self.assertAlmostEqual( weighted_average( self.fm2 )[i,j],vect_sum)
-                                      
+
         self.fm1.update(self.a2,0.7)
         self.fm2.update(self.a2,0.7)
 
@@ -100,10 +100,10 @@ class TestDistributionMatrix(unittest.TestCase):
                 self.assertAlmostEqual( weighted_average( self.fm2 )[i,j],vect_sum)
 
         # to even test more....
-        
+
         self.fm1.update(self.a3,0.9)
         self.fm2.update(self.a3,0.9)
-        
+
         for i in range(3):
             self.assertAlmostEqual( weighted_average( self.fm1 )[i,0], 0.65)
             self.assertAlmostEqual( weighted_average( self.fm1 )[i,1], 0.7)
@@ -111,17 +111,17 @@ class TestDistributionMatrix(unittest.TestCase):
             self.assertAlmostEqual( weighted_average( self.fm2 )[i,0],vect_sum)
             vect_sum = wrap(0,1,arg(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j)+exp(0.9*2*pi*1j))/(2*pi))
             self.assertAlmostEqual( weighted_average( self.fm2 )[i,1],vect_sum)
-            
-                                          
+
+
     def test_selectivity(self):
-        
+
         for i in range(3):
             for j in range(2):
                 # when only one bin the selectivity is 1 (from C code)
                 self.assertAlmostEqual( selectivity( self.fm1 )[i,j], 1.0)
                 self.assertAlmostEqual( selectivity( self.fm2 )[i,j], 1.0)
 
-        # To test the update function     
+        # To test the update function
         self.fm1.update(self.a1,0.7)
         self.fm2.update(self.a1,0.7)
 
@@ -131,13 +131,13 @@ class TestDistributionMatrix(unittest.TestCase):
                 offset = 1.0/2.0
                 relative_selectivity = (proportion-offset)/(1.0-offset)  ## gives 0 ..?
                 self.assertAlmostEqual( selectivity( self.fm1 )[i,j],relative_selectivity)
-                vect_sum = abs(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/2.0 
-                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum) 
-                                      
-                                      
+                vect_sum = abs(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/2.0
+                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum)
 
-        
-        # To test the keep_peak=True 
+
+
+
+        # To test the keep_peak=True
         self.fm1.update(self.a1,0.7)
         self.fm2.update(self.a1,0.7)
 
@@ -147,10 +147,10 @@ class TestDistributionMatrix(unittest.TestCase):
                 offset = 1.0/2.0
                 relative_selectivity = (proportion-offset)/(1.0-offset)
                 self.assertAlmostEqual( selectivity( self.fm1 )[i,j],relative_selectivity)
-                vect_sum = abs(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/2.0 
-                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum) 
+                vect_sum = abs(exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/2.0
+                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum)
 
-                                                           
+
         self.fm1.update(self.a2,0.7)
         self.fm2.update(self.a2,0.7)
 
@@ -160,14 +160,14 @@ class TestDistributionMatrix(unittest.TestCase):
                 offset = 1.0/2.0
                 relative_selectivity = (proportion-offset)/(1.0-offset)
                 #self.assertAlmostEqual( selectivity( self.fm1 )[i,j],relative_selectivity)
-                vect_sum = abs(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/4.0 
-                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum) 
-                 
+                vect_sum = abs(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/4.0
+                self.assertAlmostEqual( selectivity( self.fm2 )[i,j],vect_sum)
+
         # to even test more....
-        
+
         self.fm1.update(self.a3,0.9)
         self.fm2.update(self.a3,0.9)
-        
+
         for i in range(3):
             proportion = 3.0/4.0
             offset = 1.0/3.0 ### Carefull, do not create bins when it is 0
@@ -180,12 +180,12 @@ class TestDistributionMatrix(unittest.TestCase):
             relative_selectivity = (proportion-offset)/(1.0-offset)
             ### to fix this test as well
             #self.assertAlmostEqual( selectivity( self.fm1 )[i,1], relative_selectivity)
-            
+
             vect_sum = abs(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j))/4.0
             self.assertAlmostEqual( selectivity( self.fm2 )[i,0],vect_sum)
             vect_sum = abs(3*exp(0.7*2*pi*1j)+exp(0.5*2*pi*1j)+exp(0.9*2*pi*1j))/5.0
             self.assertAlmostEqual( selectivity( self.fm2 )[i,1],vect_sum)
-             
+
 
 
 
@@ -211,34 +211,34 @@ class TestFeatureMaps(unittest.TestCase):
 
     def test_measurefeaturemap(self):
         """
-        
+
         """
-        
+
         self.feature_param = [Feature(name="phase",range=(0.0,1.0),values=[0.2,0.4,0.6],cyclic=False),
                               Feature(name="orientation",range=(0.0,1.0),step=0.5,cyclic=True)]
-        
+
         self.x = FeatureMaps(self.feature_param)
         #print self.V1.activity
         #### test has to be written!!!
 
-        
+
 cases = [TestDistributionMatrix,
          TestFeatureMaps]
 
 suite = unittest.TestSuite()
 suite.addTests(unittest.makeSuite(case) for case in cases)
-              
+
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=1).run(suite)
 
 
-        
 
 
-        
-        
 
-                
-        
 
-   
+
+
+
+
+
+

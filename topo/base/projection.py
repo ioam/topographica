@@ -20,7 +20,7 @@ from sheetview import ProjectionView
 class SheetMask(param.Parameterized):
     """
     An abstract class that defines a mask over a ProjectionSheet object.
-    
+
     This class is typically used for optimization, where mask
     indicates which neurons are active and should be processed
     further. A mask can also be used for lesion experiments, to
@@ -34,25 +34,25 @@ class SheetMask(param.Parameterized):
     # JPALERT: Is there anything about this class that assumes its
     # sheet is a ProjectionSheet?
 
-    def _get_data(self): 
+    def _get_data(self):
         assert(self._sheet != None)
         return self._data
-    def _set_data(self,data): 
+    def _set_data(self,data):
         assert(self._sheet != None)
         self._data = data
 
     data = overridable_property(_get_data,_set_data,doc="""
     Ensure that whenever somebody accesses the data they are not None.""")
 
-    def _get_sheet(self): 
+    def _get_sheet(self):
         assert(self._sheet != None)
         return self._sheet
-    def _set_sheet(self,sheet): 
-        self._sheet = sheet 
+    def _set_sheet(self,sheet):
+        self._sheet = sheet
         if(self._sheet != None): self.reset()
-    
+
     sheet = overridable_property(_get_sheet,_set_sheet)
-    
+
     def __init__(self,sheet=None,**params):
         super(SheetMask,self).__init__(**params)
         self.sheet = sheet
@@ -68,41 +68,41 @@ class SheetMask(param.Parameterized):
         """Initialize mask to default value (with no neurons masked out)."""
         self.data = ones(self.sheet.shape)
 
-    
+
     def calculate(self):
         """
         Calculate a new mask based on the activity of the sheet.
-        
+
         For instance, in an algorithm like LISSOM that is based on a
         process of feedforward activation followed by lateral settling,
         the calculation is done at the beginning of each iteration after
         the feedforward activity has been calculated.
-        
+
         Subclasses should override this method to compute some non-default
         mask.
         """
         pass
 
-  
+
     # JABALERT: Not clear what the user should do with this.
     def update(self):
         """
         Update the current mask based on the current activity and a previous mask.
-        
+
         Should be called only if calculate() has already been called since the last
         reset(); potentially faster to compute than redoing the entire calculate().
-        
+
         Subclasses should override this method to compute some non-default
         mask.
         """
         pass
 
-  
+
 class CompositeSheetMask(SheetMask):
     """
-    A SheetMask that computes its value from other SheetMasks.    
+    A SheetMask that computes its value from other SheetMasks.
     """
-    __abstract =  True 
+    __abstract =  True
 
     submasks = param.List(class_=SheetMask)
 
@@ -118,7 +118,7 @@ class CompositeSheetMask(SheetMask):
         composite calculations.  The result should be stored in self.data.
         """
         raise NotImplementedError
-    
+
     def _set_sheet(self,sheet):
         for m in self.submasks:
             m.sheet = sheet
@@ -128,12 +128,12 @@ class CompositeSheetMask(SheetMask):
         for m in self.submasks:
             m.reset()
         self._combine_submasks()
-        
+
     def calculate(self):
         for m in self.submasks:
             m.calculate()
         self._combine_submasks()
-            
+
     def update(self):
         for m in self.submasks:
             m.update()
@@ -157,8 +157,8 @@ class OrMask(CompositeSheetMask):
     def _combine_submasks(self):
         self._data = asarray(reduce(logical_or,(m.data for m in self.submasks)),dtype=int)
 
-    
-        
+
+
 class Projection(EPConnection):
     """
     A projection from a Sheet into a ProjectionSheet.
@@ -169,11 +169,11 @@ class Projection(EPConnection):
     Sheet.  Other than that, a Projection may be of any type.
     """
     __abstract=True
-    
+
     strength = param.Number(default=1.0)
 
     src_port = param.Parameter(default='Activity')
-    
+
     dest_port = param.Parameter(default='Activity')
 
     output_fns = param.HookList(default=[],class_=TransferFn,doc="""
@@ -182,7 +182,7 @@ class Projection(EPConnection):
     plastic = param.Boolean(default=True, doc="""
         Whether or not to update the internal state on each call.
         Allows plasticity to be turned off during analysis, and then re-enabled.""")
-    
+
     activity_group = param.Parameter(default=(0.5,numpy.add), doc="""
        Grouping and precedence specifier for computing activity from
        Projections.  In a ProjectionSheet, all Projections in the
@@ -198,24 +198,24 @@ class Projection(EPConnection):
     # CEBALERT: precedence should probably be defined at some higher level
     # (and see other classes where it's defined, e.g. Sheet)
     precedence = param.Number(default=0.5)
-    
-       
+
+
     def __init__(self,**params):
         super(Projection,self).__init__(**params)
         self.activity = array(self.dest.activity)
         self._plasticity_setting_stack = []
 
-        
+
     def activate(self,input_activity):
         """
         Compute an activity matrix for output, based on the specified input_activity.
-        
+
         Subclasses must override this method to whatever it means to
         calculate activity in that subclass.
         """
         raise NotImplementedError
 
-    
+
     def learn(self):
         """
         This function has to be re-implemented by sub-classes, if they wish
@@ -236,7 +236,7 @@ class Projection(EPConnection):
         pass
 
 
-  
+
     def override_plasticity_state(self, new_plasticity_state):
         """
         Temporarily override plasticity of medium and long term internal
@@ -273,7 +273,7 @@ class Projection(EPConnection):
         for of in self.output_fns:
             if hasattr(of,'override_plasticity_state'):
                 of.override_plasticity_state(new_plasticity_state)
-      
+
 
     def restore_plasticity_state(self):
         """
@@ -308,15 +308,15 @@ class Projection(EPConnection):
         """
         (rows,cols) = self.activity.shape
         return rows*cols
-    
-    
+
+
     def n_conns(self):
         """
-        Return the size of this projection, in number of connections.  
-        
+        Return the size of this projection, in number of connections.
+
         Must be implemented by subclasses, if only to declare that no
         connections are stored.
-        """         
+        """
         raise NotImplementedError
 
 
@@ -344,9 +344,9 @@ class ProjectionSheet(Sheet):
     """
 
     dest_ports=['Activity']
-    
+
     src_ports=['Activity']
-        
+
     # CEBALERT: why isn't this a parameter of Sheet?
     # Should be a MaskParameter for safety
     #mask = ClassSelectorParameter(SheetMask,default=SheetMask(),instantiate=True,doc="""
@@ -370,7 +370,7 @@ class ProjectionSheet(Sheet):
         depends on the implementation of learning and learning output
         functions.""")
 
-    
+
     def __init__(self,**params):
         super(ProjectionSheet,self).__init__(**params)
         self.new_input = False
@@ -427,14 +427,14 @@ class ProjectionSheet(Sheet):
         The entry None will contain those that are not of type
         <ptype>, while the other entries will contain a list of
         Projections, each of which has type ptype.
-        
+
         Example: to obtain the lists of projections that should be
         jointly normalised together, call
         __grouped_in_projection('JointNormalize').
         """
         in_proj = KeyedList()
         in_proj[None]=[] # Independent (ungrouped) connections
-        
+
         for c in self.in_connections:
             d = c.dest_port
             if not isinstance(c,Projection):
@@ -448,50 +448,50 @@ class ProjectionSheet(Sheet):
             #    raise ValueError("Unable to determine appropriate action for dest_port: %s (connection %s)." % (d,c.name))
             else:
                 in_proj[None].append(c)
-                    
+
         return in_proj
 
 
     def activate(self):
         """
         Collect activity from each projection, combine it to calculate
-        the activity for this sheet, and send the result out. 
+        the activity for this sheet, and send the result out.
 
         Subclasses may override this method to whatever it means to
         calculate activity in that subclass.
         """
-        
+
         self.activity *= 0.0
         tmp_dict={}
-        
+
         for proj in self.in_connections:
             if (proj.activity_group != None) | (proj.dest_port[0] != 'Activity'):
-                if not tmp_dict.has_key(proj.activity_group[0]): 
+                if not tmp_dict.has_key(proj.activity_group[0]):
                     tmp_dict[proj.activity_group[0]]=[]
                 tmp_dict[proj.activity_group[0]].append(proj)
-        
+
         keys = tmp_dict.keys()
         keys.sort()
         for priority in keys:
             tmp_activity = self.activity.copy() * 0.0
-            
+
             for proj in tmp_dict[priority]:
                 tmp_activity += proj.activity
             self.activity=tmp_dict[priority][0].activity_group[1](self.activity,tmp_activity)
-        
+
         if self.apply_output_fns:
             for of in self.output_fns:
                 of(self.activity)
-    
+
         self.send_output(src_port='Activity',data=self.activity)
-    
+
 
     def process_current_time(self):
         """
-        Called by the simulation after all the events are processed for the 
+        Called by the simulation after all the events are processed for the
         current time but before time advances.  Allows the event processor
         to send any events that must be sent before time advances to drive
-        the simulation. 
+        the simulation.
         """
         if self.new_input:
             self.activate()
@@ -504,7 +504,7 @@ class ProjectionSheet(Sheet):
         """
         By default, call the learn() and apply_learn_output_fns()
         methods on every Projection to this Sheet.
-        
+
         Any other type of learning can be implemented by overriding this method.
         Called from self.process_current_time() _after_ activity has
         been propagated.
@@ -521,7 +521,7 @@ class ProjectionSheet(Sheet):
         """
         Provide the given input_activity to each in_projection that has a dest_port
         equal to the specified port, asking each one to compute its activity.
-        
+
         The sheet's own activity is not calculated until activate()
         is called.
         """
@@ -530,7 +530,7 @@ class ProjectionSheet(Sheet):
 
     def projections(self,name=None):
         """
-        
+
         Return either a named input p, or a dictionary
         {projection_name, projection} of all the in_connections for
         this ProjectionSheet.
@@ -575,7 +575,7 @@ class ProjectionSheet(Sheet):
         for of in self.output_fns:
             if hasattr(of,'override_plasticity_state'):
                 of.override_plasticity_state(new_plasticity_state)
-                
+
         for proj in self.in_connections:
             # Could instead check for a override_plasticity_state method
             if isinstance(proj,Projection):
@@ -592,8 +592,8 @@ class ProjectionSheet(Sheet):
         for proj in self.in_connections:
             if isinstance(proj,Projection):
                 proj.restore_plasticity_state()
-        
-    
+
+
     def n_bytes(self):
         """
         Estimate the memory bytes taken by this Sheet and its Projections.
@@ -614,11 +614,11 @@ class ProjectionSheet(Sheet):
         return self.activity.nbytes + \
                sum([p.n_bytes() for p in self.in_connections
                     if isinstance(p,Projection)])
-    
-    
+
+
     def n_conns(self):
         """
-        Count the total size of all incoming projections, in number of connections.  
+        Count the total size of all incoming projections, in number of connections.
         """
         return sum([p.n_conns() for p in self.in_connections
                     if isinstance(p,Projection)])
@@ -644,14 +644,14 @@ class NeighborhoodMask(SheetMask):
        the calculation will be unaffected by the mask, but it will
        reduce any computational benefit from the mask.""")
 
-    
+
     def __init__(self,sheet,**params):
         super(NeighborhoodMask,self).__init__(sheet,**params)
 
 
     def calculate(self):
         rows,cols = self.data.shape
-        
+
         # JAHACKALERT: Not sure whether this is OK. Another way to do
         # this would be to ask for the sheet coordinates of each unit
         # inside the loop.

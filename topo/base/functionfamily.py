@@ -30,7 +30,7 @@ class LearningFn(param.Parameterized):
         """
         Apply this learning function given the input and output
         activities and current weights.
-        
+
         Must be implemented by subclasses.
         """
         raise NotImplementedError
@@ -42,10 +42,10 @@ class Hebbian(LearningFn):
 
     Increases each weight in proportion to the product of this
     neuron's activity and the input activity.
-    
+
     Requires some form of output_fn normalization for stability.
     """
-    
+
     def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
         weights += single_connection_learning_rate * unit_activity * input_activity
 
@@ -59,7 +59,7 @@ class IdentityLF(LearningFn):
     derive other classes from this object, modify it to have different
     behavior, add side effects, or anything of that nature.
     """
-    
+
     def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
         pass
 
@@ -81,7 +81,7 @@ class ResponseFn(param.Parameterized):
 class DotProduct(ResponseFn):
     """
     Return the sum of the element-by-element product of two 2D
-    arrays.  
+    arrays.
     """
     def __call__(self,m1,m2):
         # CBENHANCEMENT: numpy.vdot(m1,m2)?
@@ -89,7 +89,7 @@ class DotProduct(ResponseFn):
         # vdot(a,b)=dot(a.ravel(),b.ravel()) but was slower. Should
         # check that.
         return numpy.dot(m1.ravel(),m2.ravel())
-        
+
 
 
 class CoordinateMapperFn(param.Parameterized):
@@ -126,20 +126,20 @@ class PatternDrivenAnalysis(param.Parameterized):
     and that the initial state is restored after analysis.
 
     Any subclasses must ensure that these hook lists are run at the
-    appropriate stage in their processing, using e.g. 
+    appropriate stage in their processing, using e.g.
     "for f in some_hook_list: f()".
     """
-    
+
     __abstract = True
 
     pre_analysis_session_hooks = param.HookList(default=[],instantiate=False,doc="""
         List of callable objects to be run before an analysis session begins.""")
-    
+
     pre_presentation_hooks = param.HookList(default=[],instantiate=False,doc="""
         List of callable objects to be run before each pattern is presented.""")
-    
+
     post_presentation_hooks = param.HookList(default=[],instantiate=False,doc="""
         List of callable objects to be run after each pattern is presented.""")
-    
+
     post_analysis_session_hooks = param.HookList(default=[],instantiate=False,doc="""
         List of callable objects to be run after an analysis session ends.""")

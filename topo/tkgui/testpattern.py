@@ -38,7 +38,7 @@ from plotgrouppanel import SheetPanel
 
 
 # CEBALERT: this uses make_template_plot(), so how is it not a
-# TemplatePlotGroup? 
+# TemplatePlotGroup?
 class TestPatternPlotGroup(SheetPlotGroup):
 
     def sheets(self):
@@ -55,7 +55,7 @@ class TestPatternPlotGroup(SheetPlotGroup):
                                   sheet.name,sheet.precedence,topo.sim.time())
             sheet.sheet_views['Activity']=new_view
             channels = {'Strength':'Activity','Hue':None,'Confidence':None}
-        
+
             ### JCALERT! it is not good to have to pass '' here... maybe a test in plot would be better
             dynamic_plots.append(make_template_plot(channels,sheet.sheet_views,
                                                     sheet.xdensity,sheet.bounds,self.normalize,
@@ -68,7 +68,7 @@ class TestPatternPlotGroup(SheetPlotGroup):
 class TestPattern(SheetPanel,PatternDrivenAnalysis):
 
     sheet_type = GeneratorSheet
-    
+
     dock = param.Boolean(False)
 
     edit_sheet = param.ObjectSelector(doc="""
@@ -76,7 +76,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
 
     plastic = param.Boolean(default=False,doc="""
         Whether to enable plasticity during presentation.""")
-    
+
     duration = param.Number(default=1.0, softbounds=(0.0,10.0),doc="""
         How long to run the simulation for each presentation.""")
 
@@ -89,9 +89,9 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
 
     def __init__(self,master,plotgroup=None,**params):
         plotgroup = plotgroup or TestPatternPlotGroup()
-        
+
         super(TestPattern,self).__init__(master,plotgroup,**params)
-        
+
         self.auto_refresh = True
 
         self.plotcommand_frame.pack_forget()
@@ -103,7 +103,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
 
         self.pg_control_pane = Frame(self) #,bd=1,relief="sunken")
         self.pg_control_pane.pack(side="top",expand='yes',fill='x')
-        
+
         self.params_frame = tk.ParametersFrame(
             self.pg_control_pane,
             parameterized_object=self.pattern_generator,
@@ -119,7 +119,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         self.pack_param('edit_sheet',parent=self.pg_control_pane,on_modify=self.switch_sheet,widget_options={'new_default':True,'sort_fn_args':{'cmp':lambda x, y: cmp(-x.precedence,-y.precedence)}})
         self.pack_param('pattern_generator',parent=self.pg_control_pane,
                         on_modify=self.change_pattern_generator,side="top")
-        
+
         present_frame = Frame(self)
         present_frame.pack(side='bottom')
 
@@ -131,7 +131,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
 
     def setup_plotgroup(self):
         super(TestPattern,self).setup_plotgroup()
-        
+
         # CB: could copy the sheets instead (deleting connections etc)
         self.plotgroup._sheets = [GeneratorSheet(name=gs.name,
                                                  nominal_bounds=gs.nominal_bounds,
@@ -145,7 +145,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
             self.pattern_generator = self.edit_sheet.input_generator
         self.change_pattern_generator()
 
-        
+
     def change_pattern_generator(self):
         """
         Set the current PatternGenerator to the one selected and get the
@@ -159,7 +159,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         for sheet in self.plotgroup.sheets():
             if sheet==self.edit_sheet:
                 sheet.set_input_generator(self.pattern_generator)
-        
+
         self.conditional_refresh()
 
 
@@ -169,7 +169,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         """
         self.refresh_plots()
 
-        
+
     def present_pattern(self):
         """
         Move the user created patterns into the GeneratorSheets, run for
@@ -177,7 +177,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         patterns.
         """
         topo.sim.run(0.0)  # ensure EPs are start()ed
-        
+
         topo.sim.state_push()
         for f in self.pre_presentation_hooks: f()
         input_dict = dict([(sheet.name,sheet.input_generator) \
@@ -187,4 +187,4 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         topo.guimain.auto_refresh()
         for f in self.post_presentation_hooks: f()
         topo.sim.state_pop()
-        
+

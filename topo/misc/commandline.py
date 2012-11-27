@@ -62,7 +62,7 @@ licensing information.
 class GlobalParams(Parameterized,OptionalSingleton):
     """
     A Parameterized class providing script-level parameters.
-    
+
     Script-level parameters can be set from the commandline by passing
     via -p, e.g. ./topographica -p retina_density=10
 
@@ -125,7 +125,7 @@ class GlobalParams(Parameterized,OptionalSingleton):
                 self.warning("Replacing previous value of '%s' with '%s'"%(name,val))
             self.context[name]=val
             self.unused_names.add(name)
-            
+
     def exec_in_context(self,arg):
         """
         exec arg in self.context, tracking new names and
@@ -144,7 +144,7 @@ class GlobalParams(Parameterized,OptionalSingleton):
         new_names = set(self.context.keys()).difference(set(current_ids.keys()))
         for k in new_names:
             self.unused_names.add(k)
-        
+
     def check_for_unused_names(self):
         """Warn about any unused names."""
         for s in self.unused_names:
@@ -161,8 +161,8 @@ class GlobalParams(Parameterized,OptionalSingleton):
             if name in self.context:
                 if self.context[name]!=self.inspect_value(name):
                     self.warning("'%s=%s' is unused."%(name,self.context[name]))
-            
-    
+
+
     def add(self,**kw):
         """
         For each parameter_name=parameter_object specified in kw:
@@ -170,23 +170,23 @@ class GlobalParams(Parameterized,OptionalSingleton):
         * if there is an entry in context that has the same name as the parameter,
           sets the value of the parameter in this object to that value, and then removes
           the name from context
-        """        
+        """
         for p_name,p_obj in kw.items():
             self._add_parameter(p_name,p_obj)
             if p_name in self.context:
                 setattr(self,p_name,self.context[p_name])
                 if p_name in self.unused_names:
                     # i.e. remove from __main__ if it was a -p option (but not if -c)
-                    del self.context[p_name]  
+                    del self.context[p_name]
                     self.unused_names.remove(p_name)
-                
+
 
 global_params=GlobalParams(context=__main__.__dict__)
 
 
 
 ##### Command-prompt formatting
-#    
+#
 class IPCommandPromptHandler(object):
     """
     Allows control over IPython's dynamic command prompts.
@@ -203,7 +203,7 @@ class IPCommandPromptHandler(object):
         IP = __main__.__dict__['__IP']
         prompt = getattr(IP.outputcache,cls._prompt)
         prompt.p_template = format
-        prompt.set_p_str()        
+        prompt.set_p_str()
         cls._format = format
 
     @classmethod
@@ -213,7 +213,7 @@ class IPCommandPromptHandler(object):
         """
         return cls._format
 
-    
+
 class CommandPrompt(IPCommandPromptHandler):
     """
     Control over input prompt.
@@ -236,7 +236,7 @@ class CommandPrompt(IPCommandPromptHandler):
       CommandPrompt.set_format('{my_var}>>> ')
     """
     _prompt = 'prompt1'
-    
+
     # Predefined alternatives
     basic_format   = 'Topographica>>> '
     if ipython_prompt_interface == "PromptManager":
@@ -245,7 +245,7 @@ class CommandPrompt(IPCommandPromptHandler):
     else:
         simtime_format = 'topo_t${topo.sim.timestr()}>>> '
         simtimecmd_format = 'topo_t${topo.sim.timestr()}_c\\#>>> '
-    
+
     _format = simtimecmd_format
 
 
@@ -294,7 +294,7 @@ def sim_name_from_filename(filename):
 
 
 def boolean_option_action(option,opt_str,value,parser):
-    """Callback function for boolean-valued options that apply to the entire run.""" 
+    """Callback function for boolean-valued options that apply to the entire run."""
     #print "Processing %s" % (opt_str)
     setattr(parser.values,option.dest,True)
 
@@ -308,7 +308,7 @@ def i_action(option,opt_str,value,parser):
     """Callback function for the -i option."""
     boolean_option_action(option,opt_str,value,parser)
     interactive()
-    
+
 topo_parser.add_option("-i","--interactive",action="callback",callback=i_action,
                        dest="interactive",default=False,
                        help="provide an interactive prompt even if stdin does not appear to be a terminal.")
@@ -319,7 +319,7 @@ def v_action(option,opt_str,value,parser):
     import param.parameterized
     param.parameterized.min_print_level=param.parameterized.VERBOSE
     print "Enabling verbose message output."
-    
+
 topo_parser.add_option("-v","--verbose",action="callback",callback=v_action,dest="verbose",default=False,help="""\
 enable verbose messaging output.""")
 
@@ -329,7 +329,7 @@ def d_action(option,opt_str,value,parser):
     import param.parameterized
     param.parameterized.min_print_level=param.parameterized.DEBUG
     print "Enabling debugging message output."
-    
+
 topo_parser.add_option("-d","--debug",action="callback",callback=d_action,dest="debug",default=False,help="""\
 enable debugging message output (implies --verbose).""")
 
@@ -341,14 +341,14 @@ def l_action(option,opt_str,value,parser):
     from topo.misc.legacy import install_legacy_support
     print "Enabling legacy support."
     install_legacy_support()
-    
+
 topo_parser.add_option("-l","--legacy",action="callback",callback=l_action,dest="legacy",default=False,help="""\
 launch Topographica with legacy support enabled.""")
 
 
 def gui(start=True):
     """Start the GUI as if -g were supplied in the command used to launch Topographica."""
-    if matplotlib_imported: 
+    if matplotlib_imported:
         rcParams['backend']='TkAgg'
     auto_import_commands()
     if start:
@@ -385,9 +385,9 @@ def c_action(option,opt_str,value,parser):
     something_executed=True
     openmp_settings_names = ['openmp_threads', 'openmp_min_threads', 'openmp_max_threads']
     openmp_present = [(k in __main__.__dict__) for k in openmp_settings_names]
-    if openmp_present and parser.values.gui: 
+    if openmp_present and parser.values.gui:
         print "\nWARNING: For OpenMP settings to be used properly they need to be specified after the -g flag."
-    
+
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
 		       help="string of arbitrary Python code to be executed in the main namespace.")
@@ -399,7 +399,7 @@ def p_action(option,opt_str,value,parser):
     global_params.exec_in_context(value)
     global something_executed
     something_executed=True
-            
+
 topo_parser.add_option("-p","--set-parameter",action = "callback",callback=p_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
 		       help="command specifying value(s) of script-level (global) Parameter(s).")
@@ -419,11 +419,11 @@ def auto_import_commands():
             modulename = re.sub('\.py$','',f)
             exec "from topo.command."+modulename+" import *" in __main__.__dict__
     exec "from topo.command import *" in __main__.__dict__
-    
+
 def a_action(option,opt_str,value,parser):
     """Callback function for the -a option."""
     auto_import_commands()
-    
+
 topo_parser.add_option("-a","--auto-import-commands",action="callback",callback=a_action,help="""\
 import everything from commands/*.py into the main namespace, for convenience; \
 equivalent to -c 'from topo.misc.commandline import auto_import_commands ; auto_import_commands()'.""")
@@ -452,17 +452,17 @@ def exec_startup_files():
         if os.path.exists(startup_file):
             print "Executing user startup file %s" % (startup_file)
             execfile(startup_file,__main__.__dict__)
-    
+
     #####
     # CEBALERT: locations we used to use on Windows and OS X. Should
     # remove after 0.9.8.
     # application data on windows
     inipath = os.path.join(os.path.expandvars("$APPDATA"),'Topographica','topographica.ini')
-    # application support on OS X  
+    # application support on OS X
     configpath = os.path.join(os.path.expanduser("~"),"Library","Application Support",'Topographica','topographica.config')
     for startup_file in (configpath,inipath):
         if os.path.exists(startup_file):
-            param.Parameterized().warning("Ignoring %s; location for startup file is %s (UNIX/Linux/Mac OS X) or %s (Windows)."%(startup_file,rcpath,inipath)) 
+            param.Parameterized().warning("Ignoring %s; location for startup file is %s (UNIX/Linux/Mac OS X) or %s (Windows)."%(startup_file,rcpath,inipath))
     #####
 
 
@@ -591,7 +591,7 @@ def process_argv(argv):
     ## some kind of cleanup code afterwards)
     if os.environ.get('PYTHONINSPECT'):
         print "Output path: %s" % param.normalize_path.prefix
-        print BANNER    
+        print BANNER
         # CBALERT: should probably allow a way for users to pass
         # things to IPython? Or at least set up some kind of
         # topographica ipython config file. Right now, a topo_parser
