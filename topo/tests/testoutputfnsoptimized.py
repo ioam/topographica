@@ -1,6 +1,6 @@
 """
 
-$Id$
+
 """
 
 # CEBHACKALERT: we should delete this file, right?

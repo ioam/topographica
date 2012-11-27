@@ -16,7 +16,7 @@ CFSheet: A subclass of ProjectionSheet that provides an interface to
 the underlying ConnectionFields in any projection of type
 CFProjection.
 
-$Id$
+
 """
 
 

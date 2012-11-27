@@ -9,7 +9,7 @@ here are the remaining uncategorized EventProcessors.  Any new
 EventProcessors classes added to this directory will automatically
 become available for any model.
 
-$Id$
+
 """
 
 import param

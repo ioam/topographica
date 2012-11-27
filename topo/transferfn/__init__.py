@@ -14,7 +14,7 @@ the entire Projection at once.
 Any new output functions added to this directory will automatically
 become available for any model.
 
-$Id$
+
 """
 
 import copy

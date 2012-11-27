@@ -1,7 +1,7 @@
 """
 Support for optional Cython .pyx files.
 
-$Id$
+
 """
 
 # CEBENHANCEMENT: If we begin using Cython components, consider adding

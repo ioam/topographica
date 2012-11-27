@@ -23,7 +23,7 @@ From the Makefile (Tabs have been stripped)::
         ./topographica topo/gendocs.py
         mv docs/topo.__init__.html docs/index.html
 
-$Id$
+
 """
 
 

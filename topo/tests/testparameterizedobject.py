@@ -2,7 +2,7 @@
 Unit test for Parameterized.
 
 
-$Id$
+
 """
 
 import unittest

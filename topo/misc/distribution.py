@@ -1,7 +1,7 @@
 """
 Distribution class
 
-$Id$
+
 """
 # To do:
 #

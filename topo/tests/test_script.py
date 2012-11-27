@@ -4,7 +4,7 @@ not changed.
 
 Buildbot shows how to run all these tests.
 
-$Id$
+
 """
 
 

@@ -113,7 +113,7 @@ doctest
 
 
 
-$Id$
+
 """
 
 # CEBALERT: It might be good if tests/ were a directory at the top

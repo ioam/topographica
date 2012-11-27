@@ -10,7 +10,7 @@ retinal magnification using a CFProjection.  A CoordinateMapperFn
 CFProjection's coord_mapper parameter to an instance of the desired
 CoordinateMapperFn.
 
-$Id$
+
 """
 
 from math import atan,pi,atan2

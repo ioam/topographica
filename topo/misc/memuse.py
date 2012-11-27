@@ -17,7 +17,7 @@ Examples::
 
   ./topographica -a -c 'from topo.misc import memuse, asizeof' -c 'memuse.memuse_batch("examples/tiny.ty",times=[0,100],analysis_fn=memuse.plotting_and_saving_analysis_fn,cortex_density=20)'
 
-$Id$
+
 """
 __version__='$Revision: 10367 $'
 

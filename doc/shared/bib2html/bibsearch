@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -T -w
 
-# $Id$
+# 
 #
 # CGI script for search bibliographies.
 #

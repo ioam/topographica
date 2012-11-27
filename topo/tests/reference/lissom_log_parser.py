@@ -6,7 +6,7 @@ Before using these functions, you should set filename_base to
 give the base filename path of the C++ LISSOM files, e.g.
 'topo/tests/reference/or_map_topo.'
 
-$Id$
+
 """
 
 # CEBHACKALERT: filename should change

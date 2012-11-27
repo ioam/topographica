@@ -4,7 +4,7 @@ Projection-level response functions.
 For CFProjections, these function objects compute a response matrix
 when given an input pattern and a set of ConnectionField objects.
 
-$Id$
+
 """
 
 from numpy import sum,exp,zeros,ravel

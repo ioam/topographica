@@ -50,7 +50,7 @@ connections might have src_port = 'Recurrent', and probably also a
 special dest_port.
 
 
-$Id$
+
 """
 
 import param

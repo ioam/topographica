@@ -1,4 +1,4 @@
-# $Id$
+# 
 
 clean: 
 # CEBALERT: dodgy way of finding these dirs?

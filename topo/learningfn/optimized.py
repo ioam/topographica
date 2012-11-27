@@ -4,7 +4,7 @@ written in C to optimize performance.
 
 Requires the weave package; without it unoptimized versions are used.
 
-$Id$
+
 """
 
 from numpy import zeros, ones
