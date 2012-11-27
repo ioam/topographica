@@ -5,7 +5,7 @@
 ...    x = param.Number(default=0)
 ...    y = param.Number(default=0)
 ...    xy = param.Composite(attribs=['x','y'])
-... 
+...
 
 # Make an instance and do default checks
 >>> a = A()
@@ -31,7 +31,7 @@
 3
 
 # Get the compound on the class
->>> A.xy 
+>>> A.xy
 [0, 0]
 
 # Set the compound default on the class
@@ -55,7 +55,7 @@
 2
 >>> a.y
 3
->>> 
+>>>
 
 
 
@@ -71,12 +71,12 @@
 ...         val=self.sequence[self.index]
 ...         self.index+=1
 ...         return val
-        
+
 
 >>> a2 = A(x=SomeSequence([1,2,3]),y=SomeSequence([4,5,6]))
 
 >>> x1,y1 = a2.x,a2.y
->>> a2.inspect_value('xy')  # inspect should not advance numbers 
+>>> a2.inspect_value('xy')  # inspect should not advance numbers
 [1, 4]
 
 >>> ix,iy = a2.get_value_generator('xy')
