@@ -61,7 +61,7 @@ class LinearDecay(param.Parameterized):
     ending_value = param.Number(0.02,doc="""Value at the end of learning.""")
     duration = param.Number(30000,doc="""Time for the ending_value.""")
     time_fn = topo.sim.time
-    
+
     def __call__(self):
         return self.starting_value + (self.ending_value-self.starting_value)/self.duration*float(self.time_fn())
 
