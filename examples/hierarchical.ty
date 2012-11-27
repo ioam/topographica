@@ -14,9 +14,9 @@ import param
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
-import topo.learningfn.optimized 
+import topo.learningfn.optimized
 import topo.pattern.random
-import topo.responsefn.optimized 
+import topo.responsefn.optimized
 
 
 # Parameters that can be passed on the command line using -p
@@ -99,7 +99,7 @@ topo.sim.connect('RightRetina','V1',delay=0.5,name='AfferentRight',
 # Projections to V2
 topo.sim.connect('LeftRetina','V2',delay=0.5,name='AfferentLeft',
                  connection_type=projection.CFProjection)
-                  
+
 topo.sim.connect('RightRetina','V2',delay=0.5,name='AfferentRight',
                  connection_type=projection.CFProjection)
 

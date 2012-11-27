@@ -102,14 +102,14 @@ topo.sim.connect('Retina','V1', delay=0.1,
           nominal_bounds_template=BoundingBox(radius=0.05),learning_rate=0.0,
           decay_rate=0.2)
 
-topo.sim.connect('V1','V1', delay=0.1, 
-          connection_type=LeakyCFProjection,strength = 0.9, 
+topo.sim.connect('V1','V1', delay=0.1,
+          connection_type=LeakyCFProjection,strength = 0.9,
           name='LateralExcitatory',
           nominal_bounds_template=BoundingBox(radius=0.2),learning_rate=0.1,
           decay_rate=0.05)
-            
-topo.sim.connect('V1','V1', delay=0.1, 
-          connection_type=LeakyCFProjection,strength = -1.1, 
+
+topo.sim.connect('V1','V1', delay=0.1,
+          connection_type=LeakyCFProjection,strength = -1.1,
           name='LateralInhibitory',
           nominal_bounds_template=BoundingBox(radius=1.0),learning_rate=0.1,
           decay_rate=0.01)
@@ -134,7 +134,7 @@ topo.sim.connect('V1','V1', delay=0.1,
 ##
 #topo.sim.schedule_command(  200,'topo.sim["V1"].projections()["LateralExcitatory"].learning_rate=1.445')
 #topo.sim.schedule_command(  500,'topo.sim["V1"].projections()["LateralExcitatory"].learning_rate=0.205')
-#topo.sim.schedule_command( 1000,'topo.sim["V1"].projections()["LateralExcitatory"].learning_rate=0.149') 
+#topo.sim.schedule_command( 1000,'topo.sim["V1"].projections()["LateralExcitatory"].learning_rate=0.149')
 #
 #topo.sim.schedule_command(  500,'topo.sim["V1"].projections()["Afferent0"].learning_rate=0.911')
 #topo.sim.schedule_command( 2000,'topo.sim["V1"].projections()["Afferent0"].learning_rate=0.729')

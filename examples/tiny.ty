@@ -12,10 +12,10 @@ import param
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
-import topo.learningfn.projfn 
+import topo.learningfn.projfn
 import topo.transferfn.projfn
 import topo.pattern.random
-import topo.responsefn.optimized 
+import topo.responsefn.optimized
 import topo.sheet.lissom
 
 from topo.base.functionfamily import LearningFn
@@ -41,7 +41,7 @@ class SampleHebbian(LearningFn):
 
     Increases each weight in proportion to the product of this
     neuron's activity and the input activity.
-    
+
     Requires some form of output_fn normalization for stability.
     """
     sample_param=param.Number(default=0.1,bounds=(0,None),doc="Example positive-valued numeric parameter")
@@ -50,7 +50,7 @@ class SampleHebbian(LearningFn):
     def __init__(self,**params):
         super(SampleHebbian,self).__init__(**params)
         self.value=self.value_0
-        
+
     def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
         """
         Update the value of the given weights matrix based on the
@@ -81,7 +81,7 @@ topo.sim['V1'] = sheet.CFSheet(nominal_density=p.cortex_density,
 
 topo.sim.connect(
     'Retina','V1',name='Afferent',delay=0.05,
-    connection_type=projection.CFProjection, 
+    connection_type=projection.CFProjection,
     weights_generator=pattern.random.UniformRandom(),
     nominal_bounds_template=sheet.BoundingBox(radius=0.2),
     response_fn=responsefn.optimized.CFPRF_DotProduct_opt(),

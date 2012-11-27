@@ -1,20 +1,20 @@
 """
   Example of wrapping objects in an external simulator as Topographica Sheets.
-  
+
   Based on Laurent Perrinet's retina.py model implemented in
   PyNEST/PyNN (see perrinet_retina_pynest.py).
-  
+
   To run this, first meet these prerequisites:
 
   1. Make sure libgsl0-dev is installed.
 
   2. Download nest-1 and Pynest1 from:
-  
+
        http://www.nest-initiative.uni-freiburg.de/index.php/Software:Download
        http://www.nest-initiative.org/index.php/Image:Pynest1.tgz
 
      and PyNN 0.3 from:
-     
+
        http://neuralensemble.org/trac/PyNN/wiki/Download
 
   3. Build and install NEST as described in its documentation.  E.g.:
@@ -22,7 +22,7 @@
       > tar -xzf /tmp/nest-1.0.13.tar.gz
       > mkdir nest-obj
       > cd nest-obj
-      > ~/research/nest-1.0.13/configure 
+      > ~/research/nest-1.0.13/configure
       (45 sec)
       > make
       (10 min)
@@ -37,7 +37,7 @@
 
   5. Build PyNN for Topographica's copy of python.  E.g.:
       > cd ~/research/
-      > tar -xzf /tmp/PyNN-0.3.0.tar.gz 
+      > tar -xzf /tmp/PyNN-0.3.0.tar.gz
       > cd PyNN-0.3.0
       > ~/research/topographica/bin/python setup.py install
 
