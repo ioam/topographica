@@ -24,7 +24,7 @@ from topo.base.boundingregion import BoundingBox
 from topo.base.cf import CFProjection
 
 from topo.sheet import GeneratorSheet
-from topo.sheet.saccade import ShiftingGeneratorSheet, SaccadeController
+from topo.sheet.saccade import ShiftingGeneratorSheet, SaccadeController    
 from topo.projection import SharedWeightCFProjection
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
 from topo.coordmapper import OttesSCMotorMapper
@@ -55,7 +55,7 @@ saccade_generator = topo.pattern.Gaussian(
     #
     # A cycle through a series of saccades to the
     # periphery, and back to the center.
-    #
+    # 
     #          NE    C     SE   C     NW   C     SW    C
     # x=cycle([0.3,-0.3,  0.3,-0.3, -0.3, 0.3, -0.3, 0.3]),
     # y=cycle([0.3,-0.3, -0.3, 0.3,  0.3,-0.3, -0.3, 0.3]),
@@ -68,7 +68,7 @@ saccade_generator = topo.pattern.Gaussian(
     # SaccadeController.decode_method = 'sample'
     # x = 0.0,
     # y = 0.0,
-
+    
     size =  0.1,
     aspect_ratio=1.0)
 
@@ -90,7 +90,7 @@ topo.sim['SC'] = GeneratorSheet(input_generator=saccade_generator,
 ##########################################################################
 # Connections: The colliculus efferent connection connects to the
 # saccade controller's activity port with a CFProjection, which
-# connects to the 'Saccade' port of the Eye with a generic connection.
+# connects to the 'Saccade' port of the Eye with a generic connection. 
 
 topo.sim.connect('SC','SaccadeControl',name="Efferent",
                  dest_port = 'Activity',

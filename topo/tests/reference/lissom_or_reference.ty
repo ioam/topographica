@@ -30,7 +30,7 @@ Miikkulainen, Bednar, Choe, and Sirosh (2005), Computational Maps in
 the Visual Cortex, Springer, except:
 
  - The default_density is smaller for practicality (142 in the book)
- - The lateral inhibitory radius is 0.5 matrix units greater than in the
+ - The lateral inhibitory radius is 0.5 matrix units greater than in the 
    book, becauseTopographica enforces good circular-shaped CF outlines.
  - Input patterns are evaluated on the entire retina, instead of only up
    to bounds_multiplier=2.5 times the gaussian sigma in the book
@@ -55,7 +55,7 @@ $Id$
 
 
 # Notes for developers:
-#
+# 
 # This simulation will not pickle, but that is only because it defines
 # functions in __main__ (and uses lambda functions). Many variables are
 # also defined in __main__; some these would have to be made available

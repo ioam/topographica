@@ -24,9 +24,9 @@ import param
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
-import topo.learningfn.projfn
+import topo.learningfn.projfn 
 import topo.pattern.random
-import topo.responsefn.optimized
+import topo.responsefn.optimized 
 import topo.transferfn.misc
 
 # Parameters that can be passed on the command line using -p

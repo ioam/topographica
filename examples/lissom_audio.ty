@@ -5,7 +5,7 @@ Example of a simplified auditory pathway incorporating the cochlea, MGBv, and AI
 
 The cochlea comprises a rolling FFT spectrogram, passing its output to an MGBv
 sheet where responses are categorised by typical MGBv neuron responses. The final
-auditory station in this example is an lissom AI sheet, calibrated to the parameters
+auditory station in this example is an lissom AI sheet, calibrated to the parameters 
 for V1 used in examples/lissom_oo_or.ty
 
 $Id: lissom_audio.ty 11027 2010-04-10 01:17:05Z bilalkhancnsg $
@@ -29,14 +29,14 @@ from topo.pattern.audio import AudioFile, AuditorySpectrogramSimpleOuterEar
 from numpy import hanning
 
 
-# Parameters that can be passed on the command line using -p
+# Parameters that can be passed on the command line using -p  
 p.add(
     density_multiplier = param.Number(default=1.0, bounds=(None,None), doc=
         """Multiplicatively scales mgb and cortex densities"""),
-
+        
     cochlea_density = param.Number(default=100.0, bounds=(0,None), inclusive_bounds=(False,True), doc=
         """The nominal_density to use for the Cochlea."""),
-
+        
     mgbv_density = param.Number(default=50.0, bounds=(0,None), inclusive_bounds=(False,True), doc=
         """The nominal_density to use for the Medial Geniculate Body (Ventral division)."""),
 
@@ -57,14 +57,14 @@ projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
 
 ### Audio pattern generator
 """
-All STRFs employed come from the domestic cat. Audible frequency range of the  cat is in fact 48-85,000Hz.
+All STRFs employed come from the domestic cat. Audible frequency range of the  cat is in fact 48-85,000Hz. 
 (Hearing range of the domestic cat, Hearing Research 19, p85-88, 1985, R.Heffner, H.Heffner)
 
-We can't get anywhere near this with the ubiquitous audio sample rate of 44,100Hz, which spans
+We can't get anywhere near this with the ubiquitous audio sample rate of 44,100Hz, which spans 
 the range 0-22,050Hz, so we confine to the human audible range 20-20,000Hz.
 """
 
-# Guitar rendition of Daisy Bell, in tribute to the IBM 704,
+# Guitar rendition of Daisy Bell, in tribute to the IBM 704, 
 # which in 1962 became the first computer ever to 'sing'.
 
 audio_data = AudioFile(filename="sounds/complex/daisy.wav", seconds_per_iteration=0.001, interval_length=0.2)
@@ -81,42 +81,42 @@ topo.sim['Cochlea']=sheet.GeneratorSheet(
     input_generator=input_pattern, period=1.0, phase=0.05)
 
 mgbv_connection_dimensions = (0.2,0.1) # 20 msecs, 1 octave
-mgbv_dimensions = (cochlea_dimensions[0]-mgbv_connection_dimensions[0],
+mgbv_dimensions = (cochlea_dimensions[0]-mgbv_connection_dimensions[0], 
     cochlea_dimensions[1])
-
+                   
 topo.sim['MGBv']=sheet.CFSheet(
     nominal_density=p.mgbv_density, output_fns=[transferfn.misc.HalfRectify()],
     nominal_bounds=sheet.BoundingBox(points=((-mgbv_dimensions[0]/2, -mgbv_dimensions[1]/2),
         (mgbv_dimensions[0]/2, mgbv_dimensions[1]/2))))
-
-a1_connection_dimensions = (0.27083,0.27083)
-a1_dimensions = (mgbv_dimensions[0]-a1_connection_dimensions[0],
+        
+a1_connection_dimensions = (0.27083,0.27083)        
+a1_dimensions = (mgbv_dimensions[0]-a1_connection_dimensions[0], 
     mgbv_dimensions[1])
-
+                                                  
 topo.sim['A1']=sheet.lissom.LISSOM(
     nominal_density=p.cortex_density, tsettle=9,
     nominal_bounds=sheet.BoundingBox(points=((-a1_dimensions[0]/2, -a1_dimensions[1]/2),
         (a1_dimensions[0]/2, a1_dimensions[1]/2))),
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.083,upper_bound=0.633)],
     joint_norm_fn=sheet.optimized.compute_joint_norm_totals_opt)
-
+    
 
 ### Connections
-topo.sim.connect('Cochlea', 'MGBv', name='Cochlea Afferent', delay=0.05,
+topo.sim.connect('Cochlea', 'MGBv', name='Cochlea Afferent', delay=0.05, 
     nominal_bounds_template=sheet.BoundingBox(
         points=((-mgbv_connection_dimensions[0]/2, -mgbv_connection_dimensions[1]/2),
             (mgbv_connection_dimensions[0]/2, mgbv_connection_dimensions[1]/2))),
-    connection_type=projection.CFProjection, cf_shape=pattern.Constant(), strength=1.0,
+    connection_type=projection.CFProjection, cf_shape=pattern.Constant(), strength=1.0, 
     weights_generator=pattern.SigmoidedDoG(positive_size=0.03, positive_aspect_ratio=3.9,
-        negative_size=0.09, negative_aspect_ratio=1.8, sigmoid_slope=20.0,
-        sigmoid_x=0.01, size=0.5))
+        negative_size=0.09, negative_aspect_ratio=1.8, sigmoid_slope=20.0, 
+        sigmoid_x=0.01, size=0.5))      
 
 topo.sim.connect(
     'MGBv', 'A1', name='MGB Afferent', dest_port=('Activity','JointNormalize','Afferent'),
-    connection_type=projection.CFProjection, delay=0.05, learning_rate=0.9590/8,
+    connection_type=projection.CFProjection, delay=0.05, learning_rate=0.9590/8, 
     strength=1.0, weights_generator=pattern.random.GaussianCloud(gaussian_size=0.27083),
-    nominal_bounds_template=sheet.BoundingBox(points=((-a1_connection_dimensions[0]/2,
-        -a1_connection_dimensions[1]/2), (a1_connection_dimensions[0]/2,
+    nominal_bounds_template=sheet.BoundingBox(points=((-a1_connection_dimensions[0]/2, 
+        -a1_connection_dimensions[1]/2), (a1_connection_dimensions[0]/2, 
         a1_connection_dimensions[1]/2))))
 
 topo.sim.connect(
@@ -124,7 +124,7 @@ topo.sim.connect(
     connection_type=projection.ResizableCFProjection, learning_rate=2.55528,
     nominal_bounds_template=sheet.BoundingBox(radius=0.10417),
     weights_generator=pattern.random.GaussianCloud(gaussian_size=0.10417))
-
+        
 topo.sim.connect(
     'A1', 'A1', name='Lateral Inhibitory', delay=0.05, strength=-0.9,
     connection_type=projection.CFProjection, learning_rate=1.80873,

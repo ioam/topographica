@@ -1,11 +1,11 @@
-from __future__ import division
+from __future__ import division 
 """
 Implementation of 2D ocular dominance model from G.J. Goodhill &
 D.J. Willshaw (1990), "Application of the elastic net algorithm to the
 formation of ocular dominance stripes", Network: Computation in Neural
 Systems 1(1), p41-59.
 
-NOT YET TESTED.
+NOT YET TESTED.  
 
 $Id$
 """
@@ -39,7 +39,7 @@ class ElasticNet(Sheet):
 
     beta  = param.Number(default=2.0,bounds=(0,None),
                    doc="Scaling constant, contribution from neighbouring points on the net")
-
+                   
     initial_k = param.Number(default=0.2,bounds=(0,None),
                    doc="Initial k, scale parameter for the force of the retinal cells")
 
@@ -69,8 +69,8 @@ class ElasticNet(Sheet):
         # V1 cortical layer's ocularity) can pass above the retinal
         # layers.  V1 is located between the two layers; the distance
         # between them is the two_l.
-
-        GAP=self.two_l
+        
+        GAP=self.two_l 
         RS=self.retinasize
         CS=self.cortexsize
 
@@ -80,7 +80,7 @@ class ElasticNet(Sheet):
         # afterwards, the only difference in the retinas is the z left
         # has 0 and the right one has two_l. This is done to replicate
         # the paper's approach. It could be done differently as well.
-
+        
         self.cell  = [[point() for i in range(2*RS)] for r in range(2*RS)]
         self.net  = [[point() for i in range(CS)] for r in range(CS)]
 
@@ -91,29 +91,29 @@ class ElasticNet(Sheet):
 
         #array to save the results, self.net[][].z, for printing..
         self.arraytoprint    =[[self.net[i][r].z for i in range(CS)] for r in range(CS)]
-
-        # The right retinal cells have a fixed separation between the layers  two_l
+    
+        # The right retinal cells have a fixed separation between the layers  two_l       
         for i in range(RS):
             for j in range(RS):
                 self.cell[i][j].x=i/(RS-1)
                 self.cell[i][j].y=j/(RS-1)
                 self.cell[i][j].z=GAP
 
-        # The left retinal cells have a fixed separation between the layers  two_l
+        # The left retinal cells have a fixed separation between the layers  two_l 
         for i in range(RS):
             for j in range(RS):
                 self.cell[i+RS][j+RS].x=i/(RS-1)
                 self.cell[i+RS][j+RS].y=j/(RS-1)
                 self.cell[i+RS][j+RS].z=0.0
-
-
-
+       
+                      
+       
         # The cells in V1 are initially between the two sheets (as in
         # the paper).  This bias is introduced to make sure that the
         # left end of the sheet is at the left, to reproduce the
         # biological orientation. The rest gets randomized as
         # described in the paper.
-
+        
         for i in range(CS):
             for j in range(CS):
                 self.net[i][j].x=i/(CS-1)+0.1*(numpy.random.uniform()-0.5)
@@ -138,21 +138,21 @@ class ElasticNet(Sheet):
 
     def process_current_time(self):
         """
-        Called by the simulation after all the events are processed for the
+        Called by the simulation after all the events are processed for the 
         current time but before time advances.  Allows the event processor
         to send any events that must be sent before time advances to drive
-        the simulation.
+        the simulation. 
         """
         self.learn()
-
+    
     def cellforce(self,cx,cy,px,py,K):
          """
          Gives us phi=exp((-|x-y|^2)/2K^2) and returns it.
          """
          K2=2.0*K*K  # 2K^2 scale parameter
-
+           
          d= ((self.cell[cx][cy].x-self.net[px][py].x)**2)+((self.cell[cx][cy].y-self.net[px][py].y)**2)+((self.cell[cx][cy].z-self.net[px][py].z)**2)
-
+            
          if (d>3.0*K):
              self.cforce[px][py]=0.0
          else:
@@ -160,7 +160,7 @@ class ElasticNet(Sheet):
 
          return (self.cforce[px][py])
 
-
+    
 
     def calNetTerm(self):
         """
@@ -168,40 +168,40 @@ class ElasticNet(Sheet):
         of this net point thus we get the part (yj+1 - 2yj + yj-1) of equation 1 of the paper
         which basically is the surrounding 4 neighbors but taking into account the boundary
         conditions of the 2D net  instead of rope.
-        """
-
+        """ 
+       
         CS=self.cortexsize
-
+        
         # Examine the four neighbors.  Subtract and add accordingly,
         # and since now we have four neighbors instead of two, the
         # term must be subtracted with 4 times the yi. This should
         # work as in the paper, but taking into account having three
         # dimensions and double the neighbors.
 
-        ##All the elements in the middle not touching borders
+        ##All the elements in the middle not touching borders 
         for px in range(1,CS-1):
                 for py in range(1,CS-1):
                         self.netterm[px][py].x = (self.net[px-1][py].x+self.net[px+1][py].x+self.net[px][py-1].x+self.net[px][py+1].x-4.0*self.net[px][py].x)/8.0
                         self.netterm[px][py].y = (self.net[px-1][py].y+self.net[px+1][py].y+self.net[px][py-1].y+self.net[px][py+1].y-4.0*self.net[px][py].y)/8.0
                         self.netterm[px][py].z = (self.net[px-1][py].z+self.net[px+1][py].z+self.net[px][py-1].z+self.net[px][py+1].z-4.0*self.net[px][py].z)/8.0
-
+        
 
         for px in range(1,CS-1): # Take into account the borders.
             ##All the left elements in column 0 not taking into account the very corners
             self.netterm[px][0].x= (self.net[px][1].x+self.net[px-1][0].x+self.net[px+1][0].x-3.0*self.net[px][0].x)/6.0
-            self.netterm[px][0].y= (self.net[px][1].y+self.net[px-1][0].y+self.net[px+1][0].y-3.0*self.net[px][0].y)/6.0
+            self.netterm[px][0].y= (self.net[px][1].y+self.net[px-1][0].y+self.net[px+1][0].y-3.0*self.net[px][0].y)/6.0            
             self.netterm[px][0].z= (self.net[px][1].z+self.net[px-1][0].z+self.net[px+1][0].z-3.0*self.net[px][0].z)/6.0
 
             ##All the right elements in column CS-1 not taking into account the very corners
             self.netterm[px][CS-1].x=(self.net[px][CS-2].x+self.net[px-1][CS-1].x+self.net[px+1][CS-1].x-3.0*self.net[px][CS-1].x)/6.0
-            self.netterm[px][CS-1].y=(self.net[px][CS-2].y+self.net[px-1][CS-1].y+self.net[px+1][CS-1].y-3.0*self.net[px][CS-1].y)/6.0
+            self.netterm[px][CS-1].y=(self.net[px][CS-2].y+self.net[px-1][CS-1].y+self.net[px+1][CS-1].y-3.0*self.net[px][CS-1].y)/6.0            
             self.netterm[px][CS-1].z=(self.net[px][CS-2].z+self.net[px-1][CS-1].z+self.net[px+1][CS-1].z-3.0*self.net[px][CS-1].z)/6.0
-
+            
         for py in range(1,CS-1): # Take into account the borders.
             ##All the top elements in row 0 not taking into account the very corners
             self.netterm[0][py].x= (self.net[1][py].x+self.net[0][py-1].x+self.net[0][py+1].x-3.0*self.net[0][py].x)/6.0
-            self.netterm[0][py].y= (self.net[1][py].y+self.net[0][py-1].y+self.net[0][py+1].y-3.0*self.net[0][py].y)/6.0
-            self.netterm[0][py].z= (self.net[1][py].z+self.net[0][py-1].z+self.net[0][py+1].z-3.0*self.net[0][py].z)/6.0
+            self.netterm[0][py].y= (self.net[1][py].y+self.net[0][py-1].y+self.net[0][py+1].y-3.0*self.net[0][py].y)/6.0            
+            self.netterm[0][py].z= (self.net[1][py].z+self.net[0][py-1].z+self.net[0][py+1].z-3.0*self.net[0][py].z)/6.0                        
 
             ##All the bottom elements in row cs-1 not taking into account the very corners
             self.netterm[CS-1][py].x=(self.net[CS-2][py].x+self.net[CS-1][py-1].x+self.net[CS-1][py+1].x-3.0*self.net[CS-1][py].x)/6.0
@@ -225,10 +225,10 @@ class ElasticNet(Sheet):
         self.netterm[CS-1][CS-1].x= (self.net[CS-1][CS-2].x+self.net[CS-2][CS-1].x-2.0*self.net[CS-1][CS-1].x)/4.0
         self.netterm[CS-1][CS-1].y= (self.net[CS-1][CS-2].y+self.net[CS-2][CS-1].y-2.0*self.net[CS-1][CS-1].y)/4.0
         self.netterm[CS-1][CS-1].z= (self.net[CS-1][CS-2].z+self.net[CS-2][CS-1].z-2.0*self.net[CS-1][CS-1].z)/4.0
-
+        
 
     def learn(self):
-
+        
         K=self.initial_k # scale parameter
         K2=2.0*K*K
         RS=self.retinasize
@@ -246,13 +246,13 @@ class ElasticNet(Sheet):
         for cx in range(RS): # For all the right retina cells do... calculate Wij
             for cy in range(RS):
 
-                Sum=0.0
-
+                Sum=0.0 
+                        
                 for px in range(CS): # calculate Phi
                     for py in range(CS):
-
+                        
                         Sum+=self.cellforce(cx,cy,px,py,K)
-
+                        
                 ##The Sigma(wij)*(xi-yj) gets calculated here and stored in Ftotal matrix for future usage.
                 for px in range(CS):
                     for py in range(CS):
@@ -260,18 +260,18 @@ class ElasticNet(Sheet):
                         self.ftot[px][py].y += self.cforce[px][py]*(self.cell[cx][cy].y-self.net[px][py].y)/Sum
                         self.ftot[px][py].z += self.cforce[px][py]*(self.cell[cx][cy].z-self.net[px][py].z)/Sum
 
-
-
+        
+                
         for cx in range(RS,RS*2): # For all the left retina cells do... calculate Wij
-
+            
             for cy in range(RS,RS*2):
-
+                
                 Sum=0.0
-
+                
                 for px in range(CS): # calculate Phi
                     for py in range(CS):
                         Sum+=self.cellforce(cx,cy,px,py,K)
-
+                        
                 ##The Sigma(wij)*(xi-yj) gets calculated here and stored in Ftotal matrix for future usage.
                 for px in range(CS):
                     for py in range(CS):
@@ -280,12 +280,12 @@ class ElasticNet(Sheet):
                         self.ftot[px][py].y += (self.cell[cx][cy].y-self.net[px][py].y)*cf/Sum
                         self.ftot[px][py].z += (self.cell[cx][cy].z-self.net[px][py].z)*cf/Sum
 
-
+       
 
 
            ######## END OF LOOP OVER CELLS #########
-
-
+ 
+        
         self.calNetTerm(); ## get (yj+1 - 2yj + yj-1) of equation 1 but with 4 neighbors
 
 
@@ -294,7 +294,7 @@ class ElasticNet(Sheet):
                     for py in range(CS):
                         self.net[px][py].x+= self.alpha*self.ftot[px][py].x+self.beta*K*self.netterm[px][py].x
                         self.net[px][py].y+= self.alpha*self.ftot[px][py].y+self.beta*K*self.netterm[px][py].y
-                        self.net[px][py].z+= self.alpha*self.ftot[px][py].z+self.beta*K*self.netterm[px][py].z
+                        self.net[px][py].z+= self.alpha*self.ftot[px][py].z+self.beta*K*self.netterm[px][py].z            
 
 
         self.initial_k*=rateK

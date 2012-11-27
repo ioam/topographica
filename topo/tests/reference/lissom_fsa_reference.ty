@@ -66,7 +66,7 @@ min_exc_rad = 1.5
 #default_afferent_size_scale=BaseN/BaseRN
 gammaexc = 0.9
 gammainh = 0.9
-gammaaff = 1.07
+gammaaff = 1.07 
 delta = 0.1
 beta = delta + 0.55
 
@@ -219,8 +219,8 @@ min_exc_radius = min_exc_rad / (BaseN * area_scale)
 # Connection parameters
 lgn_weight_bounds = BoundingBox(radius = r_L / BaseLN)
 afferent_weight_bounds   = BoundingBox(radius = rf_radius / (BaseLN * area_scale))
-excitatory_weight_bounds = BoundingBox(radius = exc_rad / (BaseN * area_scale), min_radius = min_exc_radius)
-inhibitory_weight_bounds = BoundingBox(radius = inh_rad / (BaseN * area_scale))
+excitatory_weight_bounds = BoundingBox(radius = exc_rad / (BaseN * area_scale), min_radius = min_exc_radius)  
+inhibitory_weight_bounds = BoundingBox(radius = inh_rad / (BaseN * area_scale))                  
 
 # Circular ConnectionFields
 RandomArray.seed(500,500)

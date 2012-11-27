@@ -64,13 +64,13 @@ class Whiskers(pattern.PatternGenerator):
     a multi-whisker stimulus pattern.  See Wilson et al (2010),
     equation 1.
     """
-
+    
     whisker = param.Integer(default=p.Wx*p.Wy, doc="""
         Activate either a single whisker by number, or the entire array if Wx*Wy.""")
-
+    
     kappa = param.Number(default=1e7, doc="""
 	Inverse of variance, applied to each whisker deflection angle separately.""")
-
+    
 
     def whisker_to_barrel(self,pattern,density):
 	"""
@@ -134,7 +134,7 @@ class LinearBoundary(pattern.PatternGenerator):
     See Wilson et al (2010): `Methods; Stimulating the Whiskers'
     for details.
     """
-
+    
     def function(self,params):
         self.pattern_x+=self.offset
         return numpy.where(self.pattern_x<=0.0,1.0,0.0)

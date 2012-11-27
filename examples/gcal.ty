@@ -11,13 +11,13 @@ differences include:
  - Using homeostatic adaptation (A) rather than manual threshold adjustment,
    to avoid the need for most parameter adjustment and to be more robust
  - Using a fixed lateral excitatory radius rather than shrinking it
-   (now that homeostatic plasticity allows all neurons to develop robustly)
+   (now that homeostatic plasticity allows all neurons to develop robustly) 
 
 GCAL is described fully in:
 
   Law, Antolik, and Bednar (2011). Mechanisms for stable and robust
   development of orientation maps and receptive fields.
-  Technical report, University of Edinburgh, EDI-INF-RR-1404.
+  Technical report, University of Edinburgh, EDI-INF-RR-1404.  
   http://www.inf.ed.ac.uk/publications/report/1404.html
 
 $Id$
@@ -32,11 +32,11 @@ import param
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
 import topo.learningfn.optimized
-import topo.learningfn.projfn
-import topo.transferfn.optimized
+import topo.learningfn.projfn 
+import topo.transferfn.optimized 
 import topo.pattern.random
 import topo.pattern.image
-import topo.responsefn.optimized
+import topo.responsefn.optimized 
 import topo.sheet.lissom
 import topo.sheet.optimized
 
@@ -117,9 +117,9 @@ if p.dataset=="Gaussian":
                        orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=21+i),
                        size=0.088388, aspect_ratio=4.66667, scale=p.scale)
             for i in xrange(total_num_inputs)]
-
+    
     combined_inputs = pattern.SeparatedComposite(min_separation=0,generators=inputs)
-
+    
 elif p.dataset=="Nature":
     input_type=pattern.image.FileImage
     image_filenames=["images/shouval/combined%02d.png"%(i+1) for i in xrange(25)]
@@ -150,7 +150,7 @@ for s in ['LGNOn','LGNOff']:
     lgn_surroundg = pattern.Gaussian(size=0.25,aspect_ratio=1.0,
         output_fns=[transferfn.DivisiveNormalizeL1()])
 
-    topo.sim.connect(s,s,delay=0.05,name='LateralGC',
+    topo.sim.connect(s,s,delay=0.05,name='LateralGC',                       
                      dest_port=('Activity'),activity_group=(0.6,DivideWithConstant(c=0.11)),
                      connection_type=projection.SharedWeightCFProjection,
                      strength=0.6,weights_generator=lgn_surroundg,
@@ -158,7 +158,7 @@ for s in ['LGNOn','LGNOff']:
 
 
 topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
-    tsettle=16, plastic=True,
+    tsettle=16, plastic=True, 
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),
     output_fns=[transferfn.misc.HomeostaticResponse()])
 
@@ -172,7 +172,7 @@ centerg   = pattern.Gaussian(size=0.07385,aspect_ratio=1.0,
                              output_fns=[transferfn.DivisiveNormalizeL1()])
 surroundg = pattern.Gaussian(size=0.29540,aspect_ratio=1.0,
                              output_fns=[transferfn.DivisiveNormalizeL1()])
-
+    
 on_weights = pattern.Composite(
     generators=[centerg,surroundg],operator=numpy.subtract)
 
@@ -199,7 +199,7 @@ topo.sim.connect(
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
     weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083),
     learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
-
+                     
 topo.sim.connect(
     'LGNOff','V1',delay=0.05,strength=p.aff_strength,name='LGNOffAfferent',
     dest_port=('Activity','JointNormalize','Afferent'),
