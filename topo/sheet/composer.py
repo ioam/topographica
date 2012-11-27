@@ -29,14 +29,14 @@ class Composer(Sheet):
     dest_ports=None # Allows connections to come in on any port
 
     def __init__(self,**params):
-        super(Composer,self).__init__(**params)        
+        super(Composer,self).__init__(**params)
         self.inputs = {}
         self.__dirty = False
 
     def port_configure(self,port,**config):
         """
         Configure a specific input port.
-        
+
         origin = (default (0,0)) The offset in the output matrix where
         this port's input should be placed.
         """
@@ -49,13 +49,13 @@ class Composer(Sheet):
     def _dest_connect(self,proj,origin=(0,0)):
         super(Composer,self)._dest_connect(proj)
         self.inputs[(proj.src.name,proj.src_port)] = Struct(origin=origin)
-    
+
     def process_current_time(self):
-        if self.__dirty:        
-            self.send_output(data=self.activity) 
+        if self.__dirty:
+            self.send_output(data=self.activity)
             self.activity = zeros(self.activity.shape)+0.0
             self.__dirty=False
-           
+
     def input_event(self,conn,data):
 
         self.verbose("Received %s input from %s." % (NxN(data.shape),conn.src))

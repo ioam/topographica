@@ -41,12 +41,12 @@ def matrix_hsv_to_rgb(hMapArray,sMapArray,vMapArray):
     been normalized to 1.  There should be no side-effects on the
     original input matrices.
     """
-    
+
     shape = hMapArray.shape
     rmat = array(hMapArray,Float)
     gmat = array(sMapArray,Float)
     bmat = array(vMapArray,Float)
-    
+
     ## This code should never be seen.  It means that calling code did
     ## not take the precaution of clipping the input matrices.
     if max(rmat.ravel()) > 1 or max(gmat.ravel()) > 1 or max(bmat.ravel()) > 1:
@@ -62,7 +62,7 @@ def matrix_hsv_to_rgb(hMapArray,sMapArray,vMapArray):
             rmat[j,i] = rgb[0]
             gmat[j,i] = rgb[1]
             bmat[j,i] = rgb[2]
-                
+
     return (rmat, gmat, bmat)
 
 
@@ -124,19 +124,19 @@ class TestPlot(unittest.TestCase):
         ### CATCH EXCEPTION
 
         plot_channels1 = {'Strength':None,'Hue':None,'Confidence':None}
-        # plot1: empty plot 
+        # plot1: empty plot
         self.plot1 = make_template_plot(plot_channels1,self.view_dict,density=10.0,name='plot1')
-        
-        plot_channels2 = {'Strength':self.key1,'Hue':None,'Confidence':None}                       
+
+        plot_channels2 = {'Strength':self.key1,'Hue':None,'Confidence':None}
         # plot2: sheetView 1, no normalize, no clipping
         self.plot2 = make_template_plot(plot_channels2,self.view_dict,density=10.0,name='plot2')
- 
+
         plot_channels3 = {'Strength':self.key1,'Hue':self.key2,'Confidence':None}
         # plot3: sheetView 1+2, no normalize, no clipping
         self.plot3 = make_template_plot(plot_channels3,self.view_dict,density=10.0,name='plot3')
 
         plot_channels4 = {'Strength':self.key1,'Hue':self.key2,'Confidence':self.key3}
-        # plot4: sheetView 1+2+3, no normalize , no clipping 
+        # plot4: sheetView 1+2+3, no normalize , no clipping
         self.plot4 = make_template_plot(plot_channels4,self.view_dict,density=10.0,name='plot4')
 
         plot_channels5 = {'Strength':self.key1,'Hue':None,'Confidence':self.key3}
@@ -144,15 +144,15 @@ class TestPlot(unittest.TestCase):
         self.plot5 = make_template_plot(plot_channels5,self.view_dict,density=10.0,name='plot5')
 
         plot_channels6 = {'Strength':None,'Hue':self.key2,'Confidence':self.key3}
-        # plot6: sheetView 2+3, no normalize , no clipping 
+        # plot6: sheetView 2+3, no normalize , no clipping
         self.plot6 = make_template_plot(plot_channels6,self.view_dict,density=10.0,name='plot6')
 
         plot_channels7 = {'Strength':self.key4,'Hue':self.key2,'Confidence':self.key3}
-        # plot7: sheetView 1+2+3, no normalize , clipping 
+        # plot7: sheetView 1+2+3, no normalize , clipping
         self.plot7 = make_template_plot(plot_channels7,self.view_dict,density=10.0,name='plot7')
 
         plot_channels8 = {'Strength':self.key1,'Hue':self.key2,'Confidence':self.key3}
-        # plot8: sheetView 1+2+3, normalize , no clipping 
+        # plot8: sheetView 1+2+3, normalize , no clipping
         self.plot8 = make_template_plot(plot_channels8,self.view_dict,density=10.0,normalize=True,name='plot8')
 
         ### JCALERT! FOR THE MOMENT I TAKE THE DEFAULT FOR NORMALIZE.
@@ -169,12 +169,12 @@ class TestPlot(unittest.TestCase):
         plot_channels9 = {'Strength':self.key1,'Hue':self.key2,'Confidence':self.key3}
         self.plot9 = make_template_plot(plot_channels9,self.sheet.sheet_views,density=10.0,name='plot9')
 
-        
-        
+
+
 
     def test_plot(self):
         pass
-    
+
 #       ### JCALERT! make a test for plot0
 
 #       # plot 1
@@ -182,7 +182,7 @@ class TestPlot(unittest.TestCase):
 #       self.assertEqual(self.plot1,test)
 
 #       # plot 2
-#       sat = zeros((10,10),Float) 
+#       sat = zeros((10,10),Float)
 #       hue = zeros((10,10),Float)
 #       val = self.matrix1
 
@@ -192,28 +192,28 @@ class TestPlot(unittest.TestCase):
 #               self.assertAlmostEqual(each3,each4)
 
 #       # plot 3
-#       sat = ones((10,10),Float) 
+#       sat = ones((10,10),Float)
 #       hue = zeros((10,10),Float) + 0.3
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
 #       for each1,each2 in zip(self.plot3.rgb_matrices,test):
 #           for each3,each4 in zip(each1.ravel(),each2.ravel()):
-#               self.assertAlmostEqual(each3,each4)  
+#               self.assertAlmostEqual(each3,each4)
 
 #       # plot 4
-#       sat = self.matrix3 
+#       sat = self.matrix3
 #       hue = zeros((10,10),Float) + 0.3
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
 #       for each1,each2 in zip(self.plot4.rgb_matrices,test):
 #           for each3,each4 in zip(each1.ravel(),each2.ravel()):
-#               self.assertAlmostEqual(each3,each4)  
+#               self.assertAlmostEqual(each3,each4)
 
 #       # plot 5
-#       sat = zeros((10,10),Float) 
-#       hue = zeros((10,10),Float) 
+#       sat = zeros((10,10),Float)
+#       hue = zeros((10,10),Float)
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
@@ -222,35 +222,35 @@ class TestPlot(unittest.TestCase):
 #               self.assertAlmostEqual(each3,each4)
 
 #       # plot 6
-#       sat = self.matrix3 
-#       hue = zeros((10,10),Float) + 0.3 
-#       val = ones((10,10),Float) 
+#       sat = self.matrix3
+#       hue = zeros((10,10),Float) + 0.3
+#       val = ones((10,10),Float)
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
 #       for each1,each2 in zip(self.plot6.rgb_matrices,test):
 #           for each3,each4 in zip(each1.ravel(),each2.ravel()):
-#               self.assertAlmostEqual(each3,each4)  
-    
+#               self.assertAlmostEqual(each3,each4)
+
 #       # plot 7
-#       sat = self.matrix3 
-#       hue = zeros((10,10),Float) + 0.3 
+#       sat = self.matrix3
+#       hue = zeros((10,10),Float) + 0.3
 #       val = self.matrix4
 
 #         val = MLab.clip(val,0.0,1.0)
-        
+
 #       test = matrix_hsv_to_rgb(hue,sat,val)
 #       for each1,each2 in zip(self.plot7.rgb_matrices,test):
 #           for each3,each4 in zip(each1.ravel(),each2.ravel()):
 #               self.assertAlmostEqual(each3,each4)
-        
+
 
 #       # plot 8
-#       sat = self.matrix3 
-#       hue = zeros((10,10),Float) + 0.3 
+#       sat = self.matrix3
+#       hue = zeros((10,10),Float) + 0.3
 #       val = self.matrix1
 
 #       val = divide(val,float(max(val.ravel())))
-        
+
 #       test = matrix_hsv_to_rgb(hue,sat,val)
 
 #       for each1,each2 in zip(self.plot8.rgb_matrices,test):
@@ -261,14 +261,14 @@ class TestPlot(unittest.TestCase):
 
 
 #       # plot 9
-#       sat = self.matrix3 
-#       hue = zeros((10,10),Float) + 0.3 
+#       sat = self.matrix3
+#       hue = zeros((10,10),Float) + 0.3
 #       val = self.matrix1
-        
+
 #       test = matrix_hsv_to_rgb(hue,sat,val)
 #       for each1,each2 in zip(self.plot9.rgb_matrices,test):
 #           for each3,each4 in zip(each1.ravel(),each2.ravel()):
-#               self.assertAlmostEqual(each3,each4)  
+#               self.assertAlmostEqual(each3,each4)
 
 # #### Think about doing a plot test using sheet_dict and a sheet?
 # ### Ask Jim if it is really necessary...
@@ -310,10 +310,10 @@ class TestPlot(unittest.TestCase):
 #         self.assertEqual(h,h_orig)
 #         self.assertEqual(s,s_orig)
 #         self.assertEqual(v,v_orig)
-    
+
 
 ### JC: THIS CODE IS LEFT TEMPORARY IN CASE IT IS OF ANY USE IN NEAR FUTURE
-    
+
 #         x = plot.Plot(('Activity',None,None),plot.COLORMAP,self.s2)
 #         for o in dir():
 #             # pprint(o)

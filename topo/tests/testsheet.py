@@ -13,7 +13,7 @@ from topo.base.boundingregion import BoundingBox
 from topo.base.sheetview import SheetView
 
 
-# CEBALERT: 
+# CEBALERT:
 # Changes that need to be made to this file:
 # - don't create a new ct every time, just change its density
 # - test array versions of coordinate transform functions
@@ -26,7 +26,7 @@ class TestCoordinateTransforms(unittest.TestCase):
 
     Subclassed for use; the subclasses have a setUp method to create
     the particular coordinates to use each time.
-    """    
+    """
     def makeBox(self):
         self.box = BoundingBox(points=((self.left,self.bottom),
                                        (self.right,self.top)))
@@ -58,7 +58,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         self.just_out_left_idx = 0.0 - D
 
 
-        
+
     ### sheet2matrix() tests
     #
     def test_sheet2matrix_center(self):
@@ -89,7 +89,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         row, col = self.ct.sheet2matrix(self.right,self.bottom)
         self.assertEqual((row,col),(self.rbound,self.cbound))
 
-        
+
     def test_sheet2matrix_matrix2sheet(self):
         """
         Check that matrix2sheet() is the inverse of sheet2matrix().
@@ -97,12 +97,12 @@ class TestCoordinateTransforms(unittest.TestCase):
         # top-right corner
         row, col = self.ct.sheet2matrix(self.right,self.top)
         x_right, y_top = self.ct.matrix2sheet(row,col)
-        self.assertEqual((x_right,y_top),(self.right,self.top)) 
+        self.assertEqual((x_right,y_top),(self.right,self.top))
 
         # bottom-left corner
         row, col = self.ct.sheet2matrix(self.left,self.bottom)
         x_left, y_bottom = self.ct.matrix2sheet(row,col)
-        self.assertEqual((x_left,y_bottom),(self.left,self.bottom)) 
+        self.assertEqual((x_left,y_bottom),(self.left,self.bottom))
 
 
     def test_matrix2sheet_sheet2matrix(self):
@@ -112,16 +112,16 @@ class TestCoordinateTransforms(unittest.TestCase):
         # top-right corner
         x,y = self.ct.matrix2sheet(float(0),float(self.last_col))
         top_row,right_col = self.ct.sheet2matrix(x,y)
-        self.assertEqual((top_row,right_col),(float(0),float(self.last_col))) 
+        self.assertEqual((top_row,right_col),(float(0),float(self.last_col)))
 
         # bottom-left corner
         x,y = self.ct.matrix2sheet(float(self.last_row),float(0))
         bottom_row,left_col = self.ct.sheet2matrix(x,y)
         self.assertEqual((bottom_row,left_col),(float(self.last_row),float(0)))
 
-        
+
     ### sheet2matrixidx() tests
-    #    
+    #
     def test_sheet2matrixidx_left_top(self):
         """
         Test a point just inside the top-left corner of the BoundingBox, and
@@ -175,7 +175,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         Test a point just inside the bottom-right corner of the BoundingBox,
         and the corner itself - which should not be inside.
         """
-        # inside 
+        # inside
         r,c = self.last_row,self.last_col
         x,y = self.just_in_right_x,self.just_in_bottom_y
         self.assertEqual(self.ct.sheet2matrixidx(x,y),(r,c))
@@ -201,7 +201,7 @@ class TestCoordinateTransforms(unittest.TestCase):
 
         x,y = self.ct.matrix2sheet(self.just_out_left_idx,self.just_out_top_idx)
         self.assertFalse(self.box.contains(x,y))
-    
+
 
     def test_matrix2sheet_right_bottom(self):
         """
@@ -255,8 +255,8 @@ class TestCoordinateTransforms(unittest.TestCase):
         r,c = -1,-1
         test_x, test_y = self.ct.matrixidx2sheet(r,c)
         self.assertFalse(self.box.contains(test_x,test_y))
-        
-        
+
+
     def test_matrixidx2sheet_left_bottom(self):
         """
         The bottom-left matrix cell [0,rbound] should be given back
@@ -275,7 +275,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         test_x, test_y = self.ct.matrixidx2sheet(r,c)
         self.assertFalse(self.box.contains(test_x,test_y))
 
-        
+
     def test_matrixidx2sheet_right_top(self):
         """
         The top-right matrix cell [cbound,0] should be given back
@@ -294,7 +294,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         test_x, test_y = self.ct.matrixidx2sheet(r,c)
         self.assertFalse(self.box.contains(test_x,test_y))
 
-        
+
     def test_matrixidx2sheet_right_bottom(self):
         """
         The bottom-right matrix cell [cbound,rbound] should be given back
@@ -322,7 +322,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         x_center = self.left+(self.right-self.left)/2.0
         y_center = self.bottom+(self.top-self.bottom)/2.0
         x,y = x_center+self.half_unit, y_center-self.half_unit
-        self.assertEqual(self.ct.matrixidx2sheet(r,c), (x,y))    
+        self.assertEqual(self.ct.matrixidx2sheet(r,c), (x,y))
 
     def test_matrixidx2sheet_sheet2matrixidx(self):
         """
@@ -331,7 +331,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         # top-right corner
         x,y = self.ct.matrixidx2sheet(float(0),float(self.last_col))
         top_row,right_col = self.ct.sheet2matrixidx(x,y)
-        self.assertEqual((top_row,right_col),(float(0),float(self.last_col))) 
+        self.assertEqual((top_row,right_col),(float(0),float(self.last_col)))
 
         # bottom-left corner
         x,y = self.ct.matrixidx2sheet(float(self.last_row),float(0))
@@ -341,7 +341,7 @@ class TestCoordinateTransforms(unittest.TestCase):
 
 
 
-        
+
 
 
 
@@ -396,7 +396,7 @@ class TestBox2Coordinates(TestCoordinateTransforms):
 # CEB: unfinished and unused - still making tests for TestBox3Coordinates...
 class TestBox3Coordinates(TestCoordinateTransforms):
 
-    def setUp(self):        
+    def setUp(self):
         self.left = -0.8
         self.bottom = -0.8
         self.top = 0.8
@@ -511,7 +511,7 @@ class ExtraSheetTests(unittest.TestCase):
         test case for the definition of density; without it,
         the tests above could be passed by a variety of
         sheet2matrix, bounds2shape functions, etc.
-        
+
         CEBALERT: transfer the box to TestBox3Coordinates and have
         these tests run in the framework.
         """
@@ -522,7 +522,7 @@ class ExtraSheetTests(unittest.TestCase):
         bounds = BoundingBox(points=((l,b),(r,t)))
 
         ct = SheetCoordinateSystem(bounds,density,density)
-        
+
         self.assertEqual(ct.sheet2matrixidx(0.8,0.8),(0,24+1))
         self.assertEqual(ct.sheet2matrixidx(0.0,0.0),(12,12))
         self.assertEqual(ct.sheet2matrixidx(-0.8,-0.8),(24+1,0))
@@ -567,7 +567,7 @@ class ExtraSheetTests(unittest.TestCase):
 
         l,b,r,t = sheet.lbrt
         self.assertEqual(l,-0.5)
-        self.assertEqual(r,0.5)                      
+        self.assertEqual(r,0.5)
         self.assertAlmostEqual(t,0.9975)
         self.assertAlmostEqual(b,-1.0025)
 
@@ -588,7 +588,7 @@ class ExtraSheetTests(unittest.TestCase):
 
         # now check that it gives the correct bounds...
         cropped_bounds = slice_.compute_bounds(sheet)
-        
+
         true_cropped_bounds = BoundingBox(points=((0.3,0.3),(0.5,0.5)))
         for a,b in zip(cropped_bounds.lbrt(),true_cropped_bounds.lbrt()):
             self.assertAlmostEqual(a,b)
@@ -599,50 +599,50 @@ class ExtraSheetTests(unittest.TestCase):
 
 
     def test_bounds2slice(self):
-        
+
         # test that if you ask to slice the matrix with the sheet's BoundingBox, you
         # get back the whole matrix
         sheet_bb = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         ct = SheetCoordinateSystem(sheet_bb,10)
-        
+
         slice_ = Slice(sheet_bb,ct)
         true_slice = (0,10,0,10) # inclusive left boundary, exclusive right boundary
-        self.assertEqual(tuple(slice_.tolist()),true_slice) 
+        self.assertEqual(tuple(slice_.tolist()),true_slice)
 
         # for the following tests, the values have been all computed by hand and then
         # tested (by JC). The boundingbox and density tested have been chosen randomly,
         # then drawn to get the slice from it.
-       
-        # Test with 20 density. 
+
+        # Test with 20 density.
         ct = SheetCoordinateSystem(sheet_bb,20,20)
         bb = BoundingBox(points=((-0.05,-0.20),(0.20,0.05)))
         slice_ = Slice(bb,ct)
 
-        true_slice = (9,14,9,14) 
+        true_slice = (9,14,9,14)
         self.assertEqual(tuple(slice_.tolist()),true_slice)
 
         bb = BoundingBox(points=((-0.40,0),(-0.30,0.30)))
         slice_ = Slice(bb,ct)
-        true_slice = (4,10,2,4) 
+        true_slice = (4,10,2,4)
         self.assertEqual(tuple(slice_.tolist()),true_slice)
 
         bb = BoundingBox(points=((0.15,0.10),(0.30,0.30)))
         slice_ = Slice(bb,ct)
-        true_slice = (4,8,13,16) 
+        true_slice = (4,8,13,16)
         self.assertEqual(tuple(slice_.tolist()),true_slice)
 
         bb = BoundingBox(points=((-0.05,-0.45),(0.10,-0.25)))
         slice_ = Slice(bb,ct)
-        true_slice = (15,19,9,12) 
+        true_slice = (15,19,9,12)
         self.assertEqual(tuple(slice_.tolist()),true_slice)
-        
+
         # test with 7 density sheet.
-        
+
         bb = BoundingBox(points=((-0.5+2.0/7.0,0.5-2.0/7.0),(-0.5+4.0/7.0,0.5)))
         ct = SheetCoordinateSystem(sheet_bb,7)
-        
+
         slice_ = Slice(bb,ct)
-        true_slice = (0,2,2,4) 
+        true_slice = (0,2,2,4)
         self.assertEqual(tuple(slice_.tolist()),true_slice)
 
         #(4x4 matrix)
@@ -659,14 +659,14 @@ class ExtraSheetTests(unittest.TestCase):
         #test_bounds.translate(0.05,-0.05)
         #r1,r2,c1,c2 = ct.bounds2slice(test_bounds)
         #self.assertEqual((r1,r2,c1,c2),(1,4,1,4))
-        
-        
+
+
     def test_slice2bounds(self):
 
         # test that if you ask to slice the matrix with the sheet's BoundingBox, you
-        # get back the whole matrix 
+        # get back the whole matrix
         # (I chose to use a 7 density, I don't know why I like 7 so much, it is kind of mystical)
-        
+
         sheet_bb = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         ct = SheetCoordinateSystem(sheet_bb,7)
         slice_ = (0,7,0,7)
@@ -679,7 +679,7 @@ class ExtraSheetTests(unittest.TestCase):
         # by hand and then tested (by JC). The boundingbox and density
         # tested have been chosen randomly, then drawn to get the slice
         # from it.
-        
+
         # Test for 10 density
         ct = SheetCoordinateSystem(sheet_bb,10)
         slice_ = (0,9,1,5)
@@ -693,7 +693,7 @@ class ExtraSheetTests(unittest.TestCase):
         true_bounds_lbrt = (0.2,0.2,0.5,0.3)
         for a,b in zip(bounds.lbrt(),true_bounds_lbrt):
             self.assertAlmostEqual(a,b)
-        
+
         # Test for 7 density
         ct = SheetCoordinateSystem(sheet_bb,7)
         slice_ = (3,7,2,5)
@@ -715,14 +715,14 @@ class ExtraSheetTests(unittest.TestCase):
         true_bounds_lbrt = (-0.5+4.0/25.0,-0.5,-0.5+10.0/25.0,0.5)
         for a,b in zip(bounds.lbrt(),true_bounds_lbrt):
             self.assertAlmostEqual(a,b)
-        
+
 
         slice_ = (7,18,3,11)
         bounds = BoundingBox(points=Slice._slicespec2boundsspec(slice_,ct))
         true_bounds_lbrt = (-0.5+3.0/25.0,0.5-18.0/25.0,-0.5+11.0/25.0,0.5-7.0/25.0)
         for a,b in zip(bounds.lbrt(),true_bounds_lbrt):
             self.assertAlmostEqual(a,b)
-            
+
 
 ##     # bounds2shape() tests
 ##     #
@@ -734,7 +734,7 @@ class ExtraSheetTests(unittest.TestCase):
 ##         n_rows,n_cols = bounds2shape(self.box,self.density)
 ##         self.assertEqual((n_rows,n_cols),(self.last_row+1,self.last_col+1))
 
-        
+
     def test_sheetview_release(self):
         s = Sheet()
         s.activity = array([[1,2],[3,4]])
@@ -759,4 +759,4 @@ suite.addTest(unittest.makeSuite(ExtraSheetTests))
 
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
-        
+

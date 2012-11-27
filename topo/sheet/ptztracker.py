@@ -45,7 +45,7 @@ class PtzTracker(Sheet):
         Field of view along y in degrees. It is calculate with the resolution
         of the camera, and its field of view. It also depends of the bounds used,
         here the size_normalization used is "fit_shortest". So Sheet coordinates
-        along y for camera's image are between -0.5 and 0.5.     
+        along y for camera's image are between -0.5 and 0.5.
         The original calculation is fov_y=fov_x*0.5*2/ratio.
         """)
 
@@ -57,7 +57,7 @@ class PtzTracker(Sheet):
         """Maximum position of the camera along x.""")
 
     maxrange_y = param.Number(default=1920, doc=
-        """Maximum position of the camera along y.""")   
+        """Maximum position of the camera along y.""")
 
     #Coordinates in degrees
     y_deg = 0
@@ -70,7 +70,7 @@ class PtzTracker(Sheet):
     #Current postitions along x and y
     curr_y=0
     curr_x=0
- 
+
     def __init__(self, **params):
         # Set here to avoid having it one instantiated by default
         if self.ptz==None: self.ptz=PTZ()
@@ -81,11 +81,11 @@ class PtzTracker(Sheet):
     def determine_next_position(self,img):
         """
         Determine the next location to move in the specified image, using whatever
-        criterion is appropriate for this class.  Returns a tuple of (pos,bbox), 
+        criterion is appropriate for this class.  Returns a tuple of (pos,bbox),
         where pos is the (row,column) coordinate of the next position, and bbox
         is a bounding box around that coordinate, with whatever size is appropriate
         for this class.  Returns None if no appropriate location can be found.
-        """    
+        """
         raise NotImplementedError
 
 
@@ -104,25 +104,25 @@ class PtzTracker(Sheet):
     def move_camera(self,pos, bboxmin, bbboxmax,brightpixel):
         """
         Move the camera to centre the returned location.
-        """     
+        """
         #Determinate the centre of the returned location
         if (self.brightpixel==True):
             self.pos=pos
         else:
             self.pos=(((self.bboxmax[0]+self.bboxmin[0])/2,(self.bboxmax[1]+self.bboxmin[1])/2))
-        
+
         #Find sheet coordinates of the specified position
         self.coor=self.matrixidx2sheet(*self.pos)
 
         self.y_deg=self.coor[1]*(self.fov_y/2)/0.5
         self.x_deg=self.coor[0]*(self.fov_x/2)/(self.ratio/2)
-            
+
         # The unit of uvcdynctrl is 1/64th of a degree
         ## HACK problem with the scaling. so divide by 2.
         ##it doesn't come from the fov or resolution maybe from somewhere with the coordinates
         self.y_deg_uvc=self.y_deg*64/2
         self.x_deg_uvc=self.x_deg*64/2
-           
+
         self.message("Coordinates of the new position: (%f,%f)" % (self.coor[0],self.coor[1]))
         self.verbose("Current position of the camera (%f,%f) along the two directions of the camera" % (self.curr_x,self.curr_y))
         self.verbose("Movements in degrees of uvcdynctrl (%f,%f)" % (self.x_deg_uvc,self.y_deg_uvc))
@@ -134,7 +134,7 @@ class PtzTracker(Sheet):
             self.ptz.tilt(self.y_deg_uvc)
         else:
             self.message("The camera can't move further along y")
-                
+
         if ((self.curr_x+self.x_deg_uvc<self.maxrange_x) and (self.curr_x+self.x_deg_uvc>-self.maxrange_x)):
             self.curr_x+=self.x_deg_uvc
             self.ptz.pan(self.x_deg_uvc)
@@ -165,14 +165,14 @@ class PtzTracker(Sheet):
 
 
 class BrightPixelTracker(PtzTracker):
-    """ 
+    """
     This class is used to define the position of the brightest pixel
     in the image.
     """
 
     def determine_next_position(self,img):
         self.maximum=array_argmax(img)
-   
+
         #Coordinates for the box around the brightest pixel
         self.coormin_bbox=(self.maximum[1]-1,self.maximum[0]-1)
         self.coormax_bbox=(self.maximum[1]+1,self.maximum[0]+1)
@@ -199,14 +199,14 @@ class FaceTracker(PtzTracker):
 
         if self.faces.total < 1:
             return None
- 
+
         for f in self.faces:
             print "face detected: %s" %f
             #row and column are inverted in Opencv
             self.pos=(f.y,f.x)
             self.coormin_bbox=(self.pos[0],self.pos[1])
             self.coormax_bbox=(self.pos[0]+f.width,self.pos[1]+f.height)
-            self.brightpixel=False      
+            self.brightpixel=False
             return (self.pos,self.coormin_bbox,self.coormax_bbox,self.brightpixel)
 
 

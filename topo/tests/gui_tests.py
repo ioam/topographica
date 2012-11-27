@@ -25,7 +25,7 @@ def run_basic():
 
     s = 'Simulation'
     p = 'Plots'
-    
+
     menu_paths = [ (s,'Test Pattern'),
                    (s,'Model Editor'),
                    (p,'Activity'),
@@ -34,7 +34,7 @@ def run_basic():
                    (p,'Projection Activity'),
                    (p,'Preference Maps','Orientation Preference'),
                    (p,'Tuning Curves','Orientation Tuning') ]
-    
+
     return ft.run([_menu_item_fn(*x) for x in menu_paths],"Running basic GUI tests...")
 
 
@@ -57,7 +57,7 @@ def test_cf_coords():
     cf = g['Plots']['Connection Fields'](x=0.125,y=0.250)
     assert cf.x==0.125
     assert cf.y==0.250
-    
+
 
 def test_test_pattern():
     """Check that test pattern window is working."""
@@ -77,7 +77,7 @@ def test_test_pattern():
     topo.sim.run(2)
     assert_array_not_equal(topo.sim['GS'].activity,act1,"GeneratorSheet no longer generating patterns")
     ##
-    
+
     tp.gui_set_param('pattern_generator','TwoRectangles')
     from topo.pattern import TwoRectangles
     assert isinstance(tp.pattern_generator,TwoRectangles), "Pattern generator did not change."
@@ -98,12 +98,12 @@ def test_test_pattern():
     preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict['Activity'].view()[0]
     assert_array_equal(preview,0.5*two_rectangles,"Changing pattern parameters did not update preview.")
 
-    
+
     ### Defaults button
 
     # first change several more parameters
     initial_preview = tp.plotgroup.plots[0].view_dict['Activity'].view()[0]
-    
+
     new_param_values = [#('output_fns','Sigmoid'),
                         ('scale','2')]
 
@@ -118,7 +118,7 @@ def test_test_pattern():
         pass
     else:
         raise AssertionError("Test pattern didn't change.")
-    
+
     # test that preview display is correct
     tp.params_frame.Defaults()
     preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict['Activity'].view()[0]
@@ -130,7 +130,7 @@ def test_test_pattern():
 
 def test_projection():
     """Check the Projection window."""
-    
+
     p = g['Plots']['Projection']()
     p.gui_set_param('sheet','S')
     p.gui_set_param('projection','GSToS')
@@ -138,7 +138,7 @@ def test_projection():
     p.gui_set_param('sheet','S2')
     p.gui_set_param('projection','GS2ToS2')
     p.gui_set_param('projection','GSToS2')
-    
+
 
 def test_orientation_tuning():
     """Check that orientation tuning plot works."""
@@ -199,4 +199,4 @@ def _get_named_plot(name,plots):
             return plot
 
     assert False
-    
+

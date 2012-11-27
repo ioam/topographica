@@ -40,7 +40,7 @@ class Plot(param.Parameterized):
        timestamp and the one with the latest timestamp is larger
        than this parameter's value, produce a warning.
        """)
-     
+
      def __init__(self,image=None,**params):
           super(Plot,self).__init__(**params)
           self._orig_bitmap = Bitmap(image)
@@ -138,7 +138,7 @@ def make_template_plot(channels,sheet_views,density=None,
                if plot.bitmap is not None or range_ is None:
                     # range_ is None means we're calculating the range
                     return plot
-     
+
      param.Parameterized(name="make_template_plot").verbose('No',name,'plot constructed for this Sheet')
      return None
 
@@ -158,7 +158,7 @@ class TemplatePlot(Plot):
                  range_=False,**params):
         """
         Build a plot out of a set of SheetViews as determined by a plot_template.
-        
+
         channels is a plot_template, i.e. a dictionary with keys
         (i.e. 'Strength','Hue','Confidence' ...).  Each key typically
         has a string value naming specifies a SheetView in
@@ -179,29 +179,29 @@ class TemplatePlot(Plot):
 
         normalize specifies how the Plot should be normalized: any
         value of normalize other than 'None' will result in normalization
-        according to the value of the range argument: 
+        according to the value of the range argument:
 
           range=(A,B) - scale plot so that A is 0 and B is 1
 
-          range=False - scale plot so that min(plot) is 0 and 
-                        max(plot) is 1 (i.e. fill the maximim 
+          range=False - scale plot so that min(plot) is 0 and
+                        max(plot) is 1 (i.e. fill the maximim
                         dynamic range)
- 
+
           range=None  - calculate value_range only
 
-        
+
         name (which is inherited from Parameterized) specifies the name
         to use for this plot.
         """
-        super(TemplatePlot,self).__init__(**params) 
+        super(TemplatePlot,self).__init__(**params)
         # for a template plot, resize is True by default
         self.resize=True
         self.bitmap = None
-        
+
 
         self.channels = channels
         self.view_dict = copy.copy(sheet_views)
-        # bounds of the situated plotting area 
+        # bounds of the situated plotting area
         self.plot_bounding_box = plot_bounding_box
 
 
@@ -213,10 +213,10 @@ class TemplatePlot(Plot):
         # the name of the plot_template), it provides the necessary information for displaying plot label
         self._set_plot_src_name()
 
-        
+
         # # Eventually: support other type of plots (e.g vector fields...) using
         # # something like:
-        # def annotated_bitmap(self):  
+        # def annotated_bitmap(self):
         # enable other construction....
 
 
@@ -276,8 +276,8 @@ class TemplatePlot(Plot):
                 sv = self.view_dict.get(name,None)
                 if sv != None:
                      shape = sv.view()[0].shape
-                     box = sv.view()[1]    
-    
+                     box = sv.view()[1]
+
         return shape,box
 
 
@@ -288,9 +288,9 @@ class TemplatePlot(Plot):
     #
     # range=None  - calculate value_range; don't scale a
     # range=(A,B) - scale a so that A is 0 and B is 1
-    # range=False - scale a so that min(array) is 0 and max(array) is 1 
+    # range=False - scale a so that min(array) is 0 and max(array) is 1
     def _normalize(self,a,range_):
-        """ 
+        """
         Normalize an array s to be in the range 0 to 1.0.
         For an array of identical elements, returns an array of ones
         if the elements are greater than zero, and zeros if the
@@ -301,20 +301,20 @@ class TemplatePlot(Plot):
              range_max = float(range_[1])
 
              if range_min==range_max:
-                  if range_min>0: 
+                  if range_min>0:
                        resu = ones(a.shape)
                   else:
                        resu = zeros(a.shape)
              else:
                   a_offset = a - range_min
                   resu = a_offset/(range_max-range_min)
-            
+
              return resu
         else:
              if range_ is None:
                   if not hasattr(self,'value_range'):
                        self.value_range=(a.min(),a.max())
-                  else: 
+                  else:
                        # If normalizing multiple matrices, take the largest values
                        self.value_range=(min(self.value_range[0],a.min()),
                                          max(self.value_range[1],a.max()))
@@ -360,9 +360,9 @@ class TemplatePlot(Plot):
              new_mat = s.submatrix(mat)
 
         return new_mat
-  
-             
-             
+
+
+
 
 
 class SHCPlot(TemplatePlot):
@@ -376,13 +376,13 @@ class SHCPlot(TemplatePlot):
     def __init__(self,channels,sheet_views,density,
                  plot_bounding_box,normalize,
                  range_=False,**params):
-        super(SHCPlot,self).__init__(channels,sheet_views,density, 
+        super(SHCPlot,self).__init__(channels,sheet_views,density,
                                    plot_bounding_box,normalize,**params)
-        
+
         # catching the empty plot exception
         s_mat = self._get_matrix('Strength')
         h_mat = self._get_matrix('Hue')
-        c_mat = self._get_matrix('Confidence') 
+        c_mat = self._get_matrix('Confidence')
 
         # If it is an empty plot: self.bitmap=None
         if (s_mat==None and c_mat==None and h_mat==None):
@@ -391,37 +391,37 @@ class SHCPlot(TemplatePlot):
         # Otherwise, we construct self.bitmap according to what is specified by the channels.
         else:
 
-            shape,box = self._get_shape_and_box()                                 
+            shape,box = self._get_shape_and_box()
 
             hue,sat,val = self.__make_hsv_matrices((s_mat,h_mat,c_mat),shape,normalize,range_)
-            
+
             if range_ is None:
                  return ##############################
 
 
             if self.plot_bounding_box == None:
                self.plot_bounding_box = box
-                            
+
             hue = self._re_bound(self.plot_bounding_box,hue,box,density)
             sat = self._re_bound(self.plot_bounding_box,sat,box,density)
             val = self._re_bound(self.plot_bounding_box,val,box,density)
-            
+
             self.bitmap = HSVBitmap(hue,sat,val)
 
         self._orig_bitmap=self.bitmap
-        
+
 
     def __make_hsv_matrices(self,hsc_matrices,shape,normalize,range_=False):
-        """ 
-        Sub-function of plot() that return the h,s,v matrices corresponding 
+        """
+        Sub-function of plot() that return the h,s,v matrices corresponding
         to the current matrices in sliced_matrices_dict. The shape of the matrices
         in the dict is passed, as well as the normalize boolean parameter.
         The result specified a bitmap in hsv coordinate.
-    
+
         Applies normalizing and cropping if required.
         """
         zero=zeros(shape,Float)
-        one=ones(shape,Float)   
+        one=ones(shape,Float)
 
         s,h,c = hsc_matrices
         # Determine appropriate defaults for each matrix
@@ -437,7 +437,7 @@ class SHCPlot(TemplatePlot):
              s=self._normalize(s,range_=range_)
              # CEBALERT: I meant False, right?
              c=self._normalize(c,range_=False)
-            
+
 
         # This translation from SHC to HSV is valid only for black backgrounds;
         # it will need to be extended also to support white backgrounds.
@@ -447,11 +447,11 @@ class SHCPlot(TemplatePlot):
 
 
 
-    
+
 class RGBPlot(TemplatePlot):
   """
   Bitmap plot based on Red, Green, and Blue matrices.
-  
+
   Construct an RGB (red, green, and blue) plot from the Red, Green,
   and Blue channels.
   """
@@ -459,14 +459,14 @@ class RGBPlot(TemplatePlot):
                plot_bounding_box,normalize,
                range_=False,**params):
 
-       super(RGBPlot,self).__init__(channels,sheet_views,density, 
+       super(RGBPlot,self).__init__(channels,sheet_views,density,
                                    plot_bounding_box,normalize,**params)
 
 
        # catching the empty plot exception
        r_mat = self._get_matrix('Red')
        g_mat = self._get_matrix('Green')
-       b_mat = self._get_matrix('Blue') 
+       b_mat = self._get_matrix('Blue')
 
        # If it is an empty plot: self.bitmap=None
        if (r_mat==None and g_mat==None and b_mat==None):
@@ -474,7 +474,7 @@ class RGBPlot(TemplatePlot):
             # Otherwise, we construct self.bitmap according to what is specified by the channels.
        else:
 
-            shape,box = self._get_shape_and_box()                                 
+            shape,box = self._get_shape_and_box()
 
             red,green,blue = self.__make_rgb_matrices((r_mat,g_mat,b_mat),shape,
                                                       normalize,range_=range_)
@@ -484,32 +484,32 @@ class RGBPlot(TemplatePlot):
 
             if self.plot_bounding_box == None:
                self.plot_bounding_box = box
-                            
+
             red = self._re_bound(self.plot_bounding_box,red,box,density)
             green = self._re_bound(self.plot_bounding_box,green,box,density)
             blue = self._re_bound(self.plot_bounding_box,blue,box,density)
-         
+
             self.bitmap = RGBBitmap(red,green,blue)
-        
+
        self._orig_bitmap=self.bitmap
 
   def __make_rgb_matrices(self, rgb_matrices,shape,normalize,range_=False):
-        """ 
+        """
         Sub-function of plot() that return the h,s,v matrices
         corresponding to the current matrices in
         sliced_matrices_dict. The shape of the matrices in the dict is
         passed, as well as the normalize boolean parameter.  The
         result specified a bitmap in hsv coordinate.
-    
+
         Applies normalizing and cropping if required.
         """
         zero=zeros(shape,Float)
 
         r,g,b = rgb_matrices
         # Determine appropriate defaults for each matrix
-        if r is None: r=zero 
-        if g is None: g=zero 
-        if b is None: b=zero 
+        if r is None: r=zero
+        if g is None: g=zero
+        if b is None: b=zero
 
         # CEBALERT: have I checked this works?
         if normalize!='None':
@@ -518,7 +518,7 @@ class RGBPlot(TemplatePlot):
              b = self._normalize(b,range_=range_)
 
         return (r,g,b)
-   
+
 
 
 
@@ -532,11 +532,11 @@ class PalettePlot(TemplatePlot):
      When implemented, construct an RGB plot from a Strength channel,
      optionally colorized using a specified Palette.
      """
-  
+
      def __init__(self,channels,sheet_views,density,
                   plot_bounding_box,normalize,**params):
 
-          super(PalettePlot,self).__init__(channels,sheet_views,density, 
+          super(PalettePlot,self).__init__(channels,sheet_views,density,
                                            plot_bounding_box,normalize,**params)
 
           ### JABHACKALERT: To implement the class: If Strength is present,
@@ -544,7 +544,7 @@ class PalettePlot(TemplatePlot):
 
 
 
-             
+
 
 
 class MultiOrPlot(TemplatePlot):
@@ -563,9 +563,9 @@ class MultiOrPlot(TemplatePlot):
     def __init__(self,channels,sheet_views,density,
                  plot_bounding_box,normalize,
                  range_=False,**params):
-        super(MultiOrPlot,self).__init__(channels,sheet_views,density, 
+        super(MultiOrPlot,self).__init__(channels,sheet_views,density,
                                    plot_bounding_box,normalize,**params)
-        
+
         n       = len( channels.keys() )
         if density > 10:
             self.unit_size = int( density )
@@ -577,7 +577,7 @@ class MultiOrPlot(TemplatePlot):
 
         if ( self.unit_size % 2 ) == 0:
             self.unit_size = self.unit_size + 1
-        
+
         n       = n / 2
         m       = []
         for i in range( n ):
@@ -587,13 +587,13 @@ class MultiOrPlot(TemplatePlot):
                 self.debug('Empty plot.')
                 return
             m.append( ( o, s ) )
-                
-        shape,box         = self._get_shape_and_box()                                 
+
+        shape,box         = self._get_shape_and_box()
         dm                = self.__make_lines_from_or_matrix( m, shape )
         box_size          = self.unit_size
         self.bitmap       = DrawBitmap( dm, box_size )
         self._orig_bitmap = self.bitmap
-        
+
 
     def __vertices_from_or( self, o ):
         """
@@ -609,7 +609,7 @@ class MultiOrPlot(TemplatePlot):
         s       = 0.5 * sin( o )
         c       = 0.5 * cos( o )
         return [ ( 0.5 - c, 0.5 + s ), ( 0.5 + c, 0.5 - s ) ]
-        
+
 
     def __make_line_directive( self, os_list ):
         """
@@ -626,12 +626,12 @@ class MultiOrPlot(TemplatePlot):
                 f       = "hsl(%d,100%%,%2d%%)" % ( hue, max( self.min_brightness, n * ( 1. - s ) ) )
                 p.append( { "line": [ o, { "fill": f } ] } )
             hue         = hue + d_hue
-        
+
         return p
 
 
     def __make_lines_from_or_matrix( self, matrices, shape ):
-        """ 
+        """
         return a matrix of line drawing directives for each unit, derived from
         the given list of tuples ( o, s ), where o is the orientation view and s
         is the selectivity. The list is ordered by the orientation preference.

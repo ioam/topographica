@@ -70,7 +70,7 @@ class TestBitmap(unittest.TestCase):
         self.assertEqual(g,0.01)
         self.assertEqual(b,0.01)
 
- 
+
 
     def test_RGBBitmap(self):
         rgb = RGBBitmap(self.ra,self.ga,self.ba)

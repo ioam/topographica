@@ -30,10 +30,10 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
     is equivalent to this one, but it also works for 1D arrays.
     """
 
-    single_cf_fn = param.ClassSelector(ResponseFn,DotProduct(),readonly=True)    
+    single_cf_fn = param.ClassSelector(ResponseFn,DotProduct(),readonly=True)
 
     def __call__(self, iterator, input_activity, activity, strength, **params):
-       
+
         temp_act = activity  # pyflakes:ignore (passed to weave C code)
         irows,icols = input_activity.shape
         X = input_activity.ravel()  # pyflakes:ignore (passed to weave C code)
@@ -59,7 +59,7 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
                     // CONTIGUOUS_ARRAY_FROM_SLOT_OFFSET(float,weights,cf) <<<<<<<<<<<
 
                     LOOKUP_FROM_SLOT_OFFSET_UNDECL_DATA(float,weights,cf);
-                    char *data = weights_obj->data;                  
+                    char *data = weights_obj->data;
                     int s0 = weights_obj->strides[0];
                     int s1 = weights_obj->strides[1];
 
@@ -75,7 +75,7 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
                         npfloat *xi = xj;
 
 
-                    //    float *wi = weights;                       
+                    //    float *wi = weights;
                     //    for (int j=cc1; j<cc2; ++j) {
                     //        tot += *wi * *xi;
                     //        ++wi;
@@ -90,19 +90,19 @@ class CFPRF_DotProduct_opt(CFPResponseFn):
 
                         xj += icols;
                  //       weights += cc2-cc1;
-                    }  
+                    }
                     temp_act[r] = tot*strength;
 
                 //    DECREF_CONTIGUOUS_ARRAY(weights);
                 }
             }
         """%c_decorators
-        inline(code, ['mask','X', 'strength', 'icols', 'temp_act','cfs','num_cfs','cf_type'], 
+        inline(code, ['mask','X', 'strength', 'icols', 'temp_act','cfs','num_cfs','cf_type'],
                local_dict=locals(), headers=['<structmember.h>'])
 
 class CFPRF_DotProduct(CFPRF_Plugin):
     """
-    Wrapper written to allow transparent non-optimized fallback; 
+    Wrapper written to allow transparent non-optimized fallback;
     equivalent to CFPRF_Plugin(single_cf_fn=DotProduct()).
     """
     # CB: should probably have single_cf_fn here & readonly
@@ -142,7 +142,7 @@ class CFPRF_EuclideanDistance_opt(CFPResponseFn):
             #include <math.h>
             npfloat *tact = temp_act;
             double max_dist=0.0;
-    
+
             for (int r=0; r<num_cfs; ++r) {
                 PyObject *cf = PyList_GetItem(cfs,r);
 
@@ -162,7 +162,7 @@ class CFPRF_EuclideanDistance_opt(CFPResponseFn):
                 // computes the dot product
                 double tot = 0.0;
                 for (int i=rr1; i<rr2; ++i) {
-                    npfloat *xi = xj;                        
+                    npfloat *xi = xj;
                     float *wi = wj;
                     for (int j=cc1; j<cc2; ++j) {
                         double diff = *wi - *xi;
@@ -174,7 +174,7 @@ class CFPRF_EuclideanDistance_opt(CFPResponseFn):
                     wj += cc2-cc1;
                 }
 
-                double euclidean_distance = sqrt(tot); 
+                double euclidean_distance = sqrt(tot);
                 if (euclidean_distance>max_dist)
                     max_dist = euclidean_distance;
 
@@ -189,7 +189,7 @@ class CFPRF_EuclideanDistance_opt(CFPResponseFn):
             for (int r=0; r<num_cfs; ++r) {
                 *tact = strength*(max_dist - *tact);
                 ++tact;
-            }   
+            }
         """
         inline(code, ['X', 'strength', 'icols', 'temp_act','cfs','num_cfs'],
                local_dict=locals())

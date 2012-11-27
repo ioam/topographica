@@ -8,7 +8,7 @@ $Id$
 import unittest
 from numpy.testing import assert_array_almost_equal
 
-from topo import pattern 
+from topo import pattern
 import topo.pattern.audio
 
 class TestAudio(unittest.TestCase):

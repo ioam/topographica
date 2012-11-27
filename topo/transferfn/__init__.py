@@ -39,18 +39,18 @@ from imagen.transferfn import DivisiveNormalizeLp # pyflakes:ignore (API import)
 
 
 class PiecewiseLinear(TransferFn):
-    """ 
+    """
     Piecewise-linear TransferFn with lower and upper thresholds.
-    
+
     Values below the lower_threshold are set to zero, those above
     the upper threshold are set to 1.0, and those in between are
     scaled linearly.
     """
     lower_bound = param.Number(default=0.0,softbounds=(0.0,1.0))
     upper_bound = param.Number(default=1.0,softbounds=(0.0,1.0))
-    
+
     def __call__(self,x):
-        fact = 1.0/(self.upper_bound-self.lower_bound)        
+        fact = 1.0/(self.upper_bound-self.lower_bound)
         x -= self.lower_bound
         x *= fact
         x.clip(0.0,1.0,out=x)
@@ -58,30 +58,30 @@ class PiecewiseLinear(TransferFn):
 
 
 class Sigmoid(TransferFn):
-    """ 
+    """
     Sigmoidal (logistic) transfer function: 1/(1+exp-(r*x+k)).
 
-    As defined in Jochen Triesch, ICANN 2005, LNCS 3696 pp. 65-70. 
+    As defined in Jochen Triesch, ICANN 2005, LNCS 3696 pp. 65-70.
     The parameters control the growth rate (r) and the x position (k)
     of the exponential.
-    
+
     This function is a special case of the GeneralizedLogistic
     function, with parameters r=r, l=0, u=1, m=-k/2r, and b=1.  See
     Richards, F.J. (1959), A flexible growth function for empirical
     use. J. Experimental Botany 10: 290--300, 1959.
     http://en.wikipedia.org/wiki/Generalised_logistic_curve
     """
-    
+
     r = param.Number(default=1,doc="Parameter controlling the growth rate")
     k = param.Number(default=0,doc="Parameter controlling the x-postion")
-    
+
     def __call__(self,x):
         x_orig = copy.copy(x)
         x *= 0.0
         x += 1.0 / (1.0 + exp(-(self.r*x_orig+self.k)))
 
 
-                  
+
 class NakaRushton(TransferFn):
     #JABALERT: Please write the equation into words in the docstring, as in Sigmoid.
     """
@@ -95,12 +95,12 @@ class NakaRushton(TransferFn):
     curve is usually contrast, but under the assumption that the
     firing rate of a model neuron is directly proportional to the
     contrast, it can be used as a TransferFn for a Sheet.
-    
+
     The parameter c50 corresponds to the contrast at which the half of
     the maximal output is reached.  For a Sheet TransferFn this translates
     to the input for which a neuron will respond with activity 0.5.
     """
-    
+
     c50 = param.Number(default=0.1, doc="""
         The input of the neuron at which it responds at half of its
         maximal firing rate (1.0).""")
@@ -119,7 +119,7 @@ class NakaRushton(TransferFn):
 
 
 class GeneralizedLogistic(TransferFn):
-    """ 
+    """
     The generalized logistic curve (Richards' curve): y = l + (u /(1 + b * exp(-r*(x-2*m))^(1/b))).
 
     The logistic curve is a flexible function for specifying a
@@ -135,7 +135,7 @@ class GeneralizedLogistic(TransferFn):
     use. J. Experimental Botany 10: 290--300.
     http://en.wikipedia.org/wiki/Generalised_logistic_curve
     """
-    
+
     # JABALERT: Reword these to say what they are, not what they
     # control, if they are anything that can be expressed naturally.
     # E.g. is l a parameter controlling the lower asymptote, or is it
@@ -147,11 +147,11 @@ class GeneralizedLogistic(TransferFn):
     m = param.Number(default=1,doc="Parameter controlling the time of maximum growth.")
     r = param.Number(default=1,doc="Parameter controlling the growth rate.")
     b = param.Number(default=1,doc="Parameter which affects near which asymptote maximum growth occurs.")
-    
+
     def __call__(self,x):
         x_orig = copy.copy(x)
         x *= 0.0
-        x += self.l + ( self.u /(1 + self.b*exp(-self.r *(x_orig - 2*self.m))**(1 / self.b)) )    
+        x += self.l + ( self.u /(1 + self.b*exp(-self.r *(x_orig - 2*self.m))**(1 / self.b)) )
 
 
 
@@ -162,7 +162,7 @@ class HalfRectifyAndSquare(TransferFn):
     """
     t = param.Number(default=0.0,doc="""
         The threshold at which output becomes non-zero.""")
-    
+
     def __call__(self,x):
         x -= self.t
         clip_lower(x,0)
@@ -178,10 +178,10 @@ class HalfRectifyAndPower(TransferFn):
     """
     e = param.Number(default=2.0,doc="""
         The exponent to which the thresholded value is raised.""")
-    
+
     t = param.Number(default=0.0,doc="""
         The threshold level subtracted from x.""")
-    
+
     def __call__(self,x):
         x -= self.t
         clip_lower(x,0)
@@ -202,10 +202,10 @@ class ExpLinear(TransferFn):
         The threshold level where function becomes non-zero""")
     t2 = param.Number(default=1.0,doc="""
         The threshold level at which curve becomes linear""")
-        
+
     a = param.Number(default=1.0,doc="""
         The overall scaling of the function""")
-    
+
     def __call__(self,x):
         x-=self.t1
         clip_lower(x,0)
@@ -220,8 +220,8 @@ class Square(TransferFn):
     """Transfer function that applies a squaring nonlinearity."""
 
     def __call__(self,x):
-        x *= x     
-        
+        x *= x
+
 
 
 # JAALERT: rename to something like PlasticTransferFn
@@ -239,7 +239,7 @@ class TransferFnWithState(TransferFn):
         Allows plasticity to be turned off during analysis, and then re-enabled.""")
 
     __abstract = True
-    
+
     def __init__(self,**params):
         super(TransferFnWithState,self).__init__(**params)
         self._plasticity_setting_stack = []
@@ -255,7 +255,7 @@ class TransferFnWithState(TransferFn):
         differences that do not depend on an internal state), and no
         call should have any effect that persists after a subsequent
         restore_plasticity_state() call.
-        
+
         By default, simply saves a copy of the 'plastic' parameter to
         an internal stack (so that it can be restored by
         restore_plasticity_state()), and then sets the plastic
@@ -277,19 +277,19 @@ class TransferFnWithState(TransferFn):
         By default, simply restores the last saved value of the
         'plastic' parameter.
         """
-        self.plastic = self._plasticity_setting_stack.pop()                        
+        self.plastic = self._plasticity_setting_stack.pop()
 
     def state_push(self):
         """
         Save the current state onto a stack, to be restored using state_pop.
-        
+
         Subclasses must implement state_push and state_pop if they
         store any lasting state across invocations, so that the result
         of state_pop will be the state that was present at the
         previous state_push.
         """
         pass
-    
+
     def state_pop(self):
         """
         Restore the state saved by the most recent state_push call.
@@ -317,9 +317,9 @@ class TransferFnWithRandomState(TransferFnWithState):
         TransferFnWithRandomState subclass that has its own state, set
         this parameter on the instance to a new RandomState instance.
         """)
-        
+
     __abstract = True
-    
+
     def __init__(self,**params):
         super(TransferFnWithRandomState,self).__init__(**params)
         self.__random_generators_stack = []
@@ -339,13 +339,13 @@ class TransferFnWithRandomState(TransferFnWithState):
         """
         self.random_generator = self.__random_generators_stack.pop()
         super(TransferFnWithRandomState,self).state_push()
-        
+
 
 
 class PoissonSample(TransferFnWithRandomState):
     """
     Simulate Poisson-distributed activity with specified mean values.
-    
+
     This transfer function interprets each matrix value as the
     (potentially scaled) rate of a Poisson process and replaces it
     with a sample from the appropriate Poisson distribution.
@@ -361,19 +361,19 @@ class PoissonSample(TransferFnWithRandomState):
     where x is a matrix value and P(r) samples from a Poisson
     distribution with rate r.
     """
-    
+
     in_scale = param.Number(default=1.0,doc="""
        Amount by which to scale the input.""")
-    
+
     baseline_rate = param.Number(default=0.0,doc="""
        Constant to add to the input after scaling, resulting in a baseline
        Poisson process rate.""")
-    
+
     out_scale = param.Number(default=1.0,doc="""
        Amount by which to scale the output (e.g. 1.0/in_scale).""")
 
     def __call__(self,x):
-        
+
         x *= self.in_scale
         x += self.baseline_rate
         sample = self.random_generator.poisson(x,x.shape)
@@ -404,15 +404,15 @@ class ActivityAveragingTF(TransferFnWithState):
         How often to update the average.
         For instance, step=1 means to update it every time this TF is
         called; step=2 means to update it every other time.""")
-    
+
     smoothing = param.Number(default=0.9997, doc="""
         The degree of weighting for the previous average, when
         calculating the new average.""")
-   
+
     initial_average=param.Number(default=0, doc="""
         Starting value for the average activity.""")
 
-    
+
     def __init__(self,**params):
         super(ActivityAveragingTF,self).__init__(**params)
         self.n_step = 0
@@ -421,10 +421,10 @@ class ActivityAveragingTF(TransferFnWithState):
 
     def __call__(self,x):
         if self.x_avg is None:
-            self.x_avg=self.initial_average*ones(x.shape, activity_type)         
+            self.x_avg=self.initial_average*ones(x.shape, activity_type)
 
         # Collect values on each appropriate step
-        
+
         self.n_step += 1
         if self.n_step == self.step:
             self.n_step = 0
@@ -437,15 +437,15 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
     """
     Implementation of homeostatic intrinsic plasticity from Jochen Triesch,
     ICANN 2005, LNCS 3696 pp.65-70.
-    
+
     A sigmoid activation function is adapted automatically to achieve
     desired average firing rate and approximately exponential
     distribution of firing rates (for the maximum possible entropy).
-    
+
     Note that this TransferFn has state, so the history of calls to it
     will affect future behavior.  The plastic parameter can be used
     to disable changes to the state.
-    
+
     Also calculates average activity as useful debugging information,
     for use with AttributeTrackingTF.  Average activity is calculated as
     an exponential moving average with a smoothing factor (smoothing).
@@ -456,22 +456,22 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
 
     eta = param.Number(default=0.0002,doc="""
         Learning rate for homeostatic plasticity.""")
-    
+
     mu = param.Number(default=0.01,doc="""
         Target average firing rate.""")
-    
+
     smoothing = param.Number(default=0.9997, doc="""
         Weighting of previous activity vs. current activity when
         calculating the average.""")
 
     a_init = param.Parameter(default=None,doc="""
         Multiplicative parameter controlling the exponential.""")
-   
+
     b_init = param.Parameter(default=None,doc="""
         Additive parameter controlling the exponential.""")
 
     step = param.Number(default=1, doc="""
-        How often to update the a and b parameters.  
+        How often to update the a and b parameters.
         For instance, step=1 means to update it every time this TF is
         called; step=2 means to update it every other time.""")
 
@@ -484,7 +484,7 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
         self.b=None
         self.y_avg=None
 
-    def __call__(self,x):      
+    def __call__(self,x):
         if self.first_call:
             self.first_call = False
             if self.a_init==None:
@@ -495,21 +495,21 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
                 self.b = self.random_generator.uniform(low=-8.0, high=-4.0,size=x.shape)
             else:
                 self.b = ones(x.shape, x.dtype.char) * self.b_init
-            self.y_avg = zeros(x.shape, x.dtype.char) 
+            self.y_avg = zeros(x.shape, x.dtype.char)
 
         # Apply sigmoid function to x, resulting in what Triesch calls y
         x_orig = copy.copy(x)
-       
+
         x *= 0.0
         x += 1.0 / (1.0 + exp(-(self.a*x_orig + self.b)))
-                
+
 
         self.n_step += 1
         if self.n_step == self.step:
             self.n_step = 0
-            if self.plastic:                
+            if self.plastic:
                 self.y_avg = (1.0-self.smoothing)*x + self.smoothing*self.y_avg #Calculate average for use in debugging only
-                
+
                 # Update a and b
                 self.a += self.eta * (1.0/self.a + x_orig - (2.0 + 1.0/self.mu)*x_orig*x + x_orig*x*x/self.mu)
                 self.b += self.eta * (1.0 - (2.0 + 1.0/self.mu)*x + x*x/self.mu)
@@ -519,11 +519,11 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
         self.__current_state_stack.append((copy.copy(self.a), copy.copy(self.b), copy.copy(self.y_avg), copy.copy(self.first_call)))
         super(HomeostaticMaxEnt,self).state_push()
 
-        
+
     def state_pop(self):
         self.a, self.b, self.y_avg, self.first_call =  self.__current_state_stack.pop()
         super(HomeostaticMaxEnt,self).state_pop()
-        
+
 
 
 class ScalingTF(TransferFnWithState):
@@ -539,7 +539,7 @@ class ScalingTF(TransferFnWithState):
     The plastic parameter allows the updating of the average values
     to be disabled temporarily, e.g. while presenting test patterns.
     """
-    
+
     target = param.Number(default=0.01, doc="""
         Target average activity for each unit.""")
 
@@ -550,7 +550,7 @@ class ScalingTF(TransferFnWithState):
         Determines the degree of weighting of previous activity vs.
         current activity when calculating the average.""")
 
-    
+
     def __init__(self,**params):
         super(ScalingTF,self).__init__(**params)
         self.n_step = 0
@@ -558,14 +558,14 @@ class ScalingTF(TransferFnWithState):
         self.sf=None
 
     def __call__(self,x):
-    
+
         if self.x_avg is None:
-            self.x_avg=self.target*ones(x.shape, activity_type)         
+            self.x_avg=self.target*ones(x.shape, activity_type)
         if self.sf is None:
             self.sf=ones(x.shape, activity_type)
 
         # Collect values on each appropriate step
-       
+
         self.n_step += 1
         if self.n_step == self.step:
             self.n_step = 0
@@ -573,9 +573,9 @@ class ScalingTF(TransferFnWithState):
                 self.sf *= 0.0
                 self.sf += self.target/self.x_avg
                 self.x_avg = (1.0-self.smoothing)*x + self.smoothing*self.x_avg
-        
+
         x *= self.sf
-              
+
 
 
 class Hysteresis(TransferFnWithState):
@@ -586,25 +586,25 @@ class Hysteresis(TransferFnWithState):
 
     time_constant  = param.Number(default=0.3,doc="""
         Controls the time scale of the interpolation.""")
-    
+
     def __init__(self,**params):
         super(Hysteresis,self).__init__(**params)
         self.first_call = True
         self.__current_state_stack=[]
-        self.old_a = 0 
+        self.old_a = 0
         topo.base.functionfamily.PatternDrivenAnalysis.pre_presentation_hooks.append(self.reset)
-        
+
     def __call__(self,x):
         if self.first_call is True:
            self.old_a = x.copy() * 0.0
            self.first_call = False
-           
-        #if (float(topo.sim.time()) %1.0) <= 0.15: self.old_a =  self.old_a* 0 
+
+        #if (float(topo.sim.time()) %1.0) <= 0.15: self.old_a =  self.old_a* 0
         new_a = x.copy()
         self.old_a = self.old_a + (new_a - self.old_a)*self.time_constant
         x*=0
         x += self.old_a
-        
+
     def reset(self):
         self.old_a *= 0
 

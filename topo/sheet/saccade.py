@@ -56,7 +56,7 @@ def activity_centroid(sheet,activity=None,threshold=0.0):
     a = activity.flat
 
     ## Optimization to only compute centroid from
-    ## active (non-zero) units. 
+    ## active (non-zero) units.
     idxs = nonzero(a > threshold)[0]
     if not len(idxs):
         return sheet.bounds.centroid()
@@ -82,7 +82,7 @@ def activity_sample(sheet,activity=None):
 def activity_mode(sheet,activity=None):
     """
     Returns the sheet coordinates of the mode (highest value) of
-    the sheet activity.   
+    the sheet activity.
     """
 
     # JPHACKALERT:  The mode is computed using numpy.argmax, and
@@ -96,13 +96,13 @@ def activity_mode(sheet,activity=None):
     idx = argmax(activity.flat)
     r,c = util.idx2rowcol(idx,activity.shape)
     return sheet.matrix2sheet(r,c)
-      
+
 
 
 class SaccadeController(CFSheet):
     """
     Sheet that decodes activity on CFProjections into a saccade command.
-    
+
     This class accepts CF-projected input and computes its activity
     like a normal CFSheet, then decodes that activity into a saccade
     amplitude and direction as would be specified by activity in the
@@ -132,7 +132,7 @@ class SaccadeController(CFSheet):
         Scale factor for saccade command amplitude, expressed in
         degrees per unit of sheet.  Indicates how large a saccade is
         represented by the x-component of the command input.""")
-    
+
     direction_scale = param.Number(default=180,doc="""
         Scale factor for saccade command direction, expressed in
         degrees per unit of sheet.  Indicates what direction of saccade
@@ -154,26 +154,26 @@ class SaccadeController(CFSheet):
 
     def activate(self):
         super(SaccadeController,self).activate()
-            
-        # get the input projection activity            
+
+        # get the input projection activity
         # decode the input projection activity as a command
         xa,ya = self.decode_fn(self)
         self.verbose("Saccade command centroid = (%.2f,%.2f)"%(xa,ya))
 
         xa,ya = self.command_mapper(xa,ya)
-        
+
         amplitude = xa * self.amplitude_scale
         direction = ya * self.direction_scale
 
         self.verbose("Saccade amplitute = %.2f."%amplitude)
         self.verbose("Saccade direction = %.2f."%direction)
-        
+
         self.send_output(src_port='Saccade',data=(amplitude,direction))
 
 
 
 
-        
+
 class ShiftingGeneratorSheet(SequenceGeneratorSheet):
     """
     A GeneratorSheet that takes an extra input on port 'Saccade'
@@ -194,7 +194,7 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
 
     generate_on_shift = param.Boolean(default=True,doc="""
        Whether to generate a new pattern when a shift occurs.""")
-                                         
+
     fixation_jitter = param.Number(default=0,doc="""
        Standard deviation of Gaussian fixation jitter.""")
     fixation_jitter_period = param.Number(default=10,doc="""
@@ -227,7 +227,7 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
         super(ShiftingGeneratorSheet,self).generate()
         self.send_output(src_port='Position',
                          data=self.bounds.aarect().centroid())
-        
+
 
     def shift(self,amplitude,direction,generate=None):
         """
@@ -244,7 +244,7 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
         output after shifting.  If generate is None, then the value of
         the sheet's generate_on_shift parameter will be used.
         """
-        
+
         # JPALERT:  Right now this method assumes that we're doing
         # colliculus-style saccades. i.e. amplitude and direction
         # relative to the current position.  Technically it would
@@ -274,10 +274,10 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
             self._find_saccade_in_bounds(radius,direction)
 
         self.fixation_point = self.bounds.centroid()
-        
+
         if generate is None:
             generate = self.generate_on_shift
-            
+
         if generate:
             self.generate()
 
@@ -295,7 +295,7 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
             jitter_vec = random.normal(0,self.fixation_jitter,(2,))
         else:
             jitter_vec = zeros((2,))
-        
+
         fix = asarray(self.fixation_point)
         pos = asarray(self.bounds.centroid())
         refix_vec = (fix - pos) + jitter_vec
@@ -334,7 +334,7 @@ class ShiftingGeneratorSheet(SequenceGeneratorSheet):
         # easy for boxes, circles, and ellipses, at least.)
 
         # Assume we're starting out of bounds, so start by shifting
-        # back to the original position        
+        # back to the original position
         self._translate(-radius,theta)
 
         while not self._out_of_bounds():

@@ -15,11 +15,11 @@ required = {'PIL':">=1.1.6",
             'paramtk':">=0.8",
             'imagen':">=1.0"}
 
-optional = {'gmpy':'>=1.0', 
+optional = {'gmpy':'>=1.0',
             'matplotlib':'>=0.8',
             'scipy':'>=0.5',
             'ipython':">=0.7"}
-            
+
 # for pip/easy_install (just go for the basics until easy_install works better!)
 packages_to_install = [required]
 
@@ -62,13 +62,13 @@ TRAINSCRIPTS = [
 
 
 _topographica_devs='Topographica Developers'
-_topographica_devs_email='developers[at]topographica[dot]org' 
+_topographica_devs_email='developers[at]topographica[dot]org'
 
 
 setup_args.update(dict(
     name='topographica',
 
-    # CEBALERT: we need one single place with the version number!  
+    # CEBALERT: we need one single place with the version number!
     #
     # This release number is usually 1 higher than the Makefile's,
     # except when the Makefile is updated just prior to release.  This
@@ -103,7 +103,7 @@ Alternatively, you can download and unpack the archive below, and then
 install Topographica with a command like ``python setup.py install``
 (e.g. ``sudo python setup.py install`` for a site-wide installation,
 or ``python setup.py install --user`` to install into
-``~/.local``). You will need to install at least `NumPy`_, `PIL`_, 
+``~/.local``). You will need to install at least `NumPy`_, `PIL`_,
 `Param`_, `ParamTk`_, and `ImaGen`_, before running Topographica. We
 also recommend that you install `MatPlotLib`_ so you can access all
 Topographica's plots, as well as `GmPy`_ and Weave (available as part
@@ -111,15 +111,15 @@ of `SciPy`_) for optimum performance.
 
 .. _Topographica:
    http://topographica.org/Home/
-.. _NumPy: 
+.. _NumPy:
    http://pypi.python.org/pypi/numpy
-.. _Gmpy: 
+.. _Gmpy:
    http://pypi.python.org/pypi/gmpy
-.. _SciPy: 
+.. _SciPy:
    http://pypi.python.org/pypi/scipy
-.. _MatPlotLib: 
+.. _MatPlotLib:
    http://pypi.python.org/pypi/matplotlib
-.. _PIL: 
+.. _PIL:
    http://pypi.python.org/pypi/PIL
 .. _pip:
    http://pip.openplans.org/

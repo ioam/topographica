@@ -37,19 +37,19 @@ class PicklableClassAttributes(object):
     param_moves = {}
 
     # pylint: disable-msg=R0903
-    
+
     # CB: might have mixed up module and package in the docs.
     def __init__(self,module,exclusions=(),startup_commands=()):
         """
         module: a module object, such as topo
-        
+
         Any submodules listed by name in exclusions will not have their
         classes' attributes saved.
         """
         self.module=module
         self.exclude=exclusions
         self.startup_commands=startup_commands
-        
+
     def __getstate__(self):
         """
         Return a dictionary of self.module's PO classes' attributes, plus
@@ -68,7 +68,7 @@ class PicklableClassAttributes(object):
         Execute the startup commands and set class attributes.
         """
         self.startup_commands = state['startup_commands']
-        
+
         for cmd in self.startup_commands:
             exec cmd in __main__.__dict__
 
@@ -95,8 +95,8 @@ class PicklableClassAttributes(object):
                     assert new_p_name not in to_restore[new_class_path]
                     to_restore[new_class_path][new_p_name]=p_obj
 
-                    
-                elif p_name in self.param_name_changes.get(class_path,{}):                    
+
+                elif p_name in self.param_name_changes.get(class_path,{}):
                     new_p_name = self.param_name_changes[class_path][p_name]
 
                     if class_path not in to_restore:
@@ -109,7 +109,7 @@ class PicklableClassAttributes(object):
                     if class_path not in to_restore:
                         to_restore[class_path] = {}
                     to_restore[class_path][p_name]= p_obj
-                        
+
 
         ########## restoring
         for class_path in to_restore:
@@ -140,7 +140,7 @@ class PicklableClassAttributes(object):
                         Parameterized(name='load_snapshot').warning("%s.%s found in snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. If you are using this class, please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
                 else:
                     setattr(class_,p_name,p_obj)
-                                        
+
 
     # CB: I guess this could be simplified
     def get_PO_class_attributes(self,module,class_attributes,processed_modules,exclude=()):

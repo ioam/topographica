@@ -61,7 +61,7 @@ def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     output_typecode = sctype2char(output_type)
     vfn.otypes=output_typecode*num_outputs # typecodes of outputs of fn
     import inspect
-    
+
     try:
         fn_code = fn.func_code if hasattr(fn,'func_code') else fn.__call__.func_code
     except:
@@ -85,8 +85,8 @@ class NullCFError(ValueError):
     """
     def __init__(self,x,y,input,rows,cols):
         ValueError.__init__(self,"ConnectionField at (%s,%s) (input_sheet=%s) has a zero-sized weights matrix (%s,%s); you may need to supply a larger bounds_template or increase the density of the sheet."%(x,y,input,rows,cols))
-    
-                 
+
+
 class ConnectionField(object):
     """
     A set of weights on one input Sheet.
@@ -109,7 +109,7 @@ class ConnectionField(object):
         else:
             # CEBALERT: what was I playing with for this before?
             return abs(self.weights).sum()
-            
+
     def __set_norm_total(self,new_norm_total):
         """
         Set an explicit value to be returned by norm_total.
@@ -148,16 +148,16 @@ class ConnectionField(object):
         across corresponding CFs in multiple Projections.
 
         Apart from such cases, norm_total can be ignored.
-        
+
         Note that every person who uses a class that sets or gets
         norm_total must be very careful to ensure that stale values
         will never be accessed.  A good way to do this is to make sure
         that the value is only set just before it will be used, and
         deleted as soon as it has been accessed.
-        
+
         WARNING: Any c-optimized code can bypass this property and
         access directly _has_norm_total, _norm_total
-       
+
         """)
 
 
@@ -179,7 +179,7 @@ class ConnectionField(object):
         """
         Create weights at the specified (x,y) location on the
         specified input_sheet.
-        
+
         The supplied template (if a BoundingRegion) is converted to a
         Slice, moved to the specified (x,y) location, and then the
         weights pattern is drawn inside by the weights_generator.
@@ -191,7 +191,7 @@ class ConnectionField(object):
 
         The supplied template object itself will not be modified (it
         is copied before use).
-                
+
         The mask allows the weights to be limited to being non-zero in
         a subset of the rectangular weights area.  The actual mask
         used is a view of the given mask created by cropping to the
@@ -217,7 +217,7 @@ class ConnectionField(object):
         # CEBALERT: it's not really worth adding more ALERTs on this
         # topic, but...there's no way for the CF to control autosize
         # and threshold.
-                               input_sheet,True,0.5) 
+                               input_sheet,True,0.5)
 
 
         # CB: has to be set for C code. Can't be initialized at the
@@ -231,7 +231,7 @@ class ConnectionField(object):
 
         if output_fns is None:
             output_fns = []
-            
+
         # CEBALERT: now even more confusing; weights_slice is
         # different from input_sheet_slice. At least need to rename.
         weights_slice = self._create_input_sheet_slice(input_sheet,x,y,template,min_matrix_radius)
@@ -243,7 +243,7 @@ class ConnectionField(object):
 
         # (without it, optimized learning function creates artifacts in CFs at
         # left and right edges of sheet, at some densities)
-        
+
         # CBENHANCEMENT: might want to do something about a size
         # that's specified (right now the size is assumed to be that
         # of the bounds)
@@ -267,7 +267,7 @@ class ConnectionField(object):
         # including in learningfn/. We should investigate masked
         # arrays (from numpy).
         for of in output_fns:
-            of(self.weights)        
+            of(self.weights)
 
 
     # CB: can this be renamed to something better?
@@ -345,7 +345,7 @@ class CFPRF_Plugin(CFPResponseFn):
     """
     single_cf_fn = param.ClassSelector(ResponseFn,default=DotProduct(),
         doc="Accepts a ResponseFn that will be applied to each CF individually.")
-    
+
     def __call__(self, iterator, input_activity, activity, strength):
         single_cf_fn = self.single_cf_fn
         for cf,i in iterator():
@@ -367,10 +367,10 @@ class CFPLearningFn(param.Parameterized):
     the arguments specified below.
     """
     __abstract = True
-        
+
 
     def constant_sum_connection_rate(self,n_units,learning_rate):
-        """ 
+        """
         Return the learning rate for a single connection assuming that
         the total rate is to be divided evenly among all the units in
         the connection field.
@@ -390,7 +390,7 @@ class CFPLearningFn(param.Parameterized):
 class CFPLF_Identity(CFPLearningFn):
     """CFLearningFunction performing no learning."""
     single_cf_fn = param.ClassSelector(LearningFn,default=IdentityLF(),constant=True)
-  
+
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         pass
 
@@ -407,9 +407,9 @@ class CFPLF_Plugin(CFPLearningFn):
 
         for cf,i in iterator():
             single_cf_fn(cf.get_input_matrix(input_activity),
-                         output_activity.flat[i], cf.weights, 
+                         output_activity.flat[i], cf.weights,
                          single_connection_learning_rate)
-            cf.weights *= cf.mask                
+            cf.weights *= cf.mask
 
 
 class CFPOutputFn(param.Parameterized):
@@ -433,7 +433,7 @@ class CFPOF_Plugin(CFPOutputFn):
     """
     single_cf_fn = param.ClassSelector(TransferFn,default=IdentityTF(),
         doc="Accepts a TransferFn that will be applied to each CF individually.")
-    
+
     def __call__(self, iterator, **params):
         if type(self.single_cf_fn) is not IdentityTF:
             single_cf_fn = self.single_cf_fn
@@ -451,7 +451,7 @@ class CFPOF_Identity(CFPOutputFn):
     be called. (I.e., it could simply be tested for and skipped.)
     """
     single_cf_fn = param.ClassSelector(TransferFn,default=IdentityTF(),constant=True)
-    
+
     def __call__(self, iterator, **params):
         pass
 
@@ -463,8 +463,8 @@ class CFProjection(Projection):
     A projection composed of ConnectionFields from a Sheet into a ProjectionSheet.
 
     CFProjection computes its activity using a response_fn of type
-    CFPResponseFn (typically a CF-aware version of mdot) and output_fns 
-    (typically none).  The initial contents of the 
+    CFPResponseFn (typically a CF-aware version of mdot) and output_fns
+    (typically none).  The initial contents of the
     ConnectionFields mapping from the input Sheet into the target
     ProjectionSheet are controlled by the weights_generator, cf_shape,
     and weights_output_fn parameters, while the location of the
@@ -478,13 +478,13 @@ class CFProjection(Projection):
     response_fn = param.ClassSelector(CFPResponseFn,
         default=CFPRF_Plugin(),
         doc='Function for computing the Projection response to an input pattern.')
-    
+
     cf_type = param.Parameter(default=ConnectionField,constant=True,
         doc="Type of ConnectionField to use when creating individual CFs.")
 
     # JPHACKALERT: Not all support for null CFs has been implemented.
     # CF plotting and C-optimized CFPxF_ functions need
-    # to be fixed to support null CFs without crashing.    
+    # to be fixed to support null CFs without crashing.
     allow_null_cfs = param.Boolean(default=False,
         doc="Whether or not the projection can have entirely empty CFs")
 
@@ -492,7 +492,7 @@ class CFProjection(Projection):
         default=BoundingBox(radius=0.1),doc="""
         Bounds defining the Sheet area covered by a prototypical ConnectionField.
         The true bounds will differ depending on the density (see create_slice_template()).""")
-    
+
     weights_generator = param.ClassSelector(PatternGenerator,
         default=patterngenerator.Constant(),constant=True,
         doc="Generate initial weights values.")
@@ -507,7 +507,7 @@ class CFProjection(Projection):
         all CFs, which saves computation time and memory.  If False,
         the cf_shape is evaluated once for each CF, allowing each to
         have its own shape.""")
-    
+
     learning_fn = param.ClassSelector(CFPLearningFn,
         default=CFPLF_Plugin(),
         doc='Function for computing changes to the weights based on one activation step.')
@@ -543,7 +543,7 @@ class CFProjection(Projection):
         included; otherwise it is excluded from the mask.""")
 
     apply_output_fns_init=param.Boolean(default=True,doc="""
-        Whether to apply the output function to connection fields (e.g. for 
+        Whether to apply the output function to connection fields (e.g. for
         normalization) when the CFs are first created.""")
 
     min_matrix_radius = param.Integer(default=1,bounds=(0,None),doc="""
@@ -582,17 +582,17 @@ class CFProjection(Projection):
                                      min_matrix_radius=self.min_matrix_radius)
 
         self.bounds_template = self._slice_template.compute_bounds(self.src)
-        
+
         self.mask_template = _create_mask(self.cf_shape,self.bounds_template,
                                          self.src,self.autosize_mask,
                                          self.mask_threshold)
 
         self.n_units = self._calc_n_units()
-        
+
         if initialize_cfs:
             self._create_cfs()
 
-            
+
         ### JCALERT! We might want to change the default value of the
         ### input value to self.src.activity; but it fails, raising a
         ### type error. It probably has to be clarified why this is
@@ -606,7 +606,7 @@ class CFProjection(Projection):
         vectorized_coord_mapper = simple_vectorize(self.coord_mapper,
                                                    num_outputs=2,
                                                    # CB: could switch to float32?
-                                                   output_type=float) 
+                                                   output_type=float)
         return vectorized_coord_mapper(X,Y)
 
 
@@ -617,7 +617,7 @@ class CFProjection(Projection):
         self.cfs = vectorized_create_cf(*self._generate_coords())
         self.flatcfs = list(self.cfs.flat)
 
-        
+
     def _create_cf(self,x,y):
         """
         Create a ConnectionField at x,y in the src sheet.
@@ -641,7 +641,7 @@ class CFProjection(Projection):
             CF = self.cf_type(self.src,x=x,y=y,
                               template=self._slice_template,
                               weights_generator=self.weights_generator,
-                              mask=mask_template, 
+                              mask=mask_template,
                               output_fns=ofs,
                               min_matrix_radius=self.min_matrix_radius)
         except NullCFError:
@@ -649,13 +649,13 @@ class CFProjection(Projection):
                 CF = None
             else:
                 raise
-        
+
         return CF
 
 
 
     def _calc_n_units(self):
-        """Return the number of unmasked units in a typical ConnectionField."""      
+        """Return the number of unmasked units in a typical ConnectionField."""
 
         return min(len(self.mask_template.ravel().nonzero()[0]),
                    # CEBALERT: if the mask_template is bigger than the
@@ -681,13 +681,13 @@ class CFProjection(Projection):
         Return a single connection field UnitView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
-        matrix_data = zeros(self.src.activity.shape,Float) 
+        matrix_data = zeros(self.src.activity.shape,Float)
         (r,c) = self.dest.sheet2matrixidx(sheet_x,sheet_y)
         r1,r2,c1,c2 = self.cfs[r,c].input_sheet_slice
         matrix_data[r1:r2,c1:c2] = self.cfs[r,c].weights
 
         # CB: the following would be equivalent with Slice __call__
-        
+
         # cf = self.cf(self.dest.sheet2matrixidx(sheet_x,sheet_y))
         # matrix_data = numpy.zeros(self.src.activity.shape,Numeric.Float)
         # matrix_data[cf.input_sheet_slice()]=cf.weights
@@ -705,7 +705,7 @@ class CFProjection(Projection):
 
 
     # CEBALERT: should add active_units_mask to match
-    # apply_learn_output_fns.  
+    # apply_learn_output_fns.
     def learn(self):
         """
         For a CFProjection, learn consists of calling the learning_fn.
@@ -714,7 +714,7 @@ class CFProjection(Projection):
         # i.e. there is an input to the Projection.
         if self.input_buffer != None:
             self.learning_fn(MaskedCFIter(self),self.input_buffer,self.dest.activity,self.learning_rate)
-       
+
 
     # CEBALERT: called 'learn' output fns here, but called 'weights' output fns
     # elsewhere (mostly). Change all to 'learn'?
@@ -744,13 +744,13 @@ class CFProjection(Projection):
         # Could also count the input_sheet_slice
         rows,cols=self.cfs.shape
         return super(CFProjection,self).n_bytes() + \
-               sum([cf.weights.nbytes + 
+               sum([cf.weights.nbytes +
                     cf.mask.nbytes
                     for cf,i in CFIter(self,ignore_sheet_mask=True)()])
 
 
     def n_conns(self):
-        # Counts non-masked values, if mask is available; otherwise counts 
+        # Counts non-masked values, if mask is available; otherwise counts
         # weights as connections if nonzero
         rows,cols=self.cfs.shape
         return sum([len((cf.mask if cf.mask is not None else cf.weights).ravel().nonzero()[0])
@@ -792,13 +792,13 @@ class CFIter(object):
     Iterator to walk through all ConnectionFields of all neurons in
     the destination Sheet of the given CFProjection.  Each iteration
     yields the tuple (cf,i) where cf is the ConnectionField at
-    position i in the projection's flatcfs list. 
+    position i in the projection's flatcfs list.
 
     If active_units_mask is True, inactive units will be skipped. If
     ignore_sheet_mask is True, even units excluded by the sheet mask
     will be included.
     """
-    
+
     # CB: as noted elsewhere, rename active_units_mask (to e.g.
     # ignore_inactive_units).
     def __init__(self,cfprojection,active_units_mask=False,ignore_sheet_mask=False):
@@ -814,9 +814,9 @@ class CFIter(object):
         self.ignore_sheet_mask = ignore_sheet_mask
 
     def __nomask(self):
-        # return an array indicating all units should be processed 
-        
-        # dtype for C functions. 
+        # return an array indicating all units should be processed
+
+        # dtype for C functions.
         # could just be flat.
         return numpy.ones(self.activity.shape,dtype=self.activity.dtype)
 
@@ -824,7 +824,7 @@ class CFIter(object):
     def get_sheet_mask(self):
         if not self.ignore_sheet_mask:
             return self.mask.data
-        else: 
+        else:
             return self.__nomask()
 
     # CEBALERT: make _ (and probably drop '_mask').
@@ -858,7 +858,7 @@ class CFIter(object):
         sheet_mask = self.get_sheet_mask()
         active_units_mask = self.get_active_units_mask()
         return numpy.logical_and(sheet_mask,active_units_mask)
-    
+
 
     def __call__(self):
         mask = self.get_overall_mask()
@@ -901,7 +901,7 @@ class CFSheet(ProjectionSheet):
 
         Each UnitView is then added to the sheet_views of its source sheet.
         It returns the list of all UnitViews for the given unit.
-        """     
+        """
         for p in self.in_connections:
             if not isinstance(p,CFProjection):
                 self.debug("Skipping non-CFProjection "+p.name)
@@ -927,7 +927,7 @@ class ResizableCFProjection(CFProjection):
     # Less efficient memory usage than CFProjection because it stores
     # the (x,y) position of each ConnectionField.
 
-    
+
     def _generate_coords(self):
         # same as super's, but also stores the coords.
 
@@ -936,7 +936,7 @@ class ResizableCFProjection(CFProjection):
         # and y coords, and generate the grids when needed?
         self.X_cf,self.Y_cf = super(ResizableCFProjection,self)._generate_coords()
         return self.X_cf,self.Y_cf
-        
+
 
     ### This could be changed into a special __set__ method for
     ### bounds_template, instead of being a separate function, but
@@ -997,7 +997,7 @@ class ResizableCFProjection(CFProjection):
     def change_density(self, new_wt_density):
         """
         Rescales the weight matrix in place, interpolating or resampling as needed.
-        
+
         Not yet implemented.
         """
         raise NotImplementedError
@@ -1018,12 +1018,12 @@ class ResizableCFProjection(CFProjection):
         """
         if output_fns is None:
             output_fns = []
-            
+
         # CEBALERT: re-write to allow arbitrary resizing
         or1,or2,oc1,oc2 = cf.input_sheet_slice
 
         weights_slice = cf._create_input_sheet_slice(input_sheet,x,y,copy(template),min_matrix_radius)
-                    
+
         r1,r2,c1,c2 = cf.input_sheet_slice
 
 

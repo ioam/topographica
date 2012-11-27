@@ -16,12 +16,12 @@ def _name_is_main(obj):
     # CEBALERT: see IPython hack in commandline.py
     return obj.__module__ == "__main__" or obj.__module__ == "__mynamespace__"
 
-    
+
 
 class PickleMain(object):
     """
     Pickle support for types and functions defined in __main__.
-    
+
     When pickled, saves types and functions defined in __main__ by
     value (i.e. as bytecode). When unpickled, loads previously saved
     types and functions back into __main__.
@@ -60,13 +60,13 @@ class PickleMain(object):
 
     def __getstate__(self):
         self._create_pickler()
-        
+
         bytecode = {}
         for name,obj in __main__.__dict__.items():
             if not name.startswith('_'):
                 if isinstance(obj,types.FunctionType) or isinstance(obj,type):
                     # (could be extended to other types, I guess
-                    if _name_is_main(obj): 
+                    if _name_is_main(obj):
                         #CB: how do I print out info via Parameterized?
                         print "%s is defined in __main__: saving bytecode."%name
                         bytecode[name] = obj
@@ -131,14 +131,14 @@ def save_module_dict(self, obj, main_dict=vars(__import__('__main__'))):
         save_global_byname(self, obj, '__main__', '__dict__')
     else:
         return self.save_dict(obj)
-        #return pickle.Pickler.save_dict(self, obj)      # fallback to original 
+        #return pickle.Pickler.save_dict(self, obj)      # fallback to original
 
 def save_classobj(self, obj):
     """ Save an interactively defined classic class object by value """
     if _name_is_main(obj):
         args = (obj.__name__, obj.__bases__, obj.__dict__)
         self.save_reduce(new.classobj, args, obj=obj)
-    else:  
+    else:
         name = str(obj).split('.')[-1]  # CEB: hack to find classic class name
         self.save_global(obj,name)
         #pickle.Pickler.save_global(self, obj, name)
@@ -165,7 +165,7 @@ def save_type(self, obj):
     elif _name_is_main(obj):
         # Types in __main__ are saved by value
 
-        # Make sure we have a reference to type.__new__        
+        # Make sure we have a reference to type.__new__
         if id(type.__new__) not in self.memo:
             self.save_reduce(getattr, (type, '__new__'), obj=type.__new__)
             self.write(pickle.POP)
@@ -175,11 +175,11 @@ def save_type(self, obj):
         # Clean up unpickleable descriptors added by Python
         d.pop('__dict__', None)
         d.pop('__weakref__', None)
-        
+
         args = (type(obj), obj.__name__, obj.__bases__, d)
         self.save_reduce(type.__new__, args, obj=obj)
     else:
         # Fallback to default behavior: save by reference
         self.save_global(obj)
         #pickle.Pickler.save_global(self, obj)
-###############################################################        
+###############################################################

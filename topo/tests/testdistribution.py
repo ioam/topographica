@@ -10,7 +10,7 @@ $Id$
 
 import unittest
 from topo.misc.distribution import Distribution, DSF_WeightedAverage
-import copy 
+import copy
 
 # for testing the statistics
 from math import pi, atan2, cos
@@ -44,7 +44,7 @@ class TestDistribution(unittest.TestCase):
         self.h.add({5:0.5})
         self.h.add({5:0.5})
         self.h.add({5:0.5})
-        
+
         self.g = copy.deepcopy(self.h)
         self.g.add({0:0.0})
         self.g.add({1:0.1})
@@ -79,7 +79,7 @@ class TestDistribution(unittest.TestCase):
         self.assertAlmostEqual(self.g.get_value(3), 1.2)
         self.assertAlmostEqual(self.g.get_value(4), 2.0)
         self.assertAlmostEqual(self.g.get_value(5), 3.0)
-        
+
 
     def test_lissom_mags(self):
         self.assertAlmostEqual(self.h.value_mag(0), 0.0/5.5)
@@ -96,46 +96,46 @@ class TestDistribution(unittest.TestCase):
         self.assertAlmostEqual(self.h.count_mag(4), 4.0/16)
         self.assertAlmostEqual(self.h.count_mag(5), 5.0/16)
 
-   
+
     def test_lissom_statistics(self):
         self.assertEqual(len(self.h.values()), 6)
         self.assertAlmostEqual(self.h.total_value, 5.5)
         self.assertEqual(self.h.total_count, 16)
-        
+
         self.assertAlmostEqual(max(self.h.values()), 2.5)
         self.assertAlmostEqual(min(self.h.values()), 0.0)
         self.assertEqual(max(self.h.counts()), 5)
         self.assertEqual(min(self.h.counts()), 1)
 
-        
-        self.assertAlmostEqual(self.g.total_value, 7.0)         
+
+        self.assertAlmostEqual(self.g.total_value, 7.0)
         self.assertEqual(self.g.total_count, 22)
         self.assertAlmostEqual(sum(self.g.values()), 7.0)
 
         self.assertAlmostEqual(self.g.weighted_sum(), 28.0)
         # (should return _weighted_average:)
         self.assertAlmostEqual( weighted_average( self.g ), 28.0/sum(self.g.values()))
-        self.assertAlmostEqual(vector_sum( self.g )[1], 4.40449904283) 
+        self.assertAlmostEqual(vector_sum( self.g )[1], 4.40449904283)
 
 
         self.q = Distribution((0,4), cyclic=True)
         self.q.add({3:1})
-        self.q.add({0:0, 1:0, 2:0, 4:0})                
+        self.q.add({0:0, 1:0, 2:0, 4:0})
         self.assertAlmostEqual(vector_sum( self.q )[0], 1.0)
         self.assertAlmostEqual(weighted_average( self.q ), 3.0)
-        self.assertAlmostEqual(vector_sum( self.q )[1], 3.0)  
+        self.assertAlmostEqual(vector_sum( self.q )[1], 3.0)
 
         # Example where this matches LISSOM by using an empty bin at 5.
         self.rr = Distribution((0,5), cyclic=True)  # 5 because in the L. test example 0 and 4 are distinct
         self.rr.add({0:1, 1:1, 2:1, 3:1, 4:1})
-        
+
         self.assertAlmostEqual(vector_sum( self.rr )[0], 0.0)
         self.assertAlmostEqual(weighted_average( self.rr ), vector_sum( self.rr )[1])
         self.rr.add({1:2})
-        self.assertAlmostEqual(vector_sum( self.rr )[0], 2.0) 
-        self.assertAlmostEqual(weighted_average( self.rr ), 1.0)  
+        self.assertAlmostEqual(vector_sum( self.rr )[0], 2.0)
+        self.assertAlmostEqual(weighted_average( self.rr ), 1.0)
         self.rr.add({3:2})
-        self.assertAlmostEqual(vector_sum( self.rr )[0], 2*2*cos(2*pi/5)) 
+        self.assertAlmostEqual(vector_sum( self.rr )[0], 2*2*cos(2*pi/5))
         self.assertAlmostEqual(weighted_average( self.rr ), 2.0)
 
 
@@ -183,15 +183,15 @@ class TestDistribution(unittest.TestCase):
 
         self.c = Distribution((0.0,1.0), cyclic=True)
         self.c.add({0.0:1.0, 0.25:1.0})
-        self.assertAlmostEqual(vector_sum( self.c )[0], (1.0+1.0)**0.5) 
+        self.assertAlmostEqual(vector_sum( self.c )[0], (1.0+1.0)**0.5)
         self.assertAlmostEqual(weighted_average( self.c ), vector_sum( self.c )[1])
         self.assertEqual(vector_sum( self.c )[1], atan2(1.0,1.0)/(2*pi))
 
         self.c.add({1.75:1.0})  # added beyond bounds
-        self.assertAlmostEqual(vector_sum( self.c )[0], 1.0) 
+        self.assertAlmostEqual(vector_sum( self.c )[0], 1.0)
         self.assertEqual(weighted_average( self.c ), 0.0)
 
-        
+
         self.d = Distribution(axis_bounds=(0.0,1.0),cyclic=False,keep_peak=False)
         self.assertEqual(self.d.undefined_vals, 0)
         self.assertAlmostEqual(selectivity( self.d ), 1.0)
@@ -206,22 +206,22 @@ class TestDistribution(unittest.TestCase):
 
         self.assertAlmostEqual(weighted_average( self.d ),0.0)
         self.assertEqual(self.d.undefined_vals, 6)
-        
+
         self.d.add({0.0: 1.0})
         self.assertAlmostEqual(selectivity( self.d ), 1.0)
         self.assertEqual(self.d.undefined_vals, 6)
-        
+
         self.d.add({0.5: 1.0})
         self.assertAlmostEqual(selectivity( self.d ), 0.0)
 
         self.d.add({0.75: 2.0})
-        self.assertAlmostEqual(selectivity( self.d ), 0.25) 
-        
+        self.assertAlmostEqual(selectivity( self.d ), 0.25)
+
 
 suite = unittest.TestSuite()
 suite.addTest(unittest.makeSuite(TestDistribution))
 
-              
+
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 

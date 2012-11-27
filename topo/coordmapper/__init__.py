@@ -31,10 +31,10 @@ class ConstantMapper(CoordinateMapperFn):
     """
     Map all values to the same constant, pre-specified coordinates.
     """
-    
+
     x_cons = param.Number(default=0.0,doc="""
        Constant x value returned by the mapping.""")
-    
+
     y_cons = param.Number(default=0.0, doc="""
        Constant y value returned by the mapping.""")
 
@@ -47,7 +47,7 @@ class Pipeline(CoordinateMapperFn):
     """
     Applies a sequence of coordmappers, left to right.
     """
-    
+
     mappers=param.List(default=[],
         doc="The sequence of mappers to apply.")
 
@@ -77,7 +77,7 @@ class NormalJitter(CoordinateMapperFn):
 
     gen = param.Parameter(default=numbergen.NormalRandom(),doc=
          "Number generator to use, typically a Gaussian distribution.")
-    
+
     def __call__(self,x,y):
         return x+self.gen(),y+self.gen()
 
@@ -97,10 +97,10 @@ class Grid(CoordinateMapperFn):
     def __call__(self,x,y):
         xd=self.xdensity
         yd=self.ydensity
-        
+
         xquant=(1.0/xd)*(int(xd*(x+0.5))-(0.5*(xd-1)))
         yquant=(1.0/yd)*(int(yd*(y+0.5))-(0.5*(yd-1)))
-        
+
         return  xquant,yquant
 
 
@@ -118,7 +118,7 @@ class Polar2Cartesian(CoordinateMapperFn):
             theta = theta * pi/180
 
             return r*cos(theta), r*sin(theta)
-                          
+
 
 class Cartesian2Polar(CoordinateMapperFn):
     """
@@ -136,7 +136,7 @@ class Cartesian2Polar(CoordinateMapperFn):
     def __call__(self, x, y):
 
         if self.negative_radii:
-            xsgn,xabs = signabs(x)            
+            xsgn,xabs = signabs(x)
             radius = xsgn * sqrt(x*x+y*y)
             angle = atan2(y,xabs)
         else:
@@ -147,7 +147,7 @@ class Cartesian2Polar(CoordinateMapperFn):
             angle *= 180/pi
 
         return radius,angle
-                          
+
 
 
 
@@ -160,7 +160,7 @@ class AffineTransform(CoordinateMapperFn):
     matrix. Single translations, etc, can be specified more simply
     with the subclasses Translate2d, Rotate2d, and Scale2d.
     """
-    
+
     matrix = param.Parameter(default=ones((3,3)),doc="""
        The affine transformation matrix.  The functions
        Translate2dMat, Rotate2dMat, and Scale2dMat generate affine
@@ -179,7 +179,7 @@ class AffineTransform(CoordinateMapperFn):
         self._op_buf = matrix([[0.0],
                                [0.0],
                                [1.0]])
-        
+
     def __call__(self, x, y):
 
         ## JPHACKALERT: If the coordmapper interface took a matrix of
@@ -197,7 +197,7 @@ class AffineTransform(CoordinateMapperFn):
         self._op_buf[0] = x
         self._op_buf[1] = y
         result = dot(self.matrix,self._op_buf)
-               
+
         return result[0,0],result[1,0]
 
 
@@ -273,7 +273,7 @@ class SingleDimensionMapper(CoordinateMapperFn):
 
     An abstract mapping function for coordinate mappers that remap
     based on the radius, x, or y individually. Subclasses should override
-    _map_fn(self,z). 
+    _map_fn(self,z).
     """
     __abstract = True
 
@@ -315,11 +315,11 @@ class MagnifyingMapper(SingleDimensionMapper):
     """
     Exponential (magnifying) mapping function.
 
-    Provides a mapping that magnifies the center of the activity image. 
+    Provides a mapping that magnifies the center of the activity image.
     Parameter k indicates amount of magnification, where 0 means no
     magnification.
     """
-    
+
     k = param.Number(default=1.0,bounds=(0,None))
 
     def _map_fn(self,z):
@@ -335,15 +335,15 @@ class ReducingMapper(SingleDimensionMapper):
     """
     Provides a mapping that reduces the center of the activity.
 
-    Roughly the inverse of MagnifyingMapper.  k indicates amount of reduction.    
+    Roughly the inverse of MagnifyingMapper.  k indicates amount of reduction.
     """
     k = param.Number(default=1.0,bounds=(0,None))
-    
+
     def _map_fn(self,z):
         k = self.k
         sgn,z = signabs(z)
         return sgn * self.out_range * log(z/self.in_range*k+1)/log(k+1)
-        
+
 
 class OttesSCMapper(CoordinateMapperFn):
     """
@@ -351,12 +351,12 @@ class OttesSCMapper(CoordinateMapperFn):
 
     Subclasses of this class implement afferent and efferent mappings
     from Ottes et al. (1986) Vision Research 26:857-873.
-    
-    Default constant values are from Table 1, ibid.  
-    """
-    __abstract = True 
 
-    
+    Default constant values are from Table 1, ibid.
+    """
+    __abstract = True
+
+
     A = param.Number(default=5.3, doc="""
        Shape parameter A, in degrees""")
     Bu = param.Number(default=1.8, doc="""
@@ -373,15 +373,15 @@ class OttesSCMapper(CoordinateMapperFn):
         degrees per unit of sheet.  Indicates how large a
         saccade is represented by the x-component of the command
         input.""")
-    
+
     direction_scale = param.Number(default=1,doc="""
         Scale factor for saccade command direction, expressed in
         degrees per unit of sheet.  Indicates what direction of saccade
         is represented by the y-component of the command input.""")
-    
+
 
     def __call__(self,x,y):
-        raise NotImplementedError        
+        raise NotImplementedError
 
 
 class OttesSCMotorMapper(OttesSCMapper):
@@ -397,11 +397,11 @@ class OttesSCMotorMapper(OttesSCMapper):
     """
     def __call__(self,x,y):
 
-        A = self.A 
+        A = self.A
         Bu = self.Bu / self.mm_scale
-        Bv = self.Bv / self.mm_scale 
+        Bv = self.Bv / self.mm_scale
 
-        R = x * self.amplitude_scale 
+        R = x * self.amplitude_scale
         phi = y * self.direction_scale
 
         Rsign,R = signabs(R)
@@ -409,7 +409,7 @@ class OttesSCMotorMapper(OttesSCMapper):
         u,v = ottes_mapping(R,phi,A,Bu,Bv)
         return Rsign*u,v
 
-        
+
 
 class OttesSCSenseMapper(OttesSCMapper):
     """
@@ -427,9 +427,9 @@ class OttesSCSenseMapper(OttesSCMapper):
 
     def __call__(self,x,y):
 
-        A  = self.A 
-        Bu = self.Bu 
-        Bv = self.Bv 
+        A  = self.A
+        Bu = self.Bu
+        Bv = self.Bv
 
         u = x * self.mm_scale
         v = y * self.mm_scale
@@ -452,10 +452,10 @@ def ottes_mapping(R,phi,A,Bu,Bv):
     in mm, where the u axis is rostral/caudal, and the v axis is
     medial/lateral.
     """
-    
+
     phi *= pi/180
     u = Bu * (log(sqrt(R**2 + A**2 + 2*A*R*cos(phi))) - log(A))
-    v = Bv * atan((R*sin(phi))/(R*cos(phi)+A))        
+    v = Bv * atan((R*sin(phi))/(R*cos(phi)+A))
     return u,v
 
 
@@ -469,7 +469,7 @@ def ottes_inverse_mapping(u,v,A,Bu,Bv):
     Inverse is approximate, with increasing error as positions near the
     edges of the collicular sheet. (I.e. with high absolute v value).
     """
-    
+
     rads = pi/180
     R   = A * sqrt(exp(2*u/Bu) - 2*exp(u/Bu)*cos(rads*v/Bv) + 1)
     #phi = atan( (exp(u/Bu)*sin(rads*v/Bv)) / (exp(u/Bu)*cos(rads*v/Bv) -1) )
@@ -478,7 +478,7 @@ def ottes_inverse_mapping(u,v,A,Bu,Bv):
     # JPALERT: Don't know why we have to multiply by 180/pi twice, but the answers
     # are way off without it.  Is the bug in my code, or in the original formula?
     return R,phi*180/pi
-                 
+
 
 # JPALERT: Temporary testing function.  Will disappear eventually.
 def test_ottes_inverse():

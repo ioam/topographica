@@ -67,8 +67,8 @@ class TestBoundingBox(unittest.TestCase):
         self.assert_(self.region.contains(self.xc, self.bottom))
     def test_top_boundary(self):
         self.assert_(self.region.contains(self.xc, self.top))
-        
-                    
+
+
 class TestBoundingEllipse(TestBoundingBox):
     def setUp(self):
         TestBoundingBox.setUp(self)
@@ -93,7 +93,7 @@ class TestBoundingCircle(TestBoundingEllipse):
 
         self.region = BoundingCircle(radius = self.radius, center = (self.xcenter,self.ycenter))
         self.xc, self.yc = self.region.aarect().centroid()
-        
+
 cases = [TestAARectangle,
          TestBoundingBox,
          TestBoundingEllipse,
@@ -102,6 +102,6 @@ cases = [TestAARectangle,
 suite = unittest.TestSuite()
 
 suite.addTests([unittest.makeSuite(case) for case in cases])
-              
+
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=1).run(suite)

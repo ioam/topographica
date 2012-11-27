@@ -17,7 +17,7 @@ that can be used with the above functions and classes::
 
   sheet          - Sheet classes: 2D arrays of processing units
   projection     - Projection classes: connections between Sheets
-  pattern        - PatternGenerator classes: 2D input or weight patterns 
+  pattern        - PatternGenerator classes: 2D input or weight patterns
   ep             - EventProcessor classes: other simulation objects
   transferfn     - Transfer functions, for e.g. normalization or squashing
   responsefn     - Calculate the response of a Projection
@@ -54,7 +54,7 @@ __all__ = ['analysis',
 release='0.9.8'
 version='12131'
 
-import param 
+import param
 import os
 import errno
 import platform
@@ -95,7 +95,7 @@ def _xdg_documents_path():
 
 # Determine the appropriate location in which to create files
 # on this operating system
-_default_output_path = os.path.join(os.path.expanduser('~'), 
+_default_output_path = os.path.join(os.path.expanduser('~'),
                                     'Documents', 'Topographica')
 try:
     documents = _xdg_documents_path()
@@ -236,13 +236,13 @@ except ImportError:
     from topo.misc.util import gmpyImporter
     import sys
     sys.meta_path.append(gmpyImporter())
-        
 
 
-sim = Simulation() 
+
+sim = Simulation()
 
 
-# numbergen used to be part of topo; import it there for backwards compatibility 
+# numbergen used to be part of topo; import it there for backwards compatibility
 # and set the time function to be topo.sim.time()
 import sys,numbergen
 sys.modules['topo.numbergen']=numbergen
@@ -278,7 +278,7 @@ license (http://www.opensource.org/licenses/bsd-license.php).
 """%(release,version)
     if display:
         print ABOUT_TEXT
-    else:        
+    else:
         return ABOUT_TEXT
 
 

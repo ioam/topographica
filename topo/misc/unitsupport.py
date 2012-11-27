@@ -14,13 +14,13 @@ import numpy as np
 
 got_unum = False; got_pq=False
 
-try:  
-    import quantities as pq 
+try:
+    import quantities as pq
     got_pq=True
 except: pass
 
-try: 
-    import unum 
+try:
+    import unum
     import unum.units
     unum.Unum.UNIT_FORMAT = '%s'
     got_unum=True
@@ -37,7 +37,7 @@ class strip_pq_hook(param.ParameterizedFunction):
         """
         if not hasattr(val,'units'):
             return val
-        
+
         if hasattr(obj,'unit_conversions'):
             return obj.unit_conversions.convert_to_base(val)
         elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
@@ -52,7 +52,7 @@ class strip_unum_hook(param.ParameterizedFunction):
         """
         if not val.__class__.__name__ == 'Unum':
             return val
-        
+
         if hasattr(obj,'unit_conversions'):
             return obj.unit_conversions.convert_to_base(val)
         elif hasattr(obj,'src') and hasattr(obj.src,'unit_conversions'):
@@ -82,18 +82,18 @@ class Conversions(object):
             self._unit_objects = {}
         if not hasattr(self,'_unit_specs'):
             self._unit_specs = {}
-        
+
         if 'unit_conversions' not in sheet.Sheet.params():
             sheet.Sheet._add_parameter("unit_conversions",param.Parameter(None))
         if 'unit_conversions' not in pattern.PatternGenerator.params():
-            pattern.PatternGenerator._add_parameter("unit_conversions",param.Parameter(None))            
+            pattern.PatternGenerator._add_parameter("unit_conversions",param.Parameter(None))
         if 'unit_conversions' not in numbergen.NumberGenerator.params():
             numbergen.NumberGenerator._add_parameter("unit_conversions",param.Parameter(None))
-        
+
         self.initialize(units)
         self.initialized = True
 
-        
+
     @bothmethod
     def declare_unit(obj,unit_key,conversion,name,base=False):
         """
@@ -101,14 +101,14 @@ class Conversions(object):
         """
         if obj.package == 'Quantities':
             unit_obj = pq.UnitQuantity(name, definition=conversion,symbol=unit_key)
-            
+
             if base:
                 unit = [(unit_obj,unit_key,conversion,name)]
                 obj._set_base_units_pq(unit)
             else:
                 unit = [(unit_obj,conversion)]
                 obj.initialize_units(unit)
-            
+
             return unit_obj
 
         if obj.package == 'Unum':
@@ -117,14 +117,14 @@ class Conversions(object):
 
             obj.del_unit(unit_key)
             unit_obj = unum.Unum.unit(unit_key,conversion,name)
-            
+
             if base:
                 unit = [(unit_obj,unit_key,conversion,name)]
                 obj._set_base_units_unum(unit)
             else:
                 unit = [(unit_obj,conversion)]
                 obj.initialize_units(unit)
-            
+
             return unit_obj
 
 
@@ -153,9 +153,9 @@ class Conversions(object):
         unum_methods = [obj._convert_to_base_unum,obj._initialize_unum,obj._initialize_units_unum,obj._set_local_units_unum]
         pq_methods = [obj._convert_to_base_pq,obj._initialize_pq,obj._initialize_units_pq,obj._set_local_units_pq]
 
-        if obj.package == 'Unum' and not got_unum: 
+        if obj.package == 'Unum' and not got_unum:
             raise ImportError('Unum package not installed, call Conversions.set_package(\'Quantities\') or install Unum.')
-        if obj.package == 'Quantities' and not got_pq: 
+        if obj.package == 'Quantities' and not got_pq:
             raise ImportError('Quantities package not installed, call Conversions.set_package = (\'Unum\') or install Quantities.')
 
         if obj.package =='Unum': selected = unum_methods
@@ -229,7 +229,7 @@ class Conversions(object):
     def _get_global_unit(obj,unit_key):
         if obj.package == 'Unum': return getattr(unum.units,unit_key)
         elif obj.package == 'Quantities': return pq.registry.unit_registry[unit_key]
-        else: return None  
+        else: return None
 
 
     def _initialize_pq(self,units):
@@ -242,7 +242,7 @@ class Conversions(object):
         base.boundingregion.BoundingRegionParameter.set_hook = strip_pq_hook
 
         self.initialize_units(units)
-        
+
 
     def _initialize_unum(self,units):
         """
@@ -319,9 +319,9 @@ class Conversions(object):
         """
         for unit in self._unit_specs.keys():
             self._unit_objects[unit]._conv_ref = np.array(self._unit_specs[unit][0].magnitude) * self._unit_specs[unit][0].units.simplified
-        for idx,unit in enumerate(self._base_units):    
+        for idx,unit in enumerate(self._base_units):
             self._base_units[idx][0]._conv_ref = np.array(unit[2].magnitude) * unit[2].units.simplified
-    
+
 
     def _set_local_units_unum(self):
         """

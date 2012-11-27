@@ -74,7 +74,7 @@ c_decorators = collections.defaultdict(lambda:'')
 # separate memory subsystems for each core, such as a Xeon. See Marco
 # Elver's report at http://homepages.inf.ed.ac.uk/s0787712/stuff/melver_project-report.pdf.
 openmp_threads = __main__.__dict__.get('openmp_threads',False)
-    
+
 # Variable that will be used to report whether weave was successfully
 # imported (below).
 weave_imported = False
@@ -101,8 +101,8 @@ if import_weave:
             # now dynamically patch weave and restore USERNAME
             import scipy.weave.catalog
             iam = scipy.weave.catalog.whoami().replace(" ","")
-            scipy.weave.catalog.whoami = lambda: iam                
-            os.environ["USERNAME"]=original_user        
+            scipy.weave.catalog.whoami = lambda: iam
+            os.environ["USERNAME"]=original_user
         except:
             pass
 ##########
@@ -135,7 +135,7 @@ try:
         named_params = copy(inline_named_params) # Make copy of defaults.
         named_params.update(nparams)             # Add newly passed named parameters.
         weave.inline(*params,**named_params)
-        
+
     # Overwrites stub definition with full Weave definition
     inline = inline_weave
 
@@ -167,7 +167,7 @@ warn_for_each_unoptimized_component = False
 def provide_unoptimized_equivalent(optimized_name, unoptimized_name, local_dict):
     """
     If not using optimization, replace the optimized component with its unoptimized equivalent.
-    
+
     The objects named by optimized_name and unoptimized_name should be
     plug-compatible.  The local_dict argument should be given the
     contents of locals(), so that this function can replace the
@@ -175,12 +175,12 @@ def provide_unoptimized_equivalent(optimized_name, unoptimized_name, local_dict)
     which it has been called.
 
     As an example, calling this function as::
-    
+
       provide_unoptimized_equivalent("sort_opt","sort",locals())
 
     is equivalent to putting the following code directly into the
     calling location::
-    
+
       if not optimized:
         sort_opt = sort
         print 'module: Inline-optimized components not available; using sort instead of sort_opt.'
@@ -264,5 +264,5 @@ typedef double npfloat;
 # Simple test
 if __name__ == '__main__':
     inline('printf("Hello World!!\\n");')
-    
+
 

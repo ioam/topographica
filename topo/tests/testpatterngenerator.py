@@ -30,7 +30,7 @@ class TestPatternGenerator(unittest.TestCase):
         r = Rectangle(bounds=pattern_bounds,xdensity=10,
                       ydensity=10,aspect_ratio=1,size=1,smoothing=0.0)
         assert_array_equal(r(),pattern_target)
-        
+
 
     def test_constant(self):
         """
@@ -44,7 +44,7 @@ class TestPatternGenerator(unittest.TestCase):
 
         c = Constant(bounds=pattern_bounds,xdensity=10.0,ydensity=10)
         assert_array_equal(c(),pattern_target)
-        
+
 
     def test_position(self):
         """
@@ -112,10 +112,10 @@ class TestPatternGenerator(unittest.TestCase):
         bounds = BoundingBox(points=((-0.9,-0.8),(0.1,0.2)))
         r = Rectangle(bounds=bounds,xdensity=10,ydensity=10,smoothing=0.0,
                       aspect_ratio=width/height,size=height)
-        
+
         assert_array_equal(r(x=-0.4,y=-0.3),target)
-        
-    
+
+
 
     def test_orientation_and_rotation(self):
         """
@@ -135,7 +135,7 @@ class TestPatternGenerator(unittest.TestCase):
         ydensity = 10
         width = 2.0/xdensity
         height = 4.0/ydensity
-        
+
         rect = Rectangle(size=height,
                          aspect_ratio=width/height,smoothing=0.0,
                          xdensity=xdensity,ydensity=ydensity,bounds=bounds)
@@ -151,7 +151,7 @@ class TestPatternGenerator(unittest.TestCase):
                         [0, 0, 1, 1, 1, 0],
                         [0, 0, 0, 1, 0, 0],
                         [0, 0, 0, 0, 0, 0]])
-                       
+
         assert_array_equal(rect(orientation=pi/4),rot_45)
 
 
@@ -186,7 +186,7 @@ class TestPatternGenerator(unittest.TestCase):
         c = Composite(generators=[r1,r2],bounds=bbox,xdensity=7,ydensity=7)
         assert_array_equal(c(),c_true)
 
-        
+
     def test_composite_pattern_moves(self):
         """
         Test that moving a composite pattern yields the correct pattern.
@@ -228,7 +228,7 @@ class TestSelector(unittest.TestCase):
         self.g2 = Gaussian(x=numbergen.UniformRandom())
         self.s = Selector(generators=[self.g1,self.g2])
         self.s.set_dynamic_time_fn(None,'generators')
-        
+
     def test_dynamic_index(self):
         """index should always vary"""
         self.assertNotEqual(self.s.index,self.s.index)

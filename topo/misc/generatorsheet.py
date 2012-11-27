@@ -25,23 +25,23 @@ class GeneratorSheet(Sheet):
     """
 
     src_ports=['Activity']
-    
+
     period = param.Number(default=1,bounds=(0,None), inclusive_bounds=(False, True), constant=True, doc=
         "Delay (in Simulation time) between generating new input patterns.")
-    
+
     phase  = param.Number(default=0.05,doc=
         """
         Delay after the start of the Simulation (at time zero) before
-        generating an input pattern.  For a clocked, feedforward simulation, 
+        generating an input pattern.  For a clocked, feedforward simulation,
         one would typically want to use a small nonzero phase and use delays less
         than the user-visible step size (typically 1.0), so that inputs are
         generated and processed before this step is complete.
         """)
-    
+
     input_generator = param.ClassSelector(PatternGenerator,default=Constant(),
         doc="""Specifies a particular PatternGenerator type to use when creating patterns.""")
 
-    
+
     def __init__(self,**params):
         super(GeneratorSheet,self).__init__(**params)
         self.input_generator_stack = []
@@ -77,9 +77,9 @@ class GeneratorSheet(Sheet):
         # push_input_generator must be supplied with a new generator.
         # CEBALERT: presumably we can remove this import.
         from topo.base.patterngenerator import Constant
-        self.set_input_generator(Constant()) 
+        self.set_input_generator(Constant())
 
-               
+
     def pop_input_generator(self):
         """
         Discard the current input_generator, and retrieve the previous one from the stack.
@@ -106,8 +106,8 @@ class GeneratorSheet(Sheet):
             for of in self.output_fns:
                 of(self.activity)
         self.send_output(src_port='Activity',data=self.activity)
-                                                        
-              
+
+
     def start(self):
         assert self.simulation
 

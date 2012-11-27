@@ -50,8 +50,8 @@ def _complexity_rec(x,y,index,depth,fm):
         else:
             if max_value < fm.full_matrix[index][x][y]:
                 global_index = index
-                max_value = fm.full_matrix[index][x][y]    
-    
+                max_value = fm.full_matrix[index][x][y]
+
 
 
 def complexity(full_matrix):
@@ -68,36 +68,36 @@ def complexity(full_matrix):
     i = 0
     for f in full_matrix.features:
         if f.name == "phase":
-            
+
             phase_index = i
             break
         i=i+1
     sum = 0.0
     res = 0.0
     average = 0.0
-    
+
     print "Z"
     print size(full_matrix.features)
     print full_matrix.features[0].values
-    
+
     for x in range(rows):
         for y in range(cols):
             complex_matrix[x,y] = []#
             max_value=-0.01
             global_index = ()
             _complexity_rec(x,y,(),0,full_matrix)
-            
-            #compute the sum of the responses over phases given the found index of highest response 
+
+            #compute the sum of the responses over phases given the found index of highest response
 
             iindex = array(global_index)
             sum = 0.0
             for i in range(size(full_matrix.features[phase_index].values)):
                 iindex[phase_index] = i
                 sum = sum + full_matrix.full_matrix[tuple(iindex.tolist())][x][y]
-                
+
             #average
             average = sum / float(size(full_matrix.features[phase_index].values))
-            
+
             res = 0.0
             #compute the sum of absolute values of the responses minus average
             for i in range(size(full_matrix.features[phase_index].values)):
@@ -137,9 +137,9 @@ def complexity(full_matrix):
 
 
 def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
-    
+
     """ This function allows and alternative computation of orientation tuning curve where
-    for each given orientation the response is computed as a maximum of AC or DC component 
+    for each given orientation the response is computed as a maximum of AC or DC component
     across the phases instead of the maximum used as a standard in Topographica"""
     # this method assumes that only single frequency has been used
     i = 0
@@ -150,31 +150,31 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
             orientation_index = i
         if f.name == "frequency":
             frequency_index = i
-        i=i+1   
+        i=i+1
     print sheet.curve_dict
     if not sheet.curve_dict.has_key("orientationACDC"):
         sheet.curve_dict["orientationACDC"]={}
     sheet.curve_dict["orientationACDC"][curve_label]={}
-    
+
     rows,cols = full_matrix.matrix_shape
     for o in xrange(size(full_matrix.features[orientation_index].values)):
         s_w = zeros(full_matrix.matrix_shape)
         for x in range(rows):
             for y in range(cols):
-                or_response=[] 
+                or_response=[]
                 for p in xrange(size(full_matrix.features[phase_index].values)):
                     index = [0,0,0]
                     index[phase_index] = p
                     index[orientation_index] = o
                     index[frequency_index] = 0
                     or_response.append(full_matrix.full_matrix[tuple(index)][x][y])
-                 
-                fft = numpy.fft.fft(or_response+or_response+or_response+or_response,2048)   
-                first_har = 2048/len(or_response)   
+
+                fft = numpy.fft.fft(or_response+or_response+or_response+or_response,2048)
+                first_har = 2048/len(or_response)
                 s_w[x][y] = numpy.maximum(2 *abs(fft[first_har]),abs(fft[0]))
         s = SheetView((s_w,sheet.bounds), sheet.name , sheet.precedence, topo.sim.time(),sheet.row_precedence)
-        sheet.curve_dict["orientationACDC"][curve_label].update({full_matrix.features[orientation_index].values[o]:s}) 
-    
+        sheet.curve_dict["orientationACDC"][curve_label].update({full_matrix.features[orientation_index].values[o]:s})
+
 
 
 def phase_preference_scatter_plot(sheet_name,diameter=0.39):
@@ -199,14 +199,14 @@ def phase_preference_scatter_plot(sheet_name,diameter=0.39):
         if((xc1==xc2) &  (yc1==yc2)): continue
         datax = datax + [v[xc1,yc1]]
         datay = datay + [v[xc2,yc2]]
-    
+
     for i in range(0,len(datax)):
         datax[i] = datax[i] * 360
         datay[i] = datay[i] * 360
         if(datay[i] > datax[i] + 180): datay[i]=  datay[i]- 360
         if((datax[i] > 180) & (datay[i]> 180)): datax[i] = datax[i] - 360; datay[i] = datay[i] - 360
         if((datax[i] > 180) & (datay[i] < (datax[i]-180))): datax[i] = datax[i] - 360; #datay[i] = datay[i] - 360
-        
+
     f = pylab.figure()
     ax = f.add_subplot(111, aspect='equal')
     pylab.plot(datax,datay,'ro')
@@ -260,9 +260,9 @@ def analyze_complexity(full_matrix,simple_sheet_name,complex_sheet_name,filename
     measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
                        if hasattr(s,'measure_maps') and s.measure_maps]
 
-    for sheet in measured_sheets:   
+    for sheet in measured_sheets:
         # Divide by two to get into 0-1 scale - that means simple/complex boundry is now at 0.5
-        complx = array(complexity(full_matrix[sheet]))/2.0 
+        complx = array(complexity(full_matrix[sheet]))/2.0
         # Should this be renamed to ModulationRatio?
         sheet.sheet_views['ComplexSelectivity']=SheetView((complx,sheet.bounds), sheet.name , sheet.precedence, topo.sim.time(),sheet.row_precedence)
     import topo.command.pylabplot

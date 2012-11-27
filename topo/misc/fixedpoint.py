@@ -91,7 +91,7 @@ Methods unique to FixedPoints:
    .frac()              long(x) + x.frac() == x
    .get_precision()     return the precision(p) of this FixedPoint object
    .set_precision(p)    set the precision of this FixedPoint object
-   
+
 Provided as-is; use at your own risk; no warranty; no promises; enjoy!
 """
 
@@ -171,7 +171,7 @@ class FixedPoint(object):
         self.n = self.p = 0
         if precision == None:
             precision = DEFAULT_PRECISION
-           
+
         self.set_precision(precision)
         p = self.p
 
@@ -318,7 +318,7 @@ class FixedPoint(object):
     # Basic support for pickling
     def __getstate__(self):
         state={}
-        try: 
+        try:
             for k in self.__slots__:
                 state[k] = getattr(self,k)
         except AttributeError:
@@ -425,7 +425,7 @@ class FixedPoint(object):
         return _mkFP(n2, p, type(self)).__mod__(self)
 
     def __float__(self):
-        """Return the floating point representation of this FixedPoint. 
+        """Return the floating point representation of this FixedPoint.
             Caution! float can lose precision.
         """
         n, p = self.__reduce()
@@ -445,7 +445,7 @@ class FixedPoint(object):
     def __int__(self):
         """Return integer value of FixedPoint object."""
         return int(self.__long__())
-    
+
     def frac(self):
         """Return fractional portion as a FixedPoint.
 

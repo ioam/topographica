@@ -53,7 +53,7 @@ class SheetView(param.Parameterized):
         """Whether or not the values in this View's matrix represent a cyclic dimension.""")
 
     cyclic_range = param.Parameter(None,doc="""If cyclic is True, this value is the cyclic range.""")
-    
+
     ### JCALERT! term_1 and term_2 should be more explicit...
     ### the 3 cases described in the doc, are they really useful?
     ### shouldn't it be simplified?
@@ -61,20 +61,20 @@ class SheetView(param.Parameterized):
         """
         For ``__init__(self, input_tuple, **params)``, there are three
         types of input_tuples::
-        
+
         (matrix_data, matrix_bbox)
-        
+
             This form locks the value of the sheetview to a single matrix.
             Terminating case of a composite SheetView.
-            
+
         (operation, [tuple_list])
-        
+
             'operation' is performed on the matrices collected from
             tuple_list.  See the list of valid operations in
             operations.keys().
-             
+
             Each tuple in the tuple_list is one of the following::
-            
+
                 (SheetView, None)
                     Another SheetView may be passed in to create nested plots.
                 (matrix_data, bounding_box)
@@ -84,7 +84,7 @@ class SheetView(param.Parameterized):
                     the current SheetView has its data requested by .view().
 
         (Sheet, sheet_view_name)
-        
+
                 Degenerate case that will pull data from another SheetView
                 and not do any additional processing.  Don't yet know a
                 use for this case, but documented for possible future use.
@@ -95,19 +95,19 @@ class SheetView(param.Parameterized):
         self.precedence = precedence
         self.row_precedence = row_precedence
         self.timestamp = timestamp
-        
+
         # Assume there's no such thing as an operator that can be mistaken
         # for a matrix_data element.  This is true as long as the real
         # values of the operator keys are strings.
-        if term_1 not in operations.keys():      
-            self.operation = ADD          
+        if term_1 not in operations.keys():
+            self.operation = ADD
             self._view_list = [(term_1, term_2)]
         else:
             self.operation = operations[term_1]
             self._view_list = term_2
             if not isinstance(self._view_list,types.ListType):
                 self._view_list = [self._view_list]
-            
+
 
     def view(self):
         """
@@ -155,7 +155,7 @@ class SheetView(param.Parameterized):
         result = maps.pop(0)
         for m in maps:
             # Needs to be changed
-            result = (apply(self.operation, (result[0], m[0])), result[1]) 
+            result = (apply(self.operation, (result[0], m[0])), result[1])
         return result
 
 
@@ -187,12 +187,12 @@ class UnitView(SheetView):
 class ProjectionView(SheetView):
     """
     ProjectionViews should be stored in Sheets via a tuple
-    ('Weights',Sheet,Projection). 
+    ('Weights',Sheet,Projection).
     """
 
     def __init__(self, term_tuple,projection,timestamp,**params):
         """
-        Subclass of SheetView. 
+        Subclass of SheetView.
         """
         super(ProjectionView,self).__init__(term_tuple, projection.src.name, projection.src.precedence, timestamp, row_precedence = projection.src.row_precedence, **params)
         self.projection = projection

@@ -74,7 +74,7 @@ def _reset_views(sheet):
         sheet.sheet_views = {}
     if hasattr(sheet,'curve_dict'):
         sheet.curve_dict = {}
-    
+
 
 def generate(plotgroup_names):
     assert topo.sim.name==sim_name
@@ -113,7 +113,7 @@ def checkclose(label,topo_version,x,y):
     else:
         print '...%s array is unchanged since data was generated (%s)' % (label,topo_version)
     return errors
-    
+
 
 def test(plotgroup_names):
     import topo
@@ -121,7 +121,7 @@ def test(plotgroup_names):
     assert topo.sim.name==sim_name
     assert topo.sim['V1'].nominal_density==8
     assert topo.sim.time()==100
-    
+
     failing_tests=[]
     for name in plotgroup_names:
         print "\n* Testing plotgroups['%s']:"%name
@@ -141,7 +141,7 @@ def test(plotgroup_names):
         except AttributeError:
             # CEBALERT: code here just to support old data file. Should
             # generate a new one so it's no longer necessary.
-            
+
             from topo.misc.legacy import preprocess_state
 
             import topo.base.boundingregion
@@ -153,11 +153,11 @@ def test(plotgroup_names):
 
             preprocess_state(topo.base.boundingregion.BoundingRegion,
                              _boundingregion_not_parameterized)
-    
+
             f.seek(0)
             topo_version,previous_views = pickle.load(f)
         ########################################
-            
+
         f.close()
 
         if 'sheet_views' in previous_views[sheet.name]:
@@ -166,7 +166,7 @@ def test(plotgroup_names):
                 failing_tests += checkclose(sheet.name + " " + view_name,topo_version,
                                             sheet.sheet_views[view_name].view()[0],
                                             previous_sheet_views[view_name].view()[0])
-                    
+
         if 'curve_dict' in previous_views[sheet.name]:
             previous_curve_dicts = previous_views[sheet.name]['curve_dict']
             # CB: need to cleanup var names e.g. val
@@ -176,7 +176,7 @@ def test(plotgroup_names):
                         failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),topo_version,
                                                     sheet.curve_dict[curve_name][other_param][val].view()[0],
                                                     previous_curve_dicts[curve_name][other_param][val].view()[0])
-                                          
+
     if failing_tests != []: raise AssertionError, "Failed map tests: %s" % (failing_tests)
 
 

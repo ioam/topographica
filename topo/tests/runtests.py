@@ -56,7 +56,7 @@ p.add(
     timing = param.Boolean(default=False),
 
     testdp = param.Number(default=7),
-    
+
     testdp_unopt = param.Number(default=5)
 
     )
@@ -115,7 +115,7 @@ topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0]
 def _runc(cmd):
     print cmd
     return os.system(cmd)
-    
+
 
 import topo.misc.keyedlist
 target = topo.misc.keyedlist.KeyedList()
@@ -129,7 +129,7 @@ speedtarget = topo.misc.keyedlist.KeyedList()
 # SCRIPTS= ^hierarchical.ty ^lissom_or.ty ^lissom_oo_or.ty ^som_retinotopy.ty ^sullivan_neurocomputing04.ty ^lissom.ty ^lissom_fsa.ty ^gcal.ty ^lissom_whisker_barrels.ty
 # CEB: tests on these scripts temporarily suspended (SF.net #2053538)
 # ^lissom_oo_or_homeostatic.ty ^lissom_oo_or_homeostatic_tracked.ty
-# ^lissom_or_noshrinking.ty  - only matches to 4 dp with IMPORT_WEAVE=0 
+# ^lissom_or_noshrinking.ty  - only matches to 4 dp with IMPORT_WEAVE=0
 # Now I'm using this list for train-tests:
 
 # CEBALERT: this list should be defined in one place.
@@ -229,7 +229,7 @@ target['scriptrepr']=[]
 script = os.path.join(scripts_dir,"examples/hierarchical.ty")
 target['scriptrepr'].append(topographica_script + " %(script)s -a -c \"import param;param.normalize_path.prefix='%(tmpd)s'\" -c \"save_script_repr('script_repr_test.ty')\""%dict(tmpd=tmpd,script=script))
 
-script_repr_test_path = os.path.join(tmpd,"script_repr_test.ty")    
+script_repr_test_path = os.path.join(tmpd,"script_repr_test.ty")
 target['scriptrepr'].append(topographica_script + " " + script_repr_test_path)
 target['scriptrepr'].append(topographica_script + "-c \"import shutil;shutil.rmtree('%s')\""%tmpd)
 
@@ -281,7 +281,7 @@ def start():
             if _runc(cmd) > 0:
                 if name not in errors:
                     errors.append(name)
-                
+
     print
     print "="*60
     print
@@ -292,7 +292,7 @@ def start():
     else:
         sys.exit(0)
 
-    
+
 
 if __name__=="__main__":
     start()

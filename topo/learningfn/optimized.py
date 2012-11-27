@@ -39,7 +39,7 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
     out to be zero.
     """
     single_cf_fn = param.ClassSelector(LearningFn,default=Hebbian(),readonly=True)
-    
+
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         if single_connection_learning_rate==0:
@@ -89,8 +89,8 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
                     for (int i=rr1; i<rr2; ++i) {
                         npfloat *inpi = inpj;
                         for (int j=cc1; j<cc2; ++j) {
-                            // The mask is floating point, so we have to 
-                            // use a robust comparison instead of testing 
+                            // The mask is floating point, so we have to
+                            // use a robust comparison instead of testing
                             // against exactly 0.0.
                             if (*(mask++) >= 0.000001) {
                                 *weights += load * *inpi;
@@ -100,7 +100,7 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
                             ++inpi;
                         }
                         inpj += icols;
-                    }                    
+                    }
                     // store the sum of the cf's weights
                     LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
                     _norm_total[0]=total;
@@ -113,7 +113,7 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
         inline(code, ['input_activity', 'output_activity','sheet_mask','num_cfs',
                       'icols', 'cfs', 'single_connection_learning_rate','cf_type'],
                local_dict=locals(),
-               headers=['<structmember.h>'])               
+               headers=['<structmember.h>'])
 
 
 class CFPLF_Hebbian(CFPLF_Plugin):
@@ -122,7 +122,7 @@ class CFPLF_Hebbian(CFPLF_Plugin):
 provide_unoptimized_equivalent("CFPLF_Hebbian_opt","CFPLF_Hebbian",locals())
 
 
-# CBERRORALERT: classes from here on probably ignore the sheet mask 
+# CBERRORALERT: classes from here on probably ignore the sheet mask
 
 # JABALERT: Is this really a fixed-threshold BCM rule?  If so, is that really useful?
 class CFPLF_BCMFixed_opt(CFPLearningFn):
@@ -130,7 +130,7 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
     CF-aware BCM learning rule.
 
     Implemented in C for speed.  Should be equivalent to
-    BCMFixed for CF sheets, except faster.  
+    BCMFixed for CF sheets, except faster.
 
     As a side effect, sets the norm_total attribute on any cf whose
     weights are updated during learning, to speed up later operations
@@ -139,9 +139,9 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
     May return without modifying anything if the learning rate turns
     out to be zero.
     """
-    
+
     unit_threshold=param.Number(default=0.5,bounds=(0,None),doc="Threshold between LTD and LTP.")
-    
+
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         rows,cols = output_activity.shape
         cfs = iterator.flatcfs
@@ -149,9 +149,9 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         if single_connection_learning_rate==0:
             return
-        
+
         unit_threshold=self.unit_threshold  # pyflakes:ignore (passed to weave C code)
-        
+
         irows,icols = input_activity.shape
         cf_type = iterator.cf_type  # pyflakes:ignore (passed to weave C code)
         code = c_header + """
@@ -203,8 +203,8 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
                     for (int i=rr1; i<rr2; ++i) {
                         npfloat *inpi = inpj;
                         for (int j=cc1; j<cc2; ++j) {
-                            // The mask is floating point, so we have to 
-                            // use a robust comparison instead of testing 
+                            // The mask is floating point, so we have to
+                            // use a robust comparison instead of testing
                             // against exactly 0.0.
                             if (*(m++) >= 0.000001) {
                                 *wi += load * *inpi * (unit_activity - unit_threshold);
@@ -230,7 +230,7 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
                       'icols', 'cfs', 'single_connection_learning_rate',
                       'unit_threshold','cf_type'],
                local_dict=locals(),
-               headers=['<structmember.h>'])               
+               headers=['<structmember.h>'])
 
 
 class CFPLF_BCMFixed(CFPLF_Plugin):
@@ -245,16 +245,16 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
     CF-aware Scaled Hebbian learning rule.
 
     Implemented in C for speed.  Should be equivalent to
-    CFPLF_PluginScaled(single_cf_fn=Hebbian), except faster.  
+    CFPLF_PluginScaled(single_cf_fn=Hebbian), except faster.
 
     As a side effect, sets the norm_total attribute on any cf whose
     weights are updated during learning, to speed up later operations
     that might depend on it.
     """
     single_cf_fn = param.ClassSelector(LearningFn,default=Hebbian(),readonly=True)
-    
+
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
-        
+
         if self.learning_rate_scaling_factor is None:
             self.learning_rate_scaling_factor = ones(output_activity.shape)*1.0
 
@@ -265,7 +265,7 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         if single_connection_learning_rate==0:
             return
-        
+
         irows,icols = input_activity.shape
         code = c_header + """
             npfloat *x = output_activity;
@@ -298,8 +298,8 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
                     for (int i=rr1; i<rr2; ++i) {
                         npfloat *inpi = inpj;
                         for (int j=cc1; j<cc2; ++j) {
-                            // The mask is floating point, so we have to 
-                            // use a robust comparison instead of testing 
+                            // The mask is floating point, so we have to
+                            // use a robust comparison instead of testing
                             // against exactly 0.0.
                             if (*(m++) >= 0.000001) {
                                 *wi += load * *inpi;
@@ -323,7 +323,7 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
                     Py_DECREF(total_obj);
                 }
             }
-            
+
         """
 
         inline(code, ['input_activity','learning_rate_scaling_factor', 'output_activity','num_cfs', 'icols', 'cfs', 'single_connection_learning_rate'], local_dict=locals())
@@ -338,30 +338,30 @@ provide_unoptimized_equivalent("CFPLF_Scaled_opt","CFPLF_Scaled",locals())
 
 class CFPLF_Trace_opt(CFPLearningFn):
     """
-    Optimized version of CFPLF_Trace; see projfn.py for more info 
+    Optimized version of CFPLF_Trace; see projfn.py for more info
     """
 
     trace_strength=param.Number(default=0.5,bounds=(0.0,1.0),doc="""
        How much the learning is dominated by the activity trace, relative to the current value.""")
 
     single_cf_fn = param.ClassSelector(LearningFn,default=Hebbian(),readonly=True,
-        doc="LearningFn that will be applied to each CF individually.")              
+        doc="LearningFn that will be applied to each CF individually.")
 
     def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):
         cfs = iterator.flatcfs  # pyflakes:ignore (passed to weave C code)
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         irows,icols = input_activity.shape
-        
+
         if single_connection_learning_rate==0:
             return
-        
+
         ##Initialise traces to zero if they don't already exist
         if not hasattr(self,'traces'):
             self.traces=zeros(output_activity.shape,activity_type)
-        
+
         self.traces = (self.trace_strength*output_activity)+((1-self.trace_strength)*self.traces)
         traces = self.traces  # pyflakes:ignore (passed to weave C code)
-        
+
         code = c_header + """
             npfloat *x = traces;
 
@@ -390,8 +390,8 @@ class CFPLF_Trace_opt(CFPLearningFn):
                     for (int i=rr1; i<rr2; ++i) {
                         npfloat *inpi = inpj;
                         for (int j=cc1; j<cc2; ++j) {
-                            // The mask is floating point, so we have to 
-                            // use a robust comparison instead of testing 
+                            // The mask is floating point, so we have to
+                            // use a robust comparison instead of testing
                             // against exactly 0.0.
                             if (*(m++) >= 0.000001) {
                                 *wi += load * *inpi;

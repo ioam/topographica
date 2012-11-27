@@ -35,14 +35,14 @@ class TestSnapshots(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(normalize_path.prefix)
         normalize_path.prefix=self.original_output_path
-        
+
     def basic_save_load_snapshot(self):
         """
         Very basic test to check the activity matrix of a GeneratorSheet
         comes back ok, and that class attributes are pickled.
         """
         assert topo.sim.name==SIM_NAME
-         
+
         topo.sim['R']=GeneratorSheet(input_generator=Gaussian(),nominal_density=2)
 
         topo.sim.run(1)
@@ -56,20 +56,20 @@ class TestSnapshots(unittest.TestCase):
 
         Line.x = 9.0
         exec "z=88" in __main__.__dict__
-        
+
         topo.sim['R'].set_input_generator(Line())
         topo.sim.run(1)
 
         load_snapshot(resolve_path(SNAPSHOT_NAME,search_paths=[normalize_path.prefix]))
 
-        
+
         # CEBALERT: should also test that unpickling order is correct
         # (i.e. startup_commands, class attributes, simulation)
         assert_array_equal(R_act,topo.sim['R'].activity)
         self.assertEqual(Line.x,12.0)
         self.assertEqual(__main__.__dict__['z'],99)
 
-        
+
 
     def test_basic_save_load_snapshot(self):
         self.basic_save_load_snapshot()
@@ -86,7 +86,7 @@ class TestSnapshots(unittest.TestCase):
 
 # CB: longer to run test should additionally quit the simulation
 # and start again. Should also test scheduled actions.
-   
-        
+
+
 suite = unittest.TestSuite()
 suite.addTest(unittest.makeSuite(TestSnapshots))

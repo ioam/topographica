@@ -4,15 +4,15 @@ Functions for measuring memory usage, to allow usage to be optimized.
 Examples::
 
   bin/python -c 'execfile("topo/misc/memuse.py") ; print topsize_mb()'
-  
+
   ./topographica -c 'from topo.misc import memuse' -c 'print memuse.topsize_mb()'
-  
+
   ./topographica -c 'from topo.misc import memuse, asizeof' -c 'print memuse.topsize_mb()'
-  
+
   ./topographica -a -c 'from topo.misc import memuse, asizeof' -c 'print memuse.topsize_mb()'
-  
+
   ./topographica -a -c 'from topo.misc import memuse, asizeof' examples/tiny.ty -c 'print memuse.allsizes_mb()'
-  
+
   ./topographica -a -c 'from topo.misc import memuse, asizeof' -c 'memuse.memuse_batch("examples/tiny.ty",cortex_density=20)'
 
   ./topographica -a -c 'from topo.misc import memuse, asizeof' -c 'memuse.memuse_batch("examples/tiny.ty",times=[0,100],analysis_fn=memuse.plotting_and_saving_analysis_fn,cortex_density=20)'
@@ -107,7 +107,7 @@ def plotting_and_saving_analysis_fn(prefix=""):
     import topo
     from topo.command import save_snapshot
     from topo.command.analysis import measure_sine_pref,save_plotgroup
-    
+
     print "%sMemuse at time %s: %s" % (prefix,topo.sim.timestr(),allsizes_mb())
     measure_sine_pref()
     print "%sAfter measure_sine_pref:  %s" % (prefix,allsizes_mb())
@@ -121,7 +121,7 @@ def plotting_and_saving_analysis_fn(prefix=""):
 def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**params):
     """
     Similar to run_batch, but analyzes the memory requirement of a simulation at different times.
-    
+
     First, the specified script file will be run using the specified parameters.
     Then at each of the specified times, the given analysis_fn (which
     calls allsizes_mb() by default) is run.  The output is labeled
@@ -137,7 +137,7 @@ def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**
     #prefix += time.strftime("%Y%m%d%H%M") + "_"
     prefix += scriptbase
     simname = prefix
-    
+
     # Construct parameter-value portion of filename; should do more filtering
     for a,val in params.iteritems():
         # Special case to give reasonable filenames for lists
@@ -147,13 +147,13 @@ def memuse_batch(script_file,times=[0],analysis_fn=default_memuse_analysis_fn,**
 
     # Set provided parameter values in main namespace
     global_params.set_in_context(**params)
-    
+
     # Run script in main
     try:
         execfile(script_file,__main__.__dict__) #global_params.context
         global_params.check_for_unused_names()
         topo.sim.name=simname
-    
+
         # Run each segment, doing the analysis and saving the script state each time
         for run_to in times:
             topo.sim.run(run_to - topo.sim.time())
