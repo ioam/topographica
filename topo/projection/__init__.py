@@ -12,7 +12,7 @@ $Id$
 
 from copy import copy
 
-from numpy import exp,ones,zeros,array,nonzero
+from numpy import exp,ones,zeros,array,nonzero,int32
 
 import param
 
@@ -81,7 +81,7 @@ class SharedWeightCF(ConnectionField):
 
 
 
-        self._has_norm_total=False
+        self._has_norm_total=array([0],dtype=int32)
         self.mask=mask
         weights_slice = self._create_input_sheet_slice(input_sheet,x,y,template,min_matrix_radius=min_matrix_radius)
         self.weights = weights_slice.submatrix(cf.weights)

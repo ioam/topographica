@@ -155,46 +155,26 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
         irows,icols = input_activity.shape
         cf_type = iterator.cf_type  # pyflakes:ignore (passed to weave C code)
         code = c_header + """
-            // CEBALERT: should provide a macro for getting offset
+            DECLARE_SLOT_OFFSET(weights,cf_type);
+            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
+            DECLARE_SLOT_OFFSET(mask,cf_type);
+            DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
 
-            ///// GET WEIGHTS OFFSET
-            PyMemberDescrObject *weights_descr = (PyMemberDescrObject *)PyObject_GetAttrString(cf_type,"weights");
-            Py_ssize_t weights_offset = weights_descr->d_member->offset;
-            Py_DECREF(weights_descr);
-
-            ///// GET SLICE OFFSET
-            PyMemberDescrObject *slice_descr = (PyMemberDescrObject *)PyObject_GetAttrString(cf_type,"input_sheet_slice");
-            Py_ssize_t slice_offset = slice_descr->d_member->offset;
-            Py_DECREF(slice_descr);
-
-            ///// GET MASK OFFSET
-            PyMemberDescrObject *mask_descr = (PyMemberDescrObject *)PyObject_GetAttrString(cf_type,"mask");
-            Py_ssize_t mask_offset = mask_descr->d_member->offset;
-            Py_DECREF(mask_descr);
-
-
-            npfloat *x = output_activity;
-
+            %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
-                double load = *x++;
+                double load = output_activity[r];
                 double unit_activity= load;
                 if (load != 0) {
                     load *= single_connection_learning_rate;
 
                     PyObject *cf = PyList_GetItem(cfs,r);
 
-                    PyArrayObject *weights_obj = *((PyArrayObject **)((char *)cf + weights_offset));
-                    PyArrayObject *slice_obj = *((PyArrayObject **)((char *)cf + slice_offset));
-                    PyArrayObject *mask_obj = *((PyArrayObject **)((char *)cf + mask_offset));
+                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);
 
-                    float *wi = (float *)(weights_obj->data);
-                    int *slice = (int *)(slice_obj->data);
-                    float *m = (float *)(mask_obj->data);
-
-                    int rr1 = *slice++;
-                    int rr2 = *slice++;
-                    int cc1 = *slice++;
-                    int cc2 = *slice;
+                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
 
                     double total = 0.0;
 
@@ -206,25 +186,24 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
                             // The mask is floating point, so we have to
                             // use a robust comparison instead of testing
                             // against exactly 0.0.
-                            if (*(m++) >= 0.000001) {
-                                *wi += load * *inpi * (unit_activity - unit_threshold);
-                                if (*wi<0) { *wi = 0;}
-                                total += fabs(*wi);
+                            if (*(mask++) >= 0.000001) {
+                                *weights += load * *inpi * (unit_activity - unit_threshold);
+                                if (*weights<0) { *weights = 0;}
+                                total += fabs(*weights);
                             }
-                            ++wi;
+                            ++weights;
                             ++inpi;
                         }
                         inpj += icols;
                     }
-
                     // store the sum of the cf's weights
-                    PyObject *total_obj = PyFloat_FromDouble(total);  //(new ref)
-                    PyObject_SetAttrString(cf,"_norm_total",total_obj);
-                    PyObject_SetAttrString(cf,"_has_norm_total",Py_True);
-                    Py_DECREF(total_obj);
+                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+                    _norm_total[0]=total;
+                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+                    _has_norm_total[0]=1;
                 }
             }
-        """
+        """%c_decorators
 
         inline(code, ['input_activity', 'output_activity','num_cfs',
                       'icols', 'cfs', 'single_connection_learning_rate',
@@ -257,39 +236,41 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
 
         if self.learning_rate_scaling_factor is None:
             self.learning_rate_scaling_factor = ones(output_activity.shape)*1.0
-
         learning_rate_scaling_factor = self.learning_rate_scaling_factor  # pyflakes:ignore (passed to weave C code)
 
-        cfs = iterator.flatcfs
-        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         if single_connection_learning_rate==0:
             return
 
+        cfs = iterator.flatcfs
+        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
         irows,icols = input_activity.shape
+        cf_type = iterator.cf_type
+
+        sheet_mask = iterator.get_sheet_mask()
+
         code = c_header + """
-            npfloat *x = output_activity;
-            double *sclr = learning_rate_scaling_factor;
+            DECLARE_SLOT_OFFSET(weights,cf_type);
+            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
+            DECLARE_SLOT_OFFSET(mask,cf_type);
+            DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
 
+            %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
-                double load = *x++;
-                double  a= *sclr++;
+                double load = output_activity[r];
+                double a = learning_rate_scaling_factor[r];
                 load = load * a;
-                if (load != 0) {
+                if (load != 0 && sheet_mask[r] != 0) {
                     load *= single_connection_learning_rate;
+
                     PyObject *cf = PyList_GetItem(cfs,r);
-                    PyObject *weights_obj = PyObject_GetAttrString(cf,"weights");
-                    PyObject *slice_obj   = PyObject_GetAttrString(cf,"input_sheet_slice");
-                    PyObject *mask_obj    = PyObject_GetAttrString(cf,"mask");
 
-                    float *wi = (float *)(((PyArrayObject*)weights_obj)->data);
-                    int *slice =  (int *)(((PyArrayObject*)slice_obj)->data);
-                    float *m  = (float *)(((PyArrayObject*)mask_obj)->data);
+                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);
 
-                    int rr1 = *slice++;
-                    int rr2 = *slice++;
-                    int cc1 = *slice++;
-                    int cc2 = *slice;
+                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
 
                     double total = 0.0;
 
@@ -301,32 +282,29 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
                             // The mask is floating point, so we have to
                             // use a robust comparison instead of testing
                             // against exactly 0.0.
-                            if (*(m++) >= 0.000001) {
-                                *wi += load * *inpi;
-                                total += fabs(*wi);
+                            if (*(mask++) >= 0.000001) {
+                                *weights += load * *inpi;
+                                total += fabs(*weights);
                             }
-                            ++wi;
+                            ++weights;
                             ++inpi;
                         }
                         inpj += icols;
                     }
-
-                    // Anything obtained with PyObject_GetAttrString must be explicitly freed
-                    Py_DECREF(weights_obj);
-                    Py_DECREF(slice_obj);
-                    Py_DECREF(mask_obj);
-
                     // store the sum of the cf's weights
-                    PyObject *total_obj = PyFloat_FromDouble(total);  //(new ref)
-                    PyObject_SetAttrString(cf,"_norm_total",total_obj);
-                    PyObject_SetAttrString(cf,"_has_norm_total",Py_True);
-                    Py_DECREF(total_obj);
+                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+                    _norm_total[0]=total;
+                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+                    _has_norm_total[0]=1;
                 }
             }
+        """%c_decorators
 
-        """
-
-        inline(code, ['input_activity','learning_rate_scaling_factor', 'output_activity','num_cfs', 'icols', 'cfs', 'single_connection_learning_rate'], local_dict=locals())
+        inline(code, ['input_activity','learning_rate_scaling_factor', 'output_activity',
+                      'sheet_mask', 'num_cfs', 'icols', 'cfs',
+                      'single_connection_learning_rate','cf_type'],
+               local_dict=locals(),
+               headers=['<structmember.h>'])
 
 
 class CFPLF_Scaled(CFPLF_PluginScaled):
@@ -361,27 +339,26 @@ class CFPLF_Trace_opt(CFPLearningFn):
 
         self.traces = (self.trace_strength*output_activity)+((1-self.trace_strength)*self.traces)
         traces = self.traces  # pyflakes:ignore (passed to weave C code)
-
+        cf_type = iterator.cf_type
         code = c_header + """
-            npfloat *x = traces;
+            DECLARE_SLOT_OFFSET(weights,cf_type);
+            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
+            DECLARE_SLOT_OFFSET(mask,cf_type);
+            DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
 
+            %(cfs_loop_pragma)s
             for (int r=0; r<num_cfs; ++r) {
-                double load = *x++;
+                double load = traces[r];
                 if (load != 0) {
                     load *= single_connection_learning_rate;
                     PyObject *cf = PyList_GetItem(cfs,r);
-                    PyObject *weights_obj = PyObject_GetAttrString(cf,"weights");
-                    PyObject *slice_obj   = PyObject_GetAttrString(cf,"input_sheet_slice");
-                    PyObject *mask_obj    = PyObject_GetAttrString(cf,"mask");
 
-                    float *wi = (float *)(((PyArrayObject*)weights_obj)->data);
-                    int *slice =  (int *)(((PyArrayObject*)slice_obj)->data);
-                    float *m  = (float *)(((PyArrayObject*)mask_obj)->data);
+                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);
 
-                    int rr1 = *slice++;
-                    int rr2 = *slice++;
-                    int cc1 = *slice++;
-                    int cc2 = *slice;
+                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
 
                     double total = 0.0;
 
@@ -393,31 +370,28 @@ class CFPLF_Trace_opt(CFPLearningFn):
                             // The mask is floating point, so we have to
                             // use a robust comparison instead of testing
                             // against exactly 0.0.
-                            if (*(m++) >= 0.000001) {
-                                *wi += load * *inpi;
-                                total += fabs(*wi);
+                            if (*(mask++) >= 0.000001) {
+                                *weights += load * *inpi;
+                                total += fabs(*weight);
                             }
-                            ++wi;
+                            ++weights;
                             ++inpi;
                         }
                         inpj += icols;
                     }
-
-                    // Anything obtained with PyObject_GetAttrString must be explicitly freed
-                    Py_DECREF(weights_obj);
-                    Py_DECREF(slice_obj);
-                    Py_DECREF(mask_obj);
-
                     // store the sum of the cf's weights
-                    PyObject *total_obj = PyFloat_FromDouble(total);  //(new ref)
-                    PyObject_SetAttrString(cf,"norm_total",total_obj);
-                    PyObject_SetAttrString(cf,"_has_norm_total",Py_True);
-                    Py_DECREF(total_obj);
+                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+                    _norm_total[0]=total;
+                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+                    _has_norm_total[0]=1;
                 }
             }
-        """
+        """%c_decorators
 
-        inline(code, ['input_activity', 'traces','num_cfs', 'icols', 'cfs', 'single_connection_learning_rate'], local_dict=locals())
+        inline(code, ['input_activity', 'traces','num_cfs', 'icols',
+                      'cfs', 'single_connection_learning_rate','cf_type'],
+               local_dict=locals(),
+               headers=['<structmember.h>'])
 
 
 provide_unoptimized_equivalent("CFPLF_Trace_opt","CFPLF_Trace",locals())
