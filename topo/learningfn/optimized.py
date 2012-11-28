@@ -333,6 +333,9 @@ class CFPLF_Trace_opt(CFPLearningFn):
         if single_connection_learning_rate==0:
             return
 
+        cfs = iterator.flatcfs
+        num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
+
         ##Initialise traces to zero if they don't already exist
         if not hasattr(self,'traces'):
             self.traces=zeros(output_activity.shape,activity_type)
