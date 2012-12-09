@@ -194,8 +194,8 @@ for script in STARTUPSPEEDSCRIPTS:
 target['snapshots'] = []
 
 # snapshot-compatibility-tests:
-snapshot_path = os.path.join(tests_dir,"lissom_oo_or_od_dr_cr_dy_sf_000010.00.typ")
-target['snapshots'].append(topographica_script + ''' -c "from topo.command import load_snapshot; load_snapshot(%(snapshot_path)s)" -c "topo.sim.run(1)"'''%dict(snapshot_path=repr(snapshot_path)))
+#snapshot_path = os.path.join(tests_dir,"lissom_oo_or_od_dr_cr_dy_sf_000010.00.typ")
+#target['snapshots'].append(topographica_script + ''' -c "from topo.command import load_snapshot; load_snapshot(%(snapshot_path)s)" -c #"topo.sim.run(1)"'''%dict(snapshot_path=repr(snapshot_path)))
 
 
 # Test that simulations give the same results whether run straight
