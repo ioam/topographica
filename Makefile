@@ -89,20 +89,20 @@ topographicagui:
 
 ## Currently useful lint checks
 pyflakes: # Everything except topo/tests (where we do lots of importing but not using...)
-	${PYFLAKES} topo param --ignore topo/tests --total
+	${PYFLAKES} topo external/param --ignore topo/tests --total
 
 lint-base: # topo.base and param 
-	${PYLINT} topo.base param | cat
+	${PYLINT} topo.base external/param | cat
 #CEBALERT: how to get pylint's "ignore" options to work? Upgrade pylint (http://www.logilab.org/ticket/70493)?
 
 
 # CEBALERT: need to update pychecker and work on its configuration if
 # we're going to use it.
 check:
-	${PYCHECKER} param/*.py topo/*.py topo/*/*.py
+	${PYCHECKER} external/param/*.py topo/*.py topo/*/*.py
 # CEBALERT: way too much output to use.
 lint:
-	${PYLINT} topo param
+	${PYLINT} topo external/param
 
 
 
@@ -113,7 +113,7 @@ clean-weave:
 	rm -rf ~/.python2*_compiled/ | cat
 
 clean-pyc:
-	rm -f *.pyc param/*.pyc paramtk/*.pyc topo/*.pyc topo/*/*.pyc topo/*/*/*.pyc examples/*.pyc models/*.pyc contrib/*.pyc
+	rm -f *.pyc external/param/*.pyc external/paramtk/*.pyc topo/*.pyc topo/*/*.pyc topo/*/*/*.pyc examples/*.pyc models/*.pyc contrib/*.pyc
 
 clean-doc:
 	make -C doc clean
