@@ -49,14 +49,14 @@ uninstall: python-uninstall jpeg-uninstall pil-uninstall numpy-uninstall tk-unin
 ##############################################################
 # Python (interpreted language)
 #
-PYTHON2 = Python-2.6.4
+PYTHON2 = Python-2.7.3
 
-PYTHON2_LIB  = lib/python2.6
-PYTHON2_INC  = include/python2.6
-PYTHON2_CONF = lib/python2.6/config
+PYTHON2_LIB  = lib/python2.7
+PYTHON2_INC  = include/python2.7
+PYTHON2_CONF = lib/python2.7/config
 
-PYTHON2_UNINSTALL += bin/idle bin/python bin/pydoc bin/python2.6
-PYTHON2_UNINSTALL += ${PYTHON2_LIB} man/man1/python.1 include/python2.6
+PYTHON2_UNINSTALL += bin/idle bin/python bin/pydoc bin/python2.7
+PYTHON2_UNINSTALL += ${PYTHON2_LIB} man/man1/python.1 include/python2.7
 
 
 # LDFLAGS sets ${PREFIX}/lib as the LD_LIBRARY in the binary
@@ -86,10 +86,10 @@ endif
 	touch python
 
 python-clean:
-	rm -rf ${PYTHON2} Python-2.4*/ Python-2.5*/
+	rm -rf ${PYTHON2} Python-2.4*/ Python-2.5*/ Python-2.6*/
 
 python-uninstall:
-	rm -rf python ${foreach f,${PYTHON2_UNINSTALL}, ${PREFIX}/${f}} Python-2.4*/ Python-2.5*/
+	rm -rf python ${foreach f,${PYTHON2_UNINSTALL}, ${PREFIX}/${f}} Python-2.4*/ Python-2.5*/ Python-2.6*/
 
 ##############################################################
 # Tcl (required by Tk GUI toolkit)
