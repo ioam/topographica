@@ -4,8 +4,6 @@ plots.
 
 Includes PlotGroups for standard plots of anything in a Sheet
 database, plus weight plots for one unit, and projections.
-
-$Id$
 """
 
 import copy

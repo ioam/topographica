@@ -1,4 +1,3 @@
-# $Id$
 PREFIX =  ${CURDIR}/
 PYLINT = bin/pylint --rcfile=doc/buildbot/pylintrc
 

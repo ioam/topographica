@@ -19,8 +19,6 @@ are usually grouped together using inheritance so that they share a
 set of parameters and some code, and only the bits that are specific
 to that particular plot or analysis appear below.  See the
 superclasses for the rest of the parameters and code.
-
-$Id$
 """
 
 import Image,ImageDraw

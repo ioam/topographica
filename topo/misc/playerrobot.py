@@ -6,8 +6,6 @@ hardware devices such as robots, cameras, and range sensors.
 
 This is a temporary home for this file until it finds a permanent home
 (maybe in the PlayerStage project or in PLASTK?)
-
-$Id$
 """
 
 

@@ -28,8 +28,6 @@ compared exhaustively to the original simulations.
 
 Can be reproduced by lissom.ty, but kept as a simpler color-only
 example.
-
-$Id$
 """
 __version__='$Revision: 8562 $'
 

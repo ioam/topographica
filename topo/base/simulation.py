@@ -48,9 +48,6 @@ An example src_port use might be an EP that sends different events to
 itself than it sends out to other EPs.  In this case the self
 connections might have src_port = 'Recurrent', and probably also a
 special dest_port.
-
-
-$Id$
 """
 
 import param

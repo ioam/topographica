@@ -1,8 +1,3 @@
-"""
-
-$Id$
-"""
-
 # CEBALERT: incomplete!
 
 import unittest

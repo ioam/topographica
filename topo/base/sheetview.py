@@ -8,8 +8,6 @@ create views of this data depending on the Sheet defaults or the
 information requested.  This way there can be multiple views recorded
 for a single sheet, and a view can be passed around independent of the
 originating source object.
-
-$Id$
 """
 
 import types

@@ -13,8 +13,6 @@ the Visual Cortex, Springer.  Known differences include:
  - The original simulation used a radius_0 of 13.3/40, which does work
    for some random seeds, but a much larger radius is used here so that
    it converges more reliably.
-
-$Id$
 """
 
 

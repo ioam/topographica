@@ -1,8 +1,3 @@
-"""
-
-$Id$
-"""
-
 # CEBALERT: incomplete - being written.
 
 # To do:

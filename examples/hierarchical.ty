@@ -4,8 +4,6 @@ Simple example of defining a hierarchy of visual areas.
 Similar to cfsom_or.py, but with additional eyes, visual areas,
 feedback, etc.  Does not necessarily do anything useful, but may
 be modified to do so in the future.
-
-$Id$
 """
 
 from math import pi

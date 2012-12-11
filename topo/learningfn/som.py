@@ -1,7 +1,5 @@
 """
 SOM-based learning functions for CFProjections.
-
-$Id$
 """
 
 

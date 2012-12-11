@@ -10,8 +10,6 @@ simulation time and real time.
 This module requires the PlayerStage robot interface system (from
 playerstage.sourceforge.net), and the playerrobot module for
 high-level communications with Player robots.
-
-$Id$
 """
 
 

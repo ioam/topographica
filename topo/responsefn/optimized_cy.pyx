@@ -8,8 +8,6 @@ Should be considered untested.
 
 Originally by Aistis Stankevicius; see topographica-cython branch in
 SVN for additional versions.
-
-$Id$
 """
 
 # Current weave vs cython timings (lissom_or, no scheduled events)

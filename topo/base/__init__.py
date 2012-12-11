@@ -10,8 +10,6 @@ Topographica packages outside of this one are optional.
 However, this package does depend on two related non-Topographica
 packages, i.e. param and imagen, and will not work without those being
 available in the Python path.
-
-$Id$
 """
 
 # For backwards compatibility; these files used to be in base/

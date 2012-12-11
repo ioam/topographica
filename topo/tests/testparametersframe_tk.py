@@ -1,7 +1,5 @@
 """
 Tests for the ParametersFrame classes.
-
-$Id$
 """
 
 

@@ -1,7 +1,5 @@
 """
 Test cases for the boundingregion module.
-
-$Id$
 """
 
 import unittest

@@ -3,8 +3,6 @@ Contains tests to check a particular script's results or speed have
 not changed.
 
 Buildbot shows how to run all these tests.
-
-$Id$
 """
 
 

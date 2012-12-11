@@ -1,7 +1,5 @@
 """
 Functional GUI tests: run_basic() and run_detailed().
-
-$Id$
 """
 
 import copy

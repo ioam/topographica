@@ -13,8 +13,6 @@ Known differences from the reference simulation:
   - Currently only isotropic Gaussian neighborhood functions are implemented.
 
   - Not tested. :-)
-
-$Id$
 """
 
 from math import sqrt, pi

@@ -1,8 +1,5 @@
 """
 GeneratorSheet: a sheet with a pattern generator.
-
-
-$Id$
 """
 __version__='$Revision: 7629 $'
 

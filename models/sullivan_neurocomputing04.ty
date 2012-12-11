@@ -9,8 +9,6 @@ The following parameters aren't specified in the paper:
 Sheet sizes(estimated from diagrams),
 Learning rates for both Hebbian and Trace functions,
 Input line thickness.
-
-$Id$
 """
 
 

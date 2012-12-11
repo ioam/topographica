@@ -2,8 +2,6 @@
 A Sheet class for composing activity from different sheets into a
 single activity matrix.  Primarily a simple example of how to make
 a sheet class, but can also be useful.
-
-$Id$
 """
 
 from numpy.oldnumeric import zeros

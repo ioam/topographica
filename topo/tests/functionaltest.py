@@ -1,7 +1,5 @@
 """
 Simple framework to run a set of tests and report the results.
-
-$Id$
 """
 
 import traceback,sys,inspect

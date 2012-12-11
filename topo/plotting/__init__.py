@@ -15,7 +15,5 @@ in advance of defining any particular model, and rarely require any
 editing for any particular model.
 
 For more information, see the various modules in this package.
-
-$Id$
 """
 __all__ = ['bitmap','plot','plotgroup','plotfilesaver']
