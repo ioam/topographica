@@ -1,7 +1,7 @@
 """
 Plot class.
 
-$Id$
+
 """
 
 

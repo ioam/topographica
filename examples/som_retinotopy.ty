@@ -14,7 +14,7 @@ the Visual Cortex, Springer.  Known differences include:
    for some random seeds, but a much larger radius is used here so that
    it converges more reliably.
 
-$Id$
+
 """
 
 

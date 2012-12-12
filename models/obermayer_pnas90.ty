@@ -14,7 +14,7 @@ Known differences from the reference simulation:
 
   - Not tested. :-)
 
-$Id$
+
 """
 
 from math import sqrt, pi

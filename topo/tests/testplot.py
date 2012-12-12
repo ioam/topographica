@@ -1,7 +1,7 @@
 """
 Test for the Plot class.
 
-$Id$
+
 """
 
 

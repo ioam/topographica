@@ -2,7 +2,7 @@
 Unit Support: Classes and methods to allow Unum and Quantities unit
 packages to interact with Topographica.
 
-$Id$
+
 """
 
 

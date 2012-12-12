@@ -1,6 +1,6 @@
 """
 Unit test for SheetView
-$Id$
+
 """
 
 import unittest

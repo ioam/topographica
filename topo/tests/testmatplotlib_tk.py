@@ -1,6 +1,6 @@
 """
 Unit test for the matplot lib in tkgui
-$Id$
+
 """
 
 import unittest

@@ -1,4 +1,4 @@
-# $Id$
+# 
 #
 # bib2html ships with a file Named Makefile that is not very useful,
 # so this file is named makefile instead to avoid confusion.

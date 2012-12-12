@@ -1,7 +1,7 @@
 """
 Test cases for the numbergen module.
 
-$Id$
+
 """
 
 import unittest

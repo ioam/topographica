@@ -2,7 +2,7 @@
 class TemplatePlotGroupPanel
 Panel for displaying preference maps and activity plot groups.
 
-$Id$
+
 """
 
 

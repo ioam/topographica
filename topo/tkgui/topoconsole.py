@@ -2,7 +2,7 @@
 TopoConsole class file.
 
 
-$Id$
+
 """
 
 

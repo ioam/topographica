@@ -2,7 +2,7 @@
 See test_cfsom(self) and ImagePoster for an example of how to use and call
 the PlotEngine system from a simulation.
 
-$Id$
+
 """
 
 import unittest

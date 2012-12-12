@@ -1,7 +1,7 @@
 """
 KeyedList sorted dictionary class.
 
-$Id$
+
 """
 
 

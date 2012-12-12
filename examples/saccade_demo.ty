@@ -10,7 +10,7 @@ Saccade Demo example.  This script defines three sheets:
 - a ShiftingGenerator sheet, that generates image input and shifts its
   bounds according to the received saccade command.
 
-$Id$
+
 """
 
 import pdb

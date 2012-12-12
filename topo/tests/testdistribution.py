@@ -1,7 +1,7 @@
 """
 Tests of distribution.py
 
-$Id$
+
 """
 
 # CEBALERT: almost finished. Clean up redundant tests, comment,

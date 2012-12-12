@@ -1,6 +1,6 @@
 """
 Unit test for Simulation
-$Id$
+
 """
 
 import unittest

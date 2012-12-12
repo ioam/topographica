@@ -11,7 +11,7 @@ to select a backend, or else select an appropriate one in your
 matplotlib.rc file (if any).  There are many backends available for
 different GUI or non-GUI uses.
 
-$Id$
+
 """
 
 import param

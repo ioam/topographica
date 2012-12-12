@@ -2,7 +2,7 @@
 Tests PatternGenerator (position and orientation), and some of the
 basic patterns.
 
-$Id$
+
 """
 
 import unittest

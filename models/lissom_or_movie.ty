@@ -9,7 +9,7 @@ It does the following:
 4) construct an ActivityMovie object from a period of collected data.
 5) save the frames of the movie to files.
 
-$Id$
+
 """
 __version__='$Revision: 8217 $'
 

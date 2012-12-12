@@ -7,7 +7,7 @@ Window:  window and canvas
 
 Originally written by Alan Lindsay.
 
-$Id$
+
 """
 __version__='$Revision: 8989 $'
 

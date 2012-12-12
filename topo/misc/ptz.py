@@ -6,7 +6,7 @@ it is a Logitech software for webcam.
 This class was tested with uvcdynctrl and Ubuntu 10.04 LTS.
 
 
-$Id$
+
 """
 
 

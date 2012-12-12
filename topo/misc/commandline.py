@@ -4,7 +4,7 @@ the Topographica command prompt.  Typically called from the
 './topographica' script, but can be called directly if using
 Topographica files within a separate Python.
 
-$Id$
+
 """
 
 

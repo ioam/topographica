@@ -1,5 +1,5 @@
 """
-$Id$
+
 """
 
 import unittest

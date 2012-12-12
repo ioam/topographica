@@ -15,7 +15,7 @@ other CFPResponseFns beyond CFPRF_Plugin.
 Any new response functions added to this directory will automatically
 become available for any model.
 
-$Id$
+
 """
 
 from topo.base.functionfamily import ResponseFn

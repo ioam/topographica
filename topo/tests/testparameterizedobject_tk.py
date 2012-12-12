@@ -1,7 +1,7 @@
 """
 Tests for the tkParameterized classes.
 
-$Id$
+
 """
 
 

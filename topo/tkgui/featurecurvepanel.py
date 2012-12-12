@@ -4,7 +4,7 @@ Panels for displaying tuning curves.
 Uses a PlotGroup to generate the pylab plots
 which are currently displayed separately from the gui.
 
-$Id$
+
 """
 
 import topo

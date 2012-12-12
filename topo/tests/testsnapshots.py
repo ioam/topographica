@@ -1,6 +1,6 @@
 """
 
-$Id$
+
 """
 
 import unittest, copy, shutil, tempfile

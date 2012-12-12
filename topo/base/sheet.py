@@ -16,7 +16,7 @@ be able to write and debug a simulation at a low density, and then
 scale it up to run at higher densities (or down for lower densities)
 simply by changing e.g. Sheet.nominal_density.
 
-$Id$
+
 """
 
 

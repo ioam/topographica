@@ -1,7 +1,7 @@
 """
 The Test Pattern window allows input patterns to be previewed.
 
-$Id$
+
 """
 
 ## Notes:

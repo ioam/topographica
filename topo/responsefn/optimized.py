@@ -4,7 +4,7 @@ in C to optimize performance.
 
 Requires the weave package; without it unoptimized versions are used.
 
-$Id$
+
 """
 
 import param

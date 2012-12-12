@@ -15,7 +15,7 @@ Runs the 'all_quick' target if called without any arguments:
 To add new single targets, add to the targets dictionary;
 for groups of targets, add to the group_targets dictionary.
 
-$Id$
+
 """
 
 

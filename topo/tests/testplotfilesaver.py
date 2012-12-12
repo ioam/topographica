@@ -1,7 +1,7 @@
 """
 Tests for the PlotFileSaver classes. Also tests analysis commands.
 
-$Id$
+
 """
 
 import unittest
