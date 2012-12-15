@@ -245,9 +245,9 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
         cfs = iterator.flatcfs
         num_cfs = len(cfs)  # pyflakes:ignore (passed to weave C code)
         irows,icols = input_activity.shape
-        cf_type = iterator.cf_type
+        cf_type = iterator.cf_type # pyflakes:ignore (passed to weave C code)
 
-        sheet_mask = iterator.get_sheet_mask()
+        sheet_mask = iterator.get_sheet_mask() # pyflakes:ignore (passed to weave C code)
 
         code = c_header + """
             DECLARE_SLOT_OFFSET(weights,cf_type);
@@ -342,7 +342,7 @@ class CFPLF_Trace_opt(CFPLearningFn):
 
         self.traces = (self.trace_strength*output_activity)+((1-self.trace_strength)*self.traces)
         traces = self.traces  # pyflakes:ignore (passed to weave C code)
-        cf_type = iterator.cf_type
+        cf_type = iterator.cf_type # pyflakes:ignore (passed to weave C code)
         code = c_header + """
             DECLARE_SLOT_OFFSET(weights,cf_type);
             DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
