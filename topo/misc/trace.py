@@ -6,8 +6,6 @@ time-series data, a set of Trace object types for
 specifying ways of generating 1D-vs-time traces from recorded data,
 and a TraceGroup object that will plot a set of traces on stacked,
 aligned axes.
-
-$Id$
 """
 
 import os

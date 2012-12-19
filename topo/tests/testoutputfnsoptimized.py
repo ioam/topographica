@@ -1,8 +1,3 @@
-"""
-
-$Id$
-"""
-
 # CEBHACKALERT: we should delete this file, right?
 
 import unittest

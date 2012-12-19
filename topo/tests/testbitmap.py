@@ -8,8 +8,6 @@ jpg.
 
 Should be extended as more functionality is added to the Bitmap
 classes.
-
-$Id$
 """
 
 import topo

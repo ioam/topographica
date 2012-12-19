@@ -1,7 +1,5 @@
 """
 PlotgroupPanels for displaying ProjectionSheet plotgroups.
-
-$Id$
 """
 
 

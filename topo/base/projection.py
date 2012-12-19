@@ -1,7 +1,5 @@
 """
 Projection and related classes.
-
-$Id$
 """
 
 import numpy

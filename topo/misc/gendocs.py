@@ -22,8 +22,6 @@ From the Makefile (Tabs have been stripped)::
         mkdir -p docs
         ./topographica topo/gendocs.py
         mv docs/topo.__init__.html docs/index.html
-
-$Id$
 """
 
 

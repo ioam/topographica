@@ -1,7 +1,5 @@
 """
 General utility functions and classes for Topographica that require numpy.
-
-$Id$
 """
 
 import re

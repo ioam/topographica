@@ -15,9 +15,6 @@ within a prespecified boundingregion.
 SaccadeController is a subclass of CFSheet that accepts CF projections
 and decodes its resulting activity into a saccade command suitable for
 controlling a ShiftingGeneratorSheet.
-
-
-$Id$
 """
 
 from numpy import sin,cos,pi,array,asarray,argmax,zeros,\

@@ -1,7 +1,3 @@
-"""
-$Id$
-"""
-
 import unittest
 
 class TestMatPlotLib(unittest.TestCase):

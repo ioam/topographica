@@ -13,8 +13,6 @@ CFPLF_Plugin.
 
 Any new learning functions added to this directory will automatically
 become available for any model.
-
-$Id$
 """
 
 import param

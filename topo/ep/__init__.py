@@ -8,8 +8,6 @@ will be in other more specific packages, such as topo.sheet; those
 here are the remaining uncategorized EventProcessors.  Any new
 EventProcessors classes added to this directory will automatically
 become available for any model.
-
-$Id$
 """
 
 import param

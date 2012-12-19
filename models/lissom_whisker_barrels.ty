@@ -12,8 +12,6 @@ main result in Figure 3a of Wilson et al. (2010). Run it from a
 terminal using the following:
 
 $ ./topographica examples/lissom_whisker_barrels.ty
-
-$Id$
 """
 
 

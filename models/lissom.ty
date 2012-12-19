@@ -74,8 +74,6 @@ Specifically:
     dataset='FoliageA',    dims=['or','rg']:           jbednar:neurocomputing05
     dataset='FoliageB',    dims=['or','cr']:           depaula:phd07
     dataset='Nature',      dims=['or','sf']:           palmer:sfn07
-
-$Id$
 """
 __version__='$Revision: 8706 $'
 

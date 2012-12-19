@@ -28,8 +28,6 @@ Each of the library directories can be extended with new classes of
 the appropriate type, just by adding a new .py file to that directory.
 E.g. new PatternGenerator classes can be added to pattern/, and will
 then show up in the GUI menus as potential input patterns.
-
-$Id$
 """
 
 # The tests and the GUI are omitted from this list, and have to be

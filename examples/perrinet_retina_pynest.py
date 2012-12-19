@@ -18,8 +18,6 @@ use the NEST simulation engine (http://www.nest-initiative.org).
 The model retina consists of 2 one-to-one connected layers of neurons
 on a rectangular grid, modelling ON and OFF magnocellular retinal
 ganglion cells in the primate retina.
-
-$Id$
 """
 
 import datetime

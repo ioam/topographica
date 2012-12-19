@@ -1,8 +1,6 @@
 """
 Code used to support old snapshots (those created from 0.9.7/r11275
 onwards).
-
-$Id$
 """
 __version__='$Revision: 8021 $'
 

@@ -1,7 +1,5 @@
 """
 LISSOM and related sheet classes.
-
-$Id$
 """
 
 from numpy import zeros,ones

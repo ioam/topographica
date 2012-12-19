@@ -2,8 +2,6 @@
 Example of an SLISSOM-based spiking orientation map.
 
 Work in progress.
-
-$Id$
 """
 
 from math import pi, sqrt

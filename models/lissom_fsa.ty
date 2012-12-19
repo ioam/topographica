@@ -6,8 +6,6 @@ simulation (such as figure 10.12) of Miikkulainen, Bednar, Choe, and
 Sirosh (2005), Computational Maps in the Visual Cortex, Springer.
 At present, only some of the parameters have been matched, such
 as the input patterns.
-
-$Id$
 """
 
 

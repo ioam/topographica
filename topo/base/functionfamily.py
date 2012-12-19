@@ -4,8 +4,6 @@ Basic function objects.
 TransferFns: accept and modify a 2d array
 ResponseFns: accept two 2d arrays and return a scalar
 LearningFns: accept two 2d arrays and a scalar, return one of the arrays modified
-
-$Id$
 """
 
 # CEBALERT: Documentation is just draft.

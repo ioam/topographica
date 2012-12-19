@@ -1,7 +1,5 @@
 """
 Inline-optimized Sheet classes
-
-$Id$
 """
 
 import param
