@@ -47,12 +47,11 @@ __all__ = ['analysis',
            'plotting',
            'projection',
            'responsefn',
-           'sheet']
+           'sheet',
+           'version']
 
-
-# The version number will eventually need to be set automatically from git
-release='0.9.8'
-version='12131'
+release=version.release
+version=version.version
 
 import param
 import os
