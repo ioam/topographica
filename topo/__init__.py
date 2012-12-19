@@ -48,10 +48,11 @@ __all__ = ['analysis',
            'projection',
            'responsefn',
            'sheet',
-           'version']
+           'versionator']
 
-release=version.release
-version=version.version
+import versionator
+release=versionator.release
+version=versionator.version_string(versionator.version)
 
 import param
 import os
