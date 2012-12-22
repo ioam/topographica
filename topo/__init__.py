@@ -50,9 +50,6 @@ __all__ = ['analysis',
            'sheet']
 
 
-# Find out Topographica's version.
-# First, try Git; if that fails, try to read the release file.
-
 from subprocess import check_output, CalledProcessError
 import os
 
