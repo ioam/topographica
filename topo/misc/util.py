@@ -1,7 +1,5 @@
 """
 General utility functions and classes.
-
-$Id$
 """
 
 import re

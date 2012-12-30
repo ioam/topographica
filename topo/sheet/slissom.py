@@ -1,7 +1,5 @@
 """
 The SLISSOM class.
-
-$Id$
 """
 
 from math import exp

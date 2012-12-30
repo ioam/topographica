@@ -43,8 +43,6 @@ C API cannot be assumed to be thread safe.  Calls to PyObject_SetAttrString
 are a common hazard which can often be avoided using LOOKUP_FROM_SLOT_OFFSET.
 This makes use of Python's __slots__ mechanism with the added benefit of
 bypassing the GIL.
-
-$Id$
 """
 
 import collections

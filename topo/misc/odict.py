@@ -24,8 +24,6 @@ __author__ = ('Nicola Larosa <nico-NoSp@m-tekNico.net>,'
 
 __docformat__ = "restructuredtext en"
 
-__revision__ = '$Id$'
-
 __version__ = '0.2.2'
 
 __all__ = ['OrderedDict', 'SequenceOrderedDict']

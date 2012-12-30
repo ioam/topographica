@@ -6,8 +6,6 @@ as a large set of ConnectionFields.
 
 Any new Projection classes added to this directory will automatically
 become available for any model.
-
-$Id$
 """
 
 from copy import copy

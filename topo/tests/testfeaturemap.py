@@ -1,8 +1,5 @@
 """
 TestFeatureMap
-
-$Id$
-
 """
 
 

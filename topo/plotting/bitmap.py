@@ -16,8 +16,6 @@ For more information, see the documentation for each of the Bitmap
 classes.
 
 The encapsulated PIL Image is accessible through the .bitmap attribute.
-
-$Id$
 """
 
 import os

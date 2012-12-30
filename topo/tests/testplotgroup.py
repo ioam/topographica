@@ -1,6 +1,5 @@
 """
 Test for the PlotGroup class
-$Id$
 """
 
 import unittest

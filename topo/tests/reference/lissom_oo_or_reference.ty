@@ -5,8 +5,6 @@ LISSOM simulation designed to match C++ LISSOM's oo_or_map_topo
 simulation.
 
 Please see the comments for lissom_or_reference.
-
-$Id$
 """
 
 

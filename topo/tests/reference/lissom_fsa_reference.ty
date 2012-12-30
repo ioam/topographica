@@ -1,8 +1,5 @@
 """
 LISSOM simulation designed to match C++ LISSOM's FSA simulation.
-
-
-$Id$
 """
 
 # CEBERRORALERT: need to remove DynamicNumber

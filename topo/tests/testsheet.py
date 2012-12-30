@@ -1,7 +1,5 @@
 """
 Unit tests for sheet and sheetcoords.
-
-$Id$
 """
 
 import unittest

@@ -6,8 +6,6 @@ Objects: that can be manipulated in the canvas
 Window:  window and canvas
 
 Originally written by Alan Lindsay.
-
-$Id$
 """
 __version__='$Revision: 8989 $'
 

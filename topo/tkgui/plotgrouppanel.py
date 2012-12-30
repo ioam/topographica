@@ -1,8 +1,6 @@
 """
 Classes providing GUI windows for PlotGroups, allowing sets of related plots
 to be displayed.
-
-$Id$
 """
 
 

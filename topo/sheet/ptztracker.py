@@ -2,8 +2,6 @@
 This class finds the brightest pixel of the image, returns it in white and
 other in black.
 This class also gives instructions to move the camera.
-
-$Id$
 """
 
 

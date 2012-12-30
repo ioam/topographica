@@ -4,9 +4,6 @@ In order to move the camera, you need to install UVCDYNCTRL,
 it is a Logitech software for webcam.
 
 This class was tested with uvcdynctrl and Ubuntu 10.04 LTS.
-
-
-$Id$
 """
 
 

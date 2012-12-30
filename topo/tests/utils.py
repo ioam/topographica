@@ -1,7 +1,5 @@
 """
 Utility functions used by the test files.
-
-$Id$
 """
 
 # CEB: note these from numpy 1.4 - might be handy:

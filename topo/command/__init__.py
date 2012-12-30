@@ -8,8 +8,6 @@ Commands here should be 'bullet-proof' and work 'from scratch'.
 That is, they should print warnings if required but should not raise
 errors that would interrupt e.g. a long batch run of simulation work,
 no matter what the context from which they are called.
-
-$Id$
 """
 
 import cPickle as pickle
