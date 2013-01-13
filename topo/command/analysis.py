@@ -323,32 +323,32 @@ class measure_rfs(SingleInputResponseCommand):
     """
     Map receptive fields by reverse correlation.
 
-    Presents a large collection of input patterns, typically pixel
-    by pixel on and off, keeping track of which units in the specified
-    input_sheet were active when each unit in other Sheets in the
-    simulation was active.  This data can then be used to plot
-    receptive fields for each unit.  Note that the results are true
-    receptive fields, not the connection fields usually presented in
-    lieu of receptive fields, because they take all circuitry in
+    Presents a large collection of input patterns, typically pixel by pixel on
+    and off, keeping track of which units in the specified input_sheet were
+    active when each unit in other Sheets in the simulation was active.  This
+    data can then be used to plot receptive fields for each unit.  Note that
+    the results are true receptive fields, not the connection fields usually
+    presented in lieu of receptive fields, because they take all circuitry in
     between the input and the target unit into account.
 
-    Note also that it is crucial to set the scale parameter properly when
-    using units with a hard activation threshold (as opposed to a
-    smooth sigmoid), because the input pattern used here may not be a
-    very effective way to drive the unit to activate.  The value
-    should be set high enough that the target units activate at least
-    some of the time there is a pattern on the input.
+    Note also that it is crucial to set the scale parameter properly when using
+    units with a hard activation threshold (as opposed to a smooth sigmoid),
+    because the input pattern used here may not be a very effective way to
+    drive the unit to activate.  The value should be set high enough that the
+    target units activate at least some of the time there is a pattern on the
+    input.
     """
     static_parameters = param.List(default=["offset","size"])
 
-    sampling = param.Number(default=1.0,bounds=(1.0,None),doc="""
-    	The sampling value determines the size of the input pattern and
-    	the number of presentations required to fully sample the input sheet.
-    	The higher the value the coarser the receptive field measurement
-    	will be.""")
+    sampling_interval = param.Integer(default=1,bounds=(1,None),doc="""
+    	The sampling interval determines the number of units in the input sheet
+    	that are sampled per presentation.  The higher the value the coarser
+    	the receptive field measurement will be.""")
 
-    sample_area = param.NumericTuple(default=(10,10),doc="""
-    	Unit dimensions of the area to be sampled during reverse correlation.""")
+    sampling_area = param.NumericTuple(doc="""
+    	Dimensions of the area to be sampled during reverse correlation
+        measured in units x and y on the input sheet centered around the origin
+        and expressed as a tuple (x,y).""")
 
     __abstract = True
 
@@ -371,16 +371,16 @@ class measure_rfs(SingleInputResponseCommand):
         x_units,y_units = p.input_sheet.shape
 
         unit_size = 1.0 / sheet_density
-        p.size = unit_size * p.sampling
+        p.size = unit_size * p.sampling_interval
 
-        if p.sample_area is None:
-            p.sample_area = (x_units,y_units)
+        if p.sampling_area == (0,0):
+            p.sampling_area = (x_units,y_units)
 
-        y_range = (top - (unit_size * floor((y_units-p.sample_area[1])/2)), bottom + (unit_size * ceil((y_units-p.sample_area[1])/2)))
-        x_range = (right - (unit_size * floor((x_units-p.sample_area[0])/2)), left + (unit_size * ceil((x_units-p.sample_area[0])/2)))
+        y_range = (top - (unit_size * floor((y_units-p.sampling_area[1])/2)), bottom + (unit_size * ceil((y_units-p.sampling_area[1])/2)))
+        x_range = (right - (unit_size * floor((x_units-p.sampling_area[0])/2)), left + (unit_size * ceil((x_units-p.sampling_area[0])/2)))
 
-        return [Feature(name="x", range=x_range, step=-unit_size*p.sampling),
-                Feature(name="y", range=y_range, step=-unit_size*p.sampling),
+        return [Feature(name="x", range=x_range, step=-p.size),
+                Feature(name="y", range=y_range, step=-p.size),
                 Feature(name="scale", range=(-p.scale, p.scale), step=p.scale*2)]
 
 pg = create_plotgroup(name='RF Projection',category='Other',
