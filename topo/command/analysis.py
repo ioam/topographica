@@ -26,7 +26,7 @@ import Image,ImageDraw
 import copy
 
 from numpy.oldnumeric import array, maximum
-from numpy import pi, sin, cos, nonzero, round, linspace
+from numpy import pi, sin, cos, nonzero, round, linspace, floor, ceil
 
 import param
 from param.parameterized import ParameterizedFunction
@@ -347,10 +347,8 @@ class measure_rfs(SingleInputResponseCommand):
     	The higher the value the coarser the receptive field measurement
     	will be.""")
 
-    area_ratio = param.Number(default=1.0,bounds=(0.0,1.0),doc="""
-    	Ratio defining the area in the input sheet that is sampled during
-    	the reverse correlation procedure. Reducing this value below 1.0
-    	will invalidate the RFs of all neurons outside the specified area.""")
+    sample_area = param.NumericTuple(default=(10,10),doc="""
+    	Unit dimensions of the area to be sampled during reverse correlation.""")
 
     __abstract = True
 
@@ -369,23 +367,20 @@ class measure_rfs(SingleInputResponseCommand):
     def _feature_list(self,p):
 
         left, bottom, right, top = p.input_sheet.nominal_bounds.lbrt()
-        left *= p.area_ratio; bottom *= p.area_ratio; right *= p.area_ratio; top *= p.area_ratio
         sheet_density = float(p.input_sheet.nominal_density)
+        x_units,y_units = p.input_sheet.shape
 
-        # Cannot assume square sheet.
-        vertical_divisions = ((sheet_density * (top - bottom)) - 1) / p.sampling
-        horizontal_divisions = ((sheet_density * (right - left)) - 1) / p.sampling
+        unit_size = 1.0 / sheet_density
+        p.size = unit_size * p.sampling
 
-        unit_size = 1.0 / sheet_density * p.sampling
-        half_unit_size = unit_size / 2.0 # saves repeated calculation.
-        p['size'] = unit_size
+        if p.sample_area is None:
+            p.sample_area = (x_units,y_units)
 
-        # Set the x and y max values down by half a unit so patterns are presented in the centre of each unit.
-        y_range = (top - half_unit_size, bottom)
-        x_range = (right - half_unit_size, left)
+        y_range = (top - (unit_size * floor((y_units-p.sample_area[1])/2)), bottom + (unit_size * ceil((y_units-p.sample_area[1])/2)))
+        x_range = (right - (unit_size * floor((x_units-p.sample_area[0])/2)), left + (unit_size * ceil((x_units-p.sample_area[0])/2)))
 
-        return [Feature(name="x", range=x_range, step=float(x_range[1]-x_range[0])/horizontal_divisions),
-                Feature(name="y", range=y_range, step=float(y_range[1]-y_range[0])/vertical_divisions),
+        return [Feature(name="x", range=x_range, step=-unit_size*p.sampling),
+                Feature(name="y", range=y_range, step=-unit_size*p.sampling),
                 Feature(name="scale", range=(-p.scale, p.scale), step=p.scale*2)]
 
 pg = create_plotgroup(name='RF Projection',category='Other',
