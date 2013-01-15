@@ -52,6 +52,7 @@ __all__ = ['analysis',
 
 from subprocess import check_output, CalledProcessError
 import os
+import param
 
 def version_int(v):
     """
@@ -72,12 +73,11 @@ try:
 except OSError, CalledProcessError:
     try:
 	(basepath,_) = os.path.split(os.path.abspath(__file__))
-	basepath = os.path.abspath(basepath+"/..")
-        release_file = open(basepath + "/release")
+        release_file = open(basepath + "/.release")
         git_output = release_file.read()
         release_file.close()
     except IOError:
-        print """\
+        param.Parametrized().warning("""\
 WARNING: Your Topographica installation lacks the release file and is not a
 Git repository (or you do not have Git installed).
 This could happen for several reasons:
@@ -87,13 +87,13 @@ This could happen for several reasons:
  (b) Your Topographica installation is damaged.
 
 To fix (a), either install Git or create the release file. If you choose to
-create the release file, go to a machine that has Git installed, go to the root
-directory of your Topographica installation and issue `make release-file`. Make
-sure you have write permissions on Topographica's root directory.
+create the release file, go to a machine that has Git installed and run
+"topographica make-release-file". Make sure you have write permissions on
+Topographica's root directory.
 
 To fix (b), reinstall Topographica.
 
-While Topographica will start, reading and saving files will be disabled.\n\n"""
+While Topographica will start, reading and saving files will be disabled.\n\n""")
         pickle_read_write_allowed = False
 
 (version, count, commit) = git_output[1:].split("-")
@@ -103,7 +103,6 @@ release = version_int(version)
 count = None
 
 
-import param
 import errno
 import platform
 

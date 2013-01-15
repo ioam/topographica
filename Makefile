@@ -131,7 +131,7 @@ generate-map-tests-data:
 	./topographica -c "cortex_density=8" models/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; generate(plotgroups_to_test)" 
 
 release-file:
-	echo ${GIT_DESCRIBE} > release
+	echo ${GIT_DESCRIBE} > topo/.release
 
 #############################################################################
 ##### tests
