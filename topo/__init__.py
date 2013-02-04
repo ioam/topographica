@@ -48,12 +48,62 @@ __all__ = ['analysis',
            'sheet']
 
 
-# The version number will eventually need to be set automatically from git
-release='0.9.8'
-version='12131'
+# Find out Topographica's version.
+# First, try Git; if that fails, try to read the release file.
 
-import param
+from subprocess import check_output, CalledProcessError
 import os
+import param
+
+def version_int(v):
+    """
+    Convers a version four-tuple to a format that can be used to compare
+    version numbers.
+    """
+    return int("%02d%02d%02d%05d" % v)
+
+version = (0, 0, 0, 0)
+release = 0
+commit  = ""
+
+pickle_read_write_allowed = True
+git_output = "v0.0.0-0-"
+
+try:
+    git_output = check_output(["git", "describe"]).strip()
+except OSError, CalledProcessError:
+    try:
+	(basepath,_) = os.path.split(os.path.abspath(__file__))
+        release_file = open(basepath + "/.release")
+        git_output = release_file.read()
+        release_file.close()
+    except IOError:
+        param.Parametrized().warning("""\
+WARNING: Your Topographica installation lacks the release file and is not a
+Git repository (or you do not have Git installed).
+This could happen for several reasons:
+
+ (a) You are using a Git version of Topographica and your machine does not have
+     Git installed (e.g. your Topographica copy is stored on a network drive);
+ (b) Your Topographica installation is damaged.
+
+To fix (a), either install Git or create the release file. If you choose to
+create the release file, go to a machine that has Git installed and run
+"topographica make-release-file". Make sure you have write permissions on
+Topographica's root directory.
+
+To fix (b), reinstall Topographica.
+
+While Topographica will start, reading and saving files will be disabled.\n\n""")
+        pickle_read_write_allowed = False
+
+(version, count, commit) = git_output[1:].split("-")
+version = version.split(".")
+version = (int(version[0]), int(version[1]), int(version[2]), int(count))
+release = version_int(version)
+count = None
+
+
 import errno
 import platform
 

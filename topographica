@@ -10,9 +10,28 @@ sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
 
+# Need to check this here, not using process_argv() and before importing
+# topo as the release file doesn't exist yet
+from sys import argv
+from subprocess import check_output, CalledProcessError
+if len(argv) > 1 and argv[1] == 'make-release-file':
+    try:
+        git = check_output(["git", "describe"]).strip()
+    except OSError, CalledProcessError:
+        print "Could not run `git describe`, failed to create the release file"
+        raise
+    try:
+        release_file = open(basepath + "/topo/.release", "w")
+        release_file.write(git)
+        release_file.close()
+    except IOError:
+        print "Falied to create the release file %s" % basepath + "/topo/.release"
+        raise
+    print "The release file has been created successfully."
+    sys.exit(0)
+
 import topo
 
 # Process the command-line arguments
-from sys import argv
 from topo.misc.commandline import process_argv
 process_argv(argv[1:])

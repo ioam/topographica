@@ -3,14 +3,13 @@ PYLINT = bin/pylint --rcfile=doc/buildbot/pylintrc
 
 PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
-RELEASE = 0.9.8
+GIT_DESCRIBE = $(shell git describe)
+RELEASE = $(shell echo ${GIT_DESCRIBE} | cut -d- -f1 | cut -c2-)
+GITVERSION = $(shell echo ${GIT_DESCRIBE} |  cut -d -f2)
 
 PYTHON = ${PREFIX}/bin/python
 
 PYFLAKES = ${PYTHON} etc/pyflakes-ignore.py
-
-# Currently hard-coded; needs to fetch correct value from git
-SVNVERSION = 12131
 
 # if 0, skips building tk and related external packages
 GUI = 1
@@ -51,7 +50,7 @@ DIST_ZIP                   = ${DIST_DIRNAME}.zip
 
 
 # Default does not include doc, in case user lacks PHP
-default: ext-packages topographica
+default: ext-packages release-file topographica
 
 all: default reference-manual doc tests
 
@@ -131,7 +130,8 @@ doc: FORCE
 generate-map-tests-data:
 	./topographica -c "cortex_density=8" models/lissom_oo_or.ty -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; generate(plotgroups_to_test)" 
 
-
+release-file:
+	echo ${GIT_DESCRIBE} > topo/.release
 
 #############################################################################
 ##### tests
@@ -318,8 +318,8 @@ LOG_TEXT =
 
 # CEBALERT: applies to DEB and RPM; rename
 ifeq (${DEBSTATUS},-unstable)
-	RPM_RELEASE = r${SVNVERSION}
-	UBUNTU_RELEASE = ${RELEASE}~r${SVNVERSION}-0ubuntu0
+	RPM_RELEASE = r${GITVERSION}
+	UBUNTU_RELEASE = ${RELEASE}~r${GITVERSION}-0ubuntu0
 	LOG_TEXT = "  * Pre-release version ${RELEASE} from SVN; see Changelog.txt for details."
 else
 # If you want to re-release, need to increment the last digit to
