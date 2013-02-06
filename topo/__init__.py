@@ -51,7 +51,7 @@ __all__ = ['analysis',
 # Find out Topographica's version.
 # First, try Git; if that fails, try to read the release file.
 
-from subprocess import check_output, CalledProcessError
+from subprocess import Popen, CalledProcessError, PIPE
 import os
 import param
 
@@ -70,7 +70,10 @@ pickle_read_write_allowed = True
 git_output = "v0.0.0-0-"
 
 try:
-    git_output = check_output(["git", "describe"]).strip()
+    git_process = Popen(["git", "describe"], stdout=PIPE)
+    git_output = git_process.communicate()[0].strip()
+    if git_process.poll():
+        raise CalledProcessError
 except OSError, CalledProcessError:
     try:
 	(basepath,_) = os.path.split(os.path.abspath(__file__))

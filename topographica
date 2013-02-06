@@ -13,10 +13,13 @@ sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
 # Need to check this here, not using process_argv() and before importing
 # topo as the release file doesn't exist yet
 from sys import argv
-from subprocess import check_output, CalledProcessError
+from subprocess import Popen, CalledProcessError, PIPE
 if len(argv) > 1 and argv[1] == 'make-release-file':
     try:
-        git = check_output(["git", "describe"]).strip()
+        git_process = Popen(["git", "describe"], stdout=PIPE)
+        git = git_process.communicate()[0].strip()
+        if git_process.poll():
+            raise CalledProcessError
     except OSError, CalledProcessError:
         print "Could not run `git describe`, failed to create the release file"
         raise
