@@ -48,8 +48,11 @@ def _get_version(snapshot_release,snapshot_version):
     found_version = False
 
     if snapshot_version is not None:
-        snapshot_version = snapshot_version.split(":")[0]
-        snapshot_version = snapshot_version.split("M")[0]
+        try: # to detect the passed version
+            snapshot_version = snapshot_version.split(":")[0]
+            snapshot_version = snapshot_version.split("M")[0]
+        except AttributeError: # the version is a tuple, thus it's from git
+            snapshot_version = "%02d%02d%02d%05d" % snapshot_version
 
         if len(snapshot_version)>0:
             try:
