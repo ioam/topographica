@@ -23,7 +23,7 @@ import topo
 
 import param
 
-from topo.base.cf import MaskedCFIter
+from topo.base.cf import CFIter
 from topo.base.projection import Projection
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
 
@@ -94,7 +94,7 @@ def compute_joint_norm_totals(projlist,active_units_mask=True):
     """
     # Assumes that all Projections in the list have the same r,c size
     assert len(projlist)>=1
-    iterator = MaskedCFIter(projlist[0],active_units_mask=active_units_mask)
+    iterator = CFIter(projlist[0],active_units_mask=active_units_mask)
 
     for junk,i in iterator():
         sums = [p.flatcfs[i].norm_total for p in projlist]

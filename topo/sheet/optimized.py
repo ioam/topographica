@@ -4,7 +4,7 @@ Inline-optimized Sheet classes
 
 import param
 
-from topo.base.cf import MaskedCFIter
+from topo.base.cf import CFIter
 from topo.base.projection import NeighborhoodMask
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
 from topo.sheet.lissom import LISSOM
@@ -21,7 +21,7 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
     assert length>=1
 
     proj = projlist[0]
-    iterator = MaskedCFIter(proj,active_units_mask=active_units_mask)
+    iterator = CFIter(proj,active_units_mask=active_units_mask)
     num_cfs = len(proj.flatcfs)  # pyflakes:ignore (passed to weave C code)
     active_units_mask = iterator.get_active_units_mask()
     sheet_mask = iterator.get_sheet_mask()  # pyflakes:ignore (passed to weave C code)

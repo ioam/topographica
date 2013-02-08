@@ -19,7 +19,7 @@ from topo.base.projection import Projection
 from topo.base.boundingregion import BoundingBox
 from topo.base.sheet import activity_type
 from topo.base.sheetcoords import Slice
-from topo.base.cf import CFProjection,ConnectionField,MaskedCFIter,\
+from topo.base.cf import CFProjection,ConnectionField,\
      CFPLearningFn,CFPLF_Identity,CFPOutputFn,CFIter,ResizableCFProjection
 from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.functionfamily import CoordinateMapperFn,IdentityMF
@@ -285,7 +285,7 @@ class ScaledCFProjection(CFProjection):
         if self.lr_sf is None:
             self.lr_sf=ones(self.dest.shape, activity_type)
 
-        self.response_fn(MaskedCFIter(self), input_activity, self.activity, self.strength)
+        self.response_fn(CFIter(self), input_activity, self.activity, self.strength)
         for of in self.output_fns:
             of(self.activity)
         self.calculate_sf()

@@ -20,9 +20,7 @@ CFProjection.
 
 from copy import copy
 
-from numpy import abs,array,zeros,where
-from numpy.oldnumeric import Float,Float32
-
+import numpy as np
 import param
 
 import patterngenerator
@@ -44,7 +42,6 @@ def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     Simplify creation of numpy.vectorize(fn) objects where all outputs
     have the same typecode.
     """
-    from numpy import vectorize,sctype2char
 
     # This function exists because I cannot figure out how I am
     # supposed to stop vectorize() calling fn one extra time at the
@@ -52,11 +49,11 @@ def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     # determine the output types UNLESS the output types are
     # specified.)
 
-    vfn = vectorize(fn,doc=doc)
+    vfn = np.vectorize(fn,doc=doc)
     # stop vectorize calling fn an extra time at the start
     # (works for our current numpy (1.1.1))
     vfn.nout=num_outputs # number of outputs of fn
-    output_typecode = sctype2char(output_type)
+    output_typecode = np.sctype2char(output_type)
     vfn.otypes=output_typecode*num_outputs # typecodes of outputs of fn
     import inspect
 
@@ -74,7 +71,7 @@ def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
 
 #: Specified explicitly when creating weights matrix - required
 #: for optimized C functions.
-weight_type = Float32
+weight_type = np.float32
 
 
 class NullCFError(ValueError):
@@ -106,7 +103,7 @@ class ConnectionField(object):
             return self._norm_total[0]
         else:
             # CEBALERT: what was I playing with for this before?
-            return abs(self.weights).sum()
+            return np.sum(np.abs(self.weights),dtype=np.float64)
 
     def __set_norm_total(self,new_norm_total):
         """
@@ -224,8 +221,8 @@ class ConnectionField(object):
         # http://docs.python.org/reference/datamodel.html). Can we
         # somehow avoid having to think about _has_norm_total in the
         # python code? Could the C code initialize this value?
-        self._has_norm_total=array([0],dtype=numpy.int32)
-        self._norm_total=array([0.0],dtype=float)
+        self._has_norm_total=np.array([0],dtype=np.int32)
+        self._norm_total=np.array([0.0],dtype=np.float64)
 
         if output_fns is None:
             output_fns = []
@@ -237,7 +234,7 @@ class ConnectionField(object):
         # CBNOTE: this would be clearer (but not perfect, and probably slower)
         # m = mask_template[self.weights_slice()]
         self.mask = weights_slice.submatrix(mask)  # view of original mask
-        self.mask = array(self.mask,copy=1) # CEBALERT: why is this necessary?
+        self.mask = np.array(self.mask,copy=1) # CEBALERT: why is this necessary?
 
         # (without it, optimized learning function creates artifacts in CFs at
         # left and right edges of sheet, at some densities)
@@ -590,13 +587,15 @@ class CFProjection(Projection):
         if initialize_cfs:
             self._create_cfs()
 
+        if self.apply_output_fns_init:
+            self.apply_learn_output_fns(active_units_mask=False)
 
         ### JCALERT! We might want to change the default value of the
         ### input value to self.src.activity; but it fails, raising a
         ### type error. It probably has to be clarified why this is
         ### happening
         self.input_buffer = None
-        self.activity = array(self.dest.activity)
+        self.activity = np.array(self.dest.activity)
 
 
     def _generate_coords(self):
@@ -611,7 +610,6 @@ class CFProjection(Projection):
     # CB: should be _initialize_cfs() since we already have 'initialize_cfs' flag?
     def _create_cfs(self):
         vectorized_create_cf = simple_vectorize(self._create_cf)
-        #:
         self.cfs = vectorized_create_cf(*self._generate_coords())
         self.flatcfs = list(self.cfs.flat)
 
@@ -651,7 +649,6 @@ class CFProjection(Projection):
         return CF
 
 
-
     def _calc_n_units(self):
         """Return the number of unmasked units in a typical ConnectionField."""
 
@@ -679,16 +676,10 @@ class CFProjection(Projection):
         Return a single connection field UnitView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
-        matrix_data = zeros(self.src.activity.shape,Float)
+        matrix_data = np.zeros(self.src.activity.shape,dtype=np.float64)
         (r,c) = self.dest.sheet2matrixidx(sheet_x,sheet_y)
         r1,r2,c1,c2 = self.cfs[r,c].input_sheet_slice
         matrix_data[r1:r2,c1:c2] = self.cfs[r,c].weights
-
-        # CB: the following would be equivalent with Slice __call__
-
-        # cf = self.cf(self.dest.sheet2matrixidx(sheet_x,sheet_y))
-        # matrix_data = numpy.zeros(self.src.activity.shape,Numeric.Float)
-        # matrix_data[cf.input_sheet_slice()]=cf.weights
 
         return UnitView((matrix_data,self.src.bounds),sheet_x,sheet_y,self,timestamp)
 
@@ -697,7 +688,7 @@ class CFProjection(Projection):
         """Activate using the specified response_fn and output_fn."""
         self.input_buffer = input_activity
         self.activity *=0.0
-        self.response_fn(MaskedCFIter(self), input_activity, self.activity, self.strength)
+        self.response_fn(CFIter(self), input_activity, self.activity, self.strength)
         for of in self.output_fns:
             of(self.activity)
 
@@ -711,7 +702,7 @@ class CFProjection(Projection):
         # Learning is performed if the input_buffer has already been set,
         # i.e. there is an input to the Projection.
         if self.input_buffer != None:
-            self.learning_fn(MaskedCFIter(self),self.input_buffer,self.dest.activity,self.learning_rate)
+            self.learning_fn(CFIter(self),self.input_buffer,self.dest.activity,self.learning_rate)
 
 
     # CEBALERT: called 'learn' output fns here, but called 'weights' output fns
@@ -723,7 +714,7 @@ class CFProjection(Projection):
         If active_units_mask is True, inactive units will be skipped.
         """
         for of in self.weights_output_fns:
-            of(MaskedCFIter(self,active_units_mask=active_units_mask))
+            of(CFIter(self,active_units_mask=active_units_mask))
 
 
     # CEBALERT: see gc alert in simulation.__new__
@@ -751,8 +742,8 @@ class CFProjection(Projection):
         # Counts non-masked values, if mask is available; otherwise counts
         # weights as connections if nonzero
         rows,cols=self.cfs.shape
-        return sum([len((cf.mask if cf.mask is not None else cf.weights).ravel().nonzero()[0])
-                    for cf,i in MaskedCFIter(self)()])
+        return np.sum([len((cf.mask if cf.mask is not None else cf.weights).ravel().nonzero()[0])
+                    for cf,i in CFIter(self)()])
 
 
 # CEB: have not yet decided proper location for this method
@@ -777,14 +768,13 @@ def _create_mask(shape,bounds_template,sheet,autosize=True,threshold=0.5):
                  xdensity=sheet.xdensity,
                  ydensity=sheet.ydensity)
 
-    mask = where(mask>=threshold,mask,0.0)
+    mask = np.where(mask>=threshold,mask,0.0)
 
     # CB: unnecessary copy (same as for weights)
     return mask.astype(weight_type)
 
 
 
-import numpy
 class CFIter(object):
     """
     Iterator to walk through all ConnectionFields of all neurons in
@@ -816,7 +806,7 @@ class CFIter(object):
 
         # dtype for C functions.
         # could just be flat.
-        return numpy.ones(self.activity.shape,dtype=self.activity.dtype)
+        return np.ones(self.activity.shape,dtype=self.activity.dtype)
 
     # CEBALERT: make _
     def get_sheet_mask(self):
@@ -855,7 +845,7 @@ class CFIter(object):
         # combine the masks themselves, rather than using this method.
         sheet_mask = self.get_sheet_mask()
         active_units_mask = self.get_active_units_mask()
-        return numpy.logical_and(sheet_mask,active_units_mask)
+        return np.logical_and(sheet_mask,active_units_mask)
 
 
     def __call__(self):
@@ -865,8 +855,6 @@ class CFIter(object):
                 if mask.flat[i]:
                     yield cf,i
 
-# CEBALERT: remove this once MaskedCFIter has been replaced elsewhere.
-MaskedCFIter = CFIter
 
 
 ### We don't really need this class; its methods could probably be
@@ -1028,16 +1016,14 @@ class ResizableCFProjection(CFProjection):
         if not (r1 == or1 and r2 == or2 and c1 == oc1 and c2 == oc2):
             # CB: note that it's faster to copy (i.e. replacing copy=1 with copy=0
             # below slows down change_bounds().
-            cf.weights = array(cf.weights[r1-or1:r2-or1,c1-oc1:c2-oc1],copy=1)
+            cf.weights = np.array(cf.weights[r1-or1:r2-or1,c1-oc1:c2-oc1],copy=1)
             # (so the obvious choice,
             # cf.weights=cf.weights[r1-or1:r2-or1,c1-oc1:c2-oc1],
             # is also slower).
 
             cf.mask = weights_slice.submatrix(mask)
-            cf.mask = array(cf.mask,copy=1) # CB: why's this necessary?
+            cf.mask = np.array(cf.mask,copy=1) # CB: why's this necessary?
                                                 # (see ALERT in __init__)
-
-
             cf.weights *= cf.mask
             for of in output_fns:
                 of(cf.weights)
