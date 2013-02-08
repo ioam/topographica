@@ -3,7 +3,7 @@ import numpy
 
 from topo.base.simulation import Simulation
 from topo.base.boundingregion import BoundingBox
-from topo.base.cf import CFIter,MaskedCFIter,ResizableCFProjection,CFSheet
+from topo.base.cf import CFIter,ResizableCFProjection,CFSheet
 
 class TestCFIter(unittest.TestCase):
 
