@@ -622,11 +622,6 @@ class CFProjection(Projection):
         # self.debug("Creating CF(%d,%d) from src (%.3f,%.3f) to  dest (%.3f,%.3f)"%(r,c,x_cf,y_cf,x,y))
 
         try:
-            if self.apply_output_fns_init:
-                ofs = [wof.single_cf_fn for wof in self.weights_output_fns]
-            else:
-                ofs = []
-
             if self.same_cf_shape_for_all_cfs:
                 mask_template = self.mask_template
             else:
@@ -638,7 +633,6 @@ class CFProjection(Projection):
                               template=self._slice_template,
                               weights_generator=self.weights_generator,
                               mask=mask_template,
-                              output_fns=ofs,
                               min_matrix_radius=self.min_matrix_radius)
         except NullCFError:
             if self.allow_null_cfs:
