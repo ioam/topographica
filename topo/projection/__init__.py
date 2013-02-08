@@ -143,10 +143,9 @@ class SharedWeightCFProjection(CFProjection):
 
 
     def _create_cf(self,x,y):
-        x_cf,y_cf = self.coord_mapper(x,y)
         # Does not pass the mask, as it would have to be sliced
         # for each cf, and is only used for learning.
-        CF = SharedWeightCF(self.__sharedcf,self.src,x=x_cf,y=y_cf, #JUDE ADDED
+        CF = SharedWeightCF(self.__sharedcf,self.src,x=x,y=y,
                             template=self._slice_template,
                             min_matrix_radius=self.min_matrix_radius,
                             mask=self.mask_template)
