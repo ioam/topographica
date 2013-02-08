@@ -33,6 +33,9 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
     code = c_header + """
         DECLARE_SLOT_OFFSET(_norm_total,cf_type);
         DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
+        DECLARE_SLOT_OFFSET(weights,cf_type);
+        DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
+        DECLARE_SLOT_OFFSET(mask,cf_type);
 
         npfloat *x = active_units_mask;
         npfloat *m = sheet_mask;
@@ -46,10 +49,29 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
                     PyObject *proj = PyList_GetItem(projlist,p);
                     PyObject *cfs = PyObject_GetAttrString(proj,"flatcfs");
                     PyObject *cf = PyList_GetItem(cfs,r);
-                    PyObject *o = PyObject_GetAttrString(cf,"norm_total");
-                    nt += PyFloat_AsDouble(o);
+                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+                    if (_has_norm_total[0] == 0) {
+                        LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
+                        LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
+                        LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);
+
+                        UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
+
+                        double total = 0.0;
+                        float* weights_init = weights;
+                        for (int i=rr1; i<rr2; ++i) {
+                            for (int j=cc1; j<cc2; ++j) {
+                                if (*(mask++) >= 0.000001) {
+                                    total += fabs(*weights_init);
+                                }
+                                ++weights_init;
+                            }
+                        }
+                        _norm_total[0] = total; // Get new normalized total
+                    }
+                    nt += _norm_total[0];
                     Py_DECREF(cfs);
-                    Py_DECREF(o);
                 }
 
                 for(int p=0; p<length; p++) {
