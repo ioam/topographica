@@ -55,7 +55,7 @@ p.add(
 
     timing = param.Boolean(default=False),
 
-    testdp = param.Number(default=7),
+    testdp = param.Number(default=6),
 
     testdp_unopt = param.Number(default=5)
 
