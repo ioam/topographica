@@ -850,6 +850,9 @@ class CFIter(object):
                     yield cf,i
 
 
+# PRALERT: CFIter Alias for backwards compatability with user code
+# Should be removed before release v1.0
+MaskedCFIter = CFIter
 
 ### We don't really need this class; its methods could probably be
 ### moved up to ProjectionSheet, because they may in fact be valid for
