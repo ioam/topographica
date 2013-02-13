@@ -90,7 +90,7 @@ class CFPLF_Hebbian_opt(CFPLearningFn):
                             // The mask is floating point, so we have to
                             // use a robust comparison instead of testing
                             // against exactly 0.0.
-                            if (*(mask++) >= 0.000001) {
+                            if (*(mask++) >= MASK_THRESHOLD) {
                                 *weights += load * *inpi;
                                 total += fabs(*weights);
                             }
@@ -184,7 +184,7 @@ class CFPLF_BCMFixed_opt(CFPLearningFn):
                             // The mask is floating point, so we have to
                             // use a robust comparison instead of testing
                             // against exactly 0.0.
-                            if (*(mask++) >= 0.000001) {
+                            if (*(mask++) >= MASK_THRESHOLD) {
                                 *weights += load * *inpi * (unit_activity - unit_threshold);
                                 if (*weights<0) { *weights = 0;}
                                 total += fabs(*weights);
@@ -280,7 +280,7 @@ class CFPLF_Scaled_opt(CFPLF_PluginScaled):
                             // The mask is floating point, so we have to
                             // use a robust comparison instead of testing
                             // against exactly 0.0.
-                            if (*(mask++) >= 0.000001) {
+                            if (*(mask++) >= MASK_THRESHOLD) {
                                 *weights += load * *inpi;
                                 total += fabs(*weights);
                             }
@@ -371,7 +371,7 @@ class CFPLF_Trace_opt(CFPLearningFn):
                             // The mask is floating point, so we have to
                             // use a robust comparison instead of testing
                             // against exactly 0.0.
-                            if (*(mask++) >= 0.000001) {
+                            if (*(mask++) >= MASK_THRESHOLD) {
                                 *weights += load * *inpi;
                                 total += fabs(*weight);
                             }
