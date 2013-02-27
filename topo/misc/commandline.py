@@ -47,14 +47,15 @@ except ImportError:
 
 
 # Startup banner
-BANNER = """
-Welcome to Topographica!
-
-Type help() for interactive help with python, help(topo) for general
-information about Topographica, help(commandname) for info on a
-specific command, or topo.about() for info on this release, including
-licensing information.
-"""
+# MAJ change 20130227. Moved banner and its use to topo/__init__.py
+#BANNER = """
+#Welcome to Topographica!
+#
+#Type help() for interactive help with python, help(topo) for general
+#information about Topographica, help(commandname) for info on a
+#specific command, or topo.about() for info on this release, including
+#licensing information.
+#"""
 
 
 class GlobalParams(Parameterized,OptionalSingleton):
@@ -589,7 +590,7 @@ def process_argv(argv):
     ## some kind of cleanup code afterwards)
     if os.environ.get('PYTHONINSPECT'):
         print "Output path: %s" % param.normalize_path.prefix
-        print BANNER
+#        print BANNER
         # CBALERT: should probably allow a way for users to pass
         # things to IPython? Or at least set up some kind of
         # topographica ipython config file. Right now, a topo_parser

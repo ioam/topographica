@@ -7,7 +7,7 @@ GIT_DESCRIBE = $(shell git describe)
 RELEASE = $(shell echo ${GIT_DESCRIBE} | cut -d- -f1 | cut -c2-)
 GITVERSION = $(shell echo ${GIT_DESCRIBE} |  cut -d -f2)
 
-PYTHON = ${PREFIX}/bin/python
+PYTHON = /usr/bin/python #${PREFIX}/bin/python
 
 PYFLAKES = ${PYTHON} etc/pyflakes-ignore.py
 
@@ -41,7 +41,8 @@ MAKE                       = make
 
 # Definitions for public distributions
 PROGRAM                    = topographica
-DIST_TMPDIR                = ../distributions
+#DIST_TMPDIR                = ../distributions
+DIST_TMPDIR                = /tmp/topographica
 DIST_DIRNAME               = ${PROGRAM}-${RELEASE}
 DIST_DIR                   = ${DIST_TMPDIR}/${DIST_DIRNAME}
 DIST_ARCHIVE               = ${DIST_DIRNAME}.tar.gz
@@ -298,7 +299,7 @@ BDIST_WIN_CMD = bdist_wininst
 # Note: no path to install-script, just name
 BDIST_WININST = ${BDIST_WIN_CMD} --user-access-control auto --install-script windows_postinstall.py --plat-name=win
 
-dist-pysource-sdist: 
+distpysource-sdist: 
 	${CD} ${DIST_DIR}; ${PYTHON} setup.py sdist
 
 # generate windows exe (like the exe you get for numpy or matplotlib)
