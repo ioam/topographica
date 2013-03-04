@@ -1,3 +1,10 @@
+/*
+Subclass of Eigen3 SparseMatrix extended with useful utilities for use
+by Topographica. Speed-critical components are implemented here and
+higher-level (Topographica specific) components should be implemented
+in Cython.
+*/
+
 #ifndef SparseMatrixEXT_H
 #define SparseMatrixEXT_H
 #include <iostream>
