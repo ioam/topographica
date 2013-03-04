@@ -1,5 +1,14 @@
 # distutils: language = c++
 
+"""
+Cython wrapper of Eigen3 subclass (used to extend standard sparse
+functionality) for sparse implementation. Implements Topographica
+specific functionality (e.g. DivisiveNormalizationL1, DotProduct and
+Hebbian learning). Also supplies interface for initializing, reading
+and writing sparse matrices. Further, methods to prune and compress
+the sparse matrix are available.
+"""
+
 from cython.operator cimport dereference as deref
 from cpython cimport bool
 import numpy
@@ -119,10 +128,14 @@ cdef class csarray_float:
         result.thisPtr = new SparseMatrixExt[float](self.thisPtr.add(deref(A.thisPtr)))
         return result
 
+
     def prune(self):
+        """
+        Calls prune function on the sparse matrix, sparsifying all
+        nonzero entries below a specified value.
+        """
         self.thisPtr.prune(0.0001,0.000001)
-        #self.thisPtr = (SparseMatrixExt) realloc (*self.thisPtr, self.getnnz() * 3 * 4)
-                     #sizeof(float) * 3)
+
 
     def nonzero(self):
         """
@@ -264,6 +277,9 @@ cdef class csarray_float:
 
 
     def getTriplets(self):
+        """
+        Returns coordinate and value triplets from sparse matrix.
+        """
         cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int32)
         cdef numpy.ndarray[int, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int32)
         cdef numpy.ndarray[float, ndim=1, mode="c"] values = numpy.zeros(self.getnnz(), dtype=numpy.float32)
@@ -272,14 +288,28 @@ cdef class csarray_float:
 
 
     def setTriplets(self, numpy.ndarray[int, ndim=1, mode="c"] rows, numpy.ndarray[int, ndim=1, mode="c"] cols, numpy.ndarray[float, ndim=1, mode="c"] vals):
+        """
+        Calls C method, which sets nonzero value in the sparse matrix based on coordinate and value triplets.
+        """
         self.thisPtr.setTriplets(&rows[0],&cols[0],&vals[0],int(vals.shape[0]))
 
 
     def Hebbian(self,numpy.ndarray[double, ndim=2, mode="c"] src_act, numpy.ndarray[double, ndim=2, mode="c"] dest_act, numpy.ndarray[double, ndim=2, mode="c"] norm_total, double lr):
+        """
+        Call C method to update weights based on Hebbian learning and
+        the learning rate, also calculates the CF weight totals for
+        divisive normalization.
+        """
         self.thisPtr.Hebbian(&src_act[0,0],&dest_act[0,0],&norm_total[0,0],lr)
 
 
     def Hebbian_opt(self,numpy.ndarray[double, ndim=2, mode="c"] src_act, numpy.ndarray[double, ndim=2, mode="c"] dest_act, numpy.ndarray[double, ndim=2, mode="c"] norm_total, double lr, bool init):
+        """
+        Call optimized C method to update weights based on Hebbian
+        learning and the learning rate, also calculates the CF weight
+        totals for divisive normalization. Optimization skips inactive
+        units (only provides speedup in very specific circumstances).
+        """
         if init:
             self.thisPtr.Hebbian_opt(&src_act[0,0],&dest_act[0,0],&norm_total[0,0],lr)
         else:
@@ -287,18 +317,33 @@ cdef class csarray_float:
 
 
     def DotProduct(self, double strength, numpy.ndarray[double, ndim=2, mode="c"] dense, numpy.ndarray[double, ndim=2, mode="c"] out):
+	"""
+	Call C method to calculate the dot product sums between the input activities and CF weights.
+        """
         self.thisPtr.DotProduct(self.dest_dim[0]*self.dest_dim[1],strength,&dense[0,0],&out[0,0])
 
 
     def DotProduct_opt(self, double strength, numpy.ndarray[double, ndim=2, mode="c"] dense, numpy.ndarray[double, ndim=2, mode="c"] out):
+	"""
+	Call optimized C method to calculate the dot product sums between the input activities and CF weights.
+        """
         self.thisPtr.DotProduct_opt(self.dest_dim[0]*self.dest_dim[1],strength,&dense[0,0],&out[0,0])
 
 
     def DivisiveNormalizeL1(self,numpy.ndarray[double, ndim=2, mode="c"] norm_total):
+        """
+        Calls C method to apply divisive normalization on each CF in
+        the sparse projection.
+        """
         self.thisPtr.DivisiveNormalizeL1(&norm_total[0,0])
 
 
     def DivisiveNormalizeL1_opt(self,numpy.ndarray[double, ndim=2, mode="c"] norm_total, numpy.ndarray[double, ndim=2, mode="c"] dest_act, bool init):
+        """
+        Calls optimized C method to apply divisive normalization on
+        each CF in the sparse projection.  Optimization skips inactive
+        units (only provides speedup in very specific circumstances).
+        """
         if init:
             self.thisPtr.DivisiveNormalizeL1(&norm_total[0,0])
         else:
@@ -306,6 +351,9 @@ cdef class csarray_float:
 
 
     def CFWeightTotals(self,numpy.ndarray[double, ndim=2, mode="c"] norm_total):
+        """
+        Method to calculate the current weight totals for each CF.
+        """
         self.thisPtr.CFWeightTotals(&norm_total[0,0])
 
 
