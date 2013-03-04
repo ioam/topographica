@@ -135,47 +135,40 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
     interval = param.Number(default=1000,bounds=(0,None),
         doc="Time interval between sprout/retract steps.")
 
-    residual_turnover = param.Number(default=0.01,bounds(0,1.0),
+    residual_turnover = param.Number(default=0.01,bounds=(0,1.0),
         doc="Constant turnover rate indepedent of current sparsity.")
 
-    turnover_rate = param.Number(default=0.1,bounds(0,1.0),doc="""
+    turnover_rate = param.Number(default=0.1,bounds=(0,1.0),doc="""
         Percentage of weights to change per interval assuming
         currently fully dense and target is fully sparse.""")
 
-    target_sparsity = param.Number(default=0.15,bounds(0,1.0),
+    target_sparsity = param.Number(default=0.15,bounds=(0,1.0),
         doc="Sparsity level at which sprouting and retraction cancel out.")
 
-    kernel_sigma = param.Number(default=1.0,bounds(0.0,10.0),
+    kernel_sigma = param.Number(default=1.0,bounds=(0.0,10.0),
         doc="Gaussian spatial variance for weights to diffuse per interval.")
 
-    def sprout(self, cf, temp_weights, sprout_count):
-        dim1,dim2 = temp_weights.shape
-        init_weight = temp_weights[temp_weights.nonzero()].min()
-        blurred_weights = gaussian_filter(temp_weights, sigma=self.kernel_sigma)
-        blurred_weights = (blurred_weights - blurred_weights.min()) / blurred_weights.max()
-        sprout_prob_map = (blurred_weights * np.random.rand(dim1,dim2)) * (1.0-(temp_weights > 0.0))
-        sprout_inds = np.unravel_index(np.argsort(sprout_prob_map.flatten())[-sprout_count:],(dim1,dim2))
-        temp_weights[sprout_inds] = init_weight
-
-    def prune(self,cf, temp_weights, prune_idx):
-        sorted_weights = np.sort(temp_weights.flatten())
-        threshold = sorted_weights[prune_idx]
-        temp_weights[temp_weights < threshold] = 0.0
 
     def __call__(self, projection, **params):
         time = math.ceil(topo.sim.time())
 
+        # Get CF and src sheet shapes
         cf_x,cf_y = projection.dest.activity.shape
         src_x,src_y = projection.src.activity.shape
+
+        # Initialize sparse triplet arrays
         y_array = np.zeros((src_x*src_y*cf_y),dtype=np.int32)
         x_array = np.zeros((src_x*src_y*cf_y),dtype=np.int32)
         val_array = np.zeros((src_x*src_y*cf_y),dtype=sparse_type)
+
+        # Create new sparse matrix to accumulate into
         sum_sparse = sparse.csarray_float(projection.src.activity.shape,projection.dest.activity.shape)
 
         sprout_sum = 0
         prune_sum = 0
-        mask_total = 0
         unit_total = 0
+
+        self.mask_total = 0
 
         if (time == 0):
             if not hasattr(self,"initial_conns"):
@@ -186,23 +179,8 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
             for cidx,cf in enumerate(projection.flatcfs):
                 temp_weights = cf.weights
                 dim1,dim2 = temp_weights.shape
-                # Assuming the mask shape is circular
-                masked_units = dim1*dim2 * (math.pi/4)
-                mask_total += masked_units
-                max_units = dim1*dim2
-                nnz = np.count_nonzero(temp_weights)
-                cf_sparsity = nnz / float(masked_units)
-                delta_sparsity = cf_sparsity - self.target_sparsity
-                if delta_sparsity > 0:
-                    relative_sparsity = delta_sparsity/(1.0 - self.target_sparsity)
-                else:
-                    relative_sparsity = delta_sparsity/self.target_sparsity
-                # Total number of units to modify, broken down into units for pruning and sprouting
-                delta_units = abs(self.turnover_rate * relative_sparsity + self.residual_turnover) * masked_units
-                prune_factor = 0.5 + (0.5*relative_sparsity)
-                prune_count = int(delta_units * prune_factor)
-                prune_idx = (max_units-nnz)+prune_count
-                sprout_count = int(delta_units * (1-prune_factor))
+
+                sprout_count,prune_idx,nnz = self.calc_ratios(temp_weights)
 
                 self.prune(cf,temp_weights,prune_idx)
                 nnz_pp = np.count_nonzero(temp_weights)
@@ -233,7 +211,48 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
             projection.weights = sum_sparse
             del temp_sparse, sum_sparse
             projection.weights.compress()
-            print projection.name, "pruned by", prune_sum, "and sprouted", sprout_sum, "connections is now", (float(unit_total)/mask_total)*100, "% dense"
+            print projection.name, "pruned by", prune_sum, "and sprouted", sprout_sum, "connections is now", (float(unit_total)/self.mask_total)*100, "% dense"
+
+
+    def sprout(self, cf, temp_weights, sprout_count):
+        dim1,dim2 = temp_weights.shape
+        init_weight = temp_weights[temp_weights.nonzero()].min()
+        blurred_weights = gaussian_filter(temp_weights, sigma=self.kernel_sigma)
+        blurred_weights = (blurred_weights - blurred_weights.min()) / blurred_weights.max()
+        sprout_prob_map = (blurred_weights * np.random.rand(dim1,dim2)) * (1.0-(temp_weights > 0.0))
+        sprout_inds = np.unravel_index(np.argsort(sprout_prob_map.flatten())[-sprout_count:],(dim1,dim2))
+        temp_weights[sprout_inds] = init_weight
+
+
+    def prune(self,cf, temp_weights, prune_idx):
+        sorted_weights = np.sort(temp_weights.flatten())
+        threshold = sorted_weights[prune_idx]
+        temp_weights[temp_weights < threshold] = 0.0
+
+
+    def calc_ratios(self,temp_weights):
+        dim1,dim2 = temp_weights.shape
+        # Assumes the mask shape is circular
+        masked_units = dim1*dim2 * (math.pi/4)
+        self.mask_total += masked_units
+        max_units = dim1*dim2
+        nnz = np.count_nonzero(temp_weights)
+        cf_sparsity = nnz / float(masked_units)
+        delta_sparsity = cf_sparsity - self.target_sparsity
+        if delta_sparsity > 0:
+            relative_sparsity = delta_sparsity/(1.0 - self.target_sparsity)
+        else:
+            relative_sparsity = delta_sparsity/self.target_sparsity
+
+        # Total number of units to modify, broken down into units for pruning and sprouting
+        delta_units = abs(self.turnover_rate * relative_sparsity + self.residual_turnover) * masked_units
+        prune_factor = 0.5 + (0.5*relative_sparsity)
+        prune_count = int(delta_units * prune_factor)
+        prune_idx = (max_units-nnz)+prune_count
+        sprout_count = int(delta_units * (1-prune_factor))
+
+        return sprout_count, prune_idx, nnz
+
 
 
 class CFSPRF_Plugin(param.Parameterized):
@@ -544,7 +563,7 @@ class SparseCFProjection(CFProjection):
     array.
     """
 
-    cf_type = param.ClassSelector(SparseConnectionField,default=SparseConnectionField,
+    cf_type = param.Parameter(default=SparseConnectionField,
         doc="Type of ConnectionField to use when creating individual CFs.")
 
     learning_fn = param.Callable(default=CFPLF_Hebbian_Sparse,
