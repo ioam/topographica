@@ -317,15 +317,15 @@ cdef class csarray_float:
 
 
     def DotProduct(self, double strength, numpy.ndarray[double, ndim=2, mode="c"] dense, numpy.ndarray[double, ndim=2, mode="c"] out):
-	"""
-	Call C method to calculate the dot product sums between the input activities and CF weights.
+        """
+        Call C method to calculate the dot product sums between the input activities and CF weights.
         """
         self.thisPtr.DotProduct(self.dest_dim[0]*self.dest_dim[1],strength,&dense[0,0],&out[0,0])
 
 
     def DotProduct_opt(self, double strength, numpy.ndarray[double, ndim=2, mode="c"] dense, numpy.ndarray[double, ndim=2, mode="c"] out):
-	"""
-	Call optimized C method to calculate the dot product sums between the input activities and CF weights.
+        """
+        Call optimized C method to calculate the dot product sums between the input activities and CF weights.
         """
         self.thisPtr.DotProduct_opt(self.dest_dim[0]*self.dest_dim[1],strength,&dense[0,0],&out[0,0])
 
