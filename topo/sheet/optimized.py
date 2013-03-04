@@ -54,21 +54,10 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
                     if (_has_norm_total[0] == 0) {
                         LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
                         LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
-                        LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);
 
                         UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
 
-                        double total = 0.0;
-                        float* weights_init = weights;
-                        for (int i=rr1; i<rr2; ++i) {
-                            for (int j=cc1; j<cc2; ++j) {
-                                if (*(mask++) >= 0.000001) {
-                                    total += fabs(*weights_init);
-                                }
-                                ++weights_init;
-                            }
-                        }
-                        _norm_total[0] = total; // Get new normalized total
+                        SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2);
                     }
                     nt += _norm_total[0];
                     Py_DECREF(cfs);

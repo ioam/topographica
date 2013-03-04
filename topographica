@@ -4,11 +4,14 @@
 
 # Make sure submodules can be found (only needed for git installation)
 import os,sys
+import numpy
+
 (basepath, _) = os.path.split(os.path.abspath(__file__))
 sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
 sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
+
 
 # Need to check this here, not using process_argv() and before importing
 # topo as the release file doesn't exist yet
@@ -32,6 +35,28 @@ if len(argv) > 1 and argv[1] == 'make-release-file':
         raise
     print "The release file has been created successfully."
     sys.exit(0)
+
+
+try:
+    from Cython.Distutils import build_ext
+    from distutils.core import setup
+    from distutils.extension import Extension
+
+    ext_modules = [Extension("sparse", [basepath + "/topo/sparse/sparse.pyx"],
+                             language="c++", extra_compile_args = ["-w","-O2","-fopenmp","-DNDEBUG","-msse2"],
+                             extra_link_args=['-lgomp'])]
+
+    setup_args = ['--quiet','build_ext','--build-lib',basepath + '/topo/sparse']
+    setup(name = "Sparse CF Matrix",  ext_modules = ext_modules,
+          include_dirs=[basepath+'/external/',numpy.get_include()],
+          cmdclass = {'build_ext':build_ext}, script_args = setup_args)
+
+    from topo.sparse import sparse
+except ImportError:
+    print "Requires distutils and Cython to build sparse extension."
+except:
+    print "Cannot build/import sparse extension. Sparse components not available."
+
 
 import topo
 

@@ -10,3 +10,6 @@
 [submodule "external/lancet"]
 	path = external/lancet
 	url = https://github.com/ioam/lancet.git
+[submodule "external/eigen3"]
+	path = external/eigen3
+	url = https://github.com/vancegroup-mirrors/eigen.git

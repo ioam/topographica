@@ -250,13 +250,27 @@ typedef double npfloat;
    if(attr ## _array != 0) { \
        Py_DECREF(attr ## _array); }
 
-
-
 #define UNPACK_FOUR_TUPLE(type,i1,i2,i3,i4,tuple) \
   type i1 = *tuple++; \
   type i2 = *tuple++; \
   type i3 = *tuple++; \
   type i4 = *tuple
+
+#define MASK_THRESHOLD 0.5
+
+#define SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2) \
+  LOOKUP_FROM_SLOT_OFFSET(float,mask,cf); \
+  double total = 0.0; \
+  float* weights_init = weights; \
+  for (int i=rr1; i<rr2; ++i) { \
+    for (int j=cc1; j<cc2; ++j) { \
+      if (*(mask++) >= MASK_THRESHOLD) { \
+        total += fabs(*weights_init); \
+      } \
+      ++weights_init; \
+    } \
+  } \
+  _norm_total[0] = total
 """
 
 # Simple test

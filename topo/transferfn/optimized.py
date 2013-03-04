@@ -66,18 +66,7 @@ class CFPOF_DivisiveNormalizeL1_opt(CFPOutputFn):
 
                     // if normalized total is not available, sum the weights
                     if (_has_norm_total[0] == 0) {
-                        double total = 0.0;
-                        float* weights_init = weights;
-                        LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);
-                        for (int i=rr1; i<rr2; ++i) {
-                            for (int j=cc1; j<cc2; ++j) {
-                                if (*(mask++) >= 0.000001) {
-                                    total += fabs(*weights_init);
-                                }
-                                ++weights_init;
-                            }
-                        }
-                        _norm_total[0] = total; // Get new normalized total
+                        SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2);
                     }
 
                     // normalize the weights
