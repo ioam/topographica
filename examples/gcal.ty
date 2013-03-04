@@ -136,7 +136,7 @@ elif p.dataset=="Nature":
 topo.sim['Retina']=sheet.GeneratorSheet(nominal_density=p.retina_density,
     input_generator=combined_inputs, period=1.0, phase=0.05,
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25+0.375+0.5))
-
+# (area/2+V1afferentradius+LGNafferentradius+LGNsurroundradius+LGNsurroundbuffer)
 
 # LGN has lateral connections for divisive normalization
 for s in ['LGNOn','LGNOff']:
