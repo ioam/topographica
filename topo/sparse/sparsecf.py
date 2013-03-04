@@ -1,12 +1,12 @@
 """
 Basic SparseCFProjection with associated sparse CFs and output,
-response and learning function. If sparse component cannot be imported
+response, and learning function. If sparse component cannot be imported,
 SparseCFProjection will fall back to a basic dense CFProjection.
 
 CFSOF and CFSLF Plugin function allow any single CF output function to
-be applied to the sparse CFs but may suffer a serious performance loss.
-For real work such function should be implemented at the Cython or C++
-level.
+be applied to the sparse CFs, but may suffer a serious performance
+loss.  For real work, such functions should be implemented at the
+Cython or C++ level.
 """
 
 import numpy as np
@@ -39,8 +39,9 @@ sparse_type = np.float32
 class CFSPLF_Plugin(param.Parameterized):
     """CFSPLearningFunction applying the specified single_cf_fn to each Sparse CF."""
 
-    single_cf_fn = param.ClassSelector(LearningFn,default=Hebbian(),
-        doc="Accepts a LearningFn that will be applied to each CF individually.")
+    single_cf_fn = param.ClassSelector(LearningFn,default=Hebbian(),doc="""
+        Accepts a LearningFn that will be applied to each CF individually.""")
+
 
     def constant_sum_connection_rate(self,n_units,learning_rate):
         """
@@ -50,8 +51,9 @@ class CFSPLF_Plugin(param.Parameterized):
         """
         return float(learning_rate)/n_units
 
+
     def __call__(self, projection, **params):
-        """Apply the specified single_cf_fn to every  sparse CF."""
+        """Apply the specified single_cf_fn to every sparse CF."""
         single_connection_learning_rate = self.constant_sum_connection_rate(projection.n_units,projection.learning_rate)
         # avoid evaluating these references each time in the loop
         single_cf_fn = self.single_cf_fn
@@ -65,12 +67,15 @@ class CFSPLF_Plugin(param.Parameterized):
             cf.weights = temp_weights
 
 
+
 class CFSPOF_Plugin(param.Parameterized):
     """
     Applies the specified single_cf_fn to each SparseCF in the SparseCFProjection.
     """
+
     single_cf_fn = param.ClassSelector(TransferFn,default=IdentityTF(),
         doc="Accepts a TransferFn that will be applied to each CF individually.")
+
 
     def __call__(self, projection, **params):
         if type(self.single_cf_fn) is not IdentityTF:
@@ -83,17 +88,20 @@ class CFSPOF_Plugin(param.Parameterized):
                 del cf.norm_total
 
 
+
 class CFSPOF_Prune(CFSPOF_Plugin):
     """
     Prunes specified percentage of connections from CFs in SparseCFProjection
     at specified interval.
     """
 
-    interval = param.Number(default=1000,bounds=(0,None),
-        doc="Time interval at which pruning step will be applied.")
 
-    percentile = param.Number(default=10.0,bounds=(0,100),
-        doc="Percentile boundary below which connections will be pruned.")
+    interval = param.Number(default=1000,bounds=(0,None),doc="""
+        Time interval at which pruning step will be applied.""")
+
+    percentile = param.Number(default=10.0,bounds=(0,100),doc="""
+        Percentile boundary below which connections will be pruned.""")
+
 
     def __call__(self, projection, **params):
         time = math.ceil(topo.sim.time())
@@ -101,6 +109,7 @@ class CFSPOF_Prune(CFSPOF_Plugin):
             if not hasattr(self,"initial_conns"):
                 self.initial_conns = {}
             self.initial_conns[projection.name] = projection.n_conns()
+
         elif (time % self.interval) == 0:
             for cf in projection.flatcfs:
                 dim1,dim2 = cf.weights.shape
@@ -109,19 +118,20 @@ class CFSPOF_Prune(CFSPOF_Plugin):
                 temp_weights[np.where(temp_weights<=percentile)] = 0.0
                 cf.weights = temp_weights
             projection.weights.prune()
+            # ALERT: Should use .message() method to allow user control
             print projection.name, "has", (float(projection.n_conns())/self.initial_conns[projection.name])*100, "% of initial connections"
 
 
 class CFSPOF_SproutRetract(CFSPOF_Plugin):
     """
-    Sprouting and retraction weights output function. At set time
-    interval the function removes and adds connections based on a
+    Sprouting and retraction weights output function. At a preset time
+    interval, the function removes and adds connections based on a
     piecewise function, which determines the number of connections to
     alter and the sprouting and retraction ratios, eventually allowing
     connections to converge on the target_sparsity. The function
     ensures the full turnover_rate is applied at the maximal distances
     from the target sparsity, i.e. at 0% and 100% density. As the
-    projection approaches the target sparsity it will assymptote but a
+    projection approaches the target sparsity, it will asymptote, but a
     residual turnover will ensure that a fixed amount of connections
     will continue to sprout and retract.
 
@@ -132,21 +142,21 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
     Still experimental and not scientifically validated.
     """
 
-    interval = param.Number(default=1000,bounds=(0,None),
-        doc="Time interval between sprout/retract steps.")
+    interval = param.Number(default=1000,bounds=(0,None),doc="""
+        Time interval between sprout/retract steps.""")
 
-    residual_turnover = param.Number(default=0.01,bounds=(0,1.0),
-        doc="Constant turnover rate indepedent of current sparsity.")
+    residual_turnover = param.Number(default=0.01,bounds=(0,1.0),doc="""
+        Constant turnover rate independent of current sparsity.""")
 
     turnover_rate = param.Number(default=0.1,bounds=(0,1.0),doc="""
-        Percentage of weights to change per interval assuming
+        Percentage of weights to change per interval, assuming
         currently fully dense and target is fully sparse.""")
 
-    target_sparsity = param.Number(default=0.15,bounds=(0,1.0),
-        doc="Sparsity level at which sprouting and retraction cancel out.")
+    target_sparsity = param.Number(default=0.15,bounds=(0,1.0),doc="""
+        Sparsity level at which sprouting and retraction cancel out.""")
 
-    kernel_sigma = param.Number(default=1.0,bounds=(0.0,10.0),
-        doc="Gaussian spatial variance for weights to diffuse per interval.")
+    kernel_sigma = param.Number(default=1.0,bounds=(0.0,10.0),doc="""
+        Gaussian spatial variance for weights to diffuse per interval.""")
 
 
     def __call__(self, projection, **params):
@@ -211,10 +221,12 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
             projection.weights = sum_sparse
             del temp_sparse, sum_sparse
             projection.weights.compress()
+            # ALERT: Should use .message() method to allow user control
             print projection.name, "pruned by", prune_sum, "and sprouted", sprout_sum, "connections is now", (float(unit_total)/self.mask_total)*100, "% dense"
 
 
     def sprout(self, cf, temp_weights, sprout_count):
+        # ALERT: All these methods need docstrings, e.g. to explain their assumptions
         dim1,dim2 = temp_weights.shape
         init_weight = temp_weights[temp_weights.nonzero()].min()
         blurred_weights = gaussian_filter(temp_weights, sigma=self.kernel_sigma)
@@ -269,8 +281,9 @@ class CFSPRF_Plugin(param.Parameterized):
     activation value based on those weights.
     """
 
-    single_cf_fn = param.ClassSelector(ResponseFn,default=DotProduct(),
-        doc="Accepts a ResponseFn that will be applied to each CF individually.")
+    single_cf_fn = param.ClassSelector(ResponseFn,default=DotProduct(),doc="""
+        Accepts a ResponseFn that will be applied to each CF individually.""")
+
 
     def __call__(self, projection, **params):
         single_cf_fn = self.single_cf_fn
@@ -285,6 +298,7 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
     Compute norm_total for each CF in each projection from a group to be
     normalized jointly.
     """
+
     # Assumes that all Projections in the list have the same r,c size
     assert len(projlist)>=1
     joint_sum = np.zeros(projlist[0].dest.shape,dtype=np.float64)
@@ -298,16 +312,19 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
         p.norm_total = joint_sum.copy()
 
 
+
 def CFPOF_DivisiveNormalizeL1_Sparse(projection):
     """
     Sparse CF Projection output function applying L1 divisive normalization
     to individual CFs.
     """
+
     if not projection.has_norm_total:
         projection.norm_total *= 0.0
         projection.weights.CFWeightTotals(projection.norm_total)
     projection.weights.DivisiveNormalizeL1(projection.norm_total)
     projection.has_norm_total = False
+
 
 
 def CFPLF_Hebbian_Sparse(projection):
@@ -325,9 +342,10 @@ def CFPLF_Hebbian_Sparse(projection):
 
 def CFPLF_Hebbian_Sparse_opt(projection):
     """
-    Sparse CF Projection learning function, which calls optimized Hebbian
-    learning function skipping over inactive units.
+    Sparse CF Projection learning function, which calls an optimized Hebbian
+    learning function while skipping over inactive units.
     """
+
     single_conn_lr = projection.learning_rate/projection.n_units
     projection.norm_total *= 0.0
     projection.weights.Hebbian_opt(projection.src.activity,projection.dest.activity,
@@ -335,11 +353,13 @@ def CFPLF_Hebbian_Sparse_opt(projection):
     projection.has_norm_total = True
 
 
+
 def CFPRF_DotProduct_Sparse(projection):
     """
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights.
     """
+
     projection.weights.DotProduct(projection.strength, projection.src.activity, projection.activity)
 
 
@@ -347,9 +367,11 @@ def CFPRF_DotProduct_Sparse_opt(projection):
     """
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Optimization skips
-    inactive units if certain percentage of neurons are inactive.
+    inactive units if a certain percentage of neurons is inactive.
     """
+
     nnz_ratio = np.count_nonzero(projection.src.activity) / len(projection.src.activity.flatten())
+
     if nnz_ratio < 0.1:
         projection.weights.DotProduct_opt(projection.strength, projection.src.activity, projection.activity)
     else:
@@ -366,13 +388,14 @@ class SparseConnectionField(param.Parameterized):
     including many other ConnectionFields.
     """
 
+    # ALERT: need bounds, more docs
     x = param.Number(default=0.0,doc="Sheet X coordinate of CF")
 
     y = param.Number(default=0.0,doc="Sheet Y coordinate of CF")
 
     weights_generator = param.ClassSelector(PatternGenerator,
-        default=patterngenerator.Constant(),constant=True,
-        doc="Generate initial weights values.")
+        default=patterngenerator.Constant(),constant=True,doc="""
+        Generates initial weights values.""")
 
     min_matrix_radius=param.Integer(default=1)
 
@@ -447,10 +470,10 @@ class SparseConnectionField(param.Parameterized):
 
     def __set_weights(self,arr):
         """
-        set_weights takes an input array, which has to match the CF
-        shape.  It creates an mgrid of the appropriate size, adds the
-        proper offsets and passes the values and indices to the sparse
-        matrix representation
+        Takes an input array, which has to match the CF shape, and
+        creates an mgrid of the appropriate size, adds the proper
+        offsets and passes the values and indices to the sparse matrix
+        representation.
         """
 
         x1,x2,y1,y2 = self.src_slice
@@ -467,7 +490,7 @@ class SparseConnectionField(param.Parameterized):
 
     def __init__(self,template,input_sheet,projection,**params):
         """
-        Initializes the CF object and stores meta information about the CFs
+        Initializes the CF object and stores meta information about the CF's
         shape and position in the SparseCFProjection to allow for easier
         initialization.
         """
@@ -563,17 +586,17 @@ class SparseCFProjection(CFProjection):
     array.
     """
 
-    cf_type = param.Parameter(default=SparseConnectionField,
-        doc="Type of ConnectionField to use when creating individual CFs.")
+    cf_type = param.Parameter(default=SparseConnectionField,doc="""
+        Type of ConnectionField to use when creating individual CFs.""")
 
-    learning_fn = param.Callable(default=CFPLF_Hebbian_Sparse,
-        doc="Function for computing changes to the weights based on one activation step.")
+    learning_fn = param.Callable(default=CFPLF_Hebbian_Sparse,doc="""
+        Function for computing changes to the weights based on one activation step.""")
 
-    response_fn = param.Callable(default=CFPRF_DotProduct_Sparse,
-        doc="Function for computing the Projection response to an input pattern.")
+    response_fn = param.Callable(default=CFPRF_DotProduct_Sparse,doc="""
+        Function for computing the Projection response to an input pattern.""")
 
-    weights_output_fns = param.HookList(default=[CFPOF_DivisiveNormalizeL1_Sparse],
-        doc="Functions applied to each CF after learning.")
+    weights_output_fns = param.HookList(default=[CFPOF_DivisiveNormalizeL1_Sparse],doc="""
+        Functions applied to each CF after learning.""")
 
     initialized = param.Boolean(default=False)
 
@@ -718,6 +741,7 @@ class SparseCFProjection(CFProjection):
 
     def activate(self,input_activity):
         """Activate using the specified response_fn and output_fn."""
+
         self.input_buffer = input_activity
         self.activity *=0.0
         self.response_fn(self)
@@ -753,7 +777,7 @@ class SparseCFProjection(CFProjection):
 
     def n_conns(self):
         """
-        Returns number of nonzero weights
+        Returns number of nonzero weights.
         """
         return self.weights.getnnz()
 
