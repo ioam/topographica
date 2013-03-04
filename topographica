@@ -28,7 +28,7 @@ if len(argv) > 1 and argv[1] == 'make-release-file':
         release_file.write(git)
         release_file.close()
     except IOError:
-        print "Falied to create the release file %s" % basepath + "/topo/.release"
+        print "Failed to create the release file %s" % basepath + "/topo/.release"
         raise
     print "The release file has been created successfully."
     sys.exit(0)
