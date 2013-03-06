@@ -671,7 +671,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         Used primarily for debugging long scripts that present a lot of activity patterns.
         """
         for win in self.auto_refresh_panels:
-            if re.match('Activity$',win.plotgroup.name):
+            if re.match('.*Activity$',win.plotgroup.name):
                 win.refresh()
                 self.update_idletasks()
 
