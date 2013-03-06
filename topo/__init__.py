@@ -53,7 +53,11 @@ __all__ = ['analysis',
 
 from subprocess import Popen, CalledProcessError, PIPE
 import os
+import errno
+import platform
+# MAJ changed 20130227: import param should be here as was used before import
 import param
+
 
 def version_int(v):
     """
@@ -70,18 +74,12 @@ pickle_read_write_allowed = True
 git_output = "v0.0.0-0-"
 
 try:
-    git_process = Popen(["git", "describe"], stdout=PIPE)
-    git_output = git_process.communicate()[0].strip()
-    if git_process.poll():
-        raise CalledProcessError
-except OSError, CalledProcessError:
-    try:
-	(basepath,_) = os.path.split(os.path.abspath(__file__))
-        release_file = open(basepath + "/.release")
-        git_output = release_file.read()
-        release_file.close()
-    except IOError:
-        param.Parametrized().warning("""\
+    (basepath,_) = os.path.split(os.path.abspath(__file__))
+    release_file = open(basepath + "/.release")
+    git_output = release_file.read()
+    release_file.close()
+except IOError: #MAJ changed 20130227: typo in Parameterized
+    param.Parameterized().warning("""\
 WARNING: Your Topographica installation lacks the release file and is not a
 Git repository (or you do not have Git installed).
 This could happen for several reasons:
@@ -98,17 +96,26 @@ Topographica's root directory.
 To fix (b), reinstall Topographica.
 
 While Topographica will start, reading and saving files will be disabled.\n\n""")
-        pickle_read_write_allowed = False
+    pickle_read_write_allowed = False
 
+# MAJ changed 20130227: put banner here and version/commit info to output    
 (version, count, commit) = git_output[1:].split("-")
+commit.rstrip();
 version = version.split(".")
 version = (int(version[0]), int(version[1]), int(version[2]), int(count))
 release = version_int(version)
-count = None
 
+BANNER_TEXT = """
+Welcome to Topographica!
+Version %s
+Commit: %s
 
-import errno
-import platform
+Type help() for interactive help with python, help(topo) for general
+information about Topographica, help(commandname) for info on a
+specific command, or topo.about() for info on this release, including
+licensing information.
+"""%(release,commit)
+print BANNER_TEXT
 
 
 def _win_documents_path():

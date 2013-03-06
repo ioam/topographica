@@ -7,32 +7,33 @@ import os,sys
 import numpy
 
 (basepath, _) = os.path.split(os.path.abspath(__file__))
-sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
-sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
-sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
-sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
+sys.path.append(os.path.join(basepath, 'external', 'param'))
+sys.path.append(os.path.join(basepath, 'external', 'paramtk'))
+sys.path.append(os.path.join(basepath, 'external', 'imagen'))
+sys.path.append(os.path.join(basepath, 'external', 'lancet'))
 
 
 # Need to check this here, not using process_argv() and before importing
 # topo as the release file doesn't exist yet
 from sys import argv
-from subprocess import Popen, CalledProcessError, PIPE
+from subprocess import Popen, check_output, CalledProcessError, PIPE
+
 if len(argv) > 1 and argv[1] == 'make-release-file':
+    # MAj changed 20130227: call 'git describe' and check it outputs
     try:
-        git_process = Popen(["git", "describe"], stdout=PIPE)
-        git = git_process.communicate()[0].strip()
-        if git_process.poll():
-            raise CalledProcessError
-    except OSError, CalledProcessError:
-        print "Could not run `git describe`, failed to create the release file"
-        raise
+        git_result = check_output(["git", "describe"])
+        #print "### git result: ", git_result
+    except CalledProcessError:
+        print "### \"git describe\" returned an error. Maybe running script not in GIT directory.\n"
+        sys.exit(1)
+
     try:
         release_file = open(basepath + "/topo/.release", "w")
-        release_file.write(git)
+        release_file.write(git_result)
         release_file.close()
     except IOError:
-        print "Failed to create the release file %s" % basepath + "/topo/.release"
-        raise
+        print "Falied to create the release file %s" % basepath + "/topo/.release"
+        sys.exit(1)
     print "The release file has been created successfully."
     sys.exit(0)
 

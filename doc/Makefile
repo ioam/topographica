@@ -16,7 +16,8 @@ PHPHTML = ${subst _text.php,.html,${PHPBASE}}
 
 # Can also add --graph=callgraph to show who called what, but only for a specific simulation run
 # or --graph=all
-EPYDOC = bin/epydoc
+#EPYDOC = bin/epydoc
+EPYDOC = /usr/bin/epydoc
 CALLEPYDOC = env PYTHONPATH=external/param:external/imagen:external/paramtk: ${EPYDOC} --dotpath=/usr/bin/dot --graph=classtree --inheritance=listed --docformat=ReStructuredText --show-sourcecode --html 
 
 # General rule based only on target filename and location
