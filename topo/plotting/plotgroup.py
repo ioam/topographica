@@ -33,6 +33,13 @@ from plotfilesaver import PlotGroupSaver,CFProjectionPlotGroupSaver
 #   can be plotted for CFSheets).
 # * There are no unit tests
 
+# General JABALERT:
+# We need to clean up this file; there is no need
+# for it to be so incomprehensible. Everything to do with _range,
+# _kw_for_make_template_plots, _hack, and joint normalization
+# needs to be greatly simplified.
+
+
 
 def _cmp_plot(plot1,plot2):
     """
@@ -413,6 +420,11 @@ def _get_value_range(plots):
         return (min(mins),max(maxs))
 
 
+
+def alwaystrue(x): return True
+
+
+
 class TemplatePlotGroup(SheetPlotGroup):
     """
     Container that allows creation of different types of plots in a
@@ -489,6 +501,11 @@ class TemplatePlotGroup(SheetPlotGroup):
 
     category = param.String(default="User",doc="""
         Category to which this plot belongs, which will be created if necessary.""")
+
+    filterfn = param.Callable(default=alwaystrue,doc="""
+        Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in ['Retina','V1'] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.""")
 
     # CEBALERT: how to avoid repeating documentation?
     # CB: also, documentation for normalization types needs cleaning up.
@@ -597,7 +614,7 @@ class TemplatePlotGroup(SheetPlotGroup):
         # projections) _make_template_plot() is called over, and to
         # control what keyword arguments
         # (sheet=,proj_=,range_=,bounds=,x=,...) are supplied.
-        return [dict(sheet=sheet,range_=range_) for sheet in self.sheets()]
+        return [dict(sheet=sheet,range_=range_) for sheet in filter(self.filterfn,self.sheets())]
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
@@ -708,12 +725,11 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
     def _kw_for_make_template_plot(self,range_):
         args = []
-        for proj in self.projections():
+        for proj in filter(self.filterfn,self.projections()):
             for d in self._kw_for_one_proj(proj):
                 d['range_']=range_[proj.name]
                 args.append(d)
         return args
-
 
     def _template_plots(self,range_=False):
         # all the extra processing is for normalize=='JointProjections'
@@ -893,7 +909,7 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
 
     def _kw_for_make_template_plot(self,range_):
         args = []
-        for x,y in self.generate_coords():
+        for x,y in filter(self.filterfn,self.generate_coords()):
             x_center,y_center = self.sheet.closest_cell_center(x,y)
             args.append(dict(x=x_center,y=y_center,sheet=self.sheet,range_=range_))
         return args
@@ -1131,7 +1147,7 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
 
     def _kw_for_one_proj(self,proj):
         args = []
-        for x,y in self.generate_coords():
+        for x,y in filter(self.filterfn,self.generate_coords()):
             if self.situate:
                 bounds = proj.src.bounds
             else:
