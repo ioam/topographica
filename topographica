@@ -22,7 +22,7 @@ if len(argv) > 1 and argv[1] == 'make-release-file':
         git_process = Popen(["git", "describe"], stdout=PIPE)
         git = git_process.communicate()[0].strip()
         if git_process.poll():
-            raise CalledProcessError
+            raise OSError
     except OSError, CalledProcessError:
         print "Could not run `git describe`, failed to create the release file"
         raise
