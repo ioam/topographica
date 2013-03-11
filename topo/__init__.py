@@ -77,35 +77,34 @@ def _find_version():
     pickle_allowed = True
     git_output = "v0.0.0-0-"
 
+    (basepath,_) = os.path.split(os.path.abspath(__file__))
+
     try:
-        git_process = Popen(["git", "describe"], stdout=PIPE)
+        git_process = Popen(["git", "describe"], stdout=PIPE, stderr=PIPE, cwd=basepath)
         git_output = git_process.communicate()[0].strip()
         if git_process.poll():
             raise OSError
     except OSError, CalledProcessError:
         try:
-            (basepath,_) = os.path.split(os.path.abspath(__file__))
             release_file = open(basepath + "/.release")
             git_output = release_file.read()
             release_file.close()
         except IOError:
             param.Parameterized().warning("""\
-WARNING: Your Topographica installation lacks the release file and is not a
-Git repository (or you do not have Git installed).
-This could happen for several reasons:
+Unable to determine the version information for this copy of Topographica.
 
- (a) You are using a Git version of Topographica and your machine does not have
-     Git installed (e.g. your Topographica copy is stored on a network drive);
- (b) Your Topographica installation is damaged.
-
-To fix (a), either install Git or create the release file. If you choose to
-create the release file, go to a machine that has Git installed and run
-"topographica make-release-file". Make sure you have write permissions on
+For an official release, the version information is stored in a file
+named topo/.release.  For a development copy checked out from Git, the
+version is requested using "git describe".  Neither of these options
+was successful, perhaps because Git is not available on this machine.
+To work around this problem, either install Git on this machine, or
+temporarily use a machine that does have Git and run "topographica
+make-release-file", making sure you have write permissions on
 Topographica's root directory.
 
-To fix (b), reinstall Topographica.
-
-While Topographica will start, reading and saving files will be disabled.\n\n""")
+In the meantime, reading and saving snapshots will be disabled,
+because version information is necessary for determining how to
+interpret saved files.\n\n""")
             pickle_allowed = False
             git_output = "v0.0.0-0-"
 
