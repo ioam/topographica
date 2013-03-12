@@ -257,7 +257,7 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
             relative_sparsity = delta_sparsity/self.target_sparsity
 
         # Total number of units to modify, broken down into units for pruning and sprouting
-        delta_units = abs(self.turnover_rate * relative_sparsity + self.residual_turnover) * masked_units
+        delta_units = (abs(self.turnover_rate * relative_sparsity) + self.residual_turnover) * masked_units
         prune_factor = 0.5 + (0.5*relative_sparsity)
         prune_count = int(delta_units * prune_factor)
         prune_idx = (max_units-nnz)+prune_count
@@ -783,5 +783,6 @@ class SparseCFProjection(CFProjection):
 
 
 if not use_sparse:
+    print "WARNING: Sparse component could not be imported, replacing SparseCFProjection with regular CFProjection"
     def SparseCFProjection(*args, **kwargs):
         return CFProjection(*args,**kwargs)
