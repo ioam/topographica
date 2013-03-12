@@ -10,6 +10,7 @@ TopoConsole class file.
 import os
 import copy
 import sys
+import re
 import __main__
 import webbrowser
 import string
@@ -658,7 +659,6 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         self.update_idletasks()
 
 
-
     ### CEBERRORALERT: why doesn't updatecommand("display=True") for an
     ### orientation preference map measurement work with the
     ### hierarchical example? I guess this is the reason I thought the
@@ -666,23 +666,19 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
     ### recently - or I'm confused)...
     def refresh_activity_windows(self):
         """
-        Update any windows with a plotgroup_key of 'Activity'.
+        Update any windows with a plotgroup_key ending in 'Activity'.
 
         Used primarily for debugging long scripts that present a lot of activity patterns.
         """
         for win in self.auto_refresh_panels:
-            if win.plotgroup.name=='Activity' or win.plotgroup.name=='ProjectionActivity' :
+            if re.match('.*Activity$',win.plotgroup.name):
                 win.refresh()
                 self.update_idletasks()
-
-
 
 
     def open_model_editor(self):
         """Start the Model editor."""
         return ModelEditor(self)
-
-
 
 
     def new_about_window(self):
