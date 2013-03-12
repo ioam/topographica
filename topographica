@@ -26,6 +26,7 @@ if len(argv) > 1 and argv[1] == 'make-release-file':
     except OSError, CalledProcessError:
         print "Could not run `git describe`, failed to create the release file"
         raise
+    release_filename = basepath + "/topo/.release"
     try:
         release_file = open(basepath + "/topo/.release", "w")
         release_file.write(git)
@@ -33,7 +34,7 @@ if len(argv) > 1 and argv[1] == 'make-release-file':
     except IOError:
         print "Failed to create the release file %s" % basepath + "/topo/.release"
         raise
-    print "The release file has been created successfully."
+    print "Release file %s created." % release_filename
     sys.exit(0)
 
 
