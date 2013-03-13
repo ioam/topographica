@@ -1,0 +1,51 @@
+>>> import os, sys
+>>> sys.path = [os.path.join(os.getcwd(), '..', '..', '..', 'external', 'param')] + sys.path
+
+# CEBALERT: incomplete tests of Filename and associated code
+
+## test not pickling normalize_ and resolve_paths's prefix/search_paths
+
+>>> import tempfile
+>>> import os
+>>> import param
+>>> import shutil
+>>> from topo import command
+
+>>> original_prefix = param.normalize_path.prefix
+>>> original_search_paths = param.resolve_path.search_paths
+
+>>> tmp1 = tempfile.mkdtemp()
+>>> tmp2 = tempfile.mkdtemp()
+
+>>> param.normalize_path.prefix = tmp1
+>>> param.resolve_path.search_paths = [tmp1]
+
+>>> command.save_snapshot('test.typ')
+
+>>> param.normalize_path.prefix = tmp2
+>>> param.resolve_path.search_paths = [tmp2]
+
+>>> command.load_snapshot(os.path.join(tmp1,'test.typ'))
+>>> assert param.normalize_path.prefix==tmp2
+>>> assert param.resolve_path.search_paths==[tmp2], "%s %s %s"%(tmp1,tmp2,param.resolve_path.search_paths)
+
+# clean up
+>>> param.normalize_path.prefix = original_prefix
+>>> param.resolve_path.search_paths = original_search_paths
+>>> shutil.rmtree(tmp1)
+>>> shutil.rmtree(tmp2)
+
+## end test of not pickling prefix, search_paths
+
+>>> tmp3 = tempfile.mkdtemp()
+>>> open("%s/testing"%tmp3,'w').close()
+
+
+>>> class TestFileName(param.Parameterized):
+...    filename = param.Filename(default="testing",search_paths=[tmp3])
+
+>>> c = TestFileName()
+>>> os.path.normpath(c.filename) == os.path.normpath("%s/testing"%tmp3)
+True
+
+>>> shutil.rmtree(tmp3)

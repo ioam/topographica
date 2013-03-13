@@ -1,0 +1,31 @@
+>>> import os, sys
+>>> sys.path = [os.path.join(os.getcwd(), '..', '..', '..', 'external', 'param')] + sys.path
+
+#
+# Load the setup script, defining TopRowMask, etc..
+#
+>>> from param import resolve_path
+>>> execfile(resolve_path('sheetmask_setup.py'))
+>>> from topo.base.boundingregion import BoundingBox
+>>> ProjectionSheet.nominal_bounds=BoundingBox(radius=0.5)
+>>> s = ProjectionSheet(nominal_density=2,mask=LeftColMask() & TopRowMask())
+>>> s.mask.data
+array([[1, 0],
+       [0, 0]])
+>>> s = ProjectionSheet(nominal_density=2,mask=LeftColMask() | TopRowMask())
+>>> s.mask.data
+array([[1, 1],
+       [1, 0]])
+>>> s = ProjectionSheet(nominal_density=2,mask=LeftColMask() | TopRowMask() | RightColMask())
+>>> s.mask.data
+array([[1, 1],
+       [1, 1]])
+>>> s = ProjectionSheet(nominal_density=2,mask=LeftColMask() & TopRowMask() | RightColMask())
+>>> s.mask.data
+array([[1, 1],
+       [0, 1]])
+>>> s = ProjectionSheet(nominal_density=2,mask=LeftColMask() & (TopRowMask() | RightColMask()))
+>>> s.mask.data
+array([[1, 0],
+       [0, 0]])
+>>>

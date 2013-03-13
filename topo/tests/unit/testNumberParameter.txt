@@ -1,0 +1,39 @@
+>>> import os, sys
+>>> sys.path = [os.path.join(os.getcwd(), '..', '..', '..', 'external', 'param')] + sys.path
+
+>>> import param
+>>> from topo import numbergen
+
+>>> class TestPO1(param.Parameterized):
+...    x = param.Number(default=numbergen.UniformRandom(lbound=-1,ubound=1,seed=1),bounds=(-1,1))
+...    y = param.Number(default=1,bounds=(-1,1))
+
+>>> t1 = TestPO1()
+
+
+### Test bounds (non-dynamic number)
+>>> try:
+...     t1.y = 10
+... except ValueError:
+...     pass
+... else:
+...     assert False, "Should raise ValueError."
+
+
+### Test bounds (dynamic number)
+>>> t1.x = numbergen.UniformRandom(lbound=2,ubound=3)  # bounds not checked on set
+>>> try:
+...     v1 = t1.x
+... except ValueError:
+...     pass
+... else:
+...     assert False, "Should raise ValueError."
+
+
+
+
+
+
+
+
+

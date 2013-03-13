@@ -1,0 +1,77 @@
+>>> from topo.pattern import Composite, SeparatedComposite, Gaussian
+>>> from topo import numbergen
+>>> from topo.base.simulation import Simulation
+>>> from topo.base.cf import CFSheet,CFProjection
+>>> from topo.sheet import GeneratorSheet
+
+
+
+## SeparatedComposite with 0 separation so no numbers lost through trials.
+# (so should presumably be the same as Composite)
+>>> g0 = Gaussian(x=numbergen.UniformRandom(seed=1),y=numbergen.UniformRandom(seed=2),orientation=numbergen.UniformRandom(seed=3))
+>>> g1 = Gaussian(x=numbergen.UniformRandom(seed=4),y=numbergen.UniformRandom(seed=5),orientation=numbergen.UniformRandom(seed=6))
+>>> separated_composite = SeparatedComposite(min_separation=0,generators=[g0,g1])
+
+>>> import copy
+>>> g2,g3 = copy.deepcopy(g0),copy.deepcopy(g1)
+>>> g2 is g0
+False
+
+>>> composite = Composite(generators=[g2,g3])
+>>> gaussian0 = Gaussian(x=numbergen.UniformRandom(seed=7))
+
+
+## Setup simulation
+>>> sim=Simulation(register=True)
+>>> GeneratorSheet.nominal_density=2; GeneratorSheet.period=1.0; GeneratorSheet.phase=0.05
+>>> sim['GS1']=GeneratorSheet(input_generator=separated_composite)
+>>> sim['GS2']=GeneratorSheet(input_generator=gaussian0)
+>>> sim['GS3']=GeneratorSheet(input_generator=composite)
+>>> sim['S'] = CFSheet(nominal_density=2)
+>>> conns=[sim.connect(s,'S',connection_type=CFProjection,delay=0.05) for s in ['GS1','GS2','GS3']]
+
+## get the reference streams
+>>> u = numbergen.UniformRandom(seed=1)
+>>> g0x = [u() for i in range(10)]
+>>> u = numbergen.UniformRandom(seed=2)
+>>> g0y = [u() for i in range(10)]
+>>> u = numbergen.UniformRandom(seed=3)
+>>> g0o = [u() for i in range(10)]
+
+>>> u = numbergen.UniformRandom(seed=4)
+>>> g1x = [u() for i in range(10)]
+>>> u = numbergen.UniformRandom(seed=5)
+>>> g1y = [u() for i in range(10)]
+>>> u = numbergen.UniformRandom(seed=6)
+>>> g1o = [u() for i in range(10)]
+
+>>> u = numbergen.UniformRandom(seed=7)
+>>> gaussian0x = [u() for i in range(10)]
+
+
+## typing shortcuts
+>>> o = 'orientation'
+>>> x = 'x'
+>>> y = 'y'
+
+## run once and check
+>>> import topo
+>>> topo.sim.run(1)
+
+>>> assert g0.inspect_value(o)==g0o[0], "%s %s"%(g0.inspect_value(o),g0o[0])
+>>> assert g0.inspect_value(x)==g0x[0], "%s %s"%(g0.inspect_value(x),g0x[0])
+>>> assert g0.inspect_value(y)==g0y[0], "%s %s"%(g0.inspect_value(y),g0y[0])
+
+>>> assert g2.inspect_value(o)==g0o[0], "%s %s"%(g2.inspect_value(o),g0o[0])
+>>> assert g2.inspect_value(x)==g0x[0], "%s %s"%(g2.inspect_value(x),g0x[0])
+>>> assert g2.inspect_value(y)==g0y[0], "%s %s"%(g2.inspect_value(y),g0y[0])
+
+>>> assert gaussian0.inspect_value(x)==gaussian0x[0], "%s %s"%(gaussian0.inspect_value(x),gaussian0x[0])
+
+
+
+
+
+
+
+

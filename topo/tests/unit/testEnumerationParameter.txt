@@ -1,0 +1,59 @@
+>>> import os, sys
+>>> sys.path = [os.path.join(os.getcwd(), '..', '..', '..', 'external', 'param')] + sys.path
+
+# CEBALERT: incomplete tests of object selector
+>>> import param
+
+>>> class P(param.Parameterized):
+...     e = param.ObjectSelector(default=5,objects=[5,6,7])
+...     f = param.ObjectSelector(default=10)
+...     h = param.ObjectSelector(default=None)
+...     g = param.ObjectSelector(default=None,objects=[7,8])
+...     i = param.ObjectSelector(default=7,objects=[9],check_on_set=False)
+
+>>> p = P(e=6)
+>>> p.e
+6
+
+>>> try:
+...     p.e = 9
+... except ValueError:
+...     pass
+... else:
+...     raise AssertionError("Enumeration set outside range.")
+
+>>> p.f = 9
+>>> p.f
+9
+
+>>> p.g = 7
+>>> p.g
+7
+
+>>> try:
+...     p.g = None
+... except ValueError:
+...     pass
+... else:
+...     raise AssertionError("Enumeration set outside range.")
+
+>>> p.i = 12
+>>> p.i
+12
+
+>>> try:
+...     class Q(param.Parameterized):
+...         q = param.ObjectSelector(5,objects=[4])
+... except ValueError:
+...     pass
+... else:
+...     raise AssertionError("Enumeration created outside range.")
+
+>>> try:
+...     class Q(param.Parameterized):
+...         q = param.ObjectSelector(5,objects=10)
+... except TypeError:
+...     pass
+... else:
+...     raise AssertionError("Enumeration created without range.")
+

@@ -1,0 +1,94 @@
+>>> import os, sys
+>>> sys.path = [os.path.join(os.getcwd(), '..', '..', '..', 'external', 'param')] + sys.path
+
+>>> import param
+
+# initialize a class with a compound parameter
+>>> class A(param.Parameterized):
+...    x = param.Number(default=0)
+...    y = param.Number(default=0)
+...    xy = param.Composite(attribs=['x','y'])
+...
+
+# Make an instance and do default checks
+>>> a = A()
+>>> a.x
+0
+>>> a.y
+0
+>>> a.xy
+[0, 0]
+>>> a.x = 1
+
+# Get the compound parameter on an instance
+>>> a.xy
+[1, 0]
+
+# Set the compound parameter on an instance
+>>> a.xy = (2,3)
+
+# Check that setting updates the constituent attributes
+>>> a.x
+2
+>>> a.y
+3
+
+# Get the compound on the class
+>>> A.xy
+[0, 0]
+
+# Set the compound default on the class
+>>> A.xy = (5,6)
+
+# make a new instance
+>>> b = A()
+
+# Check that the defaults have changed
+>>> b.x
+5
+>>> b.y
+6
+>>> A.x
+5
+>>> A.y
+6
+
+# Check that the previous instance still has the correct defaults
+>>> a.x
+2
+>>> a.y
+3
+>>>
+
+
+
+## CB: this test is really of Parameterized.
+## Check CompositeParameter is ok with Dynamic
+
+# can't use iter with Dynamic (doesn't pickle, doesn't copy)
+>>> class SomeSequence(object):
+...     def __init__(self,sequence):
+...         self.sequence=sequence
+...         self.index=0
+...     def __call__(self):
+...         val=self.sequence[self.index]
+...         self.index+=1
+...         return val
+
+
+>>> a2 = A(x=SomeSequence([1,2,3]),y=SomeSequence([4,5,6]))
+
+>>> x1,y1 = a2.x,a2.y
+>>> a2.inspect_value('xy')  # inspect should not advance numbers
+[1, 4]
+
+>>> ix,iy = a2.get_value_generator('xy')
+>>> ix()  # get_value_generator() should give the objects
+2
+>>> iy()
+5
+
+
+
+
+

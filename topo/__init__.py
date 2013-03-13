@@ -52,12 +52,19 @@ __all__ = ['analysis',
 # First, try Git; if that fails, try to read the release file.
 
 from subprocess import Popen, CalledProcessError, PIPE
-import os
+import os, sys
+
+(basepath, _) = os.path.split(os.path.abspath(__file__))
+sys.path = [os.path.join(basepath, '../', 'external', 'param')] + sys.path
+sys.path = [os.path.join(basepath, '../', 'external', 'paramtk')] + sys.path
+sys.path = [os.path.join(basepath, '../', 'external', 'imagen')] + sys.path
+sys.path = [os.path.join(basepath, '../', 'external', 'lancet')] + sys.path
+
 import param
 
 def version_int(v):
     """
-    Convert a version four-tuple to a format that can be used to compare
+    Convers a version four-tuple to a format that can be used to compare
     version numbers.
     """
     return int("%02d%02d%02d%05d" % v)
@@ -65,59 +72,46 @@ def version_int(v):
 version = (0, 0, 0, 0)
 release = 0
 commit  = ""
+
 pickle_read_write_allowed = True
+git_output = "v0.0.0-0-"
 
-def _find_version():
-    """
-    Return the version tuple, the release number, the git commit, and
-    whether reading pickle files is allowed (False if no version
-    information avaliable).
-    """
-
-    pickle_allowed = True
-    git_output = "v0.0.0-0-"
-
-    (basepath,_) = os.path.split(os.path.abspath(__file__))
-
+try:
+    git_process = Popen(["git", "describe"], stdout=PIPE)
+    git_output = git_process.communicate()[0].strip()
+    if git_process.poll():
+        raise CalledProcessError
+except OSError, CalledProcessError:
     try:
-        git_process = Popen(["git", "describe"], stdout=PIPE, stderr=PIPE, cwd=basepath)
-        git_output = git_process.communicate()[0].strip()
-        if git_process.poll():
-            raise OSError
-    except OSError, CalledProcessError:
-        try:
-            release_file = open(basepath + "/.release")
-            git_output = release_file.read()
-            release_file.close()
-        except IOError:
-            param.Parameterized().warning("""\
-Unable to determine the version information for this copy of Topographica.
+	(basepath,_) = os.path.split(os.path.abspath(__file__))
+        release_file = open(basepath + "/.release")
+        git_output = release_file.read()
+        release_file.close()
+    except IOError:
+        param.Parametrized().warning("""\
+WARNING: Your Topographica installation lacks the release file and is not a
+Git repository (or you do not have Git installed).
+This could happen for several reasons:
 
-For an official release, the version information is stored in a file
-named topo/.release.  For a development copy checked out from Git, the
-version is requested using "git describe".  Neither of these options
-was successful, perhaps because Git is not available on this machine.
-To work around this problem, either install Git on this machine, or
-temporarily use a machine that does have Git and run "topographica
-make-release-file", making sure you have write permissions on
+ (a) You are using a Git version of Topographica and your machine does not have
+     Git installed (e.g. your Topographica copy is stored on a network drive);
+ (b) Your Topographica installation is damaged.
+
+To fix (a), either install Git or create the release file. If you choose to
+create the release file, go to a machine that has Git installed and run
+"topographica make-release-file". Make sure you have write permissions on
 Topographica's root directory.
 
-In the meantime, reading and saving snapshots will be disabled,
-because version information is necessary for determining how to
-interpret saved files.\n\n""")
-            pickle_allowed = False
-            git_output = "v0.0.0-0-"
+To fix (b), reinstall Topographica.
 
-    (_version, count, _commit) = git_output[1:].split("-")
-    _version = _version.split(".")
-    _version = (int(_version[0]), int(_version[1]), int(_version[2]), int(count))
-    _release = version_int(_version)
+While Topographica will start, reading and saving files will be disabled.\n\n""")
+        pickle_read_write_allowed = False
 
-    return (_version, _release, _commit, pickle_allowed)
-
-
-(version, release, commit, pickle_read_write_allowed) = _find_version()
-
+(version, count, commit) = git_output[1:].split("-")
+version = version.split(".")
+version = (int(version[0]), int(version[1]), int(version[2]), int(count))
+release = version_int(version)
+count = None
 
 
 import errno
