@@ -193,8 +193,8 @@ class matrixplot(PylabPlotCommand):
     def __call__(self,mat,aspect=None,colorbar=True,**params):
         p=ParamOverrides(self,params)
 
-        p.plot_type()
         pylab.figure(figsize=(5,5))
+        p.plot_type()
 
         # Swap lbrt to lrbt to match pylab
         if p.extent is None:
@@ -227,7 +227,6 @@ class matrixplot3d(PylabPlotCommand):
     If you have trouble, you can try matrixplot3d_gnuplot instead.
     """
 
-    # JABALERT: All but the first two arguments should probably be Parameters
     def __call__(self,mat,type="wireframe",**params):
         p=ParamOverrides(self,params)
 
@@ -256,6 +255,39 @@ class matrixplot3d(PylabPlotCommand):
         ax.set_ylabel('C')
         ax.set_zlabel('Value')
 
+        self._generate_figure(p)
+
+
+
+class matrixplot3dx3(PylabPlotCommand):
+    """
+    Plot three matching matrices x,y,z as a 3D wireframe with axes.
+    See matrixplot3d for caveats and description; this plot is the
+    same but instead of using implicit r,c values of the matrix, allows
+    them to be specified directly, thus plotting a series of 3D points.
+    """
+    
+    def __call__(self,x,y,z,labels=["X","Y","Z"],type="wireframe",**params):
+        p=ParamOverrides(self,params)
+    
+        from mpl_toolkits.mplot3d import axes3d
+
+        fig = pylab.figure()
+        ax = axes3d.Axes3D(fig)
+    
+        if type=="wireframe":
+            ax.plot_wireframe(x,y,z)
+        elif type=="surface":
+            ax.plot_surface(x,y,z)
+        elif type=="contour":
+            ax.contour3D(x,y,z)
+        else:
+            raise ValueError("Unknown plot type "+str(type))
+            
+        ax.set_xlabel(labels[0])
+        ax.set_ylabel(labels[1])
+        ax.set_zlabel(labels[2])
+    
         self._generate_figure(p)
 
 
