@@ -1,0 +1,199 @@
+>>> import os, sys
+>>> sys.path = [os.path.join(os.getcwd(), '..', '..', '..', 'external', 'param')] + sys.path
+
+>>> import param
+>>> from topo import numbergen
+
+
+## Basic tests of Dynamic parameters (__get__ & __set__,
+## and that inspect_value() and get_value_generator() work).
+
+>>> class TestPO1(param.Parameterized):
+...    x = param.Dynamic(default=numbergen.UniformRandom(lbound=-1,ubound=1,seed=1),doc="nothing")
+...    y = param.Dynamic(default=1)
+
+
+>>> t1 = TestPO1()
+>>> t1.set_dynamic_time_fn(None)
+
+>>> t1.params()['x']._value_is_dynamic(t1)
+True
+>>> t1.params()['y']._value_is_dynamic(t1)
+False
+
+>>> t1.inspect_value('x')  # no value generated yet
+
+>>> t1.inspect_value('y')  # not dynamic
+1
+
+>>> t1.y = 2
+>>> t1.inspect_value('y')
+2
+
+
+
+>>> t2 = TestPO1(x=numbergen.UniformRandom(lbound=-1,ubound=1,seed=10))
+>>> t2.set_dynamic_time_fn(None)
+>>> t3 = TestPO1(x=numbergen.UniformRandom(lbound=-1,ubound=1,seed=10))
+>>> t3.set_dynamic_time_fn(None)
+
+>>> isinstance(t2.get_value_generator('x'),numbergen.UniformRandom)
+True
+
+>>> t2.x==t3.x  # check that t2 and t3 have identical streams
+True
+
+>>> forget = t2.x
+>>> t2.inspect_value('x')==t3.inspect_value('x')  # check t2 and t3 do not share UniformRandom objects
+False
+
+>>> forget=t2.x;forget=t2.x;t2_last_value=t2.x  # advance t2 beyond t3
+>>> t2.inspect_value('x')==t2_last_value  # inspect_value() should return last generated value
+True
+
+>>> t3.inspect_value('x')==t2_last_value  # ensure last_value is not shared
+False
+
+
+
+## Check instantiation of Dynamic parameter
+
+>>> class TestPO3(param.Parameterized):
+...    x = param.Dynamic(default=numbergen.UniformRandom(lbound=-1,ubound=1,seed=30))
+...    y = param.Dynamic(default=1.0)
+
+
+>>> t6 = TestPO3()
+>>> t7 = TestPO3()
+
+>>> t6_first_value = t6.x
+>>> t7.inspect_value('x')==t6_first_value  # dynamic values are instantiated
+False
+
+
+>>> TestPO3.y = 4
+>>> t6.y  # non-dynamic value not instantiated
+4
+>>> t7.y  # non-dynamic value not instantiated
+4
+
+>>> t6.y = numbergen.UniformRandom()
+>>> t8 = TestPO3()
+>>> TestPO3.y = 10
+>>> t8.y==10 # t6 got a dynamic value, but shouldn't have changed Parameter's instantiate
+True
+
+>>> TestPO3.y=numbergen.UniformRandom()  # now the Parameter instantiate should be true
+>>> t9 = TestPO3()
+>>> '_y_param_value' in t9.__dict__
+True
+
+# but now all existing instances of TestPO3 that don't have their own value for
+# the parameter share one UniformRandom object
+>>> t7.get_value_generator('y') is TestPO3().params()['y'].default
+True
+
+>>> import copy
+>>> t9 = copy.deepcopy(t7)
+>>> t9.get_value_generator('y') is TestPO3().params()['y'].default  # check a copy is the same
+True
+
+
+
+### Check time_fn
+
+>>> from topo.base.simulation import Simulation
+>>> s = Simulation(register=True)
+
+# default (time_fn of topo.sim.time)
+>>> import topo
+>>> t10 = TestPO1()
+>>> a = t10.x; b = t10.x; c = t10.x
+>>> a==b==c
+True
+
+>>> topo.sim.run(0.0001)
+>>> d = t10.x
+>>> d==a
+False
+
+>>> a = TestPO1.x; b = TestPO1.x
+>>> a==b
+True
+
+>>> topo.sim.run(0.0001)
+>>> c = TestPO1.x
+>>> c==b
+False
+
+
+>>> q = TestPO1()
+>>> q.set_dynamic_time_fn(None)
+>>> assert q.x!=q.x
+>>> assert q.y==q.y
+>>> q.y = numbergen.UniformRandom()
+>>> assert q.y!=q.y # time_fn set on the UniformRandom() when q.y was set
+
+>>> class TestPO4(TestPO1):
+...    z = param.Parameter(default=TestPO1())
+
+
+>>> t50 = TestPO4()
+>>> t50.set_dynamic_time_fn(None)
+>>> assert t50.z.x==t50.z.x # time_fn not inherited
+
+
+# Not yet possible to set time_fn for a Parameter instance
+## >>> class TestPO5(param.Parameterized):
+## ...    x = param.Dynamic(default=numbergen.UniformRandom(),dynamic_time_fn=None)
+
+
+
+
+
+
+
+
+
+
+
+
+## Check shared generator
+
+>>> u = numbergen.UniformRandom(lbound=-1,ubound=1,seed=20)
+>>> t11 = TestPO1(x=u)
+>>> t12 = TestPO1(x=u)
+>>> topo.sim.run(1)
+>>> t11.x==t12.x
+True
+
+
+# we currently don't support iterators/generators in Dynamic
+# unless they're wrapped
+## ### Check Dynamic works with some common generator-like things
+
+## >>> i = iter([1,2,3])
+## >>> t11.x = i
+
+## >>> topo.sim.run(1)
+
+## >>> t11.x
+## 1
+
+## >>> def gen():
+## ...     yield 2
+## ...     yield 4
+## ...     yield 6
+
+## >>> g = gen()
+
+## >>> t11.x = g
+
+## >>> t11.x
+## 2
+
+## >>> topo.sim.run(1)
+
+## >>> t11.x
+## 4
+

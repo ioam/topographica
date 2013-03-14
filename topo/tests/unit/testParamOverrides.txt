@@ -1,0 +1,37 @@
+>>> import os, sys
+>>> sys.path = [os.path.join(os.getcwd(), '..', '..', '..', 'external', 'param')] + sys.path
+
+# probably shouldn't be in a file on its own!
+
+>>> from param.parameterized import ParamOverrides,Parameterized
+
+>>> po = Parameterized(name='A',print_level=0)
+>>> po.name
+'A'
+
+>>> overrides = ParamOverrides(po,{'name':'B'})
+>>> overrides['name']
+'B'
+
+>>> overrides['print_level']
+0
+
+>>> try:
+...    overrides['doesnotexist']
+... except AttributeError:
+...    pass
+... except:
+...    raise AssertionError("ParamOverrides should give AttributeError when key can't be found.")
+... else:
+...    raise AssertionError("Test supposed to lookup non-existent attribute and raise error.")
+
+
+
+
+
+
+
+
+
+
+

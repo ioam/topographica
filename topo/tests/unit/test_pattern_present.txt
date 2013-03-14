@@ -1,0 +1,115 @@
+>>> import copy
+>>> from topo.pattern import Gaussian,Constant
+>>> from numpy import array
+>>> from numpy.testing import assert_array_equal
+>>> from topo.tests.utils import assert_array_not_equal, new_simulation
+>>> from topo import numbergen
+>>> from topo.command import pattern_present,save_input_generators,restore_input_generators
+>>> import topo
+
+
+>>> ignore=new_simulation()
+>>> R = topo.sim['GS']
+>>> ig=Gaussian(x=numbergen.UniformRandom())
+>>> R.set_input_generator(ig)
+
+>>> topo.sim.time()==0
+True
+
+# check for bug:
+# pattern_present() before any run() messes up events
+>>> pattern_present(inputs={'GS':Constant(scale=1)}) # comment out this line & test passes
+>>> a_t1 = copy.deepcopy(R.activity)
+
+>>> topo.sim.run(1)
+>>> assert_array_not_equal(R.activity,a_t1,"GS activity pattern did not change.")
+
+
+
+>>> topo.sim.run(1) # 2
+>>> x_t2 = R.input_generator.x
+>>> a_t2 = copy.deepcopy(R.activity)
+
+>>> topo.sim.run(1) # 3
+>>> x_t3 = R.input_generator.x
+>>> a_t3 = copy.deepcopy(R.activity)
+
+# check that dyn params are advancing
+>>> x_t2==x_t3
+False
+>>> assert_array_not_equal(a_t2,a_t3)
+
+
+### Test pattern_present
+>>> pattern_present(inputs={'GS':Constant(scale=1)})
+
+# check activity pattern
+>>> assert_array_equal(array([[1.,1.],[1.,1.]]),R.activity)
+
+# check time's back to where it should be
+>>> topo.sim.time()==3
+True
+
+# check input generator was restored
+>>> R.input_generator is ig
+True
+>>> R.input_generator.x==x_t3
+True
+
+
+>>> topo.sim.run(1)
+>>> topo.sim.time()==4
+True
+
+>>> x_t4 = R.input_generator.x
+>>> a_t4 = copy.deepcopy(R.activity)
+
+
+>>> topo.sim.run(1)  # 5
+
+>>> x_t5 = R.input_generator.x
+>>> x_t5==x_t4
+False
+
+>>> a_t5 = copy.deepcopy(R.activity)
+>>> assert_array_not_equal(a_t5,a_t4)
+
+
+>>> topo.sim.run(1)  # 6
+
+>>> x_t6 = R.input_generator.x
+>>> x_t6==x_t5
+False
+
+>>> a_t6 = copy.deepcopy(R.activity)
+>>> assert_array_not_equal(a_t6,a_t5)
+
+
+
+# check for GeneratorSheet bug:
+# push_input_generator didn't copy
+
+### Test save_/restore_generators
+>>> save_input_generators()
+>>> R.input_generator.x = 376.7
+>>> restore_input_generators()
+>>> R.input_generator.x==376.7
+False
+
+
+>>> ignore=new_simulation()
+
+>>> topo.sim.time()==0
+True
+
+>>> R = topo.sim['GS']
+>>> ig=Gaussian(x=numbergen.UniformRandom())
+>>> R.set_input_generator(ig)
+
+# CB: need to add test for bug
+# save_input_generators() before any run() messes up events
+## >>> save_input_generators()
+## >>> a_t1 = copy.deepcopy(R.activity)
+
+## >>> topo.sim.run(1)
+## >>> assert_array_not_equal(R.activity,a_t1,"GS activity pattern did not change.")
