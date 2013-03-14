@@ -54,6 +54,10 @@ class PlotGroupPanel(tk.TkParameterized,Frame):
 
     dock = param.Boolean(default=False,doc="on console or not")
 
+    maximum_plot_history_length = param.Integer(default=20,bounds=(-1,None),doc="""
+        Value of maximum plots history length. Larger number means a longer history 
+        is kept and hence more memory is used. A length of -1 means keep all.""")
+
     # Default size for images used on buttons
     button_image_size=(20,20)
 
@@ -617,10 +621,20 @@ Many hooks accept 'display=True' so that the progress can be viewed in an open A
     def add_to_plotgroups_history(self):
         """
         If there are plots on display, and we're not doing a history research,
-        the plotgroup is stored in the history.
+        the plotgroup is stored in the history depending on the parameter 
+        maximum_plot_history_length. If this parameter is -1, history is unlimited
+        (except by your machine memory!!). If it is 0, then no history is saved. If
+        it is N, then up to N plots are saved in history.
         """
         if self.history_index==0 and not len(self.canvases)==0:
-            self.plotgroups_history.append(copy.copy(self.plotgroup))
+            # Only keep history length
+            if len(self.plotgroups_history) > self.maximum_plot_history_length:
+                try:
+                    del self.plotgroups_history[0]
+                except IndexError:
+                    pass
+            if self.maximum_plot_history_length > 0:
+                self.plotgroups_history.append(copy.copy(self.plotgroup))
         self.__update_widgets_for_history()
 
     def __set_widget_state(self,widget,state):
