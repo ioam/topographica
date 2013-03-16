@@ -382,7 +382,7 @@ def c_action(option,opt_str,value,parser):
     global something_executed
     something_executed=True
     openmp_settings_names = ['openmp_threads', 'openmp_min_threads', 'openmp_max_threads']
-    openmp_present = [(k in __main__.__dict__) for k in openmp_settings_names]
+    openmp_present = [True for k in openmp_settings_names if (k in __main__.__dict__)]
     if openmp_present and parser.values.gui:
         print "\nWARNING: For OpenMP settings to be used properly they need to be specified after the -g flag."
 
