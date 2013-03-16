@@ -202,8 +202,8 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
         topo.sim.warning(preference_map + " should be measured before calling decode_feature.")
     else:
         v = sheet.sheet_views[preference_map]
-        d.add(dict(zip(cropfn(v.view()[0]).ravel(),
-                       cropfn(sheet.activity).ravel())))
+        for (p,a) in zip(cropfn(v.view()[0]).ravel(),
+                         cropfn(sheet.activity).ravel()): d.add({p:a})
 
     res = DSF_WeightedAverage()(d) if weighted_average else DSF_MaxValue()(d)
     return res['']['preference']
