@@ -10,6 +10,8 @@ from param.parameterized import bothmethod
 from topo import sheet, pattern, base, numbergen
 import numpy as np
 
+from nose.plugins.skip import SkipTest
+
 got_unum = False; got_pq=False
 
 try:
@@ -24,7 +26,7 @@ try:
     got_unum=True
 except: pass
 
-if True not in [got_unum, got_pq]: raise ImportError('Could not find Quantities or Unum.')
+if True not in [got_unum, got_pq]: raise SkipTest('Could not find Quantities or Unum.')
 
 
 class strip_pq_hook(param.ParameterizedFunction):
