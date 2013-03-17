@@ -6,13 +6,6 @@
 import os,sys
 import numpy
 
-(basepath, _) = os.path.split(os.path.abspath(__file__))
-sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
-sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
-sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
-sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
-
-
 # Need to check this here, not using process_argv() and before importing
 # topo as the release file doesn't exist yet
 from sys import argv
