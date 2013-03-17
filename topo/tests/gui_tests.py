@@ -9,15 +9,11 @@ from numpy.testing import assert_array_equal
 
 
 import topo
-assert hasattr(topo,'guimain'), "GUI must be running."
 
 import topo.tests.functionaltest as ft
 from topo.tests.utils import assert_array_not_equal
 
 from nose.tools import nottest
-
-# typing shortcut
-g = topo.guimain
 
 def run_basic():
     """Check that the windows all open ok (i.e. is GUI functioning?)."""
@@ -54,15 +50,15 @@ def run_detailed():
 @nottest
 def test_cf_coords():
     """Check that ConnectionFields window opens with specified coords."""
-    cf = g['Plots']['Connection Fields'](x=0.125,y=0.250)
+    cf = topo.guimain['Plots']['Connection Fields'](x=0.125,y=0.250)
     assert cf.x==0.125
     assert cf.y==0.250
 
 @nottest
 def test_test_pattern():
     """Check that test pattern window is working."""
-    tp = g['Simulation']['Test Pattern']()
-    act = g['Plots']['Activity']()
+    tp = topo.guimain['Simulation']['Test Pattern']()
+    act = topo.guimain['Plots']['Activity']()
 
     tp.gui_set_param('edit_sheet','GS')
 
@@ -131,7 +127,7 @@ def test_test_pattern():
 def test_projection():
     """Check the Projection window."""
 
-    p = g['Plots']['Projection']()
+    p = topo.guimain['Plots']['Projection']()
     p.gui_set_param('sheet','S')
     p.gui_set_param('projection','GSToS')
 
@@ -143,7 +139,7 @@ def test_projection():
 def test_orientation_tuning():
     """Check that orientation tuning plot works."""
 
-    p = g['Plots']['Tuning Curves']['Orientation Tuning']()
+    p = topo.guimain['Plots']['Tuning Curves']['Orientation Tuning']()
     from topo.command.pylabplot import measure_or_tuning
     p.pre_plot_hooks = [measure_or_tuning.instance(num_phase=1,num_orientation=1,curve_parameters=[{'contrast':30}])]
     p.Refresh()
@@ -169,8 +165,6 @@ def _initialize():
     sim.connect('GS','S',connection_type=CFProjection,delay=0.05)
     sim.connect('GS','S2',connection_type=CFProjection,delay=0.05)
     sim.connect('GS2','S2',connection_type=CFProjection,delay=0.05)
-    global g
-    g=topo.guimain
 
 
 def _menu_item_fn(*clicks):
