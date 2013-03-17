@@ -51,7 +51,7 @@ class TestImage(unittest.TestCase):
          96.59090909,  96.59090909,  96.59090909,]],Float)
 
 
-        image = FileImage(filename = resolve_path('testimage.pgm'),
+        image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
                       xdensity=8,
                       ydensity=8,
                       bounds=BoundingBox(radius=0.5),
@@ -96,7 +96,7 @@ class TestImage(unittest.TestCase):
 ##          96.59090909,  96.59090909,  96.59090909,  96.59090909,]],Float)
 
 
-##         image = FileImage(filename = resolve_path('testimage.pgm'),
+##         image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
 ##                       xdensity=9,
 ##                       ydensity=9,
 ##                       output_fn=IdentityTF(),
@@ -181,7 +181,7 @@ class TestImage(unittest.TestCase):
          96.59090909,]],Float)
 
 
-        image = FileImage(filename = resolve_path('testimage.pgm'),
+        image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
                       xdensity=8,
                       ydensity=8,
                       size=2.0,
@@ -268,7 +268,7 @@ class TestImage(unittest.TestCase):
          96.59090909,]])
 
 
-        image = FileImage(filename = resolve_path('testimage.pgm'),
+        image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
                       xdensity=8,
                       ydensity=8,
                       output_fns=[],
@@ -321,7 +321,7 @@ class TestImage(unittest.TestCase):
             0.,   0.,]])
 
 
-        image = FileImage(filename = resolve_path('testimage.pgm'),
+        image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
                       xdensity=15,
                       ydensity=15,
                       output_fns=[],
@@ -355,7 +355,7 @@ class TestImage(unittest.TestCase):
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
 ##          96.59090909,  96.59090909,  96.59090909,]],Float)
 
-##         image = FileImage(filename = resolve_path('testimage.pgm'),
+##         image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
 ##                       density=8,
 ##                       bounds=BoundingBox(radius=0.5),
 ##                       output_fn=IdentityTF(),

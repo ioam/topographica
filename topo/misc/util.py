@@ -26,7 +26,7 @@ class Struct:
 
     For instance:
 
-    s = Struct(foo='a',bar=1)
+    >>> s = Struct(foo='a',bar=1)
     >>> s.foo
     'a'
     >>> s.bar

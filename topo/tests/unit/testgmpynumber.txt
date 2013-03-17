@@ -3,6 +3,7 @@
 
 >>> import param
 
+>>> from nose.plugins.skip import SkipTest
 >>> try:
 ...     import gmpy
 ... except ImportError:

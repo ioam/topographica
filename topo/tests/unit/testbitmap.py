@@ -23,9 +23,9 @@ class TestBitmap(unittest.TestCase):
 
     def setUp(self):
         """
-        Uses testbitmap.jpg in the unit tests directory
+        Uses topo/tests/unit/testbitmap.jpg in the unit tests directory
         """
-        miata = Image.open(resolve_path('testbitmap.jpg'))
+        miata = Image.open(resolve_path('topo/tests/unit/testbitmap.jpg'))
         miata = miata.resize((miata.size[0]/2,miata.size[1]/2))
         self.rIm, self.gIm, self.bIm = miata.split()
         self.rseq = self.rIm.getdata()

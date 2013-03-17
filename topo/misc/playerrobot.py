@@ -10,7 +10,6 @@ This is a temporary home for this file until it finds a permanent home
 
 
 import time,array
-import playerc
 
 from threading import RLock, Thread
 from Queue import Queue
@@ -18,6 +17,20 @@ from Queue import Queue
 from operator import eq,ne
 from math import pi
 
+# Since this module ships with Topographica only as a sample and is not
+# intended to be run, the following SkipTest statement was included to allow
+# nose to handle this module (when looking for doctests) without raising an
+# import error. If the file is moved elsewhere -- or run on its own, 
+# assuming the PlayerStage package has been installed -- the below code should
+# be reworked to either import the package directly, or handle the import error
+# differently. For more information on how nose works, see topo/tests/README.
+
+from nose.plugins.skip import SkipTest
+
+try:
+	import playerc
+except ImportError:
+	raise SkipTest("Module requires the Player/Stage package to be run")
 
 # JPALERT: Because of the global interpreter lock in Python, using
 # Python threads (via the 'thread' or 'threading' modules does not

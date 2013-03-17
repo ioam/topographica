@@ -412,8 +412,6 @@ class OrderedDict(dict):
         OrderedDict([(1, 6), (2, 5), (3, 4), (4, 3), (5, 2), (6, 1), (7, 0)])
         >>> b[2:5]
         OrderedDict([(5, 2), (4, 3), (3, 4)])
-        >>> type(b[2:4])
-        <class '__main__.OrderedDict'>
         """
         if isinstance(key, types.SliceType):
             # FIXME: does this raise the error we want?
@@ -818,7 +816,8 @@ class OrderedDict(dict):
         1
         >>> d.index(4)
         Traceback (most recent call last):
-        ValueError: list.index(x): x not in list
+            ...
+        ValueError: 4 is not in list
         """
         return self._sequence.index(key)
 
@@ -1328,7 +1327,8 @@ class SequenceOrderedDict(OrderedDict):
     1
     >>> d.items.index((2, 1))
     Traceback (most recent call last):
-    ValueError: list.index(x): x not in list
+        ...
+    ValueError: (2, 1) is not in list
     >>> d.items.reverse()
     >>> d.items
     [(1, 2), (3, 4)]
