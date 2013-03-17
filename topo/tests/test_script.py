@@ -15,6 +15,7 @@ from param import resolve_path, normalize_path
 
 import topo
 
+from nose.tools import nottest
 
 # CEBALERT: should get this from somewhere else!
 TOPOGRAPHICAHOME = os.path.join(os.path.expanduser("~"),"topographica")
@@ -164,7 +165,7 @@ def _generate_data(script,data_filename,look_at='V1',run_for=[1,99,150],**args):
     pickle.dump(data,open(data_filename,'wb'),2)
 
 
-
+@nottest
 def test_script(script,decimal=None):
     """
     Run script with the parameters specified when its DATA file was
@@ -623,6 +624,7 @@ def pickle_unpickle_everything(existing_pickles=None):
 
 ###########################################################################
 # basic test of run batch
+@nottest
 def test_runbatch():
     from topo.misc.genexamples import find_examples
     from topo.command import run_batch

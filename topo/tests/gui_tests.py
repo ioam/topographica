@@ -14,6 +14,8 @@ assert hasattr(topo,'guimain'), "GUI must be running."
 import topo.tests.functionaltest as ft
 from topo.tests.utils import assert_array_not_equal
 
+from nose.tools import nottest
+
 # typing shortcut
 g = topo.guimain
 
@@ -49,14 +51,14 @@ def run_detailed():
 ######################################################################
 # DETAILED TESTS
 ######################################################################
-
+@nottest
 def test_cf_coords():
     """Check that ConnectionFields window opens with specified coords."""
     cf = g['Plots']['Connection Fields'](x=0.125,y=0.250)
     assert cf.x==0.125
     assert cf.y==0.250
 
-
+@nottest
 def test_test_pattern():
     """Check that test pattern window is working."""
     tp = g['Simulation']['Test Pattern']()
@@ -125,7 +127,7 @@ def test_test_pattern():
     # CB: still need to test duration, learning, etc
 
 
-
+@nottest
 def test_projection():
     """Check the Projection window."""
 
@@ -137,7 +139,7 @@ def test_projection():
     p.gui_set_param('projection','GS2ToS2')
     p.gui_set_param('projection','GSToS2')
 
-
+@nottest
 def test_orientation_tuning():
     """Check that orientation tuning plot works."""
 

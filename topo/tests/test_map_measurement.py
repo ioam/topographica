@@ -30,6 +30,9 @@ from topo.command.analysis import *
 from topo.command.pylabplot import *
 from topo.plotting.plotgroup import plotgroups
 
+from nose.tools import nottest
+
+
 # CEBALERT: change to be the all-in-one model eventually, and
 # uncomment all ocular/disparity/direction groups below.
 sim_name = 'lissom_oo_or'
@@ -114,7 +117,7 @@ def checkclose(label,topo_version,x,y):
         print '...%s array is unchanged since data was generated (%s)' % (label,topo_version)
     return errors
 
-
+@nottest
 def test(plotgroup_names):
     import topo
     import param
