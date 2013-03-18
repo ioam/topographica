@@ -98,7 +98,7 @@ else:
 
 if len(p.targets)==0:
     # DEFAULT
-    p.targets = ['unit','traintests','snapshots','gui','maptests'] # maptests wouldn't be default except it's caught platform different problems before (there aren't enough unit tests!)
+    p.targets = ['traintests','snapshots','gui','maptests'] # maptests wouldn't be default except it's caught platform different problems before (there aren't enough unit tests!)
 
 # Allow allsnapshottests as shortcut for snapshots and pickle.
 # CEBALERT: should just combine these tests anyway.
@@ -245,10 +245,6 @@ target['gui'].append(topographica_script + ' -g -c "from topo.tests.gui_tests im
 
 target['batch'] = []
 target['batch'].append(topographica_script + ' -c "from topo.tests.test_script import test_runbatch; test_runbatch()"')
-
-
-target['unit'] = []
-target['unit'].append(topographica_script + ' -c "import topo.tests; t=topo.tests.run(); import sys; sys.exit(len(t.failures+t.errors))"')
 
 
 # CEBALERT: should use lissom.ty and test more map types
