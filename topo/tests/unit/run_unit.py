@@ -1,1 +1,0 @@
-import nose, sysif __name__ == '__main__':    nose.run(argv=["nosetests",					"--with-doctest",					"--doctest-extension=txt"])

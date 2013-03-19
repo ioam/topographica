@@ -51,8 +51,6 @@ from topo.misc.commandline import global_params as p
 p.add(
     targets = param.List(default=[],doc="Leave empty for default set, ['all'] for all tests except speedtests, ['speed'] for speed tests, or else list the targets required."),
 
-    coverage = param.Boolean(default=False),
-
     timing = param.Boolean(default=False),
 
     testdp = param.Number(default=6),
@@ -60,12 +58,6 @@ p.add(
     testdp_unopt = param.Number(default=5)
 
     )
-
-
-if p.coverage:
-    coverage_cmd = "coverage run --rcfile=doc/buildbot/coveragerc -a -p"
-else:
-    coverage_cmd = ""
 
 if p.timing:
     timing_cmd = "/usr/bin/time"
@@ -110,7 +102,7 @@ if "allsnapshottests" in p.targets:
 # ->params ?
 tests_dir = param.resolve_path("topo/tests",path_to_file=False)
 scripts_dir = param.resolve_path(".",path_to_file=False) ### XXX
-topographica_script = xvfb + " " + timing_cmd + coverage_cmd + " " + sys.argv[0] + " " +  " "
+topographica_script = xvfb + " " + timing_cmd + " " + sys.argv[0] + " " +  " "
 
 def _runc(cmd):
     print cmd
