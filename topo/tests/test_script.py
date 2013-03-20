@@ -18,7 +18,7 @@ import topo
 from nose.tools import nottest
 
 # CEBALERT: should get this from somewhere else!
-TOPOGRAPHICAHOME = os.path.join(os.path.expanduser("~"),"topographica")
+TOPOGRAPHICAHOME = os.path.join(os.path.expanduser("~"),"Topographica")
 
 TESTSDATADIR = os.path.join(TOPOGRAPHICAHOME,"tests")
 if not os.path.exists(TESTSDATADIR):
