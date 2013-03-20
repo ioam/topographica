@@ -72,7 +72,8 @@ class Display(param.Parameterized):
         # The greyscale key (if not constant)
         if minval == maxval:
             key_data = 'Constant value of %s' % minval
-            key_item = [item % ('', el) for el in ['', key_data, '' ]]
+            key_items = [item % ('', el) for el in ['', key_data, '' ]]
+            key_cell = ''.join(key_items)
         else:
             length = (size[1] - 20) if horizontal else (size[0] - 20)
             length = length if (length > 50) else 50
