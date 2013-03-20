@@ -25,17 +25,25 @@ class Display(param.Parameterized):
     def __init__(self, array_fn):
         self.array_fn = array_fn
 
-    def _greyscale_image(self, arr, scale_factor=255):
+    def _greyscale_image(self, arr, scale_factor=255, zero_black=True):
         """
         Converts a 2D numpy array of floats (eg. float64) to a
         normalized PIL image (greyscale).
+
+        If zero_black is False, the image output is black to white,
+        regardless of the minimum value.  Otherwise, only the maximum
+        value is white so the lowest image value may not be
+        black. This means 100% black always represent zero.
         """
         min_arr = arr.min()
         value_range = (arr.max() - min_arr)
-        if value_range != 0:
-            arr = (arr - min_arr) / value_range
-        else:
+        if (value_range == 0):
             arr.fill(min_arr)
+        elif zero_black:
+            arr = arr / arr.max()
+        else:
+            arr = (arr - min_arr) / value_range
+
         return Image.fromarray(np.uint8(arr*scale_factor))
 
     def _scale_bar(self, length, aspect=10, border=2, horizontal=True):
@@ -52,7 +60,8 @@ class Display(param.Parameterized):
         return key_im
 
 
-    def _html_table(self, arr, size,  minval, maxval, horizontal=True, border=False):
+    def _html_table(self, arr, size,  minval, maxval,
+                    horizontal=True, border=False, zero_black=True):
         " Generates the HTML table to be displayed "
 
         open_table = '<table style="border:0px;"><tr>'
@@ -64,7 +73,7 @@ class Display(param.Parameterized):
         item = item_border if border else item_clear
 
         # The main image
-        raw_im = self._greyscale_image(arr)
+        raw_im = self._greyscale_image(arr, zero_black=zero_black)
         resized_im = raw_im.resize(size, Image.NEAREST)
         b64_img = self._base64_img(resized_im)
         image_item = item % ('colspan = "3"', b64_img)
@@ -80,6 +89,7 @@ class Display(param.Parameterized):
             scale_bar = self._scale_bar(length, horizontal=horizontal)
             b64_img_key = self._base64_img(scale_bar)
             (minstr, maxstr) = (' %.3g ' % minval, ' %.3g ' % maxval)
+            if zero_black: minstr = '0.0'
             maxlen = max([len(minstr), len(maxstr)])
             key_items =  [mono % minstr.rjust(maxlen), b64_img_key, mono % maxstr.ljust(maxlen)]
             key_cell =  ''.join([item % ('', el) for el in key_items])
