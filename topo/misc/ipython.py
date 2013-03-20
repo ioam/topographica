@@ -100,7 +100,7 @@ class Display(param.Parameterized):
         arr = self.array_fn(obj)
         (dim1, dim2 ) = arr.shape
         width = self.named_widths.get(getattr(obj,'name',None), self.default_width)
-        array_aspect = float(width/dim1)
+        array_aspect = float(width)/dim1
         size = (int(array_aspect*dim2), width)
         return self._html_table(arr, size,  arr.min(), arr.max())
 
