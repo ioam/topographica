@@ -1,6 +1,6 @@
 Topographica Unit Tests  Package
 
-##############################################################
+############################################################
 CEBALERT: this document is out of date. Also, this directory
 is a mess!
 - runtests.py: crude Python Makefile replacement (start here).
