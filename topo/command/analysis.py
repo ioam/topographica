@@ -641,6 +641,13 @@ class measure_dr_pref(SinusoidalMeasureResponseCommand):
 
     subplot = param.String("Direction")
 
+    preference_fn = param.ClassSelector( DistributionStatisticFn,
+        default=DSF_WeightedAverage(value_scale=(0.0,1.0/(2*pi))), doc="""
+        Function that will be used to analyze the distributions of
+        unit responses. Sets value_scale to normalize direction
+        preference values.""" )
+
+
     def _feature_list(self,p):
         # orientation is computed from direction
         dr = Feature(name="direction",range=(0.0,2*pi),step=2*pi/p.num_direction,cyclic=True)
@@ -649,7 +656,8 @@ class measure_dr_pref(SinusoidalMeasureResponseCommand):
         return [Feature(name="speed",values=[0],cyclic=False) if p.num_speeds is 0 else
                 Feature(name="speed",range=(0.0,p.max_speed),step=float(p.max_speed)/p.num_speeds,cyclic=False),
                 Feature(name="frequency",values=p.frequencies),
-                Feature(name="direction",range=(0.0,2*pi),step=2*pi/p.num_direction,cyclic=True),
+                Feature(name="direction",range=(0.0,2*pi),step=2*pi/p.num_direction,cyclic=True,
+                        preference_fn=self.preference_fn),
                 Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
                 Feature(name="orientation",range=(0.0,pi),values=or_values,cyclic=True,
                         compute_fn=compute_orientation_from_direction)]
