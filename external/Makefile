@@ -258,11 +258,11 @@ pil: ${PIL}.tgz jpeg python
 #	make -C ${PIL}/libImaging
 #
 # Apply OS-specific patches:
-ifeq ("$(shell uname -m)","x86_64")
+#ifeq ("$(shell uname -m)","x86_64")
 # CEBALERT: patch below might no longer be necessary, now we include zlib
 #       # Tell 64-bit Linux machines where to find zlib, to prevent "encoder zip not available" problems
-	cd ${PIL}; patch < ../Imaging.diff
-endif
+#	cd ${PIL}; patch < ../Imaging.diff
+#endif
 
 # On Mac, PIL inserts mac-specific locations before user-specified
 # ones (surely a bug) no matter what you try to do ...except hack the
