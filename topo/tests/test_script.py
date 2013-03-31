@@ -65,9 +65,9 @@ def _setargs(args):
 # without forking?
 from multiprocessing import Process
 def _run_in_forked_process(func, *args, **kwds):
-	p = Process(target=func(*args, **kwds))
-	p.start()
-	p.join()
+    p = Process(target=func(*args, **kwds))
+    p.start()
+    p.join()
 
 
 def _instantiate_everything(

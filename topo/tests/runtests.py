@@ -218,9 +218,9 @@ target['pickle'].append(topographica_script + '''-l -c "from topo.tests.test_scr
 
 temp_dir = ""
 if "scriptrepr" in p.targets or "all" in p.targets:
-	from tempfile import mkdtemp
-	temp_dir = mkdtemp()
-	temp_dir = temp_dir.replace("\\", "\\\\")
+    from tempfile import mkdtemp
+    temp_dir = mkdtemp()
+    temp_dir = temp_dir.replace("\\", "\\\\")
 
 #script-repr-tests:
 target['scriptrepr']=[]
