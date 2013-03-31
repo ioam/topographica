@@ -162,7 +162,7 @@ for script in TRAINSCRIPTS:
 target['unopttraintests'] = []
 for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    target['unopttraintests'].append(topographica_script + " -c 'import_weave=False'" +  " -c 'from topo.tests.test_script import test_script; test_script(script=\"%(script_path)s\",decimal=%(dp)s)'"%dict(script_path=script_path,dp=p.testdp_unopt))
+    target['unopttraintests'].append(topographica_script + " -c \"import_weave=False\"" +  " -c \"from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)\""%dict(script_path=repr(script_path),dp=p.testdp_unopt))
 
 
 speedtarget['speedtests'] = []
@@ -215,15 +215,21 @@ target['pickle'].append(topographica_script + '''-l -c "from topo.tests.test_scr
 # CEBALERT: hack that this will always be created even when test not being run
 # DSALERT: also it's not portable; python has a tempfile module that should
 # easily be able to replace this
-tmpd = commands.getoutput("mktemp -d")
+
+temp_dir = ""
+if "scriptrepr" in p.targets or "all" in p.targets:
+	from tempfile import mkdtemp
+	temp_dir = mkdtemp()
+	temp_dir = temp_dir.replace("\\", "\\\\")
+
 #script-repr-tests:
 target['scriptrepr']=[]
 script = os.path.join(scripts_dir,"examples/hierarchical.ty")
-target['scriptrepr'].append(topographica_script + " %(script)s -a -c \"import param;param.normalize_path.prefix='%(tmpd)s'\" -c \"save_script_repr('script_repr_test.ty')\""%dict(tmpd=tmpd,script=script))
+target['scriptrepr'].append(topographica_script + " %(script)s -a -c \"import param;param.normalize_path.prefix='%(temp_dir)s'\" -c \"save_script_repr('script_repr_test.ty')\""%dict(temp_dir=temp_dir,script=script))
 
-script_repr_test_path = os.path.join(tmpd,"script_repr_test.ty")
+script_repr_test_path = os.path.join(temp_dir,"script_repr_test.ty")
 target['scriptrepr'].append(topographica_script + " " + script_repr_test_path)
-target['scriptrepr'].append(topographica_script + "-c \"import shutil;shutil.rmtree('%s')\""%tmpd)
+target['scriptrepr'].append(topographica_script + "-c \"import shutil;shutil.rmtree('%s')\""%temp_dir)
 
 
 ### GUI tests
