@@ -10,7 +10,7 @@ from param.parameterized import bothmethod
 from topo import sheet, pattern, base, numbergen
 import numpy as np
 
-from nose.plugins.skip import SkipTest
+from unittest.case import SkipTest
 
 got_unum = False; got_pq=False
 

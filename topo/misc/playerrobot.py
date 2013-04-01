@@ -25,7 +25,7 @@ from math import pi
 # be reworked to either import the package directly, or handle the import error
 # differently. For more information on how nose works, see topo/tests/README.
 
-from nose.plugins.skip import SkipTest
+from unittest.case import SkipTest
 
 try:
 	import playerc

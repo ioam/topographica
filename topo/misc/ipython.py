@@ -10,7 +10,12 @@ import numpy as np
 import base64
 import param
 
-from IPython.display import HTML
+from unittest.case import SkipTest
+
+try:
+    from IPython.display import HTML
+except ImportError:
+    raise SkipTest("Old version of IPython! Please install IPython 12.0 or greater.")
 
 class Display(param.Parameterized):
 
