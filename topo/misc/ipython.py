@@ -10,7 +10,7 @@ import numpy as np
 import base64
 import param
 
-from unittest.case import SkipTest
+from nose.plugins.skip import SkipTest
 
 try:
     from IPython.display import HTML
