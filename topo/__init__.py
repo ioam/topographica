@@ -51,7 +51,7 @@ __all__ = ['analysis',
 # Find out Topographica's version.
 # First, try Git; if that fails, try to read the release file.
 
-from subprocess import Popen, CalledProcessError, PIPE
+from subprocess import Popen, CalledProcessError, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
 import os, sys
 
 (basepath, _) = os.path.split(os.path.abspath(__file__))
@@ -91,7 +91,7 @@ def _find_version():
         git_output = git_process.communicate()[0].strip()
         if git_process.poll():
             raise OSError
-    except OSError, CalledProcessError:
+    except OSError, CalledProcessError: #pyflakes:ignore (has to do with Python versions for CalledProcessError)
         try:
             release_file = open(basepath + "/.release")
             git_output = release_file.read()

@@ -21,7 +21,7 @@ from topo.base.cf import CFProjection, NullCFError,_create_mask, simple_vectoriz
 from imagen import patterngenerator
 from imagen.patterngenerator import PatternGenerator
 from topo.base.functionfamily import TransferFn, IdentityTF
-from topo.base.functionfamily import LearningFn, Hebbian, IdentityLF
+from topo.base.functionfamily import LearningFn, Hebbian
 from topo.base.functionfamily import ResponseFn, DotProduct
 from topo.base.sheetcoords import Slice
 
