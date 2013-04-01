@@ -117,8 +117,7 @@ class CFSPOF_Prune(CFSPOF_Plugin):
                 temp_weights[np.where(temp_weights<=percentile)] = 0.0
                 cf.weights = temp_weights
             projection.weights.prune()
-            # ALERT: Should use .message() method to allow user control
-            print projection.name, "has", (float(projection.n_conns())/self.initial_conns[projection.name])*100, "% of initial connections"
+            self.message("%s has %f%% of initial connections" % (projection.name, (float(projection.n_conns())/self.initial_conns[projection.name])*100))
 
 
 class CFSPOF_SproutRetract(CFSPOF_Plugin):
