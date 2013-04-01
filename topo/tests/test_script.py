@@ -20,7 +20,7 @@ from nose.tools import nottest
 # CEBALERT: should get this from somewhere else!
 TOPOGRAPHICAHOME = os.path.join(os.path.expanduser("~"),"Topographica")
 
-TESTSDATADIR = os.path.join(TOPOGRAPHICAHOME,"tests/data_traintests")
+TESTSDATADIR = os.path.join(TOPOGRAPHICAHOME,"tests")
 if not os.path.exists(TESTSDATADIR):
     os.makedirs(TESTSDATADIR)
 

@@ -146,9 +146,6 @@ release-file:
 all-speed-tests:
 	./topographica -p timing=True -p 'targets=["speed"]' topo/tests/runtests.py
 
-tests:
-	./topographica -p 'targets=["unit"]' topo/tests/runtests.py
-
 slow-tests: # all tests except speed tests
 	./topographica -p 'targets=["all"]' topo/tests/runtests.py
 
