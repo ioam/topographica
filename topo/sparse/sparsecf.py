@@ -17,9 +17,7 @@ import param
 from copy import copy
 
 import topo
-from topo.projection import Projection
 from topo.base.cf import CFProjection, NullCFError,_create_mask, simple_vectorize
-from topo.sheet import Sheet
 from imagen import patterngenerator
 from imagen.patterngenerator import PatternGenerator
 from topo.base.functionfamily import TransferFn, IdentityTF
@@ -287,10 +285,10 @@ class CFSPRF_Plugin(param.Parameterized):
 
     def __call__(self, projection, **params):
         single_cf_fn = self.single_cf_fn
-        for cf in projection.flatcfs:
-            X = cf.input_sheet_slice.submatrix(input_activity)
-            activity.flat[i] = single_cf_fn(X,cf.weights)
-        activity *= projection.strength
+        for i,cf in enumerate(projection.flatcfs):
+            X = cf.input_sheet_slice.submatrix(projection.src.activity)
+            projection.activity.flat[i] = single_cf_fn(X,cf.weights)
+        projection.activity *= projection.strength
 
 
 def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
@@ -516,7 +514,7 @@ class SparseConnectionField(param.Parameterized):
     def _init_weights(self,mask_template):
 
         if not hasattr(mask_template,'view'):
-            mask = _create_mask(mask_template,weights_slice.compute_bounds(input_sheet),self.input_sheet,True,0.5)
+            mask = _create_mask(mask_template,self.weights_slice.compute_bounds(self.input_sheet),self.input_sheet,True,0.5)
 
         mask = self.weights_slice.submatrix(mask_template)
         mask = np.array(mask,copy=1)
