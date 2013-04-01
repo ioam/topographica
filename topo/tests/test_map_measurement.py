@@ -133,7 +133,7 @@ def test(plotgroup_names):
         _reset_views(sheet)
         plotgroups[name]._exec_pre_plot_hooks()
 
-        filename = resolve_path('tests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
+        filename = resolve_path('tests/data_maptests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
                                                           name.replace(' ','_')))
         print "Reading previous results from %s" % (filename)
         f = open(filename,'r')
