@@ -17,7 +17,8 @@ import param
 from copy import copy
 
 import topo
-from topo.base.cf import CFProjection, NullCFError,_create_mask, simple_vectorize
+from topo.base.cf import CFProjection, NullCFError, _create_mask, simple_vectorize
+from topo import pattern
 from imagen import patterngenerator
 from imagen.patterngenerator import PatternGenerator
 from topo.base.functionfamily import TransferFn, IdentityTF
@@ -156,6 +157,8 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
     kernel_sigma = param.Number(default=1.0,bounds=(0.0,10.0),doc="""
         Gaussian spatial variance for weights to diffuse per interval.""")
 
+    disk_mask = param.Boolean(default=True,doc="""
+        Limits connection sprouting to a disk.""")
 
     def __call__(self, projection, **params):
         time = math.ceil(topo.sim.time())
@@ -172,10 +175,8 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
         # Create new sparse matrix to accumulate into
         sum_sparse = sparse.csarray_float(projection.src.activity.shape,projection.dest.activity.shape)
 
-        sprout_sum = 0
-        prune_sum = 0
-        unit_total = 0
-
+        # Counters for logging
+        sprout_sum = 0; prune_sum = 0; unit_total = 0
         self.mask_total = 0
 
         if (time == 0):
@@ -186,15 +187,16 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
             idx=0
             for cidx,cf in enumerate(projection.flatcfs):
                 temp_weights = cf.weights
+                dense_unit_mask = (1.0 - (temp_weights>0.0))
                 dim1,dim2 = temp_weights.shape
 
                 sprout_count,prune_idx,nnz = self.calc_ratios(temp_weights)
 
-                self.prune(cf,temp_weights,prune_idx)
+                self.prune(temp_weights,prune_idx)
                 nnz_pp = np.count_nonzero(temp_weights)
                 prune_sum += (nnz_pp-nnz)
 
-                self.sprout(cf,temp_weights,sprout_count)
+                self.sprout(temp_weights,dense_unit_mask,sprout_count)
                 nnz_ps = np.count_nonzero(temp_weights)
                 sprout_sum += nnz_ps - nnz_pp
                 unit_total += nnz_ps
@@ -219,28 +221,63 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
             projection.weights = sum_sparse
             del temp_sparse, sum_sparse
             projection.weights.compress()
-            # ALERT: Should use .message() method to allow user control
-            print projection.name, "pruned by", prune_sum, "and sprouted", sprout_sum, "connections is now", (float(unit_total)/self.mask_total)*100, "% dense"
+
+            self.message("%s pruned by %d and sprouted %d, connection is now %f%% dense" % (projection.name,prune_sum,sprout_sum,(float(unit_total)/self.mask_total)*100))
 
 
-    def sprout(self, cf, temp_weights, sprout_count):
-        # ALERT: All these methods need docstrings, e.g. to explain their assumptions
+    def sprout(self, temp_weights, mask, sprout_count):
+        """
+        Applies a Gaussian blur to the existing connection field,
+        selecting the n units with the highest probabilities to sprout
+        new connections, where n is set by the sprout_count. New
+        connections are initialized at the minimal strength of the
+        current CF.
+        """
+
         dim1,dim2 = temp_weights.shape
         init_weight = temp_weights[temp_weights.nonzero()].min()
         blurred_weights = gaussian_filter(temp_weights, sigma=self.kernel_sigma)
         blurred_weights = (blurred_weights - blurred_weights.min()) / blurred_weights.max()
-        sprout_prob_map = (blurred_weights * np.random.rand(dim1,dim2)) * (1.0-(temp_weights > 0.0))
+        sprout_prob_map = (blurred_weights * np.random.rand(dim1,dim2)) * mask
+        if self.disk_mask:
+            sprout_prob_map *= pattern.Disk(size=1.0,smoothing=0.0,xdensity=dim2,ydensity=dim1)()
         sprout_inds = np.unravel_index(np.argsort(sprout_prob_map.flatten())[-sprout_count:],(dim1,dim2))
         temp_weights[sprout_inds] = init_weight
 
 
-    def prune(self,cf, temp_weights, prune_idx):
+    def prune(self, temp_weights, prune_idx):
+        """
+        Retracts n connections with the lowest weights, where n is
+        determined by the piecewise linear function in the calc_ratios
+        method.
+        """
+
         sorted_weights = np.sort(temp_weights.flatten())
         threshold = sorted_weights[prune_idx]
         temp_weights[temp_weights < threshold] = 0.0
 
 
     def calc_ratios(self,temp_weights):
+        """
+        Uses a piecewise linear function to determine the unit
+        proportion of sprouting and retraction and the associated
+        turnover rates.
+
+        Above the target sparsity the sprout/retract ratio scales
+        linearly up to maximal density, i.e. at full density 100% of
+        the turnover is put into retraction while at full sparsity
+        all the turnover is put into sprouting new connections. At
+        the target density sprouting and retraction are equal.
+
+        The turnover is determined also determined by the piecewise
+        linear function. At maximal distance from the target sparsity,
+        i.e. at full sparsity or density, the full turnover rate will
+        be used and as the target sparsity is approached from either
+        side this term decays to zero. Therefore, a residual turnover
+        is introduced to ensure that even at the target sparsity some
+        connections continue to sprout and retract.
+        """
+
         dim1,dim2 = temp_weights.shape
         # Assumes the mask shape is circular
         masked_units = dim1*dim2 * (math.pi/4)
