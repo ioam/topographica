@@ -162,6 +162,9 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
     def __call__(self, projection, **params):
         time = math.ceil(topo.sim.time())
 
+        if self.disk_mask:
+            self.disk = pattern.Disk(size=1.0,smoothing=0.0)
+
         # Get CF and src sheet shapes
         cf_x,cf_y = projection.dest.activity.shape
         src_x,src_y = projection.src.activity.shape
@@ -239,7 +242,7 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
         blurred_weights = (blurred_weights - blurred_weights.min()) / blurred_weights.max()
         sprout_prob_map = (blurred_weights * np.random.rand(dim1,dim2)) * mask
         if self.disk_mask:
-            sprout_prob_map *= pattern.Disk(size=1.0,smoothing=0.0,xdensity=dim2,ydensity=dim1)()
+            sprout_prob_map *= self.disk(xdensity=dim2,ydensity=dim1)
         sprout_inds = np.unravel_index(np.argsort(sprout_prob_map.flatten())[-sprout_count:],(dim1,dim2))
         temp_weights[sprout_inds] = init_weight
 
@@ -278,8 +281,10 @@ class CFSPOF_SproutRetract(CFSPOF_Plugin):
         """
 
         dim1,dim2 = temp_weights.shape
-        # Assumes the mask shape is circular
-        masked_units = dim1*dim2 * (math.pi/4)
+        if self.disk_mask:
+            masked_units = len(self.disk(xdensity=dim2,ydensity=dim1).nonzero()[0])
+        else:
+            masked_units = dim1*dim2
         self.mask_total += masked_units
         max_units = dim1*dim2
         nnz = np.count_nonzero(temp_weights)
