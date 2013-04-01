@@ -1,9 +1,8 @@
-import os, sys, re, pickle, imp, shutil, time, inspect, json
+import os, sys, re, pickle, imp, time, inspect, json
 from collections import defaultdict
 import topo
 import param
 from lancet.launch import CommandTemplate
-from lancet.launch import Launcher
 from lancet.launch import review_and_launch
 
 def topo_param_string(p, exclude=['print_level', 'name'], sep=", "):
@@ -141,7 +140,7 @@ class RunBatchCommand(CommandTemplate):
 
    def __init__(self, tyfile, analysis='default', **kwargs):
 
-      if (analysis == 'custom') and ('-c' not in topo_flag_options):
+      if (analysis == 'custom') and ('-c' not in self.topo_flag_options):
          raise Exception, 'Please use -c option to introduce custom analysis to namespace!'
 
       executable =  os.path.abspath(sys.argv[0])
@@ -428,7 +427,7 @@ class RunBatchAnalysis(param.Parameterized):
       self.mapfns = [getattr(module, mapdict['map_fn']) for mapdict in self.maps]
       self.rmapfns = [getattr(module, map_reduce['map_fn']) for map_reduce in self.map_reduces]
       if self.metric is not None:
-         self.metricfn = getattr(module, metric['metric_fn'])
+         self.metricfn = getattr(module, self.metric['metric_fn'])
 
    def __call__(self):
       '''
@@ -446,7 +445,9 @@ class RunBatchAnalysis(param.Parameterized):
          print "Source path was not set! Running default analysis function instead."
          topo.command.default_analysis_function(); return
 
-      if (self.maps == []) and (self.map_reduces ==[]): default_analysis_function(); return
+      if (self.maps == []) and (self.map_reduces ==[]):
+         topo.command.default_analysis_function()
+         return
 
       topo_time = topo.sim.time()
 

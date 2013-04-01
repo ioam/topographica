@@ -10,12 +10,6 @@ import numpy as np
 import base64
 import param
 
-from nose.plugins.skip import SkipTest
-
-try:
-    from IPython.display import HTML
-except ImportError:
-    raise SkipTest("Old version of IPython! Please install IPython 12.0 or greater.")
 
 class Display(param.Parameterized):
 
@@ -139,7 +133,6 @@ def load_ipython_extension(ip):
     global _loaded
     if not _loaded:
         _loaded = True
-        ip = get_ipython()
         html_formatter = ip.display_formatter.formatters['text/html']
 
         html_formatter.for_type_by_name('topo.base.sheet', 'Sheet', sheet_display)
