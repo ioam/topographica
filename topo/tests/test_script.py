@@ -2,7 +2,7 @@
 Contains tests to check a particular script's results or speed have
 not changed.
 
-Buildbot shows how to run all these tests.
+Check README and buildbot to see how all these tests are run.
 """
 
 

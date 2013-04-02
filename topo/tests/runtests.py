@@ -3,26 +3,13 @@ Commands that were in the Makefile for running various tests. Roughly
 converted to a Python script so we can run on all platforms. Work in
 progress.
 
-Buildbot shows how to run the tests, but here are some examples:
-
-unit:
-./topographica -p 'targets=["unit"]' topo/tests/runtests.py
+Check README and buildbot to see how to run the tests, but here are some examples:
 
 default set:
 ./topographica topo/tests/runtests.py
 
 all:
 ./topographica -p 'targets=["all"]' topo/tests/runtests.py
-
-Ideally, the 'unit' target (i.e. unit tests) would be all that people
-need to run. Developers, for checking they haven't messed obvious
-stuff up. Users, for checking a Topographica installation functions ok
-on their system. The other, slower targets would only need to be run
-by buildbot (on behalf of everyone).
-
-Unfortunately, the unit tests do not currently cover enough! It's an
-important project to improve them. Until then, the default is to run
-more of the tests (but not all, since that takes too long).
 """
 
 # CEBALERT: need to fix the issue with global_params reporting name=X
