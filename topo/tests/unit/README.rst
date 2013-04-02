@@ -11,6 +11,8 @@ Before I start with the actual README, here are the two most important things I 
 REASONING
 ---------
 
+From the old README:
+
    Ideally, the 'unit' target (i.e. unit tests) would be all that people
    need to run. Developers, for checking they haven't messed obvious
    stuff up. Users, for checking a Topographica installation functions ok
@@ -74,7 +76,7 @@ Nose uses a `built-in plugin <https://nose.readthedocs.org/en/latest/plugins/doc
 
 To make nose look for doctests in modules that are not named "testsomething", pass the option ``--with-doctest``. It will then look inside all other
 modules. To make it look in non-Python files containing doctests (there are several such files here), pass the option ``--doctest-extension=txt``.
-See buildbot.
+See buildbot logs.
 
 Running ``nosetests`` at the ``topo/tests/unit`` level will produce errors because relative paths have been tweaked for running from the top-level
 Topographica directory; this is the advised way to run since it enables nose to look in other Topographica packages for doctests.
@@ -123,10 +125,10 @@ tweaking, fails to omit Python libraries from coverage reports, and fails to tak
 For this reason, Topographica's nose runner now uses the third-party plugin `nose-cov <https://pypi.python.org/pypi/nose-cov>`_ which works
 substantially better. Coverage will only be run by buildbot so installing a lightweight external library on one slave is not a problem.
 
-The plugin is enabled with the option ``--with-cov``, and HTML reports are generated with ``--cov-report html``. See buildbot.
+The plugin is enabled with the option ``--with-cov``, and HTML reports are generated with ``--cov-report html``. See buildbot logs.
 
-Many additional plugins are `already available<https://nose.readthedocs.org/en/latest/plugins/builtin.html>_ from nose itself. Many others are
-available from PyPI or `Nose Plugins <http://nose-plugins.jottit.com/>`_.
+Many additional plugins are `already available <https://nose.readthedocs.org/en/latest/plugins/builtin.html>`_ from nose itself. Many others are
+available from PyPI or `Nose Plugins <http://nose-plugins.jottit.com/>`_ .
 
 WRITING TESTS
 -------------
@@ -151,7 +153,7 @@ There are two types of tests used. The basic type is as follows::
            ...
 
 This is the most common type, and is also the one seen in examples everywhere. The second type consists of running several test cases through
-one "battery" of tests:
+one "battery" of tests::
 
    class TestSomething(unittest.TestCase):
    
@@ -175,7 +177,7 @@ To use this, put a ``@nottest`` decorator before the definition of ``class TestS
 since no ``setUp`` methods have been run yet.
 
 Using ``nosetests testmodule.py`` allows to run the module separately but the default behaviour (i.e. when running ``python testmodule.py``) should
-also be specified with a "boilerplate" at the bottom of the module:
+also be specified with a "boilerplate" at the bottom of the module::
 
    if __name__ == "__main__":
       import nose
@@ -196,6 +198,6 @@ The following problems have been identified with existing test modules:
   replaced with a ``pass`` statement.
 
 - enable tests for external packages (e.g. ImaGen, Param) to be run separately from the main Topographica suite. Use attributes via the
-  `attrib plugin<https://nose.readthedocs.org/en/latest/plugins/attrib.html>`_ to mark tests into different categories and run them separately. Possibly even move these tests to their respective packages.
+  `attrib plugin <https://nose.readthedocs.org/en/latest/plugins/attrib.html>`_ to mark tests into different categories and run them separately. Possibly even move these tests to their respective packages.
   
 Once these issues are fixed, the suite should be restructured as necessary and expanded to cover more of Topographica.
