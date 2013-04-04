@@ -123,8 +123,9 @@ class ImportErrorObject(object):
     informed of the possibility of having various extra functions on
     installation of a missing package.
     """
+    __dict__ = {}
     def __init__(self,module_name):
-        self.__module_name = module_name
+        self.__dict__['_ImportErrorObject__module_name'] = module_name
     def _raise(self):
         #param.Parameterized().warning("err:%s"%self.module_name)
         raise ImportError, "No module named %s. Install %s to get this functionality."%(self.__module_name,self.__module_name)
@@ -136,6 +137,8 @@ class ImportErrorObject(object):
     # error (rather than covering call, getitem, getattr, and maybe
     # other things I've forgotten about).
     def __getattr__(self,name):
+        if name in self.__dict__:
+            return self.__dict__[name]
         return self._raise()
     def __getitem__(self,i):
         self._raise()
