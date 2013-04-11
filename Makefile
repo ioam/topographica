@@ -1,5 +1,5 @@
 PREFIX =  ${CURDIR}/
-PYLINT = bin/pylint --rcfile=doc/buildbot/pylintrc
+PYLINT = bin/pylint --rcfile=topo/tests/buildbot/pylintrc
 
 PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
@@ -9,7 +9,7 @@ GITVERSION = $(shell echo ${GIT_DESCRIBE} |  cut -d -f2)
 
 PYTHON = ${PREFIX}/bin/python
 
-PYFLAKES = ${PYTHON} etc/pyflakes-ignore.py
+PYFLAKES = ${PYTHON} topo/tests/buildbot/pyflakes-ignore.py
 
 # if 0, skips building tk and related external packages
 GUI = 1

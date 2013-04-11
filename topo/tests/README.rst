@@ -141,7 +141,7 @@ Currently, the functional tests are very mixed up and difficult to understand. T
    
    Currently, functional tests are marked as `@nottest <https://nose.readthedocs.org/en/latest/testing_tools.html?highlight=nottest#nose.tools.nottest>`_ in order to not mess up the nose runner.
    
-   Nose will allow to easily run different sets of tests by using the `attrib plugin<https://nose.readthedocs.org/en/latest/plugins/attrib.html>`_ 
+   Nose will allow to easily run different sets of tests by using the `attrib plugin <https://nose.readthedocs.org/en/latest/plugins/attrib.html>`_ 
    instead of specifically writing code to differentiate the types of tests.
    
 5. Coverage: currently, no code coverage is observed for functional tests because ``runtests`` evoked `coverage.py <http://nedbatchelder.com/code/coverage/>`_ separately
