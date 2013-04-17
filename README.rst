@@ -52,19 +52,25 @@ RUNNING TOPOGRAPHICA
 
 Once installed as described above, Topographica can be launched by running the ``topographica`` script in the main directory; e.g. ``topographica -g`` for the GUI version.  See doc/Tutorials/index.html for examples of getting started with Topographica, and doc/index.html for all of the documentation.  You can also get online help from the Topographica command line using ``help()``, or from the shell command line using ``pydoc some-text``.
 
-MODIFYING SUBMODULES
---------------------
+MODIFYING TOPOGRAPHICA OR ITS SUBMODULES
+----------------------------------------
 
-Before committing changes to Topographica or any of its submodules
+If you're a Topographica developer wanting to commit changes to Topographica or any of its submodules, 
 make sure you first run the following commands to ensure everything is
-up-to-date::
+up to date::
 
   git pull
   git submodule update
 
-If you need to make changes to one of the submodules there are a
-number of points to remember, assuming you're starting in the topographica
-directory and you're modifying the param submodule (simply exchange param
+Changes any file outside of external/ can be made in the usual git fashion::
+
+  edit topo/dir/somefile.py
+  git commit -m "Important change" topo/dir/somefile.py
+  git push
+
+If you need to make changes to one of the submodules, there are several
+points to remember, assuming you're starting in the topographica
+directory and you're modifying the param submodule (otherwise simply exchange param
 with the submodule you want to modify)::
 
   cd ./external/param
@@ -77,7 +83,7 @@ the remote repository using::
   git commit -a -m "Changed xxx"
   git push
 
-Now that you have made the desired changes to the submodule itsself you
+Now that you have made the desired changes to the submodule itself, you
 need to update the submodule reference in topographica so it points to the
 right commit::
 
@@ -87,4 +93,4 @@ right commit::
   git push
 
 That's it, you've now committed changes to the submodule and told topographica
-to point to your new commit.
+to point to the newly updated submodule.
