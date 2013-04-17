@@ -64,7 +64,7 @@ up-to-date::
 
 If you need to make changes to one of the submodules there are a
 number of points to remember, assuming you're starting in the topographica
-directory and you're modifying the param submodule (simply exchange
+directory and you're modifying the param submodule (simply exchange param
 with the submodule you want to modify)::
 
   cd ./external/param
