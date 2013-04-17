@@ -318,7 +318,7 @@ sim = Simulation()
 import sys,numbergen
 sys.modules['topo.numbergen']=numbergen
 sys.modules['topo.numbergen.basic']=numbergen
-numbergen.ExponentialDecay.time_fn = sim.time
+numbergen.TimeDependentValue.time_fn = sim.time
 
 # imagen used to be part of topo; import its files at their former locations
 # for backwards compatibility and set the time function to be topo.sim.time()
