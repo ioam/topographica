@@ -52,22 +52,45 @@ RUNNING TOPOGRAPHICA
 
 Once installed as described above, Topographica can be launched by running the ``topographica`` script in the main directory; e.g. ``topographica -g`` for the GUI version.  See doc/Tutorials/index.html for examples of getting started with Topographica, and doc/index.html for all of the documentation.  You can also get online help from the Topographica command line using ``help()``, or from the shell command line using ``pydoc some-text``.
 
-MODIFYING SUBMODULES
---------------------
+MODIFYING TOPOGRAPHICA OR ITS SUBMODULES
+----------------------------------------
 
-Before committing changes to Topographica or any of its submodules
+If you're a Topographica developer wanting to commit changes to Topographica or any of its submodules, 
 make sure you first run the following commands to ensure everything is
-up-to-date::
+up to date::
 
   git pull
   git submodule update
 
-If you need to make changes to one of the submodules there are a
-number of points to remember. First, ``cd`` to the submodule in
-``external`` that you want to modify. Since submodules may lag behind
-the latest commits, checkout the master branch using ``git checkout
-master``, which will allow you to fast forward to the latest commit
-using ``git pull``. Now you can make the necessary changes, make a
-local commit and push it to the remote repository. Finally, ``cd``
-back to the Topographica folder to commit and push the updated
-submodule reference in ``./external/``.
+Changes any file outside of external/ can be made in the usual git fashion::
+
+  edit topo/dir/somefile.py
+  git commit -m "Important change" topo/dir/somefile.py
+  git push
+
+If you need to make changes to one of the submodules, there are several
+points to remember, assuming you're starting in the topographica
+directory and you're modifying the param submodule (otherwise simply exchange param
+with the submodule you want to modify)::
+
+  cd ./external/param
+  git checkout master
+  git pull
+
+Now make the desired changes in the submodule and commit and push them to
+the remote repository using::
+
+  git commit -a -m "Changed xxx"
+  git push
+
+Now that you have made the desired changes to the submodule itself, you
+need to update the submodule reference in topographica so it points to the
+right commit::
+
+  cd ../.. # cd back to the topographica directory
+  git add ./external/param
+  git commit -m "Updated param submodule reference"
+  git push
+
+That's it, you've now committed changes to the submodule and told topographica
+to point to the newly updated submodule.
