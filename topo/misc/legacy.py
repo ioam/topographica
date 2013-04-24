@@ -316,6 +316,86 @@ def moved_picklableclassattributes():
 
 support[12089] = moved_picklableclassattributes
 
+def removed_JointScaling():
+    from numpy import zeros,ones
+    import copy
+    from topo.base.sheet import activity_type
+    from topo.sheet import SettlingCFSheet
+    class JointScaling(SettlingCFSheet):
+        """SettlingCFSheet sheet extended to allow joint auto-scaling of Afferent input projections."""
+        target = param.Number(default=0.045, doc="""
+            Target average activity for jointly scaled projections.""")
+        target_lr = param.Number(default=0.045, doc="""
+            Target learning rate for jointly scaled projections.
+            Used for calculating a learning rate scaling factor.""")
+        smoothing = param.Number(default=0.999, doc="""
+            Influence of previous activity, relative to current, for computing the average.""")
+        apply_scaling = param.Boolean(default=True, doc="""Whether to apply the scaling factors.""")
+        precedence = param.Number(0.65)
+    
+        def __init__(self,**params):
+            super(JointScaling,self).__init__(**params)
+            self.x_avg=None
+            self.sf=None
+            self.lr_sf=None
+            self.scaled_x_avg=None
+            self.__current_state_stack=[]
+    
+        def calculate_joint_sf(self, joint_total):
+            if self.plastic:
+                self.sf *=0.0
+                self.lr_sf *=0.0
+                self.sf += self.target/self.x_avg
+                self.lr_sf += self.target_lr/self.x_avg
+                self.x_avg = (1.0-self.smoothing)*joint_total + self.smoothing*self.x_avg
+                self.scaled_x_avg = (1.0-self.smoothing)*joint_total*self.sf + self.smoothing*self.scaled_x_avg
+    
+        def do_joint_scaling(self):
+            joint_total = zeros(self.shape, activity_type)
+            for key,projlist in self._grouped_in_projections('JointNormalize'):
+                if key is not None:
+                    if key =='Afferent':
+                        for proj in projlist:
+                            joint_total += proj.activity
+                        self.calculate_joint_sf(joint_total)
+                        if self.apply_scaling:
+                            for proj in projlist:
+                                proj.activity *= self.sf
+                                if hasattr(proj.learning_fn,'learning_rate_scaling_factor'):
+                                    proj.learning_fn.update_scaling_factor(self.lr_sf)
+                                else:
+                                    raise ValueError("Projections to be joint scaled must have a learning_fn that supports scaling, such as CFPLF_PluginScaled")
+    
+                    else:
+                        raise ValueError("Only Afferent scaling currently supported")
+    
+        def activate(self):
+            self.activity *= 0.0
+            if self.x_avg is None: self.x_avg=self.target*ones(self.shape, activity_type)
+            if self.scaled_x_avg is None: self.scaled_x_avg=self.target*ones(self.shape, activity_type)
+            if self.sf is None: self.sf=ones(self.shape, activity_type)
+            if self.lr_sf is None: self.lr_sf=ones(self.shape, activity_type)
+            if self.activation_count == 0: self.do_joint_scaling()
+            for proj in self.in_connections: self.activity += proj.activity
+            if self.apply_output_fns:
+                for of in self.output_fns:
+                    of(self.activity)
+            self.send_output(src_port='Activity',data=self.activity)
+
+        def state_push(self,**args):
+            super(JointScaling,self).state_push(**args)
+            self.__current_state_stack.append((copy.copy(self.x_avg),copy.copy(self.scaled_x_avg),
+                                               copy.copy(self.sf), copy.copy(self.lr_sf)))
+        def state_pop(self,**args):
+            super(JointScaling,self).state_pop(**args)
+            self.x_avg,self.scaled_x_avg, self.sf, self.lr_sf=self.__current_state_stack.pop()
+
+    import topo.sheet.lissom
+    topo.sheet.lissom.JointScaling = JointScaling
+
+support[90800129] = removed_JointScaling
+
+
 ######################################################################
 ######################################################################
 
