@@ -1,164 +1,16 @@
 """
-Sheets first developed for the LISSOM algorithm, but now
-used in various other classes.
+Specific support for the LISSOM algorithm.
 """
 
-from numpy import zeros,ones
-import copy
-
 import param
-
 import topo
 
-from topo.base.sheet import activity_type
 from topo.sheet import SettlingCFSheet
 from topo.transferfn import PiecewiseLinear
 
 # Legacy declaration for backwards compatibility
 class LISSOM(SettlingCFSheet):
     output_fns = param.HookList(default=[PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
-
-
-class JointScaling(SettlingCFSheet):
-    """
-    SettlingCFSheet sheet extended to allow joint auto-scaling of Afferent input projections.
-
-    An exponentially weighted average is used to calculate the average
-    joint activity across all jointly-normalized afferent projections.
-    This average is then used to calculate a scaling factor for the
-    current afferent activity and for the afferent learning rate.
-
-    The target average activity for the afferent projections depends
-    on the statistics of the input; if units are activated more often
-    (e.g. the number of Gaussian patterns on the retina during each
-    iteration is increased) the target average activity should be
-    larger in order to maintain a constant average response to similar
-    inputs in V1. The target activity for learning rate scaling does
-    not need to change, because the learning rate should be scaled
-    regardless of what causes the change in average activity.
-    """
-    # ALERT: Should probably be extended to jointly scale different
-    # groups of projections. Currently only works for the joint
-    # scaling of projections named "Afferent", grouped together by
-    # JointNormalize in dest_port.
-
-    target = param.Number(default=0.045, doc="""
-        Target average activity for jointly scaled projections.""")
-
-    target_lr = param.Number(default=0.045, doc="""
-        Target learning rate for jointly scaled projections.
-
-        Used for calculating a learning rate scaling factor.""")
-
-    smoothing = param.Number(default=0.999, doc="""
-        Influence of previous activity, relative to current, for computing the average.""")
-
-    apply_scaling = param.Boolean(default=True, doc="""Whether to apply the scaling factors.""")
-
-    precedence = param.Number(0.65)
-
-
-    def __init__(self,**params):
-        super(JointScaling,self).__init__(**params)
-        self.x_avg=None
-        self.sf=None
-        self.lr_sf=None
-        self.scaled_x_avg=None
-        self.__current_state_stack=[]
-
-    def calculate_joint_sf(self, joint_total):
-        """
-        Calculate current scaling factors based on the target and previous average joint activities.
-
-        Keeps track of the scaled average for debugging. Could be
-        overridden by a subclass to calculate the factors differently.
-        """
-
-        if self.plastic:
-            self.sf *=0.0
-            self.lr_sf *=0.0
-            self.sf += self.target/self.x_avg
-            self.lr_sf += self.target_lr/self.x_avg
-            self.x_avg = (1.0-self.smoothing)*joint_total + self.smoothing*self.x_avg
-            self.scaled_x_avg = (1.0-self.smoothing)*joint_total*self.sf + self.smoothing*self.scaled_x_avg
-
-
-    def do_joint_scaling(self):
-        """
-        Scale jointly normalized projections together.
-
-        Assumes that the projections to be jointly scaled are those
-        that are being jointly normalized.  Calculates the joint total
-        of the grouped projections, and uses this to calculate the
-        scaling factor.
-        """
-        joint_total = zeros(self.shape, activity_type)
-
-        for key,projlist in self._grouped_in_projections('JointNormalize'):
-            if key is not None:
-                if key =='Afferent':
-                    for proj in projlist:
-                        joint_total += proj.activity
-                    self.calculate_joint_sf(joint_total)
-                    if self.apply_scaling:
-                        for proj in projlist:
-                            proj.activity *= self.sf
-                            if hasattr(proj.learning_fn,'learning_rate_scaling_factor'):
-                                proj.learning_fn.update_scaling_factor(self.lr_sf)
-                            else:
-                                raise ValueError("Projections to be joint scaled must have a learning_fn that supports scaling, such as CFPLF_PluginScaled")
-
-                else:
-                    raise ValueError("Only Afferent scaling currently supported")
-
-
-    def activate(self):
-        """
-        Compute appropriate scaling factors, apply them, and collect resulting activity.
-
-        Scaling factors are first computed for each set of jointly
-        normalized projections, and the resulting activity patterns
-        are then scaled.  Then the activity is collected from each
-        projection, combined to calculate the activity for this sheet,
-        and the result is sent out.
-        """
-
-        self.activity *= 0.0
-
-        if self.x_avg is None:
-            self.x_avg=self.target*ones(self.shape, activity_type)
-        if self.scaled_x_avg is None:
-            self.scaled_x_avg=self.target*ones(self.shape, activity_type)
-        if self.sf is None:
-            self.sf=ones(self.shape, activity_type)
-        if self.lr_sf is None:
-            self.lr_sf=ones(self.shape, activity_type)
-
-        #Afferent projections are only activated once at the beginning of each iteration
-        #therefore we only scale the projection activity and learning rate once.
-        if self.activation_count == 0:
-            self.do_joint_scaling()
-
-        for proj in self.in_connections:
-            self.activity += proj.activity
-
-        if self.apply_output_fns:
-            for of in self.output_fns:
-                of(self.activity)
-
-        self.send_output(src_port='Activity',data=self.activity)
-
-
-    def state_push(self,**args):
-        super(JointScaling,self).state_push(**args)
-        self.__current_state_stack.append((copy.copy(self.x_avg),copy.copy(self.scaled_x_avg),
-                                           copy.copy(self.sf), copy.copy(self.lr_sf)))
-
-
-    def state_pop(self,**args):
-        super(JointScaling,self).state_pop(**args)
-        self.x_avg,self.scaled_x_avg, self.sf, self.lr_sf=self.__current_state_stack.pop()
-
 
 
 def schedule_events(sheet_str="topo.sim['V1']",st=0.5,aff_name="Afferent",
@@ -280,6 +132,5 @@ def schedule_events(sheet_str="topo.sim['V1']",st=0.5,aff_name="Afferent",
 
 
 __all__ = [
-    "JointScaling",
     "schedule_events",
 ]
