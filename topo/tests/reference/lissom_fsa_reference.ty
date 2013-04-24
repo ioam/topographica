@@ -18,7 +18,7 @@ from fixedpoint import FixedPoint
 from numpy.oldnumeric import  sum,ones,exp, tan, sin, cos
 import numpy.oldnumeric as Numeric
 
-from topo.sheet.lissom import LISSOM
+from topo.sheet import SettlingCFSheet
 from topo.sheet import GeneratorSheet
 from topo.projection import CFProjection, SharedWeightCFProjection,ResizableCFProjection
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
@@ -238,7 +238,7 @@ topo.sim['LGNOn'] = CFSheet(nominal_bounds=lgn_bounds,nominal_density=BaseLN,
 topo.sim['LGNOff'] = CFSheet(nominal_bounds=lgn_bounds,nominal_density=BaseLN,
                       output_fn=PiecewiseLinear(lower_bound=0.0,upper_bound=1.0))
 
-topo.sim['FSA'] = LISSOM(nominal_bounds=fsa_bounds,nominal_density=BaseN,
+topo.sim['FSA'] = SettlingCFSheet(nominal_bounds=fsa_bounds,nominal_density=BaseN,
             output_fn=PiecewiseLinear(lower_bound=delta,upper_bound=beta))
 
 
@@ -290,7 +290,7 @@ topo.sim.connect('FSA','FSA',delay=FixedPoint("0.05"),
           connection_type=CFProjection,strength=-gammainh,name='LateralInhibitory',
           nominal_bounds_template=inhibitory_weight_bounds, learning_rate = alpha_inh * n_inh_units)
 
-#LISSOM.tsettle = tsettle
+#SettlingCFSheet.tsettle = tsettle
 topo.sim['FSA'].tsettle = tsettle
 
 # CEBHACKALERT: this is out of date and the times should be corrected.

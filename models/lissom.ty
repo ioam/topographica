@@ -364,8 +364,8 @@ for e in eyes:
                     measure_maps=False)
 
 
-topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
-                                     tsettle=9,nominal_bounds=sheet.BoundingBox(radius=0.5))
+topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=p.cortex_density,
+                                       tsettle=9,nominal_bounds=sheet.BoundingBox(radius=0.5))
 
 topo.sim['V1'].output_fns[0].lower_bound=0.076 if p.dataset in natural_image_sets else 0.083
 topo.sim['V1'].output_fns[0].upper_bound=0.626 if p.dataset in natural_image_sets else 0.633

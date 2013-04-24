@@ -70,7 +70,7 @@ import numpy.oldnumeric as Numeric
 from math import pi, sqrt
 
 from topo.base.boundingregion import BoundingBox
-from topo.sheet.lissom import LISSOM
+from topo.sheet import SettlingCFSheet
 from topo.sheet import GeneratorSheet
 from topo.projection import CFProjection,ResizableCFProjection
 from topo.transferfn import PiecewiseLinear
@@ -143,7 +143,7 @@ topo.sim['Eye0'] = GeneratorSheet(input_generator=input_pattern,
                                   phase=0.05,
                                   precedence=0)
 
-topo.sim['Primary'] = LISSOM(output_fns=[PiecewiseLinear(lower_bound=delta_i,
+topo.sim['Primary'] = SettlingCFSheet(output_fns=[PiecewiseLinear(lower_bound=delta_i,
                                                          upper_bound=beta_i)],
                              nominal_density = BaseN,
                              tsettle=tsettle,

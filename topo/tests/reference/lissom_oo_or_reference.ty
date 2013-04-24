@@ -18,7 +18,7 @@ from math import pi, sqrt
 
 import topo.pattern
 
-from topo.sheet.lissom import LISSOM
+from topo.sheet import SettlingCFSheet
 from topo.sheet import GeneratorSheet
 from topo.projection import CFProjection,SharedWeightCFProjection,ResizableCFProjection
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
@@ -156,7 +156,7 @@ topo.sim['Ganglia01'] = CFSheet(nominal_bounds=lgn_bounds,nominal_density=BaseLN
                                                             upper_bound=1.0)],
                                 precedence=1)
 
-topo.sim['Primary'] = LISSOM(nominal_density=BaseN,
+topo.sim['Primary'] = SettlingCFSheet(nominal_density=BaseN,
                              tsettle=tsettle,
                              output_fns=[PiecewiseLinear(lower_bound=delta_i,
                                                          upper_bound=beta_i)],

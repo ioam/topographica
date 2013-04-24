@@ -112,7 +112,7 @@ topo.sim['LGNOff']=sheet.CFSheet(nominal_density=p.lgn_density,
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)],
     measure_maps=False)
 
-topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
+topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=p.cortex_density,
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),tsettle=9,
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.083,upper_bound=0.633)],
     joint_norm_fn=sheet.optimized.compute_joint_norm_totals_opt)

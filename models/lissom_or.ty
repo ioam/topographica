@@ -88,7 +88,7 @@ topo.sim['Retina']=sheet.GeneratorSheet(
     input_generator=combined_inputs, period=1.0, phase=0.05,
     nominal_bounds=sheet.BoundingBox(radius=0.5+0.25))
 
-topo.sim['V1'] = sheet.lissom.LISSOM(
+topo.sim['V1'] = sheet.SettlingCFSheet(
     nominal_density=p.cortex_density,
     nominal_bounds=sheet.BoundingBox(radius=0.5),tsettle=9,
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])

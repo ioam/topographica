@@ -1,7 +1,5 @@
 """
 An example of using a pan/tilt/zoom camera to do simple visual tracking.
-
-$Id: tiny.ty 10778 2009-11-17 23:33:16Z KKudryavtsev $
 """
 __version__='$Revision: 10778 $'
 
@@ -17,7 +15,6 @@ import topo.learningfn.projfn
 import topo.transferfn.projfn
 import topo.pattern.random
 import topo.responsefn.optimized
-import topo.sheet.lissom
 
 from topo.base.functionfamily import LearningFn
 

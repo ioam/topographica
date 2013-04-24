@@ -20,7 +20,7 @@ from topo import param
 
 import topo.pattern
 
-from topo.sheet.optimized import LISSOM
+from topo.sheet import SettlingCFSheet
 from topo.sheet import GeneratorSheet
 from topo.projection import CFProjection,SharedWeightCFProjection,ResizableCFProjection
 from topo.responsefn.optimized import CFPRF_DotProduct_opt
@@ -236,7 +236,7 @@ for i in range(num_eyes):
                                      precedence=num_eyes+1)
 
 
-topo.sim['Primary'] = LISSOM(nominal_density=BaseN,
+topo.sim['Primary'] = SettlingCFSheet(nominal_density=BaseN,
                              nominal_bounds=BoundingBox(radius=0.5),
                              tsettle=tsettle,
                              output_fns=[PiecewiseLinear(lower_bound=delta_i,

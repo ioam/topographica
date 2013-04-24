@@ -108,7 +108,7 @@ for e in eyes:
                     measure_maps=False)
 
 
-topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=locals().get('default_density',48.0),tsettle=9,nominal_bounds=sheet.BoundingBox(radius=0.5))
+topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=locals().get('default_density',48.0),tsettle=9,nominal_bounds=sheet.BoundingBox(radius=0.5))
 
 topo.sim['V1'].output_fns[0].lower_bound=0.076
 topo.sim['V1'].output_fns[0].upper_bound=0.626

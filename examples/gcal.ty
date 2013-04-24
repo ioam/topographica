@@ -35,7 +35,6 @@ import topo.transferfn.optimized
 import topo.pattern.random
 import topo.pattern.image
 import topo.responsefn.optimized
-import topo.sheet.lissom
 import topo.sheet.optimized
 
 import topo.transferfn.misc
@@ -140,7 +139,7 @@ topo.sim['Retina']=sheet.GeneratorSheet(nominal_density=p.retina_density,
 
 # LGN has lateral connections for divisive normalization
 for s in ['LGNOn','LGNOff']:
-    topo.sim[s]=sheet.optimized.LISSOM_Opt(nominal_density=p.lgn_density,
+    topo.sim[s]=sheet.optimized.SettlingCFSheet_Opt(nominal_density=p.lgn_density,
         nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25+0.5),
         output_fns=[transferfn.misc.HalfRectify()],
         tsettle=2,strict_tsettle=1,measure_maps=False)
@@ -155,7 +154,7 @@ for s in ['LGNOn','LGNOff']:
                      nominal_bounds_template=sheet.BoundingBox(radius=0.25))
 
 
-topo.sim['V1'] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
+topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=p.cortex_density,
     tsettle=16, plastic=True,
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),
     output_fns=[transferfn.misc.HomeostaticResponse()])

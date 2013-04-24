@@ -27,7 +27,6 @@ import topo.learningfn.projfn
 import topo.transferfn.optimized
 import topo.pattern.random
 import topo.responsefn.optimized
-import topo.sheet.lissom
 
 
 # Parameters that can be passed on the command line using -p
@@ -157,7 +156,7 @@ topo.sim['Layer_4']=sheet.GeneratorSheet(nominal_density=p.barrel_density*1.0,
 			     x = numbergen.UniformRandom(lbound=-p.Wx/2.0,ubound=p.Wx/2.0,seed=73),
 			     y = numbergen.UniformRandom(lbound=-p.Wx/2.0,ubound=p.Wx/2.0,seed=74)))
 
-topo.sim['Layer2_3']=sheet.lissom.LISSOM(nominal_density=21.0,tsettle=9,
+topo.sim['Layer2_3']=sheet.SettlingCFSheet(nominal_density=21.0,tsettle=9,
     nominal_bounds=sheet.BoundingBox(points=[(-p.Wy/2.0,-p.Wx/2.0),(p.Wy/2.0,p.Wx/2.0)]))
 
 

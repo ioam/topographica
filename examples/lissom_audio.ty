@@ -3,14 +3,12 @@ Bilal Khan 2009/2010: This implements my undergrad thesis.
 
 Example of a simplified auditory pathway incorporating the cochlea, MGBv, and AI.
 
-The cochlea comprises a rolling FFT spectrogram, passing its output to an MGBv
-sheet where responses are categorised by typical MGBv neuron responses. The final
-auditory station in this example is an lissom AI sheet, calibrated to the parameters
-for V1 used in examples/lissom_oo_or.ty
-
-$Id: lissom_audio.ty 11027 2010-04-10 01:17:05Z bilalkhancnsg $
+The cochlea comprises a rolling FFT spectrogram, passing its output to
+an MGBv sheet where responses are categorised by typical MGBv neuron
+responses. The final auditory station in this example is an lissom AI
+sheet, calibrated to the parameters for V1 used in
+examples/lissom_oo_or.ty.
 """
-__version__='$Revision: 11027 $'
 
 import param
 
@@ -93,7 +91,7 @@ a1_connection_dimensions = (0.27083,0.27083)
 a1_dimensions = (mgbv_dimensions[0]-a1_connection_dimensions[0],
     mgbv_dimensions[1])
 
-topo.sim['A1']=sheet.lissom.LISSOM(
+topo.sim['A1']=sheet.SettlingCFSheet(
     nominal_density=p.cortex_density, tsettle=9,
     nominal_bounds=sheet.BoundingBox(points=((-a1_dimensions[0]/2, -a1_dimensions[1]/2),
         (a1_dimensions[0]/2, a1_dimensions[1]/2))),

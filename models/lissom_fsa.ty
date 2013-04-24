@@ -87,7 +87,7 @@ topo.sim['LGNOff']=sheet.CFSheet(
     nominal_bounds=sheet.BoundingBox(radius=1.542),
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)])
 
-topo.sim['FSA'] = sheet.lissom.LISSOM(
+topo.sim['FSA'] = sheet.SettlingCFSheet(
     nominal_density=p.cortex_density,tsettle=9,
     nominal_bounds=sheet.BoundingBox(radius=0.5),
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
