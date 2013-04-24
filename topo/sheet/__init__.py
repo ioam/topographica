@@ -25,7 +25,8 @@ import param
 
 from topo.base.cf import CFIter
 from topo.base.projection import Projection
-from topo.base.simulation import FunctionEvent, PeriodicEventSequence
+from topo.base.simulation import FunctionEvent, PeriodicEventSequence, EPConnectionEvent
+from topo.transferfn import PiecewiseLinear
 
 
 class ActivityCopy(Sheet):
@@ -199,11 +200,168 @@ class JointNormalizingCFSheet_Continuous(JointNormalizingCFSheet):
 
 
 
+class SettlingCFSheet(JointNormalizingCFSheet):
+    """
+    A JointNormalizingCFSheet implementing the idea of settling.
+
+    Breaks continuous time up into discrete iterations, each
+    consisting of a series of activations, up to a fixed number of
+    settling steps.  Settling is controlled by the tsettle parameter;
+    once that number of settling steps has been reached, an external
+    input is required before the sheet will activate again.
+
+    See the LISSOM algorithm (Sirosh and Miikkulainen, Biological
+    Cybernetics 71:66-78, 1994) for one example of its usage.
+    """
+
+    strict_tsettle = param.Parameter(default = None,doc="""
+        If non-None, delay sending output until activation_count reaches this value.""")
+
+    mask_init_time=param.Integer(default=5,bounds=(0,None),doc="""
+        Determines when a new mask is initialized in each new iteration.
+
+        The mask is reset whenever new input comes in.  Once the
+        activation_count (see tsettle) reaches mask_init_time, the mask
+        is initialized to reflect the current activity profile.""")
+
+    tsettle=param.Integer(default=8,bounds=(0,None),doc="""
+        Number of times to activate the SettlingCFSheet sheet for each external input event.
+
+        A counter is incremented each time an input is received from any
+        source, and once the counter reaches tsettle, the last activation
+        step is skipped so that there will not be any further recurrent
+        activation.  The next external (i.e., afferent or feedback)
+        event will then start the counter over again.""")
+
+    continuous_learning = param.Boolean(default=False, doc="""
+        Whether to modify the weights after every settling step.
+        If false, waits until settling is completed before doing learning.""")
+
+    output_fns = param.HookList(default=[PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
+
+    precedence = param.Number(0.6)
+
+    post_initialization_weights_output_fns = param.HookList([],doc="""
+        If not empty, weights output_fns that will replace the
+        existing ones after an initial normalization step.""")
+
+    beginning_of_iteration = param.HookList(default=[],instantiate=False,doc="""
+        List of callables to be executed at the beginning of each iteration.""")
+
+    end_of_iteration = param.HookList(default=[],instantiate=False,doc="""
+        List of callables to be executed at the end of each iteration.""")
+
+
+    def __init__(self,**params):
+        super(SettlingCFSheet,self).__init__(**params)
+        self.__counter_stack=[]
+        self.activation_count = 0
+        self.new_iteration = True
+
+
+    def start(self):
+        self._normalize_weights(active_units_mask=False)
+        if len(self.post_initialization_weights_output_fns)>0:
+            for proj in self.in_connections:
+                if not isinstance(proj,Projection):
+                    self.debug("Skipping non-Projection ")
+                else:
+                    proj.weights_output_fns=self.post_initialization_weights_output_fns
+
+
+    def input_event(self,conn,data):
+        # On a new afferent input, clear the activity
+        if self.new_iteration:
+            for f in self.beginning_of_iteration: f()
+            self.new_iteration = False
+            self.activity *= 0.0
+            for proj in self.in_connections:
+                proj.activity *= 0.0
+            self.mask.reset()
+        super(SettlingCFSheet,self).input_event(conn,data)
+
+
+    ### JABALERT!  There should be some sort of warning when
+    ### tsettle times the input delay is larger than the input period.
+    ### Right now it seems to do strange things in that case (does it
+    ### settle at all after the first iteration?), but of course that
+    ### is arguably an error condition anyway (and should thus be
+    ### flagged).
+    # CEBALERT: there is at least one bug in here for tsettle==0: see
+    # CB/JAB email "LISSOM tsettle question", 2010/03/22.
+    def process_current_time(self):
+        """
+        Pass the accumulated stimulation through self.output_fns and
+        send it out on the default output port.
+        """
+        if self.new_input:
+            self.new_input = False
+
+            if self.activation_count == self.mask_init_time:
+                self.mask.calculate()
+
+            if self.tsettle == 0:
+                # Special case: behave just like a CFSheet
+                self.activate()
+                self.learn()
+
+            elif self.activation_count == self.tsettle:
+                # Once we have been activated the required number of times
+                # (determined by tsettle), reset various counters, learn
+                # if appropriate, and avoid further activation until an
+                # external event arrives.
+                for f in self.end_of_iteration: f()
+
+                self.activation_count = 0
+                self.new_iteration = True # used by input_event when it is called
+                if (self.plastic and not self.continuous_learning):
+                    self.learn()
+            else:
+                self.activate()
+                self.activation_count += 1
+                if (self.plastic and self.continuous_learning):
+                   self.learn()
+
+
+    # print the weights of a unit
+    def printwts(self,x,y):
+        for proj in self.in_connections:
+            print proj.name, x, y
+            print proj.cfs[x,y].weights
+
+
+    def state_push(self,**args):
+        super(SettlingCFSheet,self).state_push(**args)
+        self.__counter_stack.append((self.activation_count,self.new_iteration))
+
+
+    def state_pop(self,**args):
+        super(SettlingCFSheet,self).state_pop(**args)
+        self.activation_count,self.new_iteration=self.__counter_stack.pop()
+
+    def send_output(self,src_port=None,data=None):
+        """Send some data out to all connections on the given src_port."""
+
+        out_conns_on_src_port = [conn for conn in self.out_connections
+                                 if self._port_match(conn.src_port,[src_port])]
+
+        for conn in out_conns_on_src_port:
+            if self.strict_tsettle != None:
+               if self.activation_count < self.strict_tsettle:
+                   if len(conn.dest_port)>2 and conn.dest_port[2] == 'Afferent':
+                       continue
+            self.verbose("Sending output on src_port %s via connection %s to %s" %
+                         (str(src_port), conn.name, conn.dest.name))
+            e=EPConnectionEvent(self.simulation.convert_to_time_type(conn.delay)+self.simulation.time(),conn,data)
+            self.simulation.enqueue_event(e)
+
+
+
+
 _public = list(set([_k for _k,_v in locals().items() if isinstance(_v,type) and issubclass(_v,Sheet)]))
 _public += [
     "compute_joint_norm_totals",
     "BoundingBox",
-    "ProjectionSheet",
     "activity_type",
 ]
 

@@ -11,19 +11,19 @@ import param
 
 from topo.command.pylabplot import vectorplot, matrixplot
 
-from lissom import LISSOM
+from topo.sheet import SettlingCFSheet
 
 
 
 
 activity_type = Numeric.Float32
 
-class SLISSOM(LISSOM):
+class SLISSOM(SettlingCFSheet):
     """
     A Sheet class implementing the SLISSOM algorithm
     (Choe and Miikkulainen, Neurocomputing 21:139-157, 1998).
 
-    A SLISSOM sheet is a LISSOM sheet extended to include spiking
+    A SLISSOM sheet is a SettlingCFSheet sheet extended to include spiking
     neurons using dynamic synapses.
     """
 
@@ -144,7 +144,7 @@ class SLISSOM(LISSOM):
             for proj in self.in_connections:
                 proj.activity *= 0.0
             self.mask.reset()
-        super(LISSOM,self).input_event(conn,data)
+        super(SettlingCFSheet,self).input_event(conn,data)
 
     def plot_trace(self):
         """

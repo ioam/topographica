@@ -7,7 +7,7 @@ import param
 from topo.base.cf import CFIter
 from topo.base.projection import NeighborhoodMask
 from topo.misc.inlinec import inline,provide_unoptimized_equivalent,c_header
-from topo.sheet.lissom import LISSOM
+from topo.sheet import SettlingCFSheet
 from topo.sheet import compute_joint_norm_totals  # pyflakes:ignore (replaced by optimized version)
 
 def compute_joint_norm_totals_opt(projlist,active_units_mask):
@@ -87,35 +87,37 @@ provide_unoptimized_equivalent("compute_joint_norm_totals_opt",
                                "compute_joint_norm_totals",locals())
 
 # CEBALERT: not tested
-class LISSOM_Opt(LISSOM):
+class SettlingCFSheet_Opt(SettlingCFSheet):
     """
-    Faster but potentially unsafe optimized version of LISSOM.
+    Faster but potentially unsafe optimized version of SettlingCFSheet.
 
     Adds a NeighborhoodMask that skips computation for neurons
     sufficiently distant from all those activated in the first few
     steps of settling.  This is safe only if activity bubbles reliably
     shrink after the first few steps; otherwise the results will
-    differ from LISSOM.
+    differ from SettlingCFSheet.
 
-    Typically useful only for standard LISSOM simulations with
+    Typically useful only for standard SettlingCFSheet simulations with
     localized (e.g. Gaussian) inputs and that shrink the lateral
     excitatory radius, which results in small patches of activity in
     an otherwise inactive sheet.
 
     Also overrides the function
     JointNormalizingCFSheet.__compute_joint_norm_totals with
-    C-optimized code for LISSOM sheets.
+    C-optimized code for SettlingCFSheets.
     """
 
     joint_norm_fn = param.Callable(default=compute_joint_norm_totals_opt)
 
     def __init__(self,**params):
-        super(LISSOM_Opt,self).__init__(**params)
+        super(SettlingCFSheet_Opt,self).__init__(**params)
         # CEBALERT: this wipes out any user-specified sheet mask.
         self.mask = NeighborhoodMask_Opt(threshold = 0.00001,radius = 0.05,sheet = self)
 
-provide_unoptimized_equivalent("LISSOM_Opt","LISSOM",locals())
+provide_unoptimized_equivalent("SettlingCFSheet_Opt","SettlingCFSheet",locals())
 
+# Legacy declaration for backwards compatibility
+LISSOM_Opt=SettlingCFSheet_Opt
 
 
 class NeighborhoodMask_Opt(NeighborhoodMask):
@@ -171,6 +173,6 @@ provide_unoptimized_equivalent("NeighborhoodMask_Opt","NeighborhoodMask",locals(
 
 __all__ = [
     "compute_joint_norm_totals",
-    "LISSOM",
+    "SettlingCFSheet",
     "NeighborhoodMask",
 ]
