@@ -14,7 +14,6 @@ import topo.learningfn.projfn
 import topo.transferfn.projfn
 import topo.pattern.random
 import topo.responsefn.optimized
-import topo.sheet.lissom
 
 from topo.base.functionfamily import LearningFn
 
