@@ -26,7 +26,6 @@ import param
 from topo.base.cf import CFIter
 from topo.base.projection import Projection
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence, EPConnectionEvent
-from topo.transferfn import PiecewiseLinear
 
 
 class ActivityCopy(Sheet):
@@ -236,8 +235,6 @@ class SettlingCFSheet(JointNormalizingCFSheet):
     continuous_learning = param.Boolean(default=False, doc="""
         Whether to modify the weights after every settling step.
         If false, waits until settling is completed before doing learning.""")
-
-    output_fns = param.HookList(default=[PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
 
     precedence = param.Number(0.6)
 

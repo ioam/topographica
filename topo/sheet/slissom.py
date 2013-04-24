@@ -12,6 +12,7 @@ import param
 from topo.command.pylabplot import vectorplot, matrixplot
 
 from topo.sheet import SettlingCFSheet
+from topo.transferfn import PiecewiseLinear
 
 
 
@@ -47,6 +48,8 @@ class SLISSOM(SettlingCFSheet):
 
     noise_rate = param.Number(default=0.0,bounds=(0,1.0),
         doc="Noise added to the on-going activity")
+
+    output_fns = param.HookList(default=[PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
 
     # logging facility for debugging
     trace_coords = param.List(default=[],

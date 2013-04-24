@@ -157,8 +157,8 @@ topo.sim['Layer_4']=sheet.GeneratorSheet(nominal_density=p.barrel_density*1.0,
 			     y = numbergen.UniformRandom(lbound=-p.Wx/2.0,ubound=p.Wx/2.0,seed=74)))
 
 topo.sim['Layer2_3']=sheet.SettlingCFSheet(nominal_density=21.0,tsettle=9,
-    nominal_bounds=sheet.BoundingBox(points=[(-p.Wy/2.0,-p.Wx/2.0),(p.Wy/2.0,p.Wx/2.0)]))
-
+    nominal_bounds=sheet.BoundingBox(points=[(-p.Wy/2.0,-p.Wx/2.0),(p.Wy/2.0,p.Wx/2.0)]),
+    output_fns=[PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
 
 
 ### Connections

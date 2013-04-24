@@ -12,9 +12,12 @@ import topo
 
 from topo.base.sheet import activity_type
 from topo.sheet import SettlingCFSheet
+from topo.transferfn import PiecewiseLinear
 
 # Legacy declaration for backwards compatibility
-LISSOM=SettlingCFSheet
+class LISSOM(SettlingCFSheet):
+    output_fns = param.HookList(default=[PiecewiseLinear(lower_bound=0.1,upper_bound=0.65)])
+
 
 class JointScaling(SettlingCFSheet):
     """
