@@ -474,6 +474,9 @@ class CFProjection(Projection):
         default=CFPRF_Plugin(),
         doc='Function for computing the Projection response to an input pattern.')
 
+    input_fns = param.HookList(default=[],class_=TransferFn,doc="""
+        Function(s) applied to the input before the projection activity is computed.""")
+
     cf_type = param.Parameter(default=ConnectionField,constant=True,
         doc="Type of ConnectionField to use when creating individual CFs.")
 
@@ -680,6 +683,10 @@ class CFProjection(Projection):
 
     def activate(self,input_activity):
         """Activate using the specified response_fn and output_fn."""
+        if self.input_fns:
+            input_activity = input_activity.copy()
+        for iaf in self.input_fns:
+            iaf(input_activity)
         self.input_buffer = input_activity
         self.activity *=0.0
         self.response_fn(CFIter(self), input_activity, self.activity, self.strength)

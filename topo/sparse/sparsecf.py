@@ -399,7 +399,7 @@ def CFPRF_DotProduct_Sparse(projection):
     between incoming activities and CF weights.
     """
 
-    projection.weights.DotProduct(projection.strength, projection.src.activity, projection.activity)
+    projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
@@ -780,7 +780,10 @@ class SparseCFProjection(CFProjection):
 
     def activate(self,input_activity):
         """Activate using the specified response_fn and output_fn."""
-
+        if self.input_fns:
+            input_activity = input_activity.copy()
+        for iaf in self.input_fns:
+            iaf(input_activity)
         self.input_buffer = input_activity
         self.activity *=0.0
         self.response_fn(self)
