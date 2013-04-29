@@ -1,87 +1,157 @@
-# Makefile for doc directory
-# Does not currently make the reference manual, so that
-# the documentation can be compiled even if the code won't.
+# Makefile for Sphinx documentation
+#
 
-RM                              = rm -f
-PHP                             = php -q
-SED                             = sed
-LN                              = ln -s
-M4                              = m4 -P
-MAKE                            = make
+# You can set these variables from the command line.
+SPHINXOPTS    =
+SPHINXBUILD   = sphinx-build
+PAPER         =
+BUILDDIR      = _build
 
-M4BASE = ${wildcard */*_text.php.m4}
+# Internal variables.
+PAPEROPT_a4     = -D latex_paper_size=a4
+PAPEROPT_letter = -D latex_paper_size=letter
+ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+# the i18n builder cannot share the environment and doctrees with the others
+I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-PHPBASE = ${wildcard */*_text.php} ${subst .php.m4,.php,${M4BASE}}
-PHPHTML = ${subst _text.php,.html,${PHPBASE}}
+.PHONY: help clean reference-manual html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
-# Can also add --graph=callgraph to show who called what, but only for a specific simulation run
-# or --graph=all
-EPYDOC = bin/epydoc
-CALLEPYDOC = env PYTHONPATH=external/param:external/imagen:external/paramtk: ${EPYDOC} --dotpath=/usr/bin/dot --graph=classtree --inheritance=listed --docformat=ReStructuredText --show-sourcecode --html 
-
-# General rule based only on target filename and location
-
-# Old version: worked only for text.php -> index.html
-#%/index.html : %/text.php shared/*.php shared/*.css
-#	cd $* ; ${PHP} ../shared/index.php > index.html
-
-# Works for any *_text.php -> *.html
-# Hack: passes in text filename in an arbitrary php.ini option named
-# 'sendmail_from', because it's not clear how to pass in 
-# a user-defined variable value
-%.html : %_text.php shared/*.php shared/*.css
-	cd ${dir $@} ; ${PHP} -d sendmail_from=${notdir $<} ../shared/index.php > $(subst _text.php,.html,${notdir $<})
-
-
-# PHP files can be preprocessed with M4 if desired.
-%.php : %.php.m4 shared/bib2html.m4
-	${M4} $< > $@
-
-# Generate HTML files from source versions
-default: bib2html imagedirs all
-all: ${PHPHTML}
-
-# Extra dependency
-Home/index.html: Home/news_text.php
-
-# Doesn't currently build Lancet manual by default
-reference-manual: Param_Reference/index.html ParamTk_Reference/index.html Imagen_Reference/index.html Reference_Manual/toc.html
-
-Reference_Manual/toc.html: ../topo/*.py ../topo/*/*.py ../external/param/param/*.py ../external/paramtk/paramtk/*.py ../external/imagen/numbergen/*.py  ../external/imagen/imagen/*.py Reference_Manual/index_text.php
-	cd .. ; ${CALLEPYDOC} -o doc/Reference_Manual --exclude=topo.tests --name=IOAM --url=http://ioam.github.com topo external/param/param external/paramtk/paramtk external/imagen/numbergen external/imagen/imagen
-	mv Reference_Manual/index.html Reference_Manual/hierarchy.html
-	make Reference_Manual/index.html
-
-Param_Reference/index.html: ../external/param/param/*.py
-	cd .. ; ${CALLEPYDOC} -o doc/Param_Reference --name=Param --url=http://ioam.github.com/param external/param/param
-
-ParamTk_Reference/index.html: ../external/paramtk/paramtk/*.py
-	cd .. ; ${CALLEPYDOC} -o doc/ParamTk_Reference --name=ParamTk --url=http://ioam.github.com/paramtk external/paramtk/paramtk
-
-Imagen_Reference/index.html: ../external/imagen/numbergen/*.py  ../external/imagen/imagen/*.py
-	cd .. ; ${CALLEPYDOC} -o doc/ImaGen_Reference --name=ImaGen --url=http://ioam.github.com/imagen external/imagen/imagen
-
-Lancet_Reference/index.html: ../external/lancet/lancet/*.py
-	cd .. ; ${CALLEPYDOC} -o doc/Lancet_Reference --name=Lancet --url=http://github.com/ioam/lancet external/lancet/lancet
-
-
-
-
-imagedirs:
-	${MAKE} -C User_Manual/images/
-
-
-bib2html:
-	${MAKE} -C shared/bib2html/
+help:
+	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  html       to make standalone HTML files"
+	@echo "  dirhtml    to make HTML files named index.html in directories"
+	@echo "  singlehtml to make a single large HTML file"
+	@echo "  pickle     to make pickle files"
+	@echo "  json       to make JSON files"
+	@echo "  htmlhelp   to make HTML files and a HTML help project"
+	@echo "  qthelp     to make HTML files and a qthelp project"
+	@echo "  devhelp    to make HTML files and a Devhelp project"
+	@echo "  epub       to make an epub"
+	@echo "  latex      to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
+	@echo "  latexpdf   to make LaTeX files and run them through pdflatex"
+	@echo "  text       to make text files"
+	@echo "  man        to make manual pages"
+	@echo "  texinfo    to make Texinfo files"
+	@echo "  info       to make Texinfo files and run them through makeinfo"
+	@echo "  gettext    to make PO message catalogs"
+	@echo "  changes    to make an overview of all changed/added/deprecated items"
+	@echo "  linkcheck  to check all external links for integrity"
+	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
+	-rm -rf $(BUILDDIR)/*
+	-rm -rf Reference_Manual/*-module.rst
 
-# Not removed by default, for people who do not have PHP locally
-clean_php:
-	${RM} ${PHPHTML}
-	${RM} .??*~ *~ */*~ */.??*~ reference-manual
-	${RM} Reference_Manual/*.html Reference_Manual/*.css Reference_Manual/*.png Reference_Manual/*.js
-	${RM} -r *_Reference/
+reference-manual:
+	python manualgen.py
 
-.PHONY: default all clean clean-php
+html: reference-manual
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	@echo
+	@echo "Website build finished. The HTML pages are in ${BUILDDIR}/html." 
 
+dirhtml:
+	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
+
+singlehtml:
+	$(SPHINXBUILD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/singlehtml
+	@echo
+	@echo "Build finished. The HTML page is in $(BUILDDIR)/singlehtml."
+
+pickle:
+	$(SPHINXBUILD) -b pickle $(ALLSPHINXOPTS) $(BUILDDIR)/pickle
+	@echo
+	@echo "Build finished; now you can process the pickle files."
+
+json:
+	$(SPHINXBUILD) -b json $(ALLSPHINXOPTS) $(BUILDDIR)/json
+	@echo
+	@echo "Build finished; now you can process the JSON files."
+
+htmlhelp:
+	$(SPHINXBUILD) -b htmlhelp $(ALLSPHINXOPTS) $(BUILDDIR)/htmlhelp
+	@echo
+	@echo "Build finished; now you can run HTML Help Workshop with the" \
+	      ".hhp project file in $(BUILDDIR)/htmlhelp."
+
+qthelp:
+	$(SPHINXBUILD) -b qthelp $(ALLSPHINXOPTS) $(BUILDDIR)/qthelp
+	@echo
+	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
+	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/Topographica.qhcp"
+	@echo "To view the help file:"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/Topographica.qhc"
+
+devhelp:
+	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
+	@echo
+	@echo "Build finished."
+	@echo "To view the help file:"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/Topographica"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/Topographica"
+	@echo "# devhelp"
+
+epub:
+	$(SPHINXBUILD) -b epub $(ALLSPHINXOPTS) $(BUILDDIR)/epub
+	@echo
+	@echo "Build finished. The epub file is in $(BUILDDIR)/epub."
+
+latex:
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
+	@echo
+	@echo "Build finished; the LaTeX files are in $(BUILDDIR)/latex."
+	@echo "Run \`make' in that directory to run these through (pdf)latex" \
+	      "(use \`make latexpdf' here to do that automatically)."
+
+latexpdf:
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
+	@echo "Running LaTeX files through pdflatex..."
+	$(MAKE) -C $(BUILDDIR)/latex all-pdf
+	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
+
+text:
+	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text
+	@echo
+	@echo "Build finished. The text files are in $(BUILDDIR)/text."
+
+man:
+	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
+	@echo
+	@echo "Build finished. The manual pages are in $(BUILDDIR)/man."
+
+texinfo:
+	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
+	@echo
+	@echo "Build finished. The Texinfo files are in $(BUILDDIR)/texinfo."
+	@echo "Run \`make' in that directory to run these through makeinfo" \
+	      "(use \`make info' here to do that automatically)."
+
+info:
+	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
+	@echo "Running Texinfo files through makeinfo..."
+	make -C $(BUILDDIR)/texinfo info
+	@echo "makeinfo finished; the Info files are in $(BUILDDIR)/texinfo."
+
+gettext:
+	$(SPHINXBUILD) -b gettext $(I18NSPHINXOPTS) $(BUILDDIR)/locale
+	@echo
+	@echo "Build finished. The message catalogs are in $(BUILDDIR)/locale."
+
+changes:
+	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) $(BUILDDIR)/changes
+	@echo
+	@echo "The overview file is in $(BUILDDIR)/changes."
+
+linkcheck:
+	$(SPHINXBUILD) -b linkcheck $(ALLSPHINXOPTS) $(BUILDDIR)/linkcheck
+	@echo
+	@echo "Link check complete; look for any errors in the above output " \
+	      "or in $(BUILDDIR)/linkcheck/output.txt."
+
+doctest:
+	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
+	@echo "Testing of doctests in the sources finished, look at the " \
+	      "results in $(BUILDDIR)/doctest/output.txt."

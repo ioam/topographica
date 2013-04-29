@@ -1,7 +1,3 @@
-*.html
-ImaGen_Reference
-ParamTk_Reference
-Param_Reference
-*.aux
-*.blg
-*.bbl
+_build
+Reference_Manual/*-module.rst
+*.pyc
