@@ -87,10 +87,10 @@ To automate the process (instead of having to manually start the VM and the slav
    build to ensure that the guest OS has enough time to become ready before the build starts, otherwise the slave won't be online in buildbot. They
    are then scheduled to power off 10 to 15 minutes after the build would be done::
    
-   55 3 * * * VBoxHeadless --startvm "WinXPvm"
-   30 4 * * * VBoxManage controlvm "WinXPvm" poweroff
-   55 4 * * * VBoxHeadless --startvm "Win7vm"
-   30 5 * * * VBoxManage controlvm "Win7vm" poweroff
+      55 3 * * * VBoxHeadless --startvm "WinXPvm"
+      30 4 * * * VBoxManage controlvm "WinXPvm" poweroff
+      55 4 * * * VBoxHeadless --startvm "Win7vm"
+      30 5 * * * VBoxManage controlvm "Win7vm" poweroff
    
 See a cron manual and `this discussion <http://superuser.com/questions/170866/how-to-run-a-cron-job-as-a-specific-user>`_ .
 

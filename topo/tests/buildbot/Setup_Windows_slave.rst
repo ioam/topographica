@@ -58,7 +58,7 @@ commands in Topographica consist of accessing paths given as strings.
    
    Windows does not treat single and double quotes equally. A string containing whitespace will only be parsed in its entirety if
    it is surrounded by double quotes. Because of this, running `topographica   -c 'from topo.tests.test_script import test_script’` on Windows
-   will result in the following error:
+   will result in the following error::
    
       File "E:\PROG\topographica\topo\misc\commandline.py", line 381, in c_action
           exec value in __main__.__dict__

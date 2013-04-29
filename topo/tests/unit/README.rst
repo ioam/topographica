@@ -188,6 +188,8 @@ PROBLEMS AND FURTHER WORK
 
 The following problems have been identified with existing test modules:
 
+- `nosetests` produces sinister warning messages when running on DICE; see Buildbot logs.
+
 - ``testaudio.py`` should not be skipped because of not finding a given audio file in the Topographica repository. It should get the file from the
   ``ioam/dataset-sounds/complex`` repository (file called ``daisy.wav``).
 
