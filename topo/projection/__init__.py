@@ -10,7 +10,7 @@ become available for any model.
 
 from copy import copy
 
-from numpy import exp,ones,zeros,array,nonzero,int32
+import numpy as np
 
 import param
 
@@ -79,7 +79,8 @@ class SharedWeightCF(ConnectionField):
 
 
 
-        self._has_norm_total=array([0],dtype=int32)
+        self._has_norm_total=np.array([0],dtype=np.int32)
+
         self.mask=mask
         weights_slice = self._create_input_sheet_slice(input_sheet,x,y,template,min_matrix_radius=min_matrix_radius)
         self.weights = weights_slice.submatrix(cf.weights)
@@ -196,7 +197,7 @@ class LeakyCFProjection(ResizableCFProjection):
 
     def __init__(self,**params):
         super(LeakyCFProjection,self).__init__(**params)
-        self.leaky_input_buffer = zeros(self.src.activity.shape)
+        self.leaky_input_buffer = np.zeros(self.src.activity.shape)
 
     def activate(self,input_activity):
         """
@@ -204,7 +205,7 @@ class LeakyCFProjection(ResizableCFProjection):
         and add a leaked version of it to the current input_activity. This
         function needs to deal with a finer time-scale.
         """
-        self.leaky_input_buffer = input_activity + self.leaky_input_buffer*exp(-self.decay_rate)
+        self.leaky_input_buffer = input_activity + self.leaky_input_buffer*np.exp(-self.decay_rate)
         super(LeakyCFProjection,self).activate(self.leaky_input_buffer)
 
     def n_bytes(self):
@@ -277,13 +278,13 @@ class ScaledCFProjection(CFProjection):
         self.activity *=0.0
 
         if self.x_avg is None:
-            self.x_avg=self.target*ones(self.dest.shape, activity_type)
+            self.x_avg=self.target*np.ones(self.dest.shape, activity_type)
         if self.scaled_x_avg is None:
-            self.scaled_x_avg=self.target*ones(self.dest.shape, activity_type)
+            self.scaled_x_avg=self.target*np.ones(self.dest.shape, activity_type)
         if self.sf is None:
-            self.sf=ones(self.dest.shape, activity_type)
+            self.sf=np.ones(self.dest.shape, activity_type)
         if self.lr_sf is None:
-            self.lr_sf=ones(self.dest.shape, activity_type)
+            self.lr_sf=np.ones(self.dest.shape, activity_type)
 
         self.response_fn(CFIter(self), input_activity, self.activity, self.strength)
         for of in self.output_fns:
@@ -345,7 +346,7 @@ class OneToOneProjection(Projection):
                      for y in reversed(self.dest.sheet_rows())
                      for x in self.dest.sheet_cols()]
 
-        self.src_idxs = array([rowcol2idx(r,c,self.src.activity.shape)
+        self.src_idxs = np.array([rowcol2idx(r,c,self.src.activity.shape)
                                for r,c in (self.src.sheet2matrixidx(u,v)
                                            for u,v in srccoords)])
 
@@ -359,11 +360,11 @@ class OneToOneProjection(Projection):
 
         # The [0] is required because numpy.nonzero returns the
         # nonzero indices wrapped in a one-tuple.
-        self.dest_idxs = nonzero(destmask)[0]
+        self.dest_idxs = np.nonzero(destmask)[0]
         self.src_idxs = self.src_idxs.take(self.dest_idxs)
         assert len(self.dest_idxs) == len(self.src_idxs)
 
-        self.activity = zeros(self.dest.shape,dtype=float)
+        self.activity = np.zeros(self.dest.shape,dtype=float)
 
     def activate(self,input):
         self.input_buffer = input
