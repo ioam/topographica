@@ -316,6 +316,23 @@ def moved_picklableclassattributes():
 
 support[12089] = moved_picklableclassattributes
 
+
+def LISSOM_moved_to_SettlingCFSheet():
+    # For snapshots saved before 90800126
+    
+    import topo.sheet.lissom
+    import topo.sheet.optimized
+    def _LISSOM_move_private_params_to_SettlingCFSheet(instance,state):
+        if '_SettlingCFSheet__counter_stack' not in state and '_LISSOM__counter_stack' in state:
+            state['_SettlingCFSheet__counter_stack']=state['_LISSOM__counter_stack']
+            del state['_LISSOM__counter_stack']
+
+    preprocess_state(topo.sheet.lissom.LISSOM,_LISSOM_move_private_params_to_SettlingCFSheet)
+    preprocess_state(topo.sheet.optimized.LISSOM_Opt,_LISSOM_move_private_params_to_SettlingCFSheet)
+
+support[90800126] = LISSOM_moved_to_SettlingCFSheet
+
+
 def removed_JointScaling():
     from numpy import zeros,ones
     import copy
