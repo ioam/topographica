@@ -80,6 +80,7 @@ class SharedWeightCF(ConnectionField):
 
 
         self._has_norm_total=np.array([0],dtype=np.int32)
+        self._norm_total=np.array([0.0],dtype=np.float64)
 
         self.mask=mask
         weights_slice = self._create_input_sheet_slice(input_sheet,x,y,template,min_matrix_radius=min_matrix_radius)
