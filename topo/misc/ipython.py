@@ -163,6 +163,7 @@ def load_ipython_extension(ip):
                 split_list = parameter_s.split()
                 for assignment in split_list[:-1]:
                     global_params.exec_in_context(assignment)
-                    self.run(parameter_s='-i %s' % split_list[-1])
+
+                self.run(parameter_s='-i %s' % split_list[-1])
 
         ip.register_magics(ScriptExecution)
