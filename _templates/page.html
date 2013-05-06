@@ -1,0 +1,51 @@
+{% extends "!page.html" %}
+{# add our custom css and js #}
+{% set css_files = css_files + ["_static/topo.css"] %}
+{% set script_files = script_files + ["_static/topo.js"] %}
+
+{# the menu at the top #}
+{% block rootrellink %}
+<li><a href="{{ pathto('index') }}">Home</a></li>
+<li><a href="{{ pathto('Downloads/index') }}">Downloads</a></li>
+<li><a href="{{ pathto('Tutorials/index') }}">Tutorials</a></li>
+<li><a href="{{ pathto('User_Manual/index') }}">User Manual</a></li>
+{# display "Current section:" when in a manual subpage #}
+{% if parents %}
+<li><ul class="parents">
+{% endif %}
+
+{% endblock %}
+
+{# close the above #}
+{% block relbaritems %}
+{% if parents %}
+</ul></li>
+{% endif %}
+{% endblock %}
+
+{% block sidebarsourcelink %}
+<h3>{{ _('This Page') }}</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/{{ pagename }}.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+{% endblock %}
+
+{% block sidebartoc %}
+<ul class="global-toc">
+<li><a href="{{ pathto('index') }}">Home</a></li>
+<li><a href="{{ pathto('News/index') }}">News</a></li>
+<li><a href="{{ pathto('Downloads/index') }}">Downloads</a></li>
+<li><a href="{{ pathto('Tutorials/index') }}">Tutorials</a></li>
+<li><a href="{{ pathto('User_Manual/index') }}">User Manual</a></li>
+<li><a href="{{ pathto('Reference_Manual/index') }}">Reference Manual</a></li>
+<li><a href="{{ pathto('Developer_Manual/index') }}">Developer Manual</a></li>
+<li><a href="{{ pathto('Forums/index') }}">Forums</a></li>
+<li><a href="{{ pathto('Team_Members/index') }}">Team Members</a></li>
+<li><a href="{{ pathto('Future_Work/index') }}">Future Work</a></li>
+<li><a href="{{ pathto('FAQ/index') }}">FAQ</a></li>
+<li><a href="{{ pathto('Links/index') }}">Links</a></li>
+<li><a href="{{ pathto('Home/pubs') }}">Publications</a></li>
+</ul>
+<h3><a href="{{ pathto(master_doc) }}">{{ _('Table Of Contents') }}</a></h3>
+{{ toc }}
+{% endblock %}
