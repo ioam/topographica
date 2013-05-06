@@ -39,6 +39,24 @@ Topographica) and optimized math and matrix libraries. On any
 system, the integrated distributions also provide a lot of useful
 related packages, including most of Topographica's dependencies.
 
+Quick recipe for Ubuntu Linux
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you're installing on Ubuntu Linux 12.04, all you need to do is:
+
+#. ``sudo apt-get update``
+#. ``sudo apt-get install python-pip python-tk python-imaging-tk python-numpy``
+#. ``sudo apt-get install ipython python-gmpy python-matplotlib python-scipy``
+#. ``sudo pip install topographica``
+
+Step 3 is optional, but highly recommended.  The remaining sections
+below explain the general cross-platform procedure, but if you have
+problems on any particular platform, you might consider using an
+Ubuntu 12.04 virtual machine to try out Topographica so that you can
+use the simple recipe above.  Similar approaches should work on other
+platforms, but we don't currently have a list of the precise steps in
+each case.
+
 Install via pip
 ~~~~~~~~~~~~~~~
 
