@@ -153,7 +153,7 @@ class RunBatchCommand(CommandTemplate):
 
       self._prelude = []
       if self.analysis=='RunBatchAnalysis':
-         self._prelude = ['from lancet.topographica import RunBatchAnalysis']
+         self._prelude = ['from topo.misc.lancext import RunBatchAnalysis']
       if self.analysis=='default':
          self._prelude = ["analysis = default_analysis_function"]
 
