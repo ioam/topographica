@@ -2,6 +2,17 @@
 News
 ****
 
+**2 May 2013:** New web site
+============================
+
+Topographica has moved to a Sphinx_ and reStructuredText_ website with
+online editing in Git, and integrated User and Reference Manuals,
+thanks to contributions from Wiktor Brodlo.  Please let us know if
+there are any problems, and meanwhile if you add code to Topographica,
+please also contribute documentation in .rst format, which is very
+easy to write and maintain.
+
+
 **23 Nov 2012:** Version 0.9.8 released
 =======================================
 
@@ -443,3 +454,5 @@ Includes a new `LISSOM tutorial`_. (`Linux screenshot`_).
 .. _reference manual: ../Reference_Manual/index.html
 .. _LISSOM tutorial: ../Tutorials/lissom_oo_or.html
 .. _Linux screenshot: ../_static/051107_topographica_screen_shot_white.png
+.. _reStructuredText: http://docutils.sourceforge.net/docs/user/rst/quickref.html
+.. _Sphinx: http://sphinx.pocoo.org

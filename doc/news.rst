@@ -1,3 +1,5 @@
+**2 May 2013:** New website_ launched.
+
 **23 Nov 2012:** Version 0.9.8 `released`_. Screenshots from
 previous releases: `plotting 1`_ (Linux), `plotting 2`_ (Mac),
 `docking`_ (Linux), `model editor`_ (Linux).
@@ -9,6 +11,7 @@ Subversion`_ to `GitHub Git`_; see `news page`_.
 `Param`_, `ParamTk`_, and `ImaGen`_ spin-out projects from
 Topographica.
 
+.. _website: News/index.html#may-2013-new-web-site
 .. _released: News/index.html#nov-2012-version-0-9-8-released
 .. _plotting 1: _static/080903_plotting1_fedora.png
 .. _plotting 2: _static/080903_plotting2_mac.png
