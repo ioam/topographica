@@ -183,6 +183,33 @@ def clear_event_queue():
     topo.sim.event_clear()
 
 
+class runscript(param.ParameterizedFunction):
+    """
+    Runs a script that has been parameterized with script parameters.
+    For example runscript('tiny.ty', cortex_density=10) will execute
+    the 'tiny.ty' script in the currently active namespace.
+    """
+
+    ns = param.Parameter(default=globals(), doc="""
+        The namespace in which the script in to be executed.""")
+
+    push = param.Callable(default=lambda x: x, doc="""
+        Hook to push the updated namespace for handling more
+        complicated namespaces (e.g. IPython Notebook).""")
+
+    def __call__(self, source_file, ns={}, **kwargs):
+
+        from topo.misc.commandline import global_params
+        ns = ns if ns else self.ns
+        for (key, val) in kwargs.items():
+            global_params.exec_in_context('%s=%s' % (key,val))
+
+        code = compile(open(source_file, 'r').read(), "<execution>", "exec")
+        exec code in ns #globals and locals
+
+        self.push(ns)
+
+
 def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=False,apply_output_fns=True):
     """
     Present the specified test patterns for the specified duration.

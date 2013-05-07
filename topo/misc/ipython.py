@@ -130,6 +130,10 @@ def load_ipython_extension(ip):
     # Load Imagen's IPython extension
     imagen.ipython.load_ipython_extension(ip)
 
+    from topo.command import runscript
+    runscript.ns = ip.user_ns
+    runscript.push = ip.push
+
     global _loaded
     if not _loaded:
         _loaded = True
@@ -138,32 +142,3 @@ def load_ipython_extension(ip):
         html_formatter.for_type_by_name('topo.base.sheet', 'Sheet', sheet_display)
         html_formatter.for_type_by_name('topo.base.projection', 'Projection', projection_display)
         html_formatter.for_type_by_name('topo.base.cf', 'ConnectionField', cf_display)
-
-
-        from topo.misc.commandline import global_params
-        from IPython.core.magics.execution import ExecutionMagics
-        from IPython.core import magic
-
-        @magic.magics_class
-        class ScriptExecution(ExecutionMagics):
-            """
-            Allows parameters to be specified when running files that use script
-            parameters (eg. Topographica model files).
-
-            Syntax as follows:
-
-            %runscript [<parameter assignments>]+ <script file>
-            """
-
-            @magic.line_magic
-            def runscript(self, parameter_s=''):
-                if parameter_s == '':
-                    raise Exception('Please specify the ty file to run')
-
-                split_list = parameter_s.split()
-                for assignment in split_list[:-1]:
-                    global_params.exec_in_context(assignment)
-
-                self.run(parameter_s='-i %s' % split_list[-1])
-
-        ip.register_magics(ScriptExecution)
