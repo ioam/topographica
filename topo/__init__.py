@@ -365,3 +365,10 @@ license (http://www.opensource.org/licenses/bsd-license.php).
 from numpy import seterr
 old_seterr_settings=seterr(all="raise",under="ignore")
 
+
+# Load Topographica IPython extension if imported as module
+try:
+    ip = get_ipython()
+    ip.extension_manager.load_extension('topo.misc.ipython')
+except:
+    pass

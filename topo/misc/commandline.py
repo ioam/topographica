@@ -631,5 +631,8 @@ def process_argv(argv):
                               banner1="",exit_msg="")
             if option.pdb:
                 ipshell.call_pdb = True
+
+            # Load Topographica IPython extension in embedded shell
+            ipshell.extension_manager.load_extension('topo.misc.ipython')
             ipshell()
             sys.exit()
