@@ -1278,7 +1278,7 @@ class test_measure(UnitCurveCommand):
             self._compute_curves(p,sheet,val_format="%.4f")
 
     def _feature_list(self,p):
-        return [Feature(name="orientation",values=[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0],cyclic=True),
+        return [Feature(name="orientation",values=[1.0]*22,cyclic=True),
     		Feature(name="contrast",values=[100],cyclic=False)]
 
 import types
