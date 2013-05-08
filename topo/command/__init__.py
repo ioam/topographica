@@ -186,16 +186,16 @@ def clear_event_queue():
 class runscript(param.ParameterizedFunction):
     """
     Runs a script that has been parameterized with script parameters.
-    For example runscript('tiny.ty', cortex_density=10) will execute
+    For example, runscript('tiny.ty', cortex_density=10) will execute
     the 'tiny.ty' script in the currently active namespace.
     """
 
     ns = param.Parameter(default=globals(), doc="""
-        The namespace in which the script in to be executed.""")
+        The namespace in which the script is to be executed.""")
 
     push = param.Callable(default=lambda x: x, doc="""
         Hook to push the updated namespace for handling more
-        complicated namespaces (e.g. IPython Notebook).""")
+        complicated namespaces, such as IPython Notebook.""")
 
     def __call__(self, source_file, ns={}, **kwargs):
 
