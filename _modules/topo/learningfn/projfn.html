@@ -1,0 +1,434 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.learningfn.projfn &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.learningfn" href="../learningfn.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../learningfn.html" accesskey="U">topo.learningfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.learningfn.projfn</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Learning functions for Projections.</span>
+
+
+<span class="sd">For example, CFProjectionLearningFunctions compute a new set of</span>
+<span class="sd">ConnectionFields when given an input and output pattern and a set of</span>
+<span class="sd">ConnectionField objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ones</span><span class="p">,</span><span class="n">zeros</span>
+<span class="kn">import</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">as</span> <span class="nn">Numeric</span>
+<span class="kn">from</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">import</span> <span class="n">Float</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFPLearningFn</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">activity_type</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">Hebbian</span><span class="p">,</span><span class="n">LearningFn</span>
+<span class="c"># Imported here so that all ProjectionLearningFns will be in the same package</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFPLF_Identity</span><span class="p">,</span><span class="n">CFPLF_Plugin</span>  <span class="c"># pyflakes:ignore (API import)</span>
+
+
+<div class="viewcode-block" id="CFPLF_EuclideanHebbian"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.projfn-module.html#topo.learningfn.projfn.CFPLF_EuclideanHebbian">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_EuclideanHebbian</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hebbian CFProjection learning rule based on Euclidean distance.</span>
+
+<span class="sd">    Learning is driven by the distance from the input pattern to the</span>
+<span class="sd">    weights, scaled by the current activity.  To implement a Kohonen</span>
+<span class="sd">    SOM algorithm, the activity should be the neighborhood kernel</span>
+<span class="sd">    centered around the winning unit, as implemented by KernelMax.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># CEBERRORALERT: ignoring the sheet mask</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="c"># This learning function does not need to scale the learning</span>
+        <span class="c"># rate like some do, so it does not use constant_sum_connection_rate()</span>
+
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">output_activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+                <span class="n">flati</span> <span class="o">=</span> <span class="n">r</span><span class="o">*</span><span class="n">cols</span><span class="o">+</span><span class="n">c</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">output_activity</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">flati</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">out</span> <span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">rate</span> <span class="o">=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">out</span>
+                    <span class="n">cf</span> <span class="o">=</span> <span class="n">cfs</span><span class="p">[</span><span class="n">flati</span><span class="p">]</span>
+                    <span class="n">X</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">get_input_matrix</span><span class="p">(</span><span class="n">input_activity</span><span class="p">)</span>
+                    <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">+=</span> <span class="n">rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+
+                    <span class="c"># CEBHACKALERT: see ConnectionField.__init__()</span>
+                    <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">cf</span><span class="o">.</span><span class="n">mask</span>
+
+
+
+<span class="c">#### JABHACKALERT: Untested</span>
+<span class="c">##class CFPLF_BCM(CFPLearningFn):</span>
+<span class="c">##    &quot;&quot;&quot;</span>
+<span class="c">##    Bienenstock, Cooper, and Munro (1982) learning rule with sliding threshold.</span>
+<span class="c">##</span>
+<span class="c">##    (See Dayan and Abbott, 2001, equation 8.12, 8.13).</span>
+<span class="c">##</span>
+<span class="c">##    Activities change only when there is both pre- and post-synaptic activity.</span>
+<span class="c">##    Threshold is adjusted based on recent firing rates.</span>
+<span class="c">##    &quot;&quot;&quot;</span>
+<span class="c">##    single_cf_fn = param.ClassSelector(LearningFn,default=BCMFixed())</span>
+<span class="c">##</span>
+<span class="c">##    unit_threshold_0=param.Number(default=0.5,bounds=(0,None),</span>
+<span class="c">##        doc=&quot;Initial value of threshold between LTD and LTP; actual value computed based on recent history.&quot;)</span>
+<span class="c">##    unit_threshold_learning_rate=param.Number(default=0.1,bounds=(0,None),</span>
+<span class="c">##        doc=&quot;Amount by which the unit_threshold is adjusted for each activity calculation.&quot;)</span>
+<span class="c">##</span>
+<span class="c">##    def __call__(self, iterator, input_activity, output_activity, learning_rate, **params):</span>
+<span class="c">##        cfs = iterator.proj._cfs</span>
+<span class="c">##        # Initialize thresholds the first time we learn the size of the output_activity.</span>
+<span class="c">##        if not hasattr(self,&#39;unit_thresholds&#39;):</span>
+<span class="c">##            self.unit_thresholds=ones(output_activity.shape,Float32)*self.unit_threshold_0</span>
+<span class="c">##</span>
+<span class="c">##        rows,cols = output_activity.shape</span>
+<span class="c">##</span>
+<span class="c">##        # JABALERT: Is this correct?</span>
+<span class="c">##      single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)</span>
+<span class="c">##</span>
+<span class="c">##        # avoid evaluating these references each time in the loop</span>
+<span class="c">##        single_cf_fn = self.single_cf_fn</span>
+<span class="c">##      for r in xrange(rows):</span>
+<span class="c">##            for c in xrange(cols):</span>
+<span class="c">##                cf = cfs[r][c]</span>
+<span class="c">##                input_act = cf.get_input_matrix(input_activity)</span>
+<span class="c">##                unit_activity = output_activity[r,c]</span>
+<span class="c">##                threshold=self.unit_thresholds[r,c]</span>
+<span class="c">##                #print cf.weights, type(cf.weights)</span>
+<span class="c">##                #print input_act, type(input_act)</span>
+<span class="c">##                #print single_connection_learning_rate,unit_activity,threshold, (unit_activity-threshold)</span>
+<span class="c">##                cf.weights += (single_connection_learning_rate * unit_activity * (unit_activity-threshold)) * input_act</span>
+<span class="c">##                self.unit_thresholds[r,c] += self.unit_threshold_learning_rate*(unit_activity*unit_activity-threshold)</span>
+<span class="c">##</span>
+<span class="c">##                # CEBHACKALERT: see ConnectionField.__init__()</span>
+<span class="c">##                cf.weights *= cf.mask</span>
+
+
+</div>
+<div class="viewcode-block" id="CFPLF_Trace"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.projfn-module.html#topo.learningfn.projfn.CFPLF_Trace">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_Trace</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    LearningFn that incorporates a trace of recent activity,</span>
+<span class="sd">    not just the current activity.</span>
+
+<span class="sd">    Based on P. Foldiak (1991), &quot;Learning Invariance from</span>
+<span class="sd">    Transformation Sequences&quot;, Neural Computation 3:194-200.  Also see</span>
+<span class="sd">    Sutton and Barto (1981) and Wallis and Rolls (1997).</span>
+
+<span class="sd">    Incorporates a decay term to keep the weight vector bounded, and</span>
+<span class="sd">    so it does not normally require any output_fn normalization for</span>
+<span class="sd">    stability.</span>
+
+<span class="sd">    NOT YET TESTED.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">trace_strength</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;How much the learning is dominated by the activity trace, relative to the current value.&quot;</span><span class="p">)</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;LearningFn that will be applied to each CF individually.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="c">##Initialise traces to zero if they don&#39;t already exist</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;traces&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">=</span><span class="n">zeros</span><span class="p">(</span><span class="n">output_activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">activity_type</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+            <span class="n">unit_activity</span> <span class="o">=</span> <span class="n">output_activity</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c">#   print &quot;unit activity is&quot;,unit_activity</span>
+        <span class="c">#    print &quot;self trace is&quot;,self.traces[r,c]</span>
+            <span class="n">new_trace</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_strength</span><span class="o">*</span><span class="n">unit_activity</span><span class="p">)</span><span class="o">+</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_strength</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="c">#     print &quot;and is now&quot;,new_trace</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_trace</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">+=</span> <span class="n">single_connection_learning_rate</span> <span class="o">*</span> <span class="n">new_trace</span> <span class="o">*</span> \
+                              <span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">get_input_matrix</span><span class="p">(</span><span class="n">input_activity</span><span class="p">)</span> <span class="o">-</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+
+            <span class="c">#CEBHACKALERT: see ConnectionField.__init__()</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">cf</span><span class="o">.</span><span class="n">mask</span>
+
+
+</div>
+<div class="viewcode-block" id="CFPLF_OutstarHebbian"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.projfn-module.html#topo.learningfn.projfn.CFPLF_OutstarHebbian">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_OutstarHebbian</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CFPLearningFunction applying the specified (default is Hebbian)</span>
+<span class="sd">    single_cf_fn to each CF, where normalization is done in an outstar-manner.</span>
+
+<span class="sd">    Presumably does not need a separate output_fn for normalization.</span>
+
+<span class="sd">    NOT YET TESTED.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;LearningFn that will be applied to each CF individually.&quot;</span><span class="p">)</span>
+
+    <span class="n">outstar_wsum</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="c"># avoid evaluating these references each time in the loop</span>
+        <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span>
+        <span class="n">outstar_wsum</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">input_activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+            <span class="n">single_cf_fn</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">get_input_matrix</span><span class="p">(</span><span class="n">input_activity</span><span class="p">),</span>
+                         <span class="n">output_activity</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">single_connection_learning_rate</span><span class="p">)</span>
+            <span class="c"># Outstar normalization</span>
+            <span class="n">wrows</span><span class="p">,</span><span class="n">wcols</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">for</span> <span class="n">wr</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">wrows</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">wc</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">wcols</span><span class="p">):</span>
+                    <span class="n">outstar_wsum</span><span class="p">[</span><span class="n">wr</span><span class="p">][</span><span class="n">wc</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">wr</span><span class="p">][</span><span class="n">wc</span><span class="p">]</span>
+
+            <span class="c"># CEBHACKALERT: see ConnectionField.__init__()</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">cf</span><span class="o">.</span><span class="n">mask</span>
+
+
+
+</div>
+<div class="viewcode-block" id="HomeoSynaptic"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.projfn-module.html#topo.learningfn.projfn.HomeoSynaptic">[docs]</a><span class="k">class</span> <span class="nc">HomeoSynaptic</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Learning function using homeostatic synaptic scaling from</span>
+<span class="sd">    Sullivan &amp; de Sa, &quot;Homeostatic Synaptic Scaling in Self-Organizing Maps&quot;,</span>
+<span class="sd">    Neural Networks (2006), 19(6-7):734-43.</span>
+
+<span class="sd">    Does not necessarily require output_fn normalization for stability.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;LearningFn that will be applied to each CF individually&quot;</span><span class="p">)</span>
+
+    <span class="n">beta_n</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;homeostatic learning rate&quot;</span><span class="p">)</span>
+
+    <span class="n">beta_c</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;time window over which the neuron&#39;s firing rate is averaged&quot;</span><span class="p">)</span>
+
+    <span class="n">activity_target</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+         <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Target average activity&quot;</span><span class="p">)</span>
+
+    <span class="c">#debug = param.Boolean(default=False,doc=&quot;Print average activity values&quot;)</span>
+    <span class="c">#beta_n = param.Number(default=0.00033,bounds=(0,None),doc=&quot;Homeostatic learning rate&quot;) #Too small?</span>
+    <span class="c">#beta_c = param.Number(default=0.000033,bounds=(0,None),doc=&quot;Time window over which the neuron&#39;s firing rate is averaged&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HomeoSynaptic</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp_hist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ave_hist</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the value of the given weights matrix based on the</span>
+<span class="sd">        input_activity matrix (of the same size as the weights matrix)</span>
+<span class="sd">        and the response of this unit (the unit_activity), governed by</span>
+<span class="sd">        a per-connection learning rate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;averages&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">averages</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">output_activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">Float</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.1</span>
+
+
+            <span class="c"># normalize initial weights to 1.0</span>
+            <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+                <span class="n">current_norm_value</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="n">Numeric</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+                <span class="k">if</span> <span class="n">current_norm_value</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">factor</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">current_norm_value</span><span class="p">)</span>
+                    <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">factor</span>
+
+        <span class="c"># compute recent average of output activity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">averages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_c</span> <span class="o">*</span> <span class="n">output_activity</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_c</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">averages</span>
+        <span class="n">activity_norm</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_n</span> <span class="o">*</span> \
+           <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">averages</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity_target</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">activity_target</span><span class="p">)</span>
+
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+
+        <span class="c"># avoid evaluating these references each time in the loop</span>
+        <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span>
+        <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+            <span class="n">single_cf_fn</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">get_input_matrix</span><span class="p">(</span><span class="n">input_activity</span><span class="p">),</span>
+                         <span class="n">output_activity</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">single_connection_learning_rate</span><span class="p">)</span>
+
+            <span class="c"># homeostatic normalization</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">/=</span> <span class="n">activity_norm</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c"># CEBHACKALERT: see ConnectionField.__init__()</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">cf</span><span class="o">.</span><span class="n">mask</span>
+
+        <span class="c"># For analysis only; can be removed (in which case also remove the initializations above)</span>
+<span class="c"># CEBALERT: I changed [0][7] to [0]!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ave_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">averages</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp_hist</span><span class="o">.</span><span class="n">append</span> <span class="p">(</span><span class="n">Numeric</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">())))</span>
+
+
+
+</div>
+<div class="viewcode-block" id="CFPLF_PluginScaled"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.projfn-module.html#topo.learningfn.projfn.CFPLF_PluginScaled">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_PluginScaled</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CFPLearningFunction applying the specified single_cf_fn to each CF.</span>
+<span class="sd">    Scales the single-connection learning rate by a scaling factor</span>
+<span class="sd">    that is different for each individual unit. Thus each individual</span>
+<span class="sd">    connection field uses a different learning rate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Accepts a LearningFn that will be applied to each CF individually.&quot;</span><span class="p">)</span>
+
+    <span class="n">learning_rate_scaling_factor</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Matrix of scaling factors for scaling the learning rate of each CF individually.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the specified single_cf_fn to every CF.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scaling_factor</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scaling_factor</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">output_activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span>
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+            <span class="n">sc_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scaling_factor</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">single_connection_learning_rate</span>
+            <span class="n">single_cf_fn</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">get_input_matrix</span><span class="p">(</span><span class="n">input_activity</span><span class="p">),</span>
+                         <span class="n">output_activity</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">sc_learning_rate</span><span class="p">)</span>
+            <span class="c"># CEBHACKALERT: see ConnectionField.__init__() re. mask &amp; output fn</span>
+            <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">cf</span><span class="o">.</span><span class="n">mask</span>
+
+
+<div class="viewcode-block" id="CFPLF_PluginScaled.update_scaling_factor"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.projfn-module.html#topo.learningfn.projfn.CFPLF_PluginScaled.update_scaling_factor">[docs]</a>    <span class="k">def</span> <span class="nf">update_scaling_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_scaling_factor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the single-connection learning rate scaling factor.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scaling_factor</span> <span class="o">=</span> <span class="n">new_scaling_factor</span>
+
+</div></div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;CFPLF_Identity&quot;</span><span class="p">,</span>
+    <span class="s">&quot;CFPLF_Plugin&quot;</span><span class="p">,</span>
+    <span class="s">&quot;CFPLF_EuclideanHebbian&quot;</span><span class="p">,</span>
+    <span class="s">&quot;CFPLF_Trace&quot;</span><span class="p">,</span>
+    <span class="s">&quot;CFPLF_OutstarHebbian&quot;</span><span class="p">,</span>
+    <span class="s">&quot;HomeoSynaptic&quot;</span><span class="p">,</span>
+    <span class="s">&quot;CFPLF_PluginScaled&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/learningfn/projfn.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../learningfn.html" >topo.learningfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

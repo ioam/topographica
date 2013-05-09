@@ -1,0 +1,556 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.boundingregion &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="imagen" href="../imagen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" accesskey="U">imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for imagen.boundingregion</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Bounding regions and bounding boxes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span><span class="o">=</span><span class="s">&#39;$Revision$&#39;</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span>
+
+<span class="c">### JABALERT: The aarect information should probably be rewritten in</span>
+<span class="c">### matrix notation, not list notation, so that it can be scaled,</span>
+<span class="c">### translated, etc. easily.</span>
+<span class="c">###</span>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">get_occupied_slots</span>
+
+<div class="viewcode-block" id="BoundingRegion"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingRegion">[docs]</a><span class="k">class</span> <span class="nc">BoundingRegion</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract bounding region class, for any portion of a 2D plane.</span>
+
+<span class="sd">    Only subclasses can be instantiated directly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;_aarect&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    <span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xoff</span><span class="p">,</span><span class="n">yoff</span><span class="p">):</span>
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span> <span class="o">=</span> <span class="n">AARectangle</span><span class="p">((</span><span class="n">l</span><span class="o">+</span><span class="n">xoff</span><span class="p">,</span><span class="n">b</span><span class="o">+</span><span class="n">yoff</span><span class="p">),(</span><span class="n">r</span><span class="o">+</span><span class="n">xoff</span><span class="p">,</span><span class="n">t</span><span class="o">+</span><span class="n">yoff</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">theta</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    <span class="k">def</span> <span class="nf">aarect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<div class="viewcode-block" id="BoundingRegion.centroid"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingRegion.centroid">[docs]</a>    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the coordinates of the center of this BoundingBox</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span><span class="o">=</span><span class="n">AARectangle</span><span class="p">(</span><span class="o">*</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="c"># CEBALERT: same as methods on Parameter</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># BoundingRegions have slots, not a dict, so we have to</span>
+        <span class="c"># support pickle and deepcopy ourselves.</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">get_occupied_slots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">state</span><span class="p">[</span><span class="n">slot</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">slot</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state</span><span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BoundingBox"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBox">[docs]</a><span class="k">class</span> <span class="nc">BoundingBox</span><span class="p">(</span><span class="n">BoundingRegion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A rectangular bounding box defined either by two points forming</span>
+<span class="sd">    an axis-aligned rectangle (or simply a radius for a square).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return BoundingBox(points=((left,bottom),(right,top)))</span>
+
+<span class="sd">        Reimplemented here so that &#39;print&#39; for a BoundingBox</span>
+<span class="sd">        will display the bounds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="o">-</span><span class="n">l</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">==</span> <span class="o">-</span><span class="n">b</span> <span class="ow">and</span> <span class="n">r</span> <span class="o">==</span> <span class="n">t</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;BoundingBox(radius=</span><span class="si">%s</span><span class="s">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;BoundingBox(points=((</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">),(</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">)))&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">script_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imports</span><span class="o">=</span><span class="p">[],</span><span class="n">prefix</span><span class="o">=</span><span class="s">&quot;    &quot;</span><span class="p">):</span>
+        <span class="c"># Generate import statement</span>
+        <span class="n">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__module__</span>
+        <span class="n">imports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;from </span><span class="si">%s</span><span class="s"> import </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mod</span><span class="p">,</span><span class="n">cls</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a BoundingBox.</span>
+
+<span class="sd">        Either &#39;radius&#39; or &#39;points&#39; can be specified for the AARectangle.</span>
+
+<span class="sd">        If neither radius nor points is passed in, create a default</span>
+<span class="sd">        AARectangle defined by (-0.5,-0.5),(0.5,0.5).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># if present, &#39;radius&#39;, &#39;min_radius&#39;, and &#39;points&#39; are deleted from</span>
+        <span class="c"># args before they&#39;re passed to the superclass (because they</span>
+        <span class="c"># aren&#39;t parameters to be set)</span>
+        <span class="k">if</span> <span class="s">&#39;radius&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;radius&#39;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;radius&#39;</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span><span class="o">=</span><span class="n">AARectangle</span><span class="p">((</span><span class="o">-</span><span class="n">r</span><span class="p">,</span><span class="o">-</span><span class="n">r</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">r</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="s">&#39;points&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span> <span class="o">=</span> <span class="n">AARectangle</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;points&#39;</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;points&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span> <span class="o">=</span> <span class="n">AARectangle</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">))</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BoundingBox.contains"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBox.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if the given point is contained within the</span>
+<span class="sd">        bounding box, where all boundaries of the box are</span>
+<span class="sd">        considered to be inclusive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">left</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">right</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">top</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoundingBox.contains_exclusive"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBox.contains_exclusive">[docs]</a>    <span class="k">def</span> <span class="nf">contains_exclusive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the given point is contained within the</span>
+<span class="sd">        bounding box, where the bottom and right boundaries are</span>
+<span class="sd">        considered exclusive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">_left</span><span class="p">,</span><span class="n">a</span><span class="o">.</span><span class="n">_bottom</span><span class="p">,</span><span class="n">a</span><span class="o">.</span><span class="n">_right</span><span class="p">,</span><span class="n">a</span><span class="o">.</span><span class="n">_top</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">left</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">&lt;</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">top</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BoundingBox.containsbb_exclusive"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBox.containsbb_exclusive">[docs]</a>    <span class="k">def</span> <span class="nf">containsbb_exclusive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if the given BoundingBox x is contained within the</span>
+<span class="sd">        bounding box, where at least one of the boundaries of the box has</span>
+<span class="sd">        to be exclusive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="n">leftx</span><span class="p">,</span><span class="n">bottomx</span><span class="p">,</span><span class="n">rightx</span><span class="p">,</span><span class="n">topx</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">left</span> <span class="o">&lt;=</span> <span class="n">leftx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">&lt;=</span> <span class="n">bottomx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">right</span> <span class="o">&gt;=</span> <span class="n">rightx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">top</span> <span class="o">&gt;=</span> <span class="n">topx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="p">((</span><span class="n">left</span> <span class="o">==</span> <span class="n">leftx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">==</span> <span class="n">bottomx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">right</span> <span class="o">==</span> <span class="n">rightx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">top</span> <span class="o">==</span> <span class="n">topx</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="BoundingBox.containsbb_inclusive"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBox.containsbb_inclusive">[docs]</a>    <span class="k">def</span> <span class="nf">containsbb_inclusive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if the given BoundingBox x is contained within the</span>
+<span class="sd">        bounding box, including cases of exact match.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="n">leftx</span><span class="p">,</span><span class="n">bottomx</span><span class="p">,</span><span class="n">rightx</span><span class="p">,</span><span class="n">topx</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">left</span> <span class="o">&lt;=</span> <span class="n">leftx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">&lt;=</span> <span class="n">bottomx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">right</span> <span class="o">&gt;=</span> <span class="n">rightx</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">top</span> <span class="o">&gt;=</span> <span class="n">topx</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BoundingBox.upperexclusive_contains"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBox.upperexclusive_contains">[docs]</a>    <span class="k">def</span> <span class="nf">upperexclusive_contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if the given point is contained within the</span>
+<span class="sd">        bounding box, where the right and upper boundaries</span>
+<span class="sd">        are exclusive, and the left and lower boundaries are</span>
+<span class="sd">        inclusive.  Useful for tiling a plane into non-overlapping</span>
+<span class="sd">        regions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">left</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bottom</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">top</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">aarect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span>
+
+<div class="viewcode-block" id="BoundingBox.lbrt"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBox.lbrt">[docs]</a>    <span class="k">def</span> <span class="nf">lbrt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return left,bottom,right,top values for the BoundingBox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aarect</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="Cartesian2DPoint"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.Cartesian2DPoint">[docs]</a><span class="k">class</span> <span class="nc">Cartesian2DPoint</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameter whose value represents a point in a 2D Cartesian plane.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">### JABALERT: Should accept and respect a BoundingBox bounds.</span>
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span> <span class="c">## Test that it is a 2-tuple</span>
+            <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Cartesian2DPoint</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__set__</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Parameter must be a 2D point (an x,y tuple).&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BoundingEllipse"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingEllipse">[docs]</a><span class="k">class</span> <span class="nc">BoundingEllipse</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Similar to BoundingBox, but the region is the ellipse</span>
+<span class="sd">    inscribed within the rectangle.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="n">xr</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span><span class="o">-</span><span class="n">left</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">yr</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span><span class="o">-</span><span class="n">bottom</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">xc</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">xr</span>
+        <span class="n">yc</span> <span class="o">=</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">yr</span>
+
+        <span class="n">xd</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span><span class="n">xc</span>
+        <span class="n">yd</span> <span class="o">=</span> <span class="n">y</span><span class="o">-</span><span class="n">yc</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">xd</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">xr</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">yd</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">yr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+
+<span class="c"># CEBALERT: various subclasses of BoundingRegion, such as</span>
+<span class="c"># BoundingCircle, do not set _aarect during __init__. Should</span>
+<span class="c"># BoundingRegion have an __init__ that includes setting _aarect?</span>
+<span class="c"># Currently, BoundingRegion only sets _aarect when certain methods are</span>
+<span class="c"># called, such as translate(). Other subclasses (such as BoundingBox)</span>
+<span class="c"># set _aarect during __init__. I&#39;m a bit confused about the point.</span>
+<span class="c"># Anyway, the situation as it is now means BoundingCircle and other</span>
+<span class="c"># such classes can&#39;t be pickled.</span>
+</div>
+<div class="viewcode-block" id="BoundingCircle"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingCircle">[docs]</a><span class="k">class</span> <span class="nc">BoundingCircle</span><span class="p">(</span><span class="n">BoundingRegion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A circular BoundingRegion.</span>
+
+<span class="sd">    Takes parameters center (a single 2D point (x,y)) and radius (a</span>
+<span class="sd">    scalar radius).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;radius&#39;</span><span class="p">,</span><span class="s">&#39;center&#39;</span><span class="p">]</span>
+
+    <span class="c">#radius = param.Number(0.5,bounds=(0.0,None))</span>
+    <span class="c">#center = Cartesian2DPoint((0.0,0.0))</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">),</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="o">=</span><span class="n">center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="o">=</span><span class="n">radius</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BoundingCircle</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">xc</span><span class="p">,</span><span class="n">yc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span>
+        <span class="n">xd</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span><span class="n">xc</span>
+        <span class="n">yd</span> <span class="o">=</span> <span class="n">y</span><span class="o">-</span><span class="n">yc</span>
+        <span class="k">return</span> <span class="n">xd</span><span class="o">*</span><span class="n">xd</span> <span class="o">+</span> <span class="n">yd</span><span class="o">*</span><span class="n">yd</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span>
+
+    <span class="k">def</span> <span class="nf">aarect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">xc</span><span class="p">,</span><span class="n">yc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span>
+        <span class="k">return</span> <span class="n">AARectangle</span><span class="p">((</span><span class="n">xc</span><span class="o">-</span><span class="n">r</span><span class="p">,</span><span class="n">yc</span><span class="o">-</span><span class="n">r</span><span class="p">),(</span><span class="n">xc</span><span class="o">+</span><span class="n">r</span><span class="p">,</span><span class="n">yc</span><span class="o">+</span><span class="n">r</span><span class="p">))</span>
+
+
+</div>
+<span class="k">class</span> <span class="nc">Unbounded</span><span class="p">(</span><span class="n">BoundingRegion</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xoff</span><span class="p">,</span><span class="n">yoff</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">theta</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">aarect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AARectangle</span><span class="p">((</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="o">-</span><span class="n">inf</span><span class="p">),(</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span>
+
+
+<span class="c">### This class is valid only for BoundingBoxes, because it</span>
+<span class="c">### only deals with the aarect(), ignoring arbitrarily shaped</span>
+<span class="c">### BoundingRegions.  To be a real Intersection(BoundingRegion) class,</span>
+<span class="c">### it would need to have a contains() function that computes a</span>
+<span class="c">### logical AND of the contains() for each of the regions supplied.</span>
+<span class="c">### Scale, rotate, and translate would also need to be applied to the</span>
+<span class="c">### individual regions each time.</span>
+<span class="c">### Could be simpler to write this as a function, because it just</span>
+<span class="c">### ends up with a simple BoundingBox after construction.</span>
+<div class="viewcode-block" id="BoundingBoxIntersection"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingBoxIntersection">[docs]</a><span class="k">class</span> <span class="nc">BoundingBoxIntersection</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A BoundingBox initialized as the intersection of the supplied list of BoundingBoxes.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">boxes</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a list of BoundingBoxes, computes a new BoundingBox that is</span>
+<span class="sd">        the intersection of all of the supplied boxes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BoundingBoxIntersection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">boxes</span><span class="p">]</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">l</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">])</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">b</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">])</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">r</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">])</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">])</span>
+
+        <span class="c"># JABALERT: Why is this one __aarect, and BoundingBox</span>
+        <span class="c"># _aarect?  Probably should change this one to _aarect and</span>
+        <span class="c"># eliminate aarect(self).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__aarect</span> <span class="o">=</span> <span class="n">AARectangle</span><span class="p">((</span><span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">),(</span><span class="n">right</span><span class="p">,</span><span class="n">top</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">aarect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__aarect</span>
+
+
+<span class="c"># JABALERT: Should probably remove top, bottom, etc. accessor functions,</span>
+<span class="c"># and use the slot itself instead.</span>
+<span class="c">###################################################</span></div>
+<div class="viewcode-block" id="AARectangle"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.AARectangle">[docs]</a><span class="k">class</span> <span class="nc">AARectangle</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Axis-aligned rectangle class.</span>
+
+<span class="sd">    Defines the smallest axis-aligned rectangle that encloses a set of</span>
+<span class="sd">    points.</span>
+
+<span class="sd">    Usage:  aar = AARectangle( (x1,y1),(x2,y2), ... , (xN,yN) )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;_left&#39;</span><span class="p">,</span><span class="s">&#39;_bottom&#39;</span><span class="p">,</span><span class="s">&#39;_right&#39;</span><span class="p">,</span><span class="s">&#39;_top&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">points</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_top</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bottom</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+
+
+    <span class="c"># support for pickling because this class has __slots__ rather</span>
+    <span class="c"># than __dict__</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span><span class="o">=</span><span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__slots__</span><span class="p">:</span>
+            <span class="n">state</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AARectangle.top"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.AARectangle.top">[docs]</a>    <span class="k">def</span> <span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the y-coordinate of the top of the rectangle.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top</span>
+</div>
+<div class="viewcode-block" id="AARectangle.bottom"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.AARectangle.bottom">[docs]</a>    <span class="k">def</span> <span class="nf">bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the y-coordinate of the bottom of the rectangle.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bottom</span>
+</div>
+<div class="viewcode-block" id="AARectangle.left"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.AARectangle.left">[docs]</a>    <span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the x-coordinate of the left side of the rectangle.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span>
+</div>
+<div class="viewcode-block" id="AARectangle.right"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.AARectangle.right">[docs]</a>    <span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the x-coordinate of the right side of the rectangle.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span>
+</div>
+<div class="viewcode-block" id="AARectangle.lbrt"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.AARectangle.lbrt">[docs]</a>    <span class="k">def</span> <span class="nf">lbrt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return (left,bottom,right,top) as a tuple.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_left</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_bottom</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_right</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_top</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="AARectangle.centroid"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.AARectangle.centroid">[docs]</a>    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the centroid of the rectangle.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">right</span><span class="o">+</span><span class="n">left</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,(</span><span class="n">top</span><span class="o">+</span><span class="n">bottom</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="n">l1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="n">t1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="n">l2</span><span class="p">,</span><span class="n">b2</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">t2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span><span class="n">l2</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span><span class="n">b2</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="n">t2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">AARectangle</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">),(</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span>
+
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bottom</span>
+
+    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">r</span> <span class="o">&lt;=</span> <span class="n">l</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">)</span>
+
+
+</div>
+<span class="k">def</span> <span class="nf">identity_hook</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">val</span><span class="p">):</span> <span class="k">return</span> <span class="n">val</span>
+
+
+
+<span class="c">### JABALERT: Should classes like this inherit from something like</span>
+<span class="c">### ClassInstanceParameter, which takes a class name and verifies that</span>
+<span class="c">### the value is in that class?</span>
+<span class="c">###</span>
+<span class="c">### Do we also need a BoundingBoxParameter?</span>
+<div class="viewcode-block" id="BoundingRegionParameter"><a class="viewcode-back" href="../../Reference_Manual/imagen.boundingregion-module.html#imagen.boundingregion.BoundingRegionParameter">[docs]</a><span class="k">class</span> <span class="nc">BoundingRegionParameter</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameter whose value can be any BoundingRegion instance, enclosing a region in a 2D plane.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__slots__</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;set_hook&#39;</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_hook</span> <span class="o">=</span> <span class="n">identity_hook</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BoundingRegionParameter</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span><span class="n">instantiate</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+
+
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set a non default bounding box, use the installed set hook to</span>
+<span class="sd">        apply any conversion or transformation on the coordinates and</span>
+<span class="sd">        create a new bounding box with the converted coordinate set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">set_hook</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">point</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">coords</span> <span class="o">!=</span> <span class="n">val</span><span class="o">.</span><span class="n">lbrt</span><span class="p">():</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">[(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]),(</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">coords</span><span class="p">[</span><span class="mi">3</span><span class="p">])])</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span><span class="n">BoundingRegion</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Parameter must be a BoundingRegion.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">BoundingRegionParameter</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__set__</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">val</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/imagen/boundingregion.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" >imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

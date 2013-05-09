@@ -1,0 +1,440 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>param &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="param">
+<h1>param<a class="headerlink" href="#param" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance0c0d2b112e.svg" usemap="#inheritance0c0d2b112e" class="inheritance"/></div><map id="inheritance0c0d2b112e" name="inheritance0c0d2b112e">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="param.parameterized-module.html">param.parameterized</a></li>
+</ul>
+</div>
+<div class="section" id="module-param">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-param" title="Permalink to this headline">¶</a></h2>
+<p>Parameters are a kind of class attribute allowing special behavior,
+including dynamically generated parameter values, documentation
+strings, constant and read-only parameters, and type or range checking
+at assignment time.</p>
+<p>Potentially useful for any large Python program that needs
+user-modifiable object attributes; see the parameterized.Parameter and
+parameterized.Parameterized classes for more information.</p>
+<p>This file contains subclasses of Parameter, implementing specific
+parameter types (e.g. Number).</p>
+<dl class="attribute">
+<dt id="param.Array">
+<tt class="descclassname">param.</tt><tt class="descname">Array</tt><a class="reference internal" href="../_modules/param.html#Array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value is a numpy array.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Boolean">
+<tt class="descclassname">param.</tt><tt class="descname">Boolean</tt><a class="reference internal" href="../_modules/param.html#Boolean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Boolean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binary or tristate Boolean Parameter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Callable">
+<tt class="descclassname">param.</tt><tt class="descname">Callable</tt><a class="reference internal" href="../_modules/param.html#Callable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Callable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter holding a value that is a callable object, such as a function.</p>
+<p>A keyword argument instantiate=True should be provided when a
+function object is used that might have state.  On the other hand,
+regular standalone functions cannot be deepcopied as of Python
+2.4, so instantiate must be False for those values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.ClassSelector">
+<tt class="descclassname">param.</tt><tt class="descname">ClassSelector</tt><a class="reference internal" href="../_modules/param.html#ClassSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.ClassSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value is an instance of the specified class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Composite">
+<tt class="descclassname">param.</tt><tt class="descname">Composite</tt><a class="reference internal" href="../_modules/param.html#Composite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Composite" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Parameter that is a composite of a set of other attributes of the class.</p>
+<p>The constructor argument &#8216;attribs&#8217; takes a list of attribute
+names, which may or may not be Parameters.  Getting the parameter
+returns a list of the values of the constituents of the composite,
+in the order specified.  Likewise, setting the parameter takes a
+sequence of values and sets the value of the constituent
+attributes.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Dict">
+<tt class="descclassname">param.</tt><tt class="descname">Dict</tt><a class="reference internal" href="../_modules/param.html#Dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value is a dictionary.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Dynamic">
+<tt class="descclassname">param.</tt><tt class="descname">Dynamic</tt><a class="reference internal" href="../_modules/param.html#Dynamic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Dynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value can be generated dynamically by a callable
+object.</p>
+<p>If a Parameter is declared as Dynamic, it can be set a callable
+object (such as a function or callable class), and getting the
+parameter&#8217;s value will call that callable.</p>
+<p>Note that at present, the callable object must allow attributes
+to be set on itself.</p>
+<p>[Python 2.4 limitation: the callable object must be an instance of a
+callable class, rather than a named function or a lambda function,
+otherwise the object will not be picklable or deepcopyable.]</p>
+<p>Setting Dynamic.time_fn allows the production of dynamic values to
+be controlled: a new value will be produced only if the current
+value of time_fn is greater than what it was last time the
+parameter value was requested.</p>
+<p>If time_fn is set to None, a new value is always produced.</p>
+<p>If Dynamic.time_fn is set to something other than None, it must,
+when called, produce a number.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Filename">
+<tt class="descclassname">param.</tt><tt class="descname">Filename</tt><a class="reference internal" href="../_modules/param.html#Filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter that can be set to a string specifying the path of a file.</p>
+<p>The string should be specified in UNIX style, but it will be
+returned in the format of the user&#8217;s operating system.</p>
+<p>The specified path can be absolute, or relative to either:</p>
+<ul class="simple">
+<li>any of the paths specified in the search_paths attribute (if
+search_paths is not None);</li>
+</ul>
+<p>or</p>
+<ul class="simple">
+<li>any of the paths searched by resolve_path() (if search_paths
+is None).</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Foldername">
+<tt class="descclassname">param.</tt><tt class="descname">Foldername</tt><a class="reference internal" href="../_modules/param.html#Foldername"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Foldername" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter that can be set to a string specifying the path of a folder.</p>
+<p>The string should be specified in UNIX style, but it will be
+returned in the format of the user&#8217;s operating system.</p>
+<p>The specified path can be absolute, or relative to either:</p>
+<ul class="simple">
+<li>any of the paths specified in the search_paths attribute (if
+search_paths is not None);</li>
+</ul>
+<p>or</p>
+<ul class="simple">
+<li>any of the paths searched by resolve_dir_path() (if search_paths
+is None).</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.HookList">
+<tt class="descclassname">param.</tt><tt class="descname">HookList</tt><a class="reference internal" href="../_modules/param.html#HookList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.HookList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value is a list of callable objects.</p>
+<p>This type of List Parameter is typically used to provide a place
+for users to register a set of commands to be called at a
+specified place in some sequence of processing steps.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Integer">
+<tt class="descclassname">param.</tt><tt class="descname">Integer</tt><a class="reference internal" href="../_modules/param.html#Integer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Integer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeric Parameter required to be an Integer</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.List">
+<tt class="descclassname">param.</tt><tt class="descname">List</tt><a class="reference internal" href="../_modules/param.html#List"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.List" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value is a list of objects, usually of a specified type.</p>
+<p>The bounds allow a minimum and/or maximum length of
+list to be enforced.  If the class is non-None, all
+items in the list are checked to be of that type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Magnitude">
+<tt class="descclassname">param.</tt><tt class="descname">Magnitude</tt><a class="reference internal" href="../_modules/param.html#Magnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Magnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeric Parameter required to be in the range [0.0-1.0].</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Number">
+<tt class="descclassname">param.</tt><tt class="descname">Number</tt><a class="reference internal" href="../_modules/param.html#Number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Number" title="Permalink to this definition">¶</a></dt>
+<dd><p>A numeric Dynamic Parameter, with a default value and optional bounds.</p>
+<p>There are two types of bounds: <tt class="docutils literal"><span class="pre">bounds</span></tt> and
+<tt class="docutils literal"><span class="pre">softbounds</span></tt>.  <tt class="docutils literal"><span class="pre">bounds</span></tt> are hard bounds: the parameter must
+have a value within the specified range.  The default bounds are
+(None,None), meaning there are actually no hard bounds.  One or
+both bounds can be set by specifying a value
+(e.g. bounds=(None,10) means there is no lower bound, and an upper
+bound of 10). Bounds are inclusive by default, but exclusivity
+can be specified for each bound by setting inclusive_bounds
+(e.g. inclusive_bounds=(True,False) specifies an exclusive upper
+bound).</p>
+<p>Number is also a type of Dynamic parameter, so its value
+can be set to a callable to get a dynamically generated
+number (see Dynamic).</p>
+<p>When not being dynamically generated, bounds are checked when a
+Number is created or set. Using a default value outside the hard
+bounds, or one that is not numeric, results in an exception. When
+being dynamically generated, bounds are checked when a the value
+of a Number is requested. A generated value that is not numeric,
+or is outside the hard bounds, results in an exception.</p>
+<p>As a special case, if allow_None=True (which is true by default if
+the parameter has a default of None when declared) then a value
+of None is also allowed.</p>
+<p>A separate function set_in_bounds() is provided that will
+silently crop the given value into the legal range, for use
+in, for instance, a GUI.</p>
+<p><tt class="docutils literal"><span class="pre">softbounds</span></tt> are present to indicate the typical range of
+the parameter, but are not enforced. Setting the soft bounds
+allows, for instance, a GUI to know what values to display on
+sliders for the Number.</p>
+<dl class="docutils">
+<dt>Example of creating a Number::</dt>
+<dd>AB = Number(default=0.5, bounds=(None,10), softbounds=(0,1), doc=&#8217;Distance from A to B.&#8217;)</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.NumericTuple">
+<tt class="descclassname">param.</tt><tt class="descname">NumericTuple</tt><a class="reference internal" href="../_modules/param.html#NumericTuple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.NumericTuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>A numeric tuple Parameter (e.g. (4.5,7.6,3)) with a fixed tuple length.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.ObjectSelector">
+<tt class="descclassname">param.</tt><tt class="descname">ObjectSelector</tt><a class="reference internal" href="../_modules/param.html#ObjectSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.ObjectSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value must be one object from a list of possible objects.</p>
+<p>check_on_set restricts the value to be among the current list of
+objects. By default, if objects are initially supplied,
+check_on_set is True, whereas if no objects are initially
+supplied, check_on_set is False. This can be overridden by
+explicitly specifying check_on_set initially.</p>
+<p>If check_on_set is True (either because objects are supplied
+initially, or because it is explicitly specified), the default
+(initial) value must be among the list of objects (unless the
+default value is None).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Path">
+<tt class="descclassname">param.</tt><tt class="descname">Path</tt><a class="reference internal" href="../_modules/param.html#Path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter that can be set to a string specifying the path of a file or folder.</p>
+<p>The string should be specified in UNIX style, but it will be
+returned in the format of the user&#8217;s operating system. Please use
+the Filename or Foldername classes if you require discrimination
+between the two possibilities.</p>
+<p>The specified path can be absolute, or relative to either:</p>
+<ul class="simple">
+<li>any of the paths specified in the search_paths attribute (if
+search_paths is not None);</li>
+</ul>
+<p>or</p>
+<ul class="simple">
+<li>any of the paths searched by resolve_path() (if search_paths
+is None).</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.Selector">
+<tt class="descclassname">param.</tt><tt class="descname">Selector</tt><a class="reference internal" href="../_modules/param.html#Selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.Selector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter whose value must be chosen from a list of possibilities.</p>
+<p>Subclasses must implement get_range().</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="param.XYCoordinates">
+<tt class="descclassname">param.</tt><tt class="descname">XYCoordinates</tt><a class="reference internal" href="../_modules/param.html#XYCoordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.XYCoordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumericTuple for an X,Y coordinate.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="param.concrete_descendents">
+<tt class="descclassname">param.</tt><tt class="descname">concrete_descendents</tt><big>(</big><em>parentclass</em><big>)</big><a class="reference internal" href="../_modules/param.html#concrete_descendents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.concrete_descendents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary containing all subclasses of the specified
+parentclass, including the parentclass.  Only classes that are
+defined in scripts that have been run or modules that have been
+imported are included, so the caller will usually first do <tt class="docutils literal"><span class="pre">from</span>
+<span class="pre">package</span> <span class="pre">import</span> <span class="pre">*</span></tt>.</p>
+<p>Only non-abstract classes will be included.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="param.normalize_path">
+<em class="property">class </em><tt class="descclassname">param.</tt><tt class="descname">normalize_path</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/param.html#normalize_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.normalize_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<p>Convert a UNIX-style path to the current OS&#8217;s format,
+typically for creating a new file or directory.</p>
+<p>If the path is not already absolute, it will be made absolute
+(using the prefix parameter).</p>
+<p>Should do the same as Python&#8217;s os.path.abspath(), except using
+prefix rather than os.getcwd).</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">prefix</span></tt> (<em>allow_None=False, constant=False, default=/var/lib/buildbot/slaves/docs/build/doc, instantiate=False, pickle_default_value=False, precedence=None, readonly=False</em>)</dt>
+<dd>Prepended to the specified path, if that path is not
+        absolute.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="param.produce_value">
+<tt class="descclassname">param.</tt><tt class="descname">produce_value</tt><big>(</big><em>value_obj</em><big>)</big><a class="reference internal" href="../_modules/param.html#produce_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.produce_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper function that produces an actual parameter from a stored
+object: if the object is callable, call it, otherwise return the
+object.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="param.resolve_path">
+<em class="property">class </em><tt class="descclassname">param.</tt><tt class="descname">resolve_path</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/param.html#resolve_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#param.resolve_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<p>Find the path to an existing file, searching the paths specified
+in the search_paths parameter if the filename is not absolute, and
+converting a UNIX-style path to the current OS&#8217;s format if
+necessary.</p>
+<p>To turn a supplied relative path into an absolute one, the path is
+appended to paths in the search_paths parameter, in order, until
+the file is found.</p>
+<p>An IOError is raised if the file is not found.</p>
+<p>Similar to Python&#8217;s os.path.abspath(), except more search paths
+than just os.getcwd() can be used, and the file must exist.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">path_to_file</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=False, precedence=None, readonly=False</em>)</dt>
+<dd>String specifying whether the path refers to a &#8216;File&#8217; or a &#8216;Folder&#8217;.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">search_paths</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;/var/lib/buildbot/slaves/docs/build/doc&#8217;], instantiate=True, pickle_default_value=False, precedence=None, readonly=False</em>)</dt>
+<dd>Prepended to a non-relative path, in order, until a file is
+        found.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">param</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-param">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/param-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

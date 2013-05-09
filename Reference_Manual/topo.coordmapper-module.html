@@ -1,0 +1,484 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.coordmapper &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-coordmapper">
+<h1>topo.coordmapper<a class="headerlink" href="#topo-coordmapper" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancebe3ab90ace.svg" usemap="#inheritancebe3ab90ace" class="inheritance"/></div><map id="inheritancebe3ab90ace" name="inheritancebe3ab90ace">
+</map>
+<div class="section" id="module-topo.coordmapper">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.coordmapper" title="Permalink to this headline">¶</a></h2>
+<p>A family of function objects for transforming one set of coordinates into
+another.</p>
+<p>Coordinate mapper functions are useful for defining magnifications and
+other kinds of transformations on sheet coordinates, e.g. for defining
+retinal magnification using a CFProjection.  A CoordinateMapperFn
+(e.g. MagnifyingMapper), is applied to an (x,y) pair and returns a new
+(x,y) pair.  To apply a mapping to a CF projection, set the
+CFProjection&#8217;s coord_mapper parameter to an instance of the desired
+CoordinateMapperFn.</p>
+<dl class="class">
+<dt id="topo.coordmapper.ReducingMapper">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">ReducingMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#ReducingMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.ReducingMapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.SingleDimensionMapper" title="topo.coordmapper.SingleDimensionMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.SingleDimensionMapper</span></tt></a></p>
+<p>Provides a mapping that reduces the center of the activity.</p>
+<p>Roughly the inverse of MagnifyingMapper.  k indicates amount of reduction.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">k</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">out_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The maximum range of the output.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">remap_dimension</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=radius, instantiate=False, objects=[&#8216;radius&#8217;, &#8216;x&#8217;, &#8216;y&#8217;, &#8216;xy&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The dimension to remap. (&#8216;xy&#8217; remaps x and y independently.)</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">in_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The maximum range of the mapping input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Scale2d">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Scale2d</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Scale2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Scale2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.AffineTransform" title="topo.coordmapper.AffineTransform"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.AffineTransform</span></tt></a></p>
+<p>Scale the input along the x and y axes by sx and sy, respectively.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">sy</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">sx</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">matrix</span></tt> (<em>constant=False, default=[[ 1.  1.  1.]
+ [ 1.  1.  1.]
+ [ 1.  1.  1.]], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The affine transformation matrix.  The functions
+       Translate2dMat, Rotate2dMat, and Scale2dMat generate affine
+       transform matrices that can be multiplied together to create
+       combination transforms.  E.g. the matrix::
+
+         Translate2dMat(3,0)*Rotate2d(pi/2)
+
+       will shift points to the right by 3 units and rotate them around
+       the origin by 90 degrees.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Jitter">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Jitter</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Jitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Jitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Additively modifies calculated x,y coordinates, e.g. with random noise.</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>constant=False, default=0.0, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Amount of jitter.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">gen</span></tt> (<em>constant=False, default=&lt;UniformRandom UniformRandom00246&gt;, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number generator to use, typically a random distribution.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Cartesian2Polar">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Cartesian2Polar</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Cartesian2Polar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Cartesian2Polar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Maps from Cartesian (x,y) to polar (radius,angle).</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">degrees</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Indicates whether the output angle is in degrees or radians.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">negative_radii</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, coordinates with negative x values will be
+        given negative radii, and angles between -90 and 90
+        degrees. (useful for mapping to saccade amplitude/direction space)</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.OttesSCMotorMapper">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">OttesSCMotorMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#OttesSCMotorMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.OttesSCMotorMapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.OttesSCMapper" title="topo.coordmapper.OttesSCMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.OttesSCMapper</span></tt></a></p>
+<p>Efferent superior colliculus mapping.</p>
+<p>Provides the output/motor mapping from SC as defined by Ottes et al.
+(see superclass docs for reference)</p>
+<p>The mapping allows the creation of a single sheet representing
+both colliculi, one in the x-positive hemisheet and the other in
+the x-negative hemisheet.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">A</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=5.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Shape parameter A, in degrees</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mm_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=8.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor to convert constants Bu and Bv from mm to sheet
+       units.  Expressed in mm/unit.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">Bu</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Rostral-caudal scale parameter, in mm</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">direction_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor for saccade command direction, expressed in
+        degrees per unit of sheet.  Indicates what direction of saccade
+        is represented by the y-component of the command input.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">Bv</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Orthogonal (medial-lateral?) scale paraemter in mm/deg</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">amplitude_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor for saccade command amplitude, expressed in
+        degrees per unit of sheet.  Indicates how large a
+        saccade is represented by the x-component of the command
+        input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.NormalJitter">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">NormalJitter</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#NormalJitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.NormalJitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Additively modifies calculated x,y coordinates with Gaussian random noise.</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">gen</span></tt> (<em>constant=False, default=&lt;NormalRandom NormalRandom00247&gt;, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number generator to use, typically a Gaussian distribution.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Pipeline">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Pipeline</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Applies a sequence of coordmappers, left to right.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">mappers</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The sequence of mappers to apply.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.ConstantMapper">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">ConstantMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#ConstantMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.ConstantMapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Map all values to the same constant, pre-specified coordinates.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x_cons</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Constant x value returned by the mapping.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y_cons</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Constant y value returned by the mapping.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.MagnifyingMapper">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">MagnifyingMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#MagnifyingMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.MagnifyingMapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.SingleDimensionMapper" title="topo.coordmapper.SingleDimensionMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.SingleDimensionMapper</span></tt></a></p>
+<p>Exponential (magnifying) mapping function.</p>
+<p>Provides a mapping that magnifies the center of the activity image.
+Parameter k indicates amount of magnification, where 0 means no
+magnification.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">k</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">out_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The maximum range of the output.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">remap_dimension</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=radius, instantiate=False, objects=[&#8216;radius&#8217;, &#8216;x&#8217;, &#8216;y&#8217;, &#8216;xy&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The dimension to remap. (&#8216;xy&#8217; remaps x and y independently.)</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">in_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The maximum range of the mapping input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.AffineTransform">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">AffineTransform</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#AffineTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.AffineTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Remaps the input with an affine transform.</p>
+<p>This mapper allows the specification of an arbitrary combination
+of translation, rotation and scaling via a transform
+matrix. Single translations, etc, can be specified more simply
+with the subclasses Translate2d, Rotate2d, and Scale2d.</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">matrix</span></tt> (<em>constant=False, default=[[ 1.  1.  1.]
+ [ 1.  1.  1.]
+ [ 1.  1.  1.]], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The affine transformation matrix.  The functions
+       Translate2dMat, Rotate2dMat, and Scale2dMat generate affine
+       transform matrices that can be multiplied together to create
+       combination transforms.  E.g. the matrix::
+
+         Translate2dMat(3,0)*Rotate2d(pi/2)
+
+       will shift points to the right by 3 units and rotate them around
+       the origin by 90 degrees.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.SingleDimensionMapper">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">SingleDimensionMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#SingleDimensionMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.SingleDimensionMapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Coordinate Mapper that uses an origin-centered 1-D mapping function.</p>
+<p>An abstract mapping function for coordinate mappers that remap
+based on the radius, x, or y individually. Subclasses should override
+_map_fn(self,z).</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">in_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The maximum range of the mapping input.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">out_range</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.707106781187, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The maximum range of the output.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">remap_dimension</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=radius, instantiate=False, objects=[&#8216;radius&#8217;, &#8216;x&#8217;, &#8216;y&#8217;, &#8216;xy&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The dimension to remap. (&#8216;xy&#8217; remaps x and y independently.)</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Polar2Cartesian">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Polar2Cartesian</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Polar2Cartesian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Polar2Cartesian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Map from polar (radius,angle) to Cartesian (x,y) coordinates.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">degrees</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Indicates whether the input angle is in degrees or radians.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Grid">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Grid</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Divides the 2D area into a grid, where all points within each grid
+element map to the same location.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">xdensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of columns per 1.0 input sheet distance horizontally.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ydensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of rows per 1.0 input sheet distance vertically.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Translate2d">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Translate2d</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Translate2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Translate2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.AffineTransform" title="topo.coordmapper.AffineTransform"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.AffineTransform</span></tt></a></p>
+<p>Translate the input by xoff,yoff.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">xoff</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">yoff</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">matrix</span></tt> (<em>constant=False, default=[[ 1.  1.  1.]
+ [ 1.  1.  1.]
+ [ 1.  1.  1.]], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The affine transformation matrix.  The functions
+       Translate2dMat, Rotate2dMat, and Scale2dMat generate affine
+       transform matrices that can be multiplied together to create
+       combination transforms.  E.g. the matrix::
+
+         Translate2dMat(3,0)*Rotate2d(pi/2)
+
+       will shift points to the right by 3 units and rotate them around
+       the origin by 90 degrees.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.OttesSCMapper">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">OttesSCMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#OttesSCMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.OttesSCMapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.CoordinateMapperFn" title="topo.base.functionfamily.CoordinateMapperFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.CoordinateMapperFn</span></tt></a></p>
+<p>Abstract class for superior colliculus mappings.</p>
+<p>Subclasses of this class implement afferent and efferent mappings
+from Ottes et al. (1986) Vision Research 26:857-873.</p>
+<p>Default constant values are from Table 1, ibid.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">A</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=5.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Shape parameter A, in degrees</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mm_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=8.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor to convert constants Bu and Bv from mm to sheet
+       units.  Expressed in mm/unit.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">Bu</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Rostral-caudal scale parameter, in mm</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">direction_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor for saccade command direction, expressed in
+        degrees per unit of sheet.  Indicates what direction of saccade
+        is represented by the y-component of the command input.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">Bv</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Orthogonal (medial-lateral?) scale paraemter in mm/deg</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">amplitude_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor for saccade command amplitude, expressed in
+        degrees per unit of sheet.  Indicates how large a
+        saccade is represented by the x-component of the command
+        input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.Rotate2d">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">Rotate2d</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#Rotate2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.Rotate2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.AffineTransform" title="topo.coordmapper.AffineTransform"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.AffineTransform</span></tt></a></p>
+<p>Rotate the input around the origin by an angle in radians.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">angle</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">matrix</span></tt> (<em>constant=False, default=[[ 1.  1.  1.]
+ [ 1.  1.  1.]
+ [ 1.  1.  1.]], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The affine transformation matrix.  The functions
+       Translate2dMat, Rotate2dMat, and Scale2dMat generate affine
+       transform matrices that can be multiplied together to create
+       combination transforms.  E.g. the matrix::
+
+         Translate2dMat(3,0)*Rotate2d(pi/2)
+
+       will shift points to the right by 3 units and rotate them around
+       the origin by 90 degrees.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.OttesSCSenseMapper">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">OttesSCSenseMapper</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/coordmapper.html#OttesSCSenseMapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.coordmapper.OttesSCSenseMapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.coordmapper.OttesSCMapper" title="topo.coordmapper.OttesSCMapper"><tt class="xref py py-class docutils literal"><span class="pre">topo.coordmapper.OttesSCMapper</span></tt></a></p>
+<p>Afferent superior colliculus mapping.</p>
+<p>Provides the input/retinal mapping to SC as defined by Ottes et al.
+(see superclass docs for reference)</p>
+<p>The mapping allows the creation of a single sheet representing
+both colliculi, one in the x-positive hemisheet and the other in
+the x-negative hemisheet.</p>
+<p>[NOTE: see warning in docs for ottes_inverse_mapping().]</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">A</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=5.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Shape parameter A, in degrees</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mm_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=8.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor to convert constants Bu and Bv from mm to sheet
+       units.  Expressed in mm/unit.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">Bu</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Rostral-caudal scale parameter, in mm</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">direction_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor for saccade command direction, expressed in
+        degrees per unit of sheet.  Indicates what direction of saccade
+        is represented by the y-component of the command input.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">Bv</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Orthogonal (medial-lateral?) scale paraemter in mm/deg</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">amplitude_scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scale factor for saccade command amplitude, expressed in
+        degrees per unit of sheet.  Indicates how large a
+        saccade is represented by the x-component of the command
+        input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.coordmapper.CoordinateMapperFn">
+<em class="property">class </em><tt class="descclassname">topo.coordmapper.</tt><tt class="descname">CoordinateMapperFn</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.coordmapper.CoordinateMapperFn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Abstract base class for functions mapping from a 2D coordinate into another one.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.coordmapper</a><ul>
+<li><a class="reference internal" href="#module-topo.coordmapper">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.coordmapper-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.test_map_measurement &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-tests-test-map-measurement">
+<h1>topo.tests.test_map_measurement<a class="headerlink" href="#topo-tests-test-map-measurement" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-topo.tests.test_map_measurement">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.tests.test_map_measurement" title="Permalink to this headline">¶</a></h2>
+<p>Functions to test that map measurements haven&#8217;t changed.</p>
+<p>Use generate() to save data, and test() to check that the data is
+unchanged in a later version. Results from generate() are already
+checked into svn, so intentional changes to map measurement mean new
+data must be generated and committed. E.g.</p>
+<p># ...deliberate change to orientation map measurement...
+$ ./topographica -c &#8216;default_density=8&#8217; examples/lissom_oo_or.ty -c   &#8216;topo.sim.run(100)&#8217; -c   &#8216;from topo.tests.test_map_measurement import <a href="#id1"><span class="problematic" id="id2">*</span></a>&#8216; -c   &#8216;generate([&#8220;Orientation Preference&#8221;])&#8217;
+# now commit the resulting data file to the svn repository</p>
+<p>plotgroups_to_test is a list of PlotGroups for which these
+test functions are expected to be useful.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.tests.test_map_measurement</a><ul>
+<li><a class="reference internal" href="#module-topo.tests.test_map_measurement">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.tests.test_map_measurement-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

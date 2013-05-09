@@ -1,0 +1,260 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Importing external files and functions &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Developer Manual" href="index.html" />
+    <link rel="next" title="Alerts" href="alerts.html" />
+    <link rel="prev" title="Object-oriented design" href="ood.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="alerts.html" title="Alerts"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="ood.html" title="Object-oriented design"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="importing-external-files-and-functions">
+<h1>Importing external files and functions<a class="headerlink" href="#importing-external-files-and-functions" title="Permalink to this headline">¶</a></h1>
+<p>When at all possible, use a Python standard library function instead
+of writing your own code or downloading a separate package. The
+standard library functions are available to all Python platforms
+without any maintenance work from us, they will be more readable to
+Python programmers (who might just recognize the name instead of
+having to study the semantics), and those functions are much less
+likely to contain bugs than our own code is because the library
+functions have been tested by more people on more tasks.</p>
+<p>Non-standard external Python libraries should be used where
+appropriate, i.e. for anything reasonably substantial like plotting
+or matrix manipulation. The core external libraries of Topographica
+are NumPy and PIL (Imaging); you can assume that these will always
+exist for any Topographica installation. Other external packages,
+while often very useful, should be considered optional (and their
+absence should be handled gracefully).</p>
+<p>Including an external package adds an approximately fixed cost of
+tracking future updates and changes to it, handling its licensing
+issues, increasing the size of our download, restricting the number
+of supported platforms, etc. Including an external package just for
+one or two small, simple functions probably doesn&#8217;t make sense, but
+including it for non-trivial items like plot generation or matrix
+handling does make sense. The key question to answer for any
+external package is &#8220;would the code I&#8217;m using from the external
+package be easier to maintain on its own, or is it easier to just
+include the external package?&#8221;. If it&#8217;s easier just to add those
+couple of functions, just copy them (if the licensing terms allow
+it); otherwise add the external package.</p>
+<p>When importing code, whether from standard libraries or external
+functions, always import only the functions and classes that you are
+actually using. As an example that has already occurred, please do
+NOT do anything like <tt class="docutils literal"><span class="pre">from</span> <span class="pre">MLab</span> <span class="pre">import</span> <span class="pre">*</span></tt>, because of the huge
+potential for name clashes resulting in strange, hard-to-track bugs.
+For that particular example, python has a built-in function named
+max(), but this function is replaced with a matrix-specific version
+by <tt class="docutils literal"><span class="pre">from</span> <span class="pre">MLab</span> <span class="pre">import</span> <span class="pre">*</span></tt>:</p>
+<div class="highlight-python"><pre>$ bin/python
+&gt;&gt;&gt; max(1.2,0)
+1.2
+&gt;&gt;&gt; from MLab import *
+&gt;&gt;&gt; max(1.2,0)
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in ?
+  File "/lib/python2.4/site-packages/Numeric/MLab.py", line 146, in max
+    return maximum.reduce(m,axis)
+ValueError: dimension not in array
+&gt;&gt;&gt;</pre>
+</div>
+<p>Please try to avoid such problems by importing only the specific
+functions and classes you need, or (where practical) by importing
+the package only and then using the fully qualified name (e.g.
+<tt class="docutils literal"><span class="pre">import</span> <span class="pre">MLab</span> <span class="pre">;</span> <span class="pre">MLab.max()</span></tt>).</p>
+<p>If you find that you need to change any file in an external package,
+please <em>DO NOT</em> change that file, wrap it up into a .tar or .zip
+archive, and put it back into the Topographica repository. Doing so
+is a very bad idea, because it prevents us from upgrading that
+package in the future. Instead, keep the original archive intact as
+distributed, but then have the <tt class="docutils literal"><span class="pre">external/Makefile</span></tt> patch it
+automatically to change the specific items that need editing. When
+the package is updated, the same patch can often be applied as-is to
+the new package, and in any case it will be clear exactly where to
+look in the package to make the necessary change.</p>
+<p>As a convention, we arrange the imports in each Python file in order
+from most general to most specific:</p>
+<ol class="arabic">
+<li><p class="first">Python standard library items (such as <tt class="docutils literal"><span class="pre">math</span></tt>, <tt class="docutils literal"><span class="pre">sys</span></tt>, <tt class="docutils literal"><span class="pre">os</span></tt>)</p>
+</li>
+<li><p class="first">Core external packages (<tt class="docutils literal"><span class="pre">numpy</span></tt> and <tt class="docutils literal"><span class="pre">Imaging</span></tt>)</p>
+</li>
+<li><p class="first">Other external packages (such as <tt class="docutils literal"><span class="pre">matplotlib</span></tt>)</p>
+</li>
+<li><dl class="first docutils">
+<dt>Topographica files not in the current package</dt>
+<dd><p class="first last">(with absolute paths like <tt class="docutils literal"><span class="pre">topo.base.sheet</span></tt>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Topographica files in the current package</dt>
+<dd><p class="first last">(usually with relative paths like <tt class="docutils literal"><span class="pre">sheet</span></tt>)</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>A blank line separates each of these sections, and items in the
+sections are typically ordered alphabetically (at least if there is
+a long list). For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">transpose</span><span class="p">,</span> <span class="n">array</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.connectionfield</span> <span class="kn">import</span> <span class="n">CFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">TransferFn</span>
+<span class="kn">from</span> <span class="nn">topo.misc.util</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">cross_product</span>
+
+<span class="kn">from</span> <span class="nn">plot</span> <span class="kn">import</span> <span class="n">Plot</span>
+<span class="kn">import</span> <span class="nn">bitmap</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Importing external files and functions</a></li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ood.html"
+                        title="previous chapter">Object-oriented design</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="alerts.html"
+                        title="next chapter">Alerts</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Developer_Manual/imports.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="alerts.html" title="Alerts"
+             >next</a></li>
+        <li class="right" >
+          <a href="ood.html" title="Object-oriented design"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

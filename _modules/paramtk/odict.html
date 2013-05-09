@@ -1,0 +1,1524 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>paramtk.odict &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="paramtk" href="../paramtk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../paramtk.html" accesskey="U">paramtk</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for paramtk.odict</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">generators</span>
+
+<span class="c"># odict.py</span>
+<span class="c"># An Ordered Dictionary object</span>
+<span class="c"># Copyright (C) 2005 Nicola Larosa, Michael Foord</span>
+<span class="c"># E-mail: nico AT tekNico DOT net, fuzzyman AT voidspace DOT org DOT uk</span>
+
+<span class="c"># This software is licensed under the terms of the BSD license.</span>
+<span class="c"># http://www.voidspace.org.uk/python/license.shtml</span>
+<span class="c"># Basically you&#39;re free to copy, modify, distribute and relicense it,</span>
+<span class="c"># So long as you keep a copy of the license with it.</span>
+
+<span class="c"># Documentation at http://www.voidspace.org.uk/python/odict.html</span>
+<span class="c"># For information about bugfixes, updates and support, please join the</span>
+<span class="c"># Pythonutils mailing list:</span>
+<span class="c"># http://groups.google.com/group/pythonutils/</span>
+<span class="c"># Comments, suggestions and bug reports welcome.</span>
+
+<span class="sd">&quot;&quot;&quot;A dict that keeps keys in insertion order&quot;&quot;&quot;</span>
+
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Nicola Larosa &lt;nico-NoSp@m-tekNico.net&gt;,&#39;</span>
+    <span class="s">&#39;Michael Foord &lt;fuzzyman AT voidspace DOT org DOT uk&gt;&#39;</span><span class="p">)</span>
+
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s">&quot;restructuredtext en&quot;</span>
+
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Id: external.py 12024 2012-05-02 21:13:18Z ceball $&#39;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.2.2&#39;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;OrderedDict&#39;</span><span class="p">,</span> <span class="s">&#39;SequenceOrderedDict&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">INTP_VER</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">INTP_VER</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Python v.2.2 or later required&quot;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">types</span><span class="o">,</span> <span class="nn">warnings</span>
+
+<div class="viewcode-block" id="OrderedDict"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict">[docs]</a><span class="k">class</span> <span class="nc">OrderedDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class of dictionary that keeps the insertion order of keys.</span>
+<span class="sd">    </span>
+<span class="sd">    All appropriate methods return keys, items, or values in an ordered way.</span>
+<span class="sd">    </span>
+<span class="sd">    All normal dictionary methods are available. Update and comparison is</span>
+<span class="sd">    restricted to other OrderedDict objects.</span>
+<span class="sd">    </span>
+<span class="sd">    Various sequence methods are available, including the ability to explicitly</span>
+<span class="sd">    mutate the key ordering.</span>
+<span class="sd">    </span>
+<span class="sd">    __contains__ tests:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; d = OrderedDict(((1, 3),))</span>
+<span class="sd">    &gt;&gt;&gt; 1 in d</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; 4 in d</span>
+<span class="sd">    0</span>
+<span class="sd">    </span>
+<span class="sd">    __getitem__ tests:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; OrderedDict(((1, 3), (3, 2), (2, 1)))[2]</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; OrderedDict(((1, 3), (3, 2), (2, 1)))[4]</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    KeyError: 4</span>
+<span class="sd">    </span>
+<span class="sd">    __len__ tests:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; len(OrderedDict())</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; len(OrderedDict(((1, 3), (3, 2), (2, 1))))</span>
+<span class="sd">    3</span>
+<span class="sd">    </span>
+<span class="sd">    get tests:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">    &gt;&gt;&gt; d.get(1)</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; d.get(4) is None</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; d.get(4, 5)</span>
+<span class="sd">    5</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    OrderedDict([(1, 3), (3, 2), (2, 1)])</span>
+<span class="sd">    </span>
+<span class="sd">    has_key tests:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">    &gt;&gt;&gt; d.has_key(1)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; d.has_key(4)</span>
+<span class="sd">    0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_val</span><span class="o">=</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new ordered dictionary. Cannot init from a normal dict,</span>
+<span class="sd">        nor from kwargs, since items order is undefined in those cases.</span>
+<span class="sd">        </span>
+<span class="sd">        If the ``strict`` keyword argument is ``True`` (``False`` is the</span>
+<span class="sd">        default) then when doing slice assignment - the ``OrderedDict`` you are</span>
+<span class="sd">        assigning from *must not* contain any keys in the remaining dict.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; OrderedDict()</span>
+<span class="sd">        OrderedDict([])</span>
+<span class="sd">        &gt;&gt;&gt; OrderedDict({1: 1})</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: undefined order, cannot get items from dict</span>
+<span class="sd">        &gt;&gt;&gt; OrderedDict({1: 1}.items())</span>
+<span class="sd">        OrderedDict([(1, 1)])</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (3, 2), (2, 1)])</span>
+<span class="sd">        &gt;&gt;&gt; OrderedDict(d)</span>
+<span class="sd">        OrderedDict([(1, 3), (3, 2), (2, 1)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strict</span> <span class="o">=</span> <span class="n">strict</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init_val</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">=</span> <span class="n">init_val</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="nb">dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init_val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c"># we lose compatibility with other ordered dict types this way</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;undefined order, cannot get items from dict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">init_val</span><span class="p">)</span>
+
+<span class="c">### Special methods ###</span>
+
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; del d[3]</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (2, 1)])</span>
+<span class="sd">        &gt;&gt;&gt; del d[3]</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        KeyError: 3</span>
+<span class="sd">        &gt;&gt;&gt; d[3] = 2</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (2, 1), (3, 2)])</span>
+<span class="sd">        &gt;&gt;&gt; del d[0:1]</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(2, 1), (3, 2)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="c"># FIXME: efficiency?</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># do the dict.__delitem__ *first* as it raises</span>
+            <span class="c"># the more appropriate error</span>
+            <span class="nb">dict</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d == OrderedDict(d)</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d == OrderedDict(((1, 3), (2, 1), (3, 2)))</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d == OrderedDict(((1, 0), (3, 2), (2, 1)))</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d == OrderedDict(((0, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d == dict(d)</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d == False</span>
+<span class="sd">        False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="c"># FIXME: efficiency?</span>
+            <span class="c">#   Generate both item lists for each compare</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; c = OrderedDict(((0, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; c &lt; d</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d &lt; c</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d &lt; dict(c)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: Can only compare with other OrderedDicts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can only compare with other OrderedDicts&#39;</span><span class="p">)</span>
+        <span class="c"># FIXME: efficiency?</span>
+        <span class="c">#   Generate both item lists for each compare</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; c = OrderedDict(((0, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; e = OrderedDict(d)</span>
+<span class="sd">        &gt;&gt;&gt; c &lt;= d</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d &lt;= c</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d &lt;= dict(c)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: Can only compare with other OrderedDicts</span>
+<span class="sd">        &gt;&gt;&gt; d &lt;= e</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can only compare with other OrderedDicts&#39;</span><span class="p">)</span>
+        <span class="c"># FIXME: efficiency?</span>
+        <span class="c">#   Generate both item lists for each compare</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d != OrderedDict(d)</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d != OrderedDict(((1, 3), (2, 1), (3, 2)))</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d != OrderedDict(((1, 0), (3, 2), (2, 1)))</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d == OrderedDict(((0, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d != dict(d)</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d != False</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="c"># FIXME: efficiency?</span>
+            <span class="c">#   Generate both item lists for each compare</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; c = OrderedDict(((0, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d &gt; c</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; c &gt; d</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d &gt; dict(c)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: Can only compare with other OrderedDicts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can only compare with other OrderedDicts&#39;</span><span class="p">)</span>
+        <span class="c"># FIXME: efficiency?</span>
+        <span class="c">#   Generate both item lists for each compare</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; c = OrderedDict(((0, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; e = OrderedDict(d)</span>
+<span class="sd">        &gt;&gt;&gt; c &gt;= d</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; d &gt;= c</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d &gt;= dict(c)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: Can only compare with other OrderedDicts</span>
+<span class="sd">        &gt;&gt;&gt; e &gt;= d</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can only compare with other OrderedDicts&#39;</span><span class="p">)</span>
+        <span class="c"># FIXME: efficiency?</span>
+        <span class="c">#   Generate both item lists for each compare</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used for __repr__ and __str__</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; r1 = repr(OrderedDict(((&#39;a&#39;, &#39;b&#39;), (&#39;c&#39;, &#39;d&#39;), (&#39;e&#39;, &#39;f&#39;))))</span>
+<span class="sd">        &gt;&gt;&gt; r1</span>
+<span class="sd">        &quot;OrderedDict([(&#39;a&#39;, &#39;b&#39;), (&#39;c&#39;, &#39;d&#39;), (&#39;e&#39;, &#39;f&#39;)])&quot;</span>
+<span class="sd">        &gt;&gt;&gt; r2 = repr(OrderedDict(((&#39;a&#39;, &#39;b&#39;), (&#39;e&#39;, &#39;f&#39;), (&#39;c&#39;, &#39;d&#39;))))</span>
+<span class="sd">        &gt;&gt;&gt; r2</span>
+<span class="sd">        &quot;OrderedDict([(&#39;a&#39;, &#39;b&#39;), (&#39;e&#39;, &#39;f&#39;), (&#39;c&#39;, &#39;d&#39;)])&quot;</span>
+<span class="sd">        &gt;&gt;&gt; r1 == str(OrderedDict(((&#39;a&#39;, &#39;b&#39;), (&#39;c&#39;, &#39;d&#39;), (&#39;e&#39;, &#39;f&#39;))))</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; r2 == str(OrderedDict(((&#39;a&#39;, &#39;b&#39;), (&#39;e&#39;, &#39;f&#39;), (&#39;c&#39;, &#39;d&#39;))))</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">([</span><span class="si">%s</span><span class="s">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="s">&#39;(</span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allows slice assignment, so long as the slice is an OrderedDict</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict()</span>
+<span class="sd">        &gt;&gt;&gt; d[&#39;a&#39;] = &#39;b&#39;</span>
+<span class="sd">        &gt;&gt;&gt; d[&#39;b&#39;] = &#39;a&#39;</span>
+<span class="sd">        &gt;&gt;&gt; d[3] = 12</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(&#39;a&#39;, &#39;b&#39;), (&#39;b&#39;, &#39;a&#39;), (3, 12)])</span>
+<span class="sd">        &gt;&gt;&gt; d[:] = OrderedDict(((1, 2), (2, 3), (3, 4)))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; d[::2] = OrderedDict(((7, 8), (9, 10)))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(7, 8), (2, 3), (9, 10)])</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((0, 1), (1, 2), (2, 3), (3, 4)))</span>
+<span class="sd">        &gt;&gt;&gt; d[1:3] = OrderedDict(((1, 2), (5, 6), (7, 8)))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(0, 1), (1, 2), (5, 6), (7, 8), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((0, 1), (1, 2), (2, 3), (3, 4)), strict=True)</span>
+<span class="sd">        &gt;&gt;&gt; d[1:3] = OrderedDict(((1, 2), (5, 6), (7, 8)))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(0, 1), (1, 2), (5, 6), (7, 8), (3, 4)])</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; a = OrderedDict(((0, 1), (1, 2), (2, 3)), strict=True)</span>
+<span class="sd">        &gt;&gt;&gt; a[3] = 4</span>
+<span class="sd">        &gt;&gt;&gt; a</span>
+<span class="sd">        OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a[::1] = OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a</span>
+<span class="sd">        OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a[:2] = OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4), (4, 5)])</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        ValueError: slice assignment must be from unique keys</span>
+<span class="sd">        &gt;&gt;&gt; a = OrderedDict(((0, 1), (1, 2), (2, 3)))</span>
+<span class="sd">        &gt;&gt;&gt; a[3] = 4</span>
+<span class="sd">        &gt;&gt;&gt; a</span>
+<span class="sd">        OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a[::1] = OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a</span>
+<span class="sd">        OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a[:2] = OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a</span>
+<span class="sd">        OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a[::-1] = OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; a</span>
+<span class="sd">        OrderedDict([(3, 4), (2, 3), (1, 2), (0, 1)])</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; d[:1] = 3</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: slice assignment requires an OrderedDict</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict([(0, 1), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &gt;&gt;&gt; d[:1] = OrderedDict([(9, 8)])</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(9, 8), (1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+                <span class="c"># FIXME: allow a list of tuples?</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;slice assignment requires an OrderedDict&#39;</span><span class="p">)</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="c"># NOTE: Could use ``range(*key.indices(len(self._sequence)))``</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">))[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">step</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># NOTE: new slice may not be the same size as the one being</span>
+                <span class="c">#   overwritten !</span>
+                <span class="c"># NOTE: What is the algorithm for an impossible slice?</span>
+                <span class="c">#   e.g. d[5:3]</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">start</span> <span class="ow">or</span> <span class="mi">0</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">newkeys</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">newkeys</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;slice assignment must be from &#39;</span>
+                                <span class="s">&#39;unique keys&#39;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c"># NOTE: This removes duplicate keys *first*</span>
+                            <span class="c">#   so start position might have changed?</span>
+                            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">newkeys</span> <span class="o">+</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">pos</span><span class="p">:])</span>
+                <span class="nb">dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># extended slice - length of new slice must be the same</span>
+                <span class="c"># as the one being replaced</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;attempt to assign sequence of size </span><span class="si">%s</span><span class="s"> &#39;</span>
+                        <span class="s">&#39;to extended slice of size </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
+                <span class="c"># FIXME: efficiency?</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">item_list</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indexes</span><span class="p">,</span> <span class="n">val</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                <span class="c"># smallest indexes first - higher indexes not guaranteed to</span>
+                <span class="c"># exist</span>
+                <span class="n">item_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="p">(</span><span class="n">newkey</span><span class="p">,</span> <span class="n">newval</span><span class="p">)</span> <span class="ow">in</span> <span class="n">item_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span> <span class="ow">and</span> <span class="n">newkey</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;slice assignment must be from unique&#39;</span>
+                            <span class="s">&#39; keys&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="n">newval</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="nb">dict</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allows slicing. Returns an OrderedDict if you slice.</span>
+<span class="sd">        &gt;&gt;&gt; b = OrderedDict([(7, 0), (6, 1), (5, 2), (4, 3), (3, 4), (2, 5), (1, 6)])</span>
+<span class="sd">        &gt;&gt;&gt; b[::-1]</span>
+<span class="sd">        OrderedDict([(1, 6), (2, 5), (3, 4), (4, 3), (5, 2), (6, 1), (7, 0)])</span>
+<span class="sd">        &gt;&gt;&gt; b[2:5]</span>
+<span class="sd">        OrderedDict([(5, 2), (4, 3), (3, 4)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="c"># FIXME: does this raise the error we want?</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="c"># FIXME: efficiency?</span>
+            <span class="k">return</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="n">entry</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">entry</span><span class="p">])</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+    <span class="n">__str__</span> <span class="o">=</span> <span class="n">__repr__</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Implemented so that accesses to ``sequence`` raise a warning and are</span>
+<span class="sd">        diverted to the new ``setkeys`` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;sequence&#39;</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Use of the sequence attribute is deprecated.&#39;</span>
+                <span class="s">&#39; Use the keys method instead.&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+            <span class="c"># NOTE: doesn&#39;t return anything</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setkeys</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># FIXME: do we want to allow arbitrary setting of attributes?</span>
+            <span class="c">#   Or do we want to manage it?</span>
+            <span class="nb">object</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Implemented so that access to ``sequence`` raises a warning.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict()</span>
+<span class="sd">        &gt;&gt;&gt; d.sequence</span>
+<span class="sd">        []</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;sequence&#39;</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Use of the sequence attribute is deprecated.&#39;</span>
+                <span class="s">&#39; Use the keys method instead.&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+            <span class="c"># NOTE: Still (currently) returns a direct reference. Need to</span>
+            <span class="c">#   because code that uses sequence will expect to be able to</span>
+            <span class="c">#   mutate it in place.</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># raise the appropriate error</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;OrderedDict has no &#39;</span><span class="si">%s</span><span class="s">&#39; attribute&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        To allow deepcopy to work with OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; from copy import deepcopy</span>
+<span class="sd">        &gt;&gt;&gt; a = OrderedDict([(1, 1), (2, 2), (3, 3)])</span>
+<span class="sd">        &gt;&gt;&gt; a[&#39;test&#39;] = {}</span>
+<span class="sd">        &gt;&gt;&gt; b = deepcopy(a)</span>
+<span class="sd">        &gt;&gt;&gt; b == a</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; b is a</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; a[&#39;test&#39;] is b[&#39;test&#39;]</span>
+<span class="sd">        False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">memo</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">)</span>
+
+
+<span class="c">### Read-only methods ###</span>
+
+<div class="viewcode-block" id="OrderedDict.copy"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; OrderedDict(((1, 3), (3, 2), (2, 1))).copy()</span>
+<span class="sd">        OrderedDict([(1, 3), (3, 2), (2, 1)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.items"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ``items`` returns a list of tuples representing all the </span>
+<span class="sd">        ``(key, value)`` pairs in the dictionary.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.items()</span>
+<span class="sd">        [(1, 3), (3, 2), (2, 1)]</span>
+<span class="sd">        &gt;&gt;&gt; d.clear()</span>
+<span class="sd">        &gt;&gt;&gt; d.items()</span>
+<span class="sd">        []</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.keys"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a list of keys in the ``OrderedDict``.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.keys()</span>
+<span class="sd">        [1, 3, 2]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[:]</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.values"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a list of all the values in the OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        Optionally you can pass in a list of values, which will replace the</span>
+<span class="sd">        current list. The value list must be the same len as the OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.values()</span>
+<span class="sd">        [3, 2, 1]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.iteritems"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.iteritems">[docs]</a>    <span class="k">def</span> <span class="nf">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; ii = OrderedDict(((1, 3), (3, 2), (2, 1))).iteritems()</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        (1, 3)</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        (3, 2)</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        (2, 1)</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        StopIteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">make_iter</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">make_iter</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.iterkeys"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.iterkeys">[docs]</a>    <span class="k">def</span> <span class="nf">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; ii = OrderedDict(((1, 3), (3, 2), (2, 1))).iterkeys()</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        1</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        3</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; ii.next()</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        StopIteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">)</span>
+</div>
+    <span class="n">__iter__</span> <span class="o">=</span> <span class="n">iterkeys</span>
+
+<div class="viewcode-block" id="OrderedDict.itervalues"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.itervalues">[docs]</a>    <span class="k">def</span> <span class="nf">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; iv = OrderedDict(((1, 3), (3, 2), (2, 1))).itervalues()</span>
+<span class="sd">        &gt;&gt;&gt; iv.next()</span>
+<span class="sd">        3</span>
+<span class="sd">        &gt;&gt;&gt; iv.next()</span>
+<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; iv.next()</span>
+<span class="sd">        1</span>
+<span class="sd">        &gt;&gt;&gt; iv.next()</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        StopIteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">make_iter</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="bp">self</span><span class="p">[</span><span class="n">keys</span><span class="o">.</span><span class="n">next</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">make_iter</span><span class="p">()</span>
+
+<span class="c">### Read-write methods ###</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.clear"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.clear()</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.pop"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.pop">[docs]</a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        No dict.pop in Python 2.2, gotta reimplement it</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.pop(3)</span>
+<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (2, 1)])</span>
+<span class="sd">        &gt;&gt;&gt; d.pop(4)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        KeyError: 4</span>
+<span class="sd">        &gt;&gt;&gt; d.pop(4, 0)</span>
+<span class="sd">        0</span>
+<span class="sd">        &gt;&gt;&gt; d.pop(4, 0, 1)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: pop expected at most 2 arguments, got 3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;pop expected at most 2 arguments, got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.popitem"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.popitem">[docs]</a>    <span class="k">def</span> <span class="nf">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete and return an item specified by index, not a random one as in</span>
+<span class="sd">        dict. The index is -1 by default (the last item).</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.popitem()</span>
+<span class="sd">        (2, 1)</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (3, 2)])</span>
+<span class="sd">        &gt;&gt;&gt; d.popitem(0)</span>
+<span class="sd">        (1, 3)</span>
+<span class="sd">        &gt;&gt;&gt; OrderedDict().popitem()</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        KeyError: &#39;popitem(): dictionary is empty&#39;</span>
+<span class="sd">        &gt;&gt;&gt; d.popitem(2)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        IndexError: popitem(): index 2 not valid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&#39;popitem(): dictionary is empty&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&#39;popitem(): index </span><span class="si">%s</span><span class="s"> not valid&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.setdefault"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.setdefault">[docs]</a>    <span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">defval</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.setdefault(1)</span>
+<span class="sd">        3</span>
+<span class="sd">        &gt;&gt;&gt; d.setdefault(4) is None</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (3, 2), (2, 1), (4, None)])</span>
+<span class="sd">        &gt;&gt;&gt; d.setdefault(5, 0)</span>
+<span class="sd">        0</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (3, 2), (2, 1), (4, None), (5, 0)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">defval</span>
+            <span class="k">return</span> <span class="n">defval</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.update"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">from_od</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update from another OrderedDict or sequence of (key, value) pairs</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 0), (0, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.update(OrderedDict(((1, 3), (3, 2), (2, 1))))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (0, 1), (3, 2), (2, 1)])</span>
+<span class="sd">        &gt;&gt;&gt; d.update({4: 4})</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: undefined order, cannot get items from dict</span>
+<span class="sd">        &gt;&gt;&gt; d.update((4, 4))</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        TypeError: cannot convert dictionary update sequence element &quot;4&quot; to a 2-item sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">from_od</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">from_od</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">from_od</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c"># we lose compatibility with other ordered dict types this way</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;undefined order, cannot get items from dict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># FIXME: efficiency?</span>
+            <span class="c"># sequence of 2-item sequences, or error</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">from_od</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">item</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;cannot convert dictionary update&#39;</span>
+                        <span class="s">&#39; sequence element &quot;</span><span class="si">%s</span><span class="s">&quot; to a 2-item sequence&#39;</span> <span class="o">%</span> <span class="n">item</span><span class="p">)</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.rename"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_key</span><span class="p">,</span> <span class="n">new_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rename the key for a given value, without modifying sequence order.</span>
+<span class="sd">        </span>
+<span class="sd">        For the case where new_key already exists this raise an exception,</span>
+<span class="sd">        since if new_key exists, it is ambiguous as to what happens to the</span>
+<span class="sd">        associated values, and the position of new_key in the sequence.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; od = OrderedDict()</span>
+<span class="sd">        &gt;&gt;&gt; od[&#39;a&#39;] = 1</span>
+<span class="sd">        &gt;&gt;&gt; od[&#39;b&#39;] = 2</span>
+<span class="sd">        &gt;&gt;&gt; od.items()</span>
+<span class="sd">        [(&#39;a&#39;, 1), (&#39;b&#39;, 2)]</span>
+<span class="sd">        &gt;&gt;&gt; od.rename(&#39;b&#39;, &#39;c&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; od.items()</span>
+<span class="sd">        [(&#39;a&#39;, 1), (&#39;c&#39;, 2)]</span>
+<span class="sd">        &gt;&gt;&gt; od.rename(&#39;c&#39;, &#39;a&#39;)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        ValueError: New key already exists: &#39;a&#39;</span>
+<span class="sd">        &gt;&gt;&gt; od.rename(&#39;d&#39;, &#39;b&#39;)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        KeyError: &#39;d&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_key</span> <span class="o">==</span> <span class="n">old_key</span><span class="p">:</span>
+            <span class="c"># no-op</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">new_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;New key already exists: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">new_key</span><span class="p">)</span>
+        <span class="c"># rename sequence entry</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">old_key</span><span class="p">]</span> 
+        <span class="n">old_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">old_key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">old_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_key</span>
+        <span class="c"># rename internal dict entry</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_key</span><span class="p">)</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.setitems"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.setitems">[docs]</a>    <span class="k">def</span> <span class="nf">setitems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method allows you to set the items in the dict.</span>
+<span class="sd">        </span>
+<span class="sd">        It takes a list of tuples - of the same sort returned by the ``items``</span>
+<span class="sd">        method.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict()</span>
+<span class="sd">        &gt;&gt;&gt; d.setitems(((3, 1), (2, 3), (1, 2)))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(3, 1), (2, 3), (1, 2)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="c"># FIXME: this allows you to pass in an OrderedDict as well :-)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.setkeys"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.setkeys">[docs]</a>    <span class="k">def</span> <span class="nf">setkeys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ``setkeys`` all ows you to pass in a new list of keys which will</span>
+<span class="sd">        replace the current set. This must contain the same set of keys, but</span>
+<span class="sd">        need not be in the same order.</span>
+<span class="sd">        </span>
+<span class="sd">        If you pass in new keys that don&#39;t match, a ``KeyError`` will be</span>
+<span class="sd">        raised.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.keys()</span>
+<span class="sd">        [1, 3, 2]</span>
+<span class="sd">        &gt;&gt;&gt; d.setkeys((1, 2, 3))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 3), (2, 1), (3, 2)])</span>
+<span class="sd">        &gt;&gt;&gt; d.setkeys([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;])</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        KeyError: &#39;Keylist is not the same as current keylist.&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># FIXME: Efficiency? (use set for Python 2.4 :-)</span>
+        <span class="c"># NOTE: list(keys) rather than keys[:] because keys[:] returns</span>
+        <span class="c">#   a tuple, if keys is a tuple.</span>
+        <span class="n">kcopy</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="n">kcopy</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">kcopy</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&#39;Keylist is not the same as current keylist.&#39;</span><span class="p">)</span>
+        <span class="c"># NOTE: This makes the _sequence attribute a new object, instead</span>
+        <span class="c">#       of changing it in place.</span>
+        <span class="c"># FIXME: efficiency?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.setvalues"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.setvalues">[docs]</a>    <span class="k">def</span> <span class="nf">setvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You can pass in a list of values, which will replace the</span>
+<span class="sd">        current list. The value list must be the same len as the OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        (Or a ``ValueError`` is raised.)</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.setvalues((1, 2, 3))</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 1), (3, 2), (2, 3)])</span>
+<span class="sd">        &gt;&gt;&gt; d.setvalues([6])</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        ValueError: Value list is not the same length as the OrderedDict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c"># FIXME: correct error to raise?</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Value list is not the same length as the &#39;</span>
+                <span class="s">&#39;OrderedDict.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+
+<span class="c">### Sequence Methods ###</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.index"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the position of the specified key in the OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.index(3)</span>
+<span class="sd">        1</span>
+<span class="sd">        &gt;&gt;&gt; d.index(4)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">        ValueError: 4 is not in list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.insert"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes ``index``, ``key``, and ``value`` as arguments.</span>
+<span class="sd">        </span>
+<span class="sd">        Sets ``key`` to ``value``, so that ``key`` is at position ``index`` in</span>
+<span class="sd">        the OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.insert(0, 4, 0)</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(4, 0), (1, 3), (3, 2), (2, 1)])</span>
+<span class="sd">        &gt;&gt;&gt; d.insert(0, 2, 1)</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(2, 1), (4, 0), (1, 3), (3, 2)])</span>
+<span class="sd">        &gt;&gt;&gt; d.insert(8, 8, 1)</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(2, 1), (4, 0), (1, 3), (3, 2), (8, 1)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c"># FIXME: efficiency?</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.reverse"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.reverse">[docs]</a>    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reverse the order of the OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((1, 3), (3, 2), (2, 1)))</span>
+<span class="sd">        &gt;&gt;&gt; d.reverse()</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(2, 1), (3, 2), (1, 3)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="OrderedDict.sort"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.OrderedDict.sort">[docs]</a>    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sort the key order in the OrderedDict.</span>
+<span class="sd">        </span>
+<span class="sd">        This method takes the same arguments as the ``list.sort`` method on</span>
+<span class="sd">        your version of Python.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; d = OrderedDict(((4, 1), (2, 2), (3, 3), (1, 4)))</span>
+<span class="sd">        &gt;&gt;&gt; d.sort()</span>
+<span class="sd">        &gt;&gt;&gt; d</span>
+<span class="sd">        OrderedDict([(1, 4), (2, 2), (3, 3), (4, 1)])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div></div>
+<span class="k">class</span> <span class="nc">Keys</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c"># FIXME: should this object be a subclass of list?</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom object for accessing the keys of an OrderedDict.</span>
+<span class="sd">    </span>
+<span class="sd">    Can be called like the normal ``OrderedDict.keys`` method, but also</span>
+<span class="sd">    supports indexing and sequence methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_main</span> <span class="o">=</span> <span class="n">main</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pretend to be the keys method.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_keys</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch the key at position i.&quot;&quot;&quot;</span>
+        <span class="c"># NOTE: this automatically supports slicing :-)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You cannot assign to keys, but you can do slice assignment to re-order</span>
+<span class="sd">        them.</span>
+<span class="sd">        </span>
+<span class="sd">        You can only do slice assignment if the new set of keys is a reordering</span>
+<span class="sd">        of the original set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="c"># FIXME: efficiency?</span>
+            <span class="c"># check length is the same</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">))[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;attempt to assign sequence of size </span><span class="si">%s</span><span class="s"> &#39;</span>
+                    <span class="s">&#39;to slice of size </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)))</span>
+            <span class="c"># check they are the same keys</span>
+            <span class="c"># FIXME: Use set</span>
+            <span class="n">old_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">old_keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">new_keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">old_keys</span> <span class="o">!=</span> <span class="n">new_keys</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&#39;Keylist is not the same as current keylist.&#39;</span><span class="p">)</span>
+            <span class="n">orig_vals</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indexes</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">orig_vals</span><span class="p">)</span>
+            <span class="n">vals</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">strict</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;slice assignment must be from &#39;</span>
+                        <span class="s">&#39;unique keys&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Cannot assign to keys&#39;</span><span class="p">)</span>
+
+    <span class="c">### following methods pinched from UserList and adapted ###</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">)</span>
+
+    <span class="c"># FIXME: do we need to check if we are comparing with another ``Keys``</span>
+    <span class="c">#   object? (like the __cast method of UserList)</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">&lt;</span>  <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">&lt;=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">==</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">!=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">&gt;</span>  <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">&gt;=</span> <span class="n">other</span>
+    <span class="c"># FIXME: do we need __cmp__ as well as rich comparisons?</span>
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="o">*</span><span class="n">n</span>
+    <span class="n">__rmul__</span> <span class="o">=</span> <span class="n">__mul__</span>
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">+</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="n">other</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span>
+
+    <span class="c">## following methods not implemented for keys ##</span>
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t delete items from keys&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t add in place to keys&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t multiply keys in place&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t append items to keys&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t insert items into keys&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t pop items from keys&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t remove items from keys&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t extend keys&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Items</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom object for accessing the items of an OrderedDict.</span>
+<span class="sd">    </span>
+<span class="sd">    Can be called like the normal ``OrderedDict.items`` method, but also</span>
+<span class="sd">    supports indexing and sequence methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_main</span> <span class="o">=</span> <span class="n">main</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pretend to be the items method.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_items</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch the item at position i.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="c"># fetching a slice returns an OrderedDict</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set item at position i to item.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="c"># NOTE: item must be an iterable (list of tuples)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># FIXME: Does this raise a sensible error?</span>
+            <span class="n">orig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">strict</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span> <span class="ow">and</span> <span class="p">(</span><span class="n">key</span> <span class="o">!=</span> <span class="n">orig</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;slice assignment must be from &#39;</span>
+                        <span class="s">&#39;unique keys&#39;</span><span class="p">)</span>
+            <span class="c"># delete the current one</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete the item at position i.&quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="c"># FIXME: efficiency?</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="c">### following methods pinched from UserList and adapted ###</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+    <span class="c"># FIXME: do we need to check if we are comparing with another ``Items``</span>
+    <span class="c">#   object? (like the __cast method of UserList)</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&lt;</span>  <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">!=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&gt;</span>  <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">)</span> <span class="c"># easier :-)</span>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span><span class="o">*</span><span class="n">n</span>
+    <span class="n">__rmul__</span> <span class="o">=</span> <span class="n">__mul__</span>
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="n">other</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add an item to the end.&quot;&quot;&quot;</span>
+        <span class="c"># FIXME: this is only append if the key isn&#39;t already present</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;ValueError: list.remove(x): x not in list&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="c"># FIXME: is only a true extend if none of the keys already present</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="c">## following methods not implemented for items ##</span>
+
+    <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t multiply items in place&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Values</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom object for accessing the values of an OrderedDict.</span>
+<span class="sd">    </span>
+<span class="sd">    Can be called like the normal ``OrderedDict.values`` method, but also</span>
+<span class="sd">    supports indexing and sequence methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_main</span> <span class="o">=</span> <span class="n">main</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pretend to be the values method.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_values</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch the value at position i.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the value at position i to value.</span>
+<span class="sd">        </span>
+<span class="sd">        You can only do slice assignment to values if you supply a sequence of</span>
+<span class="sd">        equal length to the slice you are replacing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">SliceType</span><span class="p">):</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;attempt to assign sequence of size </span><span class="si">%s</span><span class="s"> &#39;</span>
+                    <span class="s">&#39;to slice of size </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
+            <span class="c"># FIXME: efficiency?  Would be better to calculate the indexes</span>
+            <span class="c">#   directly from the slice object</span>
+            <span class="c"># NOTE: the new keys can collide with existing keys (or even</span>
+            <span class="c">#   contain duplicates) - these will overwrite</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c">### following methods pinched from UserList and adapted ###</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="c"># FIXME: do we need to check if we are comparing with another ``Values``</span>
+    <span class="c">#   object? (like the __cast method of UserList)</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">&lt;</span>  <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">!=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">&gt;</span>  <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">_sequence</span><span class="p">)</span> <span class="c"># easier :-)</span>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reverse the values&quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">vals</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="c"># FIXME: efficiency</span>
+        <span class="bp">self</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">vals</span>
+
+    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sort the values.&quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">vals</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">vals</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="o">*</span><span class="n">n</span>
+    <span class="n">__rmul__</span> <span class="o">=</span> <span class="n">__mul__</span>
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="n">other</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+    <span class="c">## following methods not implemented for values ##</span>
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t delete items from values&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t add in place to values&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t multiply values in place&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t append items to values&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t insert items into values&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t pop items from values&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t remove items from values&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;Can</span><span class="se">\&#39;</span><span class="s">t extend values&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SequenceOrderedDict"><a class="viewcode-back" href="../../Reference_Manual/paramtk.odict-module.html#paramtk.odict.SequenceOrderedDict">[docs]</a><span class="k">class</span> <span class="nc">SequenceOrderedDict</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Experimental version of OrderedDict that has a custom object for ``keys``,</span>
+<span class="sd">    ``values``, and ``items``.</span>
+<span class="sd">    </span>
+<span class="sd">    These are callable sequence objects that work as methods, or can be</span>
+<span class="sd">    manipulated directly as sequences.</span>
+<span class="sd">    </span>
+<span class="sd">    Test for ``keys``, ``items`` and ``values``.</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; d = SequenceOrderedDict(((1, 2), (2, 3), (3, 4)))</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">    &gt;&gt;&gt; d.keys</span>
+<span class="sd">    [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; d.keys()</span>
+<span class="sd">    [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; d.setkeys((3, 2, 1))</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(3, 4), (2, 3), (1, 2)])</span>
+<span class="sd">    &gt;&gt;&gt; d.setkeys((1, 2, 3))</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[0]</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[:]</span>
+<span class="sd">    [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[-1]</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[-2]</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[0:2] = [2, 1]</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(2, 3), (1, 2), (3, 4)])</span>
+<span class="sd">    &gt;&gt;&gt; d.keys.reverse()</span>
+<span class="sd">    &gt;&gt;&gt; d.keys</span>
+<span class="sd">    [3, 1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; d.keys = [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">    &gt;&gt;&gt; d.keys = [3, 1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(3, 4), (1, 2), (2, 3)])</span>
+<span class="sd">    &gt;&gt;&gt; a = SequenceOrderedDict()</span>
+<span class="sd">    &gt;&gt;&gt; b = SequenceOrderedDict()</span>
+<span class="sd">    &gt;&gt;&gt; a.keys == b.keys</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; a[&#39;a&#39;] = 3</span>
+<span class="sd">    &gt;&gt;&gt; a.keys == b.keys</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; b[&#39;a&#39;] = 3</span>
+<span class="sd">    &gt;&gt;&gt; a.keys == b.keys</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; b[&#39;b&#39;] = 3</span>
+<span class="sd">    &gt;&gt;&gt; a.keys == b.keys</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; a.keys &gt; b.keys</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; a.keys &lt; b.keys</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; &#39;a&#39; in a.keys</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; len(b.keys)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; &#39;c&#39; in d.keys</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; 1 in d.keys</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; [v for v in d.keys]</span>
+<span class="sd">    [3, 1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; d.keys.sort()</span>
+<span class="sd">    &gt;&gt;&gt; d.keys</span>
+<span class="sd">    [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; d = SequenceOrderedDict(((1, 2), (2, 3), (3, 4)), strict=True)</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[::-1] = [1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(3, 4), (2, 3), (1, 2)])</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[:2]</span>
+<span class="sd">    [3, 2]</span>
+<span class="sd">    &gt;&gt;&gt; d.keys[:2] = [1, 3]</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    KeyError: &#39;Keylist is not the same as current keylist.&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; d = SequenceOrderedDict(((1, 2), (2, 3), (3, 4)))</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">    &gt;&gt;&gt; d.values</span>
+<span class="sd">    [2, 3, 4]</span>
+<span class="sd">    &gt;&gt;&gt; d.values()</span>
+<span class="sd">    [2, 3, 4]</span>
+<span class="sd">    &gt;&gt;&gt; d.setvalues((4, 3, 2))</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(1, 4), (2, 3), (3, 2)])</span>
+<span class="sd">    &gt;&gt;&gt; d.values[::-1]</span>
+<span class="sd">    [2, 3, 4]</span>
+<span class="sd">    &gt;&gt;&gt; d.values[0]</span>
+<span class="sd">    4</span>
+<span class="sd">    &gt;&gt;&gt; d.values[-2]</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; del d.values[0]</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    TypeError: Can&#39;t delete items from values</span>
+<span class="sd">    &gt;&gt;&gt; d.values[::2] = [2, 4]</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">    &gt;&gt;&gt; 7 in d.values</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; len(d.values)</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; [val for val in d.values]</span>
+<span class="sd">    [2, 3, 4]</span>
+<span class="sd">    &gt;&gt;&gt; d.values[-1] = 2</span>
+<span class="sd">    &gt;&gt;&gt; d.values.count(2)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; d.values.index(2)</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; d.values[-1] = 7</span>
+<span class="sd">    &gt;&gt;&gt; d.values</span>
+<span class="sd">    [2, 3, 7]</span>
+<span class="sd">    &gt;&gt;&gt; d.values.reverse()</span>
+<span class="sd">    &gt;&gt;&gt; d.values</span>
+<span class="sd">    [7, 3, 2]</span>
+<span class="sd">    &gt;&gt;&gt; d.values.sort()</span>
+<span class="sd">    &gt;&gt;&gt; d.values</span>
+<span class="sd">    [2, 3, 7]</span>
+<span class="sd">    &gt;&gt;&gt; d.values.append(&#39;anything&#39;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    TypeError: Can&#39;t append items to values</span>
+<span class="sd">    &gt;&gt;&gt; d.values = (1, 2, 3)</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(1, 1), (2, 2), (3, 3)])</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; d = SequenceOrderedDict(((1, 2), (2, 3), (3, 4)))</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="sd">    &gt;&gt;&gt; d.items()</span>
+<span class="sd">    [(1, 2), (2, 3), (3, 4)]</span>
+<span class="sd">    &gt;&gt;&gt; d.setitems([(3, 4), (2 ,3), (1, 2)])</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(3, 4), (2, 3), (1, 2)])</span>
+<span class="sd">    &gt;&gt;&gt; d.items[0]</span>
+<span class="sd">    (3, 4)</span>
+<span class="sd">    &gt;&gt;&gt; d.items[:-1]</span>
+<span class="sd">    [(3, 4), (2, 3)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items[1] = (6, 3)</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(3, 4), (6, 3), (1, 2)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items[1:2] = [(9, 9)]</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(3, 4), (9, 9), (1, 2)])</span>
+<span class="sd">    &gt;&gt;&gt; del d.items[1:2]</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    SequenceOrderedDict([(3, 4), (1, 2)])</span>
+<span class="sd">    &gt;&gt;&gt; (3, 4) in d.items</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; (4, 3) in d.items</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; len(d.items)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; [v for v in d.items]</span>
+<span class="sd">    [(3, 4), (1, 2)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.count((3, 4))</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; d.items.index((1, 2))</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; d.items.index((2, 1))</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: (2, 1) is not in list</span>
+<span class="sd">    &gt;&gt;&gt; d.items.reverse()</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(1, 2), (3, 4)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.reverse()</span>
+<span class="sd">    &gt;&gt;&gt; d.items.sort()</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(1, 2), (3, 4)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.append((5, 6))</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(1, 2), (3, 4), (5, 6)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.insert(0, (0, 0))</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(0, 0), (1, 2), (3, 4), (5, 6)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.insert(-1, (7, 8))</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(0, 0), (1, 2), (3, 4), (7, 8), (5, 6)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.pop()</span>
+<span class="sd">    (5, 6)</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(0, 0), (1, 2), (3, 4), (7, 8)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.remove((1, 2))</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(0, 0), (3, 4), (7, 8)]</span>
+<span class="sd">    &gt;&gt;&gt; d.items.extend([(1, 2), (5, 6)])</span>
+<span class="sd">    &gt;&gt;&gt; d.items</span>
+<span class="sd">    [(0, 0), (3, 4), (7, 8), (1, 2), (5, 6)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_val</span><span class="o">=</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">OrderedDict</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_val</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="n">Keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">Values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">Items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_att_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;keys&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">setkeys</span><span class="p">,</span>
+            <span class="s">&#39;items&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">setitems</span><span class="p">,</span>
+            <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">setvalues</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Protect keys, items, and values.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;_att_dict&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
+            <span class="nb">object</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_att_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">OrderedDict</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fun</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/paramtk/odict.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../paramtk.html" >paramtk</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

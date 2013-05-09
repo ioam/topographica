@@ -1,0 +1,301 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.arrayutil &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.base.arrayutil</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">General utility functions and classes for Topographica that require numpy.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sqrt</span><span class="p">,</span><span class="n">dot</span><span class="p">,</span><span class="n">arctan2</span><span class="p">,</span><span class="n">array2string</span><span class="p">,</span><span class="n">fmod</span><span class="p">,</span><span class="n">floor</span><span class="p">,</span><span class="n">array</span><span class="p">,</span> \
+     <span class="n">unravel_index</span><span class="p">,</span><span class="n">concatenate</span><span class="p">,</span><span class="n">set_printoptions</span><span class="p">,</span><span class="n">divide</span><span class="p">,</span><span class="n">maximum</span><span class="p">,</span><span class="n">minimum</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ufunc</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="c"># Ask numpy to print even relatively large arrays by default</span>
+<span class="n">set_printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="mi">200</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ufunc_script_repr"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.ufunc_script_repr">[docs]</a><span class="k">def</span> <span class="nf">ufunc_script_repr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">imports</span><span class="p">,</span><span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">settings</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a runnable representation of the numpy ufunc f, and an</span>
+<span class="sd">    import statement for its module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># (could probably be generalized if required, because module is</span>
+    <span class="c"># f.__class__.__module__)</span>
+    <span class="n">imports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;import numpy&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;numpy.&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">__name__</span>
+</div>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">parameterized</span>
+<span class="n">parameterized</span><span class="o">.</span><span class="n">script_repr_reg</span><span class="p">[</span><span class="n">ufunc</span><span class="p">]</span><span class="o">=</span><span class="n">ufunc_script_repr</span>
+
+
+<div class="viewcode-block" id="L2norm"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.L2norm">[docs]</a><span class="k">def</span> <span class="nf">L2norm</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the L2 norm of the vector v.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">v</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="divisive_normalization"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.divisive_normalization">[docs]</a><span class="k">def</span> <span class="nf">divisive_normalization</span><span class="p">(</span><span class="n">weights</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Divisively normalize an array to sum to 1.0&quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">s</span>
+        <span class="n">weights</span> <span class="o">*=</span> <span class="n">factor</span>
+
+</div>
+<div class="viewcode-block" id="add_border"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.add_border">[docs]</a><span class="k">def</span> <span class="nf">add_border</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a new matrix consisting of the given matrix with a border</span>
+<span class="sd">    or margin of the given width filled with the given value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">hborder</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">cols</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">width</span><span class="p">)</span> <span class="p">]</span><span class="o">*</span><span class="n">width</span><span class="p">)</span>
+    <span class="n">vborder</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">*</span><span class="n">width</span> <span class="p">]</span> <span class="o">*</span> <span class="n">rows</span><span class="p">)</span>
+
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">vborder</span><span class="p">,</span><span class="n">matrix</span><span class="p">,</span><span class="n">vborder</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">hborder</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">hborder</span><span class="p">)</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="arg"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.arg">[docs]</a><span class="k">def</span> <span class="nf">arg</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the complex argument (phase) of z.</span>
+<span class="sd">    (z in radians.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="nb">complex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># so that arg(z) also works for real z</span>
+    <span class="k">return</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="octave_str"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.octave_str">[docs]</a><span class="k">def</span> <span class="nf">octave_str</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mat&quot;</span><span class="p">,</span><span class="n">owner</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print the given Numpy matrix in Octave format, listing the given</span>
+<span class="sd">    matrix name and the object that owns it (if any).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># This just prints the string version of the matrix and does search/replace</span>
+    <span class="c"># to convert it; there may be a faster or easier way.</span>
+    <span class="n">mstr</span><span class="o">=</span><span class="n">array2string</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+    <span class="n">mstr</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">mstr</span><span class="p">)</span>
+    <span class="n">mstr</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;[[]&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">mstr</span><span class="p">)</span>
+    <span class="n">mstr</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;[]]&#39;</span><span class="p">,</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="n">mstr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s">&quot;# Created from </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="se">\n</span><span class="s"># name: </span><span class="si">%s</span><span class="se">\n</span><span class="s"># type: matrix</span><span class="se">\n</span><span class="s"># rows: </span><span class="si">%s</span><span class="se">\n</span><span class="s"># columns: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+           <span class="p">(</span><span class="n">owner</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">mstr</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="octave_output"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.octave_output">[docs]</a><span class="k">def</span> <span class="nf">octave_output</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">mat</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mat&quot;</span><span class="p">,</span><span class="n">owner</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes the given matrix to a new file of the given name, in Octave format.&quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">octave_str</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">owner</span><span class="p">))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="centroid"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.centroid">[docs]</a><span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="n">array_2D</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the centroid (center of gravity) for a 2D array.&quot;&quot;&quot;</span>
+
+    <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">array_2D</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">rsum</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">csum</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">rmass_sum</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">cmass_sum</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+        <span class="n">row_sum</span> <span class="o">=</span> <span class="n">array_2D</span><span class="p">[</span><span class="n">r</span><span class="p">,:]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">rsum</span> <span class="o">+=</span> <span class="n">r</span><span class="o">*</span><span class="n">row_sum</span>
+        <span class="n">rmass_sum</span> <span class="o">+=</span> <span class="n">row_sum</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+        <span class="n">col_sum</span> <span class="o">=</span> <span class="n">array_2D</span><span class="p">[:,</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">csum</span> <span class="o">+=</span> <span class="n">c</span><span class="o">*</span><span class="n">col_sum</span>
+        <span class="n">cmass_sum</span> <span class="o">+=</span> <span class="n">col_sum</span>
+
+    <span class="n">row_centroid</span><span class="o">=</span> <span class="n">rsum</span><span class="o">/</span><span class="n">rmass_sum</span>
+    <span class="n">col_centroid</span><span class="o">=</span> <span class="n">csum</span><span class="o">/</span><span class="n">cmass_sum</span>
+
+    <span class="k">return</span> <span class="n">row_centroid</span><span class="p">,</span> <span class="n">col_centroid</span>
+
+</div>
+<div class="viewcode-block" id="clip_lower"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.clip_lower">[docs]</a><span class="k">def</span> <span class="nf">clip_lower</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">lower_bound</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In-place, one-sided version of numpy.clip().</span>
+
+<span class="sd">    i.e. numpy.clip(arr,a_min=lower_bound,out=arr) if it existed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">maximum</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">lower_bound</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="clip_upper"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.clip_upper">[docs]</a><span class="k">def</span> <span class="nf">clip_upper</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">upper_bound</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In-place, one-sided version of numpy.clip().</span>
+
+<span class="sd">    i.e. numpy.clip(arr,a_max=upper_bound,out=arr) if it existed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">minimum</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">upper_bound</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="wrap"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.wrap">[docs]</a><span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Circularly alias the numeric value x into the range [lower,upper).</span>
+
+<span class="sd">    Valid for cyclic quantities like orientations or hues.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#I have no idea how I came up with this algorithm; it should be simplified.</span>
+    <span class="c">#</span>
+    <span class="c"># Note that Python&#39;s % operator works on floats and arrays;</span>
+    <span class="c"># usually one can simply use that instead.  E.g. to wrap array or</span>
+    <span class="c"># scalar x into 0,2*pi, just use &quot;x % (2*pi)&quot;.</span>
+    <span class="n">range_</span><span class="o">=</span><span class="n">upper</span><span class="o">-</span><span class="n">lower</span>
+    <span class="k">return</span> <span class="n">lower</span> <span class="o">+</span> <span class="n">fmod</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">lower</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">range_</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">range_</span><span class="p">))),</span> <span class="n">range_</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="array_argmax"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.array_argmax">[docs]</a><span class="k">def</span> <span class="nf">array_argmax</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="s">&quot;Returns the coordinates of the maximum element in the given array.&quot;</span>
+    <span class="k">return</span> <span class="n">unravel_index</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+
+
+<span class="c"># CB: Is this of general interest? Used in gcal.ty.</span></div>
+<div class="viewcode-block" id="DivideWithConstant"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.arrayutil-module.html#topo.base.arrayutil.DivideWithConstant">[docs]</a><span class="k">class</span> <span class="nc">DivideWithConstant</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Divide two scalars or arrays with a constant (c) offset on the</span>
+<span class="sd">    denominator to allow setting the gain or to avoid divide-by-zero</span>
+<span class="sd">    issues.  The non-constant part of the denominator (y) is clipped</span>
+<span class="sd">    to ensure that it has only positive values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">divide</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">maximum</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/base/arrayutil.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

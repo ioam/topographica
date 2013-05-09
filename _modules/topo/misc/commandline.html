@@ -1,0 +1,774 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.commandline &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.commandline</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Support functions for parsing command-line arguments and providing</span>
+<span class="sd">the Topographica command prompt.  Typically called from the</span>
+<span class="sd">&#39;./topographica&#39; script, but can be called directly if using</span>
+<span class="sd">Topographica files within a separate Python.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">__main__</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">Parameterized</span>
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">OptionalSingleton</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># By default, use a non-GUI backend for matplotlib.</span>
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">rcParams</span>
+    <span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;backend&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&#39;Agg&#39;</span>
+    <span class="n">matplotlib_imported</span><span class="o">=</span><span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">matplotlib_imported</span><span class="o">=</span><span class="bp">False</span>
+
+
+<span class="n">ipython_shell_interface</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">ipython_prompt_interface</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">IPython.frontend.terminal.embed</span> <span class="kn">import</span> <span class="n">InteractiveShellEmbed</span> <span class="k">as</span> <span class="n">IPShell</span>
+    <span class="kn">from</span> <span class="nn">IPython.config.loader</span> <span class="kn">import</span> <span class="n">Config</span>
+    <span class="n">ipython_shell_interface</span> <span class="o">=</span> <span class="s">&quot;InteractiveShellEmbed&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">IPython.core.prompts</span> <span class="kn">import</span> <span class="n">PromptManager</span>  <span class="c"># pyflakes:ignore (try/except import)</span>
+        <span class="n">ipython_prompt_interface</span> <span class="o">=</span> <span class="s">&quot;PromptManager&quot;</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># older version?</span>
+        <span class="kn">from</span> <span class="nn">IPython.Shell</span> <span class="kn">import</span> <span class="n">IPShell</span>  <span class="c"># pyflakes:ignore (try/except import)</span>
+        <span class="n">ipython_shell_interface</span> <span class="o">=</span> <span class="s">&quot;IPython.Shell&quot;</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Note: IPython is not available; using basic interactive Python prompt instead.&quot;</span>
+
+
+
+<span class="c"># Startup banner</span>
+<span class="n">BANNER</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">Welcome to Topographica!</span>
+
+<span class="s">Type help() for interactive help with python, help(topo) for general</span>
+<span class="s">information about Topographica, help(commandname) for info on a</span>
+<span class="s">specific command, or topo.about() for info on this release, including</span>
+<span class="s">licensing information.</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="GlobalParams"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.GlobalParams">[docs]</a><span class="k">class</span> <span class="nc">GlobalParams</span><span class="p">(</span><span class="n">Parameterized</span><span class="p">,</span><span class="n">OptionalSingleton</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Parameterized class providing script-level parameters.</span>
+
+<span class="sd">    Script-level parameters can be set from the commandline by passing</span>
+<span class="sd">    via -p, e.g. ./topographica -p retina_density=10</span>
+
+<span class="sd">    Within scripts, parameters can be declared by using the add()</span>
+<span class="sd">    method.</span>
+
+
+<span class="sd">    Example usage in a script:</span>
+
+<span class="sd">    from topo.misc.commandline import global_params as p</span>
+<span class="sd">    p.add(</span>
+<span class="sd">        retina_density=param.Number(default=24.0,bounds=(0,None),</span>
+<span class="sd">        inclusive_bounds=(False,True),doc=\&quot;&quot;&quot;</span>
+        <span class="n">The</span> <span class="n">nominal_density</span> <span class="n">to</span> <span class="n">use</span> <span class="k">for</span> <span class="n">the</span> <span class="n">retina</span><span class="o">.</span>\<span class="s">&quot;&quot;&quot;))</span>
+<span class="s">    ...</span>
+<span class="s">    topo.sim[&#39;Retina&#39;]=sheet.GeneratorSheet(</span>
+<span class="s">        nominal_density=p.retina_density)</span>
+
+
+<span class="s">    Further information:</span>
+
+<span class="s">    &#39;context&#39; is usually set to __main__.__dict__ and is used to find</span>
+<span class="s">    the value of a parameter as it is add()ed to this object</span>
+<span class="s">    (i.e. add() has access to values set via the commandline or in</span>
+<span class="s">    scripts).</span>
+
+<span class="s">    Values set via set_in_context() or exec_in_context() (used by -p)</span>
+<span class="s">    are tracked: warnings are issued for overwritten values, and</span>
+<span class="s">    unused values can be warned about via check_for_unused_names().</span>
+
+<span class="s">    The context is not saved in snapshots, but parameter values are</span>
+<span class="s">    saved.</span>
+<span class="s">    &quot;&quot;&quot;</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">OptionalSingleton</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unused_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;global_params&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GlobalParams</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># context is neither saved nor restored</span>
+        <span class="c"># (in our current usage, the context of the GlobalParams</span>
+        <span class="c"># instance will be set to __main__.__dict__ on startup).</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">GlobalParams</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s">&#39;context&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+<div class="viewcode-block" id="GlobalParams.set_in_context"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.GlobalParams.set_in_context">[docs]</a>    <span class="k">def</span> <span class="nf">set_in_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set in self.context all name=val pairs specified in **params,</span>
+<span class="sd">        tracking new names and warning of any replacements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Replacing previous value of &#39;</span><span class="si">%s</span><span class="s">&#39; with &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">val</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="n">val</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unused_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GlobalParams.exec_in_context"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.GlobalParams.exec_in_context">[docs]</a>    <span class="k">def</span> <span class="nf">exec_in_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">arg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        exec arg in self.context, tracking new names and</span>
+<span class="sd">        warning of any replacements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">## contains elaborate scheme to detect what is specified by</span>
+        <span class="c">## -s, and to warn about any replacement</span>
+        <span class="n">current_ids</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span><span class="nb">id</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+        <span class="k">exec</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unused_names</span> <span class="ow">and</span> <span class="nb">id</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">!=</span><span class="n">current_ids</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Replacing previous value of &#39;</span><span class="si">%s</span><span class="s">&#39; with &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">))</span>
+
+        <span class="n">new_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">new_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unused_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GlobalParams.check_for_unused_names"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.GlobalParams.check_for_unused_names">[docs]</a>    <span class="k">def</span> <span class="nf">check_for_unused_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Warn about any unused names.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unused_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39; is unused.&quot;</span><span class="o">%</span><span class="n">s</span><span class="p">)</span>
+
+<span class="c"># warns for param that specified with -c (but also if name gets defined in __main__,</span>
+<span class="c"># e.g. by default_density=global_params.default_density in a script file</span>
+<span class="c">##         for name in self.params():</span>
+<span class="c">##             if name in self.context:</span>
+<span class="c">##                 self.warning(&quot;&#39;%s&#39; still exists in global_params.context&quot;%name)</span>
+
+        <span class="c"># detect duplicate param value that wasn&#39;t used (e.g. specified with after script)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">inspect_value</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39; is unused.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span>
+
+</div>
+<div class="viewcode-block" id="GlobalParams.add"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.GlobalParams.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each parameter_name=parameter_object specified in kw:</span>
+<span class="sd">        * adds the parameter_object to this object&#39;s class</span>
+<span class="sd">        * if there is an entry in context that has the same name as the parameter,</span>
+<span class="sd">          sets the value of the parameter in this object to that value, and then removes</span>
+<span class="sd">          the name from context</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">p_name</span><span class="p">,</span><span class="n">p_obj</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_parameter</span><span class="p">(</span><span class="n">p_name</span><span class="p">,</span><span class="n">p_obj</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">p_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p_name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="n">p_name</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">p_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unused_names</span><span class="p">:</span>
+                    <span class="c"># i.e. remove from __main__ if it was a -p option (but not if -c)</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="n">p_name</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">unused_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p_name</span><span class="p">)</span>
+
+</div></div>
+<span class="n">global_params</span><span class="o">=</span><span class="n">GlobalParams</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+
+
+
+<span class="c">##### Command-prompt formatting</span>
+<span class="c">#</span>
+<div class="viewcode-block" id="IPCommandPromptHandler"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.IPCommandPromptHandler">[docs]</a><span class="k">class</span> <span class="nc">IPCommandPromptHandler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows control over IPython&#39;s dynamic command prompts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_format</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="n">_prompt</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IPCommandPromptHandler.set_format"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.IPCommandPromptHandler.set_format">[docs]</a>    <span class="k">def</span> <span class="nf">set_format</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="n">format</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set IPython&#39;s prompt template to format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">__main__</span>
+        <span class="n">IP</span> <span class="o">=</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;__IP&#39;</span><span class="p">]</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">IP</span><span class="o">.</span><span class="n">outputcache</span><span class="p">,</span><span class="n">cls</span><span class="o">.</span><span class="n">_prompt</span><span class="p">)</span>
+        <span class="n">prompt</span><span class="o">.</span><span class="n">p_template</span> <span class="o">=</span> <span class="n">format</span>
+        <span class="n">prompt</span><span class="o">.</span><span class="n">set_p_str</span><span class="p">()</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_format</span> <span class="o">=</span> <span class="n">format</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IPCommandPromptHandler.get_format"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.IPCommandPromptHandler.get_format">[docs]</a>    <span class="k">def</span> <span class="nf">get_format</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the current template.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_format</span>
+
+</div></div>
+<div class="viewcode-block" id="CommandPrompt"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.CommandPrompt">[docs]</a><span class="k">class</span> <span class="nc">CommandPrompt</span><span class="p">(</span><span class="n">IPCommandPromptHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Control over input prompt.</span>
+
+<span class="sd">    Several predefined formats are provided, and any of these (or any</span>
+<span class="sd">    arbitrary string) can be used by calling set_format() with their</span>
+<span class="sd">    values.</span>
+
+<span class="sd">    See the IPython manual for details:</span>
+<span class="sd">    http://ipython.scipy.org/doc/manual/html/config/index.html</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">      # Use one of the predefined formats:</span>
+<span class="sd">      CommandPrompt.set_format(CommandPrompt.basic_format)</span>
+<span class="sd">      # Just print the command number:</span>
+<span class="sd">      CommandPrompt.set_format(&#39;\# &#39;)</span>
+<span class="sd">      # Print the command number but don&#39;t use color:</span>
+<span class="sd">      CommandPrompt.set_format(&#39;\N &#39;)</span>
+<span class="sd">      # Print the value of my_var at each prompt:</span>
+<span class="sd">      CommandPrompt.set_format(&#39;{my_var}&gt;&gt;&gt; &#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_prompt</span> <span class="o">=</span> <span class="s">&#39;prompt1&#39;</span>
+
+    <span class="c"># Predefined alternatives</span>
+    <span class="n">basic_format</span>   <span class="o">=</span> <span class="s">&#39;Topographica&gt;&gt;&gt; &#39;</span>
+    <span class="k">if</span> <span class="n">ipython_prompt_interface</span> <span class="o">==</span> <span class="s">&quot;PromptManager&quot;</span><span class="p">:</span>
+        <span class="n">simtime_format</span> <span class="o">=</span> <span class="s">&#39;topo_t{topo.sim.timestr_prop}&gt;&gt;&gt; &#39;</span>
+        <span class="n">simtimecmd_format</span> <span class="o">=</span> <span class="s">&#39;topo_t{topo.sim.timestr_prop}_c</span><span class="se">\\</span><span class="s">#&gt;&gt;&gt; &#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">simtime_format</span> <span class="o">=</span> <span class="s">&#39;topo_t${topo.sim.timestr()}&gt;&gt;&gt; &#39;</span>
+        <span class="n">simtimecmd_format</span> <span class="o">=</span> <span class="s">&#39;topo_t${topo.sim.timestr()}_c</span><span class="se">\\</span><span class="s">#&gt;&gt;&gt; &#39;</span>
+
+    <span class="n">_format</span> <span class="o">=</span> <span class="n">simtimecmd_format</span>
+
+</div>
+<div class="viewcode-block" id="CommandPrompt2"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.CommandPrompt2">[docs]</a><span class="k">class</span> <span class="nc">CommandPrompt2</span><span class="p">(</span><span class="n">IPCommandPromptHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Control over continuation prompt.</span>
+
+<span class="sd">    (See CommandPrompt.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_prompt</span> <span class="o">=</span> <span class="s">&#39;prompt2&#39;</span>
+    <span class="n">basic_format</span> <span class="o">=</span> <span class="s">&#39;   .</span><span class="se">\\</span><span class="s">D.: &#39;</span>
+    <span class="n">_format</span> <span class="o">=</span> <span class="n">basic_format</span>
+
+</div>
+<div class="viewcode-block" id="OutputPrompt"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.OutputPrompt">[docs]</a><span class="k">class</span> <span class="nc">OutputPrompt</span><span class="p">(</span><span class="n">IPCommandPromptHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Control over output prompt.</span>
+
+<span class="sd">    (See CommandPrompt.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_prompt</span> <span class="o">=</span> <span class="s">&#39;prompt_out&#39;</span>
+    <span class="n">basic_format</span> <span class="o">=</span> <span class="s">&#39;Out[\#]:&#39;</span>
+    <span class="n">_format</span> <span class="o">=</span> <span class="n">basic_format</span>
+
+<span class="c">#####</span>
+
+
+
+<span class="c"># Use to define global constants</span></div>
+<span class="n">global_constants</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;pi&#39;</span><span class="p">:</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">}</span>
+
+<span class="c"># Create the topographica parser.</span>
+<span class="n">usage</span> <span class="o">=</span> <span class="s">&quot;usage: topographica ([&lt;option&gt;]:[&lt;filename&gt;])*</span><span class="se">\n\</span>
+<span class="s">where any combination of options and Python script filenames will be</span><span class="se">\n\</span>
+<span class="s">processed in order left to right.&quot;</span>
+<span class="n">topo_parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">(</span><span class="n">usage</span><span class="o">=</span><span class="n">usage</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="sim_name_from_filename"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.sim_name_from_filename">[docs]</a><span class="k">def</span> <span class="nf">sim_name_from_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the simulation title from the given filename, if none has been</span>
+<span class="sd">    set already.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;.ty$&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="boolean_option_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.boolean_option_action">[docs]</a><span class="k">def</span> <span class="nf">boolean_option_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for boolean-valued options that apply to the entire run.&quot;&quot;&quot;</span>
+    <span class="c">#print &quot;Processing %s&quot; % (opt_str)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="n">option</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">interactive</span><span class="p">():</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;PYTHONINSPECT&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&#39;1&#39;</span>
+
+<span class="c"># CB: note that topographica should stay open if an error occurs</span>
+<span class="c"># anywhere after a -i (i.e. in a -c command or script)</span>
+<div class="viewcode-block" id="i_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.i_action">[docs]</a><span class="k">def</span> <span class="nf">i_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -i option.&quot;&quot;&quot;</span>
+    <span class="n">boolean_option_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">interactive</span><span class="p">()</span>
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">,</span><span class="s">&quot;--interactive&quot;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">i_action</span><span class="p">,</span>
+                       <span class="n">dest</span><span class="o">=</span><span class="s">&quot;interactive&quot;</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&quot;provide an interactive prompt even if stdin does not appear to be a terminal.&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="v_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.v_action">[docs]</a><span class="k">def</span> <span class="nf">v_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -v option.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">param.parameterized</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">parameterized</span><span class="o">.</span><span class="n">min_print_level</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">parameterized</span><span class="o">.</span><span class="n">VERBOSE</span>
+    <span class="k">print</span> <span class="s">&quot;Enabling verbose message output.&quot;</span>
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-v&quot;</span><span class="p">,</span><span class="s">&quot;--verbose&quot;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">v_action</span><span class="p">,</span><span class="n">dest</span><span class="o">=</span><span class="s">&quot;verbose&quot;</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">help</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">enable verbose messaging output.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="d_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.d_action">[docs]</a><span class="k">def</span> <span class="nf">d_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -d option.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">param.parameterized</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">parameterized</span><span class="o">.</span><span class="n">min_print_level</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">parameterized</span><span class="o">.</span><span class="n">DEBUG</span>
+    <span class="k">print</span> <span class="s">&quot;Enabling debugging message output.&quot;</span>
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-d&quot;</span><span class="p">,</span><span class="s">&quot;--debug&quot;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">d_action</span><span class="p">,</span><span class="n">dest</span><span class="o">=</span><span class="s">&quot;debug&quot;</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">help</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">enable debugging message output (implies --verbose).&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="l_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.l_action">[docs]</a><span class="k">def</span> <span class="nf">l_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -l option.&quot;&quot;&quot;</span>
+    <span class="n">boolean_option_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">topo.misc.legacy</span> <span class="kn">import</span> <span class="n">install_legacy_support</span>
+    <span class="k">print</span> <span class="s">&quot;Enabling legacy support.&quot;</span>
+    <span class="n">install_legacy_support</span><span class="p">()</span>
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-l&quot;</span><span class="p">,</span><span class="s">&quot;--legacy&quot;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">l_action</span><span class="p">,</span><span class="n">dest</span><span class="o">=</span><span class="s">&quot;legacy&quot;</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">help</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">launch Topographica with legacy support enabled.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="gui"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.gui">[docs]</a><span class="k">def</span> <span class="nf">gui</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Start the GUI as if -g were supplied in the command used to launch Topographica.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">matplotlib_imported</span><span class="p">:</span>
+        <span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;backend&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&#39;TkAgg&#39;</span>
+    <span class="n">auto_import_commands</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">start</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">topo.tkgui</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">tkgui</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+
+<span class="c"># Topographica stays open if an error occurs after -g</span>
+<span class="c"># (see comment by i_action)</span></div>
+<div class="viewcode-block" id="g_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.g_action">[docs]</a><span class="k">def</span> <span class="nf">g_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -g option.&quot;&quot;&quot;</span>
+    <span class="n">boolean_option_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">interactive</span><span class="p">()</span>
+    <span class="n">gui</span><span class="p">()</span>
+
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-g&quot;</span><span class="p">,</span><span class="s">&quot;--gui&quot;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">g_action</span><span class="p">,</span><span class="n">dest</span><span class="o">=</span><span class="s">&quot;gui&quot;</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">help</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">launch an interactive graphical user interface; </span><span class="se">\</span>
+<span class="s">equivalent to -c &#39;from topo.misc.commandline import gui ; gui()&#39;. </span><span class="se">\</span>
+<span class="s">Implies -a.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;--pdb&quot;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span><span class="n">dest</span><span class="o">=</span><span class="s">&quot;pdb&quot;</span><span class="p">,</span><span class="n">help</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">Automatically call the pdb debugger after every uncaught </span><span class="se">\</span>
+<span class="s">exception. See IPython documentation for further details.&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="c"># Keeps track of whether something has been performed, when deciding whether to assume -i</span>
+<span class="n">something_executed</span><span class="o">=</span><span class="bp">False</span>
+
+<div class="viewcode-block" id="c_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.c_action">[docs]</a><span class="k">def</span> <span class="nf">c_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -c option.&quot;&quot;&quot;</span>
+    <span class="c">#print &quot;Processing %s &#39;%s&#39;&quot; % (opt_str,value)</span>
+    <span class="k">exec</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span>
+    <span class="k">global</span> <span class="n">something_executed</span>
+    <span class="n">something_executed</span><span class="o">=</span><span class="bp">True</span>
+    <span class="n">openmp_settings_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;openmp_threads&#39;</span><span class="p">,</span> <span class="s">&#39;openmp_min_threads&#39;</span><span class="p">,</span> <span class="s">&#39;openmp_max_threads&#39;</span><span class="p">]</span>
+    <span class="n">openmp_present</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">openmp_settings_names</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">openmp_present</span> <span class="ow">and</span> <span class="n">parser</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">gui</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">WARNING: For OpenMP settings to be used properly they need to be specified after the -g flag.&quot;</span>
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-c&quot;</span><span class="p">,</span><span class="s">&quot;--command&quot;</span><span class="p">,</span><span class="n">action</span> <span class="o">=</span> <span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">c_action</span><span class="p">,</span><span class="nb">type</span><span class="o">=</span><span class="s">&quot;string&quot;</span><span class="p">,</span>
+		       <span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">dest</span><span class="o">=</span><span class="s">&quot;commands&quot;</span><span class="p">,</span><span class="n">metavar</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&lt;command&gt;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span>
+		       <span class="n">help</span><span class="o">=</span><span class="s">&quot;string of arbitrary Python code to be executed in the main namespace.&quot;</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="p_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.p_action">[docs]</a><span class="k">def</span> <span class="nf">p_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -p option.&quot;&quot;&quot;</span>
+    <span class="n">global_params</span><span class="o">.</span><span class="n">exec_in_context</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">global</span> <span class="n">something_executed</span>
+    <span class="n">something_executed</span><span class="o">=</span><span class="bp">True</span>
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-p&quot;</span><span class="p">,</span><span class="s">&quot;--set-parameter&quot;</span><span class="p">,</span><span class="n">action</span> <span class="o">=</span> <span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">p_action</span><span class="p">,</span><span class="nb">type</span><span class="o">=</span><span class="s">&quot;string&quot;</span><span class="p">,</span>
+		       <span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">dest</span><span class="o">=</span><span class="s">&quot;commands&quot;</span><span class="p">,</span><span class="n">metavar</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&lt;command&gt;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span>
+		       <span class="n">help</span><span class="o">=</span><span class="s">&quot;command specifying value(s) of script-level (global) Parameter(s).&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="auto_import_commands"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.auto_import_commands">[docs]</a><span class="k">def</span> <span class="nf">auto_import_commands</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Import the contents of all files in the topo/command/ directory.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">re</span><span class="o">,</span><span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">topo</span>
+    <span class="kn">import</span> <span class="nn">__main__</span>
+
+    <span class="c"># CEBALERT: this kind of thing (topo.__file__) won&#39;t work with</span>
+    <span class="c"># py2exe and similar tools</span>
+    <span class="n">topo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="s">&quot;command&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">topo_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;^[^_.].*\.py$&#39;</span><span class="p">,</span><span class="n">f</span><span class="p">):</span>
+            <span class="n">modulename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;\.py$&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">exec</span> <span class="s">&quot;from topo.command.&quot;</span><span class="o">+</span><span class="n">modulename</span><span class="o">+</span><span class="s">&quot; import *&quot;</span> <span class="ow">in</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span>
+    <span class="k">exec</span> <span class="s">&quot;from topo.command import *&quot;</span> <span class="ow">in</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span>
+</div>
+<div class="viewcode-block" id="a_action"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.a_action">[docs]</a><span class="k">def</span> <span class="nf">a_action</span><span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">opt_str</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for the -a option.&quot;&quot;&quot;</span>
+    <span class="n">auto_import_commands</span><span class="p">()</span>
+</div>
+<span class="n">topo_parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-a&quot;</span><span class="p">,</span><span class="s">&quot;--auto-import-commands&quot;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s">&quot;callback&quot;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="n">a_action</span><span class="p">,</span><span class="n">help</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">import everything from commands/*.py into the main namespace, for convenience; </span><span class="se">\</span>
+<span class="s">equivalent to -c &#39;from topo.misc.commandline import auto_import_commands ; auto_import_commands()&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="exec_startup_files"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.exec_startup_files">[docs]</a><span class="k">def</span> <span class="nf">exec_startup_files</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Execute startup files.</span>
+
+<span class="sd">    Linux/UNIX/OS X: ~/.topographicarc</span>
+<span class="sd">    Windows: %USERPROFILE%\topographica.ini</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># From Bilal: On OS X, ~/Library/Preferences/ is the standard path</span>
+    <span class="c"># for user-defined params. The filename format (corresponding to</span>
+    <span class="c"># .ini on windows) is org.topographica.plist, where a plist is an</span>
+    <span class="c"># XML file. But, many shell-based programs follow the Unix</span>
+    <span class="c"># convention, so we should be fine doing that.</span>
+
+    <span class="c"># Linux/UNIX/OS X:</span>
+    <span class="n">rcpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~&quot;</span><span class="p">),</span><span class="s">&#39;.topographicarc&#39;</span><span class="p">)</span>
+    <span class="c"># Windows (ini is convention, and can be double clicked to edit):</span>
+    <span class="n">inipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="s">&quot;$USERPROFILE&quot;</span><span class="p">),</span><span class="s">&#39;topographica.ini&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">startup_file</span> <span class="ow">in</span> <span class="p">(</span><span class="n">rcpath</span><span class="p">,</span><span class="n">inipath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">startup_file</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;Executing user startup file </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">startup_file</span><span class="p">)</span>
+            <span class="nb">execfile</span><span class="p">(</span><span class="n">startup_file</span><span class="p">,</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+
+    <span class="c">#####</span>
+    <span class="c"># CEBALERT: locations we used to use on Windows and OS X. Should</span>
+    <span class="c"># remove after 0.9.8.</span>
+    <span class="c"># application data on windows</span>
+    <span class="n">inipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="s">&quot;$APPDATA&quot;</span><span class="p">),</span><span class="s">&#39;Topographica&#39;</span><span class="p">,</span><span class="s">&#39;topographica.ini&#39;</span><span class="p">)</span>
+    <span class="c"># application support on OS X</span>
+    <span class="n">configpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~&quot;</span><span class="p">),</span><span class="s">&quot;Library&quot;</span><span class="p">,</span><span class="s">&quot;Application Support&quot;</span><span class="p">,</span><span class="s">&#39;Topographica&#39;</span><span class="p">,</span><span class="s">&#39;topographica.config&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">startup_file</span> <span class="ow">in</span> <span class="p">(</span><span class="n">configpath</span><span class="p">,</span><span class="n">inipath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">startup_file</span><span class="p">):</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Ignoring </span><span class="si">%s</span><span class="s">; location for startup file is </span><span class="si">%s</span><span class="s"> (UNIX/Linux/Mac OS X) or </span><span class="si">%s</span><span class="s"> (Windows).&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">startup_file</span><span class="p">,</span><span class="n">rcpath</span><span class="p">,</span><span class="n">inipath</span><span class="p">))</span>
+    <span class="c">#####</span>
+
+</div>
+<div class="viewcode-block" id="get_omp_num_threads"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.get_omp_num_threads">[docs]</a><span class="k">def</span> <span class="nf">get_omp_num_threads</span><span class="p">(</span><span class="n">openmp_threads</span><span class="p">,</span> <span class="n">openmp_min_threads</span><span class="p">,</span> <span class="n">openmp_max_threads</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Helper function to implement sensible OpenMP behaviour where</span>
+<span class="sd">        possible.  Returns a integer tuple (OpenMP threads, CPUs detected).</span>
+
+<span class="sd">        CPUs detected may be None if multiprocessing is not available (ie</span>
+<span class="sd">        Python 2.5) and consequently OpenMP threads may be None if the user</span>
+<span class="sd">        gave a relative thread specification (ie openmp_threads &lt;= 0). When</span>
+<span class="sd">        OpenMP threads is None, the default OpenMP behaviour of using all</span>
+<span class="sd">        available cores is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="s">&#39;OMP_NUM_THREADS&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s">&#39;NSLOTS&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="s">&#39;NSLOTS&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">multiprocessing</span>
+        <span class="n">total_cores</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">total_cores</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_cores</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Cannot import multiprocessing to determine number of cores.&quot;</span>
+        <span class="n">total_cores</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="n">total_cores</span> <span class="ow">and</span> <span class="p">(</span><span class="o">-</span><span class="n">openmp_threads</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">total_cores</span><span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
+        <span class="k">print</span> <span class="s">&quot;OpenMP: Topographica needs a positive number of threads to execute!&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">openmp_threads</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">total_cores</span><span class="p">:</span>      <span class="n">openmp_threads</span> <span class="o">=</span> <span class="n">total_cores</span> <span class="o">+</span> <span class="n">openmp_threads</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">openmp_threads</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">total_cores</span><span class="p">:</span>  <span class="k">return</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">total_cores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">openmp_threads</span> <span class="o">&gt;</span> <span class="n">total_cores</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;OpenMP: More threads specified than cores detected.&quot;</span><span class="p">;</span> <span class="k">return</span> <span class="p">(</span><span class="n">total_cores</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">openmp_threads</span> <span class="o">&lt;</span> <span class="n">openmp_min_threads</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;OpenMP: Using minimum number of allowed threads.&quot;</span>
+        <span class="n">openmp_threads</span> <span class="o">=</span> <span class="n">openmp_min_threads</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">openmp_max_threads</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="n">openmp_threads</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">openmp_max_threads</span> <span class="o">&lt;</span> <span class="n">openmp_min_threads</span><span class="p">):</span>
+        <span class="k">print</span><span class="s">&quot;OpenMP: Maximum allowed threads lower than minimum allowed threads. Ignoring maximum limit.&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">openmp_threads</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">openmp_threads</span> <span class="o">&gt;</span> <span class="n">openmp_max_threads</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;OpenMP: Using maximum number of allowed threads.&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">openmp_max_threads</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">openmp_threads</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+
+
+<span class="c">### Execute what is specified by the options.</span>
+</div>
+<div class="viewcode-block" id="process_argv"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.commandline-module.html#topo.misc.commandline.process_argv">[docs]</a><span class="k">def</span> <span class="nf">process_argv</span><span class="p">(</span><span class="n">argv</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process command-line arguments (minus argv[0]!), rearrange and execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Initial preparation</span>
+    <span class="kn">import</span> <span class="nn">__main__</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">global_constants</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">exec</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span>
+
+    <span class="n">exec_startup_files</span><span class="p">()</span>
+
+    <span class="c"># Repeatedly process options, if any, followed by filenames, if any, until nothing is left</span>
+    <span class="n">topo_parser</span><span class="o">.</span><span class="n">disable_interspersed_args</span><span class="p">()</span>
+    <span class="n">args</span><span class="o">=</span><span class="n">argv</span>
+    <span class="n">option</span><span class="o">=</span><span class="bp">None</span>
+    <span class="k">global</span> <span class="n">something_executed</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="c"># Process options up until the first filename</span>
+        <span class="p">(</span><span class="n">option</span><span class="p">,</span><span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">topo_parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="n">option</span><span class="p">)</span>
+
+        <span class="c"># Handle filename</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c">#print &quot;Executing %s&quot; % (filename)</span>
+            <span class="n">filedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">filedir</span><span class="p">)</span> <span class="c"># Allow imports relative to this file&#39;s path</span>
+            <span class="n">sim_name_from_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="c"># Default value of topo.sim.name</span>
+
+            <span class="nb">execfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+            <span class="n">something_executed</span><span class="o">=</span><span class="bp">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="n">global_params</span><span class="o">.</span><span class="n">check_for_unused_names</span><span class="p">()</span>
+
+    <span class="c"># OpenMP settings and defaults</span>
+    <span class="n">openmp_threads</span> <span class="o">=</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;openmp_threads&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">openmp_threads</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span> <span class="n">openmp_threads</span><span class="o">=-</span><span class="mi">1</span>
+
+    <span class="n">openmp_min_threads</span> <span class="o">=</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;openmp_min_threads&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">openmp_min_threads</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span> <span class="n">openmp_min_threads</span><span class="o">=</span><span class="mi">2</span>
+
+    <span class="n">openmp_max_threads</span> <span class="o">=</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;openmp_max_threads&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">openmp_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span> <span class="c"># OpenMP is disabled if openmp_threads == 1</span>
+
+        <span class="p">(</span><span class="n">num_threads</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_omp_num_threads</span><span class="p">(</span><span class="n">openmp_threads</span><span class="p">,</span>
+                                                         <span class="n">openmp_min_threads</span><span class="p">,</span>
+                                                         <span class="n">openmp_max_threads</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;OpenMP: Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use.&quot;</span>
+        <span class="k">elif</span> <span class="n">num_threads</span> <span class="o">==</span> <span class="s">&#39;NSLOTS&#39;</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;OMP_NUM_THREADS&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;NSLOTS&#39;</span><span class="p">]</span>
+            <span class="k">print</span> <span class="s">&quot;NSLOTS environment variable found; overriding any other thread settings and using N=</span><span class="si">%s</span><span class="s"> threads&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;NSLOTS&#39;</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">total_cores</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;OpenMP: Using </span><span class="si">%d</span><span class="s"> threads&quot;</span> <span class="o">%</span> <span class="n">num_threads</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;OMP_NUM_THREADS&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="nb">str</span><span class="p">(</span><span class="n">num_threads</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;OpenMP: Using </span><span class="si">%d</span><span class="s"> threads on a machine with </span><span class="si">%d</span><span class="s"> detected CPUs&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_threads</span><span class="p">,</span> <span class="n">total_cores</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;OMP_NUM_THREADS&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="nb">str</span><span class="p">(</span><span class="n">num_threads</span><span class="p">)</span>
+
+    <span class="c"># If no scripts and no commands were given, pretend -i was given.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">something_executed</span><span class="p">:</span> <span class="n">interactive</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">gui</span><span class="p">:</span> <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c">## INTERACTIVE SESSION BEGINS HERE (i.e. can&#39;t have anything but</span>
+    <span class="c">## some kind of cleanup code afterwards)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;PYTHONINSPECT&#39;</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;Output path: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="o">.</span><span class="n">prefix</span>
+        <span class="k">print</span> <span class="n">BANNER</span>
+        <span class="c"># CBALERT: should probably allow a way for users to pass</span>
+        <span class="c"># things to IPython? Or at least set up some kind of</span>
+        <span class="c"># topographica ipython config file. Right now, a topo_parser</span>
+        <span class="c"># option has to be added for every ipython option we want to</span>
+        <span class="c"># support (e.g. see --pdb)</span>
+
+        <span class="k">if</span> <span class="n">ipython_shell_interface</span> <span class="o">==</span> <span class="s">&quot;IPython.Shell&quot;</span><span class="p">:</span>
+            <span class="c"># IPython 0.10 and earlier</span>
+
+            <span class="c"># Stop IPython namespace hack?</span>
+            <span class="c"># http://www.nabble.com/__main__-vs-__main__-td14606612.html</span>
+            <span class="n">__main__</span><span class="o">.</span><span class="n">__name__</span><span class="o">=</span><span class="s">&quot;__mynamespace__&quot;</span>
+
+            <span class="n">ipython_args</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;-noconfirm_exit&#39;</span><span class="p">,</span><span class="s">&#39;-nobanner&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;-pi1&#39;</span><span class="p">,</span><span class="n">CommandPrompt</span><span class="o">.</span><span class="n">get_format</span><span class="p">(),</span>
+                            <span class="s">&#39;-pi2&#39;</span><span class="p">,</span><span class="n">CommandPrompt2</span><span class="o">.</span><span class="n">get_format</span><span class="p">(),</span>
+                            <span class="s">&#39;-po&#39;</span><span class="p">,</span><span class="n">OutputPrompt</span><span class="o">.</span><span class="n">get_format</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">pdb</span><span class="p">:</span>
+                <span class="n">ipython_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-pdb&#39;</span><span class="p">)</span>
+
+            <span class="n">ipshell</span> <span class="o">=</span> <span class="n">IPShell</span><span class="p">(</span><span class="n">ipython_args</span><span class="p">,</span><span class="n">user_ns</span><span class="o">=</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+            <span class="n">ipshell</span><span class="o">.</span><span class="n">mainloop</span><span class="p">(</span><span class="n">sys_exit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">ipython_shell_interface</span> <span class="o">==</span> <span class="s">&quot;InteractiveShellEmbed&quot;</span><span class="p">:</span>
+            <span class="c"># IPython 0.11 and later</span>
+
+            <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">ipython_prompt_interface</span> <span class="o">==</span> <span class="s">&quot;PromptManager&quot;</span><span class="p">:</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">PromptManager</span><span class="o">.</span><span class="n">in_template</span> <span class="o">=</span> <span class="n">CommandPrompt</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">PromptManager</span><span class="o">.</span><span class="n">in2_template</span> <span class="o">=</span> <span class="n">CommandPrompt2</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">PromptManager</span><span class="o">.</span><span class="n">out_template</span> <span class="o">=</span> <span class="n">OutputPrompt</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">InteractiveShell</span><span class="o">.</span><span class="n">prompt_in1</span> <span class="o">=</span> <span class="n">CommandPrompt</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">InteractiveShell</span><span class="o">.</span><span class="n">prompt_in2</span> <span class="o">=</span> <span class="n">CommandPrompt2</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">InteractiveShell</span><span class="o">.</span><span class="n">prompt_out</span> <span class="o">=</span> <span class="n">OutputPrompt</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">InteractiveShell</span><span class="o">.</span><span class="n">confirm_exit</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">ipshell</span> <span class="o">=</span> <span class="n">IPShell</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span><span class="n">user_ns</span><span class="o">=</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">,</span>
+                              <span class="n">banner1</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">exit_msg</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">pdb</span><span class="p">:</span>
+                <span class="n">ipshell</span><span class="o">.</span><span class="n">call_pdb</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="c"># Load Topographica IPython extension in embedded shell</span>
+            <span class="n">ipshell</span><span class="o">.</span><span class="n">extension_manager</span><span class="o">.</span><span class="n">load_extension</span><span class="p">(</span><span class="s">&#39;topo.misc.ipython&#39;</span><span class="p">)</span>
+            <span class="n">ipshell</span><span class="p">()</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/misc/commandline.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

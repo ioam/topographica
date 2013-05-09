@@ -1,0 +1,247 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.composer &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.sheet" href="../sheet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" accesskey="U">topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sheet.composer</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A Sheet class for composing activity from different sheets into a</span>
+<span class="sd">single activity matrix.  Primarily a simple example of how to make</span>
+<span class="sd">a sheet class, but can also be useful.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">import</span> <span class="n">zeros</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.misc.util</span> <span class="kn">import</span> <span class="n">Struct</span><span class="p">,</span> <span class="n">NxN</span>
+
+<div class="viewcode-block" id="Composer"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.composer-module.html#topo.sheet.composer.Composer">[docs]</a><span class="k">class</span> <span class="nc">Composer</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Sheet that combines the activity of 2 or more other sheets into</span>
+<span class="sd">    a single activity matrix.  When connecting a sheet to a composer,</span>
+<span class="sd">    you can specify the location at which that sheet&#39;s input will be</span>
+<span class="sd">    mapped into the composer by adding the &#39;origin&#39; argument to the</span>
+<span class="sd">    connect() call e.g.:</span>
+
+<span class="sd">    sim.connect(input_sheet.name,composer.name,delay=1, origin=(0.25,0.25))</span>
+
+<span class="sd">    will cause (0,0) on input sheet&#39;s activity to map to (0.25,0.25)</span>
+<span class="sd">    on composer&#39;s activity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dest_ports</span><span class="o">=</span><span class="bp">None</span> <span class="c"># Allows connections to come in on any port</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Composer</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dirty</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="Composer.port_configure"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.composer-module.html#topo.sheet.composer.Composer.port_configure">[docs]</a>    <span class="k">def</span> <span class="nf">port_configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">port</span><span class="p">,</span><span class="o">**</span><span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configure a specific input port.</span>
+
+<span class="sd">        origin = (default (0,0)) The offset in the output matrix where</span>
+<span class="sd">        this port&#39;s input should be placed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+</div>
+    <span class="k">def</span> <span class="nf">_dest_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proj</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Composer</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_dest_connect</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[(</span><span class="n">proj</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">proj</span><span class="o">.</span><span class="n">src_port</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dirty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">+</span><span class="mf">0.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dirty</span><span class="o">=</span><span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Received </span><span class="si">%s</span><span class="s"> input from </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">NxN</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span><span class="n">conn</span><span class="o">.</span><span class="n">src</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">in_rows</span><span class="p">,</span> <span class="n">in_cols</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c"># compute the correct position of the input in the buffer</span>
+        <span class="n">start_row</span><span class="p">,</span><span class="n">start_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[(</span><span class="n">conn</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">conn</span><span class="o">.</span><span class="n">src_port</span><span class="p">)]</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
+        <span class="n">row_adj</span><span class="p">,</span><span class="n">col_adj</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;origin (row,col) = &quot;</span><span class="o">+</span><span class="sb">`(start_row,start_col)`</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;adjust (row,col) = &quot;</span><span class="o">+</span><span class="sb">`(row_adj,col_adj)`</span><span class="p">)</span>
+
+        <span class="n">start_row</span> <span class="o">-=</span> <span class="n">row_adj</span>
+        <span class="n">start_col</span> <span class="o">-=</span> <span class="n">col_adj</span>
+
+        <span class="c"># the maximum bounds</span>
+        <span class="n">max_row</span><span class="p">,</span><span class="n">max_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;max_row = </span><span class="si">%d</span><span class="s">, max_col = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">max_row</span><span class="p">,</span><span class="n">max_col</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;in_rows = </span><span class="si">%d</span><span class="s">, in_cols = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">in_rows</span><span class="p">,</span><span class="n">in_cols</span><span class="p">))</span>
+
+        <span class="n">end_row</span> <span class="o">=</span> <span class="n">start_row</span><span class="o">+</span><span class="n">in_rows</span>
+        <span class="n">end_col</span> <span class="o">=</span> <span class="n">start_col</span><span class="o">+</span><span class="n">in_cols</span>
+
+        <span class="c"># if the input goes outside the activity, clip it</span>
+        <span class="n">left_clip</span> <span class="o">=</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">start_col</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">top_clip</span>  <span class="o">=</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">start_row</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">right_clip</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">end_col</span><span class="p">,</span><span class="n">max_col</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_col</span>
+        <span class="n">bottom_clip</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">end_row</span><span class="p">,</span><span class="n">max_row</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_row</span>
+
+        <span class="n">start_col</span> <span class="o">+=</span> <span class="n">left_clip</span>
+        <span class="n">start_row</span> <span class="o">+=</span> <span class="n">top_clip</span>
+        <span class="n">end_col</span> <span class="o">-=</span> <span class="n">right_clip</span>
+        <span class="n">end_row</span> <span class="o">-=</span> <span class="n">bottom_clip</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;start_row = </span><span class="si">%d</span><span class="s">,start_col = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">start_row</span><span class="p">,</span><span class="n">start_col</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;end_row = </span><span class="si">%d</span><span class="s">,end_col = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end_row</span><span class="p">,</span><span class="n">end_col</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;left_clip = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">left_clip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;right_clip = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">right_clip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;top_clip = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">top_clip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;bottom_clip = </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">bottom_clip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;activity shape = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">NxN</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">[</span><span class="n">start_row</span><span class="p">:</span><span class="n">end_row</span><span class="p">,</span> <span class="n">start_col</span><span class="p">:</span><span class="n">end_col</span><span class="p">]</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="n">top_clip</span><span class="p">:</span><span class="n">in_rows</span><span class="o">-</span><span class="n">bottom_clip</span><span class="p">,</span>
+                                                                      <span class="n">left_clip</span><span class="p">:</span><span class="n">in_cols</span><span class="o">-</span><span class="n">right_clip</span><span class="p">]</span>
+
+</div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;Composer&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/sheet/composer.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" >topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

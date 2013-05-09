@@ -1,0 +1,265 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.transferfn.optimized &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.transferfn" href="../transferfn.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../transferfn.html" accesskey="U">topo.transferfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.transferfn.optimized</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Output functions (see basic.py) and projection-level output functions</span>
+<span class="sd">(see projfn.py) written in C to optimize performance.</span>
+
+<span class="sd">Requires the weave package; without it unoptimized versions are used.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFPOutputFn</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">TransferFn</span><span class="p">,</span> <span class="n">IdentityTF</span>
+<span class="kn">from</span> <span class="nn">topo.misc.inlinec</span> <span class="kn">import</span> <span class="n">inline</span><span class="p">,</span><span class="n">provide_unoptimized_equivalent</span><span class="p">,</span>\
+     <span class="n">c_header</span><span class="p">,</span><span class="n">c_decorators</span>
+
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">DivisiveNormalizeL1</span>
+
+
+<span class="c"># For backwards compatibility when loading pickled files; can be deleted</span>
+<span class="n">DivisiveNormalizeL1_opt</span><span class="o">=</span><span class="n">DivisiveNormalizeL1</span>
+
+
+<span class="c"># JABALERT: Need to remove 0.0000000000001 constant;</span>
+<span class="c"># currently needed to avoid divide-by-zero issues</span>
+<span class="c"># in some cases, but should be replaced.</span>
+
+<span class="c"># CEBALERT: not documented: unlike unoptimized equivalent, requires</span>
+<span class="c"># _norm_total to have been set.</span>
+<div class="viewcode-block" id="CFPOF_DivisiveNormalizeL1_opt"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.optimized-module.html#topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt">[docs]</a><span class="k">class</span> <span class="nc">CFPOF_DivisiveNormalizeL1_opt</span><span class="p">(</span><span class="n">CFPOutputFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs divisive normalization of the weights of all cfs.</span>
+<span class="sd">    Intended to be equivalent to, but faster than,</span>
+<span class="sd">    CFPOF_DivisiveNormalizeL1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span>
+        <span class="n">TransferFn</span><span class="p">,</span><span class="n">DivisiveNormalizeL1</span><span class="p">(</span><span class="n">norm_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">cf_type</span><span class="o">=</span><span class="n">iterator</span><span class="o">.</span><span class="n">cf_type</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">num_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="c"># CB: for performance, it is better to process the masks in</span>
+        <span class="c"># the C code (rather than combining them before).</span>
+        <span class="n">active_units_mask</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_active_units_mask</span><span class="p">()</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">sheet_mask</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_sheet_mask</span><span class="p">()</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+
+<span class="s">            DECLARE_SLOT_OFFSET(weights,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_norm_total,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(mask,cf_type);</span>
+
+<span class="s">            </span><span class="si">%(cfs_loop_pragma)s</span><span class="s"></span>
+<span class="s">            for (int r=0; r&lt;num_cfs; ++r) {</span>
+<span class="s">                if (active_units_mask[r] != 0 &amp;&amp; sheet_mask[r] != 0) {</span>
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);</span>
+
+<span class="s">                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);</span>
+
+<span class="s">                    // if normalized total is not available, sum the weights</span>
+<span class="s">                    if (_has_norm_total[0] == 0) {</span>
+<span class="s">                        SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2);</span>
+<span class="s">                    }</span>
+
+<span class="s">                    // normalize the weights</span>
+<span class="s">                    double factor = 1.0/_norm_total[0];</span>
+<span class="s">                    int rc = (rr2-rr1)*(cc2-cc1);</span>
+<span class="s">                    for (int i=0; i&lt;rc; ++i) {</span>
+<span class="s">                        *(weights++) *= factor;</span>
+<span class="s">                    }</span>
+
+<span class="s">                    // Indicate that norm_total is stale</span>
+<span class="s">                    _has_norm_total[0]=0;</span>
+<span class="s">                }</span>
+<span class="s">            }</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="o">%</span><span class="n">c_decorators</span>
+        <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;sheet_mask&#39;</span><span class="p">,</span><span class="s">&#39;active_units_mask&#39;</span><span class="p">,</span><span class="s">&#39;cfs&#39;</span><span class="p">,</span><span class="s">&#39;cf_type&#39;</span><span class="p">,</span><span class="s">&#39;num_cfs&#39;</span><span class="p">],</span>
+               <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+               <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&lt;structmember.h&gt;&#39;</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="CFPOF_DivisiveNormalizeL1"><a class="viewcode-back" href="../../../Reference_Manual/topo.transferfn.optimized-module.html#topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1">[docs]</a><span class="k">class</span> <span class="nc">CFPOF_DivisiveNormalizeL1</span><span class="p">(</span><span class="n">CFPOutputFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Non-optimized version of CFPOF_DivisiveNormalizeL1_opt.</span>
+
+<span class="sd">    Same as CFPOF_Plugin(single_cf_fn=DivisiveNormalizeL1()), except</span>
+<span class="sd">    that it supports joint normalization using the norm_total</span>
+<span class="sd">    property of ConnectionField.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span>
+        <span class="n">TransferFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">DivisiveNormalizeL1</span><span class="p">(</span><span class="n">norm_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses the cf.norm_total attribute to allow optimization</span>
+<span class="sd">        by computing the sum separately, and to allow joint</span>
+<span class="sd">        normalization.  After use, cf.norm_total is deleted because</span>
+<span class="sd">        the value it would have has been changed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># CEBALERT: fix this here and elsewhere</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IdentityTF</span><span class="p">:</span>
+            <span class="n">norm_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span><span class="o">.</span><span class="n">norm_value</span>
+            <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+                <span class="n">current_sum</span><span class="o">=</span><span class="n">cf</span><span class="o">.</span><span class="n">norm_total</span>
+		<span class="k">if</span> <span class="n">current_sum</span> <span class="o">&gt;</span> <span class="mf">0.0000000000001</span><span class="p">:</span>
+                    <span class="n">factor</span> <span class="o">=</span> <span class="n">norm_value</span><span class="o">/</span><span class="n">current_sum</span>
+                    <span class="n">cf</span><span class="o">.</span><span class="n">weights</span> <span class="o">*=</span> <span class="n">factor</span>
+                <span class="k">del</span> <span class="n">cf</span><span class="o">.</span><span class="n">norm_total</span>
+
+</div>
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;CFPOF_DivisiveNormalizeL1_opt&quot;</span><span class="p">,</span><span class="s">&quot;CFPOF_DivisiveNormalizeL1&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span>
+                    <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">TransferFn</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">CFPOutputFn</span><span class="p">))]))</span>
+<span class="n">__all__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;CFPOutputFn&quot;</span><span class="p">)</span>
+<span class="n">__all__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;TransferFn&quot;</span><span class="p">)</span>
+<span class="n">__all__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;IdentityTF&quot;</span><span class="p">)</span>
+<span class="n">__all__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;DivisiveNormalizeL1&quot;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/transferfn/optimized.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../transferfn.html" >topo.transferfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

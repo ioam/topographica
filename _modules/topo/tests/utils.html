@@ -1,0 +1,216 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.utils &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tests.utils</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utility functions used by the test files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># CEB: note these from numpy 1.4 - might be handy:</span>
+<span class="c">#</span>
+<span class="c"># #. assert_array_almost_equal_nulps: new method to compare two arrays of</span>
+<span class="c">#    floating point values. With this function, two values are considered</span>
+<span class="c">#    close if there are not many representable floating point values in</span>
+<span class="c">#    between, thus being more robust than assert_array_almost_equal when the</span>
+<span class="c">#    values fluctuate a lot.</span>
+<span class="c">#</span>
+<span class="c"># #. assert_array_max_ulp: raise an assertion if there are more than N</span>
+<span class="c">#    representable numbers between two floating point values.</span>
+
+
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_array_equal</span><span class="p">,</span><span class="n">assert_array_almost_equal</span>
+
+<span class="k">def</span> <span class="nf">assert_array_not_equal</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">,</span><span class="n">msg</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">assert_array_equal</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">array_almost_equal</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+<span class="c"># temp</span>
+
+<span class="c"># this kind of thing is done all over the tests;</span>
+<span class="c"># could change to use this function (if the test</span>
+<span class="c"># actually needs a new simulation).</span>
+<span class="c">#</span>
+
+<span class="k">def</span> <span class="nf">new_simulation</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">register</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">Simulation</span>
+    <span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFSheet</span><span class="p">,</span><span class="n">CFProjection</span>
+    <span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">GeneratorSheet</span>
+    <span class="kn">from</span> <span class="nn">topo.base.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+
+    <span class="n">sim</span><span class="o">=</span><span class="n">Simulation</span><span class="p">(</span><span class="n">register</span><span class="o">=</span><span class="n">register</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">sim</span><span class="p">[</span><span class="s">&#39;GS&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">GeneratorSheet</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">sim</span><span class="p">[</span><span class="s">&#39;GS2&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">GeneratorSheet</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">sim</span><span class="p">[</span><span class="s">&#39;S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFSheet</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">sim</span><span class="p">[</span><span class="s">&#39;S2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFSheet</span><span class="p">(</span><span class="n">nominal_density</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">nominal_bounds</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&#39;GS&#39;</span><span class="p">,</span><span class="s">&#39;S&#39;</span><span class="p">,</span><span class="n">connection_type</span><span class="o">=</span><span class="n">CFProjection</span><span class="p">,</span><span class="n">delay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&#39;GS&#39;</span><span class="p">,</span><span class="s">&#39;S2&#39;</span><span class="p">,</span><span class="n">connection_type</span><span class="o">=</span><span class="n">CFProjection</span><span class="p">,</span><span class="n">delay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&#39;GS2&#39;</span><span class="p">,</span><span class="s">&#39;S2&#39;</span><span class="p">,</span><span class="n">connection_type</span><span class="o">=</span><span class="n">CFProjection</span><span class="p">,</span><span class="n">delay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sim</span>
+
+
+
+<div class="viewcode-block" id="Series"><a class="viewcode-back" href="../../../Reference_Manual/topo.tests.utils-module.html#topo.tests.utils.Series">[docs]</a><span class="k">class</span> <span class="nc">Series</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When called, return the next int from the series start,</span>
+<span class="sd">    start+step, start+step+step, ...</span>
+
+<span class="sd">    Used in tests that need predictable dynamic numbers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/tests/utils.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

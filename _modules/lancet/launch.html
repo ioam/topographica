@@ -1,0 +1,1039 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lancet.launch &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for lancet.launch</h1><div class="highlight"><pre>
+<span class="c">#</span>
+<span class="c"># Lancet launchers and launch helpers</span>
+<span class="c">#</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">pipes</span><span class="o">,</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">import</span> <span class="nn">lancet.core</span> <span class="kn">as</span> <span class="nn">core</span>
+
+<span class="c">#===================#</span>
+<span class="c"># Commands Template #</span>
+<span class="c">#===================#</span>
+
+<div class="viewcode-block" id="CommandTemplate"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.CommandTemplate">[docs]</a><span class="k">class</span> <span class="nc">CommandTemplate</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A command template is a way of converting the key-value dictionary format</span>
+<span class="sd">    returned by argument specifiers into a particular command. When called with</span>
+<span class="sd">    an argument specifier, a command template returns a list of strings</span>
+<span class="sd">    corresponding to a subprocess Popen argument list.</span>
+
+<span class="sd">    __call__(self, spec, tid=None, info={}):</span>
+
+<span class="sd">    All CommandTemplates must be callable. The tid argument is the task id and</span>
+<span class="sd">    info is a dictionary of run-time information supplied by the launcher. Info</span>
+<span class="sd">    contains of the following information : root_directory, timestamp,</span>
+<span class="sd">    varying_keys, constant_keys, batch_name, batch_tag and batch_description.</span>
+
+<span class="sd">    Command templates should avoid all platform specific logic (this is the job</span>
+<span class="sd">    of the Launcher) but there are cases where the specification needs to be</span>
+<span class="sd">    read from file. This allows tasks to be queued (typically on a cluster)</span>
+<span class="sd">    before the required arguments are known. To achieve this two extra methods</span>
+<span class="sd">    should be implemented if possible:</span>
+
+<span class="sd">    specify(spec, tid, info):</span>
+
+<span class="sd">    Takes a specification for the task and writes it to a file in the</span>
+<span class="sd">    &#39;specifications&#39; subdirectory of the root directory. Each specification</span>
+<span class="sd">    filename must include the tid to ensure uniqueness.</span>
+
+<span class="sd">    queue(self,tid, info):</span>
+
+<span class="sd">    The subprocess Popen argument list that upon execution runs the desired</span>
+<span class="sd">    command using the arguments in the specification file of the given tid</span>
+<span class="sd">    located in the &#39;specifications&#39; folder of the root directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">allowed_list</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        An optional, explicit list of the argument names that the</span>
+<span class="s">        CommandTemplate is expected to accept. If the empty list, no checking is</span>
+<span class="s">        performed. This allows some degree of error checking before tasks are</span>
+<span class="s">        launched. A command may exit if invalid parameters are supplied but it</span>
+<span class="s">        is often better to explicitly check: this avoids waiting in a cluster</span>
+<span class="s">        queue or invalid simulations due to unrecognised parameters.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">executable</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;python&#39;</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        The executable that is to be run by this CommandTemplate. Unless the</span>
+<span class="s">        executable is a standard command expected on the system path, this</span>
+<span class="s">        should be an absolute path. By default this invokes python or the python</span>
+<span class="s">        environment used to invoke the CommandTemplate (eg. the topographica</span>
+<span class="s">        script).&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">do_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">        Set to True to receive input arguments as formatted strings, False for</span>
+<span class="s">        the raw unformatted objects.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">executable</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">executable</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">executable</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CommandTemplate</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">executable</span><span class="o">=</span><span class="n">executable</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Formats a single argument specification - a dictionary of argument</span>
+<span class="sd">        name/value pairs. The info dictionary includes the root_directory,</span>
+<span class="sd">        batch_name, batch_tag, batch_description, timestamp, varying_keys,</span>
+<span class="sd">        constant_keys and constant_items.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">_formatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_specifier</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_format</span><span class="p">:</span> <span class="k">return</span> <span class="n">arg_specifier</span><span class="o">.</span><span class="n">spec_formatter</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="k">else</span>             <span class="p">:</span> <span class="k">return</span> <span class="n">spec</span>
+
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_specifier</span><span class="p">,</span> <span class="n">file_handle</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">queue_cmd_only</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;root_directory&#39;</span><span class="p">:</span>     <span class="s">&#39;&lt;root_directory&gt;&#39;</span><span class="p">,</span>
+                <span class="s">&#39;batch_name&#39;</span><span class="p">:</span>         <span class="s">&#39;&lt;batch_name&gt;&#39;</span><span class="p">,</span>
+                <span class="s">&#39;batch_tag&#39;</span><span class="p">:</span>          <span class="s">&#39;&lt;batch_tag&gt;&#39;</span><span class="p">,</span>
+                <span class="s">&#39;batch_description&#39;</span><span class="p">:</span>  <span class="s">&#39;&lt;batch_description&gt;&#39;</span><span class="p">,</span>
+                <span class="s">&#39;timestamp&#39;</span><span class="p">:</span>          <span class="nb">tuple</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">()),</span>
+                <span class="s">&#39;varying_keys&#39;</span><span class="p">:</span>       <span class="n">arg_specifier</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">(),</span>
+                <span class="s">&#39;constant_keys&#39;</span><span class="p">:</span>      <span class="n">arg_specifier</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">(),</span>
+                <span class="s">&#39;constant_items&#39;</span><span class="p">:</span>     <span class="n">arg_specifier</span><span class="o">.</span><span class="n">constant_items</span><span class="p">()}</span>
+
+        <span class="k">if</span> <span class="n">queue_cmd_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;queue&#39;</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Cannot show queue: CommandTemplate does not allow queueing&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">queue_cmd_only</span><span class="p">:</span>
+            <span class="n">full_string</span> <span class="o">=</span> <span class="s">&#39;Queue command: &#39;</span><span class="o">+</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pipes</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">el</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">(</span><span class="s">&#39;&lt;tid&gt;&#39;</span><span class="p">,</span><span class="n">info</span><span class="p">)])</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">queue_cmd_only</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="n">copied</span> <span class="o">=</span> <span class="n">arg_specifier</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">full_string</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">enumerated</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">copied</span><span class="p">))</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">group_ind</span><span class="p">,</span> <span class="n">specs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">enumerated</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enumerated</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">full_string</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Group </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">group_ind</span>
+                <span class="n">quoted_cmds</span> <span class="o">=</span> <span class="p">[[</span><span class="n">pipes</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">el</span><span class="p">)</span> \
+                                    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span><span class="p">(</span><span class="n">copied</span><span class="p">,</span> <span class="n">s</span><span class="p">),</span><span class="s">&#39;&lt;tid&gt;&#39;</span><span class="p">,</span><span class="n">info</span><span class="p">)]</span> \
+                              <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">]</span>
+                <span class="n">cmd_lines</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;</span><span class="si">%d</span><span class="s">: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">qcmds</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">qcmds</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quoted_cmds</span><span class="p">)]</span>
+                <span class="n">full_string</span> <span class="o">+=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd_lines</span><span class="p">)</span>
+
+        <span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">full_string</span><span class="p">)</span>
+        <span class="n">file_handle</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+<span class="c">#===========#</span>
+<span class="c"># Launchers #</span>
+<span class="c">#===========#</span>
+</div>
+<div class="viewcode-block" id="Launcher"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher">[docs]</a><span class="k">class</span> <span class="nc">Launcher</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Launcher is constructed using a name, an argument specifier and a command</span>
+<span class="sd">    template and launches the corresponding tasks appropriately when invoked.</span>
+
+<span class="sd">    This default Launcher uses subprocess to launch tasks. It is intended to</span>
+<span class="sd">    illustrate the basic design and should be used as a base class for more</span>
+<span class="sd">    complex Launchers. In particular all Launchers should retain the same</span>
+<span class="sd">    behaviour of writing stdout/stderr to the streams directory, writing a log</span>
+<span class="sd">    file and recording launch information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">arg_specifier</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">BaseArgs</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">              The specifier used to generate the varying parameters for the tasks.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">command_template</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">CommandTemplate</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">              The command template used to generate the commands for the current tasks.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">               A very short, identifiable human-readable string that</span>
+<span class="s">               meaningfully describes the batch to be executed. Should not</span>
+<span class="s">               include spaces as it may be used in filenames.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">              A short description of the purpose of the current set of tasks.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">              Metadata information to add to the info file.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">max_concurrency</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">             Concurrency limit to impose on the launch. As the current class</span>
+<span class="s">             uses subprocess locally, multiple processes are possible at</span>
+<span class="s">             once. Set to None for no limit (eg. for clusters)&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">reduction_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">             A callable that will be invoked when the Launcher has completed all</span>
+<span class="s">             tasks. For example, this can be used to collect and analyse data</span>
+<span class="s">             generated across tasks (eg. reduce across maps in a</span>
+<span class="s">             RunBatchAnalysis), inform the user of completion (eg. send an</span>
+<span class="s">             e-mail) among other possibilities.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">NumericTuple</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,)</span><span class="o">*</span><span class="mi">9</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">            Optional override of timestamp (default timestamp set on launch</span>
+<span class="s">            call) in Python struct_time 9-tuple format.  Useful when you need to</span>
+<span class="s">            have a known root_directory path (see root_directory documentation)</span>
+<span class="s">            before launch. For example, you should store state related to</span>
+<span class="s">            analysis (eg. pickles) in the same location as everything else.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">timestamp_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">_%H%M&#39;</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">             The timestamp format for the root directories in python datetime</span>
+<span class="s">             format. If None, the timestamp is omitted from root directory name.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">metric_loader</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">             The function that will load the metric files generated by the</span>
+<span class="s">             task. By default uses pickle.load but json.load is also valid</span>
+<span class="s">             option. The callable must take a file object argument and return a</span>
+<span class="s">             python object. A third interchange format that might be considered</span>
+<span class="s">             is cvs but it is up to the user to implement the corresponding</span>
+<span class="s">             loader.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Launcher.resume_launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher.resume_launch">[docs]</a>    <span class="k">def</span> <span class="nf">resume_launch</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class method to allow Launchers to be controlled from the</span>
+<span class="sd">        environment.  If the environment is processed and the launcher</span>
+<span class="sd">        is resuming, return True, otherwise return False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_name</span><span class="p">,</span> <span class="n">arg_specifier</span><span class="p">,</span> <span class="n">command_template</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Launcher</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">arg_specifier</span><span class="o">=</span><span class="n">arg_specifier</span><span class="p">,</span>
+                                          <span class="n">command_template</span> <span class="o">=</span> <span class="n">command_template</span><span class="p">,</span>
+                                          <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span> <span class="o">=</span> <span class="n">batch_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spec_log</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span><span class="o">*</span><span class="mi">9</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">())</span>
+
+<div class="viewcode-block" id="Launcher.root_directory_name"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher.root_directory_name">[docs]</a>    <span class="k">def</span> <span class="nf">root_directory_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="s">&quot; A helper method that gives the root direcory name given a timestamp &quot;</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp_format</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;-&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span>
+</div>
+<div class="viewcode-block" id="Launcher.append_log"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher.append_log">[docs]</a>    <span class="k">def</span> <span class="nf">append_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The log contains the tids and corresponding specifications used during</span>
+<span class="sd">        launch with the specifications in json format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spec_log</span> <span class="o">+=</span> <span class="n">specs</span> <span class="c"># This should be removed</span>
+        <span class="n">log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.log&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">))</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Log</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">],</span> <span class="n">allow_append</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Launcher.record_info"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher.record_info">[docs]</a>    <span class="k">def</span> <span class="nf">record_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup_info</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        All launchers should call this method to write the info file at the end</span>
+<span class="sd">        of the launch. The info file saves the given setup_info, usually the</span>
+<span class="sd">        launch dict returned by _setup_launch. The file is written to the</span>
+<span class="sd">        root_directory. When called without setup_info, the existing info file</span>
+<span class="sd">        is being updated with the end-time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.info&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">setup_info</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">info_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">info_file</span><span class="p">:</span>
+                    <span class="n">setup_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">info_file</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">setup_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">setup_info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;end_time&#39;</span> <span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">())})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">setup_info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s">&#39;end_time&#39;</span> <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s">&#39;metadata&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
+                <span class="p">})</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">info_path</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">info_file</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">setup_info</span><span class="p">,</span> <span class="n">info_file</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_setup_launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to be used by all launchers that prepares the root directory and</span>
+<span class="sd">        generate basic launch information for command templates to use. Prepends</span>
+<span class="sd">        some information to the description, registers a timestamp and return a</span>
+<span class="sd">        dictionary of useful launch information constant across all tasks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_directory_name</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">root_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">)</span>
+        <span class="n">metrics_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="s">&#39;metrics&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">metrics_dir</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">dynamic</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">metrics_dir</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;root_directory&#39;</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span>
+                <span class="s">&#39;timestamp&#39;</span><span class="p">:</span>         <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+                <span class="s">&#39;varying_keys&#39;</span><span class="p">:</span>      <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">(),</span>
+                <span class="s">&#39;constant_keys&#39;</span><span class="p">:</span>     <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">(),</span>
+                <span class="s">&#39;constant_items&#39;</span><span class="p">:</span>     <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">constant_items</span><span class="p">(),</span>
+                <span class="s">&#39;batch_name&#39;</span><span class="p">:</span>        <span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span>
+                <span class="s">&#39;batch_tag&#39;</span><span class="p">:</span>         <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span>
+                <span class="s">&#39;batch_description&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_setup_streams_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">streams_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(),</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="s">&quot;streams&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">streams_path</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+        <span class="c"># Waiting till these directories exist (otherwise potential qstat error)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">streams_path</span><span class="p">):</span> <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">streams_path</span>
+
+<div class="viewcode-block" id="Launcher.extract_metrics"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher.extract_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">extract_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tids</span><span class="p">,</span> <span class="n">launchinfo</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to extract the metrics generated by the tasks required to update</span>
+<span class="sd">        the argument specifier (if dynamic). Uses the metric loader to extract</span>
+<span class="sd">        the metric files of the &#39;metrics&#39; subdirectory in the root</span>
+<span class="sd">        directory. Metric files should always include the tid in their name for</span>
+<span class="sd">        uniqueness and all metric files of the same tid will be returned</span>
+<span class="sd">        together.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metrics_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="s">&#39;metrics&#39;</span><span class="p">)</span>
+        <span class="n">listing</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">metrics_dir</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">listing</span> <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tids</span>
+                    <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s">&#39;metric-</span><span class="si">%d</span><span class="s">-*&#39;</span> <span class="o">%</span> <span class="n">tid</span><span class="p">)]</span>
+            <span class="n">pfiles</span> <span class="o">=</span> <span class="p">[</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">metrics_dir</span><span class="p">,</span> <span class="n">match</span><span class="p">),</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_loader</span><span class="p">(</span><span class="n">pfile</span><span class="p">)</span> <span class="k">for</span> <span class="n">pfile</span> <span class="ow">in</span> <span class="n">pfiles</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Cannot load required metric files. Cannot continue.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span> <span class="c"># StopIteration should be raised by the argument specifier</span>
+</div>
+<div class="viewcode-block" id="Launcher.limit_concurrency"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher.limit_concurrency">[docs]</a>    <span class="k">def</span> <span class="nf">limit_concurrency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that breaks list of elements into chunks (sublists) of</span>
+<span class="sd">        size self.max_concurrency.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_concurrency</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="p">[</span><span class="n">elements</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">max_concurrency</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+               <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_concurrency</span><span class="p">)]</span>
+</div>
+<div class="viewcode-block" id="Launcher.launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.Launcher.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The method that starts Launcher execution. Typically called by a launch</span>
+<span class="sd">        helper.  This could be called directly by the users but the risk is that</span>
+<span class="sd">        if __name__==&#39;__main__&#39; is omitted, the launcher may rerun on any import</span>
+<span class="sd">        of the script effectively creating a fork-bomb.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">launchinfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_launch</span><span class="p">()</span>
+        <span class="n">streams_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_streams_path</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">record_info</span><span class="p">(</span><span class="n">launchinfo</span><span class="p">)</span>
+
+        <span class="n">last_tid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">last_tids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">gid</span><span class="p">,</span> <span class="n">groupspecs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="p">):</span>
+            <span class="n">tids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last_tid</span><span class="p">,</span> <span class="n">last_tid</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">groupspecs</span><span class="p">)))</span>
+            <span class="n">last_tid</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groupspecs</span><span class="p">)</span>
+            <span class="n">allcommands</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">_formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="p">,</span> <span class="n">spec</span><span class="p">),</span> <span class="n">tid</span><span class="p">,</span> <span class="n">launchinfo</span><span class="p">)</span> \
+                           <span class="k">for</span> <span class="p">(</span><span class="n">spec</span><span class="p">,</span><span class="n">tid</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">groupspecs</span><span class="p">,</span><span class="n">tids</span><span class="p">)]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">append_log</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">tids</span><span class="p">,</span><span class="n">groupspecs</span><span class="p">)))</span>
+            <span class="n">batches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit_concurrency</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allcommands</span><span class="p">,</span><span class="n">tids</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">bid</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">batches</span><span class="p">):</span>
+                <span class="n">processes</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">stdout_handles</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">stderr_handles</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">cmd</span><span class="p">,</span><span class="n">tid</span><span class="p">)</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                    <span class="n">stdout_handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">streams_path</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.o.</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span> <span class="n">tid</span><span class="p">)),</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span>
+                    <span class="n">stderr_handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">streams_path</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.e.</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span> <span class="n">tid</span><span class="p">)),</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span>
+                    <span class="n">processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">stdout_handle</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">stderr_handle</span><span class="p">))</span>
+                    <span class="n">stdout_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stdout_handle</span><span class="p">)</span>
+                    <span class="n">stderr_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stderr_handle</span><span class="p">)</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Batch of </span><span class="si">%d</span><span class="s"> (</span><span class="si">%d</span><span class="s">:</span><span class="si">%d</span><span class="s">/</span><span class="si">%d</span><span class="s">) subprocesses started...&quot;</span> <span class="o">%</span> \
+                            <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">),</span> <span class="n">gid</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">batches</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+                <span class="k">for</span> <span class="n">stdout_handle</span> <span class="ow">in</span> <span class="n">stdout_handles</span><span class="p">:</span> <span class="n">stdout_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">stderr_handle</span> <span class="ow">in</span> <span class="n">stderr_handles</span><span class="p">:</span> <span class="n">stderr_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="n">last_tids</span> <span class="o">=</span> <span class="n">tids</span><span class="p">[:]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">dynamic</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_metrics</span><span class="p">(</span><span class="n">last_tids</span><span class="p">,</span> <span class="n">launchinfo</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">record_info</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spec_log</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="QLauncher"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher">[docs]</a><span class="k">class</span> <span class="nc">QLauncher</span><span class="p">(</span><span class="n">Launcher</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Launcher that operates the Sun Grid Engine using default arguments suitable</span>
+<span class="sd">    for running on the Edinburgh Eddie cluster. Allows automatic parameter</span>
+<span class="sd">    search strategies such as hillclimbing to be used, queueing jobs without</span>
+<span class="sd">    arguments without blocking (via specification files).</span>
+
+<span class="sd">    One of the main features of this class is that it is non-blocking - it alway</span>
+<span class="sd">    exits shortly after invoking qsub. This means that the script is not left</span>
+<span class="sd">    running, waiting for long periods of time on the cluster. This is</span>
+<span class="sd">    particularly important for long simulation where you wish to run some code</span>
+<span class="sd">    at the end of the simulation (eg. plotting your results) or when waiting for</span>
+<span class="sd">    results from runs (eg. waiting for results from 100 seeds to update your</span>
+<span class="sd">    hillclimbing algorithm).</span>
+
+<span class="sd">    To achieve this, QLauncher qsubs a job that relaunches the user&#39;s lancet</span>
+<span class="sd">    script which can then instructs the Qlauncher to continue with</span>
+<span class="sd">    &#39;collate_and_launch&#39; step (via environment variable). Collating refers to</span>
+<span class="sd">    either collecting output from a subset of runs to update the argument specifier</span>
+<span class="sd">    or to a final reduction operation over all the results. Jobs are qsubbed</span>
+<span class="sd">    with dependencies on the previous collate step and conversely each collate</span>
+<span class="sd">    step depends on the all the necessary tasks steps reaching completion.</span>
+
+<span class="sd">    By convention the standard output and error streams go to the corresponding</span>
+<span class="sd">    folders in the &#39;streams&#39; subfolder of the root directory - any -o or -e qsub</span>
+<span class="sd">    options will be overridden. The job name (the -N flag) is specified</span>
+<span class="sd">    automatically and any user value will be ignored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">qsub_switches</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;-V&#39;</span><span class="p">,</span> <span class="s">&#39;-cwd&#39;</span><span class="p">],</span> <span class="n">doc</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">          Specifies the qsub switches (flags without arguments) as a list of</span>
+<span class="s">          strings. By default the -V switch is used to exports all environment</span>
+<span class="s">          variables in the host environment to the batch job.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">qsub_flag_options</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;-b&#39;</span><span class="p">:</span><span class="s">&#39;y&#39;</span><span class="p">},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">          Specifies qsub flags and their corresponding options as a</span>
+<span class="s">          dictionary. Valid values may be strings or lists of string.  If a</span>
+<span class="s">          plain Python dictionary is used, the keys are alphanumerically sorted,</span>
+<span class="s">          otherwise the dictionary is assumed to be an OrderedDict (Python 2.7+,</span>
+<span class="s">          Python3 or param.external.OrderedDict) and the key ordering will be</span>
+<span class="s">          preserved.</span>
+
+<span class="s">          By default the -b (binary) flag is set to &#39;y&#39; to allow binaries to be</span>
+<span class="s">          directly invoked. Note that the &#39;-&#39; is added to the key if missing (to</span>
+<span class="s">          make into a valid flag) so you can specify using keywords in the dict</span>
+<span class="s">          constructor: ie. using qsub_flag_options=dict(key1=value1,</span>
+<span class="s">          key2=value2, ....)&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">script_path</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         For python environments, this is the path to the lancet script</span>
+<span class="s">         allowing the QLauncher to collate jobs. The lancet script is run with</span>
+<span class="s">         the LANCET_ANALYSIS_DIR environment variable set appropriately. This</span>
+<span class="s">         allows the launcher to resume launching jobs when using dynamic</span>
+<span class="s">         argument specifiers or when performing a reduction step.</span>
+
+<span class="s">         If set to None, the command template executable (whatever it may be) is</span>
+<span class="s">         executed with the environment variable set.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="QLauncher.resume_launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.resume_launch">[docs]</a>    <span class="k">def</span> <span class="nf">resume_launch</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resumes the execution of the launcher if environment contains</span>
+<span class="sd">        LANCET_ANALYSIS_DIR. This information allows the</span>
+<span class="sd">        launcher.pickle file to be unpickled to resume the launch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&quot;LANCET_ANALYSIS_DIR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">root_path</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;LANCET_ANALYSIS_DIR&quot;</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;LANCET_ANALYSIS_DIR&quot;</span><span class="p">]</span>
+        <span class="n">pickle_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s">&#39;launcher.pickle&#39;</span><span class="p">)</span>
+        <span class="n">launcher</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">pickle_path</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">))</span>
+        <span class="n">launcher</span><span class="o">.</span><span class="n">collate_and_launch</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_name</span><span class="p">,</span> <span class="n">arg_specifier</span><span class="p">,</span> <span class="n">command_template</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="s">&quot;LANCET_ANALYSIS_DIR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">,</span> <span class="s">&quot;LANCET_ANALYSIS_DIR already in environment!&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">QLauncher</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">batch_name</span><span class="p">,</span> <span class="n">arg_specifier</span><span class="p">,</span>
+                <span class="n">command_template</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_launchinfo</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_tids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spec_log</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_tid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_scheduled_tid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collate_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_concurrency</span> <span class="o">=</span> <span class="bp">None</span> <span class="c"># Inherited</span>
+
+        <span class="c"># The necessary conditions for reserving jobs before specification known.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_dynamic_qsub</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">dynamic</span><span class="p">,</span>
+                                    <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="p">,</span> <span class="s">&#39;schedule&#39;</span><span class="p">),</span>
+                                    <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="p">,</span>   <span class="s">&#39;queue&#39;</span><span class="p">),</span>
+                                    <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="p">,</span>   <span class="s">&#39;specify&#39;</span><span class="p">)])</span>
+
+<div class="viewcode-block" id="QLauncher.qsub_args"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.qsub_args">[docs]</a>    <span class="k">def</span> <span class="nf">qsub_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">override_options</span><span class="p">,</span> <span class="n">cmd_args</span><span class="p">,</span> <span class="n">append_options</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to generate Popen style argument list for qsub using the</span>
+<span class="sd">        qsub_switches and qsub_flag_options parameters. Switches are returned</span>
+<span class="sd">        first. The qsub_flag_options follow in keys() ordered if not a vanilla</span>
+<span class="sd">        Python dictionary (ie. a Python 2.7+ or param.external OrderedDict).</span>
+<span class="sd">        Otherwise the keys are sorted alphanumerically. Note that</span>
+<span class="sd">        override_options is a list of key-value pairs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">opt_dict</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsub_flag_options</span><span class="p">)()</span>
+        <span class="n">opt_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsub_flag_options</span><span class="p">)</span>
+        <span class="n">opt_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">override_options</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qsub_flag_options</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>   <span class="c"># Alphanumeric sort if vanilla Python dictionary</span>
+            <span class="n">ordered_options</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">opt_dict</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ordered_options</span> <span class="o">=</span>  <span class="nb">list</span><span class="p">(</span><span class="n">opt_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="n">ordered_options</span> <span class="o">+=</span> <span class="n">append_options</span>
+
+        <span class="n">unpacked_groups</span> <span class="o">=</span> <span class="p">[[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">==</span><span class="nb">list</span> <span class="k">else</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">val</span><span class="p">)]</span>
+                           <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ordered_options</span><span class="p">]</span>
+        <span class="n">unpacked_kvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">unpacked_groups</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+        <span class="c"># Adds &#39;-&#39; if missing (eg, keywords in dict constructor) and flattens lists.</span>
+        <span class="n">ordered_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="s">&#39;-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">unpacked_kvs</span><span class="p">]</span>
+        <span class="n">ordered_options</span> <span class="o">=</span> <span class="p">[[</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="p">([</span><span class="n">v</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ordered_pairs</span><span class="p">]</span>
+        <span class="n">flattened_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">kvs</span> <span class="ow">in</span> <span class="n">ordered_options</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">kvs</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">([</span><span class="s">&#39;qsub&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsub_switches</span>
+                <span class="o">+</span> <span class="n">flattened_options</span> <span class="o">+</span> <span class="p">[</span><span class="n">pipes</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cmd_args</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="QLauncher.launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main entry point for the launcher. Collects the static information about</span>
+<span class="sd">        the launch and sets up the stdout and stderr stream output</span>
+<span class="sd">        directories. Generates the first call to collate_and_launch().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_launchinfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_launch</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%H%M%S&#39;</span><span class="p">)</span>
+
+        <span class="n">streams_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_streams_path</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qsub_flag_options</span><span class="p">[</span><span class="s">&#39;-o&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">streams_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qsub_flag_options</span><span class="p">[</span><span class="s">&#39;-e&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">streams_path</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">collate_and_launch</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">record_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_launchinfo</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="QLauncher.collate_and_launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.collate_and_launch">[docs]</a>    <span class="k">def</span> <span class="nf">collate_and_launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that collates the previous jobs and launches the next block of</span>
+<span class="sd">        concurrent jobs. The launch type can be either static or dynamic (using</span>
+<span class="sd">        schedule, queue and specify for dynamic argument specifiers).  This method is</span>
+<span class="sd">        invoked on initial launch and then subsequently via the commandline to</span>
+<span class="sd">        collate the previously run jobs and launching the next block of jobs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>   <span class="n">specs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec_iter</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qdel_batch</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reduction_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spec_log</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">record_info</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">tid_specs</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_tid</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">spec</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">specs</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_tid</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">append_log</span><span class="p">(</span><span class="n">tid_specs</span><span class="p">)</span>
+
+        <span class="c"># Updating the argument specifier</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">dynamic</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_metrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_tids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_launchinfo</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_tids</span> <span class="o">=</span> <span class="p">[</span><span class="n">tid</span> <span class="k">for</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span><span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tid_specs</span><span class="p">]</span>
+
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsub_flag_options</span><span class="p">[</span><span class="s">&#39;-o&#39;</span><span class="p">]</span>
+        <span class="n">error_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsub_flag_options</span><span class="p">[</span><span class="s">&#39;-e&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dynamic_qsub</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_qsub</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">error_dir</span><span class="p">,</span> <span class="n">tid_specs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>            <span class="bp">self</span><span class="o">.</span><span class="n">static_qsub</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">error_dir</span><span class="p">,</span> <span class="n">tid_specs</span><span class="p">)</span>
+
+        <span class="c"># Pickle launcher before exit if necessary.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">dynamic</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">root_path</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">)</span>
+            <span class="n">pickle_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s">&#39;launcher.pickle&#39;</span><span class="p">)</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_path</span><span class="p">,</span><span class="s">&#39;wb&#39;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="QLauncher.qsub_collate_and_launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.qsub_collate_and_launch">[docs]</a>    <span class="k">def</span> <span class="nf">qsub_collate_and_launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">error_dir</span><span class="p">,</span> <span class="n">job_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The method that actually runs qsub to invoke the user launch script with</span>
+<span class="sd">        the necessary environment variable to trigger the next collation step</span>
+<span class="sd">        and next block of jobs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">job_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_collate_</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">job_timestamp</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">collate_count</span><span class="p">)</span>
+
+        <span class="n">overrides</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;-e&quot;</span><span class="p">,</span><span class="n">error_dir</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;-N&#39;</span><span class="p">,</span><span class="n">job_name</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;-o&quot;</span><span class="p">,</span><span class="n">output_dir</span><span class="p">),</span>
+                     <span class="p">(</span><span class="s">&#39;-hold_jid&#39;</span><span class="p">,</span><span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_names</span><span class="p">))]</span>
+
+        <span class="n">cmd_args</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">executable</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="n">cmd_args</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">script_path</span><span class="p">]</span>
+
+        <span class="n">popen_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsub_args</span><span class="p">(</span><span class="n">overrides</span><span class="p">,</span> <span class="n">cmd_args</span><span class="p">,</span>
+                        <span class="p">[(</span><span class="s">&quot;-v&quot;</span><span class="p">,</span> <span class="s">&quot;LANCET_ANALYSIS_DIR=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">)])</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">popen_args</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">collate_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Invoked qsub for next batch.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">job_name</span>
+</div>
+<div class="viewcode-block" id="QLauncher.static_qsub"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.static_qsub">[docs]</a>    <span class="k">def</span> <span class="nf">static_qsub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">error_dir</span><span class="p">,</span> <span class="n">tid_specs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method handles static argument specifiers and cases where the</span>
+<span class="sd">        dynamic specifiers cannot be queued before the arguments are known.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">job_names</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tid_specs</span><span class="p">:</span>
+            <span class="n">job_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_job_</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_timestamp</span><span class="p">,</span> <span class="n">tid</span><span class="p">)</span>
+            <span class="n">job_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+            <span class="n">cmd_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">_formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="p">,</span> <span class="n">spec</span><span class="p">),</span>
+                    <span class="n">tid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_launchinfo</span><span class="p">)</span>
+
+            <span class="n">popen_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsub_args</span><span class="p">([(</span><span class="s">&quot;-e&quot;</span><span class="p">,</span><span class="n">error_dir</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;-N&#39;</span><span class="p">,</span><span class="n">job_name</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;-o&quot;</span><span class="p">,</span><span class="n">output_dir</span><span class="p">)],</span>
+                                        <span class="n">cmd_args</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">popen_args</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">stdout</span><span class="p">)</span>
+            <span class="n">processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Invoked qsub for </span><span class="si">%d</span><span class="s"> commands&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qsub_collate_and_launch</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">error_dir</span><span class="p">,</span> <span class="n">job_names</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="QLauncher.dynamic_qsub"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.dynamic_qsub">[docs]</a>    <span class="k">def</span> <span class="nf">dynamic_qsub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">error_dir</span><span class="p">,</span> <span class="n">tid_specs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method handles dynamic argument specifiers where the dynamic</span>
+<span class="sd">        argument specifier can be queued before the arguments are computed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Write out the specification files in anticipation of execution</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tid_specs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">specify</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">_formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="p">,</span> <span class="n">spec</span><span class="p">),</span>
+                    <span class="n">tid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_launchinfo</span><span class="p">)</span>
+
+        <span class="c"># If schedule is empty (or on first initialization)...</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">==</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">schedule</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">tid_specs</span><span class="p">)</span><span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&quot;Number of specs don&#39;t match schedule!&quot;</span>
+
+            <span class="c"># Generating the scheduled tasks (ie the queue commands)</span>
+            <span class="n">collate_name</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">for</span> <span class="n">batch_size</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">:</span>
+                <span class="n">schedule_tids</span> <span class="o">=</span> <span class="p">[</span><span class="n">tid</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_scheduled_tid</span> <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span> <span class="p">]</span>
+                <span class="n">schedule_tasks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">queue</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_launchinfo</span><span class="p">))</span> <span class="k">for</span>
+                                      <span class="n">tid</span> <span class="ow">in</span> <span class="n">schedule_tids</span><span class="p">]</span>
+
+                <span class="c"># Queueing with the scheduled tasks with appropriate job id dependencies</span>
+                <span class="n">hold_jid_cmd</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">group_names</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">schedule_task</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schedule_tasks</span><span class="p">:</span>
+                    <span class="n">job_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">_job_</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_timestamp</span><span class="p">,</span> <span class="n">tid</span><span class="p">)</span>
+                    <span class="n">overrides</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;-e&quot;</span><span class="p">,</span><span class="n">error_dir</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;-N&#39;</span><span class="p">,</span><span class="n">job_name</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;-o&quot;</span><span class="p">,</span><span class="n">output_dir</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="n">collate_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="n">overrides</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&#39;-hold_jid&#39;</span><span class="p">,</span> <span class="n">collate_name</span><span class="p">)]</span>
+                    <span class="n">popen_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsub_args</span><span class="p">(</span><span class="n">overrides</span><span class="p">,</span> <span class="n">schedule_task</span><span class="p">)</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">popen_args</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                    <span class="n">group_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job_name</span><span class="p">)</span>
+
+                <span class="n">collate_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qsub_collate_and_launch</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">error_dir</span><span class="p">,</span> <span class="n">group_names</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_scheduled_tid</span> <span class="o">+=</span> <span class="n">batch_size</span>
+
+            <span class="c"># Popping the currently specified tasks off the schedule</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</div>
+<div class="viewcode-block" id="QLauncher.qdel_batch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.QLauncher.qdel_batch">[docs]</a>    <span class="k">def</span> <span class="nf">qdel_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs qdel command to remove all remaining queued jobs using the</span>
+<span class="sd">        &lt;batch_name&gt;* pattern . Necessary when StopIteration is raised with</span>
+<span class="sd">        scheduled jobs left on the queue.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s">&#39;qdel&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">*&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_timestamp</span><span class="p">)],</span>
+                             <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+<span class="c">#===============#</span>
+<span class="c"># Launch Helper #</span>
+<span class="c">#===============#</span>
+</div></div>
+<div class="viewcode-block" id="review_and_launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.review_and_launch">[docs]</a><span class="k">class</span> <span class="nc">review_and_launch</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The basic example of the sort of helper that is highly recommended for</span>
+<span class="sd">    launching:</span>
+
+<span class="sd">    1) The lancet script may include objects/class that need to be imported</span>
+<span class="sd">    (eg. for accessing analysis functions) to execute the tasks. By default this</span>
+<span class="sd">    would execute the whole script and therefore re-run the Launcher which would</span>
+<span class="sd">    cause a fork-bomb! This decorator only executes the launcher that is</span>
+<span class="sd">    returned by the wrapped function if __name__==&#39;__main__&#39;</span>
+
+<span class="sd">    Code in the script after Launcher execution has been invoked is not</span>
+<span class="sd">    guaranteed to execute *after* all tasks are complete (eg. due to forking,</span>
+<span class="sd">    subprocess, qsub etc). This decorator helps solves this issue, making sure</span>
+<span class="sd">    launch is the last thing in the definition function. The reduction_fn</span>
+<span class="sd">    parameter is the proper way of executing code after the Launcher exits.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">launcher_class</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The launcher class used for this lancet script.  Necessary to access</span>
+<span class="s">         launcher classmethods (to resume launch for example).&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">output_directory</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The output directory - the directory that will contain all the root</span>
+<span class="s">         directories for the individual launches.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">review</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         Whether or not to perform a detailed review of the launch.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">main_script</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         Whether the launch is occuring from a lancet script running as</span>
+<span class="s">         main. Set to False for projects using lancet outside the main script.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">launch_args</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">StaticArgs</span><span class="p">,</span>
+         <span class="n">doc</span><span class="o">=</span> <span class="s">&#39;&#39;&#39;An optional argument specifier to parameterise lancet,</span>
+<span class="s">                 allowing multi-launch scripts.  Useful for collecting</span>
+<span class="s">                 statistics over runs that are not deterministic or are affected</span>
+<span class="s">                 by a random seed for example.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">launch_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;The function that is to be applied.&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">launcher_class</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">review_and_launch</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">launcher_class</span><span class="o">=</span><span class="n">launcher_class</span><span class="p">,</span>
+                                                <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span>
+                                                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cross_checks</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_check_launchers</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reviewers</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_launcher</span> <span class="p">),</span>
+                           <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_args</span><span class="p">),</span>
+                           <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_command_template</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="review_and_launch.configure_launch"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.review_and_launch.configure_launch">[docs]</a>    <span class="k">def</span> <span class="nf">configure_launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lval</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hook to allow the Launch helper to autoconfigure launches as</span>
+<span class="sd">        appropriate.  For example, can be used to save objects in their final</span>
+<span class="sd">        state. Return True if configuration successful, False to cancel the</span>
+<span class="sd">        entire launch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="k">def</span> <span class="nf">section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">car</span><span class="o">=</span><span class="s">&#39;=&#39;</span><span class="p">,</span> <span class="n">carvert</span><span class="o">=</span><span class="s">&#39;|&#39;</span><span class="p">):</span>
+        <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">car</span><span class="o">*</span><span class="n">length</span><span class="p">,</span> <span class="n">carvert</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span>
+                                     <span class="n">carvert</span><span class="p">,</span> <span class="n">car</span><span class="o">*</span><span class="n">length</span><span class="p">)</span>
+
+<div class="viewcode-block" id="review_and_launch.input_options"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.review_and_launch.input_options">[docs]</a>    <span class="k">def</span> <span class="nf">input_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="s">&#39;Select option&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper to prompt the user for input on the commandline.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">options</span><span class="p">]</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> [</span><span class="si">%s</span><span class="s">]: &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)))</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">check_options</span><span class="p">:</span> <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">response</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="ow">and</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">default</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="review_and_launch.cross_check_launchers"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.review_and_launch.cross_check_launchers">[docs]</a>    <span class="k">def</span> <span class="nf">cross_check_launchers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">launchers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs consistency checks across all the launchers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">launchers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Empty launcher list&#39;</span><span class="p">)</span>
+        <span class="n">batch_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">launcher</span><span class="o">.</span><span class="n">batch_name</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">launchers</span><span class="p">]</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">launcher</span><span class="o">.</span><span class="n">timestamp</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">launchers</span><span class="p">]</span>
+        <span class="n">launcher_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">launcher</span><span class="o">.</span><span class="n">__class__</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">launchers</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">batch_names</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">launchers</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Each launcher requires a unique batch name.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">tstamp</span> <span class="k">for</span> <span class="n">tstamp</span> <span class="ow">in</span> <span class="n">timestamps</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Launcher timestamps not all equal. Consider setting timestamp explicitly.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">lclass</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher_class</span> <span class="k">for</span> <span class="n">lclass</span> <span class="ow">in</span> <span class="n">launcher_classes</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Launcher class inconsistent with returned launcher instances.&quot;</span><span class="p">)</span>
+
+        <span class="c"># Argument name consistency checks</span>
+        <span class="n">checkable_launchers</span> <span class="o">=</span> <span class="p">[</span><span class="n">launcher</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">launchers</span>
+                               <span class="k">if</span> <span class="p">(</span><span class="n">launcher</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">allowed_list</span> <span class="o">!=</span> <span class="p">[])]</span>
+
+        <span class="n">used_args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">launcher</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">()</span>
+                         <span class="o">+</span> <span class="n">launcher</span><span class="o">.</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">())</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">checkable_launchers</span><span class="p">]</span>
+
+        <span class="n">allowed_args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">launcher</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">allowed_list</span><span class="p">)</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">checkable_launchers</span><span class="p">]</span>
+
+        <span class="n">clashes</span> <span class="o">=</span> <span class="p">[</span><span class="n">used</span> <span class="o">-</span> <span class="n">allowed</span> <span class="k">for</span> <span class="p">(</span><span class="n">used</span><span class="p">,</span> <span class="n">allowed</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">used_args</span><span class="p">,</span> <span class="n">allowed_args</span><span class="p">)</span>
+                   <span class="k">if</span> <span class="p">(</span><span class="n">used</span> <span class="o">-</span> <span class="n">allowed</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">()]</span>
+
+        <span class="k">if</span> <span class="n">clashes</span> <span class="o">!=</span> <span class="p">[]:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Keys </span><span class="si">%s</span><span class="s"> not in CommandTemplate allowed list&quot;</span> <span class="o">%</span> <span class="nb">list</span><span class="p">(</span><span class="n">clashes</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">launch_fn</span> <span class="o">=</span> <span class="n">fn</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_script</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_fn</span><span class="o">.</span><span class="n">__module__</span> <span class="o">!=</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Resuming launch as necessary</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher_class</span><span class="o">.</span><span class="n">resume_launch</span><span class="p">():</span> <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Setting the output directory via param</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span>
+
+        <span class="c"># Calling the wrapped function with appropriate arguments</span>
+        <span class="n">kwargs_list</span> <span class="o">=</span> <span class="p">[{}]</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span><span class="o">.</span><span class="n">specs</span>
+        <span class="n">lvals</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">launch_fn</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">launcher_class</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">(</span><span class="n">lvals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">timestamp</span>
+            <span class="n">lvals</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">launch_fn</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">kwargs</span> <span class="ow">in</span> <span class="n">kwargs_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+
+        <span class="c"># Cross checks</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="n">checker</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cross_checks</span><span class="p">:</span>
+            <span class="n">checker</span><span class="p">([</span><span class="n">accessor</span><span class="p">(</span><span class="n">lval</span><span class="p">)</span> <span class="k">for</span> <span class="n">lval</span> <span class="ow">in</span> <span class="n">lvals</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">review</span><span class="p">:</span>
+            <span class="c"># Run review of launch args only if necessary</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">proceed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="s">&#39;Lancet Meta Parameters&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">proceed</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">lval</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lvals</span><span class="p">):</span>
+                <span class="n">proceed</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">r</span><span class="p">(</span><span class="n">access</span><span class="p">(</span><span class="n">lval</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">access</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reviewers</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">proceed</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Aborting launch.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lvals</span><span class="p">)</span><span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lvals</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">skip_remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="p">([</span><span class="s">&#39;Y&#39;</span><span class="p">,</span> <span class="s">&#39;n&#39;</span><span class="p">,</span><span class="s">&#39;quit&#39;</span><span class="p">],</span>
+                                     <span class="s">&#39;</span><span class="se">\n</span><span class="s">Skip remaining reviews?&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">skip_remaining</span> <span class="o">==</span> <span class="s">&#39;quit&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+                    <span class="k">if</span> <span class="n">skip_remaining</span> <span class="o">==</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="k">break</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_launchers</span><span class="p">(</span><span class="n">lvals</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="p">([</span><span class="s">&#39;y&#39;</span><span class="p">,</span><span class="s">&#39;N&#39;</span><span class="p">],</span> <span class="s">&#39;Execute?&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;n&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s">&#39;y&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Run configure hook. Exit if any configuration fails</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">configure_launch</span><span class="p">(</span><span class="n">lval</span><span class="p">)</span> <span class="k">for</span> <span class="n">lval</span> <span class="ow">in</span> <span class="n">lvals</span><span class="p">]):</span> <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">for</span> <span class="n">lval</span> <span class="ow">in</span> <span class="n">lvals</span><span class="p">:</span>
+            <span class="n">launcher</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">(</span><span class="n">lval</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;== Launching  </span><span class="si">%s</span><span class="s"> ==&quot;</span> <span class="o">%</span> <span class="n">launcher</span><span class="o">.</span><span class="n">batch_name</span><span class="p">)</span>
+            <span class="n">launcher</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">_process_launchers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lvals</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">review_launcher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">launcher</span><span class="p">):</span>
+        <span class="n">command_template</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">command_template</span>
+        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">(</span><span class="s">&#39;Launcher&#39;</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Type: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">launcher</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Batch Name: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">launcher</span><span class="o">.</span><span class="n">batch_name</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Command executable: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">command_template</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span>
+        <span class="n">root_directory</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">root_directory_name</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Root directory: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">root_directory</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Maximum concurrency: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">launcher</span><span class="o">.</span><span class="n">max_concurrency</span><span class="p">)</span>
+
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&#39;&lt;No description&gt;&#39;</span> <span class="k">if</span> <span class="n">launcher</span><span class="o">.</span><span class="n">description</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="k">else</span> <span class="n">launcher</span><span class="o">.</span><span class="n">description</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="s">&#39;&lt;No tag&gt;&#39;</span> <span class="k">if</span> <span class="n">launcher</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="k">else</span> <span class="n">launcher</span><span class="o">.</span><span class="n">tag</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Description: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">description</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Tag: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+        <span class="k">print</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="review_and_launch.review_args"><a class="viewcode-back" href="../../Reference_Manual/lancet.launch-module.html#lancet.launch.review_and_launch.review_args">[docs]</a>    <span class="k">def</span> <span class="nf">review_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="s">&#39;Argument Specification&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Input argument obj can be a Launcher or an ArgSpec object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">arg_specifier</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">arg_specifier</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Launcher</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span>
+        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">(</span><span class="n">heading</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Type: </span><span class="si">%s</span><span class="s"> (dynamic=</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span>
+              <span class="p">(</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">arg_specifier</span><span class="o">.</span><span class="n">dynamic</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Varying Keys: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">arg_specifier</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">())</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">arg_specifier</span><span class="o">.</span><span class="n">constant_items</span><span class="p">()])</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Constant Items:</span><span class="se">\n\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">items</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Definition:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">arg_specifier</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="p">([</span><span class="s">&#39;Y&#39;</span><span class="p">,</span> <span class="s">&#39;n&#39;</span><span class="p">,</span><span class="s">&#39;quit&#39;</span><span class="p">],</span>
+                <span class="s">&#39;</span><span class="se">\n</span><span class="s">Show available argument specifier entries?&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="s">&#39;quit&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="s">&#39;y&#39;</span><span class="p">:</span>  <span class="n">arg_specifier</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">print</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="k">def</span> <span class="nf">review_command_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">launcher</span><span class="p">):</span>
+        <span class="n">command_template</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">command_template</span>
+        <span class="n">arg_specifier</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">arg_specifier</span>
+        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">(</span><span class="n">command_template</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">command_template</span><span class="o">.</span><span class="n">allowed_list</span> <span class="o">!=</span> <span class="p">[]:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Allowed List: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">command_template</span><span class="o">.</span><span class="n">allowed_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">launcher</span><span class="p">,</span> <span class="n">QLauncher</span><span class="p">)</span> <span class="ow">and</span> <span class="n">launcher</span><span class="o">.</span><span class="n">is_dynamic_qsub</span><span class="p">:</span>
+            <span class="n">command_template</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">arg_specifier</span><span class="p">,</span> <span class="n">queue_cmd_only</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="p">([</span><span class="s">&#39;Y&#39;</span><span class="p">,</span> <span class="s">&#39;n&#39;</span><span class="p">,</span><span class="s">&#39;quit&#39;</span><span class="p">,</span><span class="s">&#39;save&#39;</span><span class="p">],</span>
+                                      <span class="s">&#39;</span><span class="se">\n</span><span class="s">Show available command entries?&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="s">&#39;quit&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="s">&#39;y&#39;</span><span class="p">:</span>
+            <span class="n">command_template</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">arg_specifier</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="s">&#39;save&#39;</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Filename: &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">fname</span><span class="p">),</span><span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">command_template</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">arg_specifier</span><span class="p">,</span> <span class="n">file_handle</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">print</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">arg_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher_class</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                    <span class="s">&#39;</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="p">,</span>
+                    <span class="s">&#39;launch_args=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;review=False&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">review</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;main_script=False&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_script</span> <span class="k">else</span> <span class="bp">None</span> <span class="p">]</span>
+        <span class="n">arg_str</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">arg_list</span> <span class="k">if</span> <span class="n">el</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;review_and_launch(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">arg_str</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">arg_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;launcher_class=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher_class</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                    <span class="s">&#39;output_directory=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="p">,</span>
+                    <span class="s">&#39;launch_args=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span><span class="o">.</span><span class="n">_pprint</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_args</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;review=False&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">review</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;main_script=False&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_script</span> <span class="k">else</span> <span class="bp">None</span> <span class="p">]</span>
+        <span class="n">arg_str</span> <span class="o">=</span> <span class="s">&#39;,</span><span class="se">\n</span><span class="s">   &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">arg_list</span> <span class="k">if</span> <span class="n">el</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;review_and_launch(</span><span class="se">\n</span><span class="s">   </span><span class="si">%s</span><span class="se">\n</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">arg_str</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/lancet/launch.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

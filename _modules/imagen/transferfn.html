@@ -1,0 +1,302 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.transferfn &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="imagen" href="../imagen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" accesskey="U">imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for imagen.transferfn</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">TransferFns: accept and modify a 2d array</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__version__</span><span class="o">=</span><span class="s">&#39;$Revision$&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+
+<div class="viewcode-block" id="TransferFn"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.TransferFn">[docs]</a><span class="k">class</span> <span class="nc">TransferFn</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function object to modify a matrix in place, e.g. for normalization.</span>
+
+<span class="sd">    Used for transforming an array of intermediate results into a</span>
+<span class="sd">    final version, by cropping it, normalizing it, squaring it, etc.</span>
+
+<span class="sd">    Objects in this class must support being called as a function with</span>
+<span class="sd">    one matrix argument, and are expected to change that matrix in place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># CEBALERT: can we have this here - is there a more appropriate</span>
+    <span class="c"># term for it, general to output functions?  JAB: Please do rename it!</span>
+    <span class="n">norm_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<span class="c"># Trivial example of a TransferFn, provided for when a default</span>
+<span class="c"># is needed.  The other concrete OutputFunction classes are stored</span>
+<span class="c"># in transferfn/, to be imported as needed.</span></div>
+<div class="viewcode-block" id="IdentityTF"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.IdentityTF">[docs]</a><span class="k">class</span> <span class="nc">IdentityTF</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identity function, returning its argument as-is.</span>
+
+<span class="sd">    For speed, calling this function object is sometimes optimized</span>
+<span class="sd">    away entirely.  To make this feasible, it is not allowable to</span>
+<span class="sd">    derive other classes from this object, modify it to have different</span>
+<span class="sd">    behavior, add side effects, or anything of that nature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="nb">sum</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+</div>
+<div class="viewcode-block" id="Threshold"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.Threshold">[docs]</a><span class="k">class</span> <span class="nc">Threshold</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Forces all values below a threshold to zero, and leaves others unchanged.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Decision point for determining values to clip.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">minimum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="BinaryThreshold"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.BinaryThreshold">[docs]</a><span class="k">class</span> <span class="nc">BinaryThreshold</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Forces all values below a threshold to zero, and above it to 1.0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Decision point for determining binary value.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">above_threshold</span> <span class="o">=</span> <span class="n">x</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="n">above_threshold</span>
+
+
+</div>
+<div class="viewcode-block" id="DivisiveNormalizeL1"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.DivisiveNormalizeL1">[docs]</a><span class="k">class</span> <span class="nc">DivisiveNormalizeL1</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TransferFn that divides an array by its L1 norm.</span>
+
+<span class="sd">    This operation ensures that the sum of the absolute values of the</span>
+<span class="sd">    array is equal to the specified norm_value, rescaling each value</span>
+<span class="sd">    to make this true.  The array is unchanged if the sum of absolute</span>
+<span class="sd">    values is zero.  For arrays of non-negative values where at least</span>
+<span class="sd">    one is non-zero, this operation is equivalent to a divisive sum</span>
+<span class="sd">    normalization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">norm_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;L1-normalize the input array, if it has a nonzero sum.&quot;&quot;&quot;</span>
+        <span class="n">current_sum</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">current_sum</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_value</span><span class="o">/</span><span class="n">current_sum</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="n">factor</span>
+
+
+</div>
+<div class="viewcode-block" id="DivisiveNormalizeL2"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.DivisiveNormalizeL2">[docs]</a><span class="k">class</span> <span class="nc">DivisiveNormalizeL2</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TransferFn to divide an array by its Euclidean length (aka its L2 norm).</span>
+
+<span class="sd">    For a given array interpreted as a flattened vector, keeps the</span>
+<span class="sd">    Euclidean length of the vector at a specified norm_value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">norm_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">xr</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">tot</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xr</span><span class="p">,</span><span class="n">xr</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">tot</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_value</span><span class="o">/</span><span class="n">tot</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="n">factor</span>
+
+
+</div>
+<div class="viewcode-block" id="DivisiveNormalizeLinf"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.DivisiveNormalizeLinf">[docs]</a><span class="k">class</span> <span class="nc">DivisiveNormalizeLinf</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TransferFn to divide an array by its L-infinity norm</span>
+<span class="sd">    (i.e. the maximum absolute value of its elements).</span>
+
+<span class="sd">    For a given array interpreted as a flattened vector, scales the</span>
+<span class="sd">    elements divisively so that the maximum absolute value is the</span>
+<span class="sd">    specified norm_value.</span>
+
+<span class="sd">    The L-infinity norm is also known as the divisive infinity norm</span>
+<span class="sd">    and Chebyshev norm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">norm_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">tot</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tot</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_value</span><span class="o">/</span><span class="n">tot</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="n">factor</span>
+
+
+</div>
+<div class="viewcode-block" id="norm"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.norm">[docs]</a><span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the Lp norm of v, where p is an arbitrary number defaulting to 2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">**</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">p</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="DivisiveNormalizeLp"><a class="viewcode-back" href="../../Reference_Manual/imagen.transferfn-module.html#imagen.transferfn.DivisiveNormalizeLp">[docs]</a><span class="k">class</span> <span class="nc">DivisiveNormalizeLp</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TransferFn to divide an array by its Lp-Norm, where p is specified.</span>
+
+<span class="sd">    For a parameter p and a given array interpreted as a flattened</span>
+<span class="sd">    vector, keeps the Lp-norm of the vector at a specified norm_value.</span>
+<span class="sd">    Faster versions are provided separately for the typical L1-norm</span>
+<span class="sd">    and L2-norm cases.  Defaults to be the same as an L2-norm, i.e.,</span>
+<span class="sd">    DivisiveNormalizeL2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">norm_value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">tot</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tot</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_value</span><span class="o">/</span><span class="n">tot</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">*=</span><span class="n">factor</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/imagen/transferfn.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" >imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

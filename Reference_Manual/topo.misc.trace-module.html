@@ -1,0 +1,455 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.trace &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-misc-trace">
+<h1>topo.misc.trace<a class="headerlink" href="#topo-misc-trace" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance814dd881d7.svg" usemap="#inheritance814dd881d7" class="inheritance"/></div><map id="inheritance814dd881d7" name="inheritance814dd881d7">
+</map>
+<div class="section" id="module-topo.misc.trace">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.misc.trace" title="Permalink to this headline">¶</a></h2>
+<p>Object classes for recording and plotting time-series data.</p>
+<p>This module defines a set of DataRecorder object types for recording
+time-series data, a set of Trace object types for
+specifying ways of generating 1D-vs-time traces from recorded data,
+and a TraceGroup object that will plot a set of traces on stacked,
+aligned axes.</p>
+<dl class="class">
+<dt id="topo.misc.trace.ActivityMovie">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">ActivityMovie</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#ActivityMovie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.ActivityMovie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>An object encapsulating a series of movie frames displaying the
+value of one or more matrix-valued time-series contained in a
+DataRecorder object.</p>
+<p>An ActivityMovie takes a DataRecorder object, a list of names of
+variables in that recorder and a sequence of timepoints at which
+to sample those variables.  It uses that information to compose a
+sequence of MontageBitmap objects displaying the stored values of
+each variable at each timepoint.  These bitmaps can then be saved
+to sequentially-named files that can be composited into a movie by
+external software.</p>
+<p>Parameters are available to control the layout of the montage,
+adding timecodes to the frames, and the names of the frame files.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">filename_time_fmt</span></tt> (<em>allow_None=False, constant=False, default=%05.0f, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The format of the frame time, using Python string substitution for
+        a floating-point number.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">timecode_offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A value to be added to each timecode before formatting for display.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">variables</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A list of variable names in a DataRecorder object containing
+        matrix-valued time series data.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">filename_fmt</span></tt> (<em>allow_None=False, constant=False, default=%n_%t.%T, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The format for the filenames used to store the frames.  The following
+        substitutions are possible:
+
+        %n: The name of this ActivityMovie object.
+        %t: The frame time, as formatted by the filename_time_fmt parameter
+        %T: The filetype given by the filetype parameter.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">timecode_options</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A dictionary of keyword options to be passed to the PIL ImageDraw.text method
+        when drawing the timecode on the frame. Valid options include font,
+        an ImageFont object indicating the text font, and fill a PIL color
+        specification indicating the text color.  If unspecified, color defaults to
+        the PIL default of black.  Font defaults to topo.plotting.bitmap.TITLE_FONT.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">add_timecode</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to add a visible timecode indicator to each frame.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">filetype</span></tt> (<em>allow_None=False, constant=False, default=tif, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The filetype to use when writing frames. Can be any filetype understood
+        by the Python Imaging Library.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">frame_times</span></tt> (<em>bounds=(0, None), constant=False, default=[0, 1], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A list of the times of the frames in the movie.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">filename_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A prefix to prepend to the filename of each frame when saving;
+        can include directories.  If the filename contains a path, any
+        non-existent directories in the path will be created when the
+        movie is saved.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">montage_params</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A dictionary containing parameters to be used when
+        instantiating the MontageBitmap objects representing each frame.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">overlays</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A dictionary indicating overlays for the variable bitmaps.  The
+        for each key in the dict matching the name of a variable, there
+        should be associated a triple of matrices to be overlayed on
+        the red, green, and blue channels of the corresponding bitmap
+        in each frame.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">timecode_fmt</span></tt> (<em>allow_None=False, constant=False, default=%05.0f, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The format of the timecode displayed in the movie frames, using
+        Python string substitution for a floating-point number.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">recorder</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The DataRecorder storing the timeseries.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.misc.trace.ActivityMovie.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#ActivityMovie.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.ActivityMovie.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the movie frames.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.trace.DataRecorder">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">DataRecorder</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#DataRecorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.DataRecorder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.simulation-module.html#topo.base.simulation.EventProcessor" title="topo.base.simulation.EventProcessor"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.simulation.EventProcessor</span></tt></a></p>
+<p>Record time-series data from a simulation.</p>
+<p>A DataRecorder instance stores a set of named time-series
+variables, consisting of a sequence of recorded data items of any
+type, along with the times at which they were recorded.</p>
+<p>DataRecorder is an abstract class for which different
+implementations may exist for different means of storing recorded
+data.  For example, the subclass InMemoryRecorder stores all the
+data in memory.</p>
+<p>A DataRecorder instance can operate either as an event processor, or in a
+stand-alone mode.  Both usage modes can be used on the same
+instance in the same simulation.</p>
+<p>STAND-ALONE USAGE:</p>
+<p>A DataRecorder instance is used as follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Method .add_variable adds a named time series variable.</li>
+<li>Method .record_data records a new data item and timestamp.</li>
+<li>Method .get_data gets a time-delimited sequence of data from a variable</li>
+</ul>
+</div></blockquote>
+<p>EVENTPROCESSOR USAGE:</p>
+<p>A DataRecorder can also be connected to a simulation as an event
+processor, forming a kind of virtual recording equipment.  An
+output port from any event processor in a simulation can be
+connected to a DataRecorder; the recorder will automaticall create
+a variable with the same name as the connection, and record any
+incoming data on that variable with the time it was received.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="s">&#39;Recorder&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">InMemoryRecorder</span><span class="p">()</span>
+<span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&#39;V1&#39;</span><span class="p">,</span><span class="s">&#39;Recorder&#39;</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;V1 Activity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This script snippet will create a new DataRecorder and
+automatically record all activity sent from the sheet &#8216;V1&#8217;.</p>
+<dl class="method">
+<dt id="topo.misc.trace.DataRecorder.add_variable">
+<tt class="descname">add_variable</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#DataRecorder.add_variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.DataRecorder.add_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new time-series variable with the given name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.trace.DataRecorder.get_data">
+<tt class="descname">get_data</tt><big>(</big><em>varname</em>, <em>times=(None</em>, <em>None)</em>, <em>fill_range=False</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#DataRecorder.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.DataRecorder.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the named timeseries between the given times
+(inclusive). If fill_range is true, the returned data will
+have timepoints exactly at the start and end of
+the given timerange.  The data values at these timepoints will
+be those of the next-earlier datapoint in the series.</p>
+<p>(NOTE: fill_range can fail to create a beginning timepoint if
+the start of the time range is earlier than the first recorded datapoint.]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.trace.DataRecorder.get_time_indices">
+<tt class="descname">get_time_indices</tt><big>(</big><em>varname</em>, <em>start_time</em>, <em>end_time</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#DataRecorder.get_time_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.DataRecorder.get_time_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>For the named variable, get the start and end indices suitable
+for slicing the data to include all times t:</p>
+<div class="highlight-python"><pre>start_time &lt;= t &lt;= end_time.</pre>
+</div>
+<p>A <a href="#id1"><span class="problematic" id="id2">start_</span></a> or end_time of None is interpreted to mean the
+earliest or latest available time, respectively.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.trace.DataRecorder.get_times">
+<tt class="descname">get_times</tt><big>(</big><em>var</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#DataRecorder.get_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.DataRecorder.get_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the timestamps for a given variable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.trace.DataRecorder.record_data">
+<tt class="descname">record_data</tt><big>(</big><em>varname</em>, <em>time</em>, <em>data</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#DataRecorder.record_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.DataRecorder.record_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Record the given data item with the given timestamp in the
+named timeseries.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.trace.IdentityTrace">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">IdentityTrace</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#IdentityTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.IdentityTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.misc.trace.Trace" title="topo.misc.trace.Trace"><tt class="xref py py-class docutils literal"><span class="pre">topo.misc.trace.Trace</span></tt></a></p>
+<p>A Trace that returns the data, unmodified.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_name</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the timeseries from which the trace is generated.
+        E.g. the connection name into a DataRecorder object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ymargin</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The fraction of the difference ymax-ymin to add to the
+        top of the plot as padding.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">plotkw</span></tt> (<em>allow_None=False, constant=False, default={&#8216;linestyle&#8217;: &#8216;steps&#8217;}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Contains the keyword arguments to pass to the plot command
+        when plotting the trace.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">ybounds</span></tt> (<em>constant=False, default=(None, None), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The (min,max) boundaries for y axis.  If either is None, then
+        the bound min or max of the data given, respectively.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.trace.InMemoryRecorder">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">InMemoryRecorder</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#InMemoryRecorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.InMemoryRecorder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.misc.trace.DataRecorder" title="topo.misc.trace.DataRecorder"><tt class="xref py py-class docutils literal"><span class="pre">topo.misc.trace.DataRecorder</span></tt></a></p>
+<p>A data recorder that stores all recorded data in memory.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.trace.IndexTrace">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">IndexTrace</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#IndexTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.IndexTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.misc.trace.Trace" title="topo.misc.trace.Trace"><tt class="xref py py-class docutils literal"><span class="pre">topo.misc.trace.Trace</span></tt></a></p>
+<p>A Trace that assumes that each data item is a sequence that can be
+indexed with a single integer, and traces the value of one indexed element.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">index</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The index into the data to be traced.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_name</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the timeseries from which the trace is generated.
+        E.g. the connection name into a DataRecorder object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ymargin</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The fraction of the difference ymax-ymin to add to the
+        top of the plot as padding.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">plotkw</span></tt> (<em>allow_None=False, constant=False, default={&#8216;linestyle&#8217;: &#8216;steps&#8217;}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Contains the keyword arguments to pass to the plot command
+        when plotting the trace.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">ybounds</span></tt> (<em>constant=False, default=(None, None), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The (min,max) boundaries for y axis.  If either is None, then
+        the bound min or max of the data given, respectively.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.trace.SheetPositionTrace">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">SheetPositionTrace</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#SheetPositionTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.SheetPositionTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.misc.trace.Trace" title="topo.misc.trace.Trace"><tt class="xref py py-class docutils literal"><span class="pre">topo.misc.trace.Trace</span></tt></a></p>
+<p>A trace that assumes that the data are sheet activity matrices,
+and traces the value of a given (x,y) position on the sheet.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_name</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the timeseries from which the trace is generated.
+        E.g. the connection name into a DataRecorder object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The y sheet-coordinate of the position to be traced.</dd>
+<dt><em>param Composite</em> <tt class="docutils literal"><span class="pre">position</span></tt> (<em>attribs=[&#8216;x&#8217;, &#8216;y&#8217;], constant=False, default=None, instantiate=False, objtype=&lt;class &#8216;topo.misc.trace.SheetPositionTrace&#8217;&gt;, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The sheet coordinates of the position to be traced.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ymargin</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The fraction of the difference ymax-ymin to add to the
+        top of the plot as padding.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The x sheet-coordinate of the position to be traced.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">coordframe</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The SheetCoordinateSystem to use to convert the position
+        into matrix coordinates.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">plotkw</span></tt> (<em>allow_None=False, constant=False, default={&#8216;linestyle&#8217;: &#8216;steps&#8217;}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Contains the keyword arguments to pass to the plot command
+        when plotting the trace.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">ybounds</span></tt> (<em>constant=False, default=(None, None), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The (min,max) boundaries for y axis.  If either is None, then
+        the bound min or max of the data given, respectively.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.trace.Trace">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">Trace</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#Trace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.Trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A specification for generating 1D traces of data from recorded
+timeseries.</p>
+<p>A Trace object is a callable object that encapsulates
+a method for generating a 1-dimensional trace from possibly
+multidimensional timeseries data, along with a specification for
+how to plot that data, including Y-axis boundaries and plotting arguments.</p>
+<p>Trace is an abstract class.  Subclasses implement
+the __call__ method to define how to extract a 1D trace from a
+sequence of data.</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">data_name</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the timeseries from which the trace is generated.
+        E.g. the connection name into a DataRecorder object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ymargin</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The fraction of the difference ymax-ymin to add to the
+        top of the plot as padding.</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">plotkw</span></tt> (<em>allow_None=False, constant=False, default={&#8216;linestyle&#8217;: &#8216;steps&#8217;}, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Contains the keyword arguments to pass to the plot command
+        when plotting the trace.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">ybounds</span></tt> (<em>constant=False, default=(None, None), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The (min,max) boundaries for y axis.  If either is None, then
+        the bound min or max of the data given, respectively.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.trace.TraceGroup">
+<em class="property">class </em><tt class="descclassname">topo.misc.trace.</tt><tt class="descname">TraceGroup</tt><big>(</big><em>recorder</em>, <em>traces=</em><span class="optional">[</span><span class="optional">]</span>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#TraceGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.TraceGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A group of data traces to be plotted together.</p>
+<p>A TraceGroup defines a set of associated data traces and allows
+them to be plotted on stacked, aligned axes.  The constructor
+takes a DataRecorder object as a data source, and a list of
+Trace objects that indicate the traces to plot.  The
+trace specifications are stored in the attribute self.traces,
+which can be modified at any time.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">time_axis_relative</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to plot the time-axis tic values relative to the start
+       of the plotted time range, or in absolute values.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">hspace</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.6, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Height spacing adjustment between plots.  Larger values
+       produce more space.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.misc.trace.TraceGroup.plot">
+<tt class="descname">plot</tt><big>(</big><em>times=(None</em>, <em>None)</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#TraceGroup.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.TraceGroup.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the traces.</p>
+<p>Requires MatPlotLib (aka pylab).</p>
+<p>Plots the traces specified in self.traces, over the timespan
+specified by times.  times = (start_time,end_time); if either
+start_time or end_time is None, it is assumed to extend to the
+beginning or end of the timeseries, respectively.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.trace.get_images">
+<tt class="descclassname">topo.misc.trace.</tt><tt class="descname">get_images</tt><big>(</big><em>name</em>, <em>times</em>, <em>recorder</em>, <em>overlays=(0</em>, <em>0</em>, <em>0)</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/trace.html#get_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.trace.get_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a time-sequence of matrix data from a DataRecorder variable
+and convert it to a sequence of images stored in Bitmap objects.</p>
+<p>Parameters: name is the name of the variable to be queried. times
+is a sequence of timepoints at which to query the
+variable. recorder is the data recorder. overlays is a tuple of
+matrices or scalars to be added to the red, green, and blue
+channels of the bitmaps respectively.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.misc.trace</a><ul>
+<li><a class="reference internal" href="#module-topo.misc.trace">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.misc.trace-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,238 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Reporting specific problems with Topographica &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Forums" href="index.html" />
+    <link rel="next" title="Team Members" href="../Team_Members/index.html" />
+    <link rel="prev" title="Forums" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Team_Members/index.html" title="Team Members"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="index.html" title="Forums"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Forums</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="reporting-specific-problems-with-topographica">
+<h1>Reporting specific problems with Topographica<a class="headerlink" href="#reporting-specific-problems-with-topographica" title="Permalink to this headline">¶</a></h1>
+<p>Topographica is used actively in research, and is thus continuously
+changing, which inevitably adds new problems as old ones are fixed
+and new features are added. When you have found what appears to be a
+problem with Topographica itself (whether a bug or a missing
+feature), please try the following:</p>
+<ol class="arabic">
+<li><p class="first">If you are using a version that is more than a few weeks old,
+consider trying the most up to date (&#8220;bleeding-edge&#8221;) version via
+<a class="reference external" href="https://github.com/ioam/topographica">Git</a>. The code is updated nearly every day, so by the end of a
+few weeks many changes will have accumulated. Often, bugs will
+have been fixed and new features will have been added already in
+the Git repository, even though they are not yet released
+officially.</p>
+</li>
+<li><p class="first">If the problem is still present in the current version, you can
+search the list of <a class="reference external" href="https://github.com/ioam/topographica/issues?state=open">bug reports</a> on our project pages at GitHub
+to see if we already know about the problem. If you find the
+problem, please feel free to add additional comments to the
+report.</p>
+</li>
+<li><p class="first">We also have a <a class="reference external" href="../Future_Work/current.html">task list</a>, used by the developers to keep track
+of tasks. Try searching this list for information about your
+problem. If you find a related task, please send an e-mail to the
+developer listed as being in charge of that item (if any). If no
+one is yet listed as being responsible, feel free to volunteer!</p>
+</li>
+<li><p class="first">If you can locate where in the code there might be a problem
+(e.g. by going to the line numbers mentioned in a Python
+exception), you will often find a comment with the keyword
+&#8220;ALERT&#8221; beside the code. These notes are used to mark problems of
+which we are aware but have not yet been able to address. If so,
+please let us know that fixing the problem is urgent, and/or
+suggest fixes for the offending code.</p>
+</li>
+<li><p class="first">Otherwise, please <a class="reference external" href="https://github.com/ioam/topographica/issues/new">file a bug report</a>. If possible, please
+include:</p>
+<ul>
+<li><p class="first">the full error message, if any</p>
+</li>
+<li><p class="first">if you are not using Git (i.e. you downloaded a released
+version), please include the Topographica release number (you
+can obtain this by starting Topographica and typing
+<tt class="docutils literal"><span class="pre">topo.release</span></tt>)</p>
+</li>
+<li><p class="first">if you are using Git, please include the output of
+<tt class="docutils literal"><span class="pre">git</span> <span class="pre">diff</span></tt>, <tt class="docutils literal"><span class="pre">git</span> <span class="pre">status</span></tt>, and <tt class="docutils literal"><span class="pre">git</span> <span class="pre">describe</span></tt>; you can
+create a single file (<tt class="docutils literal"><span class="pre">report</span></tt>) containing this information
+with the following command:</p>
+<div class="highlight-python"><pre>git describe &gt; report; git status &gt;&gt; report; git diff &gt;&gt; report</pre>
+</div>
+</li>
+<li><p class="first">which operating system (OS) you are using (Linux, Mac, or
+Windows) and which OS version</p>
+</li>
+<li><p class="first">any additional file needed to replicate the problem (e.g. a
+script you&#8217;re using)</p>
+</li>
+<li><p class="first">a specific recipe (list of steps) that can reproduce the
+problem</p>
+</li>
+</ul>
+<p>To maximize the speed of resolution, please make sure that your
+problem can be replicated using an unmodified copy of
+Topographica (either released or from Git), and try to have a
+small, clear, quick-to-run example of the problem. Any bug report
+is better than none, so in any case please do send it in even if
+you can&#8217;t satisfy the above requests. Even so, the clearer and
+simpler it is, the more likely (and more quickly) we will be able
+to address the problem.</p>
+</li>
+<li><p class="first">If you get no reply after a few days, you can try emailing <a class="reference external" href="mailto:jbednar&#37;&#52;&#48;inf&#46;ed&#46;ac&#46;uk?subject=Bug%20report">Jim</a>
+directly, in case there was some problem with the email
+notification from the issue tracking system. But it&#8217;s much more
+effective to use the issue tracking, which automatically delivers
+the appropriate messages to the appropriate developers.</p>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Reporting specific problems with Topographica</a></li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Forums</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../Team_Members/index.html"
+                        title="next chapter">Team Members</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Forums/problems.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Team_Members/index.html" title="Team Members"
+             >next</a></li>
+        <li class="right" >
+          <a href="index.html" title="Forums"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Forums</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

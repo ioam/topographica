@@ -1,0 +1,362 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.ptztracker &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.sheet" href="../sheet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" accesskey="U">topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sheet.ptztracker</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This class finds the brightest pixel of the image, returns it in white and</span>
+<span class="sd">other in black.</span>
+<span class="sd">This class also gives instructions to move the camera.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.misc.ptz</span> <span class="kn">import</span> <span class="n">PTZ</span>
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">array_argmax</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span>  <span class="n">Image</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">opencv</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;ptztracker.py classes will not be usable; python-opencv is not available.&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PtzTracker"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.ptztracker-module.html#topo.sheet.ptztracker.PtzTracker">[docs]</a><span class="k">class</span> <span class="nc">PtzTracker</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given an incoming Activity pattern, find the brightest pixel and</span>
+<span class="sd">    output an activity pattern where all but this pixel is set to zero.</span>
+<span class="sd">    Also controls a pan/tilt/zoom camera, instructing it to move so that</span>
+<span class="sd">    the brightest pixel will be in the center of the sheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dest_ports</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+    <span class="n">src_ports</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.33</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span>
+        <span class="s">&quot;Ratio depends of the resolution of the camera, here 640x480.&quot;</span><span class="p">)</span>
+
+    <span class="n">fov_x</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span>
+        <span class="s">&quot;Field of view along x in degrees, depends of the camera.&quot;</span><span class="p">)</span>
+
+    <span class="n">fov_y</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">57</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Field of view along y in degrees. It is calculate with the resolution</span>
+<span class="sd">        of the camera, and its field of view. It also depends of the bounds used,</span>
+<span class="sd">        here the size_normalization used is &quot;fit_shortest&quot;. So Sheet coordinates</span>
+<span class="sd">        along y for camera&#39;s image are between -0.5 and 0.5.</span>
+<span class="sd">        The original calculation is fov_y=fov_x*0.5*2/ratio.</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">ptz</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">PTZ</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        An instance of ptzcamera.PTZ to be controlled.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># Max Ranges (determined with uvcdynctrl -v -c)</span>
+    <span class="n">maxrange_x</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">4480</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span>
+        <span class="sd">&quot;&quot;&quot;Maximum position of the camera along x.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">maxrange_y</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1920</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span>
+        <span class="sd">&quot;&quot;&quot;Maximum position of the camera along y.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c">#Coordinates in degrees</span>
+    <span class="n">y_deg</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">x_deg</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c">#Coordinates in degrees for uvcdynctrl(unit=1/64th of a degree)</span>
+    <span class="n">y_deg_uvc</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">x_deg_uvc</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c">#Coordinates of the brightest pixel</span>
+    <span class="n">coor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c">#Current postitions along x and y</span>
+    <span class="n">curr_y</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">curr_x</span><span class="o">=</span><span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="c"># Set here to avoid having it one instantiated by default</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ptz</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ptz</span><span class="o">=</span><span class="n">PTZ</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">=</span><span class="n">data</span>
+
+<div class="viewcode-block" id="PtzTracker.determine_next_position"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.ptztracker-module.html#topo.sheet.ptztracker.PtzTracker.determine_next_position">[docs]</a>    <span class="k">def</span> <span class="nf">determine_next_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">img</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine the next location to move in the specified image, using whatever</span>
+<span class="sd">        criterion is appropriate for this class.  Returns a tuple of (pos,bbox),</span>
+<span class="sd">        where pos is the (row,column) coordinate of the next position, and bbox</span>
+<span class="sd">        is a bounding box around that coordinate, with whatever size is appropriate</span>
+<span class="sd">        for this class.  Returns None if no appropriate location can be found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="PtzTracker.draw_boxes"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.ptztracker-module.html#topo.sheet.ptztracker.PtzTracker.draw_boxes">[docs]</a>    <span class="k">def</span> <span class="nf">draw_boxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_data</span><span class="p">,</span><span class="n">bboxmin</span><span class="p">,</span><span class="n">bboxmax</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draws three boxes arond the returned location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">opencv</span><span class="o">.</span><span class="n">cvRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">,</span> <span class="n">opencv</span><span class="o">.</span><span class="n">cvPoint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span><span class="n">opencv</span><span class="o">.</span><span class="n">cvPoint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">opencv</span><span class="o">.</span><span class="n">cvRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">,</span> <span class="n">opencv</span><span class="o">.</span><span class="n">cvPoint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">opencv</span><span class="o">.</span><span class="n">cvPoint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">opencv</span><span class="o">.</span><span class="n">cvRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">,</span> <span class="n">opencv</span><span class="o">.</span><span class="n">cvPoint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mi">2</span><span class="p">),</span><span class="n">opencv</span><span class="o">.</span><span class="n">cvPoint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">2</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PtzTracker.move_camera"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.ptztracker-module.html#topo.sheet.ptztracker.PtzTracker.move_camera">[docs]</a>    <span class="k">def</span> <span class="nf">move_camera</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pos</span><span class="p">,</span> <span class="n">bboxmin</span><span class="p">,</span> <span class="n">bbboxmax</span><span class="p">,</span><span class="n">brightpixel</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move the camera to centre the returned location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#Determinate the centre of the returned location</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brightpixel</span><span class="o">==</span><span class="bp">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="o">=</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmin</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="c">#Find sheet coordinates of the specified position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_deg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fov_y</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_deg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fov_x</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratio</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c"># The unit of uvcdynctrl is 1/64th of a degree</span>
+        <span class="c">## HACK problem with the scaling. so divide by 2.</span>
+        <span class="c">##it doesn&#39;t come from the fov or resolution maybe from somewhere with the coordinates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_deg_uvc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_deg</span><span class="o">*</span><span class="mi">64</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_deg_uvc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_deg</span><span class="o">*</span><span class="mi">64</span><span class="o">/</span><span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;Coordinates of the new position: (</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coor</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">coor</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Current position of the camera (</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">) along the two directions of the camera&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curr_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">curr_y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Movements in degrees of uvcdynctrl (</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_deg_uvc</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y_deg_uvc</span><span class="p">))</span>
+
+         <span class="c">#Use class PTZ in order to move the camera with uvcdynctrl</span>
+         <span class="c"># Max Ranges (determined with uvcdynctrl -v -c)</span>
+        <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">curr_y</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">y_deg_uvc</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">maxrange_y</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curr_y</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">y_deg_uvc</span><span class="o">&gt;-</span><span class="bp">self</span><span class="o">.</span><span class="n">maxrange_y</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curr_y</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_deg_uvc</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ptz</span><span class="o">.</span><span class="n">tilt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_deg_uvc</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;The camera can&#39;t move further along y&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">curr_x</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">x_deg_uvc</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">maxrange_x</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curr_x</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">x_deg_uvc</span><span class="o">&gt;-</span><span class="bp">self</span><span class="o">.</span><span class="n">maxrange_x</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curr_x</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_deg_uvc</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ptz</span><span class="o">.</span><span class="n">pan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_deg_uvc</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;The camera can&#39;t move further along x&quot;</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;input_data&#39;</span><span class="p">):</span>
+
+            <span class="c">#Find the brightest pixel of the image, put it in white and other pixels in black</span>
+            <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">determine_next_position</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">*=</span><span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span> <span class="c"># Draw a box around the returned location</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmin</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmax</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">brightpixel</span><span class="o">=</span><span class="n">result</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">draw_boxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmin</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmax</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">return</span> <span class="c"># Else move camera</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">move_camera</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmin</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bboxmax</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">brightpixel</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="BrightPixelTracker"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.ptztracker-module.html#topo.sheet.ptztracker.BrightPixelTracker">[docs]</a><span class="k">class</span> <span class="nc">BrightPixelTracker</span><span class="p">(</span><span class="n">PtzTracker</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is used to define the position of the brightest pixel</span>
+<span class="sd">    in the image.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">determine_next_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">img</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="o">=</span><span class="n">array_argmax</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+        <span class="c">#Coordinates for the box around the brightest pixel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coormin_bbox</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coormax_bbox</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">brightpixel</span><span class="o">=</span><span class="bp">True</span>
+        <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">coormin_bbox</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">coormax_bbox</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">brightpixel</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="FaceTracker"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.ptztracker-module.html#topo.sheet.ptztracker.FaceTracker">[docs]</a><span class="k">class</span> <span class="nc">FaceTracker</span><span class="p">(</span><span class="n">PtzTracker</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is used to detect face in the image and draws a</span>
+<span class="sd">    rectangle around each detected face.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">determine_next_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">image</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">=</span><span class="n">image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">im</span><span class="o">=</span><span class="n">array2image</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipl_im</span> <span class="o">=</span> <span class="n">opencv</span><span class="o">.</span><span class="n">adaptors</span><span class="o">.</span><span class="n">PIL2Ipl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">im</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">opencv</span><span class="o">.</span><span class="n">cvCreateMemStorage</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">opencv</span><span class="o">.</span><span class="n">cvClearMemStorage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cascade</span> <span class="o">=</span> <span class="n">opencv</span><span class="p">(</span><span class="s">&#39;/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml&#39;</span><span class="p">,</span><span class="n">opencv</span><span class="o">.</span><span class="n">cvSize</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">faces</span> <span class="o">=</span> <span class="n">opencv</span><span class="o">.</span><span class="n">cvHaarDetectObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ipl_im</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cascade</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span><span class="n">opencv</span><span class="o">.</span><span class="n">CV_HAAR_DO_CANNY_PRUNING</span><span class="p">,</span> <span class="n">opencv</span><span class="o">.</span><span class="n">cvSize</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="o">.</span><span class="n">total</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;face detected: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span><span class="n">f</span>
+            <span class="c">#row and column are inverted in Opencv</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="o">=</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">f</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coormin_bbox</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coormax_bbox</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">width</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">brightpixel</span><span class="o">=</span><span class="bp">False</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">coormin_bbox</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">coormax_bbox</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">brightpixel</span><span class="p">)</span>
+
+
+
+<span class="c">#Convert an array into PIL image</span></div>
+<span class="k">def</span> <span class="nf">array2image</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="o">*</span><span class="mf">255.0</span>
+    <span class="n">arr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span><span class="c">#arr=arr.round()</span>
+    <span class="n">arr</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;PtzTracker&quot;</span><span class="p">,</span>
+    <span class="s">&quot;BrightPixelTracker&quot;</span><span class="p">,</span>
+    <span class="s">&quot;FaceTracker&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/sheet/ptztracker.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" >topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

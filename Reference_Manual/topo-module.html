@@ -1,0 +1,282 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo">
+<h1>topo<a class="headerlink" href="#topo" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="topo.tkgui.templateplotgrouppanel-module.html">topo.tkgui.templateplotgrouppanel</a></li>
+<li><a class="reference external" href="topo.tkgui.plotgrouppanel-module.html">topo.tkgui.plotgrouppanel</a></li>
+<li><a class="reference external" href="topo.tkgui.topoconsole-module.html">topo.tkgui.topoconsole</a></li>
+<li><a class="reference external" href="topo.tkgui-module.html">topo.tkgui</a></li>
+<li><a class="reference external" href="topo.tkgui.featurecurvepanel-module.html">topo.tkgui.featurecurvepanel</a></li>
+<li><a class="reference external" href="topo.tkgui.projectionpanel-module.html">topo.tkgui.projectionpanel</a></li>
+<li><a class="reference external" href="topo.tkgui.testpattern-module.html">topo.tkgui.testpattern</a></li>
+<li><a class="reference external" href="topo.tkgui.editor-module.html">topo.tkgui.editor</a></li>
+<li><a class="reference external" href="topo.responsefn.optimized-module.html">topo.responsefn.optimized</a></li>
+<li><a class="reference external" href="topo.responsefn-module.html">topo.responsefn</a></li>
+<li><a class="reference external" href="topo.responsefn.projfn-module.html">topo.responsefn.projfn</a></li>
+<li><a class="reference external" href="topo.tests.runtests-module.html">topo.tests.runtests</a></li>
+<li><a class="reference external" href="topo.tests.test_map_measurement-module.html">topo.tests.test_map_measurement</a></li>
+<li><a class="reference external" href="topo.tests-module.html">topo.tests</a></li>
+<li><a class="reference external" href="topo.tests.test_script-module.html">topo.tests.test_script</a></li>
+<li><a class="reference external" href="topo.tests.gui_tests-module.html">topo.tests.gui_tests</a></li>
+<li><a class="reference external" href="topo.tests.functionaltest-module.html">topo.tests.functionaltest</a></li>
+<li><a class="reference external" href="topo.tests.utils-module.html">topo.tests.utils</a></li>
+<li><a class="reference external" href="topo.tests.buildbot.pyflakes-ignore-module.html">topo.tests.buildbot.pyflakes-ignore</a></li>
+<li><a class="reference external" href="topo.tests.buildbot.unused.bbanalysis-module.html">topo.tests.buildbot.unused.bbanalysis</a></li>
+<li><a class="reference external" href="topo.tests.buildbot.unused.plot_performance-module.html">topo.tests.buildbot.unused.plot_performance</a></li>
+<li><a class="reference external" href="topo.tests.unit.testcf-module.html">topo.tests.unit.testcf</a></li>
+<li><a class="reference external" href="topo.tests.unit.testimage-module.html">topo.tests.unit.testimage</a></li>
+<li><a class="reference external" href="topo.tests.unit.testcfsom-module.html">topo.tests.unit.testcfsom</a></li>
+<li><a class="reference external" href="topo.tests.unit.testmatplotlib-module.html">topo.tests.unit.testmatplotlib</a></li>
+<li><a class="reference external" href="topo.tests.unit.testdistribution-module.html">topo.tests.unit.testdistribution</a></li>
+<li><a class="reference external" href="topo.tests.unit.testnumbergen-module.html">topo.tests.unit.testnumbergen</a></li>
+<li><a class="reference external" href="topo.tests.unit.testplotgroup-module.html">topo.tests.unit.testplotgroup</a></li>
+<li><a class="reference external" href="topo.tests.unit.sheetmask_setup-module.html">topo.tests.unit.sheetmask_setup</a></li>
+<li><a class="reference external" href="topo.tests.unit.testfeaturemap-module.html">topo.tests.unit.testfeaturemap</a></li>
+<li><a class="reference external" href="topo.tests.unit.testparameterizedobject-module.html">topo.tests.unit.testparameterizedobject</a></li>
+<li><a class="reference external" href="topo.tests.unit.testmatplotlib_tk-module.html">topo.tests.unit.testmatplotlib_tk</a></li>
+<li><a class="reference external" href="topo.tests.unit.testplotfilesaver-module.html">topo.tests.unit.testplotfilesaver</a></li>
+<li><a class="reference external" href="topo.tests.unit.testparametersframe_tk-module.html">topo.tests.unit.testparametersframe_tk</a></li>
+<li><a class="reference external" href="topo.tests.unit-module.html">topo.tests.unit</a></li>
+<li><a class="reference external" href="topo.tests.unit.testsnapshots-module.html">topo.tests.unit.testsnapshots</a></li>
+<li><a class="reference external" href="topo.tests.unit.testbitmap-module.html">topo.tests.unit.testbitmap</a></li>
+<li><a class="reference external" href="topo.tests.unit.testaudio-module.html">topo.tests.unit.testaudio</a></li>
+<li><a class="reference external" href="topo.tests.unit.testsimulation-module.html">topo.tests.unit.testsimulation</a></li>
+<li><a class="reference external" href="topo.tests.unit.testboundingregion-module.html">topo.tests.unit.testboundingregion</a></li>
+<li><a class="reference external" href="topo.tests.unit.testplot-module.html">topo.tests.unit.testplot</a></li>
+<li><a class="reference external" href="topo.tests.unit.testparameterizedobject_tk-module.html">topo.tests.unit.testparameterizedobject_tk</a></li>
+<li><a class="reference external" href="topo.tests.unit.testpatterngenerator-module.html">topo.tests.unit.testpatterngenerator</a></li>
+<li><a class="reference external" href="topo.tests.unit.testoutputfnsbasic-module.html">topo.tests.unit.testoutputfnsbasic</a></li>
+<li><a class="reference external" href="topo.tests.unit.testsheetview-module.html">topo.tests.unit.testsheetview</a></li>
+<li><a class="reference external" href="topo.tests.unit.testsheet-module.html">topo.tests.unit.testsheet</a></li>
+<li><a class="reference external" href="topo.tests.reference.common_control-module.html">topo.tests.reference.common_control</a></li>
+<li><a class="reference external" href="topo.tests.reference.lissom_log_parser-module.html">topo.tests.reference.lissom_log_parser</a></li>
+<li><a class="reference external" href="topo.tests.reference-module.html">topo.tests.reference</a></li>
+<li><a class="reference external" href="topo.tests.reference.topo_or_defs-module.html">topo.tests.reference.topo_or_defs</a></li>
+<li><a class="reference external" href="topo.coordmapper-module.html">topo.coordmapper</a></li>
+<li><a class="reference external" href="topo.misc.distribution-module.html">topo.misc.distribution</a></li>
+<li><a class="reference external" href="topo.misc.gendocs-module.html">topo.misc.gendocs</a></li>
+<li><a class="reference external" href="topo.misc.commandline-module.html">topo.misc.commandline</a></li>
+<li><a class="reference external" href="topo.misc.playerrobot-module.html">topo.misc.playerrobot</a></li>
+<li><a class="reference external" href="topo.misc.ipython-module.html">topo.misc.ipython</a></li>
+<li><a class="reference external" href="topo.misc.trace-module.html">topo.misc.trace</a></li>
+<li><a class="reference external" href="topo.misc.picklemain-module.html">topo.misc.picklemain</a></li>
+<li><a class="reference external" href="topo.misc.unitsupport-module.html">topo.misc.unitsupport</a></li>
+<li><a class="reference external" href="topo.misc.genexamples-module.html">topo.misc.genexamples</a></li>
+<li><a class="reference external" href="topo.misc-module.html">topo.misc</a></li>
+<li><a class="reference external" href="topo.misc.odict-module.html">topo.misc.odict</a></li>
+<li><a class="reference external" href="topo.misc.legacy-module.html">topo.misc.legacy</a></li>
+<li><a class="reference external" href="topo.misc.asizeof-module.html">topo.misc.asizeof</a></li>
+<li><a class="reference external" href="topo.misc.inlinec-module.html">topo.misc.inlinec</a></li>
+<li><a class="reference external" href="topo.misc.keyedlist-module.html">topo.misc.keyedlist</a></li>
+<li><a class="reference external" href="topo.misc.snapshots-module.html">topo.misc.snapshots</a></li>
+<li><a class="reference external" href="topo.misc.generatorsheet-module.html">topo.misc.generatorsheet</a></li>
+<li><a class="reference external" href="topo.misc.robotics-module.html">topo.misc.robotics</a></li>
+<li><a class="reference external" href="topo.misc.memuse-module.html">topo.misc.memuse</a></li>
+<li><a class="reference external" href="topo.misc.fixedpoint-module.html">topo.misc.fixedpoint</a></li>
+<li><a class="reference external" href="topo.misc.pyxhandler-module.html">topo.misc.pyxhandler</a></li>
+<li><a class="reference external" href="topo.misc.ptz-module.html">topo.misc.ptz</a></li>
+<li><a class="reference external" href="topo.misc.lancext-module.html">topo.misc.lancext</a></li>
+<li><a class="reference external" href="topo.misc.util-module.html">topo.misc.util</a></li>
+<li><a class="reference external" href="topo.base.arrayutil-module.html">topo.base.arrayutil</a></li>
+<li><a class="reference external" href="topo.base.functionfamily-module.html">topo.base.functionfamily</a></li>
+<li><a class="reference external" href="topo.base.simulation-module.html">topo.base.simulation</a></li>
+<li><a class="reference external" href="topo.base.cf-module.html">topo.base.cf</a></li>
+<li><a class="reference external" href="topo.base-module.html">topo.base</a></li>
+<li><a class="reference external" href="topo.base.sheet-module.html">topo.base.sheet</a></li>
+<li><a class="reference external" href="topo.base.sheetview-module.html">topo.base.sheetview</a></li>
+<li><a class="reference external" href="topo.base.projection-module.html">topo.base.projection</a></li>
+<li><a class="reference external" href="topo.analysis-module.html">topo.analysis</a></li>
+<li><a class="reference external" href="topo.analysis.featureresponses-module.html">topo.analysis.featureresponses</a></li>
+<li><a class="reference external" href="topo.analysis.vision-module.html">topo.analysis.vision</a></li>
+<li><a class="reference external" href="topo.sheet.lissom-module.html">topo.sheet.lissom</a></li>
+<li><a class="reference external" href="topo.sheet.optimized-module.html">topo.sheet.optimized</a></li>
+<li><a class="reference external" href="topo.sheet.slissom-module.html">topo.sheet.slissom</a></li>
+<li><a class="reference external" href="topo.sheet.saccade-module.html">topo.sheet.saccade</a></li>
+<li><a class="reference external" href="topo.sheet-module.html">topo.sheet</a></li>
+<li><a class="reference external" href="topo.sheet.composer-module.html">topo.sheet.composer</a></li>
+<li><a class="reference external" href="topo.sheet.ptztracker-module.html">topo.sheet.ptztracker</a></li>
+<li><a class="reference external" href="topo.sparse.sparsecf-module.html">topo.sparse.sparsecf</a></li>
+<li><a class="reference external" href="topo.sparse-module.html">topo.sparse</a></li>
+<li><a class="reference external" href="topo.plotting.plotgroup-module.html">topo.plotting.plotgroup</a></li>
+<li><a class="reference external" href="topo.plotting-module.html">topo.plotting</a></li>
+<li><a class="reference external" href="topo.plotting.plot-module.html">topo.plotting.plot</a></li>
+<li><a class="reference external" href="topo.plotting.bitmap-module.html">topo.plotting.bitmap</a></li>
+<li><a class="reference external" href="topo.plotting.plotfilesaver-module.html">topo.plotting.plotfilesaver</a></li>
+<li><a class="reference external" href="topo.command-module.html">topo.command</a></li>
+<li><a class="reference external" href="topo.command.pylabplot-module.html">topo.command.pylabplot</a></li>
+<li><a class="reference external" href="topo.command.analysis-module.html">topo.command.analysis</a></li>
+<li><a class="reference external" href="topo.projection.optimized-module.html">topo.projection.optimized</a></li>
+<li><a class="reference external" href="topo.projection-module.html">topo.projection</a></li>
+<li><a class="reference external" href="topo.transferfn.optimized-module.html">topo.transferfn.optimized</a></li>
+<li><a class="reference external" href="topo.transferfn.misc-module.html">topo.transferfn.misc</a></li>
+<li><a class="reference external" href="topo.transferfn-module.html">topo.transferfn</a></li>
+<li><a class="reference external" href="topo.transferfn.projfn-module.html">topo.transferfn.projfn</a></li>
+<li><a class="reference external" href="topo.learningfn.optimized-module.html">topo.learningfn.optimized</a></li>
+<li><a class="reference external" href="topo.learningfn-module.html">topo.learningfn</a></li>
+<li><a class="reference external" href="topo.learningfn.projfn-module.html">topo.learningfn.projfn</a></li>
+<li><a class="reference external" href="topo.learningfn.som-module.html">topo.learningfn.som</a></li>
+<li><a class="reference external" href="topo.ep-module.html">topo.ep</a></li>
+</ul>
+</div>
+<div class="section" id="module">
+<h2>Module<a class="headerlink" href="#module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-topo"></span><p>Topographica cortical map simulator package.</p>
+<p>Topographica is designed as a collection of packages from which
+elements can be selected to model specific systems.  For more
+information, see the individual subpackages:</p>
+<div class="highlight-python"><pre>base           - Core Topographica functions and classes
+plotting       - Visualization functions and classes
+analysis       - Analysis functions and classes (besides plotting)
+tkgui          - Tk-based graphical user interface (GUI)
+command        - High-level user commands
+misc           - Various useful independent modules</pre>
+</div>
+<p>The Topographica primitives library consists of a family of classes
+that can be used with the above functions and classes:</p>
+<div class="highlight-python"><pre>sheet          - Sheet classes: 2D arrays of processing units
+projection     - Projection classes: connections between Sheets
+pattern        - PatternGenerator classes: 2D input or weight patterns
+ep             - EventProcessor classes: other simulation objects
+transferfn     - Transfer functions, for e.g. normalization or squashing
+responsefn     - Calculate the response of a Projection
+learningfn     - Adjust weights for a Projection
+coordmapper    - CoordinateMapperFn classes: map coords between Sheets</pre>
+</div>
+<p>Each of the library directories can be extended with new classes of
+the appropriate type, just by adding a new .py file to that directory.
+E.g. new PatternGenerator classes can be added to pattern/, and will
+then show up in the GUI menus as potential input patterns.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

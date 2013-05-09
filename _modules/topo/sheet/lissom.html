@@ -1,0 +1,274 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.lissom &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.sheet" href="../sheet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" accesskey="U">topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sheet.lissom</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Specific support for the LISSOM algorithm.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">topo</span>
+
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">SettlingCFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">PiecewiseLinear</span>
+
+<span class="c"># Legacy declaration for backwards compatibility</span>
+<span class="k">class</span> <span class="nc">LISSOM</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">):</span>
+    <span class="n">output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">PiecewiseLinear</span><span class="p">(</span><span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">upper_bound</span><span class="o">=</span><span class="mf">0.65</span><span class="p">)])</span>
+
+
+<div class="viewcode-block" id="schedule_events"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.lissom-module.html#topo.sheet.lissom.schedule_events">[docs]</a><span class="k">def</span> <span class="nf">schedule_events</span><span class="p">(</span><span class="n">sheet_str</span><span class="o">=</span><span class="s">&quot;topo.sim[&#39;V1&#39;]&quot;</span><span class="p">,</span><span class="n">st</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">aff_name</span><span class="o">=</span><span class="s">&quot;Afferent&quot;</span><span class="p">,</span>
+                    <span class="n">ids</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">ars</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">increase_inhibition</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience function for scheduling a default set of events</span>
+<span class="sd">    typically used with a LISSOM model sheet.  The parameters used</span>
+<span class="sd">    are the defaults from Miikkulainen, Bednar, Choe, and Sirosh</span>
+<span class="sd">    (2005), Computational Maps in the Visual Cortex, Springer.</span>
+
+<span class="sd">    Note that Miikulainen 2005 specifies only one output_fn for the</span>
+<span class="sd">    LISSOM model sheet; where these scheduled actions operate on an</span>
+<span class="sd">    output_fn, they do so only on the first output_fn in the sheet&#39;s</span>
+<span class="sd">    list of output_fns.</span>
+
+<span class="sd">    Installs afferent learning rate changes for any projection whose</span>
+<span class="sd">    name contains the keyword specified by aff_name (typically</span>
+<span class="sd">    &quot;Afferent&quot;).</span>
+
+<span class="sd">    The st argument determines the timescale relative to a</span>
+<span class="sd">    20000-iteration simulation, and results in the default</span>
+<span class="sd">    10000-iteration simulation for the default st=0.5.</span>
+
+<span class="sd">    The ids argument specifies the input density scale, i.e. how much</span>
+<span class="sd">    input there is at each iteration, on average, relative to the</span>
+<span class="sd">    default.  The ars argument specifies how much to scale the</span>
+<span class="sd">    afferent learning rate, if necessary.</span>
+
+<span class="sd">    If increase_inhibition is true, gradually increases the strength</span>
+<span class="sd">    of the inhibitory connection, typically used for natural image</span>
+<span class="sd">    simulations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Allow sheet.BoundingBox calls (below) after reloading a snapshot</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">startup_commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;from topo import sheet&quot;</span><span class="p">)</span>
+
+    <span class="c"># Lateral excitatory bounds changes</span>
+    <span class="c"># Convenience variable: excitatory projection</span>
+    <span class="n">LE</span><span class="o">=</span><span class="n">sheet_str</span><span class="o">+</span><span class="s">&quot;.projections()[&#39;LateralExcitatory&#39;]&quot;</span>
+
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span>  <span class="mi">200</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.06250))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span>  <span class="mi">500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.04375))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">1000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.03500))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">2000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.02800))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">3000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.02240))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">4000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.01344))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">5000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.00806))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">6500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.00484))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">8000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.00290))&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span><span class="mi">20000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LE</span><span class="o">+</span><span class="s">&#39;.change_bounds(sheet.BoundingBox(radius=0.00174))&#39;</span><span class="p">)</span>
+
+    <span class="c"># Lateral excitatory learning rate changes</span>
+    <span class="n">idss</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;&quot;</span> <span class="k">if</span> <span class="n">ids</span><span class="o">==</span><span class="mi">1</span> <span class="k">else</span> <span class="s">&quot;/</span><span class="si">%3.1f</span><span class="s">&quot;</span><span class="o">%</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">estr</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.learning_rate=</span><span class="si">%%</span><span class="s">s</span><span class="si">%s</span><span class="s">*</span><span class="si">%s</span><span class="s">.n_units&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">LE</span><span class="p">,</span><span class="n">idss</span><span class="p">,</span><span class="n">LE</span><span class="p">)</span>
+
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span>  <span class="mi">200</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.12168&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span>  <span class="mi">500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">1000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">2000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">3000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">4000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">5000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">6500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">8000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span><span class="mi">20000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">estr</span><span class="o">%</span><span class="s">&#39;0.06084&#39;</span><span class="p">)</span>
+
+    <span class="c">### Lateral inhibitory learning rate and strength changes</span>
+    <span class="k">if</span> <span class="n">increase_inhibition</span><span class="p">:</span>
+        <span class="n">LI</span><span class="o">=</span><span class="n">sheet_str</span><span class="o">+</span><span class="s">&quot;.projections()[&#39;LateralInhibitory&#39;]&quot;</span>
+        <span class="n">istr</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.learning_rate=</span><span class="si">%%</span><span class="s">s</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">LI</span><span class="p">,</span><span class="n">idss</span><span class="p">)</span>
+
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">1000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">istr</span><span class="o">%</span><span class="s">&#39;1.80873/5.0*2.0&#39;</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">2000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">istr</span><span class="o">%</span><span class="s">&#39;1.80873/5.0*3.0&#39;</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">5000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">istr</span><span class="o">%</span><span class="s">&#39;1.80873/5.0*5.0&#39;</span><span class="p">)</span>
+
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">1000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LI</span><span class="o">+</span><span class="s">&#39;.strength=-2.2&#39;</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">2000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">LI</span><span class="o">+</span><span class="s">&#39;.strength=-2.6&#39;</span><span class="p">)</span>
+
+
+    <span class="c"># Afferent learning rate changes (for every Projection named Afferent)</span>
+    <span class="n">sheet_</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="n">sheet_str</span><span class="p">)</span>
+    <span class="n">projs</span> <span class="o">=</span> <span class="p">[</span><span class="n">pn</span> <span class="k">for</span> <span class="n">pn</span> <span class="ow">in</span> <span class="n">sheet_</span><span class="o">.</span><span class="n">projections</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">pn</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">aff_name</span><span class="p">)]</span>
+    <span class="n">num_aff</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">projs</span><span class="p">)</span>
+    <span class="n">arss</span><span class="o">=</span><span class="s">&quot;&quot;</span> <span class="k">if</span> <span class="n">ars</span><span class="o">==</span><span class="mf">1.0</span> <span class="k">else</span> <span class="s">&quot;*</span><span class="si">%3.1f</span><span class="s">&quot;</span><span class="o">%</span><span class="n">ars</span>
+    <span class="k">for</span> <span class="n">pn</span> <span class="ow">in</span> <span class="n">projs</span><span class="p">:</span>
+        <span class="n">ps</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">.projections()[&#39;</span><span class="si">%s</span><span class="s">&#39;].learning_rate=</span><span class="si">%%</span><span class="s">s</span><span class="si">%s%s</span><span class="s">&quot;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="n">sheet_str</span><span class="p">,</span><span class="n">pn</span><span class="p">,</span><span class="n">idss</span> <span class="k">if</span> <span class="n">num_aff</span><span class="o">==</span><span class="mi">1</span> <span class="k">else</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/</span><span class="si">%d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">idss</span><span class="p">,</span><span class="n">num_aff</span><span class="p">),</span><span class="n">arss</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span>  <span class="mi">500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">ps</span><span class="o">%</span><span class="p">(</span><span class="s">&#39;0.6850&#39;</span><span class="p">))</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">2000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">ps</span><span class="o">%</span><span class="p">(</span><span class="s">&#39;0.5480&#39;</span><span class="p">))</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">4000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">ps</span><span class="o">%</span><span class="p">(</span><span class="s">&#39;0.4110&#39;</span><span class="p">))</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span><span class="mi">20000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">ps</span><span class="o">%</span><span class="p">(</span><span class="s">&#39;0.2055&#39;</span><span class="p">))</span>
+
+    <span class="c"># Activation function threshold changes</span>
+    <span class="n">bstr</span> <span class="o">=</span> <span class="n">sheet_str</span><span class="o">+</span><span class="s">&#39;.output_fns[0].lower_bound=</span><span class="si">%5.3f</span><span class="s">;&#39;</span><span class="o">+</span>\
+           <span class="n">sheet_str</span><span class="o">+</span><span class="s">&#39;.output_fns[0].upper_bound=</span><span class="si">%5.3f</span><span class="s">&#39;</span>
+    <span class="n">lbi</span><span class="o">=</span><span class="n">sheet_</span><span class="o">.</span><span class="n">output_fns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower_bound</span>
+    <span class="n">ubi</span><span class="o">=</span><span class="n">sheet_</span><span class="o">.</span><span class="n">output_fns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper_bound</span>
+
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span>  <span class="mi">200</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.01</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.01</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span>  <span class="mi">500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.02</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.02</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">1000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.05</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.03</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">2000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.08</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.05</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">3000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.10</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.08</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">4000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.10</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.11</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">5000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.11</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.14</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">6500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.12</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.17</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">8000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.13</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.20</span><span class="p">))</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span><span class="mi">20000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">bstr</span><span class="o">%</span><span class="p">(</span><span class="n">lbi</span><span class="o">+</span><span class="mf">0.14</span><span class="p">,</span><span class="n">ubi</span><span class="o">+</span><span class="mf">0.23</span><span class="p">))</span>
+
+    <span class="c"># Just to get more progress reports</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span><span class="mi">12000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="s">&#39;pass&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span><span class="mi">16000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="s">&#39;pass&#39;</span><span class="p">)</span>
+
+    <span class="c"># Settling steps changes</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">2000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">sheet_str</span><span class="o">+</span><span class="s">&#39;.tsettle=10&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">5000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">sheet_str</span><span class="o">+</span><span class="s">&#39;.tsettle=11&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">6500</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">sheet_str</span><span class="o">+</span><span class="s">&#39;.tsettle=12&#39;</span><span class="p">)</span>
+    <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">schedule_command</span><span class="p">(</span> <span class="mi">8000</span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="n">sheet_str</span><span class="o">+</span><span class="s">&#39;.tsettle=13&#39;</span><span class="p">)</span>
+
+</div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;schedule_events&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/sheet/lissom.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" >topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

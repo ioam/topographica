@@ -1,0 +1,693 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.cf &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-base-cf">
+<h1>topo.base.cf<a class="headerlink" href="#topo-base-cf" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancef4cea304dd.svg" usemap="#inheritancef4cea304dd" class="inheritance"/></div><map id="inheritancef4cea304dd" name="inheritancef4cea304dd">
+</map>
+<div class="section" id="module-topo.base.cf">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.base.cf" title="Permalink to this headline">¶</a></h2>
+<p>ConnectionField and associated classes.</p>
+<p>This module defines some basic classes of objects used to create
+simulations of cortical sheets that take input through connection
+fields that project from other cortical sheets (or laterally from
+themselves).</p>
+<p>ConnectionField: Holds a single connection field within a
+CFProjection.</p>
+<p>CFProjection: A set of ConnectionFields mapping from a Sheet into a
+ProjectionSheet.</p>
+<p>CFSheet: A subclass of ProjectionSheet that provides an interface to
+the underlying ConnectionFields in any projection of type
+CFProjection.</p>
+<dl class="class">
+<dt id="topo.base.cf.CFIter">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFIter</tt><big>(</big><em>cfprojection</em>, <em>active_units_mask=False</em>, <em>ignore_sheet_mask=False</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFIter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Iterator to walk through all ConnectionFields of all neurons in
+the destination Sheet of the given CFProjection.  Each iteration
+yields the tuple (cf,i) where cf is the ConnectionField at
+position i in the projection&#8217;s flatcfs list.</p>
+<p>If active_units_mask is True, inactive units will be skipped. If
+ignore_sheet_mask is True, even units excluded by the sheet mask
+will be included.</p>
+<dl class="method">
+<dt id="topo.base.cf.CFIter.get_overall_mask">
+<tt class="descname">get_overall_mask</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFIter.get_overall_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFIter.get_overall_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array indicating whether or not each unit should be
+processed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPLF_Identity">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPLF_Identity</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPLF_Identity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPLF_Identity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.cf.CFPLearningFn" title="topo.base.cf.CFPLearningFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPLearningFn</span></tt></a></p>
+<p>CFLearningFunction performing no learning.</p>
+<p><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;IdentityLF IdentityLF00023&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPLF_Plugin">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPLF_Plugin</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPLF_Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPLF_Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.cf.CFPLearningFn" title="topo.base.cf.CFPLearningFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPLearningFn</span></tt></a></p>
+<p>CFPLearningFunction applying the specified single_cf_fn to each CF.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;Hebbian Hebbian00024&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a LearningFn that will be applied to each CF individually.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPLearningFn">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPLearningFn</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPLearningFn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPLearningFn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Compute new CFs for a CFProjection based on input and output activity values.</p>
+<p>Objects in this hierarchy of callable function objects compute a
+new set of CFs when given input and output patterns and a set of
+ConnectionField objects.  Used for updating the weights of one
+CFProjection.</p>
+<p>Objects in this class must support being called as a function with
+the arguments specified below.</p>
+<dl class="method">
+<dt id="topo.base.cf.CFPLearningFn.constant_sum_connection_rate">
+<tt class="descname">constant_sum_connection_rate</tt><big>(</big><em>n_units</em>, <em>learning_rate</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPLearningFn.constant_sum_connection_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPLearningFn.constant_sum_connection_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the learning rate for a single connection assuming that
+the total rate is to be divided evenly among all the units in
+the connection field.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPOF_Identity">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPOF_Identity</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPOF_Identity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPOF_Identity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.cf.CFPOutputFn" title="topo.base.cf.CFPOutputFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPOutputFn</span></tt></a></p>
+<p>CFPOutputFn that leaves the CFs unchanged.</p>
+<p>Must never be changed or subclassed, because it might never
+be called. (I.e., it could simply be tested for and skipped.)</p>
+<p><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;IdentityTF IdentityTF00026&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPOF_Plugin">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPOF_Plugin</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPOF_Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPOF_Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.cf.CFPOutputFn" title="topo.base.cf.CFPOutputFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPOutputFn</span></tt></a></p>
+<p>Applies the specified single_cf_fn to each CF in the CFProjection
+for which the mask is nonzero.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityTF IdentityTF00025&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a TransferFn that will be applied to each CF individually.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPOutputFn">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPOutputFn</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPOutputFn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPOutputFn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Type for an object that applies some operation (typically something
+like normalization) to all CFs in a CFProjection for which the specified
+mask (typically the activity at the destination of this projection)
+is nonzero.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPRF_Plugin">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPRF_Plugin</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPRF_Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPRF_Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.cf.CFPResponseFn" title="topo.base.cf.CFPResponseFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPResponseFn</span></tt></a></p>
+<p>Generic large-scale response function based on a simple single-CF function.</p>
+<p>Applies the single_cf_fn to each CF in turn.  For the default
+single_cf_fn of DotProduct(), does a basic dot product of each CF with the
+corresponding slice of the input array.  This function is likely
+to be slow to run, but it is easy to extend with any arbitrary
+single-CF response function.</p>
+<p>The single_cf_fn must be a function f(X,W) that takes two
+identically shaped matrices X (the input) and W (the
+ConnectionField weights) and computes a scalar activation value
+based on those weights.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DotProduct DotProduct00022&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a ResponseFn that will be applied to each CF individually.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFPResponseFn">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFPResponseFn</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFPResponseFn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFPResponseFn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Map an input activity matrix into an output matrix using the CFs
+in a CFProjection.</p>
+<p>Objects in this hierarchy of callable function objects compute a
+response matrix when given an input pattern and a set of
+ConnectionField objects.  Typically used as part of the activation
+function for a neuron, computing activation for one Projection.</p>
+<p>Objects in this class must support being called as a function with
+the arguments specified below, and are assumed to modify the
+activity matrix in place.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFProjection">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFProjection</tt><big>(</big><em>initialize_cfs=True</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.projection-module.html#topo.base.projection.Projection" title="topo.base.projection.Projection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.Projection</span></tt></a></p>
+<p>A projection composed of ConnectionFields from a Sheet into a ProjectionSheet.</p>
+<p>CFProjection computes its activity using a response_fn of type
+CFPResponseFn (typically a CF-aware version of mdot) and output_fns
+(typically none).  The initial contents of the
+ConnectionFields mapping from the input Sheet into the target
+ProjectionSheet are controlled by the weights_generator, cf_shape,
+and weights_output_fn parameters, while the location of the
+ConnectionField is controlled by the coord_mapper parameter.</p>
+<p>Any subclass has to implement the interface
+activate(self,input_activity) that computes the response from the
+input and stores it in the activity array.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Set to true if this connection is for internal use only, not to be manipulated by a user.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns_init</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output function to connection fields (e.g. for
+        normalization) when the CFs are first created.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">dest_port</span></tt> (<em>constant=False, default=Activity, instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False</em>)</dt>
+<dd>Identifier that can be used to distinguish different types of incoming connections.
+
+       EventProcessors that accept only a single type of incoming
+       event will typically use a src_port of None.  However, if
+       multiple types of communication are meaningful, the
+       EventProcessor can accept other values for dest_port.  It is up
+       to the dest EventProcessor to process the data appropriately
+       for each port, and to define what is expected to be sent to
+       that port.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">strength</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Global multiplicative scaling applied to the Activity of this Sheet.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src_port</span></tt> (<em>constant=False, default=Activity, instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False</em>)</dt>
+<dd>Identifier that can be used to distinguish different types of outgoing connections.
+
+       EventProcessors that generate only a single type of
+       outgoing event will typically use a src_port of None.  However,
+       if multiple types of communication are meaningful, the
+       EventProcessor can accept other values for src_port.  It is up
+       to the src EventProcessor to deliver appropriate data to each
+       port, and to declare what will be sent over that port.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">cf_type</span></tt> (<em>constant=True, default=&lt;class &#8216;topo.base.cf.ConnectionField&#8217;&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Type of ConnectionField to use when creating individual CFs.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">cf_shape</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant00030&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Mask pattern to define the shape of the connection fields.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not to update the internal state on each call.
+        Allows plasticity to be turned off during analysis, and then re-enabled.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">delay</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Simulation time between generation of an Event by the src and delivery to the dest.
+       Should normally be nonzero, to represent a causal with a well-defined ordering
+       of events.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds_template</span></tt> (<em>constant=False, default=BoundingBox(radius=0.1), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Bounds defining the Sheet area covered by a prototypical ConnectionField.
+        The true bounds will differ depending on the density (see create_slice_template()).</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">response_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;CFPRF_Plugin CFPRF_Plugin00027&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function for computing the Projection response to an input pattern.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">same_cf_shape_for_all_cfs</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not to share a single cf_shape mask for all CFs.
+        If True, the cf_shape is evaluated only once and shared for
+        all CFs, which saves computation time and memory.  If False,
+        the cf_shape is evaluated once for each CF, allowing each to
+        have its own shape.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">activity_group</span></tt> (<em>constant=False, default=(0.5, &lt;ufunc &#8216;add&#8217;&gt;), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Grouping and precedence specifier for computing activity from
+       Projections.  In a ProjectionSheet, all Projections in the
+       same activity_group will be summed, and then the results from
+       each group will be combined in the order of the activity_group
+       using the operator specified by the activity_operator.  For
+       instance, if there are two Projections with
+       activity_group==(0.2,numpy.add) and two with
+       activity_group==(0.6,numpy.divide), activity
+       from the first two will be added together, and the result
+       divided by the sum of the second two.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">coord_mapper</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityMF IdentityMF00035&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to map a projected coordinate into the target sheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mask_threshold</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=0.5, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If a unit is above this value in the cf_shape mask, it is
+        included; otherwise it is excluded from the mask.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">dest</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.11, readonly=False</em>)</dt>
+<dd>The EventProcessor to which messages are delivered.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">learning_rate</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Amount of learning at each step for this projection, specified
+        in units that are independent of the density of each Sheet.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">autosize_mask</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=True, default=True, instantiate=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Topographica sets the mask size so that it is the same as the connection field&#8217;s
+        size, unless this parameter is False - in which case the user-specified size of
+        the cf_shape is used. In normal usage of Topographica, this parameter should
+        remain True.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_null_cfs</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not the projection can have entirely empty CFs</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">min_matrix_radius</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Enforced minimum for radius of weights matrix.
+        The default of 1 gives a minimum matrix of 3x3. 0 would
+        allow a 1x1 matrix.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">learning_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;CFPLF_Plugin CFPLF_Plugin00031&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function for computing changes to the weights based on one activation step.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.1, readonly=False</em>)</dt>
+<dd>The EventProcessor from which messages originate.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">weights_generator</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant00029&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Generate initial weights values.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">weights_output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[CFPOF_Plugin(name=&#8217;CFPOF_Plugin00033&#8217;, print_level=100, single_cf_fn=IdentityTF(name=&#8217;IdentityTF00034&#8217;, norm_value=None, print_level=100))], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Functions applied to each CF after learning.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">input_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function(s) applied to the input before the projection activity is computed.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function(s) applied to the Projection activity after it is computed.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.base.cf.CFProjection.activate">
+<tt class="descname">activate</tt><big>(</big><em>input_activity</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFProjection.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFProjection.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate using the specified response_fn and output_fn.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.cf.CFProjection.apply_learn_output_fns">
+<tt class="descname">apply_learn_output_fns</tt><big>(</big><em>active_units_mask=True</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFProjection.apply_learn_output_fns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFProjection.apply_learn_output_fns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the weights_output_fns to each unit.</p>
+<p>If active_units_mask is True, inactive units will be skipped.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.cf.CFProjection.cf">
+<tt class="descname">cf</tt><big>(</big><em>r</em>, <em>c</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFProjection.cf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFProjection.cf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the specified ConnectionField</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.cf.CFProjection.cf_bounds">
+<tt class="descname">cf_bounds</tt><big>(</big><em>r</em>, <em>c</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFProjection.cf_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFProjection.cf_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the bounds of the specified ConnectionField.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.base.cf.CFProjection.cf_type">
+<tt class="descname">cf_type</tt><a class="headerlink" href="#topo.base.cf.CFProjection.cf_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#topo.base.cf.ConnectionField" title="topo.base.cf.ConnectionField"><tt class="xref py py-class docutils literal"><span class="pre">ConnectionField</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.cf.CFProjection.get_view">
+<tt class="descname">get_view</tt><big>(</big><em>sheet_x</em>, <em>sheet_y</em>, <em>timestamp</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFProjection.get_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFProjection.get_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a single connection field UnitView, for the unit
+located nearest to sheet coordinate (sheet_x,sheet_y).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.cf.CFProjection.learn">
+<tt class="descname">learn</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFProjection.learn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFProjection.learn" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a CFProjection, learn consists of calling the learning_fn.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.CFSheet">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">CFSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.projection-module.html#topo.base.projection.ProjectionSheet" title="topo.base.projection.ProjectionSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.ProjectionSheet</span></tt></a></p>
+<p>A ProjectionSheet providing access to the ConnectionFields in its CFProjections.</p>
+<p>CFSheet is a Sheet built from units indexed by Sheet coordinates
+(x,y).  Each unit can have one or more ConnectionFields on another
+Sheet (via this sheet&#8217;s CFProjections).  Thus CFSheet is a more
+concrete version of a ProjectionSheet; a ProjectionSheet does not
+require that there be units or weights of any kind.  Unless you
+need access to the underlying ConnectionFields for visualization
+or analysis, CFSheet and ProjectionSheet are interchangeable.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">measure_maps</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to include this Sheet when measuring various maps to create SheetViews.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.base.cf.CFSheet.update_unit_view">
+<tt class="descname">update_unit_view</tt><big>(</big><em>x</em>, <em>y</em>, <em>proj_name=''</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#CFSheet.update_unit_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.CFSheet.update_unit_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the list of UnitView objects for a particular unit in this CFSheet.
+(There is one UnitView for each Projection to this CFSheet).</p>
+<p>Each UnitView is then added to the sheet_views of its source sheet.
+It returns the list of all UnitViews for the given unit.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.ConnectionField">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">ConnectionField</tt><big>(</big><em>input_sheet, x=0.0, y=0.0, template=BoundingBox(radius=0.1), weights_generator=Constant(bounds=BoundingBox(radius=0.5), mask=None, mask_shape=None, name='Constant00020', offset=0.0, orientation=0.0, output_fns=[], position=[0.0, 0.0], print_level=100, scale=1.0, size=1.0, x=0.0, xdensity=10, y=0.0, ydensity=10), mask=Constant(bounds=BoundingBox(radius=0.5), mask=None, mask_shape=None, name='Constant00021', offset=0.0, orientation=0.0, output_fns=[], position=[0.0, 0.0], print_level=100, scale=1.0, size=1.0, x=0.0, xdensity=10, y=0.0, ydensity=10), output_fns=None, min_matrix_radius=1</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#ConnectionField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.ConnectionField" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A set of weights on one input Sheet.</p>
+<p>Each ConnectionField contributes to the activity of one unit on
+the output sheet, and is normally used as part of a Projection
+including many other ConnectionFields.</p>
+<dl class="attribute">
+<dt id="topo.base.cf.ConnectionField.norm_total">
+<tt class="descname">norm_total</tt><a class="headerlink" href="#topo.base.cf.ConnectionField.norm_total" title="Permalink to this definition">¶</a></dt>
+<dd><p>The norm_total property returns a value useful in computing
+a sum-based weight normalization.</p>
+<p>By default, the value returned is simply the current sum of
+the connection weights.  However, another value can be
+substituted by setting norm_total explicitly, and this cached
+value will then be returned instead.</p>
+<p>This mechanism has two main purposes.  First, it allows a
+learning function to cache the sum value for an output
+function to use later without computation, which can result in
+significant time savings.  Second, the extra level of
+indirection allows the sum value to be manipulated before it
+is used, to implement operations like joint normalization
+across corresponding CFs in multiple Projections.</p>
+<p>Apart from such cases, norm_total can be ignored.</p>
+<p>Note that every person who uses a class that sets or gets
+norm_total must be very careful to ensure that stale values
+will never be accessed.  A good way to do this is to make sure
+that the value is only set just before it will be used, and
+deleted as soon as it has been accessed.</p>
+<p>WARNING: Any c-optimized code can bypass this property and
+access directly _has_norm_total, _norm_total</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.base.cf.MaskedCFIter">
+<tt class="descclassname">topo.base.cf.</tt><tt class="descname">MaskedCFIter</tt><a class="headerlink" href="#topo.base.cf.MaskedCFIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#topo.base.cf.CFIter" title="topo.base.cf.CFIter"><tt class="xref py py-class docutils literal"><span class="pre">CFIter</span></tt></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="topo.base.cf.NullCFError">
+<em class="property">exception </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">NullCFError</tt><big>(</big><em>x</em>, <em>y</em>, <em>input</em>, <em>rows</em>, <em>cols</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#NullCFError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.NullCFError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.ValueError</span></tt></p>
+<p>Error thrown when trying to create an empty CF.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.cf.ResizableCFProjection">
+<em class="property">class </em><tt class="descclassname">topo.base.cf.</tt><tt class="descname">ResizableCFProjection</tt><big>(</big><em>initialize_cfs=True</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#ResizableCFProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.ResizableCFProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.cf.CFProjection" title="topo.base.cf.CFProjection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFProjection</span></tt></a></p>
+<p>A CFProjection with resizable weights.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Set to true if this connection is for internal use only, not to be manipulated by a user.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns_init</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output function to connection fields (e.g. for
+        normalization) when the CFs are first created.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">dest_port</span></tt> (<em>constant=False, default=Activity, instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False</em>)</dt>
+<dd>Identifier that can be used to distinguish different types of incoming connections.
+
+       EventProcessors that accept only a single type of incoming
+       event will typically use a src_port of None.  However, if
+       multiple types of communication are meaningful, the
+       EventProcessor can accept other values for dest_port.  It is up
+       to the dest EventProcessor to process the data appropriately
+       for each port, and to define what is expected to be sent to
+       that port.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">strength</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Global multiplicative scaling applied to the Activity of this Sheet.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src_port</span></tt> (<em>constant=False, default=Activity, instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False</em>)</dt>
+<dd>Identifier that can be used to distinguish different types of outgoing connections.
+
+       EventProcessors that generate only a single type of
+       outgoing event will typically use a src_port of None.  However,
+       if multiple types of communication are meaningful, the
+       EventProcessor can accept other values for src_port.  It is up
+       to the src EventProcessor to deliver appropriate data to each
+       port, and to declare what will be sent over that port.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">cf_type</span></tt> (<em>constant=True, default=&lt;class &#8216;topo.base.cf.ConnectionField&#8217;&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Type of ConnectionField to use when creating individual CFs.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">cf_shape</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant00030&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Mask pattern to define the shape of the connection fields.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not to update the internal state on each call.
+        Allows plasticity to be turned off during analysis, and then re-enabled.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">delay</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Simulation time between generation of an Event by the src and delivery to the dest.
+       Should normally be nonzero, to represent a causal with a well-defined ordering
+       of events.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds_template</span></tt> (<em>constant=False, default=BoundingBox(radius=0.1), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Bounds defining the Sheet area covered by a prototypical ConnectionField.
+        The true bounds will differ depending on the density (see create_slice_template()).</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">response_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;CFPRF_Plugin CFPRF_Plugin00027&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function for computing the Projection response to an input pattern.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">same_cf_shape_for_all_cfs</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not to share a single cf_shape mask for all CFs.
+        If True, the cf_shape is evaluated only once and shared for
+        all CFs, which saves computation time and memory.  If False,
+        the cf_shape is evaluated once for each CF, allowing each to
+        have its own shape.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">activity_group</span></tt> (<em>constant=False, default=(0.5, &lt;ufunc &#8216;add&#8217;&gt;), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Grouping and precedence specifier for computing activity from
+       Projections.  In a ProjectionSheet, all Projections in the
+       same activity_group will be summed, and then the results from
+       each group will be combined in the order of the activity_group
+       using the operator specified by the activity_operator.  For
+       instance, if there are two Projections with
+       activity_group==(0.2,numpy.add) and two with
+       activity_group==(0.6,numpy.divide), activity
+       from the first two will be added together, and the result
+       divided by the sum of the second two.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">coord_mapper</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityMF IdentityMF00035&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to map a projected coordinate into the target sheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mask_threshold</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=0.5, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If a unit is above this value in the cf_shape mask, it is
+        included; otherwise it is excluded from the mask.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">dest</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.11, readonly=False</em>)</dt>
+<dd>The EventProcessor to which messages are delivered.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">learning_rate</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Amount of learning at each step for this projection, specified
+        in units that are independent of the density of each Sheet.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">autosize_mask</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=True, default=True, instantiate=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Topographica sets the mask size so that it is the same as the connection field&#8217;s
+        size, unless this parameter is False - in which case the user-specified size of
+        the cf_shape is used. In normal usage of Topographica, this parameter should
+        remain True.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_null_cfs</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not the projection can have entirely empty CFs</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">min_matrix_radius</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Enforced minimum for radius of weights matrix.
+        The default of 1 gives a minimum matrix of 3x3. 0 would
+        allow a 1x1 matrix.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">learning_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;CFPLF_Plugin CFPLF_Plugin00031&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function for computing changes to the weights based on one activation step.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.1, readonly=False</em>)</dt>
+<dd>The EventProcessor from which messages originate.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">weights_generator</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant00029&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Generate initial weights values.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">weights_output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[CFPOF_Plugin(name=&#8217;CFPOF_Plugin00033&#8217;, print_level=100, single_cf_fn=IdentityTF(name=&#8217;IdentityTF00034&#8217;, norm_value=None, print_level=100))], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Functions applied to each CF after learning.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">input_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function(s) applied to the input before the projection activity is computed.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function(s) applied to the Projection activity after it is computed.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.base.cf.ResizableCFProjection.change_bounds">
+<tt class="descname">change_bounds</tt><big>(</big><em>nominal_bounds_template</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#ResizableCFProjection.change_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.ResizableCFProjection.change_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the bounding box for all of the ConnectionFields in this Projection.</p>
+<p>Calls change_bounds() on each ConnectionField.</p>
+<p>Currently only allows reducing the size, but should be
+extended to allow increasing as well.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.cf.ResizableCFProjection.change_density">
+<tt class="descname">change_density</tt><big>(</big><em>new_wt_density</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#ResizableCFProjection.change_density"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.ResizableCFProjection.change_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rescales the weight matrix in place, interpolating or resampling as needed.</p>
+<p>Not yet implemented.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.cf.simple_vectorize">
+<tt class="descclassname">topo.base.cf.</tt><tt class="descname">simple_vectorize</tt><big>(</big><em>fn</em>, <em>num_outputs=1</em>, <em>output_type=&lt;type 'object'&gt;</em>, <em>doc=''</em><big>)</big><a class="reference internal" href="../_modules/topo/base/cf.html#simple_vectorize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.cf.simple_vectorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplify creation of numpy.vectorize(fn) objects where all outputs
+have the same typecode.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.base.cf.weight_type">
+<tt class="descclassname">topo.base.cf.</tt><tt class="descname">weight_type</tt><a class="headerlink" href="#topo.base.cf.weight_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specified explicitly when creating weights matrix - required
+for optimized C functions.</p>
+<p>alias of <tt class="xref py py-class docutils literal"><span class="pre">float32</span></tt></p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.base.cf</a><ul>
+<li><a class="reference internal" href="#module-topo.base.cf">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.base.cf-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

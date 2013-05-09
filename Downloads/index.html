@@ -1,0 +1,333 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Downloads &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="next" title="Dependencies" href="dependencies.html" />
+    <link rel="prev" title="News" href="../News/index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="dependencies.html" title="Dependencies"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="../News/index.html" title="News"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="#">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="downloads">
+<h1>Downloads<a class="headerlink" href="#downloads" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installing-topographica">
+<h2>Installing Topographica<a class="headerlink" href="#installing-topographica" title="Permalink to this headline">¶</a></h2>
+<p>Topographica is platform-independent, and all instructions below
+apply to Linux, UNIX, Mac, or Windows, unless otherwise specified.
+In Windows, to get a command prompt, you can use the Run command
+from the Start menu and enter cmd; on other systems you can start a
+Terminal or similar application.</p>
+<p>The instructions below explain how to install Topographica <a class="reference external" href="#install-via-pip">using pip</a>
+(for most users), <a class="reference external" href="#install-via-virtualenv">using virtualenv</a> (if you don&#8217;t have pip access
+or want a separate working environment, e.g. just to try out
+Topographica), or <a class="reference external" href="#install-via-git">using git</a> (if you want the latest version, or need to
+track our files using revision control).</p>
+<div class="section" id="first-install-python">
+<h3>First install Python<a class="headerlink" href="#first-install-python" title="Permalink to this headline">¶</a></h3>
+<p>Topographica is written in Python, which is available for nearly all
+operating systems and is usually already installed (try running
+<tt class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></tt> from the command prompt). If Python version 2.6 or
+later is not installed, you can download the latest version for your
+system from <a class="reference external" href="http://www.python.org/download">python.org</a>. Note that we do not yet support Python3,
+so if only python3 is installed you will need to install python2 as
+well (e.g. Python 2.7).</p>
+<p>If Python isn&#8217;t already installed, it may be convenient to get it
+from one of the integrated scientific Python distributions like
+<a class="reference external" href="http://www.pythonxy.com">Python(X,Y)</a>, <a class="reference external" href="http://www.enthought.com/products/epd.php">EPD</a>, or <a class="reference external" href="https://store.continuum.io">Anaconda CE</a>. These distributions are
+particularly useful for Windows and Mac users, who might not
+otherwise have a C compiler (necessary for good performance in
+Topographica) and optimized math and matrix libraries. On any
+system, the integrated distributions also provide a lot of useful
+related packages, including most of Topographica&#8217;s dependencies.</p>
+</div>
+<div class="section" id="quick-recipe-for-ubuntu-linux">
+<h3>Quick recipe for Ubuntu Linux<a class="headerlink" href="#quick-recipe-for-ubuntu-linux" title="Permalink to this headline">¶</a></h3>
+<p>If you&#8217;re installing on Ubuntu Linux 12.04, all you need to do is:</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">update</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python-pip</span> <span class="pre">python-tk</span> <span class="pre">python-imaging-tk</span> <span class="pre">python-numpy</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">ipython</span> <span class="pre">python-gmpy</span> <span class="pre">python-matplotlib</span> <span class="pre">python-scipy</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">topographica</span></tt></li>
+</ol>
+<p>Step 3 is optional, but highly recommended.  The remaining sections
+below explain the general cross-platform procedure, but if you have
+problems on any particular platform, you might consider using an
+Ubuntu 12.04 virtual machine to try out Topographica so that you can
+use the simple recipe above.  Similar approaches should work on other
+platforms, but we don&#8217;t currently have a list of the precise steps in
+each case.</p>
+</div>
+<div class="section" id="install-via-pip">
+<h3>Install via pip<a class="headerlink" href="#install-via-pip" title="Permalink to this headline">¶</a></h3>
+<p>The typical way to install the most recently released version of
+Topographica is via <a class="reference external" href="http://www.pip-installer.org">pip</a> from the command prompt:</p>
+<div class="highlight-python"><pre>pip install --user topographica</pre>
+</div>
+<p>This will fetch Topographica and its required dependencies (i.e.,
+param, paramtk, imagen, numpy, and PIL, for the 0.9.8 release) from
+<a class="reference external" href="http://pypi.python.org/pypi/topographica">PyPI</a> and install them into your home directory. The files will be
+stored in a subdirectory called <tt class="docutils literal"><span class="pre">.local</span></tt> on Linux and Mac, and
+into the user&#8217;s <tt class="docutils literal"><span class="pre">%APPDATA%</span></tt> subdirectory on Windows (typically
+named <tt class="docutils literal"><span class="pre">Application</span> <span class="pre">Data</span></tt>).</p>
+<p>Beyond these absolutely required packages, you will probably also
+want to install others necessary for good performance (by at least a
+factor of 100), to provide some optional types of plotting, and to
+improve the command-line interface:</p>
+<div class="highlight-python"><pre>pip install --user gmpy matplotlib scipy ipython</pre>
+</div>
+<p>Other useful packages are described on our <a class="reference external" href="dependencies.html">dependencies</a> page, and
+can usually be installed the same way.</p>
+<p>If you have root or adminstrator access to your machine and want
+these libraries to be available to all users of your system, you can
+omit <tt class="docutils literal"><span class="pre">--user</span></tt>, or else install the dependencies via your system&#8217;s
+package manager, if any.</p>
+<p>If your system does not have pip installed or has an old version
+lacking the <tt class="docutils literal"><span class="pre">--user</span> <span class="pre">option</span></tt>, but you do have root or administrator
+access, you should first install pip using:</p>
+<div class="highlight-python"><pre>easy_install pip</pre>
+</div>
+<p>or the equivalent for your package manager. If you don&#8217;t have
+easy_install, you can install pip by downloading <a class="reference external" href="https://raw.github.com/pypa/pip/master/contrib/get-pip.py">get-pip.py</a> and
+running <tt class="docutils literal"><span class="pre">python</span> <span class="pre">get-pip.py</span></tt>.</p>
+</div>
+<div class="section" id="install-via-virtualenv">
+<h3>Install via virtualenv<a class="headerlink" href="#install-via-virtualenv" title="Permalink to this headline">¶</a></h3>
+<p>If your machine lacks pip and you do not have root or administrator
+access, then you can obtain a local copy of pip by downloading
+<a class="reference external" href="https://raw.github.com/pypa/virtualenv/master/virtualenv.py">virtualenv.py</a>. Just run it using Python to create a clean
+&#8220;virtual environment&#8221; that includes pip and into which you can
+install Topographica and its dependencies:</p>
+<div class="highlight-python"><pre>&gt; python virtualenv.py VENV
+&gt; VENV/bin/pip install topographica
+&gt; VENV/bin/topographica -g</pre>
+</div>
+<p>(Not tested under Windows.) You can then install any other
+dependencies using <a class="reference external" href="http://www.pip-installer.org">pip</a> as described above. Of course, instead of
+VENV you can use any name you like for your virtual environment, and
+you can have multiple different virtual environments for different
+purposes.</p>
+<p>Many people use <a class="reference external" href="http://www.virtualenv.org">virtualenv</a> even if they do have root access,
+because it allows you to install whatever you like without affecting
+any other installations. Virtualenv is also an excellent way to try
+out Topographica, because you can simply delete the generated VENV
+directory if you decide not to keep the installation, with no effect
+on your system.</p>
+</div>
+<div class="section" id="install-via-git">
+<h3>Install via Git<a class="headerlink" href="#install-via-git" title="Permalink to this headline">¶</a></h3>
+<p>If you want the most current version of Topographica, or if you want
+to track Topographica development over time, you&#8217;ll want the
+<a class="reference external" href="https://github.com/ioam/topographica">github</a> version of Topographica instead of installing it via pip.</p>
+</div>
+</div>
+<div class="section" id="running-topographica">
+<h2>Running Topographica<a class="headerlink" href="#running-topographica" title="Permalink to this headline">¶</a></h2>
+<p>Because there are many ways a user might install Topographica (or
+any other Python package), the next step is to figure out where the
+topographica script (used for launching Topographica) and the
+example and model files (used as starting points for your modelling)
+ended up.</p>
+<p>If you follow the instructions above, the topographica script is
+usually <tt class="docutils literal"><span class="pre">~/.local/bin/topographica</span></tt> or <tt class="docutils literal"><span class="pre">~/VENV/bin/topographica</span></tt> on
+Linux, UNIX, and Mac. On Windows pip installations it is usually
+<tt class="docutils literal"><span class="pre">%APPDATA%\Python\scripts\topographica</span></tt> (where <tt class="docutils literal"><span class="pre">%APPDATA%</span></tt> is
+something like <tt class="docutils literal"><span class="pre">C:\Users\jbednar\AppData\Roaming</span></tt>; <tt class="docutils literal"><span class="pre">AppData</span></tt> is
+often hidden in the filesystem so you may need to enable display of
+hidden files).</p>
+<p>Once you&#8217;ve located the topographica script, it will save typing if
+you make sure that the location of that script is in your command
+prompt path. Instructions for doing so differ by platform, but
+should be easily obtainable. On Windows one convenient way to put
+the script on the path is to create a file called <tt class="docutils literal"><span class="pre">topographica.bat</span></tt>
+containing a single line like:</p>
+<div class="highlight-python"><pre>@C:\Python27\python.exe %APPDATA%\Python\scripts\topographica %*</pre>
+</div>
+<p>(where you use the appropriate path to both Python and your
+topographica script) and put it somewhere in your path (e.g.
+<tt class="docutils literal"><span class="pre">C:\Windows\System32</span></tt>).</p>
+<p>The example files are usually in
+<tt class="docutils literal"><span class="pre">~/.local/share/topographica/examples/</span></tt> on Linux, UNIX, and Mac
+systems, and in <tt class="docutils literal"><span class="pre">%APPDATA%\Python\Share\Topographica\examples</span></tt> on
+Windows, or in the corresponding VENV directories.</p>
+<p>Once you&#8217;ve located the script and the examples, you can start the
+GUI version of Topographica from the command prompt using something
+like: <tt class="docutils literal"><span class="pre">topographica</span> <span class="pre">-g</span> <span class="pre">~/.local/share/topographica/examples/tiny.ty</span></tt>
+or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">%APPDATA%\Python\scripts\topographica</span> <span class="pre">-g</span>
+<span class="pre">%APPDATA%\Python\share\topographica\examples\tiny.ty</span></tt> (on
+Windows).</p>
+<p>Running Topographica interactively is described in detail in the
+<a class="reference external" href="../User_Manual/scripts.html">User Manual</a>. If you want to get straight into working with a full
+network, a good way to begin is by working through the <a class="reference external" href="../Tutorials/som_retinotopy.html">SOM</a> or
+<a class="reference external" href="../Tutorials/gcal.html">GCAL</a> tutorials.</p>
+<p>Have fun with Topographica, and be sure to subscribe to the
+<a class="reference external" href="https://lists.sourceforge.net/lists/listinfo/topographica-announce">topographica-announce</a> mailing list to hear about future updates!</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html">Dependencies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#required-external-packages">Required External Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#required-ioam-packages">Required IOAM Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#typical-external-packages">Typical External Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#optional-external-packages">Optional External Packages</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="update_script.html">Updating your scripts for a new version of Topographica</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="update_script.html#upgrading-from-0-9-5-to-0-9-6">Upgrading from 0.9.5 to 0.9.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update_script.html#upgrading-from-0-9-4-to-0-9-5">Upgrading from 0.9.4 to 0.9.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update_script.html#upgrading-from-a-version-prior-to-0-9-4">Upgrading from a version prior to 0.9.4</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="win32notes.html">Translating UNIX commands to Windows</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="#">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Downloads</a><ul>
+<li><a class="reference internal" href="#installing-topographica">Installing Topographica</a><ul>
+<li><a class="reference internal" href="#first-install-python">First install Python</a></li>
+<li><a class="reference internal" href="#quick-recipe-for-ubuntu-linux">Quick recipe for Ubuntu Linux</a></li>
+<li><a class="reference internal" href="#install-via-pip">Install via pip</a></li>
+<li><a class="reference internal" href="#install-via-virtualenv">Install via virtualenv</a></li>
+<li><a class="reference internal" href="#install-via-git">Install via Git</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-topographica">Running Topographica</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../News/index.html"
+                        title="previous chapter">News</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dependencies.html"
+                        title="next chapter">Dependencies</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Downloads/index.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="dependencies.html" title="Dependencies"
+             >next</a></li>
+        <li class="right" >
+          <a href="../News/index.html" title="News"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="#">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

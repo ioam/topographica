@@ -1,0 +1,766 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.lancext &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.lancext</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">pickle</span><span class="o">,</span> <span class="nn">imp</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">inspect</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">lancet.launch</span> <span class="kn">import</span> <span class="n">CommandTemplate</span>
+<span class="kn">from</span> <span class="nn">lancet.launch</span> <span class="kn">import</span> <span class="n">review_and_launch</span>
+
+<div class="viewcode-block" id="topo_param_string"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.topo_param_string">[docs]</a><span class="k">def</span> <span class="nf">topo_param_string</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;print_level&#39;</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s">&quot;, &quot;</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Formats global parameters nicely for use in version control (for example).</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+   <span class="n">strings</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span>
+              <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+   <span class="k">return</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="param_formatter"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.param_formatter">[docs]</a><span class="k">class</span> <span class="nc">param_formatter</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+   <span class="sd">&#39;&#39;&#39; This class is closely related to the param_formatter class in</span>
+<span class="sd">       topo/command/__init__.py.  Like that default class, it formats parameters</span>
+<span class="sd">       as a string for use in a directory name.  Unlike that default, it does</span>
+<span class="sd">       not use the parameters repr directly but instead their commandline</span>
+<span class="sd">       representation as returned by the TaskSpecifier.</span>
+
+<span class="sd">   Unlike the default param_formatter, this version has several important</span>
+<span class="sd">   advantages:</span>
+<span class="sd">   - It allows for a custom separator and an optional trunctation</span>
+<span class="sd">     length for values.</span>
+<span class="sd">   - It removes the need to import param.misc.OrderedDict in</span>
+<span class="sd">     the command string to specify map.</span>
+<span class="sd">   - Parameters are sorted from slowest to fastest varying or</span>
+<span class="sd">     (optionally) alphanumerically.</span>
+<span class="sd">   - Does not support custom ordering but does still support abbreviations.</span>
+<span class="sd">   - It formats a string for the parameters that vary by default (can be toggled)</span>
+<span class="sd">   - Most importantly, it formats values *exactly* as they appear in a command.  For example, a value</span>
+<span class="sd">     specified as 6.00 on the commandline remains this way and is never represented to higher</span>
+<span class="sd">     precision or with floating point error.</span>
+<span class="sd">   &#39;&#39;&#39;</span>
+
+   <span class="n">abbreviations</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">       A dictionary of abbreviations to use of type {&lt;key&gt;:&lt;abbrev&gt;}.</span>
+<span class="s">       If a specifier key has an entry in the dictionary, the abbreviation is used.</span>
+<span class="s">       Useful for shortening long parameter names in the directory structure.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">alphanumeric_sort</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        Whether to sort the (possibly abbreviated) keys alphabetically or not.</span>
+<span class="s">        By default, keys are ordered from slowest varying to fastest varying</span>
+<span class="s">        provided this information is available from the TaskSpecifier.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">format_constant_keys</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        Whether or not to format the parameters that are known to be constant across batches.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">truncation_limit</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">        If None, no truncation is performed, otherwise specifies the maximum</span>
+<span class="s">        length of any given specification value. &#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">separator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">          The separator to use between &lt;key&gt;=&lt;value&gt; pairs.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constant_keys</span><span class="p">,</span> <span class="n">varying_keys</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_constant_keys</span><span class="p">:</span> <span class="n">ordering</span> <span class="o">=</span> <span class="n">constant_keys</span> <span class="o">+</span> <span class="n">varying_keys</span>
+      <span class="k">else</span><span class="p">:</span>                         <span class="n">ordering</span> <span class="o">=</span> <span class="n">varying_keys</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphanumeric_sort</span><span class="p">:</span> <span class="n">ordering</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ordering</span><span class="p">)</span>
+      <span class="n">abbreved</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abbreviations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">),</span> <span class="n">spec</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ordering</span><span class="p">]</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">truncation_limit</span><span class="p">])</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">abbreved</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="RunBatchCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchCommand">[docs]</a><span class="k">class</span> <span class="nc">RunBatchCommand</span><span class="p">(</span><span class="n">CommandTemplate</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot; RunBatchCommand is designed to to format task specifications into</span>
+<span class="sd">       Topographica run_batch tasks in a way that should be flexible enough to</span>
+<span class="sd">       be used generally. Note that Topographica is invoked with the -a flag so</span>
+<span class="sd">       all of topo.command is imported.</span>
+
+<span class="sd">       Though some of the parameters required appear to duplicate those in</span>
+<span class="sd">       run_batch, they are necessary to ensure some basic consistency in the use</span>
+<span class="sd">       of run_batch between tasks. This CommandTemplate class constrains -all- the</span>
+<span class="sd">       options for run_batch with the exception of &#39;times&#39; which is free to vary</span>
+<span class="sd">       as part of the task specification. This is allowed as you may wish to</span>
+<span class="sd">       change the times at which the analysis function is invoked across</span>
+<span class="sd">       batches.</span>
+
+<span class="sd">       This command is queuable with both the queue and specify methods</span>
+<span class="sd">       implemented. As necessary, specifications are generated in the</span>
+<span class="sd">       &#39;specifications&#39; subdirectory of the root directory.</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+
+   <span class="n">topo_switches</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;-a&#39;</span><span class="p">],</span> <span class="n">doc</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">          Specifies the Topographica qsub switches (flags without arguments) as a</span>
+<span class="s">          list of strings. By default the -a switch is always used to auto import</span>
+<span class="s">          commands.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">topo_flag_options</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">          Specifies Topographica flags and their corresponding options as a</span>
+<span class="s">          dictionary.  This parameter is suitable for setting -c and -p flags for</span>
+<span class="s">          Topographica (eg. to customize OpenMP settings). This parameter is also</span>
+<span class="s">          important to introduce an analysis callable into the namespace if the</span>
+<span class="s">          analysis function is set to &#39;custom&#39;.</span>
+
+<span class="s">          Tuples can be used to indicate groups of options using the same flag:</span>
+<span class="s">          {&#39;-p&#39;:&#39;retina_density=5&#39;} =&gt; -p retina_density=5</span>
+<span class="s">          {&#39;-p&#39;:(&#39;retina_density=5&#39;, &#39;scale=2&#39;) =&gt; -p retina_density=5 -p scale=2</span>
+<span class="s">          {&#39;-p&#39;:&#39;</span>
+
+<span class="s">          If a plain Python dictionary is used, the keys are alphanumerically sorted,</span>
+<span class="s">          otherwise the dictionary is assumed to be an OrderedDict (Python 2.7+,</span>
+<span class="s">          Python3 or param.external.OrderedDict) and the key ordering will be</span>
+<span class="s">          preserved. Finally note that the &#39;-&#39; is added to the key if missing (to</span>
+<span class="s">          make into a valid flag) to allow you to specify keywords in a dict</span>
+<span class="s">          constructor ie. dict(key1=value1, key2=value2,....)&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">analysis</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">,</span>
+                                   <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">,</span> <span class="s">&#39;RunBatchAnalysis&#39;</span><span class="p">,</span> <span class="s">&#39;custom&#39;</span><span class="p">],</span>
+                                   <span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">              The type of analysis to use with run_batch. The options are &#39;default&#39;</span>
+<span class="s">              which runs the default run_batch analysis function,</span>
+<span class="s">              &#39;RunBatchAnalysis&#39; which use the more sophisticated picklable</span>
+<span class="s">              analysis function and custom which requires the analysis callable to be</span>
+<span class="s">              created in the run_batch namespace via a -c option with</span>
+<span class="s">              topo_flag_options&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">analysis_arguments</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The specifier keys to be consumed as analysis function arguments&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">name_time_format</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;%Y%m</span><span class="si">%d</span><span class="s">%H%M&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">         The timestamp format for directories created by run_batch in python</span>
+<span class="s">         datetime format.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="n">max_name_length</span><span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Equivalent to the run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">snapshot</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Equivalent to the run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">vc_info</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Equivalent to the run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">save_global_params</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Equivalent to the run_batch parameter of same name.&quot;</span><span class="p">)</span>
+
+   <span class="n">param_formatter</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">param_formatter</span><span class="o">.</span><span class="n">instance</span><span class="p">(),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If None, defaults to normal run_batch formatting.&quot;&quot;&quot;</span><span class="p">)</span>
+
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tyfile</span><span class="p">,</span> <span class="n">analysis</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">analysis</span> <span class="o">==</span> <span class="s">&#39;custom&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s">&#39;-c&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">,</span> <span class="s">&#39;Please use -c option to introduce custom analysis to namespace!&#39;</span>
+
+      <span class="n">executable</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">RunBatchCommand</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">analysis</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span>
+                                                <span class="n">executable</span><span class="o">=</span><span class="n">executable</span><span class="p">,</span>
+                                                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">tyfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">tyfile</span><span class="p">)</span>
+      <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tyfile</span><span class="p">),</span> <span class="s">&quot;Tyfile doesn&#39;t exist! Cannot proceed.&quot;</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_prelude</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="o">==</span><span class="s">&#39;RunBatchAnalysis&#39;</span><span class="p">:</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">_prelude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;from topo.misc.lancext import RunBatchAnalysis&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="o">==</span><span class="s">&#39;default&#39;</span><span class="p">:</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">_prelude</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;analysis = default_analysis_function&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="RunBatchCommand.topo_args"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchCommand.topo_args">[docs]</a>   <span class="k">def</span> <span class="nf">topo_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">switch_override</span><span class="o">=</span><span class="p">[]):</span>
+      <span class="sd">&quot;&quot;&quot; Method to generate Popen style argument list for Topographica using the</span>
+<span class="sd">      topo_switches and topo_flag_options parameters. Switches are returned first,</span>
+<span class="sd">      sorted alphanumerically.  The qsub_flag_options follow in keys() ordered if</span>
+<span class="sd">      not a vanilla Python dictionary (ie. a Python 2.7+ or param.external</span>
+<span class="sd">      OrderedDict). Otherwise the keys are sorted alphanumerically.&quot;&quot;&quot;</span>
+
+      <span class="n">opt_dict</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">)()</span>
+      <span class="n">opt_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topo_flag_options</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>   <span class="c"># Alphanumeric sort if vanilla Python dictionary</span>
+            <span class="n">ordered_options</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">opt_dict</span><span class="p">)]</span>
+      <span class="k">else</span><span class="p">:</span>
+         <span class="n">ordered_options</span> <span class="o">=</span>  <span class="nb">list</span><span class="p">(</span><span class="n">opt_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+      <span class="c"># Unpack tuple values so flag:(v1, v2,...)) =&gt; ..., flag:v1, flag:v2, ...</span>
+      <span class="n">unpacked_groups</span> <span class="o">=</span> <span class="p">[[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">==</span><span class="nb">tuple</span> <span class="k">else</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">val</span><span class="p">)]</span>
+                           <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ordered_options</span><span class="p">]</span>
+      <span class="n">unpacked_kvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">unpacked_groups</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+      <span class="c"># Adds &#39;-&#39; if missing (eg, keywords in dict constructor) and flattens lists.</span>
+      <span class="n">ordered_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="s">&#39;-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span>  <span class="n">unpacked_kvs</span><span class="p">]</span>
+      <span class="n">ordered_options</span> <span class="o">=</span> <span class="p">[[</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="p">([</span><span class="n">v</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="k">else</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ordered_pairs</span><span class="p">]</span>
+      <span class="n">flattened_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">kvs</span> <span class="ow">in</span> <span class="n">ordered_options</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">kvs</span><span class="p">]</span>
+      <span class="n">switches</span> <span class="o">=</span>  <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">switch_override</span> <span class="k">if</span> <span class="p">(</span><span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_switches</span><span class="p">)]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_switches</span>
+      <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">switches</span><span class="p">)</span> <span class="o">+</span> <span class="n">flattened_options</span>
+
+</div>
+<div class="viewcode-block" id="RunBatchCommand.queue"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchCommand.queue">[docs]</a>   <span class="k">def</span> <span class="nf">queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Uses load_kwargs helper function in topo.command.misc to get the</span>
+<span class="sd">      run_batch settings from the specifications directory. &#39;&#39;&#39;</span>
+      <span class="n">spec_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">],</span> <span class="s">&#39;specifications&#39;</span><span class="p">)</span>
+      <span class="n">spec_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spec_path</span><span class="p">,</span> <span class="s">&#39;t</span><span class="si">%s</span><span class="s">.spec&#39;</span> <span class="o">%</span> <span class="n">tid</span><span class="p">)</span>
+      <span class="n">prelude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prelude</span><span class="p">[:]</span>
+      <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;kwargs = load_kwargs(&#39;</span><span class="si">%s</span><span class="s">&#39;,globals(),locals())&quot;</span> <span class="o">%</span> <span class="n">spec_file_path</span><span class="p">]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="o">==</span><span class="s">&#39;RunBatchAnalysis&#39;</span><span class="p">:</span>
+         <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;analysis=RunBatchAnalysis.load(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">])]</span>
+         <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;analysis.current_tid = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">tid</span><span class="p">]</span>
+         <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;analysis.analysis_kwargs = dict(kwargs)&quot;</span><span class="p">]</span>
+
+      <span class="n">run_batch_cmd</span> <span class="o">=</span> <span class="s">&quot;run_batch(&#39;</span><span class="si">%s</span><span class="s">&#39;,**kwargs)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tyfile</span>
+      <span class="n">topo_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_args</span><span class="p">([</span><span class="s">&#39;-a&#39;</span><span class="p">])</span>
+      <span class="k">return</span>  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">executable</span><span class="p">]</span> <span class="o">+</span> <span class="n">topo_args</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prelude</span><span class="o">+</span><span class="p">[</span><span class="n">run_batch_cmd</span><span class="p">])]</span>
+</div>
+<div class="viewcode-block" id="RunBatchCommand.specify"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchCommand.specify">[docs]</a>   <span class="k">def</span> <span class="nf">specify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Writes the specification as a Python dictionary to file (to the</span>
+<span class="sd">          specifications subdirectory of root directory) as required by the</span>
+<span class="sd">          load_kwargs helper method in topo.misc.command.&#39;&#39;&#39;</span>
+
+      <span class="n">spec_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">],</span> <span class="s">&#39;specifications&#39;</span><span class="p">)</span>
+      <span class="n">spec_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spec_path</span><span class="p">,</span> <span class="s">&#39;t</span><span class="si">%d</span><span class="s">.spec&#39;</span> <span class="o">%</span> <span class="n">tid</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">spec_path</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">spec_path</span><span class="p">)</span>
+
+      <span class="n">spec_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">spec_file_path</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+      <span class="n">kwarg_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_batch_kwargs</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+      <span class="n">allopts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span><span class="o">**</span><span class="n">kwarg_opts</span><span class="p">)</span> <span class="c"># Override run_batch keys if (mistakenly) provided.</span>
+
+      <span class="n">keywords</span> <span class="o">=</span> <span class="s">&#39;,</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">allopts</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span>
+                             <span class="nb">sorted</span><span class="p">(</span><span class="n">kwarg_opts</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span>
+      <span class="n">spec_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;dict(</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">keywords</span><span class="p">);</span> <span class="n">spec_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+   <span class="k">def</span> <span class="nf">_run_batch_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Defines the keywords accepted by run_batch and so specifies run_batch behaviour. &#39;&#39;&#39;</span>
+      <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name_time_format&#39;</span><span class="p">:</span>   <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_time_format</span><span class="p">),</span>
+                 <span class="s">&#39;max_name_length&#39;</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">max_name_length</span><span class="p">,</span>
+                 <span class="s">&#39;snapshot&#39;</span><span class="p">:</span>           <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="p">,</span>
+                 <span class="s">&#39;vc_info&#39;</span><span class="p">:</span>            <span class="bp">self</span><span class="o">.</span><span class="n">vc_info</span><span class="p">,</span>
+                 <span class="s">&#39;save_global_params&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_global_params</span><span class="p">}</span>
+
+      <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_tag&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;&#39;</span><span class="p">:</span> <span class="n">dirname_prefix</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_name&#39;</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>                     <span class="n">dirname_prefix</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="s">&#39;[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;batch_tag&#39;</span><span class="p">])</span>
+
+      <span class="c"># Settings using information from launcher</span>
+      <span class="n">derived_options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;output_directory&#39;</span><span class="p">:</span><span class="nb">repr</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">]),</span>
+                         <span class="s">&#39;dirname_prefix&#39;</span><span class="p">:</span>  <span class="nb">repr</span><span class="p">(</span><span class="n">dirname_prefix</span><span class="p">),</span>
+                         <span class="s">&#39;tag&#39;</span><span class="p">:</span>             <span class="nb">repr</span><span class="p">(</span><span class="s">&#39;t</span><span class="si">%s</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">tid</span><span class="p">)}</span>
+
+      <span class="c"># Use fixed timestamp argument to run_batch if available.</span>
+      <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="n">derived_options</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span>
+      <span class="n">derived_options</span><span class="p">[</span><span class="s">&#39;analysis_fn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;analysis&#39;</span>
+
+      <span class="c"># Use the specified param_formatter (if desired) to create lambda in run_batch</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_formatter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+         <span class="n">dir_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_formatter</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;constant_keys&#39;</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;varying_keys&#39;</span><span class="p">],</span> <span class="n">spec</span><span class="p">)</span>
+         <span class="n">derived_options</span><span class="p">[</span><span class="s">&#39;dirname_params_filter&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s">&#39;lambda p: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">dir_format</span><span class="p">)</span>
+
+      <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">derived_options</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+      <span class="sd">&quot;&quot;&quot; Returns a Popen argument list to invoke Topographica and execute</span>
+<span class="sd">      run_batch with all options appropriately set (in alphabetical</span>
+<span class="sd">      order). Keywords that are not run_batch options are also in alphabetical</span>
+<span class="sd">      order at the end of the keyword list&quot;&quot;&quot;</span>
+
+      <span class="n">kwarg_opts</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_batch_kwargs</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+      <span class="n">allopts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span><span class="o">**</span><span class="n">kwarg_opts</span><span class="p">)</span> <span class="c"># Override spec values if mistakenly included.</span>
+
+      <span class="n">prelude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prelude</span><span class="p">[:]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="o">==</span><span class="s">&#39;RunBatchAnalysis&#39;</span><span class="p">:</span>
+         <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;analysis=RunBatchAnalysis.load(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;root_directory&#39;</span><span class="p">])]</span>
+         <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;analysis.current_tid = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">tid</span><span class="p">]</span>
+         <span class="n">analysis_kwargs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39;:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">allopts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_arguments</span><span class="p">]</span>
+         <span class="n">prelude</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;analysis.analysis_kwargs = {</span><span class="si">%s</span><span class="s">}&quot;</span> <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">analysis_kwargs</span><span class="p">)]</span>
+
+
+      <span class="n">keywords</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">allopts</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span>  <span class="c"># Was %s</span>
+                            <span class="nb">sorted</span><span class="p">(</span><span class="n">kwarg_opts</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">+</span><span class="nb">sorted</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span>
+      <span class="n">run_batch_list</span> <span class="o">=</span> <span class="n">prelude</span> <span class="o">+</span> <span class="p">[</span><span class="s">&quot;run_batch(</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tyfile</span><span class="p">),</span> <span class="n">keywords</span><span class="p">)]</span>
+      <span class="n">topo_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_args</span><span class="p">([</span><span class="s">&#39;-a&#39;</span><span class="p">])</span>
+      <span class="k">return</span>  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">executable</span><span class="p">]</span> <span class="o">+</span> <span class="n">topo_args</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;-c&#39;</span><span class="p">,</span>  <span class="s">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_batch_list</span><span class="p">)]</span>
+
+</div>
+<div class="viewcode-block" id="RunBatchAnalysis"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis">[docs]</a><span class="k">class</span> <span class="nc">RunBatchAnalysis</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot; This analysis class is a generalization of the normal analysis functions</span>
+<span class="sd">   use in Topographica&#39;s run_batch command. It allows you to factor out and</span>
+<span class="sd">   document steps in your analysis, offers a standard mechanism to collate data</span>
+<span class="sd">   returned from map functions across multiple simulations and allows you to</span>
+<span class="sd">   define a metric function for use with dynamic TaskSpecifiers</span>
+<span class="sd">   (eg. Hillclimbing). Here are the types of operation you can define:</span>
+
+<span class="sd">   Map functions</span>
+<span class="sd">   -------------</span>
+<span class="sd">   Functions called for their side-effects. Eg. saving plotgroups, orientation</span>
+<span class="sd">   maps etc.</span>
+
+<span class="sd">   Map-reduce operations</span>
+<span class="sd">   ---------------------</span>
+<span class="sd">   Allows you to collect and process dataacross simulations. The map</span>
+<span class="sd">   component generates the data per simulation while the reduce function</span>
+<span class="sd">   collapse this data (eg. plotting a variable acrosssimulations).</span>
+
+<span class="sd">   Metric function</span>
+<span class="sd">   ---------------</span>
+<span class="sd">   Provides the TaskSpecifier feedback (eg. for automated parameter</span>
+<span class="sd">   search). There can only be one metric function.</span>
+
+<span class="sd">   It works by restoring the analysis object from a pickle file *within* the</span>
+<span class="sd">   run_batch context, dynamically importing the user-defined functions from the</span>
+<span class="sd">   launch script and then executing them as specified.  Dynamic import is</span>
+<span class="sd">   necessary as pickles do not store code and the referenced user-functions need</span>
+<span class="sd">   to exist before execution. To create the initial pickle file, you need to</span>
+<span class="sd">   call the save() method once all map, map-reduce and metric functions are</span>
+<span class="sd">   defined. Note that this class is a callable (no arguments) as it is designed</span>
+<span class="sd">   to interface with run_batch like a normal analysis function.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+   <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="RunBatchAnalysis.analysis_dir"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.analysis_dir">[docs]</a>   <span class="k">def</span> <span class="nf">analysis_dir</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot; A helper method pointing to where the analysis function (map functions</span>
+<span class="sd">      specifically) is executing. For use in analysis functions written by the</span>
+<span class="sd">      user. Typically used to output custom files (ie. non-plotgroup) to the appropriate</span>
+<span class="sd">      directory.&quot;&quot;&quot;</span>
+      <span class="k">return</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="o">.</span><span class="n">prefix</span>
+</div>
+   <span class="n">current_tid</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_None</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The task identifier for the current task. This needs to be set in the</span>
+<span class="s">         run_batch context in order to ensure the correct naming convention for</span>
+<span class="s">         pickles generated by the map functions (for later reduction).&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">analysis_kwargs</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">         The keyword arguments to be passed to the analysis functions. The analysis</span>
+<span class="s">         functions can capture any desired variables by setting the appropriate</span>
+<span class="s">         keyword arguments.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="n">analysis_arguments</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="nb">set</span><span class="p">([]),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        The names of all the arguments required by the analysis functions. Used to</span>
+<span class="s">        make sure that the specifiers supply all the required keys.&#39;&#39;&#39;</span><span class="p">)</span>
+
+   <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="RunBatchAnalysis.load"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.load">[docs]</a>   <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Classmethod used to load the analysis callable in a Topographica</span>
+<span class="sd">          run_batch context.  Loads the analysisfn.pickle file from the</span>
+<span class="sd">          specified root directory.&#39;&#39;&#39;</span>
+      <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_directory</span><span class="p">,</span> <span class="s">&#39;analysisfn.pickle&#39;</span><span class="p">)</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>  <span class="n">analysisfn</span> <span class="o">=</span>  <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+      <span class="n">analysisfn</span><span class="o">.</span><span class="n">setup</span><span class="p">();</span> <span class="k">return</span> <span class="n">analysisfn</span>
+</div>
+   <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="RunBatchAnalysis.reduce_batch"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.reduce_batch">[docs]</a>   <span class="k">def</span> <span class="nf">reduce_batch</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      Classmethod used to load the analysis object then apply all reductions.</span>
+<span class="sd">      Loads the analysisfn.pickle file from the specified root directory.</span>
+<span class="sd">      &#39;&#39;&#39;</span>
+      <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_directory</span><span class="p">,</span> <span class="s">&#39;analysisfn.pickle&#39;</span><span class="p">)</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+         <span class="n">analysis_obj</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+         <span class="k">return</span> <span class="n">analysis_obj</span><span class="o">.</span><span class="n">reduce</span>
+</div>
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script_path</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">script_path</span> <span class="o">=</span> <span class="n">script_path</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">maps</span> <span class="o">=</span> <span class="p">[];</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">analysis_arguments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+
+<div class="viewcode-block" id="RunBatchAnalysis.save"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.save">[docs]</a>   <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; The method to save the initial pickle file once the map, reduce and</span>
+<span class="sd">      metric functions are defined. Must be called before launch and saves</span>
+<span class="sd">      the object as analysisfn.pickle file from the specified root</span>
+<span class="sd">      directory.&#39;&#39;&#39;</span>
+      <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">script_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">]:</span>
+         <span class="k">print</span> <span class="s">&quot;Please set the script_path and the root_directory before saving&quot;</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">)</span>
+      <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="s">&#39;analysisfn.pickle&#39;</span><span class="p">)</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+</div>
+   <span class="k">def</span> <span class="nf">_verify_mapfn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Helper function to establish map function name and enforce</span>
+<span class="sd">      correct argument signature.&#39;&#39;&#39;</span>
+      <span class="n">fn_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__name__</span>
+      <span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">varargs</span><span class="p">,</span> <span class="n">keywords</span><span class="p">,</span> <span class="n">defaults</span><span class="p">)</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+      <span class="k">assert</span> <span class="n">varargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;Function &#39;</span><span class="si">%s</span><span class="s">&#39; cannot accept arglist ie. *args&quot;</span> <span class="o">%</span> <span class="n">fn_name</span>
+      <span class="k">assert</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;Function &#39;</span><span class="si">%s</span><span class="s">&#39; must accept keywords ie. **kwargs&quot;</span> <span class="o">%</span> <span class="n">fn_name</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="n">fn_name</span><span class="p">,</span> <span class="p">())</span>
+      <span class="k">assert</span> <span class="p">(</span><span class="n">defaults</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)),</span> \
+          <span class="s">&quot;Arguments of &#39;</span><span class="si">%s</span><span class="s">&#39; must all be keywords&quot;</span> <span class="o">%</span> <span class="n">fn_name</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">analysis_arguments</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">analysis_arguments</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">fn_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+
+<div class="viewcode-block" id="RunBatchAnalysis.set_metric"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.set_metric">[docs]</a>   <span class="k">def</span> <span class="nf">set_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_fn</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Used to supply a metric function (eg. for hillclimbing) along with</span>
+<span class="sd">      appropriate description.&#39;&#39;&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;metric_fn&#39;</span><span class="p">:</span><span class="n">metric_fn</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">:</span><span class="n">description</span><span class="p">}</span>
+</div>
+<div class="viewcode-block" id="RunBatchAnalysis.add_map_fn"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.add_map_fn">[docs]</a>   <span class="k">def</span> <span class="nf">add_map_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_fn</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Used to supply an additional map function (called for its side-effects</span>
+<span class="sd">      only) along with appropriate description.&#39;&#39;&#39;</span>
+      <span class="p">(</span><span class="n">map_name</span><span class="p">,</span> <span class="n">map_args</span><span class="p">)</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_verify_mapfn</span><span class="p">(</span><span class="n">map_fn</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;map_fn&#39;</span><span class="p">:</span><span class="n">map_name</span><span class="p">,</span> <span class="s">&#39;map_args&#39;</span><span class="p">:</span><span class="n">map_args</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">:</span><span class="n">description</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="RunBatchAnalysis.add_map_reduce_fn"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.add_map_reduce_fn">[docs]</a>   <span class="k">def</span> <span class="nf">add_map_reduce_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_fn</span><span class="p">,</span> <span class="n">reduce_fn</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Used to specify a map-reduce operation whereby the map_fn returns data</span>
+<span class="sd">      from a given simulation which the reduce_fn collates across all</span>
+<span class="sd">      simulations once the batch is complete. An appropriate description also</span>
+<span class="sd">      needs to be supplied.&#39;&#39;&#39;</span>
+      <span class="p">(</span><span class="n">map_name</span><span class="p">,</span> <span class="n">map_args</span><span class="p">)</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_verify_mapfn</span><span class="p">(</span><span class="n">map_fn</span><span class="p">)</span>
+      <span class="n">reduce_name</span> <span class="o">=</span> <span class="n">reduce_fn</span><span class="o">.</span><span class="n">__name__</span>
+      <span class="p">(</span><span class="n">reduce_args</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">reduce_fn</span><span class="p">)</span>
+      <span class="n">checkmsg</span> <span class="o">=</span><span class="s">&quot;Reduction &#39;</span><span class="si">%s</span><span class="s">&#39; must accept three arguments of form (&lt;info&gt;, &lt;data&gt;, &lt;accumulator&gt;)&quot;</span>
+      <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">reduce_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">checkmsg</span> <span class="o">%</span> <span class="n">reduce_name</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;map_fn&#39;</span><span class="p">:</span><span class="n">map_name</span><span class="p">,</span>
+                               <span class="s">&#39;map_args&#39;</span><span class="p">:</span><span class="n">map_args</span><span class="p">,</span>
+                               <span class="s">&#39;reduce_fn&#39;</span><span class="p">:</span><span class="n">reduce_name</span><span class="p">,</span>
+                               <span class="s">&#39;reduce_args&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="n">reduce_args</span><span class="p">),</span>
+                               <span class="s">&#39;description&#39;</span><span class="p">:</span><span class="n">description</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="RunBatchAnalysis.set_map_reduce_fns"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.set_map_reduce_fns">[docs]</a>   <span class="k">def</span> <span class="nf">set_map_reduce_fns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_fns</span><span class="p">,</span> <span class="n">reduce_fns</span><span class="p">,</span> <span class="n">descriptions</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; &#39;&#39;&#39;</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">map_fns</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">reduce_fns</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptions</span><span class="p">):</span>
+         <span class="k">print</span> <span class="s">&quot;All input lists must be of the same length!&quot;</span><span class="p">;</span> <span class="k">return</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">map_fn</span><span class="p">,</span> <span class="n">reduce_fn</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span> <span class="ow">in</span>  <span class="nb">zip</span><span class="p">(</span><span class="n">map_fns</span><span class="p">,</span> <span class="n">reduce_fns</span><span class="p">,</span> <span class="n">descriptions</span><span class="p">):</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">add_map_reduce_fn</span><span class="p">(</span><span class="n">map_fn</span><span class="p">,</span> <span class="n">reduce_fn</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RunBatchAnalysis.pickle_data"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.pickle_data">[docs]</a>   <span class="k">def</span> <span class="nf">pickle_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; Helper method to pickle the given data to a file of the given name in</span>
+<span class="sd">          the given subdirectory on the appropriate path&#39;&#39;&#39;</span>
+      <span class="n">pickle_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">pickle_dir</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">pickle_dir</span><span class="p">)</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_directory</span><span class="p">,</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">fname</span><span class="p">),</span><span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RunBatchAnalysis.setup"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.setup">[docs]</a>   <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="s">&quot; This method is called at the start of a run_batch simulation &quot;</span>
+      <span class="n">module</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_path</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">mapfns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">mapdict</span><span class="p">[</span><span class="s">&#39;map_fn&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">mapdict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">maps</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rmapfns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">map_reduce</span><span class="p">[</span><span class="s">&#39;map_fn&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">map_reduce</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="p">]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">metricfn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">[</span><span class="s">&#39;metric_fn&#39;</span><span class="p">])</span>
+</div>
+   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      The call that occurs in run_batch. Calls all the defined map functions, pickles</span>
+<span class="sd">      the data returned from the map component of map-reductions and computes and</span>
+<span class="sd">      pickles the metric. The pickled data is a tuple that includes the topographica</span>
+<span class="sd">      simulation time at which the data was generated as run_batch typically applies</span>
+<span class="sd">      the analysis functions at multiple simulation times.</span>
+
+<span class="sd">      The pickles for map-reductions are stored in the root_directory under a</span>
+<span class="sd">      subdirectory of the supplied map function name. The metric pickles are stored</span>
+<span class="sd">      in the metrics folder of the root directory as required by all Launchers.</span>
+<span class="sd">      &#39;&#39;&#39;</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+         <span class="k">print</span> <span class="s">&quot;Source path was not set! Running default analysis function instead.&quot;</span>
+         <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">default_analysis_function</span><span class="p">();</span> <span class="k">return</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maps</span> <span class="o">==</span> <span class="p">[])</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span> <span class="o">==</span><span class="p">[]):</span>
+         <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">default_analysis_function</span><span class="p">()</span>
+         <span class="k">return</span>
+
+      <span class="n">topo_time</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+      <span class="k">for</span> <span class="n">mapfn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapfns</span><span class="p">:</span> <span class="n">mapfn</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_kwargs</span><span class="p">)</span> <span class="c"># Applying map functions in order</span>
+
+      <span class="k">for</span> <span class="p">(</span><span class="n">rmapfn</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rmapfns</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="p">):</span>
+         <span class="n">rmap_result</span> <span class="o">=</span> <span class="n">rmapfn</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_kwargs</span><span class="p">)</span>
+         <span class="k">if</span> <span class="n">rmap_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">@time=</span><span class="si">%s</span><span class="s">[</span><span class="si">%d</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;map_fn&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">topo_time</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_tid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pickle_data</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;map_fn&#39;</span><span class="p">],</span> <span class="n">fname</span><span class="p">,</span> <span class="p">(</span><span class="n">topo_time</span><span class="p">,</span> <span class="n">rmap_result</span><span class="p">))</span> <span class="c"># Pickle maps of map-reduces</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+         <span class="n">fname</span> <span class="o">=</span> <span class="s">&#39;metric-</span><span class="si">%d</span><span class="s">-time=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_tid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">topo_time</span><span class="p">))</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">pickle_data</span><span class="p">(</span><span class="s">&#39;metrics&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_tid</span><span class="p">,</span> <span class="n">topo_time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metricfn</span><span class="p">()))</span> <span class="c"># Pickle metric</span>
+
+
+<div class="viewcode-block" id="RunBatchAnalysis.reduce"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.lancext-module.html#topo.misc.lancext.RunBatchAnalysis.reduce">[docs]</a>   <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_log</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      Method to apply all defined map-reduces. For each map function, locates all</span>
+<span class="sd">      the pickles in the corresponding subfolder and matches the stored data to the</span>
+<span class="sd">      tid in the filename. The data, Topographica simulation times and corresponding</span>
+<span class="sd">      tids are extracted and passed on to the appropriate reduce function.</span>
+<span class="sd">      &#39;&#39;&#39;</span>
+      <span class="c"># FIXME: root_directory argument redundant!</span>
+      <span class="n">prefix</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="o">.</span><span class="n">prefix</span>
+      <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">root_directory</span>
+      <span class="n">reduces</span> <span class="o">=</span> <span class="p">[</span><span class="n">map_red</span><span class="p">[</span><span class="s">&#39;reduce_fn&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">map_red</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="p">]</span>
+      <span class="n">reduce_maps</span> <span class="o">=</span> <span class="p">[</span><span class="n">map_red</span><span class="p">[</span><span class="s">&#39;map_fn&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">map_red</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="p">]</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_path</span><span class="p">:</span>  <span class="n">module</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_path</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>                 <span class="k">return</span>
+
+      <span class="n">reduce_fns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">rname</span><span class="p">)</span> <span class="k">for</span> <span class="n">rname</span> <span class="ow">in</span> <span class="n">reduces</span><span class="p">]</span>
+      <span class="n">reduce_mapping</span> <span class="o">=</span> <span class="p">[(</span><span class="n">map_name</span><span class="p">,</span> <span class="n">rfn</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">map_name</span><span class="p">,</span> <span class="n">rfn</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">reduce_maps</span><span class="p">,</span> <span class="n">reduce_fns</span><span class="p">)]</span>
+
+      <span class="n">previous_reduction</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">map_name</span><span class="p">,</span> <span class="n">reducefn</span><span class="p">)</span> <span class="ow">in</span> <span class="n">reduce_mapping</span><span class="p">:</span>
+         <span class="n">ddict</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_directory</span><span class="p">,</span> <span class="n">map_name</span><span class="p">)</span>
+         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">previous_reduction</span> <span class="o">=</span> <span class="n">reducefn</span><span class="p">([</span><span class="n">root_directory</span><span class="p">,</span> <span class="n">spec_log</span><span class="p">],</span> <span class="bp">None</span><span class="p">,</span> <span class="n">previous_reduction</span><span class="p">)</span>
+            <span class="k">continue</span>
+         <span class="n">tid_pattern</span> <span class="o">=</span> <span class="n">map_name</span> <span class="o">+</span> <span class="s">&#39;.*\[(?P&lt;tid&gt;\d+)\]&#39;</span>
+         <span class="n">regexp_matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">cf</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">tid_pattern</span><span class="p">,</span><span class="n">cf</span><span class="p">))</span> <span class="k">for</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span>
+         <span class="n">tid_matches</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()[</span><span class="s">&#39;tid&#39;</span><span class="p">]),</span>  <span class="n">cf</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">cf</span><span class="p">,</span><span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="n">regexp_matches</span> <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)]</span>
+         <span class="k">for</span> <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tid_matches</span><span class="p">:</span> <span class="n">ddict</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+         <span class="n">specDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec_log</span><span class="p">)</span>
+         <span class="n">specs</span><span class="o">=</span><span class="p">[];</span> <span class="n">map_data</span> <span class="o">=</span><span class="p">[]</span>
+         <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ddict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">ddict</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+            <span class="n">pickle_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_directory</span><span class="p">,</span> <span class="n">map_name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
+            <span class="n">unpickled</span> <span class="o">=</span> <span class="p">[</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pickle_paths</span><span class="p">]</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">topo_time</span><span class="p">,</span> <span class="n">datum</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unpickled</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tp</span><span class="p">:</span> <span class="n">tp</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+               <span class="n">specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">specDict</span><span class="p">[</span><span class="n">tid</span><span class="p">],</span> <span class="n">tid</span><span class="o">=</span><span class="n">tid</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">topo_time</span><span class="p">)))</span>
+               <span class="n">map_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span>
+
+         <span class="n">previous_reduction</span> <span class="o">=</span> <span class="n">reducefn</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">map_data</span><span class="p">,</span> <span class="n">previous_reduction</span><span class="p">)</span>
+         <span class="c"># Must be restored for multiple launches (global state)</span>
+      <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+</div>
+   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; The printed representation of the analysis object. &#39;&#39;&#39;</span>
+      <span class="n">strList</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">maps</span><span class="p">:</span>
+         <span class="n">map_str</span> <span class="o">=</span> <span class="s">&#39;(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="s">&#39; ,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;map_args&#39;</span><span class="p">]</span><span class="o">+</span><span class="p">(</span><span class="s">&#39;**kwargs&#39;</span><span class="p">,))</span>
+         <span class="n">strList</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;</span><span class="si">%(map_fn)s%(map_str)s</span><span class="se">\n\t</span><span class="si">%(description)s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">map_str</span><span class="o">=</span><span class="n">map_str</span><span class="p">)]</span>
+      <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="p">:</span>
+         <span class="n">map_str</span> <span class="o">=</span> <span class="s">&#39;(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="s">&#39; ,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;map_args&#39;</span><span class="p">]</span><span class="o">+</span><span class="p">(</span><span class="s">&#39;**kwargs&#39;</span><span class="p">,))</span>
+         <span class="n">red_str</span><span class="o">=</span><span class="s">&#39;(</span><span class="si">%s</span><span class="s">)&#39;</span><span class="o">%</span> <span class="s">&#39; ,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;reduce_args&#39;</span><span class="p">])</span>
+         <span class="n">strList</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;</span><span class="si">%(map_fn)s%(map_str)s</span><span class="s"> =&gt; </span><span class="si">%(reduce_fn)s%(red_str)s</span><span class="se">\n\t</span><span class="si">%(description)s</span><span class="s">&quot;</span>
+                     <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">map_str</span><span class="o">=</span><span class="n">map_str</span><span class="p">,</span> <span class="n">red_str</span><span class="o">=</span><span class="n">red_str</span><span class="p">)]</span>
+      <span class="k">if</span> <span class="n">strList</span> <span class="o">==</span> <span class="p">[]:</span> <span class="n">strList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Default RunBatchAnalysis&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="n">strList</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&#39;Metric function </span><span class="si">%(metric_fn)s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+         <span class="n">reduction_chain</span> <span class="o">=</span> <span class="s">&quot;(..) -&gt; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">map_red</span><span class="p">[</span><span class="s">&#39;reduce_fn&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">map_red</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_reduces</span><span class="p">])</span>
+         <span class="n">strList</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&quot;Reduction Chain: </span><span class="si">%s</span><span class="s">(..)&quot;</span> <span class="o">%</span> <span class="n">reduction_chain</span><span class="p">]</span>
+      <span class="k">return</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strList</span><span class="p">)</span>
+
+<span class="c">####################</span>
+<span class="c"># Launch Decorator #</span>
+<span class="c">####################</span>
+</div>
+<span class="k">class</span> <span class="nc">batch_analysis</span><span class="p">(</span><span class="n">review_and_launch</span><span class="p">):</span>
+
+   <span class="nd">@classmethod</span>
+   <span class="k">def</span> <span class="nf">get_timestamp</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">timestamp_string</span><span class="p">,</span> <span class="n">timestamp_format</span><span class="p">):</span>
+      <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">timestamp_string</span><span class="p">,</span> <span class="n">timestamp_format</span><span class="p">))</span>
+
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">launcher_class</span><span class="p">,</span> <span class="n">reduce_timestamp</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">skip_reduce</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">batch_analysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">launcher_class</span><span class="o">=</span><span class="n">launcher_class</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">reduce_timestamp</span> <span class="o">=</span> <span class="n">reduce_timestamp</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">skip_reduce</span> <span class="o">=</span> <span class="n">skip_reduce</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dval</span><span class="p">:</span> <span class="n">dval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_cross_checks</span> <span class="o">=</span> <span class="p">[(</span><span class="k">lambda</span> <span class="n">dval</span><span class="p">:</span> <span class="n">dval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_check_analysis</span><span class="p">),</span>
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_check_launchers</span><span class="p">)]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_reviewers</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_launcher</span> <span class="p">),</span>
+                         <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_args</span><span class="p">),</span>
+                         <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_command_template</span><span class="p">),</span>
+                         <span class="p">(</span><span class="k">lambda</span> <span class="n">dval</span><span class="p">:</span> <span class="n">dval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_analysis</span><span class="p">)]</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_timestamp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">_reviewers</span> <span class="o">=</span> <span class="p">[(</span><span class="k">lambda</span> <span class="n">dval</span><span class="p">:</span> <span class="n">dval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">review_analysis</span><span class="p">)]</span>
+
+   <span class="k">def</span> <span class="nf">cross_check_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvalues</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs consistency checks across all the analysis objects before launch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dval</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">dval</span><span class="p">)</span><span class="o">==</span><span class="nb">tuple</span> <span class="k">for</span> <span class="n">dval</span> <span class="ow">in</span> <span class="n">dvalues</span><span class="p">):</span>
+           <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Launch function must return a tuple of type (Launcher, batch_analysis)&quot;</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">launchers</span><span class="p">,</span> <span class="n">analyses</span><span class="p">)</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">dvalues</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">analysis</span><span class="p">,</span> <span class="n">RunBatchAnalysis</span><span class="p">)</span> <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">):</span>
+           <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Second element of returned tuple must be a RunBatchAnalysis object&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">launcher</span><span class="o">.</span><span class="n">command_template</span><span class="p">,</span> <span class="n">RunBatchCommand</span><span class="p">)</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">launchers</span><span class="p">):</span>
+           <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;CommandTemplate specified in launcher is not a RunBatchCommand object&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">launcher</span><span class="o">.</span><span class="n">command_template</span><span class="o">.</span><span class="n">analysis</span> <span class="o">==</span><span class="s">&#39;RunBatchAnalysis&#39;</span> <span class="k">for</span> <span class="n">launcher</span> <span class="ow">in</span> <span class="n">launchers</span><span class="p">):</span>
+           <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;RunBatchCommand must use &#39;RunBatchAnalysis&#39; analysis type&quot;</span><span class="p">)</span>
+
+
+   <span class="k">def</span> <span class="nf">reduce_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_launcher</span><span class="p">):</span>
+
+      <span class="n">task_launcher</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_timestamp</span>
+      <span class="n">root_directory</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">task_launcher</span><span class="o">.</span><span class="n">root_directory_name</span><span class="p">())</span>
+      <span class="k">print</span> <span class="s">&quot;Running reduce in directory </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">root_directory</span><span class="p">)</span>
+      <span class="n">log_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.log&quot;</span> <span class="o">%</span> <span class="n">task_launcher</span><span class="o">.</span><span class="n">batch_name</span>
+      <span class="n">log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_directory</span><span class="p">,</span> <span class="n">log_name</span><span class="p">)</span>
+      <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span> <span class="s">&#39;Cannot find log file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">log_name</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">log</span><span class="p">:</span>
+         <span class="n">splits</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">log</span><span class="p">)</span>
+         <span class="n">spec_log</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">:])))</span> <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">]</span>
+
+      <span class="n">task_launcher</span><span class="o">.</span><span class="n">reduction_fn</span><span class="p">(</span><span class="n">spec_log</span><span class="p">,</span> <span class="n">root_directory</span><span class="p">)</span>
+      <span class="k">return</span> <span class="bp">False</span>
+
+   <span class="k">def</span> <span class="nf">configure_launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dval</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Determine the root directory from the launcher to configure the analysis</span>
+<span class="sd">      object appropriately, save the final state and set up the launcher&#39;s exit</span>
+<span class="sd">      callable.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="p">(</span><span class="n">task_launcher</span><span class="p">,</span> <span class="n">batch_analysis</span><span class="p">)</span> <span class="o">=</span> <span class="n">dval</span>
+      <span class="n">command_template</span> <span class="o">=</span> <span class="n">task_launcher</span><span class="o">.</span><span class="n">command_template</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_timestamp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_directory</span><span class="p">(</span><span class="n">task_launcher</span><span class="p">)</span>
+
+      <span class="n">arg_specifier</span> <span class="o">=</span> <span class="n">task_launcher</span><span class="o">.</span><span class="n">arg_specifier</span>
+      <span class="n">analysis_arguments</span> <span class="o">=</span> <span class="n">batch_analysis</span><span class="o">.</span><span class="n">analysis_arguments</span>
+      <span class="n">specifier_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">arg_specifier</span><span class="o">.</span><span class="n">varying_keys</span><span class="p">()</span> <span class="o">+</span> <span class="n">arg_specifier</span><span class="o">.</span><span class="n">constant_keys</span><span class="p">())</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">analysis_arguments</span> <span class="o">&lt;=</span> <span class="n">specifier_keys</span><span class="p">):</span>
+         <span class="n">clashes</span> <span class="o">=</span> <span class="n">analysis_arguments</span> <span class="o">-</span> <span class="n">specifier_keys</span>
+         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Analysis keys </span><span class="si">%s</span><span class="s"> not set in the specifier&quot;</span> <span class="o">%</span> <span class="nb">list</span><span class="p">(</span><span class="n">clashes</span><span class="p">))</span>
+      <span class="n">command_template</span><span class="o">.</span><span class="n">analysis_arguments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">analysis_arguments</span><span class="p">)</span>
+
+      <span class="n">root_directory</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">normalize_path</span><span class="p">(</span><span class="n">task_launcher</span><span class="o">.</span><span class="n">root_directory_name</span><span class="p">())</span>
+      <span class="n">batch_analysis</span><span class="o">.</span><span class="n">root_directory</span> <span class="o">=</span> <span class="n">root_directory</span>
+      <span class="n">task_launcher</span><span class="o">.</span><span class="n">script_path</span> <span class="o">=</span>  <span class="n">batch_analysis</span><span class="o">.</span><span class="n">script_path</span>
+      <span class="n">batch_analysis</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_reduce</span> <span class="ow">or</span> <span class="n">batch_analysis</span><span class="o">.</span><span class="n">map_reduces</span> <span class="o">!=</span> <span class="p">[]:</span>
+         <span class="n">task_launcher</span><span class="o">.</span><span class="n">reduction_fn</span> <span class="o">=</span> <span class="n">RunBatchAnalysis</span><span class="o">.</span><span class="n">reduce_batch</span><span class="p">(</span><span class="n">root_directory</span><span class="p">)</span>
+      <span class="k">return</span> <span class="bp">True</span>
+
+
+   <span class="k">def</span> <span class="nf">review_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_analysis</span><span class="p">):</span>
+      <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">(</span><span class="s">&#39;Batch Analysis&#39;</span><span class="p">)</span>
+      <span class="k">print</span> <span class="s">&quot;Source path: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">batch_analysis</span><span class="o">.</span><span class="n">script_path</span>
+      <span class="k">print</span> <span class="s">&quot;Analysis Info:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span>  <span class="nb">str</span><span class="p">(</span><span class="n">batch_analysis</span><span class="p">)</span>
+      <span class="k">return</span> <span class="bp">True</span>
+
+   <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+   <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+   <span class="k">def</span> <span class="nf">_repr_pretty_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">batch_analysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_repr_pretty_</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/misc/lancext.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,202 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.composer &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-sheet-composer">
+<h1>topo.sheet.composer<a class="headerlink" href="#topo-sheet-composer" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance8f5bd8f20a.svg" usemap="#inheritance8f5bd8f20a" class="inheritance"/></div><map id="inheritance8f5bd8f20a" name="inheritance8f5bd8f20a">
+</map>
+<div class="section" id="module-topo.sheet.composer">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.sheet.composer" title="Permalink to this headline">¶</a></h2>
+<p>A Sheet class for composing activity from different sheets into a
+single activity matrix.  Primarily a simple example of how to make
+a sheet class, but can also be useful.</p>
+<dl class="class">
+<dt id="topo.sheet.composer.Composer">
+<em class="property">class </em><tt class="descclassname">topo.sheet.composer.</tt><tt class="descname">Composer</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet/composer.html#Composer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.composer.Composer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.sheet-module.html#topo.base.sheet.Sheet" title="topo.base.sheet.Sheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheet.Sheet</span></tt></a></p>
+<p>A Sheet that combines the activity of 2 or more other sheets into
+a single activity matrix.  When connecting a sheet to a composer,
+you can specify the location at which that sheet&#8217;s input will be
+mapped into the composer by adding the &#8216;origin&#8217; argument to the
+connect() call e.g.:</p>
+<p>sim.connect(input_sheet.name,composer.name,delay=1, origin=(0.25,0.25))</p>
+<p>will cause (0,0) on input sheet&#8217;s activity to map to (0.25,0.25)
+on composer&#8217;s activity.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sheet.composer.Composer.port_configure">
+<tt class="descname">port_configure</tt><big>(</big><em>port</em>, <em>**config</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet/composer.html#Composer.port_configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.composer.Composer.port_configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure a specific input port.</p>
+<p>origin = (default (0,0)) The offset in the output matrix where
+this port&#8217;s input should be placed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.sheet.composer</a><ul>
+<li><a class="reference internal" href="#module-topo.sheet.composer">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.sheet.composer-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

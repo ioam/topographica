@@ -1,0 +1,306 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Using multiple cores with Topographica &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="User Manual" href="index.html" />
+    <link rel="next" title="ImaGen spatial coordinate systems" href="coords.html" />
+    <link rel="prev" title="Publishing Topographica results" href="publishing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="coords.html" title="ImaGen spatial coordinate systems"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="publishing.html" title="Publishing Topographica results"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-multiple-cores-with-topographica">
+<h1>Using multiple cores with Topographica<a class="headerlink" href="#using-multiple-cores-with-topographica" title="Permalink to this headline">¶</a></h1>
+<p>Starting from March 2012, Topographica supports multiple-core
+processors using the OpenMP library (<a class="reference external" href="http://openmp.org/wp/">openmp.org</a>). This
+functionality can result in significant speedup when running
+simulations on multicore machines. OpenMP support is enabled by
+default, and will not prevent Topographica from working as normal on
+single-core machines or on multicore machines that lack the
+necessary OpenMP libraries and compiler support.</p>
+<div class="section" id="openmp-in-topographica">
+<h2>OpenMP in Topographica<a class="headerlink" href="#openmp-in-topographica" title="Permalink to this headline">¶</a></h2>
+<p>Using OpenMP in Topographica is straightforward, requiring at most a
+single (optional) variable to control the number of threads used. To
+get the most out of your multicore system, it is important to
+understand that enabling OpenMP does not guarantee the best possible
+performance: in some situations you may find using multiple
+concurrent but single-threaded instances of Topographica will
+complete the desired set of simulations quicker.</p>
+<div class="section" id="installing-openmp">
+<h3>Installing OpenMP<a class="headerlink" href="#installing-openmp" title="Permalink to this headline">¶</a></h3>
+<p>The OpenMP library is supported and shipped with recent versions of
+most modern compilers. To check if your compiler can support OpenMP,
+please consult the <a class="reference external" href="http://openmp.org/wp/openmp-compilers/">list of compatible compilers at openmp.org</a>. If
+you find OpenMP cannot be enabled with Topographica, you may be
+running an older compiler version. In this case, you should consider
+updating your compiler and making sure the necessary library files
+are installed for your particular distribution or operating system.</p>
+</div>
+<div class="section" id="enabling-openmp">
+<h3>Enabling OpenMP<a class="headerlink" href="#enabling-openmp" title="Permalink to this headline">¶</a></h3>
+<p>OpenMP is enabled by default, and can be disabled via the global
+&#8220;openmp&#8221; variable in the Topographica environment using &#8216;-c
+openmp=False&#8217; at the commandline. To illustrate this with the
+example model (tiny.ty), monitor your processor usage (eg. using top
+or htop on Linux) after running the following command:</p>
+<div class="highlight-python"><pre>./topographica -p 'openmp=False' -g ./examples/tiny.ty -c 'topo.sim.run(10000)'</pre>
+</div>
+<p>If you omit &#8216;openmp=False&#8217;, you should see that all available cores
+are in use for the duration of the simulation and you may notice
+some loss of responsiveness on your system while the simulation is
+running. The default OpenMP behaviour to use all available cores for
+one or two-processor machines, and all but one of the cores for
+larger machines; the actual number being used will be reported when
+Topographica starts up.</p>
+</div>
+<div class="section" id="setting-the-number-of-threads">
+<h3>Setting the number of threads<a class="headerlink" href="#setting-the-number-of-threads" title="Permalink to this headline">¶</a></h3>
+<p>The best way to set the number of threads used by OpenMP in
+Topographica is to supply the global &#8216;openmp_threads&#8217; variable with
+the appropriate positive integer value. This can be done at the
+commandline per simulation or globally across simulations using the
+topographicarc file. In general, it may be useful to leave at least
+one core free in order to maintain a responsive system when running
+simulations, which is the default for most systems.</p>
+<div class="section" id="via-topographicarc">
+<h4>Via .topographicarc<a class="headerlink" href="#via-topographicarc" title="Permalink to this headline">¶</a></h4>
+<p>If you wish to use OpenMP with Topographica regularly, you may wish
+to enable OpenMP globally and define the number of threads in one
+place. Therefore, the recommended global way of configuring OpenMP
+is to add the following two lines to ~/.topographicarc (setting the
+number of threads to your desired value):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">openmp</span><span class="o">=</span><span class="bp">True</span>
+<span class="n">openmp_threads</span><span class="o">=</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>You can freely override this value as you wish for individual
+simulations using the commandline. You may find yourself doing this
+regularly if you are working on a hetrogeneous collection of
+machines with varying numbers of cores and need anything other than
+the default behavior.</p>
+</div>
+<div class="section" id="via-the-commandline">
+<h4>Via the commandline<a class="headerlink" href="#via-the-commandline" title="Permalink to this headline">¶</a></h4>
+<p>Here is an example of how the number of threads used can be set to
+two on the commandline:</p>
+<div class="highlight-python"><pre>./topographica -p openmp_threads=2 -g ./examples/tiny.ty -c 'topo.sim.run(10000)'</pre>
+</div>
+<p>It is advised that you only change the number of OpenMP threads when
+you want to override the value in the topographicarc file. As OpenMP
+does not change the results of the simulation, omitting OpenMP
+options at the commandline does not result in any loss of useful
+scientific information about the simulation being run.</p>
+</div>
+<div class="section" id="via-environment-variable">
+<h4>Via environment variable<a class="headerlink" href="#via-environment-variable" title="Permalink to this headline">¶</a></h4>
+<p>If the number of OpenMP threads is not set explicitly using the
+methods above, the &#8216;OMP_NUM_THREADS&#8217; environment variable is
+consulted (if it exists). To illustrate, the following simulation
+will only use two cores:</p>
+<div class="highlight-python"><pre>OMP_NUM_THREADS=2 ./topographica -p seed_val=42 -g ./examples/gcal.ty</pre>
+</div>
+<p>The OMP_NUM_THREADS environment variable is designed to be a
+system-wide setting for all OpenMP enabled programs. For this
+reason, explicit use of &#8220;openmp_threads&#8221; is preferred unless there
+is good reason to use the system-wide default.</p>
+</div>
+</div>
+<div class="section" id="when-to-use-openmp">
+<h3>When to use OpenMP<a class="headerlink" href="#when-to-use-openmp" title="Permalink to this headline">¶</a></h3>
+<p>OpenMP is very useful when you have to run a single, long-running
+simulation and do not wish to leave multiple cores on your system
+idle. When you have a batch of simulations to run, it is important
+to understand that using N threads per simulation does not mean each
+simulation will complete N times quicker. In some circumstances,
+running N single-threaded Topographica instances concurrently may
+help you complete your batch of simulations quicker. Furthermore,
+you are likely to find ever-diminishing returns as you increase the
+number of OpenMP threads per Topographica instance. This is one of
+the reasons you may wish to leave at least one core free in order to
+keep the rest of the system responsive.</p>
+<p>The scalability of OpenMP will vary depending on the computing
+environment used, the model definition and the particular parameters
+of the simulation (eg. cortex_density) as there are many possible
+trade-offs between memory usage, number of threads and number of
+cores. One simplistic rule of thumb is to try and launch many
+independent simulations as long as you launch fewer simulations than
+available cores and you do not run out of memory - swapping will
+always result in major slowdown. Each core will work most
+efficiently if it is running an independent simulation with an
+independent block of memory, provided that memory consumption is not
+the bottleneck. Unfortunately, in Topographica, this is rarely the
+case.</p>
+<p>If multiple cores are assigned to a single simulation, the cores are
+likely to have some memory contention as they are operating on the
+same block of memory. This explains why each extra core results in a
+smaller boost in performance. The fundamental problem, however, is
+that Topographica simulations are often memory-bound, making memory
+access the major bottleneck regardless of the number of cores
+available or how they are used. In summary, it is worth keeping
+these issues in mind when using OpenMP and you may find it
+worthwhile to benchmark your system for your own simulations.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Using multiple cores with Topographica</a><ul>
+<li><a class="reference internal" href="#openmp-in-topographica">OpenMP in Topographica</a><ul>
+<li><a class="reference internal" href="#installing-openmp">Installing OpenMP</a></li>
+<li><a class="reference internal" href="#enabling-openmp">Enabling OpenMP</a></li>
+<li><a class="reference internal" href="#setting-the-number-of-threads">Setting the number of threads</a><ul>
+<li><a class="reference internal" href="#via-topographicarc">Via .topographicarc</a></li>
+<li><a class="reference internal" href="#via-the-commandline">Via the commandline</a></li>
+<li><a class="reference internal" href="#via-environment-variable">Via environment variable</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#when-to-use-openmp">When to use OpenMP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="publishing.html"
+                        title="previous chapter">Publishing Topographica results</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="coords.html"
+                        title="next chapter">ImaGen spatial coordinate systems</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/User_Manual/multicore.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="coords.html" title="ImaGen spatial coordinate systems"
+             >next</a></li>
+        <li class="right" >
+          <a href="publishing.html" title="Publishing Topographica results"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

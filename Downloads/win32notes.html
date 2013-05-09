@@ -1,0 +1,188 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Translating UNIX commands to Windows &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Downloads" href="index.html" />
+    <link rel="next" title="Tutorials" href="../Tutorials/index.html" />
+    <link rel="prev" title="Updating your scripts for a new version of Topographica" href="update_script.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Tutorials/index.html" title="Tutorials"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="update_script.html" title="Updating your scripts for a new version of Topographica"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Downloads</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="translating-unix-commands-to-windows">
+<h1>Translating UNIX commands to Windows<a class="headerlink" href="#translating-unix-commands-to-windows" title="Permalink to this headline">¶</a></h1>
+<p>The Windows equivalent of &#8216;the shell&#8217; is its &#8216;Command Prompt&#8217;. The
+easiest way to start this is by clicking on &#8216;Start&#8217;, then &#8216;Run&#8217;,
+then typing <tt class="docutils literal"><span class="pre">cmd</span></tt>, then clicking &#8216;Ok&#8217;.</p>
+<p>To convert UNIX shell commands to Windows Command Prompt commands:</p>
+<ul class="simple">
+<li>Replace <tt class="docutils literal"><span class="pre">~</span></tt> in a path with the path to your user profile folder
+(<tt class="docutils literal"><span class="pre">%HOMEPATH%</span></tt>)</li>
+<li>Replace <tt class="docutils literal"><span class="pre">~/Documents</span></tt> in a path with the path to your
+<tt class="docutils literal"><span class="pre">Documents</span></tt> (Windows Vista or later) or <tt class="docutils literal"><span class="pre">My</span> <span class="pre">Documents</span></tt> folder
+(e.g. <tt class="docutils literal"><span class="pre">~/Documents/Topographica</span></tt> might become
+<tt class="docutils literal"><span class="pre">&quot;%HOMEPATH%\My</span> <span class="pre">Documents\Topographica&quot;</span></tt>)</li>
+<li>Replace any forward slash &#8216;<tt class="docutils literal"><span class="pre">/</span></tt>&#8216; in a path with a backslash
+&#8216;<tt class="docutils literal"><span class="pre">\</span></tt>&#8216;</li>
+<li>Single quotes (<tt class="docutils literal"><span class="pre">'</span></tt>) must appear inside double quotes (<tt class="docutils literal"><span class="pre">&quot;</span></tt>);
+double quotes cannot appear inside single quotes</li>
+<li>Filenames on Windows usually need double quotes, because the
+paths often contain spaces (e.g. &#8220;My Documents&#8221; or &#8220;Program
+Files&#8221;)</li>
+</ul>
+<p>Example UNIX command:</p>
+<div class="highlight-python"><pre>topographica -g ~/Documents/Topographica/examples/lissom_oo_or.ty</pre>
+</div>
+<p>Windows Vista or later equivalent:</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd>topographica -g &#8220;%HOMEPATH%DocumentsTopographicaexampleslissom_oo_or.ty&#8221;</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Translating UNIX commands to Windows</a></li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="update_script.html"
+                        title="previous chapter">Updating your scripts for a new version of Topographica</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../Tutorials/index.html"
+                        title="next chapter">Tutorials</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Downloads/win32notes.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Tutorials/index.html" title="Tutorials"
+             >next</a></li>
+        <li class="right" >
+          <a href="update_script.html" title="Updating your scripts for a new version of Topographica"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Downloads</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

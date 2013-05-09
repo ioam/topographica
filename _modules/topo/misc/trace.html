@@ -1,0 +1,679 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.trace &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.trace</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Object classes for recording and plotting time-series data.</span>
+
+<span class="sd">This module defines a set of DataRecorder object types for recording</span>
+<span class="sd">time-series data, a set of Trace object types for</span>
+<span class="sd">specifying ways of generating 1D-vs-time traces from recorded data,</span>
+<span class="sd">and a TraceGroup object that will plot a set of traces on stacked,</span>
+<span class="sd">aligned axes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">izip</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">asarray</span>
+<span class="kn">import</span> <span class="nn">ImageDraw</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">normalize_path</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">EventProcessor</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.bitmap</span> <span class="kn">import</span> <span class="n">RGBBitmap</span><span class="p">,</span> <span class="n">MontageBitmap</span><span class="p">,</span> <span class="n">TITLE_FONT</span>
+<span class="kn">from</span> <span class="nn">topo.misc.util</span> <span class="kn">import</span> <span class="n">Struct</span>
+
+
+
+<div class="viewcode-block" id="DataRecorder"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.DataRecorder">[docs]</a><span class="k">class</span> <span class="nc">DataRecorder</span><span class="p">(</span><span class="n">EventProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Record time-series data from a simulation.</span>
+
+<span class="sd">    A DataRecorder instance stores a set of named time-series</span>
+<span class="sd">    variables, consisting of a sequence of recorded data items of any</span>
+<span class="sd">    type, along with the times at which they were recorded.</span>
+
+<span class="sd">    DataRecorder is an abstract class for which different</span>
+<span class="sd">    implementations may exist for different means of storing recorded</span>
+<span class="sd">    data.  For example, the subclass InMemoryRecorder stores all the</span>
+<span class="sd">    data in memory.</span>
+
+<span class="sd">    A DataRecorder instance can operate either as an event processor, or in a</span>
+<span class="sd">    stand-alone mode.  Both usage modes can be used on the same</span>
+<span class="sd">    instance in the same simulation.</span>
+
+<span class="sd">    STAND-ALONE USAGE:</span>
+
+<span class="sd">    A DataRecorder instance is used as follows:</span>
+
+<span class="sd">      - Method .add_variable adds a named time series variable.</span>
+<span class="sd">      - Method .record_data records a new data item and timestamp.</span>
+<span class="sd">      - Method .get_data gets a time-delimited sequence of data from a variable</span>
+
+<span class="sd">    EVENTPROCESSOR USAGE:</span>
+
+<span class="sd">    A DataRecorder can also be connected to a simulation as an event</span>
+<span class="sd">    processor, forming a kind of virtual recording equipment.  An</span>
+<span class="sd">    output port from any event processor in a simulation can be</span>
+<span class="sd">    connected to a DataRecorder; the recorder will automaticall create</span>
+<span class="sd">    a variable with the same name as the connection, and record any</span>
+<span class="sd">    incoming data on that variable with the time it was received.  For</span>
+<span class="sd">    example::</span>
+
+<span class="sd">      topo.sim[&#39;Recorder&#39;] =  InMemoryRecorder()</span>
+<span class="sd">      topo.sim.connect(&#39;V1&#39;,&#39;Recorder&#39;,name=&#39;V1 Activity&#39;)</span>
+
+<span class="sd">    This script snippet will create a new DataRecorder and</span>
+<span class="sd">    automatically record all activity sent from the sheet &#39;V1&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataRecorder</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_groups</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="k">def</span> <span class="nf">_src_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+    <span class="k">def</span> <span class="nf">_dest_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataRecorder</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_dest_connect</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">record_data</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span><span class="n">data</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DataRecorder.add_variable"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.DataRecorder.add_variable">[docs]</a>    <span class="k">def</span> <span class="nf">add_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new time-series variable with the given name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="DataRecorder.record_data"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.DataRecorder.record_data">[docs]</a>    <span class="k">def</span> <span class="nf">record_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">varname</span><span class="p">,</span><span class="n">time</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record the given data item with the given timestamp in the</span>
+<span class="sd">        named timeseries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="DataRecorder.get_data"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.DataRecorder.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">varname</span><span class="p">,</span><span class="n">times</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">fill_range</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the named timeseries between the given times</span>
+<span class="sd">        (inclusive). If fill_range is true, the returned data will</span>
+<span class="sd">        have timepoints exactly at the start and end of</span>
+<span class="sd">        the given timerange.  The data values at these timepoints will</span>
+<span class="sd">        be those of the next-earlier datapoint in the series.</span>
+
+<span class="sd">        (NOTE: fill_range can fail to create a beginning timepoint if</span>
+<span class="sd">        the start of the time range is earlier than the first recorded datapoint.]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="DataRecorder.get_times"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.DataRecorder.get_times">[docs]</a>    <span class="k">def</span> <span class="nf">get_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">var</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all the timestamps for a given variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="DataRecorder.get_time_indices"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.DataRecorder.get_time_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_time_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">varname</span><span class="p">,</span><span class="n">start_time</span><span class="p">,</span><span class="n">end_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For the named variable, get the start and end indices suitable</span>
+<span class="sd">        for slicing the data to include all times t::</span>
+
+<span class="sd">          start_time &lt;= t &lt;= end_time.</span>
+
+<span class="sd">        A start_ or end_time of None is interpreted to mean the</span>
+<span class="sd">        earliest or latest available time, respectively.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_times</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">start_time</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">times</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">start_time</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_right</span><span class="p">(</span><span class="n">times</span><span class="p">,</span><span class="n">end_time</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">start</span><span class="p">,</span><span class="n">end</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="InMemoryRecorder"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.InMemoryRecorder">[docs]</a><span class="k">class</span> <span class="nc">InMemoryRecorder</span><span class="p">(</span><span class="n">DataRecorder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A data recorder that stores all recorded data in memory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InMemoryRecorder</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="k">def</span> <span class="nf">add_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="p">[],</span><span class="n">data</span><span class="o">=</span><span class="p">[])</span>
+
+
+    <span class="k">def</span> <span class="nf">record_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">varname</span><span class="p">,</span><span class="n">time</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
+
+        <span class="c"># add the data, maintaining it sorted by time</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">time</span> <span class="ow">or</span> <span class="n">var</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">time</span> <span class="o">&lt;</span> <span class="n">var</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">time</span><span class="p">)</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_right</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">time</span><span class="p">,</span><span class="n">time</span><span class="p">)</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">time</span><span class="p">)</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_datum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+        <span class="n">idx</span><span class="p">,</span><span class="n">dummy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_time_indices</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">time</span><span class="p">,</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">times</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">fill_range</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">tstart</span><span class="p">,</span><span class="n">tend</span> <span class="o">=</span> <span class="n">times</span>
+        <span class="n">start</span><span class="p">,</span><span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_time_indices</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">tstart</span><span class="p">,</span><span class="n">tend</span><span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="c"># if the start index is out of bounds</span>
+            <span class="k">if</span> <span class="n">fill_range</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">times</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">time</span><span class="p">,</span><span class="n">data</span> <span class="o">=</span> <span class="p">[],[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span><span class="p">,</span><span class="n">data</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">fill_range</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">tstart</span> <span class="ow">and</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tstart</span><span class="p">)</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">start</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">tend</span><span class="p">:</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tend</span><span class="p">)</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">time</span><span class="p">,</span><span class="n">data</span>
+
+
+    <span class="k">def</span> <span class="nf">get_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">varname</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+
+
+
+</div>
+<div class="viewcode-block" id="Trace"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.Trace">[docs]</a><span class="k">class</span> <span class="nc">Trace</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A specification for generating 1D traces of data from recorded</span>
+<span class="sd">    timeseries.</span>
+
+<span class="sd">    A Trace object is a callable object that encapsulates</span>
+<span class="sd">    a method for generating a 1-dimensional trace from possibly</span>
+<span class="sd">    multidimensional timeseries data, along with a specification for</span>
+<span class="sd">    how to plot that data, including Y-axis boundaries and plotting arguments.</span>
+
+<span class="sd">    Trace is an abstract class.  Subclasses implement</span>
+<span class="sd">    the __call__ method to define how to extract a 1D trace from a</span>
+<span class="sd">    sequence of data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">data_name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the timeseries from which the trace is generated.</span>
+<span class="s">        E.g. the connection name into a DataRecorder object.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># JPALERT: This should really be something like a NumericTuple,</span>
+    <span class="c"># except that NumericTuple won&#39;t allow the use of None to indicate</span>
+    <span class="c"># &#39;no default&#39;.  (Nor will Number.)</span>
+    <span class="c"># JB: We could have that as an option, or as another Parameter</span>
+    <span class="c"># type, but in many cases knowing that the parameter cannot be set</span>
+    <span class="c"># to a non-numeric value is crucial, as it means we don&#39;t have to</span>
+    <span class="c"># do special checks every time the value is used.  So we should</span>
+    <span class="c"># leave the default behavior as it is, but yes, it would be good</span>
+    <span class="c"># to handle None for numeric types (and also for Boolean, to make</span>
+    <span class="c"># it tri-state).  Note that Bounds is a specific type that we</span>
+    <span class="c"># should probably support in any case, because it not only needs</span>
+    <span class="c"># to support None, it needs to specify whether the bounds are</span>
+    <span class="c"># inclusive or exclusive.</span>
+    <span class="n">ybounds</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The (min,max) boundaries for y axis.  If either is None, then</span>
+<span class="s">        the bound min or max of the data given, respectively.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">ymargin</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The fraction of the difference ymax-ymin to add to the</span>
+<span class="s">        top of the plot as padding.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">plotkw</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;steps&#39;</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Contains the keyword arguments to pass to the plot command</span>
+<span class="s">        when plotting the trace.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+    <span class="c"># JB: Needs docstring.  Should this be a property instead?</span>
+    <span class="k">def</span> <span class="nf">get_ybounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ydata</span><span class="p">):</span>
+        <span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ybounds</span>
+        <span class="k">if</span> <span class="n">ymax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">ymax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ymin</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
+
+        <span class="n">ymax</span> <span class="o">+=</span> <span class="p">(</span><span class="n">ymax</span><span class="o">-</span><span class="n">ymin</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ymargin</span>
+
+        <span class="k">return</span> <span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span>
+
+</div>
+<div class="viewcode-block" id="IdentityTrace"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.IdentityTrace">[docs]</a><span class="k">class</span> <span class="nc">IdentityTrace</span><span class="p">(</span><span class="n">Trace</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Trace that returns the data, unmodified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+</div>
+<div class="viewcode-block" id="IndexTrace"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.IndexTrace">[docs]</a><span class="k">class</span> <span class="nc">IndexTrace</span><span class="p">(</span><span class="n">Trace</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Trace that assumes that each data item is a sequence that can be</span>
+<span class="sd">    indexed with a single integer, and traces the value of one indexed element.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The index into the data to be traced.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+
+
+</div>
+<div class="viewcode-block" id="SheetPositionTrace"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.SheetPositionTrace">[docs]</a><span class="k">class</span> <span class="nc">SheetPositionTrace</span><span class="p">(</span><span class="n">Trace</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A trace that assumes that the data are sheet activity matrices,</span>
+<span class="sd">    and traces the value of a given (x,y) position on the sheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The x sheet-coordinate of the position to be traced.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The y sheet-coordinate of the position to be traced.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">position</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Composite</span><span class="p">(</span><span class="n">attribs</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The sheet coordinates of the position to be traced.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># JPALERT:  Would be nice to some way to set up the coordinate system</span>
+    <span class="c"># automatically.  The DataRecorder object already knows what Sheet</span>
+    <span class="c"># the data came from.</span>
+    <span class="n">coordframe</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The SheetCoordinateSystem to use to convert the position</span>
+<span class="s">        into matrix coordinates.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordframe</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+
+
+</div>
+<div class="viewcode-block" id="TraceGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.TraceGroup">[docs]</a><span class="k">class</span> <span class="nc">TraceGroup</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A group of data traces to be plotted together.</span>
+
+<span class="sd">    A TraceGroup defines a set of associated data traces and allows</span>
+<span class="sd">    them to be plotted on stacked, aligned axes.  The constructor</span>
+<span class="sd">    takes a DataRecorder object as a data source, and a list of</span>
+<span class="sd">    Trace objects that indicate the traces to plot.  The</span>
+<span class="sd">    trace specifications are stored in the attribute self.traces,</span>
+<span class="sd">    which can be modified at any time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">hspace</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Height spacing adjustment between plots.  Larger values</span>
+<span class="s">       produce more space.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">time_axis_relative</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Whether to plot the time-axis tic values relative to the start</span>
+<span class="s">       of the plotted time range, or in absolute values.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">recorder</span><span class="p">,</span><span class="n">traces</span><span class="o">=</span><span class="p">[],</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TraceGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="n">traces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recorder</span> <span class="o">=</span> <span class="n">recorder</span>
+
+
+<div class="viewcode-block" id="TraceGroup.plot"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.TraceGroup.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">times</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the traces.</span>
+
+<span class="sd">        Requires MatPlotLib (aka pylab).</span>
+
+<span class="sd">        Plots the traces specified in self.traces, over the timespan</span>
+<span class="sd">        specified by times.  times = (start_time,end_time); if either</span>
+<span class="sd">        start_time or end_time is None, it is assumed to extend to the</span>
+<span class="sd">        beginning or end of the timeseries, respectively.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">import</span> <span class="nn">pylab</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">)</span>
+        <span class="n">tstart</span><span class="p">,</span><span class="n">tend</span> <span class="o">=</span> <span class="n">times</span>
+
+        <span class="n">pylab</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hspace</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">trace</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">):</span>
+            <span class="c"># JPALERT: The TraceGroup object should really create its</span>
+            <span class="c"># own matplotlib.Figure object and always plot there</span>
+            <span class="c"># (instead of in the frontmost plot), but I haven&#39;t</span>
+            <span class="c"># figured out how to do that yet.</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">time</span><span class="p">,</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">data_name</span><span class="p">,</span><span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span><span class="n">fill_range</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">trace</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_axis_relative</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">-</span> <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="o">**</span><span class="n">trace</span><span class="o">.</span><span class="n">plotkw</span><span class="p">)</span>
+            <span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_ybounds</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">pylab</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">xmin</span><span class="o">=</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">xmax</span><span class="o">=</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">ymin</span><span class="o">=</span><span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="o">=</span><span class="n">ymax</span><span class="p">)</span>
+
+
+
+
+</div></div>
+<div class="viewcode-block" id="get_images"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.get_images">[docs]</a><span class="k">def</span> <span class="nf">get_images</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">times</span><span class="p">,</span><span class="n">recorder</span><span class="p">,</span><span class="n">overlays</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a time-sequence of matrix data from a DataRecorder variable</span>
+<span class="sd">    and convert it to a sequence of images stored in Bitmap objects.</span>
+
+<span class="sd">    Parameters: name is the name of the variable to be queried. times</span>
+<span class="sd">    is a sequence of timepoints at which to query the</span>
+<span class="sd">    variable. recorder is the data recorder. overlays is a tuple of</span>
+<span class="sd">    matrices or scalars to be added to the red, green, and blue</span>
+<span class="sd">    channels of the bitmaps respectively.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">times</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">recorder</span><span class="o">.</span><span class="n">get_datum</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">RGBBitmap</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="n">overlays</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">d</span><span class="o">+</span><span class="n">overlays</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">d</span><span class="o">+</span><span class="n">overlays</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="c"># JABALERT: Is there some reason it is called ActivityMovie in</span>
+<span class="c"># particular, if it can plot things other than Activity?</span>
+<span class="c"># Maybe DataRecorderMovie?</span></div>
+<div class="viewcode-block" id="ActivityMovie"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.ActivityMovie">[docs]</a><span class="k">class</span> <span class="nc">ActivityMovie</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An object encapsulating a series of movie frames displaying the</span>
+<span class="sd">    value of one or more matrix-valued time-series contained in a</span>
+<span class="sd">    DataRecorder object.</span>
+
+<span class="sd">    An ActivityMovie takes a DataRecorder object, a list of names of</span>
+<span class="sd">    variables in that recorder and a sequence of timepoints at which</span>
+<span class="sd">    to sample those variables.  It uses that information to compose a</span>
+<span class="sd">    sequence of MontageBitmap objects displaying the stored values of</span>
+<span class="sd">    each variable at each timepoint.  These bitmaps can then be saved</span>
+<span class="sd">    to sequentially-named files that can be composited into a movie by</span>
+<span class="sd">    external software.</span>
+
+<span class="sd">    Parameters are available to control the layout of the montage,</span>
+<span class="sd">    adding timecodes to the frames, and the names of the frame files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A list of variable names in a DataRecorder object containing</span>
+<span class="s">        matrix-valued time series data.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">overlays</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A dictionary indicating overlays for the variable bitmaps.  The</span>
+<span class="s">        for each key in the dict matching the name of a variable, there</span>
+<span class="s">        should be associated a triple of matrices to be overlayed on</span>
+<span class="s">        the red, green, and blue channels of the corresponding bitmap</span>
+<span class="s">        in each frame.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">frame_times</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A list of the times of the frames in the movie.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">montage_params</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A dictionary containing parameters to be used when</span>
+<span class="s">        instantiating the MontageBitmap objects representing each frame.&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">instantiate</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">recorder</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="n">DataRecorder</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The DataRecorder storing the timeseries.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filename_fmt</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;%n_%t.%T&#39;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The format for the filenames used to store the frames.  The following</span>
+<span class="s">        substitutions are possible:</span>
+
+<span class="s">        %n: The name of this ActivityMovie object.</span>
+<span class="s">        %t: The frame time, as formatted by the filename_time_fmt parameter</span>
+<span class="s">        %T: The filetype given by the filetype parameter. &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filename_time_fmt</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%05.0f</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The format of the frame time, using Python string substitution for</span>
+<span class="s">        a floating-point number.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filetype</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;tif&#39;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The filetype to use when writing frames. Can be any filetype understood</span>
+<span class="s">        by the Python Imaging Library.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filename_prefix</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A prefix to prepend to the filename of each frame when saving;</span>
+<span class="s">        can include directories.  If the filename contains a path, any</span>
+<span class="s">        non-existent directories in the path will be created when the</span>
+<span class="s">        movie is saved.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">add_timecode</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to add a visible timecode indicator to each frame.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">timecode_options</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">{},</span><span class="n">instantiate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A dictionary of keyword options to be passed to the PIL ImageDraw.text method</span>
+<span class="s">        when drawing the timecode on the frame. Valid options include font,</span>
+<span class="s">        an ImageFont object indicating the text font, and fill a PIL color</span>
+<span class="s">        specification indicating the text color.  If unspecified, color defaults to</span>
+<span class="s">        the PIL default of black.  Font defaults to topo.plotting.bitmap.TITLE_FONT.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">timecode_fmt</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%05.0f</span><span class="s">&#39;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The format of the timecode displayed in the movie frames, using</span>
+<span class="s">        Python string substitution for a floating-point number.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">timecode_offset</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A value to be added to each timecode before formatting for display.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ActivityMovie</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="n">bitmaps</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_images</span><span class="p">(</span><span class="n">var</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_times</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">recorder</span><span class="p">,</span>
+                              <span class="n">overlays</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">overlays</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="p">,(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)))</span>
+                   <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">MontageBitmap</span><span class="p">(</span><span class="n">bitmaps</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">bms</span><span class="p">),</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">montage_params</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">bms</span> <span class="ow">in</span> <span class="n">izip</span><span class="p">(</span><span class="o">*</span><span class="n">bitmaps</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_timecode</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">t</span><span class="p">,</span><span class="n">f</span> <span class="ow">in</span> <span class="n">izip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_times</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">):</span>
+                <span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+                <span class="n">timecode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timecode_fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">timecode_offset</span><span class="p">)</span>
+                <span class="n">tw</span><span class="p">,</span><span class="n">th</span> <span class="o">=</span> <span class="n">draw</span><span class="o">.</span><span class="n">textsize</span><span class="p">(</span><span class="n">timecode</span><span class="p">,</span><span class="n">font</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timecode_options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;font&#39;</span><span class="p">,</span><span class="n">TITLE_FONT</span><span class="p">))</span>
+                <span class="n">w</span><span class="p">,</span><span class="n">h</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span>
+
+                <span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">w</span><span class="o">-</span><span class="n">tw</span><span class="o">-</span><span class="n">f</span><span class="o">.</span><span class="n">margin</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">h</span><span class="o">-</span><span class="n">th</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">timecode</span><span class="p">,</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">timecode_options</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ActivityMovie.save"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.trace-module.html#topo.misc.trace.ActivityMovie.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save the movie frames.&quot;&quot;&quot;</span>
+
+        <span class="n">filename_pat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_fmt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;%n&#39;</span><span class="p">))</span>
+        <span class="n">filename_pat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_time_fmt</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename_pat</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;%t&#39;</span><span class="p">))</span>
+        <span class="n">filename_pat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename_pat</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;%T&#39;</span><span class="p">))</span>
+
+        <span class="n">filename_pat</span> <span class="o">=</span> <span class="n">normalize_path</span><span class="p">(</span><span class="n">filename_pat</span><span class="p">,</span><span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_prefix</span><span class="p">)</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename_pat</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">F_OK</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&#39;Writing&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">),</span><span class="s">&#39;to files like &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span><span class="o">%</span><span class="n">filename_pat</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span><span class="n">f</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_times</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">filename_pat</span><span class="o">%</span> <span class="n">t</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Writing frame&quot;</span><span class="p">,</span><span class="nb">repr</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/misc/trace.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,196 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.inlinec &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-misc-inlinec">
+<h1>topo.misc.inlinec<a class="headerlink" href="#topo-misc-inlinec" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-topo.misc.inlinec">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.misc.inlinec" title="Permalink to this headline">¶</a></h2>
+<p>Interface class for inline C/C++ functions.  Based on the SciPy Weave package.</p>
+<p>Weave (from SciPy) allows programmers to implement Python methods or
+functions using C code written as a string in the Python file.  This
+is generally done to speed up code that would be slow if written
+directly in Python.  Because not all users can be assumed to have a
+working C/C++ compiler, it is crucial for such optimizations to be
+optional.  This file provides an interface for processing the inline
+C/C++ code in a way that can gracefully revert back to the
+unoptimized version when Weave is not available.</p>
+<p>The fallback is implemented by making use of the way Python allows
+function names to be overwritten, as in these simple examples:</p>
+<blockquote>
+<div>def x(y = 5): return y
+def x2(y = 6): return y*y
+print &#8216;x:&#8217;, x(), &#8216;x2:&#8217;, x2()  # Result &#8211; x: 5 x2: 36
+x = x2
+print &#8216;x:&#8217;, x(), &#8216;x2:&#8217;, x2()  # Result &#8211; x: 36 x2: 36</div></blockquote>
+<p>In this file, inline() is overwritten to call inline_weave() if Weave
+is available.  If Weave is not available, inline() will raise a
+NotImplementedError exception.  For a program to be usable without
+Weave, just test inlinec.optimized after defining each optimized
+component, replacing it with a non-optimized equivalent if
+inlinec.optimized is False.</p>
+<p>For more information on weave, see:
+<a class="reference external" href="http://old.scipy.org/documentation/weave/weaveusersguide.html">http://old.scipy.org/documentation/weave/weaveusersguide.html</a></p>
+<p>Some of the C functions also support OpenMP, which allows them to use
+multiple threads automatically on multi-core machines to give better
+performance.  To enable OpenMP support for those functions, set
+openmp=True in the main namespace before importing this file, and
+(optionally) set openmp_threads to the number of threads desired.  If
+openmp_threads is not set, then a thread will be allocated for each
+available core by default.</p>
+<p>Note that in order to use OpenMP, the C functions are obliged to use the
+thread-safe portions of the Python/Numpy C API. In general, the Python
+C API cannot be assumed to be thread safe.  Calls to PyObject_SetAttrString
+are a common hazard which can often be avoided using LOOKUP_FROM_SLOT_OFFSET.
+This makes use of Python&#8217;s __slots__ mechanism with the added benefit of
+bypassing the GIL.</p>
+<dl class="function">
+<dt id="topo.misc.inlinec.provide_unoptimized_equivalent">
+<tt class="descclassname">topo.misc.inlinec.</tt><tt class="descname">provide_unoptimized_equivalent</tt><big>(</big><em>optimized_name</em>, <em>unoptimized_name</em>, <em>local_dict</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/inlinec.html#provide_unoptimized_equivalent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.inlinec.provide_unoptimized_equivalent" title="Permalink to this definition">¶</a></dt>
+<dd><p>If not using optimization, replace the optimized component with its unoptimized equivalent.</p>
+<p>The objects named by optimized_name and unoptimized_name should be
+plug-compatible.  The local_dict argument should be given the
+contents of locals(), so that this function can replace the
+optimized version with the unoptimized one in the namespace from
+which it has been called.</p>
+<p>As an example, calling this function as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;sort_opt&quot;</span><span class="p">,</span><span class="s">&quot;sort&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>is equivalent to putting the following code directly into the
+calling location:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="ow">not</span> <span class="n">optimized</span><span class="p">:</span>
+  <span class="n">sort_opt</span> <span class="o">=</span> <span class="n">sort</span>
+  <span class="k">print</span> <span class="s">&#39;module: Inline-optimized components not available; using sort instead of sort_opt.&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.misc.inlinec</a><ul>
+<li><a class="reference internal" href="#module-topo.misc.inlinec">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.misc.inlinec-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

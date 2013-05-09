@@ -1,0 +1,1150 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.plotting.plotgroup &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-plotting-plotgroup">
+<h1>topo.plotting.plotgroup<a class="headerlink" href="#topo-plotting-plotgroup" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance97c36bc686.svg" usemap="#inheritance97c36bc686" class="inheritance"/></div><map id="inheritance97c36bc686" name="inheritance97c36bc686">
+</map>
+<div class="section" id="module-topo.plotting.plotgroup">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.plotting.plotgroup" title="Permalink to this headline">¶</a></h2>
+<p>Hierarchy of PlotGroup classes, i.e. output-device-independent sets of
+plots.</p>
+<p>Includes PlotGroups for standard plots of anything in a Sheet
+database, plus weight plots for one unit, and projections.</p>
+<dl class="class">
+<dt id="topo.plotting.plotgroup.CFProjectionPlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">CFProjectionPlotGroup</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#CFProjectionPlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.CFProjectionPlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.ProjectionPlotGroup</span></tt></p>
+<p>Visualize one CFProjection.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;, &#8216;JointProjections&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that the peak value will be white
+        and the minimum value black.
+
+        &#8216;None&#8217;: no scaling - 0.0 will be black and 1.0 will be white.
+
+        &#8216;AllTogether&#8217;: scale each plot so that the peak value of all the plots
+        is white, and the minimum value of all the plots will be
+        black.
+
+        &#8216;JointProjections&#8217;: as &#8216;Individually&#8217;, except that plots produced from
+        projections whose weights are jointly normalized will be
+        jointly normalized.
+
+        Normalization has the advantage of ensuring that any data that
+        is present will be visible, but the disadvantage that the
+        absolute scale will be obscured.  Non-normalized plots are
+        guaranteed to be on a known scale, but only values between 0.0
+        and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The Sheet from which to produce plots.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">density</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=10.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of units to plot per 1.0 distance in sheet coordinates</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">situate</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If True, plots the weights on the entire source sheet, using zeros
+    for all weights outside the ConnectionField.  If False, plots only
+    the actual weights that are stored.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">projection</span></tt> (<em>check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The projection to visualize.</dd>
+</dl>
+<dl class="attribute">
+<dt id="topo.plotting.plotgroup.CFProjectionPlotGroup.sheet_type">
+<tt class="descname">sheet_type</tt><a class="headerlink" href="#topo.plotting.plotgroup.CFProjectionPlotGroup.sheet_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">CFSheet</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.ConnectionFieldsPlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">ConnectionFieldsPlotGroup</tt><big>(</big><em>plot_templates=None</em>, <em>static_images=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#ConnectionFieldsPlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.ConnectionFieldsPlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.plotgroup.UnitPlotGroup" title="topo.plotting.plotgroup.UnitPlotGroup"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.UnitPlotGroup</span></tt></a></p>
+<p>Visualize ConnectionField for each of a CFSheet&#8217;s CFProjections.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;, &#8216;JointProjections&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that the peak value will be white
+        and the minimum value black.
+
+        &#8216;None&#8217;: no scaling - 0.0 will be black and 1.0 will be white.
+
+        &#8216;AllTogether&#8217;: scale each plot so that the peak value of all the plots
+        is white, and the minimum value of all the plots will be
+        black.
+
+        &#8216;JointProjections&#8217;: as &#8216;Individually&#8217;, except that plots produced from
+        projections whose weights are jointly normalized will be
+        jointly normalized.
+
+        Normalization has the advantage of ensuring that any data that
+        is present will be visible, but the disadvantage that the
+        absolute scale will be obscured.  Non-normalized plots are
+        guaranteed to be on a known scale, but only values between 0.0
+        and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The Sheet from which to produce plots.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>y-coordinate of the unit to plot</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>x-coordinate of the unit to plot</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">situate</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If True, plots the weights on the entire source sheet, using zeros
+    for all weights outside the ConnectionField.  If False, plots only
+    the actual weights that are stored.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+</dl>
+<dl class="attribute">
+<dt id="topo.plotting.plotgroup.ConnectionFieldsPlotGroup.sheet_type">
+<tt class="descname">sheet_type</tt><a class="headerlink" href="#topo.plotting.plotgroup.ConnectionFieldsPlotGroup.sheet_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">CFSheet</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.GridPlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">GridPlotGroup</tt><big>(</big><em>plot_templates=None</em>, <em>static_images=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#GridPlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.GridPlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.plotgroup.ProjectionSheetPlotGroup" title="topo.plotting.plotgroup.ProjectionSheetPlotGroup"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.ProjectionSheetPlotGroup</span></tt></a></p>
+<p>A ProjectionSheetPlotGroup capable of generating coordinates on a 2D grid.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that the peak value will be white
+        and the minimum value black.
+
+        &#8216;None&#8217;: no scaling - 0.0 will be black and 1.0 will be white.
+
+        &#8216;AllTogether&#8217;: scale each plot so that the peak value of all the plots
+        is white, and the minimum value of all the plots will be
+        black.
+
+        &#8216;JointProjections&#8217;: as &#8216;Individually&#8217;, except that plots produced from
+        projections whose weights are jointly normalized will be
+        jointly normalized.
+
+        Normalization has the advantage of ensuring that any data that
+        is present will be visible, but the disadvantage that the
+        absolute scale will be obscured.  Non-normalized plots are
+        guaranteed to be on a known scale, but only values between 0.0
+        and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The Sheet from which to produce plots.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">density</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=10.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of units to plot per 1.0 distance in sheet coordinates</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.plotting.plotgroup.GridPlotGroup.generate_coords">
+<tt class="descname">generate_coords</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#GridPlotGroup.generate_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.GridPlotGroup.generate_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evenly space out the units within the sheet bounding box, so
+that it doesn&#8217;t matter which corner the measurements start
+from.  A 4 unit grid needs 5 segments.  List is in left-to-right,
+from top-to-bottom.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.PlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">PlotGroup</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#PlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.PlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Container that has one or more Plots and also knows how to arrange
+the plots and other special parameters.</p>
+<dl class="docutils">
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.plotting.plotgroup.PlotGroup.make_plots">
+<tt class="descname">make_plots</tt><big>(</big><em>update=True</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#PlotGroup.make_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.PlotGroup.make_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and scale the plots, after first executing the PlotGroup&#8217;s pre_plot_hooks
+(if update is True) and plot_hooks.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.plotting.plotgroup.PlotGroup.scale_images">
+<tt class="descname">scale_images</tt><big>(</big><em>zoom_factor=None</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#PlotGroup.scale_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.PlotGroup.scale_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale the images by the given zoom factor, if appropriate; default is to do nothing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.ProjectionActivityPlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">ProjectionActivityPlotGroup</tt><big>(</big><em>plot_templates=None</em>, <em>static_images=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#ProjectionActivityPlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.ProjectionActivityPlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.plotgroup.ProjectionSheetPlotGroup" title="topo.plotting.plotgroup.ProjectionSheetPlotGroup"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.ProjectionSheetPlotGroup</span></tt></a></p>
+<p>Visualize the activity of all Projections into a ProjectionSheet.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;, &#8216;JointProjections&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that the peak value will be white
+        and the minimum value black.
+
+        &#8216;None&#8217;: no scaling - 0.0 will be black and 1.0 will be white.
+
+        &#8216;AllTogether&#8217;: scale each plot so that the peak value of all the plots
+        is white, and the minimum value of all the plots will be
+        black.
+
+        &#8216;JointProjections&#8217;: as &#8216;Individually&#8217;, except that plots produced from
+        projections whose weights are jointly normalized will be
+        jointly normalized.
+
+        Normalization has the advantage of ensuring that any data that
+        is present will be visible, but the disadvantage that the
+        absolute scale will be obscured.  Non-normalized plots are
+        guaranteed to be on a known scale, but only values between 0.0
+        and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The Sheet from which to produce plots.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.ProjectionSheetMeasurementCommand">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">ProjectionSheetMeasurementCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#ProjectionSheetMeasurementCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.ProjectionSheetMeasurementCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<p>A callable Parameterized command for measuring or plotting a specified Sheet.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the sheet to use in measurements.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.ProjectionSheetPlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">ProjectionSheetPlotGroup</tt><big>(</big><em>plot_templates=None</em>, <em>static_images=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#ProjectionSheetPlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.ProjectionSheetPlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.plotgroup.TemplatePlotGroup" title="topo.plotting.plotgroup.TemplatePlotGroup"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.TemplatePlotGroup</span></tt></a></p>
+<p>Abstract PlotGroup for visualizations of the Projections of one ProjectionSheet.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;, &#8216;JointProjections&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that the peak value will be white
+        and the minimum value black.
+
+        &#8216;None&#8217;: no scaling - 0.0 will be black and 1.0 will be white.
+
+        &#8216;AllTogether&#8217;: scale each plot so that the peak value of all the plots
+        is white, and the minimum value of all the plots will be
+        black.
+
+        &#8216;JointProjections&#8217;: as &#8216;Individually&#8217;, except that plots produced from
+        projections whose weights are jointly normalized will be
+        jointly normalized.
+
+        Normalization has the advantage of ensuring that any data that
+        is present will be visible, but the disadvantage that the
+        absolute scale will be obscured.  Non-normalized plots are
+        guaranteed to be on a known scale, but only values between 0.0
+        and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The Sheet from which to produce plots.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+</dl>
+<dl class="attribute">
+<dt id="topo.plotting.plotgroup.ProjectionSheetPlotGroup.sheet_type">
+<tt class="descname">sheet_type</tt><a class="headerlink" href="#topo.plotting.plotgroup.ProjectionSheetPlotGroup.sheet_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">ProjectionSheet</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.TemplatePlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">TemplatePlotGroup</tt><big>(</big><em>plot_templates=None</em>, <em>static_images=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#TemplatePlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.TemplatePlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.SheetPlotGroup</span></tt></p>
+<p>Container that allows creation of different types of plots in a
+way that is independent of particular models or Sheets.</p>
+<p>A TemplatePlotGroup is constructed from a plot_templates list, an
+optional command to run to generate the data, and other optional
+parameters.</p>
+<p>The plot_templates list should contain tuples (plot_name,
+plot_template).  Each plot_template is a list of (name, value)
+pairs, where each name specifies a plotting channel (such as Hue
+or Confidence), and the value is the name of a SheetView (such as
+Activity or OrientationPreference).</p>
+<p>Various types of plots support different channels.  An SHC
+plot supports Strength, Hue, and Confidence channels (with
+Strength usually being visualized as luminance, Hue as a color
+value, and Confidence as the saturation of the color).  An RGB
+plot supports Red, Green, and Blue channels.  Other plot types
+will be added eventually.</p>
+<p>For instance, one could define an Orientation-colored Activity
+plot as:</p>
+<div class="highlight-python"><pre>plotgroups['Activity'] =
+    TemplatePlotGroup(name='Activity', category='Basic',
+        pre_plot_hooks=[measure_activity],
+        plot_templates=[('Activity',
+            {'Strength': 'Activity', 'Hue': 'OrientationPreference', 'Confidence': None})])</pre>
+</div>
+<p>This specifies that the final TemplatePlotGroup will contain up to
+one Plot named Activity per Sheet, although there could be no
+plots at all if no Sheet has a SheetView named Activity once
+&#8216;measure_activity()&#8217; has been run.  The Plot will be colored by
+OrientationPreference if such a SheetView exists for that Sheet,
+and the value (luminance) channel will be determined by the
+SheetView Activity.  This plot will be listed in the category
+&#8216;Basic&#8217; anywhere such categories are relevant (e.g. in the GUI).</p>
+<p>Here&#8217;s a more complicated example specifying two different plots
+in the same PlotGroup:</p>
+<div class="highlight-python"><pre>TemplatePlotGroup(name='Orientation Preference', category='Basic'
+    pre_plot_hooks=[measure_or_pref.instance()],
+    plot_templates=
+        [('Orientation Preference',
+            {'Strength': None, 'Hue': 'OrientationPreference'}),
+         ('Orientation Selectivity',
+            {'Strength': 'OrientationSelectivity'})])</pre>
+</div>
+<p>Here the TemplatePlotGroup will contain up to two Plots per Sheet,
+depending on which Sheets have OrientationPreference and
+OrientationSelectivity SheetViews.</p>
+<p>The function create_plotgroup provides a convenient way to define plots using
+TemplatePlotGroups; search for create_plotgroup elsewhere in the code to see
+examples.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that its maximum value is
+        white and its minimum value black.
+
+        &#8216;None&#8217;: no scaling (0.0 will be black and 1.0 will be white).
+
+        &#8216;AllTogether&#8217;: scale each plot so that the highest maximum value is
+        white, and the lowest minimum value is black.
+
+
+        Normalizing &#8216;Individually&#8217; has the advantage of ensuring that
+        any data that is present will be visible, but the disadvantage
+        that the absolute scale will be obscured.  Non-normalized
+        plots are guaranteed to be on a known scale, but only values
+        between 0.0 and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.plotting.plotgroup.TemplatePlotGroup.add_static_image">
+<tt class="descname">add_static_image</tt><big>(</big><em>name</em>, <em>file_path</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#TemplatePlotGroup.add_static_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.TemplatePlotGroup.add_static_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a static image Plot (e.g. a color key for an Orientation Preference map).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.TwoOrientationsPlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">TwoOrientationsPlotGroup</tt><big>(</big><em>plot_templates=None</em>, <em>static_images=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#TwoOrientationsPlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.TwoOrientationsPlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.plotgroup.TemplatePlotGroup" title="topo.plotting.plotgroup.TemplatePlotGroup"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.TemplatePlotGroup</span></tt></a></p>
+<p>Display with small segments the two most preferred orientations for each
+units in the sheet. Only orientation with significative selectivity are
+shown. Darker segments correspond to orientations with more selective
+response.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that its maximum value is
+        white and its minimum value black.
+
+        &#8216;None&#8217;: no scaling (0.0 will be black and 1.0 will be white).
+
+        &#8216;AllTogether&#8217;: scale each plot so that the highest maximum value is
+        white, and the lowest minimum value is black.
+
+
+        Normalizing &#8216;Individually&#8217; has the advantage of ensuring that
+        any data that is present will be visible, but the disadvantage
+        that the absolute scale will be obscured.  Non-normalized
+        plots are guaranteed to be on a known scale, but only values
+        between 0.0 and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">unit_size</span></tt> (<em>allow_None=False, bounds=(9, None), constant=False, default=25, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>box size of a single unit</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.UnitMeasurementCommand">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">UnitMeasurementCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#UnitMeasurementCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.UnitMeasurementCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.plotgroup.ProjectionSheetMeasurementCommand" title="topo.plotting.plotgroup.ProjectionSheetMeasurementCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.ProjectionSheetMeasurementCommand</span></tt></a></p>
+<p>A callable Parameterized command for measuring or plotting specified units from a Sheet.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">coords</span></tt> (<em>bounds=(0, None), constant=False, default=[(0, 0)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of coordinates of unit(s) to measure.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the sheet to use in measurements.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">projection</span></tt> (<em>check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the projection to measure; None means all projections.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.plotgroup.UnitPlotGroup">
+<em class="property">class </em><tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">UnitPlotGroup</tt><big>(</big><em>plot_templates=None</em>, <em>static_images=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#UnitPlotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.UnitPlotGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.plotgroup.ProjectionSheetPlotGroup" title="topo.plotting.plotgroup.ProjectionSheetPlotGroup"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.plotgroup.ProjectionSheetPlotGroup</span></tt></a></p>
+<p>Visualize anything related to a unit.</p>
+<dl class="docutils">
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">normalize</span></tt> (<em>check_on_set=True, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[&#8216;None&#8217;, &#8216;Individually&#8217;, &#8216;AllTogether&#8217;, &#8216;JointProjections&#8217;], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>&#8216;Individually&#8217;: scale each plot so that the peak value will be white
+        and the minimum value black.
+
+        &#8216;None&#8217;: no scaling - 0.0 will be black and 1.0 will be white.
+
+        &#8216;AllTogether&#8217;: scale each plot so that the peak value of all the plots
+        is white, and the minimum value of all the plots will be
+        black.
+
+        &#8216;JointProjections&#8217;: as &#8216;Individually&#8217;, except that plots produced from
+        projections whose weights are jointly normalized will be
+        jointly normalized.
+
+        Normalization has the advantage of ensuring that any data that
+        is present will be visible, but the disadvantage that the
+        absolute scale will be obscured.  Non-normalized plots are
+        guaranteed to be on a known scale, but only values between 0.0
+        and 1.0 will be visibly distinguishable.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">enforce_minimum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, ensure that plots are never shown smaller than their
+        native size, i.e. with fewer than one pixel per matrix unit.
+        This option is normally left on for safety, so that no
+        visualization will be missing any units.  However, it may be
+        acceptable to turn this check off when working with matrix
+        sizes much larger than your screen resolution.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The Sheet from which to produce plots.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">prerequisites</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of preference maps that must exist before this plot can be calculated.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">doc</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Documentation string describing this type of plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">sheet_coords</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to scale plots based on their relative sizes in sheet
+        coordinates.  If true, plots are scaled so that their sizes are
+        proportional to their area in sheet coordinates, so that one can
+        compare corresponding areas.  If false, plots are scaled to have
+        similar sizes on screen, regardless of their corresponding
+        sheet areas, which maximizes the size of each plot.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">auto_refresh</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If this plot is being displayed persistently (e.g. in a GUI),
+        whether to regenerate it automatically whenever the simulation
+        time advances.  The default is False, because many plots are
+        slow to generate (including most preference map plots).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified height of the tallest plot in this PlotGroup.
+        Other plots will generally be scaled as appropriate, either
+        to match this size (when sheet_coords is False), or to
+        have the appropriate relative size (when sheet_coords is True).
+
+        If enforce_minimum_plot_height is True, the actual maximum
+        plot height may be larger than this parameter&#8217;s value.  In
+        particular, with enforce_minimum_plot_height=True, the default
+        value of 0 gives plots that are the size of the underlying
+        matrix, which is the most efficient size for saving plots
+        directly to disk.  Larger values (e.g. 150) are suitable when
+        displaying plots on screen.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute before updating this plot, e.g. to calculate sheet views.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plot_immediately</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to call the pre-plot hooks at once or only when the user asks for a refresh.
+
+        Should be set to true for quick plots, but false for those that take a long time
+        to calculate, so that the user can change the hooks if necessary.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">plot_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Commands to execute when redrawing a plot rather than regenerating data.
+
+        E.g, for a plot with data measured once but displayed one
+        sheet or unit at at time, this command will be called whenever
+        the sheet or coordinate of unit to be plotted (or the
+        simulator time) has changed.
+
+        The commands can be any callable Python objects, i.e. any x for
+        which x() is valid.  The initial value is determined by the
+        template for this plot, but various arguments can be passed, a
+        modified version substituted, etc.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">integer_scaling</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When scaling bitmaps, whether to ensure that the scaled bitmap is an even
+        multiple of the original.  If true, every unit will be represented by a
+        square of the same size.  Typically false so that the overall area will
+        be correct, e.g. when using Sheet coordinates, which is often more
+        important.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>y-coordinate of the unit to plot</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>x-coordinate of the unit to plot</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">category</span></tt> (<em>allow_None=False, constant=False, default=User, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Category to which this plot belongs, which will be created if necessary.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">filterfn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Boolean function allowing control over which items will be plotted.
+        E.g.: filterfn=lambda x: x.name in [&#8216;Retina&#8217;,&#8217;V1&#8217;] for a plot ranging over
+        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.plotting.plotgroup.create_plotgroup">
+<tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">create_plotgroup</tt><big>(</big><em>template_plot_type='bitmap'</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#create_plotgroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.create_plotgroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new PlotGroup and add it to the plotgroups list.</p>
+<p>Convenience function to make it simpler to use the name of the
+PlotGroup as the key in the plotgroups list.</p>
+<p>template_plot_type: Whether the plots are bitmap images or curves
+(&#8216;curve&#8217;).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.plotting.plotgroup.default_input_sheet">
+<tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">default_input_sheet</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#default_input_sheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.default_input_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the first GeneratorSheet defined, for use as a default value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.plotting.plotgroup.default_measureable_sheet">
+<tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">default_measureable_sheet</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/plotting/plotgroup.html#default_measureable_sheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.plotgroup.default_measureable_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the first sheet for which measure_maps is True (if any), or else the first sheet, for use as a default value.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="topo.plotting.plotgroup.plotgroups">
+<tt class="descclassname">topo.plotting.plotgroup.</tt><tt class="descname">plotgroups</tt><em class="property"> = [('Activity', TemplatePlotGroup(auto_refresh=True, category='Basic', desired_maximum_plot_height=0, doc='Plot the activity for all Sheets.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Activity', normalize='None', plot_hooks=[], plot_immediately=True, pre_plot_hooks=[&lt;function update_activity at 0x8b51de8&gt;], prerequisites=[], print_level=100, sheet_coords=False)), ('RGB', TemplatePlotGroup(auto_refresh=True, category='Other', desired_maximum_plot_height=0, doc='Combine and plot the red, green, and blue activity for all appropriate Sheets.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='RGB', normalize='None', plot_hooks=[], plot_immediately=True, pre_plot_hooks=[&lt;function update_rgb_activities at 0x8b51e60&gt;], prerequisites=[], print_level=100, sheet_coords=False)), ('Connection Fields', ConnectionFieldsPlotGroup(auto_refresh=False, category='Basic', desired_maximum_plot_height=0, doc='Plot the weight strength in each ConnectionField of a specific unit of a Sheet.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Connection Fields', normalize='Individually', plot_hooks=[], plot_immediately=True, pre_plot_hooks=[&lt;class 'topo.command.analysis.update_connectionfields'&gt;], prerequisites=[], print_level=100, sheet=None, sheet_coords=False, situate=True, x=0.0, y=0.0)), ('Projection', CFProjectionPlotGroup(auto_refresh=False, category='Basic', density=10.0, desired_maximum_plot_height=0, doc='Plot the weights of an array of ConnectionFields in a Projection.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Projection', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[&lt;class 'topo.command.analysis.update_projection'&gt;], prerequisites=[], print_level=100, projection=None, sheet=None, sheet_coords=True, situate=False)), ('Projection Activity', ProjectionActivityPlotGroup(auto_refresh=True, category='Basic', desired_maximum_plot_height=0, doc='Plot the activity in each Projection that connects to a Sheet.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Projection Activity', normalize='Individually', plot_hooks=[], plot_immediately=True, pre_plot_hooks=[update_projectionactivity(name='update_projectionactivity00061', print_level=100, sheet=None)], prerequisites=[], print_level=100, sheet=None, sheet_coords=False)), ('RF Projection', RFProjectionPlotGroup(auto_refresh=False, category='Other', density=10.0, desired_maximum_plot_height=0, doc='Measure receptive fields.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, input_sheet=None, integer_scaling=False, name='RF Projection', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_rfs(apply_output_fns=None, display=True, duration=None, generator_sheets=[], input_sheet=None, name='measure_rfs00066', offset=0.5, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00065', print_level=100), preference_fn=DSF_MaxValue(name='DSF_MaxValue00067', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, sampling_area=(0, 0), sampling_interval=1, scale=30.0, sheet_views_prefix='', static_parameters=['offset', 'size'], subplot='', weighted_average=None)], prerequisites=[], print_level=100, sheet=None, sheet_coords=False)), ('Orientation Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for sine grating orientation.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Orientation Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_sine_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_sine_pref00073', num_direction=0, num_disparity=1, num_hue=1, num_ocularity=1, num_orientation=4, num_phase=18, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00075', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00072', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 0.3183098861837907)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Orientation', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('vonMises Orientation Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for sine grating orientation using von Mises fit.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='vonMises Orientation Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_sine_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_sine_pref00081', num_direction=0, num_disparity=1, num_hue=1, num_ocularity=1, num_orientation=16, num_phase=18, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00083', print_level=100), preference_fn=DSF_VonMisesFit(name='DSF_VonMisesFit00080', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 0.3183098861837907), worst_fit=0.5), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Orientation', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Bimodal Orientation Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for sine grating orientation using bimodal von Mises fit.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Bimodal Orientation Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_sine_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_sine_pref00089', num_direction=0, num_disparity=1, num_hue=1, num_ocularity=1, num_orientation=16, num_phase=18, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00091', print_level=100), preference_fn=DSF_BimodalVonMisesFit(name='DSF_BimodalVonMisesFit00088', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 0.3183098861837907), worst_fit=0.5), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Orientation', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Two Orientation Preferences', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Display the two most preferred orientations for each units, using bimodal von Mises fit.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Two Orientation Preferences', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_sine_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_sine_pref00097', num_direction=0, num_disparity=1, num_hue=1, num_ocularity=1, num_orientation=16, num_phase=18, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00099', print_level=100), preference_fn=DSF_BimodalVonMisesFit(name='DSF_BimodalVonMisesFit00096', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0), worst_fit=0.5), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Orientation', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Spatial Frequency Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for sine grating orientation and frequency.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Spatial Frequency Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_sine_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_sine_pref00105', num_direction=0, num_disparity=1, num_hue=1, num_ocularity=1, num_orientation=4, num_phase=18, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00107', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00104', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 0.3183098861837907)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Orientation', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Ocular Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for sine gratings between two eyes.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Ocular Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_sine_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_sine_pref00110', num_direction=0, num_disparity=1, num_hue=1, num_ocularity=1, num_orientation=4, num_phase=18, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00112', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00111', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Orientation', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('PhaseDisparity Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='\n    Measure preference for sine gratings at a specific orentation differing in phase\n    between two input sheets.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='PhaseDisparity Preference', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_phasedisparity(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_phasedisparity00115', num_disparity=12, num_orientation=4, num_phase=18, offset=0.0, orientation=1.5707963267948966, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00117', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00116', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['orientation', 'scale', 'offset'], subplot='', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Direction Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for sine grating movement direction.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Direction Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_dr_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_dr_pref00123', num_direction=6, num_orientation=4, num_phase=12, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00125', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00124', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 0.15915494309189535)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Direction', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Hue Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for colors.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Hue Preference', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_hue_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_hue_pref00130', num_hue=8, num_orientation=4, num_phase=12, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00132', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00131', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=[], subplot='Hue', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Second Orientation Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure the second preference for sine grating orientation.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Second Orientation Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_second_or_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_second_or_pref00138', num_orientation=16, num_phase=18, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00140', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00139', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Second Orientation', true_peak=False, weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Second Peak Orientation Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure the second peak preference for sine grating orientation.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Second Peak Orientation Preference', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_second_or_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_second_or_pref00145', num_orientation=16, num_phase=18, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00147', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00146', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Second Orientation', true_peak=True, weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Two Peaks Orientation Preferences', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Display the two most preferred orientations for all units with a\n    multimodal orientation preference distribution.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Two Peaks Orientation Preferences', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_second_or_pref(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_second_or_pref00152', num_orientation=16, num_phase=18, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00154', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00153', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Second Orientation', true_peak=True, weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Corner OR Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure orientation preference for corner shape (or other complex stimuli that cannot be represented as fullfield patterns).', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Corner OR Preference', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_corner_or_pref(apply_output_fns=None, display=False, divisions=10, duration=None, generator_sheets=[], name='measure_corner_or_pref00161', num_orientation=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=False, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00163', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00160', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=1.0, sheet_views_prefix='', size=0.5, static_parameters=['scale', 'offset'], subplot='', weighted_average=True, x_range=(-1.2, 1.2), y_range=(-1.2, 1.2))], prerequisites=[], print_level=100, sheet_coords=False)), ('Corner Angle Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for angles in corner shapes', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Corner Angle Preference', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_corner_angle_pref(angle_0=0.7853981633974483, angle_1=2.356194490192345, apply_output_fns=None, display=False, divisions=6, duration=None, generator_sheets=[], key_img_fname='/var/lib/buildbot/slaves/docs/build/topo/command/key_angles.png', name='measure_corner_angle_pref00170', num_angle=4, num_or=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=False, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00167', print_level=100), positions=6, preference_fn=DSF_MaxValue(name='DSF_MaxValue00171', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=1.0, sheet_views_prefix='', size=0.2, static_parameters=['size', 'scale', 'offset'], subplot='', weighted_average=True, x_range=(-1.0, 1.0), y_range=(-1.0, 1.0))], prerequisites=[], print_level=100, sheet_coords=False)), ('Frequency Preference and Selectivity', TemplatePlotGroup(auto_refresh=False, category='Auditory', desired_maximum_plot_height=0, doc='Measure a best frequency preference and selectivity map for auditory neurons.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Frequency Preference and Selectivity', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_frequency_preference(apply_output_fns=None, display=True, duration=None, generator_sheets=[], name='measure_frequency_preference00180', offset=0.0, pattern_presenter=None, preference_fn=DSF_MaxValue(name='DSF_MaxValue00181', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=1.0, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Log Frequency Band Preference and Selectivity', TemplatePlotGroup(auto_refresh=False, category='Auditory', desired_maximum_plot_height=0, doc='Measure a best frequency preference and selectivity map for auditory neurons (presents frequencies with logarithmically increasing bandwidth).', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Log Frequency Band Preference and Selectivity', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_log_frequency_preference(apply_output_fns=None, display=True, duration=None, generator_sheets=[], name='measure_log_frequency_preference00184', offset=0.0, pattern_presenter=None, preference_fn=DSF_MaxValue(name='DSF_MaxValue00185', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=1.0, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Latency Preference and Selectivity', TemplatePlotGroup(auto_refresh=False, category='Auditory', desired_maximum_plot_height=0, doc='Measure a best onset latency preference and selectivity map for auditory neurons.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Latency Preference and Selectivity', normalize='Individually', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_latency_preference(apply_output_fns=None, display=True, duration=None, generator_sheets=[], name='measure_latency_preference00188', offset=0.0, pattern_presenter=None, preference_fn=DSF_MaxValue(name='DSF_MaxValue00189', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=1.0, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Orientation Preference and Complexity', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for sine grating orientation.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Orientation Preference and Complexity', normalize='None', plot_hooks=[], plot_immediately=False, pre_plot_hooks=[measure_and_analyze_complexity(apply_output_fns=None, display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_speed=0.08333333333333333, name='measure_and_analyze_complexity00193', num_direction=0, num_disparity=1, num_hue=1, num_ocularity=1, num_orientation=4, num_phase=18, num_speeds=4, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00195', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00192', print_level=100, selectivity_scale=(0.0, 17.0), value_scale=(0.0, 0.3183098861837907)), print_level=100, scale=0.3, sheet_views_prefix='', static_parameters=['scale', 'offset'], subplot='Orientation', weighted_average=True)], prerequisites=[], print_level=100, sheet_coords=False)), ('Position Preference', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure preference for the X and Y position of a Gaussian.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Position Preference', normalize='Individually', plot_hooks=[topographic_grid(axis=[-0.5, 0.5, -0.5, 0.5], file_dpi=100.0, file_format='png', filename=None, filename_suffix='', name='topographic_grid00205', print_level=100, skip=1, title=None, xsheet_view_name='XPreference', ysheet_view_name='YPreference')], plot_immediately=False, pre_plot_hooks=[measure_position_pref(apply_output_fns=None, display=False, divisions=6, duration=None, generator_sheets=[], name='measure_position_pref00202', offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00204', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00201', print_level=100, selectivity_scale=(0.0, 17.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet_views_prefix='', size=0.5, static_parameters=['scale', 'offset', 'size'], subplot='', weighted_average=True, x_range=(-0.5, 0.5), y_range=(-0.5, 0.5))], prerequisites=[], print_level=100, sheet_coords=False)), ('Center of Gravity', TemplatePlotGroup(auto_refresh=False, category='Preference Maps', desired_maximum_plot_height=0, doc='Measure the center of gravity of each ConnectionField in a Projection.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Center of Gravity', normalize='Individually', plot_hooks=[topographic_grid(axis=[-0.5, 0.5, -0.5, 0.5], file_dpi=100.0, file_format='png', filename=None, filename_suffix='', name='topographic_grid00209', print_level=100, skip=1, title=None, xsheet_view_name='XCoG', ysheet_view_name='YCoG')], plot_immediately=False, pre_plot_hooks=[measure_cog(name='measure_cog00208', print_level=100, proj_name='')], prerequisites=[], print_level=100, sheet_coords=False)), ('Orientation Tuning Fullfield', FeatureCurvePlotGroup(auto_refresh=False, category='Tuning Curves', desired_maximum_plot_height=0, doc='\n            Plot orientation tuning curves for a specific unit, measured using full-field sine gratings.\n            Although the data takes a long time to collect, once it is ready the plots\n            are available immediately for any unit.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Orientation Tuning Fullfield', normalize='None', plot_hooks=[cyclic_tuning_curve(coords=[(0, 0)], cyclic_range=3.141592653589793, file_dpi=100.0, file_format='png', filename=None, filename_suffix='', legend=True, name='cyclic_tuning_curve00217', plot_type=&lt;function plot at 0x8b4fcf8&gt;, print_level=100, sheet=None, title=None, unit='degrees', x_axis='orientation')], plot_immediately=False, pre_plot_hooks=[measure_or_tuning_fullfield(apply_output_fns=None, coords=None, curve_parameters=[{'contrast': 30}, {'contrast': 60}, {'contrast': 80}, {'contrast': 90}], display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_or_tuning_fullfield00214', num_orientation=12, num_phase=18, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='michelson_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00216', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00215', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet=None, sheet_views_prefix='', static_parameters=[], subplot='', units='%', weighted_average=True, x_axis='orientation')], prerequisites=[], print_level=100, sheet=None, sheet_coords=False, x=0.0, y=0.0)), ('Orientation Tuning', FeatureCurvePlotGroup(auto_refresh=False, category='Tuning Curves', desired_maximum_plot_height=0, doc='\n            Measure orientation tuning for a specific unit at different contrasts,\n            using a pattern chosen to match the preferences of that unit.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Orientation Tuning', normalize='None', plot_hooks=[cyclic_tuning_curve(coords=[(0, 0)], cyclic_range=3.141592653589793, file_dpi=100.0, file_format='png', filename=None, filename_suffix='', legend=True, name='cyclic_tuning_curve00223', plot_type=&lt;function plot at 0x8b4fcf8&gt;, print_level=100, sheet=None, title=None, unit='degrees', x_axis='orientation')], plot_immediately=False, pre_plot_hooks=[measure_or_tuning(apply_output_fns=None, coords=[(0, 0)], curve_parameters=[{'contrast': 30}, {'contrast': 60}, {'contrast': 80}, {'contrast': 90}], display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_or_tuning00220', num_orientation=12, num_phase=18, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='weber_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00222', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00221', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet=None, sheet_views_prefix='', size=0.5, static_parameters=['size', 'x', 'y'], subplot='', units='%', weighted_average=True, x_axis='orientation')], prerequisites=['XPreference'], print_level=100, sheet=None, sheet_coords=False, x=0.0, y=0.0)), ('Size Tuning', FeatureCurvePlotGroup(auto_refresh=False, category='Tuning Curves', desired_maximum_plot_height=0, doc='Measure the size preference for a specific unit.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Size Tuning', normalize='None', plot_hooks=[tuning_curve(coords=[(0, 0)], file_dpi=100.0, file_format='png', filename=None, filename_suffix='', legend=True, name='tuning_curve00229', plot_type=&lt;function plot at 0x8b4fcf8&gt;, print_level=100, sheet=None, title=None, unit='Diameter of stimulus', x_axis='size')], plot_immediately=False, pre_plot_hooks=[measure_size_response(apply_output_fns=None, coords=[(0, 0)], curve_parameters=[{'contrast': 30}, {'contrast': 60}, {'contrast': 80}, {'contrast': 90}], display=False, duration=None, frequencies=[2.4], generator_sheets=[], max_size=1.0, name='measure_size_response00226', num_orientation=12, num_phase=18, num_sizes=10, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='weber_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00228', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00227', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet=None, sheet_views_prefix='', size=0.5, static_parameters=['orientation', 'x', 'y'], subplot='', units='%', weighted_average=True, x_axis='size')], prerequisites=['OrientationPreference', 'XPreference'], print_level=100, sheet=None, sheet_coords=False, x=0.0, y=0.0)), ('Contrast Response', FeatureCurvePlotGroup(auto_refresh=False, category='Tuning Curves', desired_maximum_plot_height=0, doc='Measure the contrast response function for a specific unit.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Contrast Response', normalize='None', plot_hooks=[tuning_curve(coords=[(0, 0)], file_dpi=100.0, file_format='png', filename=None, filename_suffix='', legend=True, name='tuning_curve00235', plot_type=&lt;function plot at 0x8b4fcf8&gt;, print_level=100, sheet=None, title=None, unit='%', x_axis='contrast')], plot_immediately=False, pre_plot_hooks=[measure_contrast_response(apply_output_fns=None, contrasts=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100], coords=[(0, 0)], curve_parameters=[{'contrast': 30}, {'contrast': 60}, {'contrast': 80}, {'contrast': 90}], display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_contrast_response00232', num_orientation=12, num_phase=18, offset=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='weber_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00234', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00233', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, relative_orientations=[0.0, 0.5235987755982988, 0.7853981633974483, 1.5707963267948966], scale=0.3, sheet=None, sheet_views_prefix='', size=0.5, static_parameters=['size', 'x', 'y'], subplot='', units=' rad', weighted_average=True, x_axis='contrast')], prerequisites=['OrientationPreference', 'XPreference'], print_level=100, sheet=None, sheet_coords=False, x=0.0, y=0.0)), ('Orientation Contrast', FeatureCurvePlotGroup(auto_refresh=False, category='Tuning Curves', desired_maximum_plot_height=0, doc='Measure the response of one unit to a center and surround sine grating disk.', enforce_minimum_plot_height=True, filterfn=&lt;function alwaystrue at 0x77bab18&gt;, integer_scaling=False, name='Orientation Contrast', normalize='None', plot_hooks=[tuning_curve(coords=[(0, 0)], file_dpi=100.0, file_format='png', filename=None, filename_suffix='', legend=True, name='tuning_curve00243', plot_type=&lt;function plot at 0x8b4fcf8&gt;, print_level=100, sheet=None, title=None, unit='%', x_axis='orientationsurround')], plot_immediately=False, pre_plot_hooks=[measure_orientation_contrast(apply_output_fns=None, contrastcenter=100, contrastsurround=100, coords=[(0, 0)], curve_parameters=[{'contrastsurround': 30}, {'contrastsurround': 60}, {'contrastsurround': 80}, {'contrastsurround': 90}], display=False, duration=None, frequencies=[2.4], generator_sheets=[], name='measure_orientation_contrast00240', num_orientation=12, num_phase=18, offset=0.0, orientation_center=0.0, pattern_presenter=PatternPresenter(apply_output_fns=True, contrast_parameter='weber_contrast', divisions=None, duration=1.0, generator_sheets=[], name='PatternPresenter00242', print_level=100), preference_fn=DSF_WeightedAverage(name='DSF_WeightedAverage00241', print_level=100, selectivity_scale=(0.0, 1.0), value_scale=(0.0, 1.0)), print_level=100, scale=0.3, sheet=None, sheet_views_prefix='', size=0.5, sizecenter=0.5, sizesurround=1.0, static_parameters=['x', 'y', 'sizecenter', 'sizesurround', 'orientationcenter', 'thickness', 'contrastcenter'], subplot='', thickness=0.5, units='%', weighted_average=True, x_axis='orientationsurround')], prerequisites=['OrientationPreference', 'XPreference'], print_level=100, sheet=None, sheet_coords=False, x=0.0, y=0.0))]</em><a class="headerlink" href="#topo.plotting.plotgroup.plotgroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Global repository of PlotGroups, to which users can add their own as
+needed.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.plotting.plotgroup</a><ul>
+<li><a class="reference internal" href="#module-topo.plotting.plotgroup">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.plotting.plotgroup-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

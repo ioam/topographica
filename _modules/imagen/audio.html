@@ -1,0 +1,662 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.audio &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="imagen" href="../imagen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" accesskey="U">imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for imagen.audio</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Pattern generators for audio signals.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__version__</span><span class="o">=</span><span class="s">&#39;$Revision$&#39;</span>
+
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">Spectrogram</span><span class="p">,</span> <span class="n">PowerSpectrum</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">arange</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">complex64</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">flipud</span><span class="p">,</span> \
+        <span class="n">float64</span><span class="p">,</span> <span class="n">floor</span><span class="p">,</span> <span class="n">hanning</span><span class="p">,</span> <span class="n">hstack</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">log10</span><span class="p">,</span> <span class="n">logspace</span><span class="p">,</span> <span class="n">multiply</span><span class="p">,</span> \
+        <span class="n">nonzero</span><span class="p">,</span> <span class="n">ones</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">reshape</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">tile</span><span class="p">,</span> <span class="n">zeros</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">scikits.audiolab</span> <span class="kn">as</span> <span class="nn">audiolab</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;audio.py classes will not be usable because scikits.audiolab is not available.&quot;</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="AudioFile"><a class="viewcode-back" href="../../Reference_Manual/imagen.audio-module.html#imagen.audio.AudioFile">[docs]</a><span class="k">class</span> <span class="nc">AudioFile</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Requires an audio file in any format accepted by audiolab (wav, aiff, flac).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">time_series</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Filename</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;sounds/complex/daisy.wav&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        File path (can be relative to Param&#39;s base path) to an audio file.</span>
+<span class="s">        The audio can be in any format accepted by audiolab, e.g. WAV, AIFF, or FLAC.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">float64</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The float precision to use for loaded audio files.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AudioFile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_audio_file</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_load_audio_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">audiolab</span><span class="o">.</span><span class="n">Sndfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="c"># audiolab scales the range by the bit depth automatically so the dynamic range is now [-1.0, 1.0]</span>
+        <span class="c"># we rescale it to the range [0.0, 1.0]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span> <span class="o">=</span> <span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">read_frames</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">nframes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">samplerate</span>
+
+
+</div>
+<div class="viewcode-block" id="AudioFolder"><a class="viewcode-back" href="../../Reference_Manual/imagen.audio-module.html#imagen.audio.AudioFolder">[docs]</a><span class="k">class</span> <span class="nc">AudioFolder</span><span class="p">(</span><span class="n">AudioFile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a rolling spectrogram, i.e. the spectral density over time</span>
+<span class="sd">    of a rolling window of the input audio signal, for all files in the</span>
+<span class="sd">    specified folder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Filename</span><span class="p">(</span><span class="n">precedence</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">folderpath</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Foldername</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;sounds/sine_waves/normalized&#39;</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Folder path (can be relative to Param&#39;s base path) to a</span>
+<span class="s">        folder containing audio files. The audio can be in any format accepted</span>
+<span class="s">        by audiolab, i.e. WAV, AIFF, or FLAC.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">gap_between_sounds</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The gap in seconds to insert between consecutive soundfiles.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AudioFolder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_audio_folder</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_load_audio_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">folder_contents</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folderpath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sound_files</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">folder_contents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">file</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span><span class="o">==</span><span class="s">&quot;.wav&quot;</span> <span class="ow">or</span> <span class="nb">file</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span><span class="o">==</span><span class="s">&quot;.wv&quot;</span> <span class="ow">or</span> <span class="nb">file</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span><span class="o">==</span><span class="s">&quot;.aiff&quot;</span> <span class="ow">or</span> <span class="nb">file</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span><span class="o">==</span><span class="s">&quot;.aif&quot;</span> <span class="ow">or</span> <span class="nb">file</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span><span class="o">==</span><span class="s">&quot;.flac&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sound_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folderpath</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">file</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_audio_file</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_file</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="AudioFolder.extract_specific_interval"><a class="viewcode-back" href="../../Reference_Manual/imagen.audio-module.html#imagen.audio.AudioFolder.extract_specific_interval">[docs]</a>    <span class="k">def</span> <span class="nf">extract_specific_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_start</span><span class="p">,</span> <span class="n">interval_end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overload if special behaviour is required when a series ends.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">interval_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_start</span><span class="p">)</span>
+        <span class="n">interval_end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_end</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">interval_start</span> <span class="o">&gt;=</span> <span class="n">interval_end</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Requested interval&#39;s start point is past the requested end point.&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">interval_start</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat</span><span class="p">:</span>
+                <span class="n">interval_end</span> <span class="o">=</span> <span class="n">interval_end</span> <span class="o">-</span> <span class="n">interval_start</span>
+                <span class="n">interval_start</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Requested interval&#39;s start point is past the end of the time series.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">interval_end</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">interval_start</span><span class="p">:</span><span class="n">interval_end</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">requested_interval_size</span> <span class="o">=</span> <span class="n">interval_end</span> <span class="o">-</span> <span class="n">interval_start</span>
+            <span class="n">remaining_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">interval_start</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_file</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_files</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">next_file</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_file</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_files</span><span class="p">):</span>
+                <span class="n">next_source</span> <span class="o">=</span> <span class="n">audiolab</span><span class="o">.</span><span class="n">Sndfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_files</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">next_file</span><span class="p">],</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">next_file</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">next_source</span><span class="o">.</span><span class="n">samplerate</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;All sound files must be of the same sample rate&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gap_between_sounds</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">remaining_signal</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">((</span><span class="n">remaining_signal</span><span class="p">,</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gap_between_sounds</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">((</span><span class="n">remaining_signal</span><span class="p">,</span> <span class="n">next_source</span><span class="o">.</span><span class="n">read_frames</span><span class="p">(</span><span class="n">next_source</span><span class="o">.</span><span class="n">nframes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)))</span>
+
+                <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">requested_interval_size</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_next_interval_start</span> <span class="o">=</span> <span class="n">requested_interval_size</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Returning last interval of the time series.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_next_interval_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="n">samples_per_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_length</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span>
+                <span class="n">interval</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">((</span><span class="n">remaining_signal</span><span class="p">,</span> <span class="n">zeros</span><span class="p">(</span><span class="n">samples_per_interval</span><span class="o">-</span><span class="n">remaining_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">interval</span>
+
+
+</div></div>
+<div class="viewcode-block" id="LogSpectrogram"><a class="viewcode-back" href="../../Reference_Manual/imagen.audio-module.html#imagen.audio.LogSpectrogram">[docs]</a><span class="k">class</span> <span class="nc">LogSpectrogram</span><span class="p">(</span><span class="n">Spectrogram</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends Spectrogram to provide a response over an octave scale.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">log_base</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The base of the logarithm used to generate logarithmic frequency spacing.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_row_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">signal_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+        <span class="n">sample_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">sample_rate</span>
+
+        <span class="c"># A signal window *must* span one sample rate</span>
+        <span class="n">signal_window</span> <span class="o">=</span> <span class="n">tile</span><span class="p">(</span><span class="n">signal_interval</span><span class="p">,</span> <span class="n">ceil</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">interval_length</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">windowing_function</span><span class="p">:</span>
+            <span class="n">smoothed_window</span> <span class="o">=</span> <span class="n">signal_window</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">sample_rate</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">windowing_function</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">smoothed_window</span> <span class="o">=</span> <span class="n">signal_window</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">sample_rate</span><span class="p">]</span>
+
+        <span class="n">amplitudes</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">smoothed_window</span><span class="p">))[</span><span class="mi">0</span><span class="p">:</span><span class="n">sample_rate</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheet_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">start_frequency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_spacing</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">end_frequency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_spacing</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">normalisation_factor</span> <span class="o">=</span> <span class="n">nonzero</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">[</span><span class="n">start_frequency</span><span class="p">:</span><span class="n">end_frequency</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">if</span> <span class="n">normalisation_factor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">amplitudes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">amplitudes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">[</span><span class="n">start_frequency</span><span class="p">:</span><span class="n">end_frequency</span><span class="p">])</span> <span class="o">/</span> <span class="n">normalisation_factor</span>
+
+        <span class="k">return</span> <span class="n">flipud</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">_set_frequency_spacing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_freq</span><span class="p">,</span> <span class="n">max_freq</span><span class="p">):</span>
+        <span class="n">min_frequency</span> <span class="o">=</span> <span class="n">log10</span><span class="p">(</span><span class="n">min_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_base</span><span class="p">)</span>
+        <span class="n">max_frequency</span> <span class="o">=</span> <span class="n">log10</span><span class="p">(</span><span class="n">max_freq</span><span class="p">)</span> <span class="o">/</span> <span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_base</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequency_spacing</span> <span class="o">=</span> <span class="n">logspace</span><span class="p">(</span><span class="n">min_frequency</span><span class="p">,</span> <span class="n">max_frequency</span><span class="p">,</span>
+            <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_base</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="ModulatedLogSpectrogram"><a class="viewcode-back" href="../../Reference_Manual/imagen.audio-module.html#imagen.audio.ModulatedLogSpectrogram">[docs]</a><span class="k">class</span> <span class="nc">ModulatedLogSpectrogram</span><span class="p">(</span><span class="n">LogSpectrogram</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends OctaveSpectrogram with a simple model of outer ear amplification.</span>
+<span class="sd">    One can set both the range to amplify and the amount.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lower_freq_bound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The lower bound of the frequency range to be modulated.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">upper_freq_bound</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">7000.0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The upper bound of the frequency range to be modulated.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">modulation_function</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">hanning</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The function by which to modulate the signal between the</span>
+<span class="s">        specified frequency range.</span>
+
+<span class="s">        The default (hanning) multiplies a section of the signal by a</span>
+<span class="s">        hanning window.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModulatedLogSpectrogram</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_freq_bound</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_freq_bound</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Modulation frequency lower bound must be less than the upper bound.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">set_matrix_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">xdensity</span><span class="p">,</span> <span class="n">ydensity</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModulatedLogSpectrogram</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_matrix_dimensions</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">xdensity</span><span class="p">,</span> <span class="n">ydensity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modulation_start_index</span> <span class="o">=</span> <span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_spacing</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_freq_bound</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modulation_end_index</span> <span class="o">=</span> <span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency_spacing</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_freq_bound</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modulation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modulation_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modulation_end_index</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_modulation_start_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modulation</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modulation</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_shape_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_column</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">amplify_by_percentage</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_freq_bound</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_frequency</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_freq_bound</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_frequency</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Lower bound of frequency to amplify is outside the global frequency range.&quot;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper_freq_bound</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_frequency</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper_freq_bound</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_frequency</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Upper bound of frequency to amplify is outside the global frequency range.&quot;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_column</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_modulation_start_index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_modulation_end_index</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modulation</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ModulatedLogSpectrogram</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_shape_response</span><span class="p">(</span><span class="n">new_column</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="LyonsCochlearModel"><a class="viewcode-back" href="../../Reference_Manual/imagen.audio-module.html#imagen.audio.LyonsCochlearModel">[docs]</a><span class="k">class</span> <span class="nc">LyonsCochlearModel</span><span class="p">(</span><span class="n">PowerSpectrum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Outputs a cochlear decomposition as a set of frequency responses of linear</span>
+<span class="sd">    band-pass filters. Employs Lyons Cochlear Model to do so.</span>
+
+<span class="sd">    R. F. Lyon, &quot;A computational model of filtering, detection and compression</span>
+<span class="sd">    in the cochlea.&quot; in Proc. of the IEEE Int. Conf. Acoust., Speech, Signal</span>
+<span class="sd">    Processing, Paris, France, May 1982.</span>
+
+<span class="sd">    Specific implementation details can be found in:</span>
+
+<span class="sd">    Malcolm Slaney, &quot;Lyon&#39;s Cochlear Model, in Advanced Technology Group,</span>
+<span class="sd">    Apple Technical Report #13&quot;, 1988.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A TimeSeries object to be fed to the model.</span>
+
+<span class="s">        This can be any kind of signal, be it from audio files or live</span>
+<span class="s">        from a mic, as long as the values conform to a TimeSeries.</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">quality_factor</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Quality factor controls the bandwidth of each cochlear filter.</span>
+
+<span class="s">        The bandwidth of each cochlear filter is a function of its</span>
+<span class="s">        center frequency. At high frequencies the bandwidth is</span>
+<span class="s">        approximately equal to the center frequency divided by a</span>
+<span class="s">        quality constant (quality_factor). At lower frequncies the</span>
+<span class="s">        bandwidth approaches a constant given by: 1000/quality_factor.</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">stage_overlap_factor</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The degree of overlap between filters.</span>
+
+<span class="s">        Successive filter stages are overlapped by a fraction of their</span>
+<span class="s">        bandwidth. The number is arbitrary but smaller numbers lead to</span>
+<span class="s">        more computations. We currently overlap 4 stages within the</span>
+<span class="s">        bandpass region of any one filter.</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">float64</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The float precision to use when calculating ear stage filters.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LyonsCochlearModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c"># Hardwired Parameters specific to model, which is to say changing</span>
+        <span class="c"># them without knowledge of the mathematics of the model is a bad idea.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">sample_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">half_sample_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quart_sample_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">half_sample_rate</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_q</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quality_factor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_step_factor</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">stage_overlap_factor</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_break_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1000.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_break_squared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_break_f</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_break_f</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_preemph_corner_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">300.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_zero_offset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_sharpness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generateCochlearFilters</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_ear_bandwidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">cf</span><span class="o">*</span><span class="n">cf</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_break_squared</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_q</span>
+
+
+    <span class="k">def</span> <span class="nf">_max_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bandwidth_step_max_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ear_bandwidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">half_sample_rate</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_step_factor</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">half_sample_rate</span> <span class="o">+</span> <span class="n">bandwidth_step_max_f</span> <span class="o">-</span> <span class="n">bandwidth_step_max_f</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_zero_offset</span>
+
+
+    <span class="k">def</span> <span class="nf">_num_of_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">min_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_break_f</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">4.0</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_q</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_q</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_f_calc</span><span class="p">)</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="n">min_f</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">min_f</span><span class="o">*</span><span class="n">min_f</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_break_squared</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_q</span><span class="o">*</span><span class="n">channels</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_step_factor</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">_calc_centre_frequencies_till</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel_index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_centre_frequencies_till</span><span class="p">(</span><span class="n">channel_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">channel_cf</span> <span class="o">=</span> <span class="n">step</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_step_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_ear_bandwidth</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">channel_cf</span>
+
+            <span class="k">return</span> <span class="n">channel_cf</span>
+
+
+    <span class="k">def</span> <span class="nf">_evaluate_filters_for_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
+        <span class="n">Zs</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">frequencies</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">)</span>
+        <span class="n">Z_squareds</span> <span class="o">=</span> <span class="n">Zs</span> <span class="o">*</span> <span class="n">Zs</span>
+
+        <span class="n">zeros</span> <span class="o">=</span> <span class="n">ones</span><span class="p">((</span><span class="n">shape</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">complex64</span><span class="p">)</span>
+        <span class="n">zeros</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">filters</span><span class="p">[</span><span class="mi">0</span><span class="p">][:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">Z_squareds</span>
+        <span class="n">zeros</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">filters</span><span class="p">[</span><span class="mi">0</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Zs</span>
+        <span class="n">zeros</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">filters</span><span class="p">[</span><span class="mi">0</span><span class="p">][:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zeros</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">poles</span> <span class="o">=</span> <span class="n">ones</span><span class="p">((</span><span class="n">shape</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">complex64</span><span class="p">)</span>
+        <span class="n">poles</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">filters</span><span class="p">[</span><span class="mi">1</span><span class="p">][:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">Z_squareds</span>
+        <span class="n">poles</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">filters</span><span class="p">[</span><span class="mi">1</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Zs</span>
+        <span class="n">poles</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">filters</span><span class="p">[</span><span class="mi">1</span><span class="p">][:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">poles</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">poles</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">zeros</span> <span class="o">/</span> <span class="n">poles</span>
+
+
+    <span class="c"># a frequency and gain are specified so that the resulting filter can</span>
+    <span class="c"># be normalized to have any desired gain at a specified frequency.</span>
+    <span class="k">def</span> <span class="nf">_make_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">poles</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">desired_gains</span><span class="p">):</span>
+        <span class="n">desired_gains</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">desired_gains</span><span class="p">,[</span><span class="n">size</span><span class="p">(</span><span class="n">desired_gains</span><span class="p">),</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">unit_gains</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_filters_for_frequencies</span><span class="p">([</span><span class="n">zeros</span><span class="p">,</span><span class="n">poles</span><span class="p">],</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">unit_gains</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">unit_gains</span><span class="p">,[</span><span class="n">size</span><span class="p">(</span><span class="n">unit_gains</span><span class="p">),</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">zeros</span><span class="o">*</span><span class="n">desired_gains</span><span class="p">,</span> <span class="n">poles</span><span class="o">*</span><span class="n">unit_gains</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">_frequency_responses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluated_filters</span><span class="p">):</span>
+        <span class="n">evaluated_filters</span><span class="p">[</span><span class="n">evaluated_filters</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="mf">20.0</span> <span class="o">*</span> <span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">evaluated_filters</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">_specific_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x2_coefficient</span><span class="p">,</span> <span class="n">x_coefficient</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">array</span><span class="p">([[</span><span class="n">x2_coefficient</span><span class="p">,</span><span class="n">x_coefficient</span><span class="p">,</span><span class="n">constant</span><span class="p">],</span> <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_first_order_filter_from_corner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corner_f</span><span class="p">):</span>
+        <span class="n">polynomial</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+        <span class="n">polynomial</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">corner_f</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">)</span>
+        <span class="n">polynomial</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">return</span> <span class="n">polynomial</span>
+
+
+    <span class="k">def</span> <span class="nf">_second_order_filter_from_center_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">quality</span><span class="p">):</span>
+        <span class="n">cf_as_ratio</span> <span class="o">=</span> <span class="n">cf</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span>
+
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">pi</span><span class="o">*</span><span class="n">cf_as_ratio</span><span class="o">/</span><span class="n">quality</span><span class="p">)</span>
+        <span class="n">rho_squared</span> <span class="o">=</span> <span class="n">rho</span><span class="o">*</span><span class="n">rho</span>
+
+        <span class="n">theta</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">cf_as_ratio</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">4.0</span><span class="o">*</span><span class="n">quality</span><span class="o">*</span><span class="n">quality</span><span class="p">))</span>
+        <span class="n">theta_calc</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+        <span class="n">polynomial</span> <span class="o">=</span> <span class="n">ones</span><span class="p">((</span><span class="n">size</span><span class="p">(</span><span class="n">cf</span><span class="p">),</span><span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+        <span class="n">polynomial</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta_calc</span>
+        <span class="n">polynomial</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho_squared</span>
+
+        <span class="k">return</span> <span class="n">polynomial</span>
+
+
+    <span class="k">def</span> <span class="nf">_ear_filter_gains</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+
+    <span class="k">def</span> <span class="nf">_ear_first_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">outer_middle_ear_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_filters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_order_filter_from_corner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_preemph_corner_f</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_specific_filter</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">]),</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">high_freq_compensator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_filters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_specific_filter</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_specific_filter</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span>
+            <span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">quart_sample_rate</span><span class="p">]),</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">pole_pair</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_filters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_specific_filter</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_second_order_filter_from_center_q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cascade_pole_cfs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">cascade_pole_qs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">quart_sample_rate</span><span class="p">]),</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">outer_middle_ear_evaluations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_filters_for_frequencies</span><span class="p">(</span><span class="n">outer_middle_ear_filter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+        <span class="n">high_freq_compensator_evaluations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_filters_for_frequencies</span><span class="p">(</span><span class="n">high_freq_compensator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+        <span class="n">pole_pair_evaluations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_filters_for_frequencies</span><span class="p">(</span><span class="n">pole_pair</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">outer_middle_ear_evaluations</span> <span class="o">*</span> <span class="n">high_freq_compensator_evaluations</span> <span class="o">*</span> <span class="n">pole_pair_evaluations</span>
+
+
+    <span class="k">def</span> <span class="nf">_ear_all_other_stages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">zeros</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second_order_filter_from_center_q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cascade_zero_cfs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cascade_zero_qs</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">poles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second_order_filter_from_center_q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cascade_pole_cfs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cascade_pole_qs</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="n">stage_filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_filters</span><span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">poles</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_filter_gains</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_filters_for_frequencies</span><span class="p">(</span><span class="n">stage_filters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_generate_cascade_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cascade_filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_stages</span>
+
+        <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">):</span>
+            <span class="n">cascade_filters</span><span class="p">[</span><span class="n">channel</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">cascade_filters</span><span class="p">[</span><span class="n">channel</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">cascade_filters</span><span class="p">[</span><span class="n">channel</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frequency_responses</span><span class="p">(</span><span class="n">cascade_filters</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_generateCochlearFilters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">max_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_frequency</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_f_calc</span> <span class="o">=</span> <span class="n">max_f</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">max_f</span><span class="o">*</span><span class="n">max_f</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_break_squared</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_centre_frequencies_till</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">bandwidths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ear_bandwidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cascade_zero_cfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span> <span class="o">+</span> <span class="n">bandwidths</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_step_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ear_zero_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cascade_zero_qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ear_sharpness</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cascade_zero_cfs</span> <span class="o">/</span> <span class="n">bandwidths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cascade_pole_cfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cascade_pole_qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre_frequencies</span> <span class="o">/</span> <span class="n">bandwidths</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_filter_gains</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ear_filter_gains</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">half_sample_rate</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">half_sample_rate</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ear_stages</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_ear_first_stage</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ear_all_other_stages</span><span class="p">()))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cochlear_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_cascade_filters</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_row_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a real Discrete Fourier Transform (DFT; implemented</span>
+<span class="sd">        using a Fast Fourier Transform algorithm, FFT) of the current</span>
+<span class="sd">        sample from the signal multiplied by the smoothing window.</span>
+
+<span class="sd">        See numpy.rfft for information about the Fourier transform.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sample_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">sample_rate</span>
+
+        <span class="c"># A signal window *must* span one sample rate, irrespective of interval length.</span>
+        <span class="n">signal_window</span> <span class="o">=</span> <span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">(),</span> <span class="n">ceil</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">interval_length</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">windowing_function</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">smoothed_window</span> <span class="o">=</span> <span class="n">signal_window</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">sample_rate</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">smoothed_window</span> <span class="o">=</span> <span class="n">signal_window</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">sample_rate</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">windowing_function</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">)</span>
+
+        <span class="n">row_amplitudes</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">smoothed_window</span><span class="p">))[</span><span class="mi">0</span><span class="p">:</span><span class="n">sample_rate</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">row_amplitudes</span> <span class="o">=</span> <span class="n">row_amplitudes</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">sample_rate</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="n">filter_responses</span> <span class="o">=</span> <span class="n">multiply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cochlear_channels</span><span class="p">,</span> <span class="n">row_amplitudes</span><span class="p">)</span>
+        <span class="n">sheet_responses</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">):</span>
+            <span class="n">time_responses</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">filter_responses</span><span class="p">[</span><span class="n">channel</span><span class="p">]))</span>
+            <span class="n">sheet_responses</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">time_responses</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sample_rate</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sheet_responses</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">set_matrix_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">xdensity</span><span class="p">,</span> <span class="n">ydensity</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LyonsCochlearModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_matrix_dimensions</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">xdensity</span><span class="p">,</span> <span class="n">ydensity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheet_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generateCochlearFilters</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The number of Sheet Rows must correspond to the number of Lyons Filters. Adjust the number sheet rows from [</span><span class="si">%s</span><span class="s">] to [</span><span class="si">%s</span><span class="s">].&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_channels</span><span class="p">))</span>
+
+
+</div>
+<div class="viewcode-block" id="LyonsCochleogram"><a class="viewcode-back" href="../../Reference_Manual/imagen.audio-module.html#imagen.audio.LyonsCochleogram">[docs]</a><span class="k">class</span> <span class="nc">LyonsCochleogram</span><span class="p">(</span><span class="n">LyonsCochlearModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Employs Lyons Cochlear Model to return a Cochleoogram,</span>
+<span class="sd">    i.e. the response over time along the cochlea.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_update_cochleogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_column</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cochleogram</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">((</span><span class="n">new_column</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cochleogram</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cochleogram</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cochleogram</span><span class="p">[</span><span class="mi">0</span><span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+
+    <span class="k">def</span> <span class="nf">set_matrix_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">xdensity</span><span class="p">,</span> <span class="n">ydensity</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LyonsCochleogram</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_matrix_dimensions</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">xdensity</span><span class="p">,</span> <span class="n">ydensity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cochleogram</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_dimensions</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params_to_override</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_cochleogram</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_row_amplitudes</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cochleogram</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/imagen/audio.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" >imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

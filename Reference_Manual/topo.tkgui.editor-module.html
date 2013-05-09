@@ -1,0 +1,512 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui.editor &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-tkgui-editor">
+<h1>topo.tkgui.editor<a class="headerlink" href="#topo-tkgui-editor" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance1d39487c30.svg" usemap="#inheritance1d39487c30" class="inheritance"/></div><map id="inheritance1d39487c30" name="inheritance1d39487c30">
+</map>
+<div class="section" id="module-topo.tkgui.editor">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.tkgui.editor" title="Permalink to this headline">¶</a></h2>
+<p>The GUI model editor.</p>
+<p>Tools:   for the editor menu bar
+Objects: that can be manipulated in the canvas
+Window:  window and canvas</p>
+<p>Originally written by Alan Lindsay.</p>
+<dl class="class">
+<dt id="topo.tkgui.editor.ArrowTool">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">ArrowTool</tt><big>(</big><em>canvas</em>, <em>parent=None</em>, <em>parambar=None</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ArrowTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ArrowTool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Frame</span></tt></p>
+<p>ArrowTool is a selectable frame containing an arrow icon and a label. It is a
+toolbar item in a ModelEditor that allows the user to change the GUICanvas to
+&#8216;ARROW&#8217; mode.</p>
+<dl class="method">
+<dt id="topo.tkgui.editor.ArrowTool.set_focus">
+<tt class="descname">set_focus</tt><big>(</big><em>focus</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ArrowTool.set_focus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ArrowTool.set_focus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the background highlight to reflect whether this toolbar item is selected.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.ConnectionTool">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">ConnectionTool</tt><big>(</big><em>canvas</em>, <em>parent=None</em>, <em>parambar=None</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ConnectionTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ConnectionTool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Frame</span></tt></p>
+<p>ConnectionTool extends Frame. It is expected to be included in a topographica
+model development GUI and functions as a self populating Connection toolbar.
+The available Connection types are listed and the user can select one.
+When a connection is formed between two nodes a topo.projection of the
+specified type is instantiated and a reference to it is stored in it&#8217;s Editor
+cover. Allows user to change the EditorCanvas mode to &#8216;CONNECTION&#8217; mode.</p>
+<dl class="method">
+<dt id="topo.tkgui.editor.ConnectionTool.create_connection">
+<tt class="descname">create_connection</tt><big>(</big><em>editor_connection</em>, <em>node</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ConnectionTool.create_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ConnectionTool.create_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects the editor connection and the topo simulation connection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.ConnectionTool.new_cover">
+<tt class="descname">new_cover</tt><big>(</big><em>from_node</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ConnectionTool.new_cover"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ConnectionTool.new_cover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an EditorProjection and return it.</p>
+<p>If there is more than one representation for connections/
+projections, the returned object will depend on the current
+selection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.ConnectionTool.set_focus">
+<tt class="descname">set_focus</tt><big>(</big><em>focus</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ConnectionTool.set_focus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ConnectionTool.set_focus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the background highlight to reflect whether this toolbar item is selected.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.ConnectionTool.set_option">
+<tt class="descname">set_option</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ConnectionTool.set_option"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ConnectionTool.set_option" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorCanvas">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorCanvas</tt><big>(</big><em>root=None</em>, <em>width=600</em>, <em>height=600</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Canvas</span></tt></p>
+<p>EditorCanvas extends the Tk Canvas class.
+There are 3 modes that determine the effect of mouse events in the Canvas
+A Canvas can accept new objects, move objects and make connections
+between them. The intended use of this class is as the main
+canvas in a Topographica model-editing GUI.</p>
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.add_object">
+<tt class="descname">add_object</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.add_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.add_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new object to the Canvas.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.add_object_to_back">
+<tt class="descname">add_object_to_back</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.add_object_to_back"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.add_object_to_back" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new object to the Canvas at back of the list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.change_mode">
+<tt class="descname">change_mode</tt><big>(</big><em>char</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.change_mode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.change_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the mode of the canvas, i.e., what mouse events will do.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.create_object">
+<tt class="descname">create_object</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.create_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.create_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.delete_focus">
+<tt class="descname">delete_focus</tt><big>(</big><em>focus</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.delete_focus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.delete_focus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tell a connection or object to delete itself.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.end_connection">
+<tt class="descname">end_connection</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.end_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.end_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if the connection has been dropped on an object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.end_move">
+<tt class="descname">end_move</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.end_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.end_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>If dropping an object, remove focus and refresh.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.get_connection_xy">
+<tt class="descname">get_connection_xy</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.get_connection_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.get_connection_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return connection at given x, y (None if no connection).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.get_object_xy">
+<tt class="descname">get_object_xy</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.get_object_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.get_object_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return object at given x, y (or None if no object).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.get_xy">
+<tt class="descname">get_xy</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.get_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.get_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the connection or object at this x, y position or None if there is not one.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.init_connection">
+<tt class="descname">init_connection</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.init_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.init_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if click was on an object, and retain if so.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.init_move">
+<tt class="descname">init_move</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.init_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.init_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if click was on an object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.key_press">
+<tt class="descname">key_press</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.key_press"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.key_press" title="Permalink to this definition">¶</a></dt>
+<dd><p>What happens when a key is pressed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.left_click">
+<tt class="descname">left_click</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.left_click"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.left_click" title="Permalink to this definition">¶</a></dt>
+<dd><p>What is to happen if the left button is pressed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.left_click_drag">
+<tt class="descname">left_click_drag</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.left_click_drag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.left_click_drag" title="Permalink to this definition">¶</a></dt>
+<dd><p>What is to happen if the mouse is dragged while the left button is pressed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.left_double_click">
+<tt class="descname">left_double_click</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.left_double_click"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.left_double_click" title="Permalink to this definition">¶</a></dt>
+<dd><p>What is to happen if the left button is double clicked.
+The same for all modes - show the properties for the clicked item.
+Gets object or connection at this point and gives it the focus.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.left_release">
+<tt class="descname">left_release</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.left_release"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.left_release" title="Permalink to this definition">¶</a></dt>
+<dd><p>What is to happen when the left mouse button is released.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.redraw_objects">
+<tt class="descname">redraw_objects</tt><big>(</big><em>index=None</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.redraw_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.redraw_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redraw all the objects in the canvas.</p>
+<p>If non-None, the index specifies that only the objects below
+that index need drawing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.remove_object">
+<tt class="descname">remove_object</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.remove_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.remove_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an object from the canvas.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.right_click">
+<tt class="descname">right_click</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.right_click"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.right_click" title="Permalink to this definition">¶</a></dt>
+<dd><p>What is to happen if the right button is pressed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.right_release">
+<tt class="descname">right_release</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.right_release"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.right_release" title="Permalink to this definition">¶</a></dt>
+<dd><p>What is to happen when the right mouse button is released (bound to the menu).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.show_properties">
+<tt class="descname">show_properties</tt><big>(</big><em>focus</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.show_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.show_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show properties of an object or connection, and remove the focus.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.update_connection">
+<tt class="descname">update_connection</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.update_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.update_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update connection&#8217;s position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorCanvas.update_move">
+<tt class="descname">update_move</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorCanvas.update_move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorCanvas.update_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>If dragging an object, refresh its position</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorConnection">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorConnection</tt><big>(</big><em>name</em>, <em>canvas</em>, <em>from_node</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.tkgui.editor.EditorObject" title="topo.tkgui.editor.EditorObject"><tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.editor.EditorObject</span></tt></a></p>
+<p>A connection formed between 2 EditorNodes on a EditorCanvas. A EditorConnection is used
+to cover any topographica connection (connection / projection), and extending
+classes will supply a draw method and other type specific attributes.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorEP">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorEP</tt><big>(</big><em>canvas</em>, <em>simobj</em>, <em>pos</em>, <em>name</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorEP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorEP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.tkgui.editor.EditorNode" title="topo.tkgui.editor.EditorNode"><tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.editor.EditorNode</span></tt></a></p>
+<p>Represents any topo EventProcessor as a small, fixed-size oval by default.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorEPConnection">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorEPConnection</tt><big>(</big><em>name</em>, <em>canvas</em>, <em>from_node</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorEPConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorEPConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.tkgui.editor.EditorConnection" title="topo.tkgui.editor.EditorConnection"><tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.editor.EditorConnection</span></tt></a></p>
+<p>Represents any topo EPConnection using a line with an arrow head in the middle.</p>
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorEPConnection.calculate_gradient">
+<tt class="descname">calculate_gradient</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorEPConnection.calculate_gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorEPConnection.calculate_gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not implemented in this class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorEPConnection.get_radius">
+<tt class="descname">get_radius</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorEPConnection.get_radius"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorEPConnection.get_radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not implemented in this class</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorNode">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorNode</tt><big>(</big><em>canvas</em>, <em>simobj</em>, <em>pos</em>, <em>name</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.tkgui.editor.EditorObject" title="topo.tkgui.editor.EditorObject"><tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.editor.EditorObject</span></tt></a></p>
+<p>An EditorNode is used to cover any topographica node, presently this can only be a sheet.
+It is a sub class of EditorObject and supplies the methods required by any node to be used
+in a EditorCanvas. Extending classes will supply a draw method and other type specific
+attributes.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorObject">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorObject</tt><big>(</big><em>name</em>, <em>canvas</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Anything that can be added and manipulated in an EditorCanvas. Every EditorCanvas
+has a corresponding Topo object associated with it. An instance of this class can
+have the focus.</p>
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorObject.draw">
+<tt class="descname">draw</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorObject.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorObject.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the object at the current x, y position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorObject.in_bounds">
+<tt class="descname">in_bounds</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorObject.in_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorObject.in_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if x,y lies within this gui object&#8217;s boundary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorObject.move">
+<tt class="descname">move</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorObject.move"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorObject.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update position of object and redraw.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorObject.objdoc">
+<tt class="descname">objdoc</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorObject.objdoc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorObject.objdoc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Documentation string for this object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorObject.remove">
+<tt class="descname">remove</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorObject.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorObject.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove this object from the canvas and from the Topographica simulation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorObject.show_properties">
+<tt class="descname">show_properties</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorObject.show_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorObject.show_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show parameters frame for object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorProjection">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorProjection</tt><big>(</big><em>name</em>, <em>canvas</em>, <em>from_node</em>, <em>receptive_field=True</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.tkgui.editor.EditorEPConnection" title="topo.tkgui.editor.EditorEPConnection"><tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.editor.EditorEPConnection</span></tt></a></p>
+<p>Represents any topo CFProjection. It is a subclass of EditorEPConnection and fills
+in the methods that are not defined. Can be represented by a representation of a
+projection&#8217;s receptive field or by a line with an arrow head in the middle;
+lateral projections are represented by a dotted ellipse around the center.
+Can determine if x,y coord is within the triangular receptive field or within an
+area around the arrow head. The same can be determined for a lateral projection
+ellipse.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.EditorSheet">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">EditorSheet</tt><big>(</big><em>canvas</em>, <em>simobj</em>, <em>pos</em>, <em>name</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.tkgui.editor.EditorEP" title="topo.tkgui.editor.EditorEP"><tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.editor.EditorEP</span></tt></a></p>
+<p>Represents any topo sheet. It is a subclass of EditorEP and fills in the
+methods that are not defined. It is represented by a Parallelogram in its
+Canvas. The colours used for drawing can be set. Uses bounding box to
+determine if x, y coord is within its boundary.</p>
+<dl class="method">
+<dt id="topo.tkgui.editor.EditorSheet.normalize_plot">
+<tt class="descname">normalize_plot</tt><big>(</big><em>a</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#EditorSheet.normalize_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.EditorSheet.normalize_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize an array s.
+In case of a constant array, ones is returned for value greater than zero,
+and zeros in case of value inferior or equal to zero.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.ModelEditor">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">ModelEditor</tt><big>(</big><em>master</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#ModelEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.ModelEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>This class constructs the main editor window. It uses a instance
+of GUICanvas as the main editing canvas and inserts the
+three-option toolbar in a Frame along the left side of the window.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.editor.NodeTool">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">NodeTool</tt><big>(</big><em>canvas</em>, <em>parent=None</em>, <em>parambar=None</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#NodeTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.NodeTool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Tkinter.Frame</span></tt></p>
+<p>NodeTool extends Frame. It is expected to be included in a topographica
+model development GUI and functions as a self populating Node tool.
+The available Sheet types are supplied to be selected from. This Tool supplies
+a suitable Editor cover for a node and creates the corresponding topo object.</p>
+<dl class="method">
+<dt id="topo.tkgui.editor.NodeTool.set_focus">
+<tt class="descname">set_focus</tt><big>(</big><em>focus</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#NodeTool.set_focus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.NodeTool.set_focus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the background highlight to reflect whether this toolbar item is selected.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.editor.NodeTool.set_option">
+<tt class="descname">set_option</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/editor.html#NodeTool.set_option"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.editor.NodeTool.set_option" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="data">
+<dt id="topo.tkgui.editor.canvas_region">
+<tt class="descclassname">topo.tkgui.editor.</tt><tt class="descname">canvas_region</tt><em class="property"> = (0, 0, 1200, 1200)</em><a class="headerlink" href="#topo.tkgui.editor.canvas_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the canvas, as a bounding box (xl yl xh yh).</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.tkgui.editor</a><ul>
+<li><a class="reference internal" href="#module-topo.tkgui.editor">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.tkgui.editor-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

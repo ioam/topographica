@@ -1,0 +1,389 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Publishing Topographica results &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="User Manual" href="index.html" />
+    <link rel="next" title="Using multiple cores with Topographica" href="multicore.html" />
+    <link rel="prev" title="Interfacing to external simulators" href="interfacing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="multicore.html" title="Using multiple cores with Topographica"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="interfacing.html" title="Interfacing to external simulators"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="publishing-topographica-results">
+<h1>Publishing Topographica results<a class="headerlink" href="#publishing-topographica-results" title="Permalink to this headline">¶</a></h1>
+<p>While many people will want to use Topographica for demonstrations,
+class tutorials, small projects, etc., other projects are expected
+to lead to a publication eventually. This section describes how to
+produce publication-quality results, rather than screen images. If
+you follow these guidelines, you should end up with smaller file
+sizes, faster document generation, and better quality.</p>
+<p>Before discussing Topographica-specific tips, we first provide
+background on image formats and image plotting in general. These
+considerations apply to any image displayed on screen or in a paper.</p>
+<div class="section" id="image-types-photos-bitmaps-and-vector-graphics">
+<h2>Image types: photos, bitmaps, and vector graphics<a class="headerlink" href="#image-types-photos-bitmaps-and-vector-graphics" title="Permalink to this headline">¶</a></h2>
+<p>Before working with any graphical software, it is crucial to
+understand the three basic types of computer graphics images, which
+determine the file formats and programs that are appropriate for a
+particular task. The three types and the recommended formats are:</p>
+<table border="1" class="docutils" id="image-types">
+<colgroup>
+<col width="13%" />
+<col width="34%" />
+<col width="23%" />
+<col width="18%" />
+<col width="11%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Type</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Examples</strong></td>
+<td><strong>Still formats</strong></td>
+<td><strong>Animated formats</strong></td>
+</tr>
+<tr class="row-even"><td><strong>Photographic bitmaps</strong></td>
+<td>smooth, continuously-varying bitmapped images, with lots of colors</td>
+<td>photographs, photorealistic renderings, scans</td>
+<td>JPEG</td>
+<td>MPEG</td>
+</tr>
+<tr class="row-odd"><td><strong>Indexed-color bitmaps</strong></td>
+<td>sharp-edged bitmapped images with only a few colors</td>
+<td>screenshots, 80&#8217;s-style video games, icons</td>
+<td>PNG, GIF (if colors&lt;256), TIFF, BMP</td>
+<td>GIF89a, MNG</td>
+</tr>
+<tr class="row-even"><td><strong>Vector/structured
+graphics</strong></td>
+<td>sharp-edged diagrams/text that is resolution-independent, i.e. not
+bitmapped and intended to display well on both the screen and on a
+printer.</td>
+<td>text, diagrams, charts, graphs</td>
+<td>SVG, PDF, EPS, PostScript, FIG</td>
+<td>Flash</td>
+</tr>
+</tbody>
+</table>
+<p>Each of these three categories needs to be treated very differently,
+and if you use an image from one category with a format or program
+suitable for another, the result will have much lower quality and a
+much larger file size than it would with the correct format. For
+instance, if you are drawing a box-and-arrow diagram to be used in a
+printed document and save it in type GIF, the result will have ugly
+&#8220;jaggies&#8221; and will look quite unprofessional. The same simple
+drawing saved in type JPEG will have little &#8220;halos&#8221; and &#8220;ringing&#8221;
+around all of the sharp borders if you look closely, and solid color
+areas will have &#8220;speckles&#8221; and will not look uniform, especially in
+a printout. Plus the file size will be very large in JPEG and GIF
+for any reasonable quality printed version. So for such a drawing, a
+vector drawing program is the only acceptable choice. On the other
+hand, vector drawing programs do not generally offer any benefits
+for photographs, for which JPEG is a great choice. But JPEG is a
+very bad choice for screenshots, as it will introduce the
+above-mentioned artifacts, and PNG works well for those.</p>
+<p>Overuse of JPEG is probably the most common mistake; see the <a class="reference external" href="http://www.faqs.org/faqs/jpeg-faq/part1/section-3.html">JPEG
+FAQ</a> for more information about when <strong>not</strong> to use it. Note that
+the most important time to consider the format is when you first
+create the file. Once a file is in JPEG format, it will have
+artifacts forever, even if later converted to a non-lossy format.
+And once a file is in GIF format, it will have limited color
+resolution, even if later converted to JPEG or PNG. Using PNG by
+default works well, switching to JPEG for photo-like images and PDF
+or SVG for diagrams when appropriate.</p>
+</div>
+<div class="section" id="printed-versus-displayed-graphics-white-versus-black-backgrounds">
+<h2>Printed versus displayed graphics (white versus black backgrounds)<a class="headerlink" href="#printed-versus-displayed-graphics-white-versus-black-backgrounds" title="Permalink to this headline">¶</a></h2>
+<p>Display screens like CRTs create images by combining different
+colors of light, starting from a black background and adding more
+red, green, and/or blue light until the image becomes white. (LCD
+displays are similar, though the light that they use is often
+initially white and then filtered into these three colors.) This
+process is called <a class="reference external" href="http://en.wikipedia.org/wiki/Additive_color">additive color mixing</a>. The result is that
+bright colors and bright white are both very visible against a black
+background on a CRT; they are both very different from the default
+state of the screen.</p>
+<p>Diagrams on printed paper use <a class="reference external" href="http://en.wikipedia.org/wiki/Subtractive_color">subtractive color mixing</a> &#8211; the
+paper initially reflects white light (all colors of light), and then
+ink put on it removes more and more of certain colors of light until
+none remain, at which case black is perceived. In this case very
+bright colors (with lots of color ink) and black both show up well
+against white. But each color is difficult to distinguish from
+black, because both bright colors and black have large amounts of
+ink, and so bright colors on a black background is a poor choice for
+subtractive color.</p>
+<p>The practical effect is that diagrams and plots displayed onscreen
+should have white or colored lines or patches against a black
+background, while those printed on paper should have black or
+colored lines or patches against a white background. Only in those
+cases will colors and fine lines be clear and visible.</p>
+<p>Unfortunately, Topographica so far has only partial support for
+black-on-white diagrams suitable for printing; in other cases
+support is planned but not yet implemented. In some cases, it is
+possible to swap the Saturation and Value channels of plots using
+<a class="reference external" href="http://www.gimp.org">the Gimp</a>, but in others programming support will be necessary.</p>
+</div>
+<div class="section" id="topographica-plots">
+<h2>Topographica plots<a class="headerlink" href="#topographica-plots" title="Permalink to this headline">¶</a></h2>
+<p>These sections describe how to generate publication-quality figures
+from each of the various Topographica plots and display windows.
+Note that in most cases, it is best to automate these commands by
+doing them in <a class="reference external" href="batch.html">batch mode</a>, so that you have a permanent record of
+all of the commands and options used to generate your results, and
+so that they will be stored in a uniquely identifiable directory
+that you can access reliably later.</p>
+<div class="section" id="model-architecture">
+<h3>Model architecture<a class="headerlink" href="#model-architecture" title="Permalink to this headline">¶</a></h3>
+<p>The Model Editor window of Topographica is helpful for generating
+architecture diagrams for modeling papers. Just arrange the Sheets
+as clearly as possible, make sure everything is named appropriately,
+and then export this diagram to a file for use in your paper by
+right-clicking and selecting <tt class="docutils literal"><span class="pre">Export</span> <span class="pre">PostScript</span> <span class="pre">image</span></tt>. You will
+probably want to select <tt class="docutils literal"><span class="pre">Printing</span></tt> mode first, to plot each sheet
+in white instead of black.</p>
+<p>Of course, it is possible to grab a screenshot of the Model Editor
+window as well, but this is not recommended because the result will
+have jagged lines, jagged text, and will usually be a much larger
+file than necessary. Once you have an Encapsulated PostScript image,
+you can convert it to PDF for use in a document using <tt class="docutils literal"><span class="pre">epstopdf</span></tt>
+(free) or Adobe Acrobat Distiller (expensive).</p>
+</div>
+<div class="section" id="preference-map-plots">
+<h3>Preference Map plots<a class="headerlink" href="#preference-map-plots" title="Permalink to this headline">¶</a></h3>
+<p>In the GUI, plots in one of these windows can be saved by right
+clicking on one and selecting <tt class="docutils literal"><span class="pre">Save</span> <span class="pre">as</span> <span class="pre">PNG</span></tt>. A unique filename is
+generated automatically. You can also save these images from a
+script, e.g. in batch mode, using <a class="reference external" href="commandline.html#saving-bitmaps">save_plotgroup</a>.</p>
+</div>
+<div class="section" id="color-keys">
+<h3>Color keys<a class="headerlink" href="#color-keys" title="Permalink to this headline">¶</a></h3>
+<p>PlotGroups that include color-based plots, such as preference maps,
+typically include a color key when displayed in a Topographica
+window. A low-resolution bitmap version of the key is saved with the
+plots by save_plotgroup, but for publication it is usually better
+to use the original vector-format PDF files from which the bitmaps
+were generated. The PDF files will usually be located near the
+bitmap used in the PlotGroup. For instance, the &#8216;Orientation
+Preference&#8217; PlotGroup defined in topo/command/analysis.py specifies
+that the key is &#8216;topo/command/or_key_white_vert_small.png&#8217;, and
+the corresponding PDF file is
+&#8216;topo/command/or_key_white_vert.pdf&#8217;.</p>
+</div>
+<div class="section" id="activity-and-connectionfield-plots">
+<h3>Activity and ConnectionField plots<a class="headerlink" href="#activity-and-connectionfield-plots" title="Permalink to this headline">¶</a></h3>
+<p>Plots in these windows can be saved just as for Preference Map
+plots, using <a class="reference external" href="commandline.html#saving-bitmaps">save_plotgroup</a>.</p>
+<p>Note that if you plan to show plots from different Sheets in your
+paper (e.g. multiple ConnectionFields side by side, or Activity in
+each Sheet), you will usually want to ensure that each plot is
+plotted at the same size scale, so that their sizes will faithfully
+reflect their Sheet coordinate sizes. To do this, you would turn
+<tt class="docutils literal"><span class="pre">Sheet</span> <span class="pre">Coordinates</span></tt> on and <tt class="docutils literal"><span class="pre">Integer</span> <span class="pre">Scaling</span></tt> off. This way, the
+relative sizes of the sheets will be preserved, at the expense of
+individual units being slightly different sizes and the overall
+image size being larger. You will still need to ensure that the
+relative sizes are preserved when presenting the images in a paper,
+of course. Otherwise, the reader is likely to be confused about what
+part of each plot corresponds to the others.</p>
+</div>
+<div class="section" id="projection-plots">
+<h3>Projection plots<a class="headerlink" href="#projection-plots" title="Permalink to this headline">¶</a></h3>
+<p>The GUI does not yet support saving Projection plots from the
+right-click menu. However, they can be saved in PNG format from the
+command line using <a class="reference external" href="commandline.html#saving-bitmaps">save_plotgroup</a>.</p>
+<p>Alternatively, they can be selected by taking a screenshot using
+your favorite such utility. First, be sure to make the CFs as small
+as possible on screen; there is no need to store many bytes of data
+for each weight value (unless you want very thin outlines around the
+weights). Also, be sure that each pixel represents one unit, by
+turning on <tt class="docutils literal"><span class="pre">Integer</span> <span class="pre">Scaling</span></tt>. That way each unit will be plotted
+as either 1x1, 2x2, 3x3, etc., rather than some being 1x2, some 2x3,
+etc., as needed to reach a certain fixed overall plot size. Be sure
+to hit <tt class="docutils literal"><span class="pre">Reduce</span></tt> as many times as you can, to get down to 1 pixel
+per unit. It does not matter that the plot will be too small on
+screen at that point; it will be fine in the final document if it is
+scaled appropriately. Be sure to save in PNG or another <a class="reference external" href="#image-types">appropriate
+bitmap format</a>, rather than GIF or JPG.</p>
+</div>
+</div>
+<div class="section" id="citations">
+<h2>Citations<a class="headerlink" href="#citations" title="Permalink to this headline">¶</a></h2>
+<p>If you use this software in work leading to an academic publication,
+please cite the following paper so that readers will know how to
+replicate your results and build upon them. (Plus, it is only polite
+to cite work done by others that you rely on!)</p>
+<blockquote>
+<div>James&nbsp;A. Bednar. <a class="reference external" href="http://www.brains-minds-media.org/archive/1402">Understanding Neural Maps with Topographica</a>.
+Brains, Minds, and Media, 3:bmm1402, 2008.</div></blockquote>
+<p>or in BibTeX format:</p>
+<div class="highlight-python"><pre>@Article{bednar:bmm08,
+  author   = "James A. Bednar",
+  title    = "Understanding Neural Maps with {Topographica}",
+  journal  = "Brains, Minds, and Media",
+  year     = 2008,
+  volume   = 3,
+  pages    = "bmm1402",
+  url      = "http://www.brains-minds-media.org/archive/1402",
+}</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Publishing Topographica results</a><ul>
+<li><a class="reference internal" href="#image-types-photos-bitmaps-and-vector-graphics">Image types: photos, bitmaps, and vector graphics</a></li>
+<li><a class="reference internal" href="#printed-versus-displayed-graphics-white-versus-black-backgrounds">Printed versus displayed graphics (white versus black backgrounds)</a></li>
+<li><a class="reference internal" href="#topographica-plots">Topographica plots</a><ul>
+<li><a class="reference internal" href="#model-architecture">Model architecture</a></li>
+<li><a class="reference internal" href="#preference-map-plots">Preference Map plots</a></li>
+<li><a class="reference internal" href="#color-keys">Color keys</a></li>
+<li><a class="reference internal" href="#activity-and-connectionfield-plots">Activity and ConnectionField plots</a></li>
+<li><a class="reference internal" href="#projection-plots">Projection plots</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#citations">Citations</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="interfacing.html"
+                        title="previous chapter">Interfacing to external simulators</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="multicore.html"
+                        title="next chapter">Using multiple cores with Topographica</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/User_Manual/publishing.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="multicore.html" title="Using multiple cores with Topographica"
+             >next</a></li>
+        <li class="right" >
+          <a href="interfacing.html" title="Interfacing to external simulators"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

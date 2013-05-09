@@ -1,0 +1,508 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sheet</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Sheet classes.</span>
+
+<span class="sd">A Sheet is a two-dimensional arrangement of processing units,</span>
+<span class="sd">typically modeling a neural region or a subset of cells in a neural</span>
+<span class="sd">region.  Any new Sheet classes added to this directory will</span>
+<span class="sd">automatically become available for any model.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># Imported here so that all Sheets will be in the same package</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.base.projection</span> <span class="kn">import</span> <span class="n">ProjectionSheet</span>  <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.misc.generatorsheet</span> <span class="kn">import</span> <span class="n">GeneratorSheet</span>
+
+<span class="c"># Imported here for ease of access by users</span>
+<span class="kn">from</span> <span class="nn">topo.base.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>  <span class="c"># pyflakes:ignore (API import)</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">activity_type</span>  <span class="c"># pyflakes:ignore (API import)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFIter</span>
+<span class="kn">from</span> <span class="nn">topo.base.projection</span> <span class="kn">import</span> <span class="n">Projection</span>
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">FunctionEvent</span><span class="p">,</span> <span class="n">PeriodicEventSequence</span><span class="p">,</span> <span class="n">EPConnectionEvent</span>
+
+
+<div class="viewcode-block" id="ActivityCopy"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.ActivityCopy">[docs]</a><span class="k">class</span> <span class="nc">ActivityCopy</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Copies incoming Activity patterns to its activity matrix and output port.</span>
+
+<span class="sd">    Trivial Sheet class that is useful primarily as a placeholder for</span>
+<span class="sd">    data that is computed elsewhere but that you want to appear as a</span>
+<span class="sd">    Sheet, e.g. when wrapping an external simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dest_ports</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+    <span class="n">src_ports</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">=</span><span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;input_data&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">*=</span><span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span>
+
+
+</div>
+<div class="viewcode-block" id="SequenceGeneratorSheet"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.SequenceGeneratorSheet">[docs]</a><span class="k">class</span> <span class="nc">SequenceGeneratorSheet</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sheet that generates a timed sequence of patterns.</span>
+
+<span class="sd">    This sheet will repeatedly generate the input_sequence, with the</span>
+<span class="sd">    given onsets.  The sequence is repeated every self.period time</span>
+<span class="sd">    units.  If the total length of the sequence is longer than</span>
+<span class="sd">    self.period, a warning is issued and the sequence repeats</span>
+<span class="sd">    immediately after completion.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_sequence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+          <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The sequence of patterns to generate.  Must be a list of</span>
+<span class="s">          (onset,generator) tuples. An empty list defaults to the</span>
+<span class="s">          single tuple: (0,self.input_generator), resulting in</span>
+<span class="s">          identical behavior to an ordinary GeneratorSheet.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SequenceGeneratorSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sequence</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_sequence</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">input_generator</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span>
+
+        <span class="n">event_seq</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">delay</span><span class="p">,</span><span class="n">gen</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_sequence</span><span class="p">:</span>
+            <span class="n">event_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FunctionEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="n">delay</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">set_input_generator</span><span class="p">,</span><span class="n">gen</span><span class="p">))</span>
+            <span class="n">event_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FunctionEvent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">))</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">PeriodicEventSequence</span><span class="p">(</span><span class="n">now</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">),</span><span class="n">event_seq</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">enqueue_event</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="compute_joint_norm_totals"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.compute_joint_norm_totals">[docs]</a><span class="k">def</span> <span class="nf">compute_joint_norm_totals</span><span class="p">(</span><span class="n">projlist</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute norm_total for each CF in each projection from a group to</span>
+<span class="sd">    be normalized jointly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Assumes that all Projections in the list have the same r,c size</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">projlist</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">1</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="n">CFIter</span><span class="p">(</span><span class="n">projlist</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">active_units_mask</span><span class="o">=</span><span class="n">active_units_mask</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">junk</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+        <span class="n">sums</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">norm_total</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">]</span>
+        <span class="n">joint_sum</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">sums</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">flatcfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">norm_total</span><span class="o">=</span><span class="n">joint_sum</span>
+
+</div>
+<div class="viewcode-block" id="JointNormalizingCFSheet"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.JointNormalizingCFSheet">[docs]</a><span class="k">class</span> <span class="nc">JointNormalizingCFSheet</span><span class="p">(</span><span class="n">CFSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A type of CFSheet extended to support joint sum-based normalization.</span>
+
+<span class="sd">    For L1 normalization, joint normalization means normalizing the</span>
+<span class="sd">    sum of (the absolute values of) all weights in a set of</span>
+<span class="sd">    corresponding CFs in different Projections, rather than only</span>
+<span class="sd">    considering weights in the same CF.</span>
+
+<span class="sd">    This class provides a mechanism for grouping Projections (see</span>
+<span class="sd">    _port_match and _grouped_in_projections) and a learn() function</span>
+<span class="sd">    that computes the joint sums.  Joint normalization also requires</span>
+<span class="sd">    having ConnectionField store and return a norm_total for each</span>
+<span class="sd">    neuron, and having an TransferFn that will respect this norm_total</span>
+<span class="sd">    rather than the strict total of the ConnectionField&#39;s weights.  At</span>
+<span class="sd">    present, CFPOF_DivisiveNormalizeL1 and</span>
+<span class="sd">    CFPOF_DivisiveNormalizeL1_opt do use norm_total; others can be</span>
+<span class="sd">    extended to do something similar if necessary.</span>
+
+<span class="sd">    To enable joint normalization, you can declare that all the</span>
+<span class="sd">    incoming connections that should be normalized together each</span>
+<span class="sd">    have a dest_port of:</span>
+
+<span class="sd">    dest_port=(&#39;Activity&#39;,&#39;JointNormalize&#39;, &#39;AfferentGroup1&#39;),</span>
+
+<span class="sd">    Then all those that have this dest_port will be normalized</span>
+<span class="sd">    together, as long as an appropriate TransferFn is being used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">joint_norm_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">compute_joint_norm_totals</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function to use to compute the norm_total for each CF in each</span>
+<span class="s">        projection from a group to be normalized jointly.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># JABALERT: Should check that whenever a connection is added to a</span>
+    <span class="c"># group, it has the same no of cfs as the existing connections.</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_weights</span><span class="p">(</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+    <span class="c"># CEBALERT: rename active_units_mask and default to False</span>
+    <span class="k">def</span> <span class="nf">_normalize_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply the weights_output_fns for every group of Projections.</span>
+
+<span class="sd">        If active_units_mask is True, only active units will have</span>
+<span class="sd">        their weights normalized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">projlist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grouped_in_projections</span><span class="p">(</span><span class="s">&#39;JointNormalize&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">normtype</span><span class="o">=</span><span class="s">&#39;Individually&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">normtype</span><span class="o">=</span><span class="s">&#39;Jointly&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">joint_norm_fn</span><span class="p">(</span><span class="n">projlist</span><span class="p">,</span><span class="n">active_units_mask</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">normtype</span> <span class="o">+</span> <span class="s">&quot; normalizing:&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">apply_learn_output_fns</span><span class="p">(</span><span class="n">active_units_mask</span><span class="o">=</span><span class="n">active_units_mask</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;  &#39;</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="JointNormalizingCFSheet.learn"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.JointNormalizingCFSheet.learn">[docs]</a>    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Call the learn() method on every Projection to the Sheet, and</span>
+<span class="sd">        call the output functions (jointly if necessary).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Ask all projections to learn independently</span>
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span><span class="n">Projection</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Skipping non-Projection &quot;</span><span class="o">+</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">proj</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+
+        <span class="c"># Apply output function in groups determined by dest_port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_weights</span><span class="p">()</span>
+
+
+</div></div>
+<div class="viewcode-block" id="JointNormalizingCFSheet_Continuous"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.JointNormalizingCFSheet_Continuous">[docs]</a><span class="k">class</span> <span class="nc">JointNormalizingCFSheet_Continuous</span><span class="p">(</span><span class="n">JointNormalizingCFSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CFSheet that runs continuously, with no &#39;resting&#39; periods between pattern presentations.</span>
+
+<span class="sd">    Note that learning occurs only when the time is a whole number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span><span class="p">:</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">False</span>
+           <span class="k">if</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">%</span> <span class="mf">1.0</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">):</span>
+               <span class="c">#self.activate()</span>
+               <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">):</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+           <span class="c">#else:</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+
+</div>
+<div class="viewcode-block" id="SettlingCFSheet"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.SettlingCFSheet">[docs]</a><span class="k">class</span> <span class="nc">SettlingCFSheet</span><span class="p">(</span><span class="n">JointNormalizingCFSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A JointNormalizingCFSheet implementing the idea of settling.</span>
+
+<span class="sd">    Breaks continuous time up into discrete iterations, each</span>
+<span class="sd">    consisting of a series of activations, up to a fixed number of</span>
+<span class="sd">    settling steps.  Settling is controlled by the tsettle parameter;</span>
+<span class="sd">    once that number of settling steps has been reached, an external</span>
+<span class="sd">    input is required before the sheet will activate again.</span>
+
+<span class="sd">    See the LISSOM algorithm (Sirosh and Miikkulainen, Biological</span>
+<span class="sd">    Cybernetics 71:66-78, 1994) for one example of its usage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">strict_tsettle</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If non-None, delay sending output until activation_count reaches this value.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">mask_init_time</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Determines when a new mask is initialized in each new iteration.</span>
+
+<span class="s">        The mask is reset whenever new input comes in.  Once the</span>
+<span class="s">        activation_count (see tsettle) reaches mask_init_time, the mask</span>
+<span class="s">        is initialized to reflect the current activity profile.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">tsettle</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Number of times to activate the SettlingCFSheet sheet for each external input event.</span>
+
+<span class="s">        A counter is incremented each time an input is received from any</span>
+<span class="s">        source, and once the counter reaches tsettle, the last activation</span>
+<span class="s">        step is skipped so that there will not be any further recurrent</span>
+<span class="s">        activation.  The next external (i.e., afferent or feedback)</span>
+<span class="s">        event will then start the counter over again.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">continuous_learning</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to modify the weights after every settling step.</span>
+<span class="s">        If false, waits until settling is completed before doing learning.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">precedence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mf">0.6</span><span class="p">)</span>
+
+    <span class="n">post_initialization_weights_output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">([],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If not empty, weights output_fns that will replace the</span>
+<span class="s">        existing ones after an initial normalization step.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">beginning_of_iteration</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">instantiate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of callables to be executed at the beginning of each iteration.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">end_of_iteration</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">instantiate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of callables to be executed at the end of each iteration.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__counter_stack</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_weights</span><span class="p">(</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_initialization_weights_output_fns</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span><span class="n">Projection</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Skipping non-Projection &quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">proj</span><span class="o">.</span><span class="n">weights_output_fns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">post_initialization_weights_output_fns</span>
+
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="c"># On a new afferent input, clear the activity</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">beginning_of_iteration</span><span class="p">:</span> <span class="n">f</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+                <span class="n">proj</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="mf">0.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">input_event</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+
+
+    <span class="c">### JABALERT!  There should be some sort of warning when</span>
+    <span class="c">### tsettle times the input delay is larger than the input period.</span>
+    <span class="c">### Right now it seems to do strange things in that case (does it</span>
+    <span class="c">### settle at all after the first iteration?), but of course that</span>
+    <span class="c">### is arguably an error condition anyway (and should thus be</span>
+    <span class="c">### flagged).</span>
+    <span class="c"># CEBALERT: there is at least one bug in here for tsettle==0: see</span>
+    <span class="c"># CB/JAB email &quot;LISSOM tsettle question&quot;, 2010/03/22.</span>
+<div class="viewcode-block" id="SettlingCFSheet.process_current_time"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.SettlingCFSheet.process_current_time">[docs]</a>    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pass the accumulated stimulation through self.output_fns and</span>
+<span class="sd">        send it out on the default output port.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_init_time</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tsettle</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># Special case: behave just like a CFSheet</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tsettle</span><span class="p">:</span>
+                <span class="c"># Once we have been activated the required number of times</span>
+                <span class="c"># (determined by tsettle), reset various counters, learn</span>
+                <span class="c"># if appropriate, and avoid further activation until an</span>
+                <span class="c"># external event arrives.</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_of_iteration</span><span class="p">:</span> <span class="n">f</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span> <span class="o">=</span> <span class="bp">True</span> <span class="c"># used by input_event when it is called</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuous_learning</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuous_learning</span><span class="p">):</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+
+
+    <span class="c"># print the weights of a unit</span></div>
+    <span class="k">def</span> <span class="nf">printwts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+            <span class="k">print</span> <span class="n">proj</span><span class="o">.</span><span class="n">cfs</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">weights</span>
+
+
+    <span class="k">def</span> <span class="nf">state_push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_push</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__counter_stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">state_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SettlingCFSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">state_pop</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">new_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__counter_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SettlingCFSheet.send_output"><a class="viewcode-back" href="../../Reference_Manual/topo.sheet-module.html#topo.sheet.SettlingCFSheet.send_output">[docs]</a>    <span class="k">def</span> <span class="nf">send_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">src_port</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send some data out to all connections on the given src_port.&quot;&quot;&quot;</span>
+
+        <span class="n">out_conns_on_src_port</span> <span class="o">=</span> <span class="p">[</span><span class="n">conn</span> <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_connections</span>
+                                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_match</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">src_port</span><span class="p">,[</span><span class="n">src_port</span><span class="p">])]</span>
+
+        <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">out_conns_on_src_port</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict_tsettle</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+               <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_count</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict_tsettle</span><span class="p">:</span>
+                   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">dest_port</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">conn</span><span class="o">.</span><span class="n">dest_port</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Afferent&#39;</span><span class="p">:</span>
+                       <span class="k">continue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Sending output on src_port </span><span class="si">%s</span><span class="s"> via connection </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+                         <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">src_port</span><span class="p">),</span> <span class="n">conn</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">conn</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">e</span><span class="o">=</span><span class="n">EPConnectionEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">enqueue_event</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+
+</div></div>
+<span class="n">_public</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">_k</span> <span class="k">for</span> <span class="n">_k</span><span class="p">,</span><span class="n">_v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="n">Sheet</span><span class="p">)]))</span>
+<span class="n">_public</span> <span class="o">+=</span> <span class="p">[</span>
+    <span class="s">&quot;compute_joint_norm_totals&quot;</span><span class="p">,</span>
+    <span class="s">&quot;BoundingBox&quot;</span><span class="p">,</span>
+    <span class="s">&quot;activity_type&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c"># Automatically discover all .py files in this directory.</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">fnmatch</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="n">_public</span> <span class="o">+</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.py&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s">&#39;[!._]*.py&#39;</span><span class="p">)]</span>
+<span class="k">del</span> <span class="n">f</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">fnmatch</span>
+
+<span class="c"># By default, avoid loading modules that rely on external libraries</span>
+<span class="c"># that might not be present on this system.</span>
+<span class="n">__all__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;ptztracker&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/sheet.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

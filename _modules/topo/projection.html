@@ -1,0 +1,539 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.projection &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.projection</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Projection classes.</span>
+
+<span class="sd">A Projection is a connection between two Sheets, generally implemented</span>
+<span class="sd">as a large set of ConnectionFields.</span>
+
+<span class="sd">Any new Projection classes added to this directory will automatically</span>
+<span class="sd">become available for any model.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="c"># So all Projections are present in this package</span>
+<span class="kn">from</span> <span class="nn">topo.base.projection</span> <span class="kn">import</span> <span class="n">Projection</span>
+<span class="kn">from</span> <span class="nn">topo.base.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">activity_type</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheetcoords</span> <span class="kn">import</span> <span class="n">Slice</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFProjection</span><span class="p">,</span><span class="n">ConnectionField</span><span class="p">,</span>\
+     <span class="n">CFPLearningFn</span><span class="p">,</span><span class="n">CFPLF_Identity</span><span class="p">,</span><span class="n">CFPOutputFn</span><span class="p">,</span><span class="n">CFIter</span><span class="p">,</span><span class="n">ResizableCFProjection</span>
+<span class="kn">from</span> <span class="nn">topo.base.patterngenerator</span> <span class="kn">import</span> <span class="n">PatternGenerator</span><span class="p">,</span><span class="n">Constant</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">CoordinateMapperFn</span><span class="p">,</span><span class="n">IdentityMF</span>
+<span class="kn">from</span> <span class="nn">topo.misc.util</span> <span class="kn">import</span> <span class="n">rowcol2idx</span>
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">TransferFn</span><span class="p">,</span><span class="n">IdentityTF</span>
+<span class="kn">from</span> <span class="nn">topo.learningfn</span> <span class="kn">import</span> <span class="n">LearningFn</span><span class="p">,</span><span class="n">IdentityLF</span>
+<span class="kn">from</span> <span class="nn">topo.base</span> <span class="kn">import</span> <span class="n">patterngenerator</span>
+
+<div class="viewcode-block" id="CFPOF_SharedWeight"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.CFPOF_SharedWeight">[docs]</a><span class="k">class</span> <span class="nc">CFPOF_SharedWeight</span><span class="p">(</span><span class="n">CFPOutputFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CFPOutputFn for use with SharedWeightCFProjections.</span>
+
+<span class="sd">    Applies the single_cf_fn to the single shared CF&#39;s weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">TransferFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">IdentityTF</span><span class="p">())</span>
+
+    <span class="c"># CEBALERT: remove norm_values?</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfs</span><span class="p">,</span> <span class="n">norm_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the specified single_cf_fn to every CF.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IdentityTF</span><span class="p">:</span>
+            <span class="n">cf</span> <span class="o">=</span> <span class="n">cfs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+</div>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">_create_mask</span>
+
+<span class="k">class</span> <span class="nc">SharedWeightCF</span><span class="p">(</span><span class="n">ConnectionField</span><span class="p">):</span>
+
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cf</span><span class="p">,</span><span class="n">input_sheet</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">template</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+                 <span class="n">mask</span><span class="o">=</span><span class="n">patterngenerator</span><span class="o">.</span><span class="n">Constant</span><span class="p">(),</span>
+                 <span class="n">min_matrix_radius</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        From an existing copy of ConnectionField (CF) that acts as a</span>
+<span class="sd">        template, create a new CF that shares weights with the</span>
+<span class="sd">        template CF.  Copies all the properties of CF to stay</span>
+<span class="sd">        identical except the weights variable that actually contains</span>
+<span class="sd">        the data.</span>
+
+<span class="sd">        The only difference from a normal CF is that the weights of</span>
+<span class="sd">        the CF are implemented as a numpy view into the single master</span>
+<span class="sd">        copy of the weights stored in the CF template.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># CEBALERT: There&#39;s no call to super&#39;s __init__; see JAHACKALERT</span>
+        <span class="c"># below.</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template</span><span class="p">,</span><span class="n">Slice</span><span class="p">):</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="n">template</span><span class="p">,</span><span class="n">input_sheet</span><span class="p">,</span><span class="n">force_odd</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                             <span class="n">min_matrix_radius</span><span class="o">=</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+
+        <span class="c"># Note: if passed in, mask is shared between CFs (but not if created here)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span><span class="s">&#39;view&#39;</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">_create_mask</span><span class="p">(</span><span class="n">patterngenerator</span><span class="o">.</span><span class="n">Constant</span><span class="p">(),</span>
+                               <span class="n">template</span><span class="o">.</span><span class="n">compute_bounds</span><span class="p">(</span><span class="n">input_sheet</span><span class="p">),</span>
+                               <span class="n">input_sheet</span><span class="p">,</span><span class="bp">True</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_has_norm_total</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_norm_total</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">=</span><span class="n">mask</span>
+        <span class="n">weights_slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_input_sheet_slice</span><span class="p">(</span><span class="n">input_sheet</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">template</span><span class="p">,</span><span class="n">min_matrix_radius</span><span class="o">=</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights_slice</span><span class="o">.</span><span class="n">submatrix</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="c"># JAHACKALERT the TransferFn cannot be applied in SharedWeightCF</span>
+        <span class="c"># - another inconsistency in the class tree design - there</span>
+        <span class="c"># should be nothing in the parent class that is ignored in its</span>
+        <span class="c"># children.  Probably need to extract some functionality of</span>
+        <span class="c"># ConnectionField into a shared abstract parent class.</span>
+        <span class="c"># We have agreed to make this right by adding a constant property that</span>
+        <span class="c"># will be set true if the learning should be active</span>
+        <span class="c"># The SharedWeightCFProjection class and its anccestors will</span>
+        <span class="c"># have this property set to false which means that the</span>
+        <span class="c"># learning will be deactivated</span>
+
+
+
+<div class="viewcode-block" id="SharedWeightCFProjection"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.SharedWeightCFProjection">[docs]</a><span class="k">class</span> <span class="nc">SharedWeightCFProjection</span><span class="p">(</span><span class="n">CFProjection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Projection with a single set of weights, shared by all units.</span>
+
+<span class="sd">    Otherwise similar to CFProjection, except that learning is</span>
+<span class="sd">    currently disabled.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">### JABHACKALERT: Set to be constant as a clue that learning won&#39;t</span>
+    <span class="c">### actually work yet, but we could certainly extend it to support</span>
+    <span class="c">### learning if desired, e.g. to learn position-independent responses.</span>
+    <span class="n">learning_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">,</span><span class="n">CFPLF_Identity</span><span class="p">(),</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">weights_output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">CFPOF_SharedWeight</span><span class="p">()])</span>
+    <span class="n">precedence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the Projection with a single cf_type object</span>
+<span class="sd">        (typically a ConnectionField),</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># We don&#39;t want the whole set of cfs initialized, but we</span>
+        <span class="c"># do want anything that CFProjection defines.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SharedWeightCFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">initialize_cfs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c"># We want the sharedcf to be located on the grid, so use the</span>
+        <span class="c"># center of a unit</span>
+        <span class="n">sheet_rows</span><span class="p">,</span><span class="n">sheet_cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">shape</span>
+        <span class="c"># arbitrary (e.g. could use 0,0)</span>
+        <span class="n">center_row</span><span class="p">,</span><span class="n">center_col</span> <span class="o">=</span> <span class="n">sheet_rows</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">sheet_cols</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">center_unitxcenter</span><span class="p">,</span><span class="n">center_unitycenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">center_row</span><span class="p">,</span>
+                                                                       <span class="n">center_col</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sharedcf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cf_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
+                                     <span class="n">x</span><span class="o">=</span><span class="n">center_unitxcenter</span><span class="p">,</span>
+                                     <span class="n">y</span><span class="o">=</span><span class="n">center_unitycenter</span><span class="p">,</span>
+                                     <span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_slice_template</span><span class="p">,</span>
+                                     <span class="n">weights_generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_generator</span><span class="p">,</span>
+                                     <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_template</span><span class="p">,</span>
+                                     <span class="n">output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">wof</span><span class="o">.</span><span class="n">single_cf_fn</span> <span class="k">for</span> <span class="n">wof</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_output_fns</span><span class="p">],</span>
+                                     <span class="n">min_matrix_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_matrix_radius</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_cfs</span><span class="p">()</span>
+
+
+
+    <span class="k">def</span> <span class="nf">_create_cf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="c"># Does not pass the mask, as it would have to be sliced</span>
+        <span class="c"># for each cf, and is only used for learning.</span>
+        <span class="n">CF</span> <span class="o">=</span> <span class="n">SharedWeightCF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sharedcf</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                            <span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_slice_template</span><span class="p">,</span>
+                            <span class="n">min_matrix_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_matrix_radius</span><span class="p">,</span>
+                            <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_template</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">CF</span>
+
+
+<div class="viewcode-block" id="SharedWeightCFProjection.learn"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.SharedWeightCFProjection.learn">[docs]</a>    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Because of how output functions are applied, it is not currently</span>
+<span class="sd">        possible to use learning functions and learning output functions for</span>
+<span class="sd">        SharedWeightCFProjections, so we disable them here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="SharedWeightCFProjection.apply_learn_output_fns"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.SharedWeightCFProjection.apply_learn_output_fns">[docs]</a>    <span class="k">def</span> <span class="nf">apply_learn_output_fns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Because of how output functions are applied, it is not currently</span>
+<span class="sd">        possible to use learning functions and learning output functions for</span>
+<span class="sd">        SharedWeightCFProjections, so we disable them here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sharedcf</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">+</span> \
+               <span class="nb">sum</span><span class="p">([</span><span class="n">cf</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">nbytes</span>
+                    <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="n">CFIter</span><span class="p">(</span><span class="bp">self</span><span class="p">)()])</span>
+
+
+
+
+
+<span class="c"># JABALERT: Can this be replaced with a CFProjection with a Hysteresis output_fn?</span>
+<span class="c"># If not it should probably be replaced with a new output_fn type instead.</span></div>
+<div class="viewcode-block" id="LeakyCFProjection"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.LeakyCFProjection">[docs]</a><span class="k">class</span> <span class="nc">LeakyCFProjection</span><span class="p">(</span><span class="n">ResizableCFProjection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A projection that has a decay_rate parameter so that incoming</span>
+<span class="sd">    input is decayed over time as x(t) = input + x(t-1)*exp(-decay_rate),</span>
+<span class="sd">    and then the weighted sum of x(t) is calculated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">decay_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+                        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Input decay rate for each leaky synapse&quot;</span><span class="p">)</span>
+
+    <span class="n">precedence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LeakyCFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leaky_input_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LeakyCFProjection.activate"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.LeakyCFProjection.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_activity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retain input_activity from the previous step in leaky_input_buffer</span>
+<span class="sd">        and add a leaked version of it to the current input_activity. This</span>
+<span class="sd">        function needs to deal with a finer time-scale.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leaky_input_buffer</span> <span class="o">=</span> <span class="n">input_activity</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">leaky_input_buffer</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">decay_rate</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LeakyCFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leaky_input_buffer</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">LeakyCFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">n_bytes</span><span class="p">()</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">nbytes</span><span class="o">*</span><span class="mi">1</span> <span class="c"># for leaky_input_buffer</span>
+
+</div>
+<div class="viewcode-block" id="ScaledCFProjection"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.ScaledCFProjection">[docs]</a><span class="k">class</span> <span class="nc">ScaledCFProjection</span><span class="p">(</span><span class="n">CFProjection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows scaling of activity based on a specified target average activity.</span>
+
+<span class="sd">    An exponentially weighted average is used to calculate the average</span>
+<span class="sd">    activity.  This average is then used to calculate scaling factors</span>
+<span class="sd">    for the current activity and for the learning rate.</span>
+
+<span class="sd">    The plastic parameter can be used to turn off updating of the average</span>
+<span class="sd">    activity, e.g. during map measurement.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.045</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Target average activity for the projection.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">target_lr</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.045</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Target average activity for scaling the learning rate.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">smoothing</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Influence of previous activity, relative to current, for computing the average.&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">precedence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="c"># JABALERT: Private variables should be prefixed __ (truly private) or _ (nominally private)</span>
+        <span class="c"># Are all of these really something you expect people to be using outside this class?</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ScaledCFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sf</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr_sf</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaled_x_avg</span><span class="o">=</span><span class="bp">None</span>
+
+
+<div class="viewcode-block" id="ScaledCFProjection.calculate_sf"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.ScaledCFProjection.calculate_sf">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_sf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate current scaling factors based on the target and previous average activities.</span>
+
+<span class="sd">        Keeps track of the scaled average for debugging. Could be</span>
+<span class="sd">        overridden by a subclass to calculate the factors differently.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="o">*=</span><span class="mf">0.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lr_sf</span> <span class="o">*=</span><span class="mf">0.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lr_sf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_lr</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaled_x_avg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scaled_x_avg</span>
+
+</div>
+<div class="viewcode-block" id="ScaledCFProjection.do_scaling"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.ScaledCFProjection.do_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">do_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scale the projection activity and learning rate for the projection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_fn</span><span class="p">,</span><span class="s">&#39;learning_rate_scaling_factor&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">learning_fn</span><span class="o">.</span><span class="n">update_scaling_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lr_sf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Projections to be called must have learning function which supports scaling (e.g. CFPLF_PluginScaled).&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ScaledCFProjection.activate"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.ScaledCFProjection.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_activity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Activate using the specified response_fn and output_fn.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="n">input_activity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span><span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_avg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">activity_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled_x_avg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaled_x_avg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">activity_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">activity_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_sf</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lr_sf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">activity_type</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">response_fn</span><span class="p">(</span><span class="n">CFIter</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">input_activity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strength</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_sf</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_scaling</span><span class="p">()</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ScaledCFProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">n_bytes</span><span class="p">()</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">nbytes</span><span class="o">*</span><span class="mi">4</span> <span class="c"># for x_avg,sf,lr_sf,scaled_x_avg</span>
+
+
+</div>
+<div class="viewcode-block" id="OneToOneProjection"><a class="viewcode-back" href="../../Reference_Manual/topo.projection-module.html#topo.projection.OneToOneProjection">[docs]</a><span class="k">class</span> <span class="nc">OneToOneProjection</span><span class="p">(</span><span class="n">Projection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A projection that has at most one input connection for each unit.</span>
+
+<span class="sd">    This projection has exactly one weight for each destination unit.</span>
+<span class="sd">    The input locations on the input sheet are determined by a</span>
+<span class="sd">    coordinate mapper.  Inputs that map outside the bounds of the</span>
+<span class="sd">    input sheet are treated as having zero weight.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">coord_mapper</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">IdentityMF</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&#39;Function to map a destination unit coordinate into the src sheet.&#39;</span><span class="p">)</span>
+
+    <span class="n">weights_generator</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">PatternGenerator</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">Constant</span><span class="p">(),</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Generate initial weight values for each unit of the destination sheet.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">learning_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">IdentityLF</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;Learning function applied to weights.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OneToOneProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">dx</span><span class="p">,</span><span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span>
+
+        <span class="c"># JPALERT: Not sure if this is the right way to generate weights.</span>
+        <span class="c"># For full specificity, each initial weight should be dependent on the</span>
+        <span class="c"># coordinates of both the src unit and the dest unit.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_generator</span><span class="p">(</span><span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                                              <span class="n">xdensity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                              <span class="n">ydensity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">ydensity</span><span class="p">)</span>
+
+
+        <span class="c"># JPALERT: CoordMapperFns should really be made to take</span>
+        <span class="c"># matrices of x/y points and apply their mapping to all.  This</span>
+        <span class="c"># could give great speedups, esp for AffineTransform mappings,</span>
+        <span class="c"># which can be applied to many points with a single matrix</span>
+        <span class="c"># multiplication.</span>
+        <span class="n">srccoords</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coord_mapper</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">sheet_rows</span><span class="p">())</span>
+                     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">sheet_cols</span><span class="p">()]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rowcol2idx</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                               <span class="k">for</span> <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+                                           <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">srccoords</span><span class="p">)])</span>
+
+        <span class="c"># dest_idxs contains the indices of the dest units whose weights project</span>
+        <span class="c"># in bounds on the src sheet.</span>
+        <span class="n">src_rows</span><span class="p">,</span><span class="n">src_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">def</span> <span class="nf">in_bounds</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">src_rows</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">src_cols</span><span class="p">)</span>
+        <span class="n">destmask</span> <span class="o">=</span> <span class="p">[</span><span class="n">in_bounds</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">srccoords</span><span class="p">]</span>
+
+        <span class="c"># The [0] is required because numpy.nonzero returns the</span>
+        <span class="c"># nonzero indices wrapped in a one-tuple.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dest_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">destmask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_idxs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_idxs</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest_idxs</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest_idxs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_idxs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">input</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="o">=</span> <span class="nb">input</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest_idxs</span><span class="p">)</span> <span class="o">*</span> <span class="nb">input</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_idxs</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">strength</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest_idxs</span><span class="p">,</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">learning_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_buffer</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">n_conns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">return</span> <span class="n">rows</span><span class="o">*</span><span class="n">cols</span>
+
+    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">OneToOneProjection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">n_bytes</span><span class="p">()</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">nbytes</span>
+
+</div>
+<span class="n">_public</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">_k</span> <span class="k">for</span> <span class="n">_k</span><span class="p">,</span><span class="n">_v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span><span class="n">Projection</span><span class="p">)]))</span>
+<span class="n">_public</span> <span class="o">+=</span> <span class="p">[</span>
+    <span class="s">&quot;CFPOF_SharedWeight&quot;</span><span class="p">,</span>
+    <span class="s">&quot;SharedWeightCF&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c"># Automatically discover all .py files in this directory.</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">fnmatch</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="n">_public</span> <span class="o">+</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.py&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s">&#39;[!._]*.py&#39;</span><span class="p">)]</span>
+<span class="k">del</span> <span class="n">f</span><span class="p">,</span><span class="n">os</span><span class="p">,</span><span class="n">fnmatch</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/projection.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

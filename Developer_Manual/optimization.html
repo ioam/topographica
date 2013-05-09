@@ -1,0 +1,600 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Performance optimization &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Developer Manual" href="index.html" />
+    <link rel="next" title="Memory usage" href="memuse.html" />
+    <link rel="prev" title="Implementing the GUI" href="gui.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="memuse.html" title="Memory usage"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="gui.html" title="Implementing the GUI"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="performance-optimization">
+<h1>Performance optimization<a class="headerlink" href="#performance-optimization" title="Permalink to this headline">¶</a></h1>
+<p>According to C.A.R. Hoare, &#8220;Premature optimization is the root of
+all evil&#8221;. Although the performance of Topographica is critically
+important, the way to achieve high performance is by spending <em>all</em>
+of our optimization efforts on the very small portion of the code
+that accounts for nearly all of the run time, i.e., the bottlenecks.
+The overall architecture of Topographica is designed explicitly to
+localize those bottlenecks into specific functions and objects that
+can then be heavily optimized without affecting any of the rest of
+the code. Only in such small, local regions, behind well-defined
+modules with clear semantics, is it possible to optimize effectively
+in a way that can be maintained in the long run. If it is precisely
+clear what the module is supposed to do, then the implementation can
+be polished to achieve that, while reasoning only about the behavior
+of that one specific module.</p>
+<p>Conversely, finding that good performance requires adding special
+hacks in the largest-scale, general-purpose parts of the overall
+Topographica architecture means that the architecture is flawed and
+needs to be re-thought. For instance, please do not add any special
+checks scattered through the code testing for specific
+PatternGenerator or Sheet objects, substituting a quicker version of
+some operation but falling back to the general case for others. Such
+code is impossible to understand and maintain, because changes to
+the specific object implementations will not have any effect.
+Instead, we can optimize the individual PatternGenerator or Sheet
+object heavily. If some special hack needs to be done at a high
+level, e.g. at the base Sheet class level, we can add a method there
+that then gets overridden in the subclass with the special purpose
+code. That way all optimization will be local (and thus
+maintainable). If it&#8217;s not clear how to optimize something cleanly,
+first do it uncleanly to see if it will have any effect, but don&#8217;t
+check it in to Git. If it looks like the optimization is worthwhile,
+brainstorm with other team members to figure out a way to do it
+cleanly and check in the clean version instead.</p>
+<p>This document considers runtime performance primarily; optimizing
+total memory is considered separately under <a class="reference external" href="memuse.html">Memory usage</a>. On the
+other hand, the <em>patterns</em> of access to memory are crucially
+important for performance in large simulations. For a good overview
+of how to optimize memory usage patterns, see <a class="reference external" href="http://lwn.net/Articles/250967/">Ulrich Drepper&#8217;s
+article</a>. If you are ambitious, even the most optimized components
+in Topographica could be further improved using these techniques,
+possibly substantially.</p>
+<div class="section" id="optimizing-python-code">
+<h2>Optimizing Python code<a class="headerlink" href="#optimizing-python-code" title="Permalink to this headline">¶</a></h2>
+<p>Although dramatic speedups usually require big changes as described
+below, sometimes all you need is minor tweaks to Python code to get
+it to have reasonable performance. Usually this involves avoiding
+unnecessary attribute lookup, as described in various collections of
+<a class="reference external" href="http://wiki.python.org/moin/PythonSpeed/PerformanceTips">Python performance tips</a>.</p>
+<p>What is usually more important to ensure is that anything that can
+use the array-based primitives provided by <a class="reference external" href="http://numpy.scipy.org/">numpy</a> does so, because
+these generally have underlying C implementations that are quite
+fast. Using numpy operations should be the first approach when
+optimizing any component, and indeed when writing the component for
+the first time (because the numpy primitives are much easier to use
+and maintain than e.g. explicitly writing <tt class="docutils literal"><span class="pre">for</span></tt> loops).</p>
+</div>
+<div class="section" id="providing-optimized-versions-of-topographica-objects">
+<h2>Providing optimized versions of Topographica objects<a class="headerlink" href="#providing-optimized-versions-of-topographica-objects" title="Permalink to this headline">¶</a></h2>
+<p>However, there are certain cases where the performance of numpy is
+not sufficient, or where numpy is unsuitable (for example, some
+numpy operations do not act in-place on arrays). Other components
+may be able to be implemented much more quickly if certain
+assumptions are made about the nature of their arguments, or the
+types of computations that can be performed.</p>
+<p>In these cases, it is worthwhile to have a reference version of the
+object that is simple to understand and does not make any special
+assumptions. Then, an optimized version can be offered as an
+alternative. The convention we use is to add the suffix <tt class="docutils literal"><span class="pre">_optN</span></tt> to
+the optimized version, where <tt class="docutils literal"><span class="pre">N</span></tt> is a number that allows to
+distinguish between different optimized versions. This is helpful
+both for understanding and for ensuring correctness.</p>
+<p>For example, consider <tt class="docutils literal"><span class="pre">CFPRF_DotProduct</span></tt>, from
+<tt class="docutils literal"><span class="pre">topo.responsefn.projfn</span></tt>. If users wish to use a version optimized
+by having been written in C, they can instead import
+<tt class="docutils literal"><span class="pre">CFPRF_DotProduct_opt</span></tt> from <tt class="docutils literal"><span class="pre">topo.responsefn.optimized</span></tt>. We use
+<tt class="docutils literal"><span class="pre">CFPRF_DotProduct_opt</span></tt> as standard in our code because it&#8217;s much
+faster than &#8212; but otherwise identical to &#8212; the unoptimized
+version. However, because <tt class="docutils literal"><span class="pre">CFPRF_DotProduct_opt</span></tt> relies on a more
+complex setup (having the weave module installed, as well as a
+correctly configured C++ compiler), we cannot assume all users will
+have access to it. It is also extremely difficult to read and
+understand. Therefore, we provide an automatic fall-back to the
+unoptimized version (see <tt class="docutils literal"><span class="pre">topo/responsefn/optimized.py</span></tt> for an
+example of how to do this).</p>
+<p>The non-optimized version also acts as a simple specification of
+exactly what the optimized version is supposed to do, apart from any
+optimizations. The optimized versions are often nearly unreadable,
+so having the simple version available is very helpful for
+understanding and debugging. The expectation is that the simple
+(slow) versions will rarely change, but the optimized ones will get
+faster and faster over time, while preserving the same user-visible
+behavior.</p>
+</div>
+<div class="section" id="finding-bottlenecks">
+<h2>Finding bottlenecks<a class="headerlink" href="#finding-bottlenecks" title="Permalink to this headline">¶</a></h2>
+<p>As discussed above, we wish to spend our time optimizing parts of
+the code that account for most of the run time. <tt class="docutils literal"><span class="pre">topo.misc.util</span></tt>
+contains the <tt class="docutils literal"><span class="pre">profile()</span></tt> function, providing a simple way to do
+this.</p>
+<p>In order to see how basic optimization could be applied, we now show
+how optimizing one component can lead to a dramatic improvement. We
+will use <tt class="docutils literal"><span class="pre">examples/lissom_oo_or.ty</span></tt> without its optimized response
+function, by replacing
+<tt class="docutils literal"><span class="pre">projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()</span></tt>
+with
+<tt class="docutils literal"><span class="pre">projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct()</span></tt>.</p>
+<p>Now we can run topographica as follows, using the <tt class="docutils literal"><span class="pre">profile()</span></tt>
+function to give us information about the performance:</p>
+<div class="highlight-python"><pre>$ ./topographica examples/lissom_oo_or.ty -c "from topo.misc.util import profile; \
+profile('topo.sim.run(99)',n=20)"
+
+       28148082 function calls (28145508 primitive calls) in 81.806 CPU seconds
+
+   Ordered by: cumulative time, internal time
+   List reduced from 245 to 20 due to restriction &lt;20&gt;
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.041    0.041   81.806   81.806 topo/base/simulation.py:1121(run)
+     2178    0.006    0.000   79.951    0.037 topo/base/simulation.py:437(__call__)
+     2178    0.021    0.000   79.925    0.037 topo/base/projection.py:399(input_event)
+     2178    0.003    0.000   79.879    0.037 topo/base/projection.py:527(present_input)
+     2178    0.052    0.000   79.875    0.037 topo/base/cf.py:696(activate)
+     1980    0.013    0.000   79.816    0.040 topo/sheet/lissom.py:95(input_event)
+     1980   19.207    0.010   79.640    0.040 topo/base/cf.py:348(__call__)
+  4561920    8.435    0.000   34.585    0.000 topo/base/functionfamily.py:125(__call__)
+  4561920   19.912    0.000   19.912    0.000 topo/base/sheetcoords.py:387(submatrix)
+  9124038   13.639    0.000   13.639    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+  4561920   12.512    0.000   12.512    0.000 {numpy.core._dotblas.dot}
+  4563900    5.848    0.000    5.932    0.000 topo/base/cf.py:861(__call__)
+     1188    0.010    0.000    1.133    0.001 topo/sheet/lissom.py:113(process_current_time)
+     1094    0.005    0.000    0.866    0.001 topo/misc/inlinec.py:72(inline_weave)
+     1094    0.017    0.000    0.855    0.001 lib/python2.6/site-packages/weave/inline_tools.py:130(inline)
+     1094    0.658    0.001    0.831    0.001 {apply}
+       99    0.001    0.000    0.684    0.007 topo/sheet/basic.py:284(learn)
+      100    0.002    0.000    0.546    0.005 topo/sheet/basic.py:263(_normalize_weights)
+       99    0.000    0.000    0.469    0.005 topo/base/simulation.py:511(__call__)
+       99    0.002    0.000    0.469    0.005 topo/sheet/basic.py:140(generate)</pre>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">n=20</span></tt> argument restricts the list to the top 20 functions,
+ordered by cumulative time. For more information about the types of
+ordering available, <tt class="docutils literal"><span class="pre">help(profile)</span></tt> provides a link to Python&#8217;s
+documentation.</p>
+<p>From <tt class="docutils literal"><span class="pre">profile()</span></tt>&#8216;s output above, we see (as expected) that all the
+time is spent in <tt class="docutils literal"><span class="pre">Simulation</span></tt>&#8216;s <tt class="docutils literal"><span class="pre">run()</span></tt> method. We must proceed
+down the list until we find a less granular function &#8212; one that
+does not call many others, but instead performs some atomic task.
+The first such function is <tt class="docutils literal"><span class="pre">cf.py:352(__call__)</span></tt> (<tt class="docutils literal"><span class="pre">cf.py</span></tt>, line
+352), <tt class="docutils literal"><span class="pre">CFPRF_Plugin</span></tt>&#8216;s <tt class="docutils literal"><span class="pre">__call__()</span></tt> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">CFPRF_Plugin</span><span class="p">(</span><span class="n">CFPResponseFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic large-scale response function based on a simple single-CF function.</span>
+
+<span class="sd">    Applies the single_cf_fn to each CF in turn.  For the default</span>
+<span class="sd">    single_cf_fn of DotProduct(), does a basic dot product of each CF with the</span>
+<span class="sd">    corresponding slice of the input array.  This function is likely</span>
+<span class="sd">    to be slow to run, but it is easy to extend with any arbitrary</span>
+<span class="sd">    single-CF response function.</span>
+
+<span class="sd">    The single_cf_fn must be a function f(X,W) that takes two</span>
+<span class="sd">    identically shaped matrices X (the input) and W (the</span>
+<span class="sd">    ConnectionField weights) and computes a scalar activation value</span>
+<span class="sd">    based on those weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">ResponseFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">DotProduct</span><span class="p">(),</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Accepts a ResponseFn that will be applied to each CF individually.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">strength</span><span class="p">):</span>
+        <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_cf_fn</span>
+        <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">():</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">input_sheet_slice</span><span class="o">.</span><span class="n">submatrix</span><span class="p">(</span><span class="n">input_activity</span><span class="p">)</span>
+            <span class="n">activity</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_cf_fn</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">cf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">activity</span> <span class="o">*=</span> <span class="n">strength</span>
+</pre></div>
+</div>
+<p>About 97% of the total run time is spent in this method, so if we
+were able to optimize it, this would lead to good optimization of
+the simulation in total.</p>
+<p>How do we begin to optimize this method? In the first section of
+profile()&#8217;s output, we have more fine-grained information about the
+occupation of the CPU while executing this method:</p>
+<div class="highlight-python"><pre>Function                       called...
+                                    ncalls  tottime  cumtime
+...
+topo/base/cf.py:348(__call__)  -&gt;    1980    0.003    0.004  param/parameterized.py:339(__get__)
+                                  4563900    5.848    5.932  topo/base/cf.py:861(__call__)
+                                  4561920    8.435   34.585  topo/base/functionfamily.py:125(__call__)
+                                  4561920   19.912   19.912  topo/base/sheetcoords.py:387(submatrix)</pre>
+</div>
+<p>Over 40% of the time is spent running
+<tt class="docutils literal"><span class="pre">functionfamily.py:151(__call__)</span></tt>, <tt class="docutils literal"><span class="pre">CFPRF_Plugin</span></tt>&#8216;s default
+<tt class="docutils literal"><span class="pre">single_cf_fn</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">DotProduct</span><span class="p">(</span><span class="n">ResponseFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the sum of the element-by-element product of two 2D</span>
+<span class="sd">    arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">m2</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Optimizing this dot product is evidently important, but it is not
+the only significant component. About 25% of the time is spent in
+the call to submatrix(), which is simply returning a section of the
+input activity array. Following this, the next most significant
+component is unlisted: about 20% of the time in the CFPRF&#8217;s
+__call__ is spent not calling other functions, i.e. inside this
+function itself.</p>
+<p>We could simply replace the dot product with an optimized version,
+but that would still leave other parts of this function as the
+speed-limiting factors. Line-by-line profiling could indicate
+exactly where the problems are, but a component such as this is a
+good candidate for replacement with an optimized version; we will
+describe this in the following section. Line-by-line profiling is
+described in a later section.</p>
+<div class="section" id="considering-optimizations-with-c-weave">
+<h3>Considering optimizations with C++ (weave)<a class="headerlink" href="#considering-optimizations-with-c-weave" title="Permalink to this headline">¶</a></h3>
+<p>Topographica makes it reasonably easy to re-write functions in C++
+and offer them as optimized alternatives. We have done this for the
+CFPResponseFn described in the previous section, resulting in this
+code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">CFPRF_DotProduct_opt</span><span class="p">(</span><span class="n">CFPResponseFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dot-product response function.</span>
+
+<span class="sd">    Written in C for a manyfold speedup; see CFPRF_DotProduct for an</span>
+<span class="sd">    easier-to-read version in Python.  The unoptimized Python version</span>
+<span class="sd">    is equivalent to this one, but it also works for 1D arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">ResponseFn</span><span class="p">,</span><span class="n">DotProduct</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">strength</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+        <span class="n">temp_act</span> <span class="o">=</span> <span class="n">activity</span>
+        <span class="n">irows</span><span class="p">,</span><span class="n">icols</span> <span class="o">=</span> <span class="n">input_activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">input_activity</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>
+        <span class="n">num_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfs</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">cf_type</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">cf_type</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">            DECLARE_SLOT_OFFSET(weights,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);</span>
+
+<span class="s">            npfloat *tact = temp_act;</span>
+
+<span class="s">            for (int r=0; r &lt; num_cfs; ++r) {</span>
+<span class="s">                if((*mask++) == 0.0)</span>
+<span class="s">                    *tact = 0;</span>
+<span class="s">                else {</span>
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+
+<span class="s">                    CONTIGUOUS_ARRAY_FROM_SLOT_OFFSET(float,weights,cf)</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);</span>
+
+<span class="s">                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);</span>
+
+<span class="s">                    double tot = 0.0;</span>
+<span class="s">                    npfloat *xj = X+icols*rr1+cc1;</span>
+
+<span class="s">                    // computes the dot product</span>
+<span class="s">                    for (int i=rr1; i &lt; rr2; ++i) {</span>
+<span class="s">                        npfloat *xi = xj;</span>
+<span class="s">                        float *wi = weights;</span>
+<span class="s">                        for (int j=cc1; j &lt; cc2; ++j) {</span>
+<span class="s">                            tot += *wi * *xi;</span>
+<span class="s">                            ++wi;</span>
+<span class="s">                            ++xi;</span>
+<span class="s">                        }</span>
+<span class="s">                        xj += icols;</span>
+<span class="s">                        weights += cc2-cc1;</span>
+<span class="s">                    }</span>
+<span class="s">                    *tact = tot*strength;</span>
+
+<span class="s">                    DECREF_CONTIGUOUS_ARRAY(weights);</span>
+<span class="s">                }</span>
+<span class="s">                ++tact;</span>
+<span class="s">            }</span>
+<span class="s">        &quot;&quot;&quot;</span>
+        <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;mask&#39;</span><span class="p">,</span><span class="s">&#39;X&#39;</span><span class="p">,</span> <span class="s">&#39;strength&#39;</span><span class="p">,</span> <span class="s">&#39;icols&#39;</span><span class="p">,</span> <span class="s">&#39;temp_act&#39;</span><span class="p">,</span><span class="s">&#39;cfs&#39;</span><span class="p">,</span><span class="s">&#39;num_cfs&#39;</span><span class="p">,</span><span class="s">&#39;cf_type&#39;</span><span class="p">],</span>
+               <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Replacing the CFP function with one written entirely in C++ (by
+reverting the line previously edited), we get the following profile:</p>
+<div class="highlight-python"><pre>./topographica examples/lissom_oo_or.ty -c "from topo.misc.util import profile; profile('topo.sim.run(99)',n=20)"
+
+         778542 function calls (775968 primitive calls) in 4.691 CPU seconds
+
+   Ordered by: cumulative time, internal time
+   List reduced from 239 to 20 due to restriction &lt;20&gt;
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.039    0.039    4.691    4.691 topo/base/simulation.py:1121(run)
+     3074    0.018    0.000    3.359    0.001 topo/misc/inlinec.py:72(inline_weave)
+     3074    0.045    0.000    3.326    0.001 lib/python2.6/site-packages/weave/inline_tools.py:130(inline)
+     3074    3.101    0.001    3.273    0.001 {apply}
+     2178    0.006    0.000    2.838    0.001 topo/base/simulation.py:437(__call__)
+     2178    0.019    0.000    2.814    0.001 topo/base/projection.py:399(input_event)
+     2178    0.003    0.000    2.770    0.001 topo/base/projection.py:527(present_input)
+     2178    0.055    0.000    2.767    0.001 topo/base/cf.py:696(activate)
+     1980    0.012    0.000    2.703    0.001 topo/sheet/lissom.py:95(input_event)
+     2178    0.021    0.000    2.642    0.001 topo/responsefn/optimized.py:35(__call__)
+     1188    0.010    0.000    1.135    0.001 topo/sheet/lissom.py:113(process_current_time)
+       99    0.001    0.000    0.680    0.007 topo/sheet/basic.py:284(learn)
+      100    0.003    0.000    0.545    0.005 topo/sheet/basic.py:263(_normalize_weights)
+       99    0.000    0.000    0.469    0.005 topo/base/simulation.py:511(__call__)
+       99    0.002    0.000    0.468    0.005 topo/sheet/basic.py:140(generate)
+   297/99    0.016    0.000    0.451    0.005 topo/base/patterngenerator.py:116(__call__)
+     1089    0.112    0.000    0.446    0.000 topo/base/projection.py:462(activate)
+       99    0.013    0.000    0.403    0.004 topo/pattern/basic.py:589(function)
+      400    0.002    0.000    0.327    0.001 topo/base/cf.py:719(apply_learn_output_fns)
+      400    0.003    0.000    0.318    0.001 topo/transferfn/optimized.py:33(__call__)</pre>
+</div>
+<p>The simulation is now almost 20 times faster than the Numpy version.</p>
+<p>The C++ code adds extra work: for maintenance, for deployment on
+different platforms, and for user understanding &#8212; so it has to be
+justified, meaning it should provide large speedups. In this case,
+the performance improvement justifies the additional costs (which
+have been substantial in terms of maintenance and platform support
+&#8212; although platform support cost is diluted by all such C++
+functions, and any added in the future).</p>
+<p>While making this kind of investigation, you must check that
+simulations run with different versions of a function are producing
+the same results. In particular, when working with optimized C++
+functions, it is possible for one version to appear much faster than
+another when in fact the computations being performed are not
+equivalent.</p>
+<p>A final consideration is to ensure that the profile run times are
+long enough to obtain reliable results. For shorter runs, it would
+be necessary to repeat them to find a reasonable estimate of the
+minimum time.</p>
+</div>
+<div class="section" id="line-by-line-profiling">
+<span id="line-by-line"></span><h3>Line-by-line profiling<a class="headerlink" href="#line-by-line-profiling" title="Permalink to this headline">¶</a></h3>
+<p>The profile function described above (which uses Python&#8217;s inbuilt
+profiling) only reports time spent inside functions, but gives no
+information about how that time is spent. There is also an optional
+line-by-line profiling package available that gives information
+about how the time is spent inside one or two specific functions.
+So, for instance, if you have a function that does various
+operations on arrays, you can now see how long all those operations
+take relative to each other. That might allow you to identify a
+bottleneck in the function easily. (Note that before doing a
+line-by-line profile of a function, you should previously have
+identified that function as a bottleneck using the profiling
+function described earlier. Otherwise, optimizing the function will
+result in little performance gain overall.)</p>
+<p>The line-by-line profiling package is not yet built by default. If
+you want to build it, execute the following from your Topographica
+directory:</p>
+<div class="highlight-python"><pre>$ make -C external line_profiler</pre>
+</div>
+<p>Then, the easiest way to use the new package is to:</p>
+<ol class="arabic">
+<li><p class="first">put the following two lines into <tt class="docutils literal"><span class="pre">~/ipy_user_conf.py</span></tt> (in the
+<tt class="docutils literal"><span class="pre">main()</span></tt> function):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">line_profiler</span>
+<span class="n">ip</span><span class="o">.</span><span class="n">expose_magic</span><span class="p">(</span><span class="s">&#39;lprun&#39;</span><span class="p">,</span><span class="n">line_profiler</span><span class="o">.</span><span class="n">magic_lprun</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">use <tt class="docutils literal"><span class="pre">%lprun</span></tt> from the Topographica prompt</p>
+</li>
+</ol>
+<div class="section" id="examples">
+<h4>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h4>
+<p>To profile topo.base.cf.ConnectionField&#8217;s
+_create_input_sheet_slice() method while starting the lissom.ty
+script:</p>
+<div class="highlight-python"><pre>$ ./topographica
+topo_t000000.00_c1&gt;&gt;&gt; from topo.base.cf import ConnectionField
+topo_t000000.00_c2&gt;&gt;&gt; %lprun -f ConnectionField._create_input_sheet_slice execfile("examples/lissom.ty")</pre>
+</div>
+<p>To profile calling of topo.transferfn.HomeoStaticMaxEnt while
+Topographica is running:</p>
+<div class="highlight-python"><pre>$ ./topographica -i contrib/lesi.ty
+topo_t000000.00_c1&gt;&gt;&gt; from topo.transferfn import HomeostaticMaxEnt
+topo_t000000.00_c2&gt;&gt;&gt; %lprun -f HomeostaticMaxEnt.__call__ topo.sim.run(30)</pre>
+</div>
+<p>The output you get is something like this:</p>
+<div class="highlight-python"><pre>Timer unit: 1e-06 s
+
+File: /disk/data1/workspace/v1cball/topographica/topo/transferfn/basic.py
+Function: __call__ at line 749
+Total time: 0.955004 s
+
+Line Hits   Time  PerHit %Time Line Contents
+================================================
+749                           def __call__(self,x):
+750   450  13003   28.9   1.4    if self.first_call:
+751     1      9    9.0   0.0         self.first_call = False
+752     1     20   20.0   0.0         if self.a_init==None:
+753     1    817  817.0   0.1             self.a = self.random_generator.uniform(low=10, high=20,size=x.shape)
+754                                   else:
+755                                       self.a = ones(x.shape, x.dtype.char) * self.a_init
+756     1     27   27.0   0.0         if self.b_init==None:
+757     1    411  411.0   0.0             self.b = self.random_generator.uniform(low=-8.0, high=-4.0,size=x.shape)
+758                                   else:
+759                                       self.b = ones(x.shape, x.dtype.char) * self.b_init
+760     1    128  128.0   0.0        self.y_avg = zeros(x.shape, x.dtype.char)
+761
+762                              # Apply sigmoid function to x, resulting in what Triesch calls y
+763   450  88485  196.6   9.3     x_orig = copy.copy(x)
+764
+765   450  24277   53.9   2.5     x *= 0.0
+766   450 662809 1472.9  69.4     x += 1.0 / (1.0 + exp(-(self.a*x_orig + self.b)))
+767
+768
+769   450   5979   13.3   0.6    self.n_step += 1
+770   450  34237   76.1   3.6    if self.n_step == self.step:
+771    30    253    8.4   0.0        self.n_step = 0
+772    30    654   21.8   0.1        if self.plastic:
+773    30  19448  648.3   2.0            self.y_avg = (1.0-self.smoothing)*x + self.smoothing*self.y_avg
+774
+775                                      # Update a and b
+776    30  65652 2188.4   6.9            self.a += self.eta * (1.0/self.a + x_orig - (2.0 + 1.0/self.mu)*...
+777    30  38795 1293.2   4.1            self.b += self.eta * (1.0 - (2.0 + 1.0/self.mu)*x + x*x/self.mu)</pre>
+</div>
+<p>From this output, you can see that 69.4% of the time is spent in
+line 766, which is thus the best place to start optimizing (e.g. by
+using a lookup table for the sigmoid function, in this case).</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Performance optimization</a><ul>
+<li><a class="reference internal" href="#optimizing-python-code">Optimizing Python code</a></li>
+<li><a class="reference internal" href="#providing-optimized-versions-of-topographica-objects">Providing optimized versions of Topographica objects</a></li>
+<li><a class="reference internal" href="#finding-bottlenecks">Finding bottlenecks</a><ul>
+<li><a class="reference internal" href="#considering-optimizations-with-c-weave">Considering optimizations with C++ (weave)</a></li>
+<li><a class="reference internal" href="#line-by-line-profiling">Line-by-line profiling</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gui.html"
+                        title="previous chapter">Implementing the GUI</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="memuse.html"
+                        title="next chapter">Memory usage</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Developer_Manual/optimization.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="memuse.html" title="Memory usage"
+             >next</a></li>
+        <li class="right" >
+          <a href="gui.html" title="Implementing the GUI"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

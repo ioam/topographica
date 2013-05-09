@@ -1,0 +1,223 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.sheetview &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-base-sheetview">
+<h1>topo.base.sheetview<a class="headerlink" href="#topo-base-sheetview" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance5c943e4cbf.svg" usemap="#inheritance5c943e4cbf" class="inheritance"/></div><map id="inheritance5c943e4cbf" name="inheritance5c943e4cbf">
+</map>
+<div class="section" id="module-topo.base.sheetview">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.base.sheetview" title="Permalink to this headline">¶</a></h2>
+<p>Topographica SheetView objects and its subclasses.</p>
+<p>For use with the Topographica plotting and data analysis mechanisms.
+A Sheet object has its internal data which remains hidden, but it will
+create views of this data depending on the Sheet defaults or the
+information requested.  This way there can be multiple views recorded
+for a single sheet, and a view can be passed around independent of the
+originating source object.</p>
+<dl class="class">
+<dt id="topo.base.sheetview.ProjectionView">
+<em class="property">class </em><tt class="descclassname">topo.base.sheetview.</tt><tt class="descname">ProjectionView</tt><big>(</big><em>term_tuple</em>, <em>projection</em>, <em>timestamp</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/sheetview.html#ProjectionView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.sheetview.ProjectionView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.sheetview.SheetView" title="topo.base.sheetview.SheetView"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheetview.SheetView</span></tt></a></p>
+<p>ProjectionViews should be stored in Sheets via a tuple
+(&#8216;Weights&#8217;,Sheet,Projection).</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">cyclic_range</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If cyclic is True, this value is the cyclic range.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">cyclic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not the values in this View&#8217;s matrix represent a cyclic dimension.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.sheetview.SheetView">
+<em class="property">class </em><tt class="descclassname">topo.base.sheetview.</tt><tt class="descname">SheetView</tt><big>(</big><em>(term_1</em>, <em>term_2)</em>, <em>src_name=None</em>, <em>precedence=0.0</em>, <em>timestamp=-1</em>, <em>row_precedence=0.5</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/sheetview.html#SheetView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.sheetview.SheetView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A SheetView is constructed from a matrix of values, a bounding box
+for that matrix, and a name.  There are two major ways to create a
+SheetView: one is from a single matrix of data from a single
+sheet, the other is by combining the matrices from multiple
+matrices or SheetViews.</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">cyclic_range</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If cyclic is True, this value is the cyclic range.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">cyclic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not the values in this View&#8217;s matrix represent a cyclic dimension.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.base.sheetview.SheetView.sum_maps">
+<tt class="descname">sum_maps</tt><big>(</big><em>maps</em><big>)</big><a class="reference internal" href="../_modules/topo/base/sheetview.html#SheetView.sum_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.sheetview.SheetView.sum_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the list of (matrix, bbox) tuples into a single matrix
+and another bounding box.  Not a protected function as it could
+prove useful to other areas of the simulator.</p>
+<p>THIS MUST BE EXPANDED IN THE FUTURE TO MAKE PROPER USE OF THE
+BOUNDING BOX INFORMATION. CURRENT (8/04) IMPLEMENTATION
+PASSES THE FIRST MAP IN THE LIST AS THE BOUNDING BOX FOR THE
+CONSTRUCTED VIEW.</p>
+<p>WOULD HAVE DONE AN ADD/INTERSECTION/UNION, BUT BOUNDINGREGION
+DOES NOT YET SUPPORT SUCH OPERATIONS.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.sheetview.SheetView.view">
+<tt class="descname">view</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/sheetview.html#SheetView.view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.sheetview.SheetView.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the requested view as a (matrix, bbox) tuple.</p>
+<p>If the constructor was given multiple maps, the view must be
+built before being returned, which may lock in new views of
+data from the specified sheets.</p>
+<p>Inputs are in the variable self._view_list which is a list of
+tuples, with each tuple being a matrix and a bounding box, or
+a sheet and a map name.  The sequence cannot be dumped into
+maps just once because the raw maps may have changed, so other
+sheets must be queried for the data repeatedly.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.sheetview.UnitView">
+<em class="property">class </em><tt class="descclassname">topo.base.sheetview.</tt><tt class="descname">UnitView</tt><big>(</big><em>term_tuple</em>, <em>x</em>, <em>y</em>, <em>projection</em>, <em>timestamp</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/sheetview.html#UnitView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.sheetview.UnitView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.sheetview.SheetView" title="topo.base.sheetview.SheetView"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheetview.SheetView</span></tt></a></p>
+<p>SPRING 2005: Currently does not extend any functions, but can do
+so to add outlines, and other interesting features.</p>
+<p>Consists of an X,Y position for the unit that this View is
+created for.  Subclasses the SheetView class.</p>
+<p>UnitViews should be stored in Sheets via a tuple
+(&#8216;Weights&#8217;,Sheet,Projection,X,Y).  The dictionary in Sheets can be
+accessed by any valid key.</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">cyclic_range</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If cyclic is True, this value is the cyclic range.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">cyclic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not the values in this View&#8217;s matrix represent a cyclic dimension.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.base.sheetview</a><ul>
+<li><a class="reference internal" href="#module-topo.base.sheetview">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.base.sheetview-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

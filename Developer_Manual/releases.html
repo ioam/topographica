@@ -1,0 +1,261 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Making Releases &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Developer Manual" href="index.html" />
+    <link rel="next" title="Developing Topographica Using Git" href="git.html" />
+    <link rel="prev" title="Test suite" href="testing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="git.html" title="Developing Topographica Using Git"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="testing.html" title="Test suite"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="making-releases">
+<h1>Making Releases<a class="headerlink" href="#making-releases" title="Permalink to this headline">¶</a></h1>
+<p>The latest version of Topographica is always available by Git, but
+we also make more stable versions available periodically. To make
+such a release, the steps we generally follow are:</p>
+<ol class="arabic">
+<li><p class="first">Ensure that no one besides yourself has any modified files
+checked out in Git; if they do, make sure all of it gets checked
+in or does not need to be included in the release, and ensure
+that none of it will be checked in until the release is complete.</p>
+</li>
+<li><p class="first">Increment the RELEASE number in ./Makefile, and do &#8220;make
+new-version&#8221;.</p>
+</li>
+<li><p class="first">Update the documentation files, especially README.txt,
+doc/News/index_text.php, doc/Home/news_text.php and
+doc/Downloads/index_text.php (check the download links will be
+correct). The rest should be read through, making sure that the
+auto-generated pages are working properly, that the citations in
+the User Manual work, and that pages written by hand match the
+current version of the code. In particular,
+doc/Reference_Manual/index_text.php needs to match the current
+version of the reference manual (don&#8217;t forget to
+<tt class="docutils literal"><span class="pre">make</span> <span class="pre">reference-manual</span></tt> and check the dot graphs).</p>
+</li>
+<li><p class="first">Update the tutorials to match changes to the GUI, if necessary. A
+simple way to get updated versions of each image is to:</p>
+<ol class="arabic simple">
+<li>Change to the doc/Tutorials/images/ directory</li>
+<li>Launch <tt class="docutils literal"><span class="pre">xv</span></tt> on all of the images (<tt class="docutils literal"><span class="pre">xv</span> <span class="pre">*</span> <span class="pre">&amp;</span></tt>)</li>
+<li>Select the image you want to update, using xv&#8217;s right-click
+menu</li>
+<li>Select Grab from xv&#8217;s right-click menu</li>
+<li>Select Save from xv&#8217;s right-click menu</li>
+</ol>
+<p>The advantage of this method is that you never need to type in
+filenames, make sure they match the .html or .php file, and so
+on.</p>
+<p>Be sure to work through the tutorial once it is updated, to make
+sure all of the instructions still make sense for the new
+release.</p>
+</li>
+<li><p class="first">Update Changelog.txt (by making a copy of ChangeLog.txt, doing
+&#8220;make Changelog.txt&#8221;, and pasting the new items at the top of the
+copy (so that any fixes to the old items are preserved). Also
+summarize major changes in it for the release notes in News/.</p>
+</li>
+<li><p class="first">Update the issues trackers and the remaining work lists in
+Future_Work/index_text.php and Future_Work/current_text.php
+to reflect completed tasks and changes in priority.</p>
+</li>
+<li><p class="first">Check any modified files into Git.</p>
+</li>
+<li><p class="first">Are all the buildbot tests still passing? You might need to
+trigger new builds to check all platforms are ok.</p>
+</li>
+<li><p class="first">Save all open files from within any editor, and do a &#8220;make dist&#8221;
+to create a candidate distribution archive. (To ensure that all
+files are saved in Emacs, you can do &#8220;M-x compile RET make
+dist&#8221;.) Note that this step is best done on a local disk rather
+than on a network drive. (Additionally, using a scratch copy of
+Topographica on which you have run &#8216;make -C external clean&#8217; will
+speed things up, but this is not necessary.)</p>
+</li>
+<li><p class="first">Unpack the distribution archive and examine it:</p>
+<ol class="arabic simple">
+<li>Use &#8220;ls -lFRA&#8221; or &#8220;find .&#8221; to ensure that no stray files were
+included; if they were, edit &#8220;distclean:&#8221; in ./Makefile to
+delete them from the generated distribution.</li>
+<li>Double-check the generated documentation to ensure that it is
+complete and was generated properly.</li>
+<li>Try out the source on various platforms, ensuring that there
+are no errors. Also perform a self-test on the various
+platforms (&#8220;make tests; make slow-tests&#8221;).</li>
+</ol>
+</li>
+<li><p class="first">If you find problems, go back to step 6 and start over.</p>
+</li>
+<li><p class="first">Now generate the tar.gz
+(<tt class="docutils literal"><span class="pre">make</span> <span class="pre">dist-pysource</span> <span class="pre">dist-pysource-sdist</span></tt>) and check its
+contents in the same way as above.</p>
+</li>
+<li><p class="first">At this point, it is a good idea to test the packages. Buildbot
+does not yet check that the packages it generates work on all
+platforms. You should use clean virtual machines to test the
+process of installing and using the packages it has generated.</p>
+</li>
+<li><p class="first">When the package is ready for release, make a commit stating the
+version number (e.g. &#8216;git commit -m &#8220;Version 0.9.8&#8221;&#8217;). Notify the
+other developers that they may once again commit new code to the
+Git repository.</p>
+</li>
+<li><p class="first">Create tar.gz and upload them to pypi:
+<tt class="docutils literal"><span class="pre">make</span> <span class="pre">dist-pysource-sdist;</span> <span class="pre">make</span> <span class="pre">dist-pypi-upload</span></tt>.</p>
+</li>
+<li><p class="first">update the public web site. Change to the copy of Topographica
+you created for distribution so that no stray files from doc/ are
+included and do &#8220;make sf-web-site&#8221;.</p>
+</li>
+<li><p class="first">Send an announcement to topographica-announce at lists.sf.net.</p>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Making Releases</a></li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="testing.html"
+                        title="previous chapter">Test suite</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="git.html"
+                        title="next chapter">Developing Topographica Using Git</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Developer_Manual/releases.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="git.html" title="Developing Topographica Using Git"
+             >next</a></li>
+        <li class="right" >
+          <a href="testing.html" title="Test suite"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

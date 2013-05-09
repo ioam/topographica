@@ -1,0 +1,536 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.learningfn.optimized &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.learningfn" href="../learningfn.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../learningfn.html" accesskey="U">topo.learningfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.learningfn.optimized</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Learning functions and projection-level learning functions (see projfn.py)</span>
+<span class="sd">written in C to optimize performance.</span>
+
+<span class="sd">Requires the weave package; without it unoptimized versions are used.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">ones</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="n">activity_type</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFPLearningFn</span><span class="p">,</span><span class="n">CFPLF_Plugin</span>
+<span class="kn">from</span> <span class="nn">topo.learningfn.projfn</span> <span class="kn">import</span> <span class="n">CFPLF_PluginScaled</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">Hebbian</span><span class="p">,</span><span class="n">LearningFn</span>
+<span class="kn">from</span> <span class="nn">topo.misc.inlinec</span> <span class="kn">import</span> <span class="n">inline</span><span class="p">,</span><span class="n">provide_unoptimized_equivalent</span><span class="p">,</span>\
+     <span class="n">c_header</span><span class="p">,</span><span class="n">c_decorators</span>
+<span class="kn">from</span> <span class="nn">topo.learningfn</span> <span class="kn">import</span> <span class="n">BCMFixed</span>
+
+<span class="kn">from</span> <span class="nn">projfn</span> <span class="kn">import</span> <span class="n">CFPLF_Trace</span>  <span class="c"># pyflakes:ignore (optimized version provided)</span>
+
+
+
+
+<div class="viewcode-block" id="CFPLF_Hebbian_opt"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.optimized-module.html#topo.learningfn.optimized.CFPLF_Hebbian_opt">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_Hebbian_opt</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CF-aware Hebbian learning rule.</span>
+
+<span class="sd">    Implemented in C for speed.  Should be equivalent to</span>
+<span class="sd">    CFPLF_Plugin(single_cf_fn=Hebbian), except faster.</span>
+
+<span class="sd">    As a side effect, sets the norm_total attribute on any cf whose</span>
+<span class="sd">    weights are updated during learning, to speed up later operations</span>
+<span class="sd">    that might depend on it.</span>
+
+<span class="sd">    May return without modifying anything if the learning rate turns</span>
+<span class="sd">    out to be zero.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">single_connection_learning_rate</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>
+        <span class="n">num_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfs</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">irows</span><span class="p">,</span><span class="n">icols</span> <span class="o">=</span> <span class="n">input_activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">cf_type</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">cf_type</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="c"># CEBALERT: this function *always* skips inactive units,</span>
+        <span class="c"># because it uses the output_activity directly rather than</span>
+        <span class="c"># going through the iterator. That&#39;s ok since we know this</span>
+        <span class="c"># function can always skip inactive units. But the unoptimized</span>
+        <span class="c"># equivalent should be made to do the same, because right now</span>
+        <span class="c"># it respects the iterator.  (Just a case of setting the</span>
+        <span class="c"># iterator&#39;s active_units_mask to be True before calling the</span>
+        <span class="c"># iterator in the unoptimized version.)</span>
+
+        <span class="n">sheet_mask</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_sheet_mask</span><span class="p">()</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">            DECLARE_SLOT_OFFSET(weights,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(mask,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_norm_total,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);</span>
+
+<span class="s">            </span><span class="si">%(cfs_loop_pragma)s</span><span class="s"></span>
+<span class="s">            for (int r=0; r&lt;num_cfs; ++r) {</span>
+<span class="s">                double load = output_activity[r];</span>
+<span class="s">                if (load != 0 &amp;&amp; sheet_mask[r] != 0) {</span>
+<span class="s">                    load *= single_connection_learning_rate;</span>
+
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);</span>
+
+<span class="s">                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);</span>
+
+<span class="s">                    double total = 0.0;</span>
+
+<span class="s">                    // modify non-masked weights</span>
+<span class="s">                    npfloat *inpj = input_activity+icols*rr1+cc1;</span>
+<span class="s">                    for (int i=rr1; i&lt;rr2; ++i) {</span>
+<span class="s">                        npfloat *inpi = inpj;</span>
+<span class="s">                        for (int j=cc1; j&lt;cc2; ++j) {</span>
+<span class="s">                            // The mask is floating point, so we have to</span>
+<span class="s">                            // use a robust comparison instead of testing</span>
+<span class="s">                            // against exactly 0.0.</span>
+<span class="s">                            if (*(mask++) &gt;= MASK_THRESHOLD) {</span>
+<span class="s">                                *weights += load * *inpi;</span>
+<span class="s">                                total += fabs(*weights);</span>
+<span class="s">                            }</span>
+<span class="s">                            ++weights;</span>
+<span class="s">                            ++inpi;</span>
+<span class="s">                        }</span>
+<span class="s">                        inpj += icols;</span>
+<span class="s">                    }</span>
+<span class="s">                    // store the sum of the cf&#39;s weights</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);</span>
+<span class="s">                    _norm_total[0]=total;</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);</span>
+<span class="s">                    _has_norm_total[0]=1;</span>
+<span class="s">                }</span>
+<span class="s">            }</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="o">%</span><span class="n">c_decorators</span>
+
+        <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;input_activity&#39;</span><span class="p">,</span> <span class="s">&#39;output_activity&#39;</span><span class="p">,</span><span class="s">&#39;sheet_mask&#39;</span><span class="p">,</span><span class="s">&#39;num_cfs&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;icols&#39;</span><span class="p">,</span> <span class="s">&#39;cfs&#39;</span><span class="p">,</span> <span class="s">&#39;single_connection_learning_rate&#39;</span><span class="p">,</span><span class="s">&#39;cf_type&#39;</span><span class="p">],</span>
+               <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+               <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&lt;structmember.h&gt;&#39;</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="CFPLF_Hebbian"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.optimized-module.html#topo.learningfn.optimized.CFPLF_Hebbian">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_Hebbian</span><span class="p">(</span><span class="n">CFPLF_Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Same as CFPLF_Plugin(single_cf_fn=Hebbian()); just for non-optimized fallback.&quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;CFPLF_Hebbian_opt&quot;</span><span class="p">,</span><span class="s">&quot;CFPLF_Hebbian&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+
+
+<span class="c"># CBERRORALERT: classes from here on probably ignore the sheet mask</span>
+
+<span class="c"># JABALERT: Is this really a fixed-threshold BCM rule?  If so, is that really useful?</span>
+<div class="viewcode-block" id="CFPLF_BCMFixed_opt"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.optimized-module.html#topo.learningfn.optimized.CFPLF_BCMFixed_opt">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_BCMFixed_opt</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CF-aware BCM learning rule.</span>
+
+<span class="sd">    Implemented in C for speed.  Should be equivalent to</span>
+<span class="sd">    BCMFixed for CF sheets, except faster.</span>
+
+<span class="sd">    As a side effect, sets the norm_total attribute on any cf whose</span>
+<span class="sd">    weights are updated during learning, to speed up later operations</span>
+<span class="sd">    that might depend on it.</span>
+
+<span class="sd">    May return without modifying anything if the learning rate turns</span>
+<span class="sd">    out to be zero.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">unit_threshold</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;Threshold between LTD and LTP.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">output_activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>
+        <span class="n">num_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfs</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">single_connection_learning_rate</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">unit_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_threshold</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="n">irows</span><span class="p">,</span><span class="n">icols</span> <span class="o">=</span> <span class="n">input_activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">cf_type</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">cf_type</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">            DECLARE_SLOT_OFFSET(weights,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(mask,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_norm_total,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);</span>
+
+<span class="s">            </span><span class="si">%(cfs_loop_pragma)s</span><span class="s"></span>
+<span class="s">            for (int r=0; r&lt;num_cfs; ++r) {</span>
+<span class="s">                double load = output_activity[r];</span>
+<span class="s">                double unit_activity= load;</span>
+<span class="s">                if (load != 0) {</span>
+<span class="s">                    load *= single_connection_learning_rate;</span>
+
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);</span>
+
+<span class="s">                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);</span>
+
+<span class="s">                    double total = 0.0;</span>
+
+<span class="s">                    // modify non-masked weights</span>
+<span class="s">                    npfloat *inpj = input_activity+icols*rr1+cc1;</span>
+<span class="s">                    for (int i=rr1; i&lt;rr2; ++i) {</span>
+<span class="s">                        npfloat *inpi = inpj;</span>
+<span class="s">                        for (int j=cc1; j&lt;cc2; ++j) {</span>
+<span class="s">                            // The mask is floating point, so we have to</span>
+<span class="s">                            // use a robust comparison instead of testing</span>
+<span class="s">                            // against exactly 0.0.</span>
+<span class="s">                            if (*(mask++) &gt;= MASK_THRESHOLD) {</span>
+<span class="s">                                *weights += load * *inpi * (unit_activity - unit_threshold);</span>
+<span class="s">                                if (*weights&lt;0) { *weights = 0;}</span>
+<span class="s">                                total += fabs(*weights);</span>
+<span class="s">                            }</span>
+<span class="s">                            ++weights;</span>
+<span class="s">                            ++inpi;</span>
+<span class="s">                        }</span>
+<span class="s">                        inpj += icols;</span>
+<span class="s">                    }</span>
+<span class="s">                    // store the sum of the cf&#39;s weights</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);</span>
+<span class="s">                    _norm_total[0]=total;</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);</span>
+<span class="s">                    _has_norm_total[0]=1;</span>
+<span class="s">                }</span>
+<span class="s">            }</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="o">%</span><span class="n">c_decorators</span>
+
+        <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;input_activity&#39;</span><span class="p">,</span> <span class="s">&#39;output_activity&#39;</span><span class="p">,</span><span class="s">&#39;num_cfs&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;icols&#39;</span><span class="p">,</span> <span class="s">&#39;cfs&#39;</span><span class="p">,</span> <span class="s">&#39;single_connection_learning_rate&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;unit_threshold&#39;</span><span class="p">,</span><span class="s">&#39;cf_type&#39;</span><span class="p">],</span>
+               <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+               <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&lt;structmember.h&gt;&#39;</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="CFPLF_BCMFixed"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.optimized-module.html#topo.learningfn.optimized.CFPLF_BCMFixed">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_BCMFixed</span><span class="p">(</span><span class="n">CFPLF_Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Same as CFPLF_Plugin(single_cf_fn=BCMFixed()); just for non-optimized fallback.&quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">BCMFixed</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;CFPLF_BCMFixed_opt&quot;</span><span class="p">,</span><span class="s">&quot;CFPLF_Hebbian&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+
+
+<span class="c"># CEBALERT: 2009/04/03 - when used in GCA-LISSOM, causes Python to crash.</span>
+<div class="viewcode-block" id="CFPLF_Scaled_opt"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.optimized-module.html#topo.learningfn.optimized.CFPLF_Scaled_opt">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_Scaled_opt</span><span class="p">(</span><span class="n">CFPLF_PluginScaled</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CF-aware Scaled Hebbian learning rule.</span>
+
+<span class="sd">    Implemented in C for speed.  Should be equivalent to</span>
+<span class="sd">    CFPLF_PluginScaled(single_cf_fn=Hebbian), except faster.</span>
+
+<span class="sd">    As a side effect, sets the norm_total attribute on any cf whose</span>
+<span class="sd">    weights are updated during learning, to speed up later operations</span>
+<span class="sd">    that might depend on it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scaling_factor</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scaling_factor</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">output_activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="mf">1.0</span>
+        <span class="n">learning_rate_scaling_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate_scaling_factor</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">single_connection_learning_rate</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>
+        <span class="n">num_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfs</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">irows</span><span class="p">,</span><span class="n">icols</span> <span class="o">=</span> <span class="n">input_activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">cf_type</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">cf_type</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="n">sheet_mask</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_sheet_mask</span><span class="p">()</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">            DECLARE_SLOT_OFFSET(weights,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(mask,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_norm_total,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);</span>
+
+<span class="s">            </span><span class="si">%(cfs_loop_pragma)s</span><span class="s"></span>
+<span class="s">            for (int r=0; r&lt;num_cfs; ++r) {</span>
+<span class="s">                double load = output_activity[r];</span>
+<span class="s">                double a = learning_rate_scaling_factor[r];</span>
+<span class="s">                load = load * a;</span>
+<span class="s">                if (load != 0 &amp;&amp; sheet_mask[r] != 0) {</span>
+<span class="s">                    load *= single_connection_learning_rate;</span>
+
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);</span>
+
+<span class="s">                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);</span>
+
+<span class="s">                    double total = 0.0;</span>
+
+<span class="s">                    // modify non-masked weights</span>
+<span class="s">                    npfloat *inpj = input_activity+icols*rr1+cc1;</span>
+<span class="s">                    for (int i=rr1; i&lt;rr2; ++i) {</span>
+<span class="s">                        npfloat *inpi = inpj;</span>
+<span class="s">                        for (int j=cc1; j&lt;cc2; ++j) {</span>
+<span class="s">                            // The mask is floating point, so we have to</span>
+<span class="s">                            // use a robust comparison instead of testing</span>
+<span class="s">                            // against exactly 0.0.</span>
+<span class="s">                            if (*(mask++) &gt;= MASK_THRESHOLD) {</span>
+<span class="s">                                *weights += load * *inpi;</span>
+<span class="s">                                total += fabs(*weights);</span>
+<span class="s">                            }</span>
+<span class="s">                            ++weights;</span>
+<span class="s">                            ++inpi;</span>
+<span class="s">                        }</span>
+<span class="s">                        inpj += icols;</span>
+<span class="s">                    }</span>
+<span class="s">                    // store the sum of the cf&#39;s weights</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);</span>
+<span class="s">                    _norm_total[0]=total;</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);</span>
+<span class="s">                    _has_norm_total[0]=1;</span>
+<span class="s">                }</span>
+<span class="s">            }</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="o">%</span><span class="n">c_decorators</span>
+
+        <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;input_activity&#39;</span><span class="p">,</span><span class="s">&#39;learning_rate_scaling_factor&#39;</span><span class="p">,</span> <span class="s">&#39;output_activity&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;sheet_mask&#39;</span><span class="p">,</span> <span class="s">&#39;num_cfs&#39;</span><span class="p">,</span> <span class="s">&#39;icols&#39;</span><span class="p">,</span> <span class="s">&#39;cfs&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;single_connection_learning_rate&#39;</span><span class="p">,</span><span class="s">&#39;cf_type&#39;</span><span class="p">],</span>
+               <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+               <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&lt;structmember.h&gt;&#39;</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="CFPLF_Scaled"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.optimized-module.html#topo.learningfn.optimized.CFPLF_Scaled">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_Scaled</span><span class="p">(</span><span class="n">CFPLF_PluginScaled</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Same as CFPLF_PluginScaled(single_cf_fn=Hebbian()); just for non-optimized fallback.&quot;&quot;&quot;</span>
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;CFPLF_Scaled_opt&quot;</span><span class="p">,</span><span class="s">&quot;CFPLF_Scaled&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+
+
+
+<div class="viewcode-block" id="CFPLF_Trace_opt"><a class="viewcode-back" href="../../../Reference_Manual/topo.learningfn.optimized-module.html#topo.learningfn.optimized.CFPLF_Trace_opt">[docs]</a><span class="k">class</span> <span class="nc">CFPLF_Trace_opt</span><span class="p">(</span><span class="n">CFPLearningFn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optimized version of CFPLF_Trace; see projfn.py for more info</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">trace_strength</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       How much the learning is dominated by the activity trace, relative to the current value.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">single_cf_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">LearningFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">Hebbian</span><span class="p">(),</span><span class="n">readonly</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;LearningFn that will be applied to each CF individually.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">,</span> <span class="n">input_activity</span><span class="p">,</span> <span class="n">output_activity</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">single_connection_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_sum_connection_rate</span><span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">proj_n_units</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="n">irows</span><span class="p">,</span><span class="n">icols</span> <span class="o">=</span> <span class="n">input_activity</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">single_connection_learning_rate</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">cfs</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">flatcfs</span>
+        <span class="n">num_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfs</span><span class="p">)</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+
+        <span class="c">##Initialise traces to zero if they don&#39;t already exist</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;traces&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">=</span><span class="n">zeros</span><span class="p">(</span><span class="n">output_activity</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">activity_type</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_strength</span><span class="o">*</span><span class="n">output_activity</span><span class="p">)</span><span class="o">+</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_strength</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">)</span>
+        <span class="n">traces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">cf_type</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">cf_type</span>  <span class="c"># pyflakes:ignore (passed to weave C code)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">c_header</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">            DECLARE_SLOT_OFFSET(weights,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(mask,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_norm_total,cf_type);</span>
+<span class="s">            DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);</span>
+
+<span class="s">            </span><span class="si">%(cfs_loop_pragma)s</span><span class="s"></span>
+<span class="s">            for (int r=0; r&lt;num_cfs; ++r) {</span>
+<span class="s">                double load = traces[r];</span>
+<span class="s">                if (load != 0) {</span>
+<span class="s">                    load *= single_connection_learning_rate;</span>
+<span class="s">                    PyObject *cf = PyList_GetItem(cfs,r);</span>
+
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(float,mask,cf);</span>
+
+<span class="s">                    UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);</span>
+
+<span class="s">                    double total = 0.0;</span>
+
+<span class="s">                    // modify non-masked weights</span>
+<span class="s">                    npfloat *inpj = input_activity+icols*rr1+cc1;</span>
+<span class="s">                    for (int i=rr1; i&lt;rr2; ++i) {</span>
+<span class="s">                        npfloat *inpi = inpj;</span>
+<span class="s">                        for (int j=cc1; j&lt;cc2; ++j) {</span>
+<span class="s">                            // The mask is floating point, so we have to</span>
+<span class="s">                            // use a robust comparison instead of testing</span>
+<span class="s">                            // against exactly 0.0.</span>
+<span class="s">                            if (*(mask++) &gt;= MASK_THRESHOLD) {</span>
+<span class="s">                                *weights += load * *inpi;</span>
+<span class="s">                                total += fabs(*weight);</span>
+<span class="s">                            }</span>
+<span class="s">                            ++weights;</span>
+<span class="s">                            ++inpi;</span>
+<span class="s">                        }</span>
+<span class="s">                        inpj += icols;</span>
+<span class="s">                    }</span>
+<span class="s">                    // store the sum of the cf&#39;s weights</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);</span>
+<span class="s">                    _norm_total[0]=total;</span>
+<span class="s">                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);</span>
+<span class="s">                    _has_norm_total[0]=1;</span>
+<span class="s">                }</span>
+<span class="s">            }</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="o">%</span><span class="n">c_decorators</span>
+
+        <span class="n">inline</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;input_activity&#39;</span><span class="p">,</span> <span class="s">&#39;traces&#39;</span><span class="p">,</span><span class="s">&#39;num_cfs&#39;</span><span class="p">,</span> <span class="s">&#39;icols&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;cfs&#39;</span><span class="p">,</span> <span class="s">&#39;single_connection_learning_rate&#39;</span><span class="p">,</span><span class="s">&#39;cf_type&#39;</span><span class="p">],</span>
+               <span class="n">local_dict</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+               <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&lt;structmember.h&gt;&#39;</span><span class="p">])</span>
+
+</div>
+<span class="n">provide_unoptimized_equivalent</span><span class="p">(</span><span class="s">&quot;CFPLF_Trace_opt&quot;</span><span class="p">,</span><span class="s">&quot;CFPLF_Trace&quot;</span><span class="p">,</span><span class="nb">locals</span><span class="p">())</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/learningfn/optimized.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../learningfn.html" >topo.learningfn</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

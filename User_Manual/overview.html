@@ -1,0 +1,594 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview of Topographica design and features &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="User Manual" href="index.html" />
+    <link rel="next" title="Representing time in Topographica" href="time.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="time.html" title="Representing time in Topographica"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="overview-of-topographica-design-and-features">
+<h1>Overview of Topographica design and features<a class="headerlink" href="#overview-of-topographica-design-and-features" title="Permalink to this headline">¶</a></h1>
+<p>This section will first give an overview of the parts that make up
+Topographica, and will then give a guide on how to choose a subset
+of them for use in any particular model.</p>
+<div class="section" id="major-topographica-object-types">
+<span id="class-hierarchies"></span><h2>Major Topographica object types<a class="headerlink" href="#major-topographica-object-types" title="Permalink to this headline">¶</a></h2>
+<p>In this section, we outline the basic hierarchies of object types
+used by Topographica. All of these are available to the user when
+designing a model, but as the <a class="reference internal" href="#implementation-levels"><em>later section</em></a> indicates, not all of
+them need to be used for any particular model, and anything not used
+can be ignored. These lists are only representative of the object
+types available in each general class; see the <a class="reference external" href="../Reference_Manual/index.html">reference manual</a>
+entry for each base class (which is typically hyperlinked below),
+the menus in the GUI <a class="reference external" href="modeleditor.html">model editor</a>, or the files in topo/*/ to
+see the full list of the ones available.</p>
+<p>In each section, the relationships between the different classes are
+shown as an inheritance diagram, in outline format. As an example,
+the indentation in this diagram:</p>
+<ul class="simple">
+<li>Animal<ul>
+<li>Dog<ul>
+<li>Collie</li>
+<li>Terrier</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>indicates that a Dog is a type of Animal, and that Collies and
+Terriers are both types of Dog (and thus also types of Animals). All
+Collies are Dogs, and all Collies are Animals, but not all Dogs are
+Collies, and not all Animals are necessarily Dogs. These
+relationships show how the classes fit together; e.g., anything in
+Topographica that requires an object of type Animal will accept a
+Collie or a Terrier as well, plus any user-defined object of type
+Dog.</p>
+<div class="section" id="parameterized-objects-and-parameters">
+<h3>Parameterized objects and Parameters<a class="headerlink" href="#parameterized-objects-and-parameters" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/param.parameterized.Parameterized-class.html">Parameterized</a></li>
+<li><a class="reference external" href="../Reference_Manual/param.parameterized.Parameter-class.html">Parameter</a><ul>
+<li><a class="reference external" href="../Reference_Manual/param.Number-class.html">Number</a><ul>
+<li><a class="reference external" href="../Reference_Manual/param.Integer-class.html">Integer</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="../Reference_Manual/param.Boolean-class.html">Boolean</a></li>
+<li><a class="reference external" href="../Reference_Manual/param.Callable-class.html">Callable</a></li>
+<li><a class="reference external" href="../Reference_Manual/param.ClassSelector-class.html">ClassSelector</a></li>
+</ul>
+</li>
+</ul>
+<p>In Python, any object can have <em>attributes</em>, which consist of a name
+and a value (of any type). Topographica provides an extended version
+of attributes called <a class="reference external" href="../Reference_Manual/param.parameterized.Parameter-class.html">Parameter</a>s, which have their own
+documentation, range and type error checking, and mechanisms for
+inheritance of default values. These features are provided for any
+<a class="reference external" href="../Reference_Manual/param.parameterized.Parameterized-class.html">Parameterized</a> object, which is a Python object extended to
+support <a class="reference external" href="../Reference_Manual/param.parameterized.Parameter-class.html">Parameter</a>s. Most Topographica objects are
+<a class="reference external" href="../Reference_Manual/param.parameterized.Parameterized-class.html">Parameterized</a>. <a class="reference external" href="parameters.html">Parameters</a> are discussed in more detail on a
+separate page.</p>
+</div>
+<div class="section" id="simulation-and-events">
+<h3>Simulation and Events<a class="headerlink" href="#simulation-and-events" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/topo.base.simulation.Simulation-class.html">Simulation</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.simulation.Event-class.html">Event</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.simulation.EventProcessor-class.html">EventProcessor</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.sheet.Sheet-class.html">Sheet</a>: (see below)</li>
+</ul>
+</li>
+</ul>
+<p>The set of objects to be simulated is kept by the <a class="reference external" href="../Reference_Manual/topo.base.simulation.Simulation-class.html">Simulation</a>
+class, which keeps track of the current simulator time along with
+<a class="reference external" href="../Reference_Manual/topo.base.simulation.Event-class.html">Event</a>s that are currently occurring or are scheduled to occur
+in the future. The objects in the simulation are of type
+<a class="reference external" href="../Reference_Manual/topo.base.simulation.EventProcessor-class.html">EventProcessor</a>, which simply means that they can process events.
+Events and EventProcessors are both very general concepts, because
+the Simulation must be able to include any possible process that
+could be relevant for a model.</p>
+</div>
+<div class="section" id="sheets">
+<h3>Sheets<a class="headerlink" href="#sheets" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/topo.base.sheet.Sheet-class.html">Sheet</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.projection.ProjectionSheet-class.html">ProjectionSheet</a> Sheet that can calculate activity based on
+a set of <a class="reference external" href="../Reference_Manual/topo.base.projection.Projection-class.html">Projection</a>s.<ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFSheet-class.html">CFSheet</a> ProjectionSheet whose Projections are of type
+<a class="reference external" href="../Reference_Manual/topo.base.cf.CFProjection-class.html">CFProjection</a>, which means that they are made up of
+<a class="reference external" href="../Reference_Manual/topo.base.cf.ConnectionField-class.html">ConnectionField</a>s (below). This Sheet type supports a
+large class of topographic map models as-is, but others
+need specific extensions.<ul>
+<li><a class="reference external" href="../Reference_Manual/topo.sheet.lissom.LISSOM-class.html">LISSOM</a>: CFSheet with extensions to support the LISSOM
+algorithm.</li>
+<li><a class="reference external" href="../Reference_Manual/topo.sheet.saccade.SaccadeController-class.html">SaccadeController</a>: CFSheet with extensions to support
+saccades.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>The actual EventProcessors in most current Topographica simulations
+are typically of type <a class="reference external" href="../Reference_Manual/topo.base.sheet.Sheet-class.html">Sheet</a>. A Sheet is a specific type of
+EventProcessor that occupies a finite 2D region of the continuous
+plane, allows indexing of this region using floating point
+coordinates, and maintains a rectangular array of activity values
+covering this region.</p>
+</div>
+<div class="section" id="connections-and-projections">
+<h3>Connections and Projections<a class="headerlink" href="#connections-and-projections" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/topo.base.simulation.EPConnection-class.html">EPConnection</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.projection.Projection-class.html">Projection</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFProjection-class.html">CFProjection</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.projection.SharedWeightCFProjection-class.html">SharedWeightCFProjection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>EventProcessors can be connected together with unidirectional links
+called <a class="reference external" href="../Reference_Manual/topo.base.simulation.EPConnection-class.html">EPConnection</a>s. These connections provide a persistent
+mechanism for data generated by one EventProcessor to be delivered
+to another one after some nonzero delay in simulation time.</p>
+<p>Most connections between Sheets are of type <a class="reference external" href="../Reference_Manual/topo.base.projection.Projection-class.html">Projection</a>, which can
+be thought of as a bulk set of connections that includes many
+individual connections between neural units. More specifically, a
+Projection is a Connection that can produce an Activity matrix when
+given an input Activity matrix, which will typically be used by the
+destination Sheet when it computes its activation. In the GUI, the
+Projection activity can be visualized just as Sheet activity is,
+though the Sheet activity is considered the actual response of each
+unit. (The Projection activity is just a handy way of computing and
+reasoning about the contribution of each Projection to this overall
+Sheet activity.)</p>
+<p>One specific type of Projection currently implemented is
+<a class="reference external" href="../Reference_Manual/topo.base.cf.CFProjection-class.html">CFProjection</a>, i.e. a Projection that consists of a set of
+<a class="reference external" href="../Reference_Manual/topo.base.cf.ConnectionField-class.html">ConnectionField</a> objects, each of which contains the connections
+to one unit in the destination CFSheet. CFProjection is very
+general, and with appropriate parameters can implement either
+spatially restricted localized CFs, all-to-all projections (using a
+nominal_bounds_template BoundingBox with a radius larger than the
+source Sheet), or one-to-one projections (using a
+nominal_bounds_template sized to cover only a single unit on the
+source Sheet). A special type of CFProjection,
+<a class="reference external" href="../Reference_Manual/topo.projection.SharedWeightCFProjection-class.html">SharedWeightCFProjection</a> is used to perform the mathematical
+operation of convolution, i.e., applying a set of weights to all
+points in a plane, and is equivalent to having one ConnectionField
+shared by every destination neuron.</p>
+</div>
+<div class="section" id="patterngenerators">
+<h3>PatternGenerators<a class="headerlink" href="#patterngenerators" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/topo.base.patterngenerator.PatternGenerator-class.html">PatternGenerator</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.pattern.Gaussian-class.html">Gaussian</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.patterngenerator.Constant-class.html">Constant</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.pattern.random.UniformRandom-class.html">UniformRandom</a></li>
+</ul>
+</li>
+</ul>
+<p>A large family of flexible, general-purpose function objects for
+producing 2D patterns is provided, as described on <a class="reference internal" href="patterns.html"><em>the Patterns page</em></a>.</p>
+</div>
+<div class="section" id="transfer-functions">
+<h3>Transfer functions<a class="headerlink" href="#transfer-functions" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/topo.base.functionfamily.TransferFn-class.html">TransferFn</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.transferfn.DivisiveNormalizeL1-class.html">DivisiveNormalizeL1</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.transferfn.DivisiveNormalizeL2-class.html">DivisiveNormalizeL2</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.transferfn.PiecewiseLinear-class.html">PiecewiseLinear</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.transferfn.misc.PatternCombine-class.html">PatternCombine</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.functionfamily.IdentityTF-class.html">IdentityTF</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFPOutputFn-class.html">CFPOutputFn</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFPOF_Plugin-class.html">CFPOF_Plugin</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1-class.html">CFPOF_DivisiveNormalizeL1</a></li>
+</ul>
+</li>
+</ul>
+<p>A TransferFn is a function object that will accept a matrix argument
+and (typically) modify it in some way. This is a very simple
+concept, but it is used many times throughout the Topographica code,
+and provides a lot of flexibility. Any function that can normalize a
+set of weights or an input pattern is a TransferFn, as is any
+Sheet&#8217;s activity transfer function.</p>
+<p>TransferFns are controlled by a set of parameters that are each
+typically called output_fns. Each such parameter is associated with
+a particular processing step of a Sheet or a Projection. For
+instance, CFProjections have output_fns applied after they
+calculate their activity, and weights_output_fns applied after a
+set of weights is modified. Sheets have output_fns applied after
+they calculate their activity, and PatternGenerators have
+output_fns applied after the pattern is calculated.</p>
+<p>The output_fns parameters allow the user to control calculations in
+a flexible way, without having to write or maintain new code. For
+instance, the PatternCombine TransferFn can be used to add a
+user-specified type of random noise to any of the major processing
+steps. Alternatively, it can be used to mask out a specific region
+at the end of the calculation, to implement a user-specified lesion
+or a non-rectangular neural region.</p>
+<p>Multiple TransferFns can be applied in series, e.g. to add random
+noise, normalize the results, and then mask out lesioned units.</p>
+<p>For the common and very expensive case of normalizing
+ConnectionField weights, a family of transfer functions that works
+on an entire CFProjection at once is also available (CFPOutputFn).
+These functions can be optimized heavily, and can do such things as
+normalizing across an entire Projection.</p>
+</div>
+<div class="section" id="response-functions">
+<h3>Response functions<a class="headerlink" href="#response-functions" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/topo.base.functionfamily.ResponseFn-class.html">ResponseFn</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.functionfamily.DotProduct-class.html">DotProduct</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFPResponseFn-class.html">CFPResponseFn</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFPRF_Plugin-class.html">CFPRF_Plugin</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.responsefn.optimized.CFPRF_DotProduct-class.html">CFPRF_DotProduct</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.responsefn.projfn.CFPRF_EuclideanDistance-class.html">CFPRF_EuclideanDistance</a></li>
+</ul>
+</li>
+</ul>
+<p>A ResponseFn is a function object that will compute a matrix of
+activity values from a matrix of weights and an input matrix of the
+same shape. This is typically used for a neural response function.</p>
+<p>A family of response functions that works on an entire CFProjection
+at once is also available (CFPResponseFn). These functions can be
+optimized heavily, and can do such things as normalizing across an
+entire Sheet.</p>
+</div>
+<div class="section" id="learning-functions">
+<h3>Learning functions<a class="headerlink" href="#learning-functions" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="../Reference_Manual/topo.base.functionfamily.LearningFn-class.html">LearningFn</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.functionfamily.Hebbian-class.html">Hebbian</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.learningfn.Oja-class.html">Oja</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.learningfn.Covariance-class.html">Covariance</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFPLearningFn-class.html">CFPLearningFn</a><ul>
+<li><a class="reference external" href="../Reference_Manual/topo.base.cf.CFPLF_Plugin-class.html">CFPLF_Plugin</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.learningfn.optimized.CFPLF_Hebbian-class.html">CFPLF_Hebbian</a></li>
+<li><a class="reference external" href="../Reference_Manual/topo.learningfn.som.CFPLF_HebbianSOM-class.html">CFPLF_HebbianSOM</a></li>
+</ul>
+</li>
+</ul>
+<p>A LearningFn is a function object that will modify a matrix of
+weight values given an input activity pattern and an output activity
+value. Most such rules are Hebbian-based, i.e., driven by the
+product of the input and output activity values, but there are many
+variants.</p>
+<p>A family of learning functions that works on an entire CFProjection
+at once is also available (CFPLearningFn). These functions can be
+optimized heavily, and can do such things as basing the activity on
+the single best-responding unit in a Sheet (as in a Kohonen SOM).</p>
+</div>
+</div>
+<div class="section" id="who-should-use-topographica">
+<h2>Who should use Topographica?<a class="headerlink" href="#who-should-use-topographica" title="Permalink to this headline">¶</a></h2>
+<p>Topographica&#8217;s main target audience is computational neuroscientists
+who want to simulate large, topographically mapped brain regions.
+Many such researchers initially start coding with general-purpose
+languages like Matlab or bare Python, because it is relatively
+straightforward to specify an initial fully-connected model with
+square connections and hard-coded sizes from scratch. However, as
+soon as the model becomes more complex, the code quickly becomes
+unwieldy. Supporting local rather than full connectivity, circular
+or arbitrary connection patterns rather than rectangular arrays,
+variable densities of neurons per region rather than hard-coded
+ones, arbitrary patterns of connectivity (including feedforward and
+feedback connections) between sheets rather than feedforward
+connections only, &#8212; all of these will quickly make code be
+unreadable and unmaintainable without a clear, clean overall design.
+Topographica&#8217;s developers have dealt with these cases already, and
+the result is highly robust and reliable, making it very
+straightforward to run a large class of models without complicated
+coding or debugging.</p>
+</div>
+<div class="section" id="how-much-of-topographica-to-use">
+<span id="implementation-levels"></span><h2>How much of Topographica to use<a class="headerlink" href="#how-much-of-topographica-to-use" title="Permalink to this headline">¶</a></h2>
+<p>Topographica is designed as an extensible framework or toolkit,
+rather than as a monolithic application with a fixed list of
+features. Users can extend its functionality by writing objects in
+Python, which is a fully general-purpose interpreted programming
+language. As a result, Topographica supports any possible model (and
+indeed, any possible software program), but as the above lists
+suggest, it provides much more specific support for specific types
+of models of topographic maps. This approach allows some models to
+be built without any programming, while not limiting the future
+directions of research.</p>
+<p>The following list explains the different levels of support provided
+by Topographica for different types of models, depending on which
+parts of Topographica you are able to use. The list is ordered so
+that the most general support, suitable for everyone but requiring
+the most user effort, is at the top, and the most specific support
+is at the bottom. Note that everything in the levels below where
+your model fits in can be ignored, because those files can be
+deleted with no ill effects unless some part of your model uses
+objects from those levels. You can also add items to any level,
+i.e., to any class hierarchy listed above; please <a class="reference external" href="mailto:jbednar&#37;&#52;&#48;inf&#46;ed&#46;ac&#46;uk">contact us</a> to
+contribute any of these to the project or to join as a developer.</p>
+<p>Topographica levels:</p>
+<ol class="arabic">
+<li><p class="first">Python with C interface (ignoring <em>everything</em> in topo/):</p>
+<dl class="docutils">
+<dt>Supports:</dt>
+<dd><p class="first last">Anything is possible, with no performance or programming
+limitations (since anything can be written efficiently in C, and
+the rest can be written in Python).</p>
+</dd>
+<dt>Limitations:</dt>
+<dd><p class="first last">Need to do all programming yourself. Can&#8217;t mix and match code
+with other researchers very easily, because they are unlikely to
+CHoose similar interfaces or make similar assumptions.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Everything in 1., plus event-driven simulator with
+parameterizable objects, debugging output, etc. (using just
+simulation.py from topo/base/ in addition to Parameter support
+from the Param package):</p>
+<dl class="docutils">
+<dt>Supports:</dt>
+<dd><p class="first last">Running simulations of any physical system, with good semantics
+for object parameter specification with inheritance.</p>
+</dd>
+<dt>Limitations:</dt>
+<dd><p class="first last">Basic event structure is in Python, which is good for generality
+but means that performance will be good only if the computation
+in the individual events is big compared to the number of events.
+This assumption is true for existing Topographica simulations,
+but may not apply to all systems being modelled.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Everything in 1.-2., plus Sheets (adding topo/base/sheet.py and
+its dependencies)</p>
+<dl class="docutils">
+<dt>Supports:</dt>
+<dd><p class="first last">Uniform interface for a wide variety of brain models of
+topographically organized 2D regions. E.g. can measure preference
+maps for anything supporting the Sheet interface, and can do
+plotting for them uniformly.</p>
+</dd>
+<dt>Limitations:</dt>
+<dd><p class="first last">Not useful if the assumptions of what constitutes a Sheet do not
+apply to your model &#8211; e.g. ignores curvature, sulci, gyrii; has
+hard boundaries between regions, uses Cartesian, not hexagonal
+grid. For instance, Sheets are not a good way to model how the
+entire brain is parcellated into brain areas during development,
+because that happens in 3D and does not start out with very
+strict boundaries between regions.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Everything in 1.-3., plus Projections and ConnectionFields
+(adding the rest of topo/base/)</p>
+<dl class="docutils">
+<dt>Supports:</dt>
+<dd><p class="first last">Anything with topographically organized projections between
+Sheets, each of which contains an array of units, each unit
+having input from a spatially restricted region on another (or
+the same) sheet. Any such sheet can be plotted and analyzed
+uniformly.</p>
+</dd>
+<dt>Limitations:</dt>
+<dd><p class="first last">Much more specific limitations on what types of models can be
+used &#8211; e.g. broad, sparse connectivity between regions is less
+well supported (so far), and non-topographic mappings are
+currently left out.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Everything in 1.-4., plus the Topographica primitives library
+(the rest of topo/)</p>
+<dl class="docutils">
+<dt>Supports:</dt>
+<dd><p class="first last">Can implement a large range of map models without coding any new
+objects &#8211; instead setting parameters and calling methods on
+existing objects. Easy to mix and match components between
+models, and to add just a few new components for a new but
+similar model. Easy to compare different models from this class
+under identical conditions.</p>
+</dd>
+<dt>Limitations:</dt>
+<dd><p class="first last">Only a relatively small set of components has actually been
+implemented so far, and so in practice the primitives library
+will need to be expanded to cover most new models, even from the
+class of models described in 4.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>As one moves down this list, the amount of programming required to
+implement a basic model decreases (down to zero if you use only the
+primitives we&#8217;ve already implemented), but the limitations governing
+what can be done at that level increase. To the extent that these
+limitations are appropriate for what you want to model, Topographica
+will be an appropriate tool. If what you want to do conflicts with
+these limitations, you will have to go up to higher levels in this
+list, doing more of the implementation work yourself and gaining
+less from what the Topographica developers have done. If everything
+you are doing ends up being implemented at level 1 above, then there
+is probably no reason to use Topographica at all, except perhaps as
+an example of how to use Python and C together with various external
+libraries.</p>
+<p>Note that different parts of any particular model may be implemented
+at different levels from this list. For instance, even for a model
+that is fully supported by the Topographica primitives in level 5,
+you may want to add an interface to a custom-built external hardware
+device, which would have to be implemented at level 1. Data from the
+device would then presumably appear in a form compatible with one of
+the lower layers 3-5, and could then be used with the other
+Topographica primitives.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Overview of Topographica design and features</a><ul>
+<li><a class="reference internal" href="#major-topographica-object-types">Major Topographica object types</a><ul>
+<li><a class="reference internal" href="#parameterized-objects-and-parameters">Parameterized objects and Parameters</a></li>
+<li><a class="reference internal" href="#simulation-and-events">Simulation and Events</a></li>
+<li><a class="reference internal" href="#sheets">Sheets</a></li>
+<li><a class="reference internal" href="#connections-and-projections">Connections and Projections</a></li>
+<li><a class="reference internal" href="#patterngenerators">PatternGenerators</a></li>
+<li><a class="reference internal" href="#transfer-functions">Transfer functions</a></li>
+<li><a class="reference internal" href="#response-functions">Response functions</a></li>
+<li><a class="reference internal" href="#learning-functions">Learning functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#who-should-use-topographica">Who should use Topographica?</a></li>
+<li><a class="reference internal" href="#how-much-of-topographica-to-use">How much of Topographica to use</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="time.html"
+                        title="next chapter">Representing time in Topographica</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/User_Manual/overview.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="time.html" title="Representing time in Topographica"
+             >next</a></li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

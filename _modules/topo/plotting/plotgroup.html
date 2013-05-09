@@ -1,0 +1,1459 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.plotting.plotgroup &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.plotting.plotgroup</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Hierarchy of PlotGroup classes, i.e. output-device-independent sets of</span>
+<span class="sd">plots.</span>
+
+<span class="sd">Includes PlotGroups for standard plots of anything in a Sheet</span>
+<span class="sd">database, plus weight plots for one unit, and projections.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">Image</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">ParamOverrides</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">resolve_path</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFSheet</span><span class="p">,</span><span class="n">CFProjection</span>
+<span class="kn">from</span> <span class="nn">topo.base.projection</span> <span class="kn">import</span> <span class="n">ProjectionSheet</span>
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">GeneratorSheet</span><span class="p">,</span><span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">topo.misc.keyedlist</span> <span class="kn">import</span> <span class="n">KeyedList</span>
+
+<span class="kn">from</span> <span class="nn">plot</span> <span class="kn">import</span> <span class="n">make_template_plot</span><span class="p">,</span> <span class="n">Plot</span>
+<span class="kn">from</span> <span class="nn">plotfilesaver</span> <span class="kn">import</span> <span class="n">PlotGroupSaver</span><span class="p">,</span><span class="n">CFProjectionPlotGroupSaver</span>
+
+<span class="c"># General CEBALERTs for this file:</span>
+<span class="c"># * It is very difficult to understand what is happening in these</span>
+<span class="c">#   classes!</span>
+<span class="c"># * Improve hierarchy. E.g. GridPlotGroup should be a mixin?</span>
+<span class="c"># * Oh yeah, and don&#39;t forget about the TestPattern window. It has</span>
+<span class="c">#   some kind of PlotGroup in it too...</span>
+<span class="c"># * There are missing classes (e.g. currently only the CFProjections</span>
+<span class="c">#   can be plotted for CFSheets).</span>
+<span class="c"># * There are no unit tests</span>
+
+<span class="c"># General JABALERT:</span>
+<span class="c"># We need to clean up this file; there is no need</span>
+<span class="c"># for it to be so incomprehensible. Everything to do with _range,</span>
+<span class="c"># _kw_for_make_template_plots, _hack, and joint normalization</span>
+<span class="c"># needs to be greatly simplified.</span>
+
+
+
+<span class="k">def</span> <span class="nf">_cmp_plot</span><span class="p">(</span><span class="n">plot1</span><span class="p">,</span><span class="n">plot2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Comparison function for sorting Plots.</span>
+<span class="sd">    It compares the precedence number first and then the src_name and name attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">plot1</span><span class="o">.</span><span class="n">precedence</span> <span class="o">!=</span> <span class="n">plot2</span><span class="o">.</span><span class="n">precedence</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">plot1</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span><span class="n">plot2</span><span class="o">.</span><span class="n">precedence</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">((</span><span class="n">plot1</span><span class="o">.</span><span class="n">plot_src_name</span><span class="o">+</span><span class="n">plot1</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                   <span class="p">(</span><span class="n">plot2</span><span class="o">.</span><span class="n">plot_src_name</span><span class="o">+</span><span class="n">plot2</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="PlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.PlotGroup">[docs]</a><span class="k">class</span> <span class="nc">PlotGroup</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Container that has one or more Plots and also knows how to arrange</span>
+<span class="sd">    the plots and other special parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pre_plot_hooks</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Commands to execute before updating this plot, e.g. to calculate sheet views.</span>
+
+<span class="s">        The commands can be any callable Python objects, i.e. any x for</span>
+<span class="s">        which x() is valid.  The initial value is determined by the</span>
+<span class="s">        template for this plot, but various arguments can be passed, a</span>
+<span class="s">        modified version substituted, etc.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">plot_hooks</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Commands to execute when redrawing a plot rather than regenerating data.</span>
+
+<span class="s">        E.g, for a plot with data measured once but displayed one</span>
+<span class="s">        sheet or unit at at time, this command will be called whenever</span>
+<span class="s">        the sheet or coordinate of unit to be plotted (or the</span>
+<span class="s">        simulator time) has changed.</span>
+
+<span class="s">        The commands can be any callable Python objects, i.e. any x for</span>
+<span class="s">        which x() is valid.  The initial value is determined by the</span>
+<span class="s">        template for this plot, but various arguments can be passed, a</span>
+<span class="s">        modified version substituted, etc.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># I guess the interface for users of the class (I just mean methods</span>
+    <span class="c"># likely to be used) is:</span>
+    <span class="c"># make_plots()</span>
+    <span class="c"># scale_images()</span>
+    <span class="c"># + parameters</span>
+
+    <span class="c"># And the interface for subclasses (I mean methods likely to be</span>
+    <span class="c"># overridden) is:</span>
+    <span class="c"># _generate_plots()      - return the list of plots</span>
+    <span class="c"># _generate_labels()     - return the list of labels</span>
+    <span class="c"># _sort_plots()          - sort the list of plots</span>
+    <span class="c"># _exec_pre_plot_hooks() - run the pre_plot_hooks</span>
+    <span class="c"># _exec_plot_hooks()     - run the plot_hooks</span>
+
+
+    <span class="c">##############################</span>
+    <span class="c">########## interface for users</span>
+
+<div class="viewcode-block" id="PlotGroup.make_plots"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.PlotGroup.make_plots">[docs]</a>    <span class="k">def</span> <span class="nf">make_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and scale the plots, after first executing the PlotGroup&#39;s pre_plot_hooks</span>
+<span class="sd">        (if update is True) and plot_hooks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">update</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exec_plot_hooks</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_images</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_images</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PlotGroup.scale_images"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.PlotGroup.scale_images">[docs]</a>    <span class="k">def</span> <span class="nf">scale_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">zoom_factor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Scale the images by the given zoom factor, if appropriate; default is to do nothing.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+    <span class="c">###################################</span>
+    <span class="c">########## interface for subclasses</span>
+</div>
+    <span class="k">def</span> <span class="nf">_generate_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the list of Plots&quot;&quot;&quot;</span>
+        <span class="c"># subclasses may have dynamically generated Plots to add</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_plots</span><span class="p">[:]</span>
+
+
+    <span class="k">def</span> <span class="nf">_generate_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">plot</span><span class="o">.</span><span class="n">label</span><span class="p">()</span> <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">_sort_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sort plots according to their precedence, then alphabetically.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">_cmp_plot</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_static_plots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filesaver</span> <span class="o">=</span> <span class="n">PlotGroupSaver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># In the future, it might be good to be able to specify the</span>
+        <span class="c"># plot rows and columns using tuples.  For instance, if three</span>
+        <span class="c"># columns are desired with the plots laid out from left to</span>
+        <span class="c"># right, we could use (None, 3).  If three rows are desired</span>
+        <span class="c"># then (3, None).  Another method that would work is [3,2,4]</span>
+        <span class="c"># would have the first row with 3, the second row with 2, the</span>
+        <span class="c"># third row with 4, etc.  The default left-to-right ordering</span>
+        <span class="c"># in one row could perhaps be represented as (None, Inf).</span>
+        <span class="c">#</span>
+        <span class="c"># Alternatively, we could add another precedence value, so</span>
+        <span class="c"># that the usual precedence value controls where the plot</span>
+        <span class="c"># appears left to right, while a rowprecedence value would</span>
+        <span class="c"># control where it appears top to bottom.  All plots with the</span>
+        <span class="c"># same rowprecedence would go on the same row, and the actual</span>
+        <span class="c"># value of the rowprecedence would determine which row goes</span>
+        <span class="c"># first.</span>
+
+
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_plot_hooks</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_exec_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_hooks</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+    <span class="c"># unlikely to be overridden?</span>
+    <span class="k">def</span> <span class="nf">_create_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the sorted and scaled list of plots constituting the PlotGroup.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="o">=</span> <span class="p">[</span><span class="n">plot</span> <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_plots</span><span class="p">()</span> <span class="k">if</span> <span class="n">plot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+
+        <span class="c"># Suppress plots in the special case of plots not being updated</span>
+        <span class="c"># and having no resizable images, to suppress plotgroups that</span>
+        <span class="c"># have nothing but a color key</span>
+        <span class="n">resizeable_plots</span> <span class="o">=</span> <span class="p">[</span><span class="n">plot</span> <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="k">if</span> <span class="n">plot</span><span class="o">.</span><span class="n">resize</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">update</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">resizeable_plots</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="c"># Take the timestamps from the underlying Plots</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">plot</span><span class="o">.</span><span class="n">timestamp</span> <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span>
+                      <span class="k">if</span> <span class="n">plot</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">min</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Combining Plots from different times (</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">timestamps</span><span class="p">),</span><span class="nb">max</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sort_plots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_labels</span><span class="p">()</span>
+
+
+
+<span class="c">### In the rest of the file, whenever we do a loop through all the</span>
+<span class="c">### simulation&#39;s sheets, seems like we should have set the sheet</span>
+<span class="c">### Parameter&#39;s range instead. sheet&#39;s range is set by the GUI.</span>
+<span class="c">### i.e. maybe there should be a sheet parameter here, with its range</span>
+<span class="c">### set when the plotgroup is instantiated. Then if sheet=None, the</span>
+<span class="c">### sheet&#39;s range can be used as the list of sheets.</span>
+</div>
+<span class="k">class</span> <span class="nc">SheetPlotGroup</span><span class="p">(</span><span class="n">PlotGroup</span><span class="p">):</span>
+
+    <span class="c"># CEBALERT: shouldn&#39;t this be abstract? Currently it wouldn&#39;t do</span>
+    <span class="c"># anything with its sheets if you asked it to make plots.</span>
+    <span class="c">#</span>
+    <span class="c"># (TemplatePlotGroup and TestPatternPlotGroup are the only two</span>
+    <span class="c"># immediate children at the moment.)</span>
+
+    <span class="n">sheet_coords</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to scale plots based on their relative sizes in sheet</span>
+<span class="s">        coordinates.  If true, plots are scaled so that their sizes are</span>
+<span class="s">        proportional to their area in sheet coordinates, so that one can</span>
+<span class="s">        compare corresponding areas.  If false, plots are scaled to have</span>
+<span class="s">        similar sizes on screen, regardless of their corresponding</span>
+<span class="s">        sheet areas, which maximizes the size of each plot.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># CEBALERT: in the GUI, this isn&#39;t getting the right help text. I</span>
+    <span class="c"># suspect I put in a hack for these parameters in parametersframe,</span>
+    <span class="c"># sp when used outside of a parametersframe, they don&#39;t get the</span>
+    <span class="c"># help text.</span>
+    <span class="n">normalize</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span>
+                                     <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;None&#39;</span><span class="p">,</span><span class="s">&#39;Individually&#39;</span><span class="p">],</span>
+                                  <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        &#39;Individually&#39;: scale each plot so that the peak value will be white</span>
+<span class="s">        and the minimum value black.</span>
+
+<span class="s">        &#39;None&#39;: no scaling - 0.0 will be black and 1.0 will be white.</span>
+
+<span class="s">        Normalization has the advantage of ensuring that any data that</span>
+<span class="s">        is present will be visible, but the disadvantage that the</span>
+<span class="s">        absolute scale will be obscured.  Non-normalized plots are</span>
+<span class="s">        guaranteed to be on a known scale, but only values between 0.0</span>
+<span class="s">        and 1.0 will be visibly distinguishable.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">integer_scaling</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        When scaling bitmaps, whether to ensure that the scaled bitmap is an even</span>
+<span class="s">        multiple of the original.  If true, every unit will be represented by a</span>
+<span class="s">        square of the same size.  Typically false so that the overall area will</span>
+<span class="s">        be correct, e.g. when using Sheet coordinates, which is often more</span>
+<span class="s">        important.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">auto_refresh</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If this plot is being displayed persistently (e.g. in a GUI),</span>
+<span class="s">        whether to regenerate it automatically whenever the simulation</span>
+<span class="s">        time advances.  The default is False, because many plots are</span>
+<span class="s">        slow to generate (including most preference map plots).&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">desired_maximum_plot_height</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        User-specified height of the tallest plot in this PlotGroup.</span>
+<span class="s">        Other plots will generally be scaled as appropriate, either</span>
+<span class="s">        to match this size (when sheet_coords is False), or to</span>
+<span class="s">        have the appropriate relative size (when sheet_coords is True).</span>
+
+<span class="s">        If enforce_minimum_plot_height is True, the actual maximum</span>
+<span class="s">        plot height may be larger than this parameter&#39;s value.  In</span>
+<span class="s">        particular, with enforce_minimum_plot_height=True, the default</span>
+<span class="s">        value of 0 gives plots that are the size of the underlying</span>
+<span class="s">        matrix, which is the most efficient size for saving plots</span>
+<span class="s">        directly to disk.  Larger values (e.g. 150) are suitable when</span>
+<span class="s">        displaying plots on screen.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">enforce_minimum_plot_height</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If true, ensure that plots are never shown smaller than their</span>
+<span class="s">        native size, i.e. with fewer than one pixel per matrix unit.</span>
+<span class="s">        This option is normally left on for safety, so that no</span>
+<span class="s">        visualization will be missing any units.  However, it may be</span>
+<span class="s">        acceptable to turn this check off when working with matrix</span>
+<span class="s">        sizes much larger than your screen resolution.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># For users, adds:</span>
+    <span class="c"># sheets()</span>
+    <span class="c"># update_maximum_plot_height()</span>
+    <span class="c"># scale_images()</span>
+
+    <span class="c">#########################</span>
+    <span class="c">########## adds for users</span>
+
+    <span class="k">def</span> <span class="nf">sheets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">update_maximum_plot_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">zoom_factor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine which plot will be the largest, based on the</span>
+<span class="sd">        settings for minimum plot heights, the specified zoom factor</span>
+<span class="sd">        (if not None), etc.</span>
+
+<span class="sd">        A minimum size (and potentially a maximum size) are enforced,</span>
+<span class="sd">        as described below.</span>
+
+<span class="sd">        If the scaled sizes would be outside of the allowed range,</span>
+<span class="sd">        False is returned.</span>
+
+<span class="sd">        For matrix coordinate plots (sheet_coords=False), the minimum</span>
+<span class="sd">        size is calculated as the native size of the largest bitmap to</span>
+<span class="sd">        be plotted.  Other plots are then usually scaled up to (but</span>
+<span class="sd">        not greater than) this size, so that all plots are</span>
+<span class="sd">        approximately the same size, and no plot is missing any pixel.</span>
+
+<span class="sd">        For Sheet coordinate plots, the minimum plotting density that</span>
+<span class="sd">        will avoid losing pixels is determined by the maximum density</span>
+<span class="sd">        from any sheet.  If all plots are then drawn at that density</span>
+<span class="sd">        (as they must be for them to be in Sheet coordinates), the</span>
+<span class="sd">        largest plot will then be the one with the largest sheet</span>
+<span class="sd">        bounds, and the size of that plot will be the maximum density</span>
+<span class="sd">        times the largest sheet bounds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Apply optional scaling to the overall size</span>
+        <span class="k">if</span> <span class="n">zoom_factor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">desired_maximum_plot_height</span><span class="o">*=</span><span class="n">zoom_factor</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximum_plot_height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_maximum_plot_height</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enforce_minimum_plot_height</span><span class="p">):</span>
+            <span class="n">resizeable_plots</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">resize</span><span class="p">]</span>
+
+            <span class="c"># CEBALERT: not sure how I should have handled this...</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">resizeable_plots</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_coords</span><span class="p">:</span>
+                <span class="n">bitmap_heights</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">resizeable_plots</span><span class="p">]</span>
+                <span class="n">minimum_height_of_tallest_plot</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">bitmap_heights</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">### JABALERT: Should take the plot bounds instead of the sheet bounds</span>
+                <span class="c">### Specifically, a weights plot with situate=False</span>
+                <span class="c">### doesn&#39;t use the Sheet bounds, and so the</span>
+                <span class="c">### minimum_height is significantly overstated.</span>
+
+                <span class="n">sheets</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span>
+                <span class="n">max_sheet_height</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([(</span><span class="n">sheets</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">]</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span>
+                                         <span class="n">sheets</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">]</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+                                       <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">resizeable_plots</span><span class="p">])</span>
+                <span class="n">max_sheet_density</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">sheets</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">]</span><span class="o">.</span><span class="n">xdensity</span>
+                                         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">resizeable_plots</span><span class="p">])</span>
+                <span class="n">minimum_height_of_tallest_plot</span> <span class="o">=</span> <span class="n">max_sheet_height</span><span class="o">*</span><span class="n">max_sheet_density</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_sheet_height</span><span class="o">=</span><span class="n">max_sheet_height</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_plot_height</span> <span class="o">&lt;</span> <span class="n">minimum_height_of_tallest_plot</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">maximum_plot_height</span> <span class="o">=</span> <span class="n">minimum_height_of_tallest_plot</span>
+                <span class="c"># Return failure if trying to reduce but hit the minimum</span>
+                <span class="k">if</span> <span class="n">zoom_factor</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">zoom_factor</span><span class="o">&gt;</span><span class="mf">1.0</span>
+
+<span class="c">#       print zoom_factor, self.maximum_plot_height, self.desired_maximum_plot_height</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+
+    <span class="c">### CEB: At least some of this scaling would be common to all</span>
+    <span class="c">### plotgroups, if some (e.g. featurecurve) didn&#39;t open new</span>
+    <span class="c">### windows.</span>
+    <span class="c">###</span>
+    <span class="c">### Could strip out the matrix-coord scaling and put it into</span>
+    <span class="c">### PlotGroup</span>
+    <span class="k">def</span> <span class="nf">scale_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">zoom_factor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enlarge or reduce the bitmaps as needed for display.</span>
+
+<span class="sd">        The calculated sizes will be multiplied by the given</span>
+<span class="sd">        zoom_factor, if it is not None.</span>
+
+<span class="sd">        If the scaled sizes would be outside of the allowed range, no</span>
+<span class="sd">        scaling is done, and False is returned.  (One might</span>
+<span class="sd">        conceivably instead want the scaling to reach the actual</span>
+<span class="sd">        minimum or maximum allowed, but if we did this, then repeated</span>
+<span class="sd">        enlargements and reductions would not be reversible, unless we</span>
+<span class="sd">        were very tricky about how we did it.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># No scaling to do if there are no scalable plots, or no desired size</span>
+        <span class="n">resizeable_plots</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">resize</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resizeable_plots</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_maximum_plot_height</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Calculate maximum_plot_height, and abort if not feasible</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_maximum_plot_height</span><span class="p">(</span><span class="n">zoom_factor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">zoom_factor</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Scale the images so that each has a size up to the self.maximum_plot_height</span>
+        <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="n">resizeable_plots</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_coords</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)[</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_src_name</span><span class="p">]</span>
+                <span class="n">scaling_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_plot_height</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xdensity</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">max_sheet_height</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scaling_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_plot_height</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">_orig_bitmap</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer_scaling</span><span class="p">:</span>
+                <span class="n">scaling_factor</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">scaling_factor</span><span class="p">))</span>
+
+            <span class="n">plot</span><span class="o">.</span><span class="n">set_scale</span><span class="p">(</span><span class="n">scaling_factor</span><span class="p">)</span>
+
+            <span class="c">#print &quot;Scaled %s %s: %d-&gt;%d (x %f)&quot; % (plot.plot_src_name, plot.name, plot._orig_bitmap.height(), plot.bitmap.height(), scaling_factor)</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+
+
+<span class="k">def</span> <span class="nf">_get_value_range</span><span class="p">(</span><span class="n">plots</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to return the (min,max) given by the value_ranges of</span>
+<span class="sd">    the given plots.</span>
+
+<span class="sd">    Return None if there were no plots with value_range.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mins</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">maxs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="n">plots</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plot</span><span class="p">,</span><span class="s">&#39;value_range&#39;</span><span class="p">):</span>
+            <span class="n">mins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">value_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">maxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">value_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mins</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">mins</span><span class="p">),</span><span class="nb">max</span><span class="p">(</span><span class="n">maxs</span><span class="p">))</span>
+
+
+
+<span class="k">def</span> <span class="nf">alwaystrue</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="bp">True</span>
+
+
+
+<div class="viewcode-block" id="TemplatePlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.TemplatePlotGroup">[docs]</a><span class="k">class</span> <span class="nc">TemplatePlotGroup</span><span class="p">(</span><span class="n">SheetPlotGroup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Container that allows creation of different types of plots in a</span>
+<span class="sd">    way that is independent of particular models or Sheets.</span>
+
+<span class="sd">    A TemplatePlotGroup is constructed from a plot_templates list, an</span>
+<span class="sd">    optional command to run to generate the data, and other optional</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    The plot_templates list should contain tuples (plot_name,</span>
+<span class="sd">    plot_template).  Each plot_template is a list of (name, value)</span>
+<span class="sd">    pairs, where each name specifies a plotting channel (such as Hue</span>
+<span class="sd">    or Confidence), and the value is the name of a SheetView (such as</span>
+<span class="sd">    Activity or OrientationPreference).</span>
+
+<span class="sd">    Various types of plots support different channels.  An SHC</span>
+<span class="sd">    plot supports Strength, Hue, and Confidence channels (with</span>
+<span class="sd">    Strength usually being visualized as luminance, Hue as a color</span>
+<span class="sd">    value, and Confidence as the saturation of the color).  An RGB</span>
+<span class="sd">    plot supports Red, Green, and Blue channels.  Other plot types</span>
+<span class="sd">    will be added eventually.</span>
+
+<span class="sd">    For instance, one could define an Orientation-colored Activity</span>
+<span class="sd">    plot as::</span>
+
+<span class="sd">      plotgroups[&#39;Activity&#39;] =</span>
+<span class="sd">          TemplatePlotGroup(name=&#39;Activity&#39;, category=&#39;Basic&#39;,</span>
+<span class="sd">              pre_plot_hooks=[measure_activity],</span>
+<span class="sd">              plot_templates=[(&#39;Activity&#39;,</span>
+<span class="sd">                  {&#39;Strength&#39;: &#39;Activity&#39;, &#39;Hue&#39;: &#39;OrientationPreference&#39;, &#39;Confidence&#39;: None})])</span>
+
+<span class="sd">    This specifies that the final TemplatePlotGroup will contain up to</span>
+<span class="sd">    one Plot named Activity per Sheet, although there could be no</span>
+<span class="sd">    plots at all if no Sheet has a SheetView named Activity once</span>
+<span class="sd">    &#39;measure_activity()&#39; has been run.  The Plot will be colored by</span>
+<span class="sd">    OrientationPreference if such a SheetView exists for that Sheet,</span>
+<span class="sd">    and the value (luminance) channel will be determined by the</span>
+<span class="sd">    SheetView Activity.  This plot will be listed in the category</span>
+<span class="sd">    &#39;Basic&#39; anywhere such categories are relevant (e.g. in the GUI).</span>
+
+
+<span class="sd">    Here&#39;s a more complicated example specifying two different plots</span>
+<span class="sd">    in the same PlotGroup::</span>
+
+<span class="sd">      TemplatePlotGroup(name=&#39;Orientation Preference&#39;, category=&#39;Basic&#39;</span>
+<span class="sd">          pre_plot_hooks=[measure_or_pref.instance()],</span>
+<span class="sd">          plot_templates=</span>
+<span class="sd">              [(&#39;Orientation Preference&#39;,</span>
+<span class="sd">                  {&#39;Strength&#39;: None, &#39;Hue&#39;: &#39;OrientationPreference&#39;}),</span>
+<span class="sd">               (&#39;Orientation Selectivity&#39;,</span>
+<span class="sd">                  {&#39;Strength&#39;: &#39;OrientationSelectivity&#39;})])</span>
+
+<span class="sd">    Here the TemplatePlotGroup will contain up to two Plots per Sheet,</span>
+<span class="sd">    depending on which Sheets have OrientationPreference and</span>
+<span class="sd">    OrientationSelectivity SheetViews.</span>
+
+
+<span class="sd">    The function create_plotgroup provides a convenient way to define plots using</span>
+<span class="sd">    TemplatePlotGroups; search for create_plotgroup elsewhere in the code to see</span>
+<span class="sd">    examples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Documentation string describing this type of plot.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">plot_immediately</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether to call the pre-plot hooks at once or only when the user asks for a refresh.</span>
+
+<span class="s">        Should be set to true for quick plots, but false for those that take a long time</span>
+<span class="s">        to calculate, so that the user can change the hooks if necessary.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">prerequisites</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">([],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of preference maps that must exist before this plot can be calculated.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">category</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;User&quot;</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Category to which this plot belongs, which will be created if necessary.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">filterfn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">alwaystrue</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Boolean function allowing control over which items will be plotted.</span>
+<span class="s">        E.g.: filterfn=lambda x: x.name in [&#39;Retina&#39;,&#39;V1&#39;] for a plot ranging over</span>
+<span class="s">        Sheets, or filterfn=lambda x: x[0]==x[1] for a plot ranging over coordinates.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># CEBALERT: how to avoid repeating documentation?</span>
+    <span class="c"># CB: also, documentation for normalization types needs cleaning up.</span>
+    <span class="n">normalize</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span>
+                                     <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;None&#39;</span><span class="p">,</span><span class="s">&#39;Individually&#39;</span><span class="p">,</span><span class="s">&#39;AllTogether&#39;</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+
+<span class="s">        &#39;Individually&#39;: scale each plot so that its maximum value is</span>
+<span class="s">        white and its minimum value black.</span>
+
+<span class="s">        &#39;None&#39;: no scaling (0.0 will be black and 1.0 will be white).</span>
+
+<span class="s">        &#39;AllTogether&#39;: scale each plot so that the highest maximum value is</span>
+<span class="s">        white, and the lowest minimum value is black.</span>
+
+
+<span class="s">        Normalizing &#39;Individually&#39; has the advantage of ensuring that</span>
+<span class="s">        any data that is present will be visible, but the disadvantage</span>
+<span class="s">        that the absolute scale will be obscured.  Non-normalized</span>
+<span class="s">        plots are guaranteed to be on a known scale, but only values</span>
+<span class="s">        between 0.0 and 1.0 will be visibly distinguishable.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _generate_plots() - supports normalize==&#39;AllTogether&#39;</span>
+
+    <span class="c"># For users, adds:</span>
+    <span class="c"># add_template()</span>
+    <span class="c"># add_static_image()</span>
+
+    <span class="c"># For subclasses, adds:</span>
+    <span class="c"># _template_plots()             -</span>
+    <span class="c"># _make_template_plot()         -</span>
+    <span class="c"># _kw_for_make_template_plots() -</span>
+
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">_generate_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="o">==</span><span class="s">&#39;AllTogether&#39;</span><span class="p">:</span>
+            <span class="n">range_</span> <span class="o">=</span> <span class="n">_get_value_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_plots</span><span class="p">(</span><span class="n">range_</span><span class="o">=</span><span class="bp">None</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">range_</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_plots</span><span class="p">[:]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_plots</span><span class="p">(</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_templates</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">static_images</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemplatePlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_templates</span> <span class="o">=</span> <span class="n">KeyedList</span><span class="p">(</span><span class="n">plot_templates</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="c"># Add plots for the static images, if any</span>
+        <span class="k">for</span> <span class="n">image_name</span><span class="p">,</span><span class="n">file_path</span> <span class="ow">in</span> <span class="n">static_images</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_static_image</span><span class="p">(</span><span class="n">image_name</span><span class="p">,</span><span class="n">file_path</span><span class="p">)</span>
+
+
+    <span class="c">#########################</span>
+    <span class="c">########## adds for users</span>
+
+    <span class="c"># JCALERT! We might eventually write these two functions</span>
+    <span class="c"># &#39;Python-like&#39; by using keyword argument to specify each</span>
+    <span class="c"># channel and then get the dictionnary of all remaining</span>
+    <span class="c"># arguments.</span>
+    <span class="c">#</span>
+    <span class="c"># JABALERT: We should also be able to store a documentation string</span>
+    <span class="c"># describing each plot (for hovering help text) within each</span>
+    <span class="c"># plot template.</span>
+
+    <span class="k">def</span> <span class="nf">add_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">specification_tuple_list</span><span class="p">):</span>
+        <span class="n">dict_</span><span class="o">=</span><span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">specification_tuple_list</span><span class="p">:</span>
+            <span class="n">dict_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_templates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span><span class="n">dict_</span><span class="p">))</span>
+
+    <span class="n">add_plot</span> <span class="o">=</span> <span class="n">add_template</span> <span class="c"># CEBALERT: should be removed when callers updated</span>
+
+
+<div class="viewcode-block" id="TemplatePlotGroup.add_static_image"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.TemplatePlotGroup.add_static_image">[docs]</a>    <span class="k">def</span> <span class="nf">add_static_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a static image Plot (e.g. a color key for an Orientation Preference map).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">resolve_path</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="n">Plot</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_static_plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+
+
+
+    <span class="c">##############################</span>
+    <span class="c">########## adds for subclasses</span>
+</div>
+    <span class="k">def</span> <span class="nf">_template_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="c"># calls make_template_plot for all plot_templates for all kw returned</span>
+        <span class="c"># by _kw_for_make_template_plot!!</span>
+        <span class="n">template_plots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_templates</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_make_template_plot</span><span class="p">(</span><span class="n">range_</span><span class="p">):</span>
+                <span class="n">template_plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_template_plot</span><span class="p">(</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">template_plots</span>
+
+
+    <span class="k">def</span> <span class="nf">_kw_for_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="p">):</span>
+        <span class="c"># Return a list of dictionaries; for each dictionary,</span>
+        <span class="c"># _make_template_plot() will be called with that dictionary</span>
+        <span class="c"># as keyword arguments.</span>
+        <span class="c">#</span>
+        <span class="c"># Allows subclasses to control what range of things (sheets,</span>
+        <span class="c"># projections) _make_template_plot() is called over, and to</span>
+        <span class="c"># control what keyword arguments</span>
+        <span class="c"># (sheet=,proj_=,range_=,bounds=,x=,...) are supplied.</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">sheet</span><span class="o">=</span><span class="n">sheet</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span> <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterfn</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">())]</span>
+
+
+    <span class="k">def</span> <span class="nf">_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_template</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                  <span class="c"># CEBALERT: after this class, p.t. name never used</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="n">plot_template_name</span><span class="p">,</span>
+                                  <span class="n">range_</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">])</span>
+
+
+</div>
+<div class="viewcode-block" id="default_measureable_sheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.default_measureable_sheet">[docs]</a><span class="k">def</span> <span class="nf">default_measureable_sheet</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Returns the first sheet for which measure_maps is True (if any), or else the first sheet, for use as a default value.&quot;&quot;&quot;</span>
+
+    <span class="n">sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+              <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="s">&#39;measure_maps&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">measure_maps</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sheets</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">Sheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sheets</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Unable to find a suitable measureable sheet.&quot;</span><span class="p">)</span>
+    <span class="n">sht</span><span class="o">=</span><span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sheets</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;Using sheet </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="n">sht</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sht</span>
+
+
+</div>
+<div class="viewcode-block" id="ProjectionSheetPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.ProjectionSheetPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">ProjectionSheetPlotGroup</span><span class="p">(</span><span class="n">TemplatePlotGroup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract PlotGroup for visualizations of the Projections of one ProjectionSheet.&quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># Class attribute; forms part of the key for sheet_views (see</span>
+    <span class="c"># the _key() method).</span>
+    <span class="n">keyname</span> <span class="o">=</span> <span class="s">&quot;ProjectionSheet&quot;</span>
+
+    <span class="n">sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                 <span class="n">compute_default_fn</span><span class="o">=</span><span class="n">default_measureable_sheet</span><span class="p">,</span>
+                                 <span class="n">doc</span><span class="o">=</span>
+        <span class="sd">&quot;&quot;&quot;The Sheet from which to produce plots.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">normalize</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span>
+                                  <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;None&#39;</span><span class="p">,</span><span class="s">&#39;Individually&#39;</span><span class="p">,</span><span class="s">&#39;AllTogether&#39;</span><span class="p">,</span><span class="s">&#39;JointProjections&#39;</span><span class="p">],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        &#39;Individually&#39;: scale each plot so that the peak value will be white</span>
+<span class="s">        and the minimum value black.</span>
+
+<span class="s">        &#39;None&#39;: no scaling - 0.0 will be black and 1.0 will be white.</span>
+
+<span class="s">        &#39;AllTogether&#39;: scale each plot so that the peak value of all the plots</span>
+<span class="s">        is white, and the minimum value of all the plots will be</span>
+<span class="s">        black.</span>
+
+<span class="s">        &#39;JointProjections&#39;: as &#39;Individually&#39;, except that plots produced from</span>
+<span class="s">        projections whose weights are jointly normalized will be</span>
+<span class="s">        jointly normalized.</span>
+
+<span class="s">        Normalization has the advantage of ensuring that any data that</span>
+<span class="s">        is present will be visible, but the disadvantage that the</span>
+<span class="s">        absolute scale will be obscured.  Non-normalized plots are</span>
+<span class="s">        guaranteed to be on a known scale, but only values between 0.0</span>
+<span class="s">        and 1.0 will be visibly distinguishable.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">ProjectionSheet</span>
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _exec*plot_hooks()           - passes sheet to hooks</span>
+    <span class="c"># sheet()                      - returns only a single sheet</span>
+    <span class="c"># _kw_for_make_template_plot() - adds projections (+ assumes one sheet)</span>
+    <span class="c"># _template_plots()            - support joint normalization</span>
+    <span class="c"># _make_template_plot()        -</span>
+    <span class="c"># _generate_labels()           -</span>
+
+    <span class="c"># Adds for users:</span>
+    <span class="c"># projections() -</span>
+
+    <span class="c"># Adds for subclasses:</span>
+    <span class="c"># _key() -</span>
+    <span class="c"># _kw_for_one_proj() -</span>
+    <span class="c"># _check_sheet_type() -</span>
+    <span class="c"># _check_data_exist() -</span>
+
+
+    <span class="c">#########################</span>
+    <span class="c">########## adds for users</span>
+
+    <span class="k">def</span> <span class="nf">projections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">projections</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">sheets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">(</span><span class="s">&#39;sheet&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">compute_default</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_sheet_type</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheetPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="n">sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_exec_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheetPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_plot_hooks</span><span class="p">(</span><span class="n">sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_kw_for_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterfn</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">projections</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_one_proj</span><span class="p">(</span><span class="n">proj</span><span class="p">):</span>
+                <span class="n">d</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">range_</span><span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="k">def</span> <span class="nf">_template_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="c"># all the extra processing is for normalize==&#39;JointProjections&#39;</span>
+
+        <span class="c"># {name:range_} for the projections</span>
+        <span class="n">named_ranges</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">([</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projections</span><span class="p">()],</span><span class="n">range_</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="o">==</span><span class="s">&#39;JointProjections&#39;</span><span class="p">:</span>
+            <span class="n">ranges</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">group_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">_grouped_in_projections</span><span class="p">(</span><span class="s">&#39;JointNormalize&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">group_key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">ranges</span><span class="p">[</span><span class="n">group_key</span><span class="p">]</span><span class="o">=</span><span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">projlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">_grouped_in_projections</span><span class="p">(</span><span class="s">&#39;JointNormalize&#39;</span><span class="p">)[</span><span class="n">group_key</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_exist</span><span class="p">(</span><span class="n">projlist</span><span class="p">)</span>
+
+                    <span class="c"># hack: need a _kw_for_make_template() that works</span>
+                    <span class="c"># with a single range value and restricts</span>
+                    <span class="c"># projections to those with a specified key.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_group_key</span> <span class="o">=</span> <span class="n">group_key</span>
+                    <span class="n">_orig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_make_template_plot</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_make_template_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hack</span>
+
+                    <span class="n">plotlist</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheetPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_template_plots</span><span class="p">(</span><span class="n">range_</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_make_template_plot</span> <span class="o">=</span> <span class="n">_orig</span>
+                    <span class="n">ranges</span><span class="p">[</span><span class="n">group_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_value_range</span><span class="p">(</span><span class="n">plotlist</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__keyed_projections</span><span class="p">():</span>
+                <span class="n">named_ranges</span><span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ranges</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheetPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_template_plots</span><span class="p">(</span><span class="n">range_</span><span class="o">=</span><span class="n">named_ranges</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span><span class="c">#sheet,proj</span>
+        <span class="k">return</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">(</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                  <span class="bp">None</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">range_</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_generate_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s">&quot;</span><span class="si">%s%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="p">((</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">(from </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="n">plot</span><span class="o">.</span><span class="n">proj_src_name</span><span class="p">)</span>
+                         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plot</span><span class="p">,</span><span class="s">&quot;proj_src_name&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+                 <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="p">]</span>
+
+
+    <span class="c">##############################</span>
+    <span class="c">########## adds for subclasses</span>
+
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="c"># the key for sheet_views</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keyname</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_kw_for_one_proj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proj</span><span class="p">):</span>
+        <span class="c"># Return a list of dictionaries; for each dictionary,</span>
+        <span class="c"># _make_template_plot() will be called with that dictionary as</span>
+        <span class="c"># keyword arguments.</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="n">proj</span><span class="p">)]</span>
+
+
+    <span class="c"># CB: this isn&#39;t really necessary for these classes</span>
+    <span class="c"># themselves. Right now we have it provide a useful error message</span>
+    <span class="c"># to users (which is useful).</span>
+    <span class="k">def</span> <span class="nf">_check_sheet_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s">&quot;</span><span class="si">%s</span><span class="s">&#39;s sheet Parameter must be set to a </span><span class="si">%s</span><span class="s"> instance (currently </span><span class="si">%s</span><span class="s">, type </span><span class="si">%s</span><span class="s">).&quot;</span> \
+                <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">)))</span>
+
+
+    <span class="k">def</span> <span class="nf">_check_data_exist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">projlist</span><span class="p">):</span>
+        <span class="c"># for joint normalization, not all data required may be</span>
+        <span class="c"># measured and displayed by the PlotGroup (in subclasses that</span>
+        <span class="c"># don&#39;t display all projections at once).</span>
+        <span class="k">pass</span>
+
+    <span class="c"># unlikely to be overridden?</span>
+    <span class="k">def</span> <span class="nf">_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plotgroup_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">plotgroup_template</span><span class="p">)</span>
+        <span class="n">channels</span><span class="p">[</span><span class="s">&#39;Strength&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">channels</span>
+
+
+    <span class="c"># CEBALERT: used to temporarily override</span>
+    <span class="c"># _kw_for_make_template_plot(), to allow calculation of range for</span>
+    <span class="c"># joint normalization. A mess.</span>
+    <span class="k">def</span> <span class="nf">_hack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">projlist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">_grouped_in_projections</span><span class="p">(</span><span class="s">&#39;JointNormalize&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_key</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">projlist</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">projections</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_one_proj</span><span class="p">(</span><span class="n">proj</span><span class="p">):</span>
+                        <span class="n">d</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">range_</span>
+                        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">args</span>
+        <span class="k">raise</span>
+
+
+    <span class="k">def</span> <span class="nf">__keyed_projections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># helper method to return a list of (key,proj) pairs from self.sheet</span>
+        <span class="n">keys_and_projns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">projlist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">_grouped_in_projections</span><span class="p">(</span><span class="s">&#39;JointNormalize&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+                <span class="n">keys_and_projns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span><span class="n">proj</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">keys_and_projns</span>
+
+
+</div>
+<div class="viewcode-block" id="ProjectionSheetMeasurementCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.ProjectionSheetMeasurementCommand">[docs]</a><span class="k">class</span> <span class="nc">ProjectionSheetMeasurementCommand</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ParameterizedFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A callable Parameterized command for measuring or plotting a specified Sheet.&quot;&quot;&quot;</span>
+
+    <span class="n">sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the sheet to use in measurements.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+</div>
+<div class="viewcode-block" id="ProjectionActivityPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.ProjectionActivityPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">ProjectionActivityPlotGroup</span><span class="p">(</span><span class="n">ProjectionSheetPlotGroup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Visualize the activity of all Projections into a ProjectionSheet.&quot;&quot;&quot;</span>
+
+    <span class="n">keyname</span><span class="o">=</span><span class="s">&#39;ProjectionActivity&#39;</span>
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">(</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">range_</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">])</span>
+
+
+<span class="c"># CEBALERT: Total mess. should be a mix-in class, or something like</span>
+<span class="c"># that.</span></div>
+<div class="viewcode-block" id="GridPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.GridPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">GridPlotGroup</span><span class="p">(</span><span class="n">ProjectionSheetPlotGroup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A ProjectionSheetPlotGroup capable of generating coordinates on a 2D grid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">### JPALERT: The bounds are meaningless for large sheets anyway.  If a sheet</span>
+    <span class="c">### is specified in, say, visual angle coordinates (e.g., -60 to +60 degrees), then</span>
+    <span class="c">### the soft min of 5.0/unit will still give a 600x600 array of CFs!</span>
+    <span class="c">### Density should probably be specified WRT to sheet bounds,</span>
+    <span class="c">### instead of per-unit-of-sheet.</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+                     <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">50.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">                     Number of units to plot per 1.0 distance in sheet coordinates&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">normalize</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span>
+                                  <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;None&#39;</span><span class="p">,</span><span class="s">&#39;Individually&#39;</span><span class="p">,</span><span class="s">&#39;AllTogether&#39;</span><span class="p">])</span> <span class="c"># joint is removed</span>
+
+
+    <span class="c"># Adds for subclasses:</span>
+    <span class="c"># generate_coords() -</span>
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _sort_plots()</span>
+    <span class="c"># _kw_for_make_template_plot() - no projection</span>
+    <span class="c"># _key()                       - no projection</span>
+    <span class="c"># _make_template_plot()        - no projection</span>
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">_sort_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Skips plot sorting to keep the generated order.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+    <span class="k">def</span> <span class="nf">_kw_for_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterfn</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">generate_coords</span><span class="p">()):</span>
+            <span class="n">x_center</span><span class="p">,</span><span class="n">y_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">closest_cell_center</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_center</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y_center</span><span class="p">,</span><span class="n">sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">args</span>
+
+
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keyname</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">(</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                  <span class="n">range_</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">])</span>
+
+    <span class="c"># (should *skip* the joint normalization additions in</span>
+    <span class="c"># projectionsheet for some subclasses (e.g. RFProjectionPlot), but</span>
+    <span class="c"># should not for other subclasses (e.g. ProjectionPlotGroup))</span>
+<span class="c">#    def _template_plots(self,range_=False):</span>
+<span class="c">#        return TemplatePlotGroup._dynamic_plot(self,range_)</span>
+
+
+
+    <span class="c">##############################</span>
+    <span class="c">########## adds for subclasses</span>
+
+<div class="viewcode-block" id="GridPlotGroup.generate_coords"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.GridPlotGroup.generate_coords">[docs]</a>    <span class="k">def</span> <span class="nf">generate_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evenly space out the units within the sheet bounding box, so</span>
+<span class="sd">        that it doesn&#39;t matter which corner the measurements start</span>
+<span class="sd">        from.  A 4 unit grid needs 5 segments.  List is in left-to-right,</span>
+<span class="sd">        from top-to-bottom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">rev</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="n">y</span><span class="o">.</span><span class="n">reverse</span><span class="p">();</span> <span class="k">return</span> <span class="n">y</span>
+
+        <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">l</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">x_step</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">y_step</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">l</span> <span class="o">+</span> <span class="n">x_step</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="n">y_step</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj_plotting_shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">),</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">rev</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_plotting_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_plotting_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x_step</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">l</span><span class="p">,</span> <span class="n">y_step</span><span class="o">*</span><span class="n">j</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">coords</span>
+
+
+</div></div>
+<div class="viewcode-block" id="default_input_sheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.default_input_sheet">[docs]</a><span class="k">def</span> <span class="nf">default_input_sheet</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Returns the first GeneratorSheet defined, for use as a default value.&quot;&quot;&quot;</span>
+    <span class="n">sheets</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sheets</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Unable to find a suitable input sheet.&quot;</span><span class="p">)</span>
+    <span class="n">sht</span><span class="o">=</span><span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sheets</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;Using input sheet </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="n">sht</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sht</span>
+
+
+</div>
+<span class="k">class</span> <span class="nc">RFProjectionPlotGroup</span><span class="p">(</span><span class="n">GridPlotGroup</span><span class="p">):</span>
+    <span class="n">keyname</span><span class="o">=</span><span class="s">&#39;RFs&#39;</span>
+    <span class="n">input_sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">compute_default_fn</span><span class="o">=</span><span class="n">default_input_sheet</span><span class="p">,</span>
+                                       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;The sheet on which to measure the RFs.&quot;</span><span class="p">)</span>
+
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _template_plots()      - no projection</span>
+    <span class="c"># _exec_pre_plot_hooks() -</span>
+
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">_template_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TemplatePlotGroup</span><span class="o">.</span><span class="n">_template_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="o">=</span><span class="n">range_</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span> <span class="c"># RFHACK</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">(</span><span class="s">&#39;input_sheet&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">compute_default</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RFProjectionPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="n">input_sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TwoOrientationsPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.TwoOrientationsPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">TwoOrientationsPlotGroup</span><span class="p">(</span> <span class="n">TemplatePlotGroup</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Display with small segments the two most preferred orientations for each</span>
+<span class="sd">    units in the sheet. Only orientation with significative selectivity are</span>
+<span class="sd">    shown. Darker segments correspond to orientations with more selective</span>
+<span class="sd">    response.&quot;&quot;&quot;</span>
+
+    <span class="n">unit_size</span>       <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;box size of a single unit&quot;</span><span class="p">)</span>
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _make_template_plot	- use density argument slot to parse unit_size</span>
+
+    <span class="k">def</span> <span class="nf">_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_template</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">unit_size</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="n">plot_template_name</span><span class="p">,</span>
+                                  <span class="n">range_</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">])</span>
+
+
+
+
+<span class="c"># CEBALERT: haven&#39;t modified; might need updating. Doesn&#39;t seem to be</span>
+<span class="c"># a way to call it from the GUI - is it known to be broken?</span></div>
+<span class="k">class</span> <span class="nc">RetinotopyPlotGroup</span><span class="p">(</span><span class="n">TemplatePlotGroup</span><span class="p">):</span>
+    <span class="n">input_sheet</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">compute_default_fn</span><span class="o">=</span><span class="n">default_input_sheet</span><span class="p">,</span>
+                                       <span class="n">doc</span><span class="o">=</span><span class="s">&quot;The sheet on which to measure the RFs.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span> <span class="c"># RFHACK</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">(</span><span class="s">&#39;input_sheet&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">compute_default</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RetinotopyPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span>
+            <span class="n">input_sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_sheet</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+
+<span class="k">class</span> <span class="nc">ProjectionPlotGroup</span><span class="p">(</span><span class="n">GridPlotGroup</span><span class="p">):</span>
+
+    <span class="n">keyname</span><span class="o">=</span><span class="s">&#39;Weights&#39;</span>
+
+    <span class="n">projection</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;The projection to visualize.&quot;</span><span class="p">)</span>
+
+    <span class="c"># ProjectionSheetPlotGroup</span>
+    <span class="n">normalize</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;None&#39;</span><span class="p">,</span>
+                                  <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;None&#39;</span><span class="p">,</span><span class="s">&#39;Individually&#39;</span><span class="p">,</span><span class="s">&#39;AllTogether&#39;</span><span class="p">,</span><span class="s">&#39;JointProjections&#39;</span><span class="p">])</span>
+
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _projections()               - one projection</span>
+    <span class="c"># _key()                       - restores projection</span>
+    <span class="c"># _kw_for_make_template_plot() - restores projection</span>
+    <span class="c"># _exec_pre_plot_hooks()       - pass coords to hooks</span>
+    <span class="c"># _check_data_exist() - check for data from other jointly normalized projections</span>
+
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">projections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">]</span>
+
+
+    <span class="c"># GridPlotGroup+ProjectionSheetPlotGroup</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keyname</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">])</span>
+
+
+    <span class="c"># ProjectionSheetPlotGroup</span>
+    <span class="k">def</span> <span class="nf">_check_data_exist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">projlist</span><span class="p">):</span>
+        <span class="n">nodata</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">projlist</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_one_proj</span><span class="p">(</span><span class="n">proj</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># only checking one (x,y)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">proj</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">:</span>
+                <span class="n">nodata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Joint normalization cannot proceed unless data has been measured for all jointly normalized projections (no data for </span><span class="si">%s</span><span class="s">)&quot;</span><span class="o">%</span><span class="n">nodata</span><span class="p">)</span>
+
+
+    <span class="c"># GridPlotGroup+ProjectionSheetPlotGroup</span>
+    <span class="k">def</span> <span class="nf">_kw_for_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">range_</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kw_for_one_proj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">range_</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">args</span>
+
+
+    <span class="c"># GridPlotGroup+ProjectionSheetPlotGroup</span>
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generate_coords</span><span class="p">()</span> <span class="c"># why not in gridplotgroup?</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span><span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="UnitMeasurementCommand"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.UnitMeasurementCommand">[docs]</a><span class="k">class</span> <span class="nc">UnitMeasurementCommand</span><span class="p">(</span><span class="n">ProjectionSheetMeasurementCommand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A callable Parameterized command for measuring or plotting specified units from a Sheet.&quot;&quot;&quot;</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        List of coordinates of unit(s) to measure.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">projection</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Name of the projection to measure; None means all projections.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">ParamOverrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">sheet</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">update_unit_view</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">projection</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">p</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="CFProjectionPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.CFProjectionPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">CFProjectionPlotGroup</span><span class="p">(</span><span class="n">ProjectionPlotGroup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Visualize one CFProjection.&quot;&quot;&quot;</span>
+
+    <span class="n">situate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    If True, plots the weights on the entire source sheet, using zeros</span>
+<span class="s">    for all weights outside the ConnectionField.  If False, plots only</span>
+<span class="s">    the actual weights that are stored.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">CFSheet</span>
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _make_template_plot()  - add bounds</span>
+    <span class="c"># _kw_for_one_proj()     - add bounds</span>
+    <span class="c"># _exec_pre_plot_hooks() - check proj type</span>
+
+    <span class="c"># Adds for subclasses:</span>
+    <span class="c"># _check_projection_type() -</span>
+
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">(</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;bounds&#39;</span><span class="p">],</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">range_</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_kw_for_one_proj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proj</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterfn</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">generate_coords</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">situate</span><span class="p">:</span>
+                <span class="n">bounds</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">bounds</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">bounds</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">cf_bounds</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span><span class="n">proj</span><span class="o">=</span><span class="n">proj</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">args</span>
+
+
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_projection_type</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CFProjectionPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CFProjectionPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filesaver</span> <span class="o">=</span> <span class="n">CFProjectionPlotGroupSaver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+
+    <span class="c">##############################</span>
+    <span class="c">########## adds for subclasses</span>
+
+    <span class="c"># CB: same comment for ProjectionSheetPlotGroup&#39;s _check_sheet_type.</span>
+    <span class="k">def</span> <span class="nf">_check_projection_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span><span class="n">CFProjection</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s">&quot;</span><span class="si">%s</span><span class="s">&#39;s projection Parameter must be set to a </span><span class="si">%s</span><span class="s"> instance (currently </span><span class="si">%s</span><span class="s">, type </span><span class="si">%s</span><span class="s">).&quot;</span> \
+                <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">CFProjection</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)))</span>
+
+
+<span class="c"># a mix-in?</span></div>
+<div class="viewcode-block" id="UnitPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.UnitPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">UnitPlotGroup</span><span class="p">(</span><span class="n">ProjectionSheetPlotGroup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize anything related to a unit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JABALERT: need to show actual coordinates of unit returned</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;x-coordinate of the unit to plot&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;y-coordinate of the unit to plot&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="c">## &quot;&quot;&quot;Sheet coordinate location desired.  The unit nearest this location will be returned.</span>
+<span class="c">## It is an error to request a unit outside the area of the Sheet.&quot;&quot;&quot;)</span>
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _key()        - removes projection, adds coords</span>
+    <span class="c"># _exec*hooks() - includes coords</span>
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keyname</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnitPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)],</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_exec_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnitPlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_plot_hooks</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)],</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="ConnectionFieldsPlotGroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.ConnectionFieldsPlotGroup">[docs]</a><span class="k">class</span> <span class="nc">ConnectionFieldsPlotGroup</span><span class="p">(</span><span class="n">UnitPlotGroup</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize ConnectionField for each of a CFSheet&#39;s CFProjections.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keyname</span><span class="o">=</span><span class="s">&#39;Weights&#39;</span>
+
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">CFSheet</span>
+
+    <span class="n">situate</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    If True, plots the weights on the entire source sheet, using zeros</span>
+<span class="s">    for all weights outside the ConnectionField.  If False, plots only</span>
+<span class="s">    the actual weights that are stored.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># Overrides:</span>
+    <span class="c"># _key()                - adds projection back</span>
+    <span class="c"># _make_template_plot() - adds projection back</span>
+    <span class="c"># _kw_for_one_proj()    - includes bounds</span>
+
+
+    <span class="c">#####################</span>
+    <span class="c">########## overridden</span>
+
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keyname</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_template_name</span><span class="p">,</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">(</span><span class="n">plot_template</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span>
+                                  <span class="n">kw</span><span class="p">[</span><span class="s">&#39;bounds&#39;</span><span class="p">],</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;proj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">range_</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;range_&#39;</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_kw_for_one_proj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">situate</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">cf_bounds</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="n">proj</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)]</span>
+
+
+
+
+
+</div>
+<span class="k">class</span> <span class="nc">FeatureCurvePlotGroup</span><span class="p">(</span><span class="n">UnitPlotGroup</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">_exec_pre_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FeatureCurvePlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_pre_plot_hooks</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_curve_time</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_exec_plot_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FeatureCurvePlotGroup</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_exec_plot_hooks</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_curve_time</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_curve_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get timestamps from the current SheetViews in the curve_dict and</span>
+<span class="sd">        use the max timestamp as the plot label</span>
+<span class="sd">        Displays a warning if not all curves have been measured at the same time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">x_axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">curve_dict</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">curve_label</span> <span class="ow">in</span> <span class="n">x_axis</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+                <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">SheetView</span><span class="o">.</span><span class="n">timestamp</span> <span class="k">for</span> <span class="n">SheetView</span> <span class="ow">in</span> <span class="n">curve_label</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()]</span>
+
+        <span class="k">if</span> <span class="n">timestamps</span> <span class="o">!=</span> <span class="p">[]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">min</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Displaying curves from different times (</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">timestamps</span><span class="p">),</span><span class="nb">max</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)))</span>
+
+
+
+<span class="n">plotgroups</span> <span class="o">=</span> <span class="n">KeyedList</span><span class="p">()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Global repository of PlotGroups, to which users can add their own as</span>
+<span class="sd">needed.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">plotgroup_types</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Connection Fields&#39;</span><span class="p">:</span> <span class="n">ConnectionFieldsPlotGroup</span><span class="p">,</span>
+                   <span class="s">&#39;Projection&#39;</span><span class="p">:</span> <span class="n">CFProjectionPlotGroup</span><span class="p">,</span>
+                   <span class="s">&#39;RF Projection&#39;</span><span class="p">:</span> <span class="n">RFProjectionPlotGroup</span><span class="p">,</span>
+                   <span class="s">&#39;Retinotopy&#39;</span><span class="p">:</span> <span class="n">RetinotopyPlotGroup</span><span class="p">,</span>
+                   <span class="s">&#39;Projection Activity&#39;</span><span class="p">:</span> <span class="n">ProjectionActivityPlotGroup</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="create_plotgroup"><a class="viewcode-back" href="../../../Reference_Manual/topo.plotting.plotgroup-module.html#topo.plotting.plotgroup.create_plotgroup">[docs]</a><span class="k">def</span> <span class="nf">create_plotgroup</span><span class="p">(</span><span class="n">template_plot_type</span><span class="o">=</span><span class="s">&#39;bitmap&#39;</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a new PlotGroup and add it to the plotgroups list.</span>
+
+<span class="sd">    Convenience function to make it simpler to use the name of the</span>
+<span class="sd">    PlotGroup as the key in the plotgroups list.</span>
+
+<span class="sd">    template_plot_type: Whether the plots are bitmap images or curves</span>
+<span class="sd">    (&#39;curve&#39;).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+
+    <span class="n">pg_type</span> <span class="o">=</span> <span class="n">TemplatePlotGroup</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">plotgroup_types</span><span class="p">:</span>
+            <span class="n">pg_type</span> <span class="o">=</span> <span class="n">plotgroup_types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">template_plot_type</span><span class="o">==</span><span class="s">&#39;curve&#39;</span><span class="p">:</span>
+            <span class="n">pg_type</span> <span class="o">=</span> <span class="n">FeatureCurvePlotGroup</span>
+
+    <span class="n">pg</span> <span class="o">=</span> <span class="n">pg_type</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">plotgroups</span><span class="p">[</span><span class="n">pg</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="n">pg</span>
+    <span class="k">return</span> <span class="n">pg</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/plotting/plotgroup.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

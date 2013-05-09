@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.reference.lissom_log_parser &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-tests-reference-lissom-log-parser">
+<h1>topo.tests.reference.lissom_log_parser<a class="headerlink" href="#topo-tests-reference-lissom-log-parser" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-topo.tests.reference.lissom_log_parser">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.tests.reference.lissom_log_parser" title="Permalink to this headline">¶</a></h2>
+<p>Functions for getting C++ LISSOM data and comparing them
+with Topographica&#8217;s.</p>
+<p>Before using these functions, you should set filename_base to
+give the base filename path of the C++ LISSOM files, e.g.
+&#8216;topo/tests/reference/or_map_topo.&#8217;</p>
+<dl class="function">
+<dt id="topo.tests.reference.lissom_log_parser.check_activities">
+<tt class="descclassname">topo.tests.reference.lissom_log_parser.</tt><tt class="descname">check_activities</tt><big>(</big><em>sheet_name</em>, <em>required_dp=5</em>, <em>display=True</em><big>)</big><a class="reference internal" href="../_modules/topo/tests/reference/lissom_log_parser.html#check_activities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tests.reference.lissom_log_parser.check_activities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the smallest number of decimal places to which all
+corresponding elements of the C++ lissom and Topographica
+activities of sheet_name match.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.tests.reference.lissom_log_parser.check_weights">
+<tt class="descclassname">topo.tests.reference.lissom_log_parser.</tt><tt class="descname">check_weights</tt><big>(</big><em>sheet_name</em>, <em>proj_name</em>, <em>unit</em>, <em>slices=None</em>, <em>required_dp=6</em>, <em>display=True</em><big>)</big><a class="reference internal" href="../_modules/topo/tests/reference/lissom_log_parser.html#check_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tests.reference.lissom_log_parser.check_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that corresponding elements of the C++ lissom and
+Topographica weights of unit in proj_name (which projects into
+sheet_name) match to at least required_dp.</p>
+<p>If required_dp is 0, simply prints the smallest number of decimal
+places to which the two corresponding elements match.</p>
+<p>If specified, slices must be a tuple of slice objects specifying
+where the weights are (C++ lissom does not situate weights in its
+.matrix files; check_weights uses unsituate() to guess, but if
+it&#8217;s wrong you can override with slices).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.tests.reference.lissom_log_parser.compare_elements">
+<tt class="descclassname">topo.tests.reference.lissom_log_parser.</tt><tt class="descname">compare_elements</tt><big>(</big><em>topo_matrix</em>, <em>lissom_matrix</em>, <em>max_dp=8</em>, <em>name=None</em><big>)</big><a class="reference internal" href="../_modules/topo/tests/reference/lissom_log_parser.html#compare_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tests.reference.lissom_log_parser.compare_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the smallest number of decimal places to which all
+corresponding elements of a C++ lissom and topographica matrix match.</p>
+<p>max_dp specifies the greatest number of decimal places to try.</p>
+<p>Returns -1 if they don&#8217;t match to at least 1 decimal place.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.tests.reference.lissom_log_parser.get_input_params">
+<tt class="descclassname">topo.tests.reference.lissom_log_parser.</tt><tt class="descname">get_input_params</tt><big>(</big><em>old_compat=False</em><big>)</big><a class="reference internal" href="../_modules/topo/tests/reference/lissom_log_parser.html#get_input_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tests.reference.lissom_log_parser.get_input_params" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Return iterators over list of float values for C++ LISSOM&#8217;s cx,
+cy, and theta for multiple eyes, as well as sign.</p>
+<p>Expects log file with values held in lines like this:</p>
+<div class="highlight-python"><pre>'Iteration: 000000  [Eye0 [Obj0 cx:02.1 cy:11.6 theta:074.0]]</pre>
+</div>
+</div></blockquote>
+<p>&#8216;</p>
+<blockquote>
+<div><p>or this:</p>
+<blockquote>
+<div>&#8216;Iteration: 000000  [Eye0 [Obj0 cx:23.4 cy:10.0 theta:059.6]]  [Eye1 [Obj0 cx:22.6 cy:10.5 theta:059.6]]  [Eye2 [Obj0 cx:21.7 cy:11.1 theta:059.6]]  [Eye3 [Obj0 cx:20.8 cy:11.6 theta:059.6]]</div></blockquote>
+</div></blockquote>
+<p>&#8216;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.tests.reference.lissom_log_parser.get_matrix">
+<tt class="descclassname">topo.tests.reference.lissom_log_parser.</tt><tt class="descname">get_matrix</tt><big>(</big><em>matrix_file</em><big>)</big><a class="reference internal" href="../_modules/topo/tests/reference/lissom_log_parser.html#get_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tests.reference.lissom_log_parser.get_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array containing the data in the specified C++ LISSOM .matrix
+file.</p>
+<p>Ignores lines that start with a hash (#).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.tests.reference.lissom_log_parser.unsituate">
+<tt class="descclassname">topo.tests.reference.lissom_log_parser.</tt><tt class="descname">unsituate</tt><big>(</big><em>matrix</em>, <em>expected_diameter=None</em><big>)</big><a class="reference internal" href="../_modules/topo/tests/reference/lissom_log_parser.html#unsituate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tests.reference.lissom_log_parser.unsituate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the view of matrix that contains all non-zero rows and
+columns (a guess at how to unsituate a weights matrix).</p>
+<p>expected_diameter can be specifed as an optional check.</p>
+<p>** This function will fail if the weights matrix itself has a
+** border row or column of zeros (or, less likely, a row or
+** column of zeros somewhere inside the weights matrix).
+** Never report that this function is broken: fix it, or
+** update c++ lissom.</p>
+<p>e.g. for matrix
+0 0 0 0 0.0 0.0 0.0 0.0
+0 0 0 0 0.0 0.1 0.0 0.0
+0.0 0.0 0.1 0.2 0.3 0.0
+0 0 0 0 0.0 0.1 0.0 0.0
+0 0 0 0 0.0 0.0 0.0 0.0</p>
+<p>will return matrix[1:4,2:5] i.e.
+0.0 0.1 0.0
+0.1 0.2 0.3
+0.0 0.1 0.0</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.tests.reference.lissom_log_parser</a><ul>
+<li><a class="reference internal" href="#module-topo.tests.reference.lissom_log_parser">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.tests.reference.lissom_log_parser-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

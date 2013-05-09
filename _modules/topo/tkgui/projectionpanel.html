@@ -1,0 +1,480 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui.projectionpanel &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" accesskey="U">topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tkgui.projectionpanel</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PlotgroupPanels for displaying ProjectionSheet plotgroups.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">ImageTk</span>
+<span class="c">### JCALERT! Try not to have to use chain and delete this import.</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span> <span class="nn">Tkinter</span> <span class="kn">import</span> <span class="n">Canvas</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sometrue</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFProjection</span>
+<span class="kn">from</span> <span class="nn">topo.base.projection</span> <span class="kn">import</span> <span class="n">ProjectionSheet</span><span class="p">,</span> <span class="n">Projection</span>
+<span class="kn">from</span> <span class="nn">topo.misc.generatorsheet</span> <span class="kn">import</span> <span class="n">GeneratorSheet</span>
+
+<span class="kn">from</span> <span class="nn">templateplotgrouppanel</span> <span class="kn">import</span> <span class="n">TemplatePlotGroupPanel</span>
+
+
+
+<div class="viewcode-block" id="cmp_projections"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.projectionpanel-module.html#topo.tkgui.projectionpanel.cmp_projections">[docs]</a><span class="k">def</span> <span class="nf">cmp_projections</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Comparison function for Plots.</span>
+<span class="sd">    It compares the precedence number first and then the src_name and name attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">precedence</span> <span class="o">!=</span> <span class="n">p2</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">precedence</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span><span class="n">p2</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">precedence</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">)</span>
+
+</div>
+<span class="n">UNIT_PADDING</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+
+<div class="viewcode-block" id="ProjectionSheetPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.projectionpanel-module.html#topo.tkgui.projectionpanel.ProjectionSheetPanel">[docs]</a><span class="k">class</span> <span class="nc">ProjectionSheetPanel</span><span class="p">(</span><span class="n">TemplatePlotGroupPanel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for panels relating to ProjectionSheets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">ProjectionSheet</span>
+    <span class="n">projection_type</span> <span class="o">=</span> <span class="n">Projection</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ProjectionSheetPanel.valid_context"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.projectionpanel-module.html#topo.tkgui.projectionpanel.ProjectionSheetPanel.valid_context">[docs]</a>    <span class="k">def</span> <span class="nf">valid_context</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if there is at least one instance of</span>
+<span class="sd">        projection_type among all projections in the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">sheet</span><span class="o">.</span><span class="n">projections</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                         <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">cls</span><span class="o">.</span><span class="n">projection_type</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">auto_refresh</span><span class="o">=</span><span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;sheet&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_3</span><span class="p">,</span>
+            <span class="n">on_modify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_change</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">widget_options</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;new_default&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="s">&#39;sort_fn_args&#39;</span><span class="p">:{</span><span class="s">&#39;cmp&#39;</span><span class="p">:</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">precedence</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">.</span><span class="n">precedence</span><span class="p">)}})</span>
+
+
+    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup_plotgroup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populate_sheet_param</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">sheet_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_plots</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">populate_sheet_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_type</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                  <span class="k">if</span> <span class="n">sometrue</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_type</span><span class="p">)</span>
+                               <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">in_connections</span><span class="p">])]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">params</span><span class="p">()[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">sheets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheet</span> <span class="o">=</span> <span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># CB: necessary?</span>
+
+
+</div>
+<span class="k">class</span> <span class="nc">ProjectionActivityPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionActivityPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">_plot_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Activity in projections to </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
+
+
+
+<span class="k">class</span> <span class="nc">UnitsPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_args</span><span class="o">=</span><span class="n">params</span> <span class="c"># CEBALERT: store the initial arguments so we can get sheet,x,y in</span>
+                                 <span class="c"># sheet_change if any of them were specified. Isn&#39;t there a cleaner</span>
+                                 <span class="c"># way?</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnitsPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_4</span><span class="p">,</span><span class="n">on_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">refresh_plots</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_4</span><span class="p">,</span><span class="n">on_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">refresh_plots</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_change</span><span class="p">()</span>
+
+
+<span class="c">##############################################################################</span>
+        <span class="c"># CEBALERT:</span>
+        <span class="c"># - Need to couple taggedslider to a Number parameter in a better way</span>
+        <span class="c"># somewhere else.</span>
+        <span class="c"># - Clean up or document: passing the params, setting the bounds</span>
+        <span class="c">#</span>
+        <span class="c"># Also:</span>
+        <span class="c"># e.g. bound on parameter is 0.5 but means &lt;0.5, taggedslider</span>
+        <span class="c">#   still lets you set to 0.5 -&gt; error</span>
+
+    <span class="k">def</span> <span class="nf">sheet_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># CEBHACKALERT: get an inconsequential but scary</span>
+        <span class="c"># cf-out-of-range error if you e.g. set y &lt; -0.4 on sheet V1</span>
+        <span class="c"># and then change to V2 (which has smaller bounds).</span>
+        <span class="c"># x and y don&#39;t seem to be updated in time...</span>
+        <span class="c">#self.x,self.y = 0.0,0.0</span>
+
+        <span class="c"># CEBALERT: need to crop x,y (for e.g. going to smaller sheet) rather</span>
+        <span class="c"># than set to 0</span>
+
+        <span class="k">if</span> <span class="s">&#39;sheet&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_args</span><span class="p">[</span><span class="s">&#39;sheet&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tkvars</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span><span class="mf">0.0</span><span class="p">))</span>
+
+        <span class="n">l</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="c"># CEBALERT: see &quot;CEBERRORALERT: doesn&#39;t take account of</span>
+        <span class="c"># exclusive bounds&quot; in topo/param/__init.__.py.</span>
+        <span class="n">D</span><span class="o">=</span><span class="mf">0.0000000001</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="o">-</span><span class="n">D</span><span class="p">),</span>
+                  <span class="s">&#39;y&#39;</span><span class="p">:(</span><span class="n">b</span><span class="p">,</span><span class="n">t</span><span class="o">-</span><span class="n">D</span><span class="p">)}</span>
+
+        <span class="n">inclusive_bounds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span><span class="p">:(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span>  <span class="c"># GUI knows about exclusive sheet bounds</span>
+                            <span class="s">&#39;y&#39;</span><span class="p">:(</span><span class="bp">False</span><span class="p">,</span><span class="bp">True</span><span class="p">)}</span>
+
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">]:</span>
+            <span class="n">param_obj</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_parameter_object</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+            <span class="n">param_obj</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span>
+            <span class="n">param_obj</span><span class="o">.</span><span class="n">inclusive_bounds</span> <span class="o">=</span> <span class="n">inclusive_bounds</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span>
+
+            <span class="c"># (method can be called before x,y widgets added)</span>
+            <span class="k">if</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">:</span>
+                <span class="n">w</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="p">[</span><span class="n">coord</span><span class="p">][</span><span class="s">&#39;widget&#39;</span><span class="p">]</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">set_bounds</span><span class="p">(</span><span class="n">param_obj</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">param_obj</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                             <span class="n">inclusive_bounds</span><span class="o">=</span><span class="n">param_obj</span><span class="o">.</span><span class="n">inclusive_bounds</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">tag_set</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_args</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># reset now we&#39;ve used them</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnitsPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">sheet_change</span><span class="p">()</span>
+<span class="c">##############################################################################</span>
+
+
+<span class="k">class</span> <span class="nc">ConnectionFieldsPanel</span><span class="p">(</span><span class="n">UnitsPanel</span><span class="p">):</span>
+
+    <span class="n">projection_type</span> <span class="o">=</span> <span class="n">CFProjection</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConnectionFieldsPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;situate&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_3</span><span class="p">,</span><span class="n">on_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">situate_change</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">situate_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_plot_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Connection Fields of </span><span class="si">%s</span><span class="s"> unit (</span><span class="si">%4.3f</span><span class="s">,</span><span class="si">%4.3f</span><span class="s">) at time </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> \
+               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="PlotMatrixPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.projectionpanel-module.html#topo.tkgui.projectionpanel.PlotMatrixPanel">[docs]</a><span class="k">class</span> <span class="nc">PlotMatrixPanel</span><span class="p">(</span><span class="n">ProjectionSheetPanel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PlotGroupPanel for visualizing an array of bitmaps, such as for</span>
+<span class="sd">    a projection involving a matrix of units.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gui_desired_maximum_plot_height</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Value to provide for PlotGroup.desired_maximum_plot_height for</span>
+<span class="s">        PlotGroups opened by the GUI.  Determines the initial, default</span>
+<span class="s">        scaling for the PlotGroup.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">sheet_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c"># don&#39;t want to refresh_plots (measure new data) each time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PlotMatrixPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="n">update</span><span class="p">)</span>
+        <span class="c"># take the size of the plot as the desired size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">update_maximum_plot_height</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_maximum_plot_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">maximum_plot_height</span>
+
+
+<div class="viewcode-block" id="PlotMatrixPanel.display_plots"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.projectionpanel-module.html#topo.tkgui.projectionpanel.PlotMatrixPanel.display_plots">[docs]</a>    <span class="k">def</span> <span class="nf">display_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CFProjectionPanel requires a 2D grid of plots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plots</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plots</span>
+        <span class="c"># Generate the zoomed images.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoomed_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">ImageTk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">plots</span><span class="p">]</span>
+        <span class="n">old_canvases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvases</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvases</span> <span class="o">=</span> <span class="p">[</span><span class="n">Canvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_container</span><span class="p">,</span>
+                                <span class="n">width</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span>
+                                <span class="n">height</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span>
+                                <span class="n">borderwidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">highlightthickness</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                <span class="n">relief</span><span class="o">=</span><span class="s">&#39;groove&#39;</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoomed_images</span><span class="p">]</span>
+
+        <span class="c"># Lay out images</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">image</span><span class="p">,</span><span class="n">canvas</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zoomed_images</span><span class="p">)),</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">zoomed_images</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">canvases</span><span class="p">):</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">i</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">proj_plotting_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">column</span><span class="o">=</span><span class="n">i</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">proj_plotting_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">padx</span><span class="o">=</span><span class="n">UNIT_PADDING</span><span class="p">,</span><span class="n">pady</span><span class="o">=</span><span class="n">UNIT_PADDING</span><span class="p">)</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">create_image</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">anchor</span><span class="o">=</span><span class="s">&#39;nw&#39;</span><span class="p">,</span><span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">)</span>
+
+
+        <span class="c"># Delete old ones.  This may resize the grid.</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">old_canvases</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">grid_forget</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_canvas_bindings</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="PlotMatrixPanel.display_labels"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.projectionpanel-module.html#topo.tkgui.projectionpanel.PlotMatrixPanel.display_labels">[docs]</a>    <span class="k">def</span> <span class="nf">display_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Do not display labels for these plots.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+</div></div>
+<span class="k">class</span> <span class="nc">RFProjectionPanel</span><span class="p">(</span><span class="n">PlotMatrixPanel</span><span class="p">):</span>
+
+    <span class="n">sheet_type</span> <span class="o">=</span> <span class="n">ProjectionSheet</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RFProjectionPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;input_sheet&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_3</span><span class="p">,</span>
+                        <span class="n">on_modify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;density&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_4</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RFProjectionPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup_plotgroup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populate_input_sheet_param</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">populate_input_sheet_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">GeneratorSheet</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">params</span><span class="p">()[</span><span class="s">&#39;input_sheet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">sheets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">=</span><span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_plot_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;RFs of </span><span class="si">%s</span><span class="s"> on </span><span class="si">%s</span><span class="s"> at time </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">input_sheet</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                             <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">ProjectionPanel</span><span class="p">(</span><span class="n">PlotMatrixPanel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;projection&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_3</span><span class="p">,</span>
+                        <span class="n">on_modify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">widget_options</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;sort_fn_args&#39;</span><span class="p">:{</span><span class="s">&#39;cmp&#39;</span><span class="p">:</span><span class="n">cmp_projections</span><span class="p">},</span>
+                                        <span class="s">&#39;new_default&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;density&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_4</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_plot_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; projection from &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; to &#39;</span> \
+               <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; at time &#39;</span> <span class="o">+</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timestr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setup_plotgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup_plotgroup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populate_projection_param</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">sheet_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_projections</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">sheet_change</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">populate_projection_param</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">prjns</span> <span class="o">=</span> <span class="p">[</span><span class="n">proj</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">projections</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_type</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">params</span><span class="p">()[</span><span class="s">&#39;projection&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">prjns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">prjns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># CB: necessary?</span>
+
+
+    <span class="k">def</span> <span class="nf">refresh_projections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populate_projection_param</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_selector</span><span class="p">(</span><span class="s">&#39;projection&#39;</span><span class="p">)</span>
+
+<span class="c">##         #################</span>
+<span class="c">##         # CEBALERT: How do you change list of tkinter.optionmenu options? Use pmw&#39;s optionmenu?</span>
+<span class="c">##         # Or search the web for a way to alter the list in the tkinter one.</span>
+<span class="c">##         # Currently, replace widget completely: looks bad and is complex.</span>
+<span class="c">##         # When fixing, remove try/except marked by the &#39;for projectionpanel&#39; CEBALERT in</span>
+<span class="c">##         # tkparameterizedobject.py.</span>
+<span class="c">##         if &#39;projection&#39; in self.representations:</span>
+<span class="c">##             w  = self.representations[&#39;projection&#39;][&#39;widget&#39;]</span>
+<span class="c">##             l  = self.representations[&#39;projection&#39;][&#39;label&#39;]</span>
+<span class="c">##             l.destroy()</span>
+<span class="c">##             w.destroy()</span>
+<span class="c">##             self.pack_param(&#39;projection&#39;,parent=self.representations[&#39;projection&#39;][&#39;frame&#39;],</span>
+<span class="c">##                             on_modify=self.refresh_plots,side=&#39;left&#39;,expand=1,</span>
+<span class="c">##                             widget_options={&#39;sort_fn_args&#39;:{&#39;cmp&#39;:cmp_projections},</span>
+<span class="c">##                                             &#39;new_default&#39;:True})</span>
+<span class="c">##         #################</span>
+
+
+
+<div class="viewcode-block" id="CFProjectionPanel"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.projectionpanel-module.html#topo.tkgui.projectionpanel.CFProjectionPanel">[docs]</a><span class="k">class</span> <span class="nc">CFProjectionPanel</span><span class="p">(</span><span class="n">ProjectionPanel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Panel for displaying CFProjections.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">projection_type</span> <span class="o">=</span> <span class="n">CFProjection</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CFProjectionPanel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">master</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;situate&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_frame_3</span><span class="p">,</span><span class="n">on_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">situate_change</span><span class="p">,</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">situate_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redraw_plots</span><span class="p">()</span>
+
+
+
+
+<span class="c">## Need to add test file:</span>
+<span class="c"># check projection, sheet ordering</span>
+<span class="c"># check sheet changes, check projection changes</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/tkgui/projectionpanel.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" >topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

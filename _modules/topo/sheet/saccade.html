@@ -1,0 +1,491 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.saccade &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.sheet" href="../sheet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" accesskey="U">topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.sheet.saccade</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Sheets for simulating a moving eye.</span>
+
+<span class="sd">This module provides two classes, ShiftingGeneratorSheet, and</span>
+<span class="sd">SaccadeController, that can be used to simulate a moving eye,</span>
+<span class="sd">controlled by topographic neural activity from structures like the</span>
+<span class="sd">superior colliculus.</span>
+
+<span class="sd">ShiftingGeneratorSheet is a subclass of GeneratorSheet that accepts a</span>
+<span class="sd">saccade command on the &#39;Saccade&#39; port in the form of a tuple:</span>
+<span class="sd">(amplitude,direction), specified in degrees.  It shifts its sheet</span>
+<span class="sd">bounds in response to this command, keeping the centroid of the bounds</span>
+<span class="sd">within a prespecified boundingregion.</span>
+
+<span class="sd">SaccadeController is a subclass of CFSheet that accepts CF projections</span>
+<span class="sd">and decodes its resulting activity into a saccade command suitable for</span>
+<span class="sd">controlling a ShiftingGeneratorSheet.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span><span class="n">cos</span><span class="p">,</span><span class="n">pi</span><span class="p">,</span><span class="n">array</span><span class="p">,</span><span class="n">asarray</span><span class="p">,</span><span class="n">argmax</span><span class="p">,</span><span class="n">zeros</span><span class="p">,</span>\
+     <span class="n">nonzero</span><span class="p">,</span><span class="n">take</span><span class="p">,</span><span class="n">random</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.cf</span> <span class="kn">import</span> <span class="n">CFSheet</span>
+<span class="kn">from</span> <span class="nn">topo.base.simulation</span> <span class="kn">import</span> <span class="n">PeriodicEventSequence</span><span class="p">,</span><span class="n">FunctionEvent</span>
+<span class="kn">from</span> <span class="nn">topo.base.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span><span class="p">,</span><span class="n">BoundingRegionParameter</span>
+<span class="kn">from</span> <span class="nn">topo.base.functionfamily</span> <span class="kn">import</span> <span class="n">CoordinateMapperFn</span><span class="p">,</span> <span class="n">IdentityMF</span>
+<span class="kn">from</span> <span class="nn">topo.sheet</span> <span class="kn">import</span> <span class="n">SequenceGeneratorSheet</span>
+<span class="kn">from</span> <span class="nn">topo.misc</span> <span class="kn">import</span> <span class="n">util</span>
+
+
+<span class="c"># JPALERT: The next three functions (activity_centroid,</span>
+<span class="c"># activity_sample, and activity_mode) could actually apply to any</span>
+<span class="c"># Sheet.  Maybe they should be moved to topo.base.sheet?</span>
+
+<div class="viewcode-block" id="activity_centroid"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.saccade-module.html#topo.sheet.saccade.activity_centroid">[docs]</a><span class="k">def</span> <span class="nf">activity_centroid</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span><span class="n">activity</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the sheet coords of the (weighted) centroid of sheet activity.</span>
+
+<span class="sd">    If the activity argument is not None, then it is used instead</span>
+<span class="sd">    of sheet.activity.  If the sheet activity is all zero, the</span>
+<span class="sd">    centroid of the sheet bounds is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">activity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">activity</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">activity</span>
+
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">sheet_rows</span><span class="p">()</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">sheet_cols</span><span class="p">()</span>
+
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">array</span><span class="p">([(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">])</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">activity</span><span class="o">.</span><span class="n">flat</span>
+
+    <span class="c">## Optimization to only compute centroid from</span>
+    <span class="c">## active (non-zero) units.</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="n">nonzero</span><span class="p">(</span><span class="n">a</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sheet</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">centroid</span><span class="p">(</span><span class="n">take</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span><span class="n">idxs</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span><span class="n">take</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">idxs</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="activity_sample"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.saccade-module.html#topo.sheet.saccade.activity_sample">[docs]</a><span class="k">def</span> <span class="nf">activity_sample</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span><span class="n">activity</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sample from the sheet activity as if it were a probability distribution.</span>
+
+<span class="sd">    Returns the sheet coordinates of the sampled unit.  If</span>
+<span class="sd">    activity is not None, it is used instead of sheet.activity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">activity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">activity</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">activity</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">weighted_sample_idx</span><span class="p">(</span><span class="n">activity</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+    <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">idx2rowcol</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sheet</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="activity_mode"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.saccade-module.html#topo.sheet.saccade.activity_mode">[docs]</a><span class="k">def</span> <span class="nf">activity_mode</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span><span class="n">activity</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the sheet coordinates of the mode (highest value) of</span>
+<span class="sd">    the sheet activity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JPHACKALERT:  The mode is computed using numpy.argmax, and</span>
+    <span class="c"># thus for distributions with multiple equal-valued modes, the</span>
+    <span class="c"># result will have a systematic bias toward higher x and lower</span>
+    <span class="c"># y values. (in that order).  Function may still be useful for</span>
+    <span class="c"># unimodal activity distributions, or sheets without limiting/squashing</span>
+    <span class="c"># output functions.</span>
+    <span class="k">if</span> <span class="n">activity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">activity</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">activity</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">argmax</span><span class="p">(</span><span class="n">activity</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">idx2rowcol</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sheet</span><span class="o">.</span><span class="n">matrix2sheet</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="SaccadeController"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.saccade-module.html#topo.sheet.saccade.SaccadeController">[docs]</a><span class="k">class</span> <span class="nc">SaccadeController</span><span class="p">(</span><span class="n">CFSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sheet that decodes activity on CFProjections into a saccade command.</span>
+
+<span class="sd">    This class accepts CF-projected input and computes its activity</span>
+<span class="sd">    like a normal CFSheet, then decodes that activity into a saccade</span>
+<span class="sd">    amplitude and direction as would be specified by activity in the</span>
+<span class="sd">    superior colliculi.  The X dimension of activity corresponds to</span>
+<span class="sd">    amplitude, the Y dimension to direction.  The activity is decoded</span>
+<span class="sd">    to a single (x,y) point according to the parameter decode_method.</span>
+
+<span class="sd">    From this (x,y) point an (amplitude,direction) pair, specified in</span>
+<span class="sd">    degrees, is computed using the parameters amplitude_scale and</span>
+<span class="sd">    direction scale.  That pair is then sent out on the &#39;Saccade&#39;</span>
+<span class="sd">    output port.</span>
+
+<span class="sd">    NOTE: Non-linear mappings for saccade commands, as in Ottes, et</span>
+<span class="sd">    al (below), are assumed to be provided using the coord_mapperg</span>
+<span class="sd">    parameter of the incoming CFProjection.</span>
+
+<span class="sd">    References:</span>
+<span class="sd">    Ottes, van Gisbergen, Egglermont. 1986.  Visuomotor fields of the</span>
+<span class="sd">    superior colliculus: a quantitative model.  Vision Research;</span>
+<span class="sd">    26(6): 857-73.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JPALERT: amplitude_scale and direction scale can be implemented as</span>
+    <span class="c"># part of self.command_mapper, so these should probably be removed.</span>
+
+    <span class="n">amplitude_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Scale factor for saccade command amplitude, expressed in</span>
+<span class="s">        degrees per unit of sheet.  Indicates how large a saccade is</span>
+<span class="s">        represented by the x-component of the command input.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">direction_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Scale factor for saccade command direction, expressed in</span>
+<span class="s">        degrees per unit of sheet.  Indicates what direction of saccade</span>
+<span class="s">        is represented by the y-component of the command input.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="n">decode_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">activity_centroid</span><span class="p">,</span>
+                                  <span class="n">instantiate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The function for extracting a single point from sheet activity.</span>
+<span class="s">        Should take a sheet as the first argument, and return (x,y).&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">command_mapper</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">CoordinateMapperFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="n">IdentityMF</span><span class="p">(),</span>
+                                   <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        A CoordinateMapperFn that will be applied to the command vector extracted</span>
+<span class="s">        from the sheet activity.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">src_ports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="s">&#39;Saccade&#39;</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SaccadeController</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+
+        <span class="c"># get the input projection activity</span>
+        <span class="c"># decode the input projection activity as a command</span>
+        <span class="n">xa</span><span class="p">,</span><span class="n">ya</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Saccade command centroid = (</span><span class="si">%.2f</span><span class="s">,</span><span class="si">%.2f</span><span class="s">)&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span><span class="n">ya</span><span class="p">))</span>
+
+        <span class="n">xa</span><span class="p">,</span><span class="n">ya</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_mapper</span><span class="p">(</span><span class="n">xa</span><span class="p">,</span><span class="n">ya</span><span class="p">)</span>
+
+        <span class="n">amplitude</span> <span class="o">=</span> <span class="n">xa</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">amplitude_scale</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="n">ya</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction_scale</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Saccade amplitute = </span><span class="si">%.2f</span><span class="s">.&quot;</span><span class="o">%</span><span class="n">amplitude</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Saccade direction = </span><span class="si">%.2f</span><span class="s">.&quot;</span><span class="o">%</span><span class="n">direction</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Saccade&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span><span class="p">))</span>
+
+
+
+
+</div>
+<div class="viewcode-block" id="ShiftingGeneratorSheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.saccade-module.html#topo.sheet.saccade.ShiftingGeneratorSheet">[docs]</a><span class="k">class</span> <span class="nc">ShiftingGeneratorSheet</span><span class="p">(</span><span class="n">SequenceGeneratorSheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A GeneratorSheet that takes an extra input on port &#39;Saccade&#39;</span>
+<span class="sd">    that specifies a saccade command as a tuple (amplitude,direction),</span>
+<span class="sd">    indicating the relative size and direction of the saccade in</span>
+<span class="sd">    degrees.  The parameter visual_angle_scale defines the</span>
+<span class="sd">    relationship between degrees and sheet coordinates.  The parameter</span>
+<span class="sd">    saccade bounds limits the region within which the saccades may occur.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">visual_angle_scale</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The scale factor determining the visual angle subtended by this sheet, in</span>
+<span class="s">        degrees per unit of sheet.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">saccade_bounds</span> <span class="o">=</span> <span class="n">BoundingRegionParameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The bounds for saccades.  Saccades are constrained such that the centroid of the</span>
+<span class="s">        sheet bounds remains within this region.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">generate_on_shift</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Whether to generate a new pattern when a shift occurs.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">fixation_jitter</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Standard deviation of Gaussian fixation jitter.&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">fixation_jitter_period</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Period, in time units, indicating how often the eye jitters.</span>
+<span class="s">       &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">dest_ports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Trigger&quot;</span><span class="p">,</span><span class="s">&quot;Saccade&quot;</span><span class="p">]</span>
+    <span class="n">src_ports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="s">&#39;Position&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShiftingGeneratorSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixation_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShiftingGeneratorSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixation_jitter_period</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">refix_event</span> <span class="o">=</span> <span class="n">PeriodicEventSequence</span><span class="p">(</span><span class="n">now</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fixation_jitter_period</span><span class="p">),</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">convert_to_time_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fixation_jitter_period</span><span class="p">),</span>
+                                                <span class="p">[</span><span class="n">FunctionEvent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">refixate</span><span class="p">)])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">enqueue_event</span><span class="p">(</span><span class="n">refix_event</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">conn</span><span class="o">.</span><span class="n">dest_port</span> <span class="o">==</span> <span class="s">&#39;Saccade&#39;</span><span class="p">:</span>
+            <span class="c"># the data should be (amplitude,direction)</span>
+            <span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShiftingGeneratorSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Position&#39;</span><span class="p">,</span>
+                         <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">centroid</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="ShiftingGeneratorSheet.shift"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.saccade-module.html#topo.sheet.saccade.ShiftingGeneratorSheet.shift">[docs]</a>    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">amplitude</span><span class="p">,</span><span class="n">direction</span><span class="p">,</span><span class="n">generate</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shift the bounding box by the given amplitude and</span>
+<span class="sd">        direction.</span>
+
+<span class="sd">        Amplitude and direction are specified in degrees, and will be</span>
+<span class="sd">        converted using the sheet&#39;s visual_angle_scale</span>
+<span class="sd">        parameter. Negative directions are always downward, regardless</span>
+<span class="sd">        of whether the amplitude is positive (rightword) or negative</span>
+<span class="sd">        (leftward).  I.e. straight-down = -90, straight up = +90.</span>
+
+<span class="sd">        The generate argument indicates whether or not to generate</span>
+<span class="sd">        output after shifting.  If generate is None, then the value of</span>
+<span class="sd">        the sheet&#39;s generate_on_shift parameter will be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># JPALERT:  Right now this method assumes that we&#39;re doing</span>
+        <span class="c"># colliculus-style saccades. i.e. amplitude and direction</span>
+        <span class="c"># relative to the current position.  Technically it would</span>
+        <span class="c"># not be hard to also support absolute or relative x,y</span>
+        <span class="c"># commands, and select what style to use with either with</span>
+        <span class="c"># a parameter, or with a different input port (e.g. &#39;xy</span>
+        <span class="c"># relative&#39;, &#39;xy absolute&#39; etc.</span>
+
+        <span class="c"># JPHACKALERT: Currently there is no support for modeling the</span>
+        <span class="c"># fact that saccades actually take time, and larger amplitudes</span>
+        <span class="c"># take more time than small amplitudes.  No clue if we should</span>
+        <span class="c"># do that, or how, or what gets sent out while the saccade</span>
+        <span class="c"># &quot;eye&quot; is moving.</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_of_bounds</span><span class="p">()</span>
+
+        <span class="c"># convert the command to x/y translation</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">amplitude</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">visual_angle_scale</span>
+
+        <span class="c"># if the amplitude is negative, negate the direction (so up is still up)</span>
+        <span class="k">if</span> <span class="n">radius</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_translate</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span><span class="n">direction</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_of_bounds</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_find_saccade_in_bounds</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span><span class="n">direction</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixation_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">generate</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">generate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_on_shift</span>
+
+        <span class="k">if</span> <span class="n">generate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ShiftingGeneratorSheet.refixate"><a class="viewcode-back" href="../../../Reference_Manual/topo.sheet.saccade-module.html#topo.sheet.saccade.ShiftingGeneratorSheet.refixate">[docs]</a>    <span class="k">def</span> <span class="nf">refixate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move the bounds toward the fixation point.</span>
+
+<span class="sd">        Moves the bounds toward the fixation point specified in</span>
+<span class="sd">        self.fixation_point, potentially with noise as specified by</span>
+<span class="sd">        the parameter self.fixation_jitter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Refixating.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixation_jitter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">jitter_vec</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fixation_jitter</span><span class="p">,(</span><span class="mi">2</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">jitter_vec</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,))</span>
+
+        <span class="n">fix</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fixation_point</span><span class="p">)</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">centroid</span><span class="p">())</span>
+        <span class="n">refix_vec</span> <span class="o">=</span> <span class="p">(</span><span class="n">fix</span> <span class="o">-</span> <span class="n">pos</span><span class="p">)</span> <span class="o">+</span> <span class="n">jitter_vec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="o">*</span><span class="n">refix_vec</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">angle</span><span class="p">):</span>
+        <span class="n">angle</span> <span class="o">*=</span> <span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+        <span class="n">xoff</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="n">yoff</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Applying translation vector (</span><span class="si">%.2f</span><span class="s">,</span><span class="si">%.2f</span><span class="s">)&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span><span class="n">yoff</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span><span class="n">yoff</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_out_of_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return true if the centroid of the current bounds is outside the saccade bounds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">saccade_bounds</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">aarect</span><span class="p">()</span><span class="o">.</span><span class="n">centroid</span><span class="p">())</span>
+
+
+    <span class="k">def</span> <span class="nf">_find_saccade_in_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">theta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find a saccade in the given direction (theta) that lies within self.saccade_bounds.</span>
+
+<span class="sd">        Assumes that the given saccade was already performed and</span>
+<span class="sd">        landed out of bounds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># JPHACKALERT: This method iterates to search for a saccade</span>
+        <span class="c"># that lies in bounds along the saccade vector. We should</span>
+        <span class="c"># really compute this algebraically. Doing so involves computing</span>
+        <span class="c"># the intersection of the saccade vector with the saccade</span>
+        <span class="c"># bounds.  Ideally, each type of BoundingRegion would know how</span>
+        <span class="c"># to compute its own intersection with a given line (should be</span>
+        <span class="c"># easy for boxes, circles, and ellipses, at least.)</span>
+
+        <span class="c"># Assume we&#39;re starting out of bounds, so start by shifting</span>
+        <span class="c"># back to the original position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_translate</span><span class="p">(</span><span class="o">-</span><span class="n">radius</span><span class="p">,</span><span class="n">theta</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_of_bounds</span><span class="p">():</span>
+            <span class="n">radius</span> <span class="o">*=</span> <span class="mf">0.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_translate</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span><span class="n">theta</span><span class="p">)</span>
+
+        <span class="n">radius</span> <span class="o">=</span> <span class="o">-</span><span class="n">radius</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_of_bounds</span><span class="p">():</span>
+            <span class="n">radius</span> <span class="o">*=</span> <span class="mf">0.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_translate</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span><span class="n">theta</span><span class="p">)</span>
+
+</div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;SaccadeController&quot;</span><span class="p">,</span>
+    <span class="s">&quot;ShiftingGeneratorSheet&quot;</span><span class="p">,</span>
+    <span class="s">&quot;activity_centroid&quot;</span><span class="p">,</span>
+    <span class="s">&quot;activity_sample&quot;</span><span class="p">,</span>
+    <span class="s">&quot;activity_mode&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/sheet/saccade.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../sheet.html" >topo.sheet</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

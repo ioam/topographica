@@ -1,0 +1,861 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.analysis.featureresponses &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-analysis-featureresponses">
+<h1>topo.analysis.featureresponses<a class="headerlink" href="#topo-analysis-featureresponses" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance0f827376bc.svg" usemap="#inheritance0f827376bc" class="inheritance"/></div><map id="inheritance0f827376bc" name="inheritance0f827376bc">
+</map>
+<div class="section" id="module-topo.analysis.featureresponses">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.analysis.featureresponses" title="Permalink to this headline">¶</a></h2>
+<p>FeatureResponses and associated functions and classes.</p>
+<p>These classes implement map and tuning curve measurement based
+on measuring responses while varying features of an input pattern.</p>
+<dl class="class">
+<dt id="topo.analysis.featureresponses.DistributionMatrix">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">DistributionMatrix</tt><big>(</big><em>matrix_shape</em>, <em>axis_range=(0.0</em>, <em>1.0)</em>, <em>cyclic=False</em>, <em>keep_peak=True</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#DistributionMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.DistributionMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Maintains a matrix of Distributions (each of which is a dictionary
+of (feature value: activity) pairs).</p>
+<p>The matrix contains one Distribution for each unit in a
+rectangular matrix (given by the matrix_shape constructor
+argument).  The contents of each Distribution can be updated for a
+given bin value all at once by providing a matrix of new values to
+update().</p>
+<p>The results can then be accessed as a matrix of weighted averages
+(which can be used as a preference map) and/or a selectivity
+map (which measures the peakedness of each distribution).</p>
+<dl class="method">
+<dt id="topo.analysis.featureresponses.DistributionMatrix.apply_DSF">
+<tt class="descname">apply_DSF</tt><big>(</big><em>dsf</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#DistributionMatrix.apply_DSF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.DistributionMatrix.apply_DSF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the given dsf DistributionStatisticFn on each element of the distribution_matrix</p>
+<p>Return a dictionary of dictionaries, with the same structure of the called
+DistributionStatisticFn, but with matrices as values, instead of scalars</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.analysis.featureresponses.DistributionMatrix.update">
+<tt class="descname">update</tt><big>(</big><em>new_values</em>, <em>bin</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#DistributionMatrix.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.DistributionMatrix.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new matrix of histogram values for a given bin value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.FullMatrix">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">FullMatrix</tt><big>(</big><em>matrix_shape</em>, <em>features</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FullMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FullMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Records the output of every unit in a sheet, for every combination of feature values.
+Useful for collecting data for later analysis while presenting many input patterns.</p>
+<dl class="method">
+<dt id="topo.analysis.featureresponses.FullMatrix.update">
+<tt class="descname">update</tt><big>(</big><em>new_values</em>, <em>feature_value_permutation</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FullMatrix.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FullMatrix.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new matrix of histogram values for a given bin value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.FeatureResponses">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">FeatureResponses</tt><big>(</big><em>features</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureResponses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureResponses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.functionfamily-module.html#topo.base.functionfamily.PatternDrivenAnalysis" title="topo.base.functionfamily.PatternDrivenAnalysis"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.functionfamily.PatternDrivenAnalysis</span></tt></a></p>
+<p>Systematically vary input pattern feature values and collate the responses.</p>
+<p>Each sheet has a DistributionMatrix for each feature that will be
+tested.  The DistributionMatrix stores the distribution of
+activity values for each unit in the sheet for that feature.  For
+instance, if the features to be tested are orientation and phase,
+we will create a DistributionMatrix for orientation and a
+DistributionMatrix for phase for each sheet.  The orientation and
+phase of the input are then systematically varied (when
+measure_responses is called), and the responses of each unit
+to each pattern are collected into the DistributionMatrix.</p>
+<p>The resulting data can then be used to plot feature maps and
+tuning curves, or for similar types of feature-based analyses.</p>
+<dl class="docutils">
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[&lt;function wipe_out_activity at 0x7b1aed8&gt;, &lt;function clear_event_queue at 0x7b1a488&gt;], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after an analysis session ends.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before an analysis session begins.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">repetitions</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>How many times each stimulus will be presented.
+
+        Each stimulus is specified by a particular feature
+        combination, and need only be presented once if the network
+        has no other source of variability.  If results differ for
+        each presentation of an identical stimulus (e.g. due to
+        intrinsic noise), then this parameter can be increased
+        so that results will be an average over the specified
+        number of repetitions.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.analysis.featureresponses.FeatureResponses.initialize_featureresponses">
+<tt class="descname">initialize_featureresponses</tt><big>(</big><em>features</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureResponses.initialize_featureresponses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureResponses.initialize_featureresponses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an empty DistributionMatrix for each feature and each sheet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.analysis.featureresponses.FeatureResponses.measure_responses">
+<tt class="descname">measure_responses</tt><big>(</big><em>pattern_presenter</em>, <em>param_dict</em>, <em>features</em>, <em>display</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureResponses.measure_responses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureResponses.measure_responses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Present the given input patterns and collate the responses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.analysis.featureresponses.FeatureResponses.present_permutation">
+<tt class="descname">present_permutation</tt><big>(</big><em>permutation</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureResponses.present_permutation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureResponses.present_permutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Present a pattern with the specified set of feature values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.analysis.featureresponses.FeatureResponses.sheets_to_measure">
+<tt class="descname">sheets_to_measure</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureResponses.sheets_to_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureResponses.sheets_to_measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of the Sheets in the current simulation for which to collect responses.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.ReverseCorrelation">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">ReverseCorrelation</tt><big>(</big><em>features</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#ReverseCorrelation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.ReverseCorrelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.FeatureResponses" title="topo.analysis.featureresponses.FeatureResponses"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.FeatureResponses</span></tt></a></p>
+<p>Calculate the receptive fields for all neurons using reverse correlation.</p>
+<dl class="docutils">
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[&lt;function wipe_out_activity at 0x7b1aed8&gt;, &lt;function clear_event_queue at 0x7b1a488&gt;], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after an analysis session ends.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before an analysis session begins.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">repetitions</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>How many times each stimulus will be presented.
+
+        Each stimulus is specified by a particular feature
+        combination, and need only be presented once if the network
+        has no other source of variability.  If results differ for
+        each presentation of an identical stimulus (e.g. due to
+        intrinsic noise), then this parameter can be increased
+        so that results will be an average over the specified
+        number of repetitions.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">input_sheet</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="method">
+<dt id="topo.analysis.featureresponses.ReverseCorrelation.measure_responses">
+<tt class="descname">measure_responses</tt><big>(</big><em>pattern_presenter</em>, <em>param_dict</em>, <em>features</em>, <em>display</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#ReverseCorrelation.measure_responses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.ReverseCorrelation.measure_responses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Present the given input patterns and collate the responses.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.analysis.featureresponses.ReverseCorrelation.present_permutation">
+<tt class="descname">present_permutation</tt><big>(</big><em>permutation</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#ReverseCorrelation.present_permutation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.ReverseCorrelation.present_permutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Present a pattern with the specified set of feature values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.FeatureMaps">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">FeatureMaps</tt><big>(</big><em>features</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureMaps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureMaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.FeatureResponses" title="topo.analysis.featureresponses.FeatureResponses"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.FeatureResponses</span></tt></a></p>
+<p>Measures and collects the responses to a set of features for calculating feature maps.</p>
+<p>For each feature and each sheet, the results are stored as a
+preference matrix and selectivity matrix in the sheet&#8217;s
+sheet_views; these can then be plotted as preference
+or selectivity maps.</p>
+<dl class="docutils">
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[&lt;function wipe_out_activity at 0x7b1aed8&gt;, &lt;function clear_event_queue at 0x7b1a488&gt;], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after an analysis session ends.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before an analysis session begins.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">sheet_views_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Prefix to add to the name under which results are stored in sheet_views.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">repetitions</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>How many times each stimulus will be presented.
+
+        Each stimulus is specified by a particular feature
+        combination, and need only be presented once if the network
+        has no other source of variability.  If results differ for
+        each presentation of an identical stimulus (e.g. due to
+        intrinsic noise), then this parameter can be increased
+        so that results will be an average over the specified
+        number of repetitions.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_WeightedAverage DSF_WeightedAverage00039&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit responses.
+            Note that this default is orverriden by specific functions for features, if
+            specified in the Feature objects</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">selectivity_multiplier</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=17.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Scaling of the feature selectivity values applied in all feature dimensions.
+            The multiplier sets the output scaling.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.analysis.featureresponses.FeatureMaps.collect_feature_responses">
+<tt class="descname">collect_feature_responses</tt><big>(</big><em>pattern_presenter</em>, <em>param_dict</em>, <em>display</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureMaps.collect_feature_responses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureMaps.collect_feature_responses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Present the given input patterns and collate the responses.</p>
+<p>Responses are statistics on the distributions of measure for every unit,
+extracted by functions that are subclasses of DistributionStatisticFn, and could
+be specified in each feature with the preference_fn parameter, otherwise the
+default in self.preference_fn is used.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.FeatureCurves">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">FeatureCurves</tt><big>(</big><em>features</em>, <em>sheet</em>, <em>x_axis</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureCurves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureCurves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.FeatureResponses" title="topo.analysis.featureresponses.FeatureResponses"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.FeatureResponses</span></tt></a></p>
+<p>Measures and collects the responses to a set of features, for calculating tuning and similar curves.</p>
+<p>These curves represent the response of a Sheet to patterns that
+are controlled by a set of features.  This class can collect data
+for multiple curves, each with the same x axis.  The x axis
+represents the main feature value that is being varied, such as
+orientation.  Other feature values can also be varied, such as
+contrast, which will result in multiple curves (one per unique
+combination of other feature values).</p>
+<p>The sheet responses used to construct the curves will be stored in
+a dictionary curve_dict kept in the Sheet of interest.  A
+particular set of patterns is then constructed using a
+user-specified PatternPresenter by adding the parameters
+determining the curve (curve_param_dict) to a static list of
+parameters (param_dict), and then varying the specified set of
+features.  The results can be accessed in the curve_dict,
+indexed by the curve_label and feature value.</p>
+<dl class="docutils">
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[&lt;function wipe_out_activity at 0x7b1aed8&gt;, &lt;function clear_event_queue at 0x7b1a488&gt;], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_presentation_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after each pattern is presented.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run after an analysis session ends.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">pre_analysis_session_hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run before an analysis session begins.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">repetitions</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>How many times each stimulus will be presented.
+
+        Each stimulus is specified by a particular feature
+        combination, and need only be presented once if the network
+        has no other source of variability.  If results differ for
+        each presentation of an identical stimulus (e.g. due to
+        intrinsic noise), then this parameter can be increased
+        so that results will be an average over the specified
+        number of repetitions.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_collect_responses_hook</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callable objects to be run at the end of collect_feature_responses function.
+        The functions should accept three parameters: FullMatrix, curve label, sheet</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.Feature">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">Feature</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#Feature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.Feature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Specifies several parameters required for generating a map of one input feature</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_WeightedAverage DSF_WeightedAverage00040&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit response
+            to this feature</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">cyclic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether the range of this feature is cyclic (wraps around at the high end)</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">compute_fn</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, a function that when given a list of other parameter values,
+            computes and returns the value for this feature</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">step</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>increment used to build a list of values for this feature, together with
+            the range parameter</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">range</span></tt> (<em>constant=False, default=(0, 0), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>lower and upper values for a feature, used to build a list of values,
+            together with the step parameter</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">values</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>explicit list of values for this feature, used in alternative to the range
+            and step parameters</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>offset to add to the values for this feature</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.PatternPresenter">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">PatternPresenter</tt><big>(</big><em>pattern_generator</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#PatternPresenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.PatternPresenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Function object for presenting PatternGenerator-created patterns.</p>
+<p>This class helps coordinate a set of patterns to be presented to a
+set of GeneratorSheets.  It provides a standardized way of
+generating a set of linked patterns for testing or analysis, such
+as when measuring preference maps or presenting test patterns.
+Subclasses can provide additional mechanisms for doing this in
+different ways.</p>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">contrast_parameter</span></tt> (<em>constant=False, default=michelson_contrast, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">divisions</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">generator_sheets</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The set of GeneratorSheets onto which patterns will be drawn.
+
+        By default (i.e. for an empty list), all GeneratorSheets in
+        the simulation will be used.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>When presenting a pattern, whether to apply each sheet&#8217;s
+        output function.  If False, for many networks the response
+        will be linear, which requires fewer test patterns to measure
+        a meaningful response, but it may not correspond to the actual
+        preferences of each neuron under other conditions.  If True,
+        callers will need to ensure that the input patterns are in a
+        suitable range to drive the neurons to generate meaningful
+        output, because e.g. a threshold-based output function might
+        result in no activity for inputs that are too weak..</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">duration</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Amount of simulation time for which to present each test pattern.
+        By convention, most Topographica example files are designed to
+        have a suitable activity pattern computed by the
+        default time, but the duration will need to be changed for
+        other models that do not follow that convention or if a
+        linear response is desired.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.Subplotting">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">Subplotting</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#Subplotting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.Subplotting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Convenience functions for handling subplots (such as colorized Activity plots).
+Only needed for avoiding typing, as plots can be declared with their own
+specific subplots without using these functions.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">plotgroups_to_subplot</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;Activity&#8217;, &#8216;Connection Fields&#8217;, &#8216;Projection&#8217;, &#8216;Projection Activity&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of plotgroups for which to set subplots.</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">_last_args</span></tt> (<em>constant=False, default=(), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">subplotting_declared</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether set_subplots has previously been called</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="topo.analysis.featureresponses.Subplotting.set_subplots">
+<em class="property">static </em><tt class="descname">set_subplots</tt><big>(</big><em>prefix=None</em>, <em>hue=''</em>, <em>confidence=''</em>, <em>force=True</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#Subplotting.set_subplots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.Subplotting.set_subplots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define Hue and Confidence subplots for each of the plotgroups_to_subplot.
+Typically used to make activity or weight plots show a
+preference value as the hue, and a selectivity as the
+confidence.</p>
+<p>The specified hue, if any, should be the name of a SheetView,
+such as OrientationPreference.  The specified confidence, if
+any, should be the name of a (usually) different SheetView,
+such as OrientationSelectivity.</p>
+<p>The prefix option is a shortcut making the usual case easier
+to type; it sets hue to prefix+&#8221;Preference&#8221; and confidence to
+prefix+&#8221;Selectivity&#8221;.</p>
+<p>If force=False, subplots are changed only if no subplot is
+currently defined.  Force=False is useful for setting up
+subplots automatically when maps are measured, without
+overwriting any subplots set up specifically by the user.</p>
+<p>Currently works only for plotgroups that have a plot
+with the same name as the plotgroup, though this could
+be changed easily.</p>
+<p>Examples:</p>
+<div class="highlight-python"><pre>Subplotting.set_subplots("Orientation")
+  - Set the default subplots to OrientationPreference and OrientationSelectivity
+
+Subplotting.set_subplots(hue="OrientationPreference")
+  - Set the default hue subplot to OrientationPreference with no selectivity
+
+Subplotting.set_subplots()
+  - Remove subplots from all the plotgroups_to_subplot.</pre>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.MeasureResponseCommand">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">MeasureResponseCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#MeasureResponseCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.MeasureResponseCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.ParameterizedFunction" title="param.parameterized.ParameterizedFunction"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.ParameterizedFunction</span></tt></a></p>
+<p>Parameterized command for presenting input patterns and measuring responses.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">static_parameters</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;scale&#8217;, &#8216;offset&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of names of parameters of this class to pass to the
+        pattern_presenter as static parameters, i.e. values that
+        will be fixed to a single value during measurement.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">subplot</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of map to register as a subplot, if any.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">generator_sheets</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>pattern_presenter.generator_sheets will be set to this value.
+        The default value of [] results in all GeneratorSheets being
+        used.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">weighted_average</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to compute results using a weighted average, or just
+        discrete values.  A weighted average can give more precise
+        results, without being limited to a set of discrete values,
+        but the results can have systematic biases due to the
+        averaging, especially for non-cyclic parameters.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=True, bounds=(0, 1), constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.apply_output_fns will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">pattern_presenter</span></tt> (<em>constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Callable object that will present a parameter-controlled pattern to a
+        set of Sheets.  Needs to be supplied by a subclass or in the call.
+        The attributes duration and apply_output_fns (if non-None) will
+        be set on this object, and it should respect those if possible.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Multiplicative strength of input pattern.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">sheet_views_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additive offset to input pattern.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">duration</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_MaxValue DSF_MaxValue00041&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit responses.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">display</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to update a GUI display (if any) during the map measurement.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.SinusoidalMeasureResponseCommand">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">SinusoidalMeasureResponseCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#SinusoidalMeasureResponseCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.SinusoidalMeasureResponseCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.MeasureResponseCommand" title="topo.analysis.featureresponses.MeasureResponseCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.MeasureResponseCommand</span></tt></a></p>
+<p>Parameterized command for presenting sine gratings and measuring responses.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">static_parameters</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;scale&#8217;, &#8216;offset&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of names of parameters of this class to pass to the
+        pattern_presenter as static parameters, i.e. values that
+        will be fixed to a single value during measurement.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">subplot</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of map to register as a subplot, if any.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">generator_sheets</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>pattern_presenter.generator_sheets will be set to this value.
+        The default value of [] results in all GeneratorSheets being
+        used.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">weighted_average</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to compute results using a weighted average, or just
+        discrete values.  A weighted average can give more precise
+        results, without being limited to a set of discrete values,
+        but the results can have systematic biases due to the
+        averaging, especially for non-cyclic parameters.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=True, bounds=(0, 1), constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.apply_output_fns will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">frequencies</span></tt> (<em>bounds=(0, None), constant=False, default=[2.4], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Sine grating frequencies to test.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">pattern_presenter</span></tt> (<em>constant=False, default=&lt;PatternPresenter PatternPresenter00043&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Callable object that will present a parameter-controlled pattern to a
+        set of Sheets.  By default, uses a SineGrating presented for a short
+        duration.  By convention, most Topographica example files
+        are designed to have a suitable activity pattern computed by
+        that time, but the duration will need to be changed for other
+        models that do not follow that convention.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">num_orientation</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=4, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of orientations to test.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Multiplicative strength of input pattern.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">sheet_views_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additive offset to input pattern.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">duration</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">num_phase</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=18, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of phases to test.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_WeightedAverage DSF_WeightedAverage00044&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit responses.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">display</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to update a GUI display (if any) during the map measurement.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.PositionMeasurementCommand">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">PositionMeasurementCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#PositionMeasurementCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.PositionMeasurementCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.MeasureResponseCommand" title="topo.analysis.featureresponses.MeasureResponseCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.MeasureResponseCommand</span></tt></a></p>
+<p>Parameterized command for measuring topographic position.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">static_parameters</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;scale&#8217;, &#8216;offset&#8217;, &#8216;size&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of names of parameters of this class to pass to the
+        pattern_presenter as static parameters, i.e. values that
+        will be fixed to a single value during measurement.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">subplot</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of map to register as a subplot, if any.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">generator_sheets</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>pattern_presenter.generator_sheets will be set to this value.
+        The default value of [] results in all GeneratorSheets being
+        used.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">weighted_average</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to compute results using a weighted average, or just
+        discrete values.  A weighted average can give more precise
+        results, without being limited to a set of discrete values,
+        but the results can have systematic biases due to the
+        averaging, especially for non-cyclic parameters.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">x_range</span></tt> (<em>constant=False, default=(-0.5, 0.5), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The range of X values to test.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=True, bounds=(0, 1), constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.apply_output_fns will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">divisions</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=6, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The number of different positions to measure in X and in Y.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">pattern_presenter</span></tt> (<em>constant=False, default=&lt;PatternPresenter PatternPresenter00046&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Callable object that will present a parameter-controlled
+        pattern to a set of Sheets.  For measuring position, the
+        pattern_presenter should be spatially localized, yet also able
+        to activate the appropriate neurons reliably.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Multiplicative strength of input pattern.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">sheet_views_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additive offset to input pattern.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">duration</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_MaxValue DSF_MaxValue00041&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit responses.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">y_range</span></tt> (<em>constant=False, default=(-0.5, 0.5), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The range of Y values to test.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">display</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to update a GUI display (if any) during the map measurement.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The size of the pattern to present.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.SingleInputResponseCommand">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">SingleInputResponseCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#SingleInputResponseCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.SingleInputResponseCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.MeasureResponseCommand" title="topo.analysis.featureresponses.MeasureResponseCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.MeasureResponseCommand</span></tt></a></p>
+<p>A callable Parameterized command for measuring the response to input on a specified Sheet.</p>
+<p>Note that at present the input is actually presented to all input sheets; the
+specified Sheet is simply used to determine various parameters.  In the future,
+it may be modified to draw the pattern on one input sheet only.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">static_parameters</span></tt> (<em>bounds=(0, None), constant=False, default=[&#8216;scale&#8217;, &#8216;offset&#8217;, &#8216;size&#8217;], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of names of parameters of this class to pass to the
+        pattern_presenter as static parameters, i.e. values that
+        will be fixed to a single value during measurement.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">subplot</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of map to register as a subplot, if any.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">generator_sheets</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>pattern_presenter.generator_sheets will be set to this value.
+        The default value of [] results in all GeneratorSheets being
+        used.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">weighted_average</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to compute results using a weighted average, or just
+        discrete values.  A weighted average can give more precise
+        results, without being limited to a set of discrete values,
+        but the results can have systematic biases due to the
+        averaging, especially for non-cyclic parameters.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=True, bounds=(0, 1), constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.apply_output_fns will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">pattern_presenter</span></tt> (<em>constant=False, default=&lt;PatternPresenter PatternPresenter00048&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Callable object that will present a parameter-controlled pattern to a
+        set of Sheets.  Needs to be supplied by a subclass or in the call.
+        The attributes duration and apply_output_fns (if non-None) will
+        be set on this object, and it should respect those if possible.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">input_sheet</span></tt> (<em>check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the sheet where input should be drawn.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=30.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Multiplicative strength of input pattern.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">sheet_views_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additive offset to input pattern.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">duration</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_MaxValue DSF_MaxValue00041&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit responses.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">display</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to update a GUI display (if any) during the map measurement.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.FeatureCurveCommand">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">FeatureCurveCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#FeatureCurveCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.FeatureCurveCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.SinusoidalMeasureResponseCommand" title="topo.analysis.featureresponses.SinusoidalMeasureResponseCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.SinusoidalMeasureResponseCommand</span></tt></a></p>
+<p>A callable Parameterized command for measuring tuning curves.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">static_parameters</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of names of parameters of this class to pass to the
+        pattern_presenter as static parameters, i.e. values that
+        will be fixed to a single value during measurement.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">subplot</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of map to register as a subplot, if any.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">generator_sheets</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>pattern_presenter.generator_sheets will be set to this value.
+        The default value of [] results in all GeneratorSheets being
+        used.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">weighted_average</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to compute results using a weighted average, or just
+        discrete values.  A weighted average can give more precise
+        results, without being limited to a set of discrete values,
+        but the results can have systematic biases due to the
+        averaging, especially for non-cyclic parameters.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the sheet to use in measurements.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=True, bounds=(0, 1), constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.apply_output_fns will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">frequencies</span></tt> (<em>bounds=(0, None), constant=False, default=[2.4], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Sine grating frequencies to test.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">pattern_presenter</span></tt> (<em>constant=False, default=&lt;PatternPresenter PatternPresenter00043&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Callable object that will present a parameter-controlled pattern to a
+        set of Sheets.  By default, uses a SineGrating presented for a short
+        duration.  By convention, most Topographica example files
+        are designed to have a suitable activity pattern computed by
+        that time, but the duration will need to be changed for other
+        models that do not follow that convention.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">num_orientation</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=12, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of orientations to test.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">curve_parameters</span></tt> (<em>constant=False, default=[{&#8216;contrast&#8217;: 30}, {&#8216;contrast&#8217;: 60}, {&#8216;contrast&#8217;: 80}, {&#8216;contrast&#8217;: 90}], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of parameter values for which to measure a curve.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">units</span></tt> (<em>allow_None=False, constant=False, default=%, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Units for labeling the curve_parameters in figure legends.
+        The default is %, for use with contrast, but could be any
+        units (or the empty string).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Multiplicative strength of input pattern.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">sheet_views_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additive offset to input pattern.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">duration</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">num_phase</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=18, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of phases to test.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_WeightedAverage DSF_WeightedAverage00044&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit responses.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">display</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to update a GUI display (if any) during the map measurement.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">x_axis</span></tt> (<em>allow_None=False, constant=False, default=orientation, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Parameter to use for the x axis of tuning curves.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.analysis.featureresponses.UnitCurveCommand">
+<em class="property">class </em><tt class="descclassname">topo.analysis.featureresponses.</tt><tt class="descname">UnitCurveCommand</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/analysis/featureresponses.html#UnitCurveCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.analysis.featureresponses.UnitCurveCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.analysis.featureresponses.FeatureCurveCommand" title="topo.analysis.featureresponses.FeatureCurveCommand"><tt class="xref py py-class docutils literal"><span class="pre">topo.analysis.featureresponses.FeatureCurveCommand</span></tt></a></p>
+<p>Measures tuning curve(s) of particular unit(s).</p>
+<dl class="docutils">
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">subplot</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of map to register as a subplot, if any.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">preference_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DSF_WeightedAverage DSF_WeightedAverage00044&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function that will be used to analyze the distributions of unit responses.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">duration</span></tt> (<em>allow_None=True, bounds=None, constant=False, default=None, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The size of the pattern to present.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Multiplicative strength of input pattern.</dd>
+<dt><em>param ObjectSelector</em> <tt class="docutils literal"><span class="pre">sheet</span></tt> (<em>check_on_set=False, compute_default_fn=None, constant=False, default=None, instantiate=False, objects=[], pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Name of the sheet to use in measurements.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">pattern_presenter</span></tt> (<em>constant=False, default=&lt;PatternPresenter PatternPresenter00051&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Callable object that will present a parameter-controlled pattern to a
+        set of Sheets.  By default, uses a SineGrating presented for a short
+        duration.  By convention, most Topographica example files
+        are designed to have a suitable activity pattern computed by
+        that time, but the duration will need to be changed for other
+        models that do not follow that convention.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">num_orientation</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=12, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of orientations to test.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">curve_parameters</span></tt> (<em>constant=False, default=[{&#8216;contrast&#8217;: 30}, {&#8216;contrast&#8217;: 60}, {&#8216;contrast&#8217;: 80}, {&#8216;contrast&#8217;: 90}], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of parameter values for which to measure a curve.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">x_axis</span></tt> (<em>allow_None=False, constant=False, default=orientation, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Parameter to use for the x axis of tuning curves.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">static_parameters</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of names of parameters of this class to pass to the
+        pattern_presenter as static parameters, i.e. values that
+        will be fixed to a single value during measurement.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">generator_sheets</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>pattern_presenter.generator_sheets will be set to this value.
+        The default value of [] results in all GeneratorSheets being
+        used.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">weighted_average</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to compute results using a weighted average, or just
+        discrete values.  A weighted average can give more precise
+        results, without being limited to a set of discrete values,
+        but the results can have systematic biases due to the
+        averaging, especially for non-cyclic parameters.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=True, bounds=(0, 1), constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, pattern_presenter.apply_output_fns will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">frequencies</span></tt> (<em>bounds=(0, None), constant=False, default=[2.4], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Sine grating frequencies to test.</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">units</span></tt> (<em>allow_None=False, constant=False, default=%, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Units for labeling the curve_parameters in figure legends.
+        The default is %, for use with contrast, but could be any
+        units (or the empty string).</dd>
+<dt><em>param String</em> <tt class="docutils literal"><span class="pre">sheet_views_prefix</span></tt> (<em>allow_None=False, constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Additive offset to input pattern.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">coords</span></tt> (<em>bounds=(0, None), constant=False, default=[(0, 0)], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of coordinates of units to measure.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">num_phase</span></tt> (<em>allow_None=False, bounds=(1, None), constant=False, default=18, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of phases to test.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">display</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to update a GUI display (if any) during the map measurement.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.analysis.featureresponses</a><ul>
+<li><a class="reference internal" href="#module-topo.analysis.featureresponses">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.analysis.featureresponses-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

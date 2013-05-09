@@ -1,0 +1,557 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.projection &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-base-projection">
+<h1>topo.base.projection<a class="headerlink" href="#topo-base-projection" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance1f1dc666b6.svg" usemap="#inheritance1f1dc666b6" class="inheritance"/></div><map id="inheritance1f1dc666b6" name="inheritance1f1dc666b6">
+</map>
+<div class="section" id="module-topo.base.projection">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.base.projection" title="Permalink to this headline">¶</a></h2>
+<p>Projection and related classes.</p>
+<dl class="class">
+<dt id="topo.base.projection.AndMask">
+<em class="property">class </em><tt class="descclassname">topo.base.projection.</tt><tt class="descname">AndMask</tt><big>(</big><em>sheet=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#AndMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.AndMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.projection.CompositeSheetMask" title="topo.base.projection.CompositeSheetMask"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.CompositeSheetMask</span></tt></a></p>
+<p>A composite SheetMask that computes its value as the logical AND (i.e. intersection) of its sub-masks.</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">submasks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.projection.CompositeSheetMask">
+<em class="property">class </em><tt class="descclassname">topo.base.projection.</tt><tt class="descname">CompositeSheetMask</tt><big>(</big><em>sheet=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#CompositeSheetMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.CompositeSheetMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.projection.SheetMask" title="topo.base.projection.SheetMask"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.SheetMask</span></tt></a></p>
+<p>A SheetMask that computes its value from other SheetMasks.</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">submasks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.projection.NeighborhoodMask">
+<em class="property">class </em><tt class="descclassname">topo.base.projection.</tt><tt class="descname">NeighborhoodMask</tt><big>(</big><em>sheet</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#NeighborhoodMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.NeighborhoodMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.projection.SheetMask" title="topo.base.projection.SheetMask"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.SheetMask</span></tt></a></p>
+<p>A SheetMask where the mask includes a neighborhood around active neurons.</p>
+<p>Given a radius and a threshold, considers a neuron active if at
+least one neuron in the radius is over the threshold.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">threshold</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1e-05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Threshold for considering a neuron active.
+       This value should be small to avoid discarding significantly active
+       neurons.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">radius</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Radius in Sheet coordinates around active neurons to consider
+       neighbors active as well.  Using a larger radius ensures that
+       the calculation will be unaffected by the mask, but it will
+       reduce any computational benefit from the mask.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.projection.OrMask">
+<em class="property">class </em><tt class="descclassname">topo.base.projection.</tt><tt class="descname">OrMask</tt><big>(</big><em>sheet=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#OrMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.OrMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.base.projection.CompositeSheetMask" title="topo.base.projection.CompositeSheetMask"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.CompositeSheetMask</span></tt></a></p>
+<p>A composite SheetMask that computes its value as the logical OR (i.e. union) of its sub-masks.</p>
+<p><em>param List</em> <tt class="docutils literal"><span class="pre">submasks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.projection.Projection">
+<em class="property">class </em><tt class="descclassname">topo.base.projection.</tt><tt class="descname">Projection</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.simulation-module.html#topo.base.simulation.EPConnection" title="topo.base.simulation.EPConnection"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.simulation.EPConnection</span></tt></a></p>
+<p>A projection from a Sheet into a ProjectionSheet.</p>
+<p>Projections are required to support the activate() method, which
+will construct a matrix the same size as the target
+ProjectionSheet, from an input matrix of activity from the source
+Sheet.  Other than that, a Projection may be of any type.</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.1, readonly=False</em>)</dt>
+<dd>The EventProcessor from which messages originate.</dd>
+</dl>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">strength</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">src_port</span></tt> (<em>constant=False, default=Activity, instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False</em>)</dt>
+<dd>Identifier that can be used to distinguish different types of outgoing connections.
+
+       EventProcessors that generate only a single type of
+       outgoing event will typically use a src_port of None.  However,
+       if multiple types of communication are meaningful, the
+       EventProcessor can accept other values for src_port.  It is up
+       to the src EventProcessor to deliver appropriate data to each
+       port, and to declare what will be sent over that port.</dd>
+</dl>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="docutils">
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">dest</span></tt> (<em>constant=True, default=None, instantiate=True, pickle_default_value=True, precedence=0.11, readonly=False</em>)</dt>
+<dd>The EventProcessor to which messages are delivered.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">private</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Set to true if this connection is for internal use only, not to be manipulated by a user.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether or not to update the internal state on each call.
+        Allows plasticity to be turned off during analysis, and then re-enabled.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">delay</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Simulation time between generation of an Event by the src and delivery to the dest.
+       Should normally be nonzero, to represent a causal with a well-defined ordering
+       of events.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function(s) applied to the Projection activity after it is computed.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">activity_group</span></tt> (<em>constant=False, default=(0.5, &lt;ufunc &#8216;add&#8217;&gt;), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Grouping and precedence specifier for computing activity from
+       Projections.  In a ProjectionSheet, all Projections in the
+       same activity_group will be summed, and then the results from
+       each group will be combined in the order of the activity_group
+       using the operator specified by the activity_operator.  For
+       instance, if there are two Projections with
+       activity_group==(0.2,numpy.add) and two with
+       activity_group==(0.6,numpy.divide), activity
+       from the first two will be added together, and the result
+       divided by the sum of the second two.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">dest_port</span></tt> (<em>constant=False, default=Activity, instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False</em>)</dt>
+<dd>Identifier that can be used to distinguish different types of incoming connections.
+
+       EventProcessors that accept only a single type of incoming
+       event will typically use a src_port of None.  However, if
+       multiple types of communication are meaningful, the
+       EventProcessor can accept other values for dest_port.  It is up
+       to the dest EventProcessor to process the data appropriately
+       for each port, and to define what is expected to be sent to
+       that port.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.base.projection.Projection.activate">
+<tt class="descname">activate</tt><big>(</big><em>input_activity</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an activity matrix for output, based on the specified input_activity.</p>
+<p>Subclasses must override this method to whatever it means to
+calculate activity in that subclass.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.Projection.apply_learn_output_fns">
+<tt class="descname">apply_learn_output_fns</tt><big>(</big><em>active_units_mask=True</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.apply_learn_output_fns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.apply_learn_output_fns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sub-classes can implement this function if they wish to
+perform an operation after learning has completed, such as
+normalizing weight values across different projections.</p>
+<p>The active_units_mask argument determines whether or not to
+apply the output_fn to non-responding units.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.Projection.get_projection_view">
+<tt class="descname">get_projection_view</tt><big>(</big><em>timestamp</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.get_projection_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.get_projection_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the activity in a single projection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.Projection.learn">
+<tt class="descname">learn</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.learn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.learn" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function has to be re-implemented by sub-classes, if they wish
+to support learning.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.Projection.n_bytes">
+<tt class="descname">n_bytes</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.n_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.n_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the memory bytes taken by this Projection.</p>
+<p>By default, counts only the activity array, but subclasses
+should implement this method to include also the bytes taken
+by weight arrays and any similar arrays, as a rough lower
+bound from which memory requirements and memory usage patterns
+can be estimated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.Projection.n_conns">
+<tt class="descname">n_conns</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.n_conns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.n_conns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the size of this projection, in number of connections.</p>
+<p>Must be implemented by subclasses, if only to declare that no
+connections are stored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.Projection.override_plasticity_state">
+<tt class="descname">override_plasticity_state</tt><big>(</big><em>new_plasticity_state</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.override_plasticity_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.override_plasticity_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporarily override plasticity of medium and long term internal
+state.</p>
+<p>This function should be implemented by all subclasses so that
+it preserves the ability of the Projection to compute
+activity, i.e. to operate over a short time scale, while
+preventing any lasting changes to the state.</p>
+<p>For instance, if new_plasticity_state is False, in a
+Projection with modifiable connection weights, the values of
+those weights should temporarily be made fixed and unchanging
+after this call.  For a Projection with automatic
+normalization, homeostatic plasticity, or other features that
+depend on a history of events (rather than just the current
+item being processed), changes in those properties would be
+disabled temporarily.  Setting the plasticity state to False
+is useful during analysis operations (e.g. map measurement)
+that would otherwise change the state of the underlying
+network.</p>
+<p>Any process that does not have any lasting state, such as
+those affecting only the current activity level, should not
+be affected by this call.</p>
+<p>By default, this call simply calls override_plasticity_state()
+on the Projection&#8217;s output_fn, and sets the &#8216;plastic&#8217;
+parameter to False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.Projection.restore_plasticity_state">
+<tt class="descname">restore_plasticity_state</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#Projection.restore_plasticity_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.Projection.restore_plasticity_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore previous plasticity state of medium and long term
+internal state after a override_plasticity_state call.</p>
+<p>This function should be implemented by all subclasses to
+remove the effect of the most recent override_plasticity_state call,
+e.g. to reenable plasticity of any type that was disabled.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.projection.ProjectionSheet">
+<em class="property">class </em><tt class="descclassname">topo.base.projection.</tt><tt class="descname">ProjectionSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.sheet-module.html#topo.base.sheet.Sheet" title="topo.base.sheet.Sheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheet.Sheet</span></tt></a></p>
+<p>A Sheet whose activity is computed using Projections from other sheets.</p>
+<p>A standard ProjectionSheet expects its input to be generated from
+other Sheets. Upon receiving an input event, the ProjectionSheet
+interprets the event data to be (a copy of) an activity matrix
+from another sheet.  The ProjectionSheet provides a copy of this
+matrix to each Projection from that input Sheet, asking each one
+to compute their own activity in response.  The same occurs for
+any other pending input events.</p>
+<p>After all events have been processed for a given time, the
+ProjectionSheet computes its own activity matrix using its
+activate() method, which by default sums all its Projections&#8217;
+activity matrices and passes the result through user-specified
+output_fns() before sending it out on the default output port.
+The activate() method can be overridden to sum some of the
+projections, multiply that by the sum of other projections, etc.,
+to model modulatory or other more complicated types of connections.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.activate">
+<tt class="descname">activate</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect activity from each projection, combine it to calculate
+the activity for this sheet, and send the result out.</p>
+<p>Subclasses may override this method to whatever it means to
+calculate activity in that subclass.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.input_event">
+<tt class="descname">input_event</tt><big>(</big><em>conn</em>, <em>data</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.input_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.input_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accept input from some sheet.  Call .present_input() to
+compute the stimulation from that sheet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.learn">
+<tt class="descname">learn</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.learn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.learn" title="Permalink to this definition">¶</a></dt>
+<dd><p>By default, call the learn() and apply_learn_output_fns()
+methods on every Projection to this Sheet.</p>
+<p>Any other type of learning can be implemented by overriding this method.
+Called from self.process_current_time() _after_ activity has
+been propagated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.n_bytes">
+<tt class="descname">n_bytes</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.n_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.n_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the memory bytes taken by this Sheet and its Projections.</p>
+<p>Typically, this number will include the activity array and any
+similar arrays, plus memory taken by all incoming Projections.
+It will not usually include memory taken by the Python
+dictionary or various &#8220;housekeeping&#8221; attributes, which usually
+contribute only a small amount to the memory requirements.
+Thus this value should be considered only a rough lower bound
+from which memory requirements and memory usage patterns can
+be estimated.</p>
+<p>Subclasses should reimplement this method if they store a
+significant amount of data other than in the activity array
+and the projections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.n_conns">
+<tt class="descname">n_conns</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.n_conns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.n_conns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count the total size of all incoming projections, in number of connections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.override_plasticity_state">
+<tt class="descname">override_plasticity_state</tt><big>(</big><em>new_plasticity_state</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.override_plasticity_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.override_plasticity_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporarily override plasticity state of medium and long term
+internal state.</p>
+<p>This function should be implemented by all subclasses so that
+when new_plasticity_state=False, it preserves the ability of
+the ProjectionSheet to compute activity, i.e. to operate over
+a short time scale, while preventing any lasting changes to
+the state.</p>
+<p>Any process that does not have any lasting state, such as
+those affecting only the current activity level, should not
+be affected by this call.</p>
+<p>By default, calls override_plasticity_state() on the
+ProjectionSheet&#8217;s output_fns and all of its incoming
+Projections, and also enables the &#8216;plastic&#8217; parameter for this
+ProjectionSheet.  The old value of the plastic parameter is
+saved to an internal stack to be restored by
+restore_plasticity_state().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.present_input">
+<tt class="descname">present_input</tt><big>(</big><em>input_activity</em>, <em>conn</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.present_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.present_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide the given input_activity to each in_projection that has a dest_port
+equal to the specified port, asking each one to compute its activity.</p>
+<p>The sheet&#8217;s own activity is not calculated until activate()
+is called.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.process_current_time">
+<tt class="descname">process_current_time</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.process_current_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.process_current_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by the simulation after all the events are processed for the
+current time but before time advances.  Allows the event processor
+to send any events that must be sent before time advances to drive
+the simulation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.ProjectionSheet.projections">
+<tt class="descname">projections</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#ProjectionSheet.projections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.ProjectionSheet.projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return either a named input p, or a dictionary
+{projection_name, projection} of all the in_connections for
+this ProjectionSheet.</p>
+<p>A minor convenience function for finding projections by name;
+the sheet&#8217;s list of in_connections usually provides simpler
+access to the Projections.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.base.projection.SheetMask">
+<em class="property">class </em><tt class="descclassname">topo.base.projection.</tt><tt class="descname">SheetMask</tt><big>(</big><em>sheet=None</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#SheetMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.SheetMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>An abstract class that defines a mask over a ProjectionSheet object.</p>
+<p>This class is typically used for optimization, where mask
+indicates which neurons are active and should be processed
+further. A mask can also be used for lesion experiments, to
+specify which units should be kept inactive.</p>
+<p>See the code for CFProjection and CFResponseFn to see how this
+class can be used to restrict the computation to only those
+neurons that the Mask lists as active.</p>
+<dl class="method">
+<dt id="topo.base.projection.SheetMask.calculate">
+<tt class="descname">calculate</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#SheetMask.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.SheetMask.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a new mask based on the activity of the sheet.</p>
+<p>For instance, in an algorithm like LISSOM that is based on a
+process of feedforward activation followed by lateral settling,
+the calculation is done at the beginning of each iteration after
+the feedforward activity has been calculated.</p>
+<p>Subclasses should override this method to compute some non-default
+mask.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.base.projection.SheetMask.data">
+<tt class="descname">data</tt><a class="headerlink" href="#topo.base.projection.SheetMask.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure that whenever somebody accesses the data they are not None.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.SheetMask.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#SheetMask.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.SheetMask.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize mask to default value (with no neurons masked out).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.base.projection.SheetMask.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/base/projection.html#SheetMask.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.projection.SheetMask.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the current mask based on the current activity and a previous mask.</p>
+<p>Should be called only if calculate() has already been called since the last
+reset(); potentially faster to compute than redoing the entire calculate().</p>
+<p>Subclasses should override this method to compute some non-default
+mask.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.base.projection</a><ul>
+<li><a class="reference internal" href="#module-topo.base.projection">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.base.projection-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

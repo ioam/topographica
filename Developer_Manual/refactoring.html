@@ -1,0 +1,257 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Refactoring &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Developer Manual" href="index.html" />
+    <link rel="next" title="Test suite" href="testing.html" />
+    <link rel="prev" title="Memory usage" href="memuse.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="testing.html" title="Test suite"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="memuse.html" title="Memory usage"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="refactoring">
+<h1>Refactoring<a class="headerlink" href="#refactoring" title="Permalink to this headline">¶</a></h1>
+<p>(From <a class="reference external" href="http://www.refactoring.com/">refactoring.com</a>):</p>
+<blockquote>
+<div>Refactoring is a disciplined technique for restructuring an
+existing body of code, altering its internal structure without
+changing its external behavior. Its heart is a series of small
+behavior preserving transformations. Each transformation (called
+a &#8216;refactoring&#8217;) does little, but a sequence of transformations
+can produce a significant restructuring. Since each refactoring
+is small, it&#8217;s less likely to go wrong. The system is also kept
+fully working after each small refactoring, reducing the chances
+that a system can get seriously broken during the restructuring.</div></blockquote>
+<p>We rely heavily on refactoring in Topographica to ensure that the
+design is always kept up to date and suitable for future scientific
+advances.</p>
+<div class="section" id="bad-smells">
+<h2>Bad smells<a class="headerlink" href="#bad-smells" title="Permalink to this headline">¶</a></h2>
+<p>Fowler 1999, <a class="reference external" href="http://www.amazon.co.uk/exec/obidos/ASIN/0201485672/">Refactoring: Improving the Design of Existing Code</a>,
+pp. 417-418) contains a nice list of &#8220;bad smells&#8221; in code that drive
+a developer to want or need to refactor it:</p>
+<ul class="simple">
+<li>Duplicated Code</li>
+<li>Long Method</li>
+<li>Large Class</li>
+<li>Long Parameter List</li>
+<li>Divergent Change</li>
+<li>Shotgun Surgery</li>
+<li>Feature Envy</li>
+<li>Data Clumps</li>
+<li>Primitive Obsession</li>
+<li>Switch Statements</li>
+<li>Parallel Inheritance Hierarchies</li>
+<li>Lazy Class</li>
+<li>Speculative Generality</li>
+<li>Temporary Field</li>
+<li>Message Chains</li>
+<li>Middle Man</li>
+<li>Inappropriate Intimacy</li>
+<li>Alternative Classes with Different Interfaces</li>
+<li>Incomplete Library Class</li>
+<li>Data Class</li>
+<li>Refused Bequest</li>
+<li>Comments</li>
+</ul>
+<p>More information is available from the <a class="reference external" href="http://sis36.berkeley.edu/projects/streek/agile/bad-smells-in-code.html">bad smells</a> site.</p>
+</div>
+<div class="section" id="refactoring-testing-tips">
+<h2>Refactoring/testing tips<a class="headerlink" href="#refactoring-testing-tips" title="Permalink to this headline">¶</a></h2>
+<p>This list of &#8220;soundbites&#8221; again comes from Fowler 1999,
+<a class="reference external" href="http://www.amazon.co.uk/exec/obidos/ASIN/0201485672/">Refactoring: Improving the Design of Existing Code</a>, pp. 417-418).
+It seems to apply reasonably well to this project, particularly the
+parts about testing.</p>
+<ul class="simple">
+<li>Page 7: When you find you have to add a feature to a program, and
+the program&#8217;s code is not structured in a convenient way to add
+the feature, first refactor the program to make it easy to add
+the feature, then add the feature.</li>
+<li>Page 8: Before you start refactoring, check that you have a solid
+suite of tests. These tests must be self-checking.</li>
+<li>Page 13: Refactoring changes the programs in small steps. If you
+make a mistake, it is easy to find the bug.</li>
+<li>Page 15: Any fool can write code that a computer can understand.
+Good programmers write code that humans can understand.</li>
+<li>Page 53: Refactoring (noun): a change made to the internal
+structure of software to make it easier to understand and cheaper
+to modify without changing the observable behavior of the
+software.</li>
+<li>Page 43: Refactor (verb): to restructure software by applying a
+series of refactorings without changing the observable behavior
+of the software.</li>
+<li>Page 58: Three strikes and you refactor.</li>
+<li>Page 65: Don&#8217;t publish interfaces prematurely. Modify your code
+ownership policies to smooth refactoring.</li>
+<li>Page 88: When you feel the need to write a comment, first try to
+refactor the code so that any comment becomes superfluous.</li>
+<li>Page 90: Make sure all tests are fully automatic and that they
+check their own results.</li>
+<li>Page 90: A suite of tests is a powerful bug detector that
+decapitates the time it takes to find bugs.</li>
+<li>Page 94: Run your tests frequently. Localize tests whenever you
+compile &#8212; every test at least every day.</li>
+<li>Page 97: When you get a bug report, start by writing a unit test
+that exposes the bug.</li>
+<li>Page 98: It is better to write and run incomplete tests than not
+to run complete tests.</li>
+<li>Page 99: Think of the boundary conditions under which things
+might go wrong and concentrate your tests there.</li>
+<li>Page 100: Don&#8217;t forget to test that exceptions are raised when
+things are expected to go wrong.</li>
+<li>Page 101: Don&#8217;t let the fear that testing can&#8217;t catch all bugs
+stop you from writing the tests that will catch most bugs.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Refactoring</a><ul>
+<li><a class="reference internal" href="#bad-smells">Bad smells</a></li>
+<li><a class="reference internal" href="#refactoring-testing-tips">Refactoring/testing tips</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="memuse.html"
+                        title="previous chapter">Memory usage</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="testing.html"
+                        title="next chapter">Test suite</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Developer_Manual/refactoring.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="testing.html" title="Test suite"
+             >next</a></li>
+        <li class="right" >
+          <a href="memuse.html" title="Memory usage"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

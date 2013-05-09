@@ -1,0 +1,303 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Implementing the GUI &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Developer Manual" href="index.html" />
+    <link rel="next" title="Performance optimization" href="optimization.html" />
+    <link rel="prev" title="Alerts" href="alerts.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="optimization.html" title="Performance optimization"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="alerts.html" title="Alerts"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="implementing-the-gui">
+<h1>Implementing the GUI<a class="headerlink" href="#implementing-the-gui" title="Permalink to this headline">¶</a></h1>
+<p>When coding, the GUI should be considered an optional component. No
+part of Topographica should import GUI files, rely on the presence
+of a particular GUI or any GUI at all, or assume that the data it
+generates will be used only by a GUI unless it is absolutely
+necessary, e.g. for the actual GUI implementation. This is a special
+case of the <a class="reference external" href="ood.html">general principles of object-oriented design</a>
+discussed elsewhere.</p>
+<p>Many components that would at first glance seem to be GUI-related
+are, in, fact much more general. Such code should be written for the
+general case, not in terms of the GUI (and not even with names or
+comments that suggest they are in any way limited to being part of a
+GUI).</p>
+<p>For instance, many of the analysis and plotting routines will
+commonly be used in the context of a GUI. However, the vast majority
+of this code is not specific to a GUI, i.e. it does not require a
+user to actually move a mouse or manipulate widgets. E.g. a
+SheetView is a bitmap representation of a Sheet; the resulting
+bitmap can of course be displayed in a GUI window, but it could also
+be saved to a file, and in batch mode or unit tests often <em>will</em> be
+saved directly to a file, with no GUI window ever created. Most of
+the important code for plotting is independent of the output device,
+and any such code should be written using general terminology like
+Plotting, not GUI. Similarly for other analysis routines &#8212; they
+should be implemented and named in terms of some general module name
+like Analysis, not GUI.</p>
+<p>Obviously, it&#8217;s very helpful for plots, etc. to have interactive
+widgets to set the scales, select subplots, etc. But these can
+generally be implemented in a way that can also be specified
+textually, i.e. without a mouse, so that they can be used without a
+GUI, or at least without any particular GUI. Even for things that
+are inherently mouse-based, like data exploration tools that change
+viewpoints dynamically based on the mouse position, as much code as
+possible should be extracted out, made general, and kept out of the
+GUI code.</p>
+<p>If you want more information on this approach, search the web for
+Model-View-Controller. Writing the code in this way helps ensure
+that the core of the simulator is not dependent on any particular
+output device, which is crucial because different output devices are
+appropriate in different contexts, e.g. over the web, in
+non-interactive runs, in batch testing, supporting different
+look-and-feel standards, etc. The approach also greatly eases
+maintenance, because GUI libraries often vary significantly over
+time and across platforms. To be able to maintain our code over the
+long term, we need to minimize the amount of our code that depends
+on such varying details. Finally, this approach ensures that
+scientific users can ignore all of the GUI details, which are
+irrelevant to what Topographica actually computes. Allowing users to
+focus on the core code is absolutely crucial for them to be able to
+understand and trust what they are actually simulating.</p>
+<div class="section" id="programming-with-tkgui">
+<h2>Programming with tkgui<a class="headerlink" href="#programming-with-tkgui" title="Permalink to this headline">¶</a></h2>
+<p>tkgui uses <a class="reference external" href="http://wiki.python.org/moin/TkInter">Tkinter</a> to draw the GUI components, but simplifies GUI
+implementation by handling linkage of Parameters with their
+representations in the GUI.</p>
+<p>The classes <a class="reference external" href="../Reference_Manual/param.tk.TkParameterized-class.html">TkParameterized</a> and <a class="reference external" href="../Reference_Manual/param.tk.ParametersFrame-class.html">ParametersFrame</a> are the ones
+most often used for creating a new GUI representation of some
+Topographica component. Which to use depends on how much you wish to
+customize the display: a ParametersFrame displays all of a
+Parameterized&#8217;s Parameters as a list in one Frame, whereas a
+TkParameterized can display any number of the Parameters in any
+number of Frames (which you specify). Hence the PlotGroupPanels,
+which display Parameters from multiple Parameterizeds in a custom
+layout, are based on TkParameterized, whereas editing properties of
+an object in the model editor simply brings up a ParametersFrame for
+that object.</p>
+<div class="section" id="parametersframe">
+<h3>ParametersFrame<a class="headerlink" href="#parametersframe" title="Permalink to this headline">¶</a></h3>
+<p>If you wish to display and/or edit the Parameters of a Parameterized
+in the GUI, you can simply insert a ParametersFrame for that object
+into an existing container (a window such as a param.tk.AppWindow or
+a Tkinter.Toplevel, or a frame such as a Tkinter.Frame):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">pattern</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">tk</span>
+
+<span class="c"># existing component and existing window</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">()</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="p">()</span>
+
+<span class="c"># display all parameters of g in w</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">ParametersFrame</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All the non-hidden Parameters of <tt class="docutils literal"><span class="pre">p</span></tt> will be displayed in a new
+Frame in <tt class="docutils literal"><span class="pre">w</span></tt>. Changing the Parameter&#8217;s value in the GUI
+immediately changes the actual Parameter value; the class
+<a class="reference external" href="../Reference_Manual/param.tk.ParametersFrameWithApply-class.html">param.tk.ParametersFrameWithApply</a> is a version of ParametersFrame
+that does not immediately apply changes, instead waiting for
+confirmation via an Apply button.</p>
+</div>
+<div class="section" id="tkparameterized">
+<h3>TkParameterized<a class="headerlink" href="#tkparameterized" title="Permalink to this headline">¶</a></h3>
+<p>ParametersFrame extends TkParameterized, the basic class for
+representing Parameters in the GUI. TkParameterized is more
+flexible, but also slightly more complex to use. In the
+ParametersFrame example above, we display all the Parameters of the
+Gaussian pattern; if instead we wanted to display only its size, x,
+and y Parameters, we could do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">pattern</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">tk</span>
+
+<span class="c"># existing component and existing window</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">()</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="p">()</span>
+
+<span class="c"># display selected parameters of g in w</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">TkParameterized</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;size&#39;</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">t</span><span class="o">.</span><span class="n">pack_param</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As for ParametersFrame, changes to values in the GUI are immediately
+reflected in the actual Parameters. TkParameterized&#8217;s flexibility
+for custom arrangements comes from the pack_param() method, which
+takes several optional arguments to control the positioning of the
+Parameter.</p>
+</div>
+</div>
+<div class="section" id="tkinter-references">
+<h2>Tkinter references<a class="headerlink" href="#tkinter-references" title="Permalink to this headline">¶</a></h2>
+<p>The following links provide useful reference material for
+programming with Tkinter and Tcl/Tk:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.tkdocs.com/">TkDocs</a></li>
+<li><a class="reference external" href="http://effbot.org/tkinterbook/">An Introduction to Tkinter</a></li>
+<li><a class="reference external" href="http://www.nmt.edu/tcc/help/lang/python/tkinter.html">Tkinter: GUI programming with Python</a></li>
+<li><a class="reference external" href="http://www.ferg.org/thinking_in_tkinter/index.html">Thinking in Tkinter</a></li>
+<li><a class="reference external" href="http://wiki.tcl.tk/">The Tcler&#8217;s Wiki</a></li>
+<li><a class="reference external" href="http://sebsauvage.net/python/gui/">Building a basic GUI application step-by-step in Python with
+Tkinter and wxWidgets</a></li>
+<li><a class="reference external" href="http://tkinter.unpythonic.net/wiki/">Tkinter Wiki</a></li>
+<li><a class="reference external" href="http://news.gmane.org/group/gmane.comp.python.tkinter">comp.python.tkinter</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Implementing the GUI</a><ul>
+<li><a class="reference internal" href="#programming-with-tkgui">Programming with tkgui</a><ul>
+<li><a class="reference internal" href="#parametersframe">ParametersFrame</a></li>
+<li><a class="reference internal" href="#tkparameterized">TkParameterized</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tkinter-references">Tkinter references</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="alerts.html"
+                        title="previous chapter">Alerts</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="optimization.html"
+                        title="next chapter">Performance optimization</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Developer_Manual/gui.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="optimization.html" title="Performance optimization"
+             >next</a></li>
+        <li class="right" >
+          <a href="alerts.html" title="Alerts"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

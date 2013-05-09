@@ -1,0 +1,602 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>News &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="next" title="Downloads" href="../Downloads/index.html" />
+    <link rel="prev" title="Home" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Downloads/index.html" title="Downloads"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="../index.html" title="Home"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="news">
+<h1>News<a class="headerlink" href="#news" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="may-2013-new-web-site">
+<h2><strong>2 May 2013:</strong> New web site<a class="headerlink" href="#may-2013-new-web-site" title="Permalink to this headline">¶</a></h2>
+<p>Topographica has moved to a <a class="reference external" href="http://sphinx.pocoo.org">Sphinx</a> and <a class="reference external" href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">reStructuredText</a> website with
+online editing in Git, and integrated User and Reference Manuals,
+thanks to contributions from Wiktor Brodlo.  Please let us know if
+there are any problems, and meanwhile if you add code to Topographica,
+please also contribute documentation in .rst format, which is very
+easy to write and maintain.</p>
+</div>
+<div class="section" id="nov-2012-version-0-9-8-released">
+<h2><strong>23 Nov 2012:</strong> Version 0.9.8 released<a class="headerlink" href="#nov-2012-version-0-9-8-released" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>General improvements:</dt>
+<dd><ul class="first last simple">
+<li>now uses native Python by default, making it much easier to integrate Topographica into your scientific workflow</li>
+<li><a class="reference external" href="../User_Manual/multicore.html">shared-memory multiple-core support (via OpenMP)</a></li>
+<li>support for Python 2.7, NumPy 1.6, IPython 0.11-0.12, and Matplotlib 1.1.0</li>
+<li>Mac OS X: right click supported on more platforms, automatic .ty file syntax colouring in Xcode 3</li>
+<li>snapshots created by version 0.9.7 and above will be supported</li>
+<li>default output path now in a Topographica subfolder of your system&#8217;s Documents directory (often ~ on Linux; typically Documents elsewhere)</li>
+<li>simpler installation using pip on all platforms</li>
+<li>no longer need to build topographica script on installation</li>
+<li>minor bugfixes</li>
+</ul>
+</dd>
+<dt>Command-line and batch:</dt>
+<dd><ul class="first last simple">
+<li>&#8211;pdb calls debugger after every unhandled exception</li>
+</ul>
+</dd>
+<dt>Example scripts:</dt>
+<dd><ul class="first last simple">
+<li>ptztracker.ty: example of controlling a pan/tilt/zoom camera to track objects in real time</li>
+<li>new &#8220;models&#8221; subdirectory for published work; &#8220;examples&#8221; is now meant only for simpler starting points</li>
+</ul>
+</dd>
+<dt>GUI:</dt>
+<dd><ul class="first last simple">
+<li>Model Editor allows text labels to be suppressed so that .eps output can be labeled in an illustration program (e.g. Inkscape) for use in publications</li>
+<li>New plot options for right-clicking: plot in sheet coords, plot in matrix coords, autocorrelation (requires SciPy)</li>
+</ul>
+</dd>
+<dt>Component library:</dt>
+<dd><ul class="first last simple">
+<li>PatternGenerators: <a class="reference external" href="../Reference_Manual/imagen.Sigmoid-class.html">Sigmoid</a> (half plane with sigmoidal border), <a class="reference external" href="../Reference_Manual/imagen.LogGaussian-class.html">LogGaussian</a> (Gaussian with skew), <a class="reference external" href="../Reference_Manual/imagen.SigmoidedDoG-class.html">SigmoidedDoG</a> (auditory RF with a DoG multiplied by a sigmoid), <a class="reference external" href="../Reference_Manual/imagen.SigmoidedDoLG-class.html">SigmoidedDoLG</a> (auditory RF with two DoLGs multiplied by a sigmoid), <a class="reference external" href="../Reference_Manual/imagen.opencvcamera.CameraImage-class.html">new CameraImage</a> (OpenCV live camera import) pattern families</li>
+<li><a class="reference external" href="../Reference_Manual/topo.misc.distribution.DistributionStatisticFn-class.html">DistributionStatisticFn</a> classes for controlling map and tuning curve measurement: <a class="reference external" href="../Reference_Manual/topo.misc.distribution.DSF_MaxValue-class.html">DSF_MaxValue</a> (preference is peak value) <a class="reference external" href="../Reference_Manual/topo.misc.distribution.DSF_WeightedAverage-class.html">DSF_WeightedAverage</a> (pref is weighted average) <a class="reference external" href="../Reference_Manual/topo.misc.distribution.DSF_VonMisesFit-class.html">DSF_VonMisesFit</a>, (from von Mises circular normal fit), <a class="reference external" href="../Reference_Manual/topo.misc.distribution.DSF_BimodalVonMisesFit-class.html">DSF_BimodalVonMisesFit</a> (bimodal distribution fit; also see <a class="reference external" href="../Reference_Manual/topo.misc.distribution.DSF_TopTwoValues-class.html">DSF_TopTwoValues</a> and <a class="reference external" href="../Reference_Manual/topo.misc.distribution.DSF_BimodalPeaks-class.html">DSF_BimodalPeaks</a>).</li>
+<li><a class="reference external" href="../Reference_Manual/param.Array-class.html">Array</a> parameter</li>
+<li>Simulation and EventProcessors now support tab completion and &#8221;.&#8221; access to their Sheets and EPConnections (e.g. &#8220;topo.sim.V1.Afferent&#8221;)</li>
+<li>greatly expanded support for auditory input; see <a class="reference external" href="../Reference_Manual/imagen.audio-module.html">imagen.audio</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="oct-2012-topographica-development-moved-from-sourceforge-svn-to-github-git">
+<h2><strong>3 Oct 2012:</strong> Topographica development moved from <a class="reference external" href="http://sourceforge.net/projects/topographica">SourceForge SVN</a> to <a class="reference external" href="http://github.com/ioam/topographica">GitHub git</a>.<a class="headerlink" href="#oct-2012-topographica-development-moved-from-sourceforge-svn-to-github-git" title="Permalink to this headline">¶</a></h2>
+<p>SVN write access has now been disabled. See the <a class="reference external" href="https://git.wiki.kernel.org/index.php/GitSvnCrashCourse">Git Crash Course</a>
+to translate your SVN commands to Git. All features since 0.9.7 are
+now available from <a class="reference external" href="https://github.com/ioam/topographica">github</a>, and all sf.net bugs and feature
+requests have been converted to GitHub issues. The Param and ImaGen
+subprojects now accompany Topographica as git submodules, allowing
+easy editing while leaving them as separate projects. Installation
+is now via either <a class="reference external" href="https://github.com/ioam/topographica">git (for developers)</a> or <a class="reference external" href="../Downloads/index.html">pip (for users)</a>.</p>
+</div>
+<div class="section" id="jul-2012-new-subprojects-at-github">
+<h2><strong>18 Jul 2012:</strong> New subprojects at GitHub<a class="headerlink" href="#jul-2012-new-subprojects-at-github" title="Permalink to this headline">¶</a></h2>
+<p>New subprojects at GitHub have been created for elements of Topographica that are widely reusable in other projects:</p>
+<dl class="docutils">
+<dt><a class="reference external" href="http://ioam.github.com/param/">Param</a> and <a class="reference external" href="http://ioam.github.com/paramtk/">ParamTk</a></dt>
+<dd>General-purpose support for full-featured Parameters, extending
+Python attributes to have documentation, bounds, types, etc.,
+with optional Tk support.</dd>
+<dt><a class="reference external" href="http://ioam.github.com/imagen/">ImaGen</a></dt>
+<dd>General-purpose support for generating 0D (scalar), 1D (vector),
+and 2D (image) patterns, starting from mathematical functions,
+geometric shapes, random distributions, images, etc.</dd>
+</dl>
+<p>These subprojects contain code still used in Topographica (with
+imagen visible as topo.pattern for backwards compatibility), but can
+now be downloaded and installed separately. Both projects were
+introduced at SciPy 2012 (Austin, TX); the <a class="reference external" href="http://www.youtube.com/watch?v=7_ELWwzFCi0">talk on Param</a> is
+available online.</p>
+</div>
+<div class="section" id="july-2010-version-0-9-7-released">
+<h2><strong>18 July 2010:</strong> Version 0.9.7 released<a class="headerlink" href="#july-2010-version-0-9-7-released" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>General improvements:</dt>
+<dd><ul class="first last simple">
+<li>now released under less-restrictive BSD license instead of GPL, to facilitate commercial use of components</li>
+<li>now supports Python 2.6</li>
+<li>significantly reduced memory consumption (35% less for lissom.ty)</li>
+<li>minor bugfixes</li>
+<li>now available as .deb package for Ubuntu and .rpm for Fedora Core, in addition to .zip and .tar.gz versions, and via &#8216;easy_install topographica&#8217;</li>
+<li>optional <a class="reference external" href="http://divmod.org/trac/wiki/DivmodPyflakes">PyFlakes</a> package for detecting common Python problems</li>
+<li>optional <a class="reference external" href="http://mpi4py.scipy.org">mpi4py</a> package using MPI for writing parallel applications</li>
+<li><a class="reference external" href="../Downloads/git.html">instructions</a> available for checking out Git version of repository</li>
+</ul>
+</dd>
+<dt>Command-line and batch:</dt>
+<dd><ul class="first last simple">
+<li><a class="reference external" href="../Reference_Manual/topo.command.run_batch-class.html">run_batch</a> accept new name_time_format and dirname_prefix parameters</li>
+<li><a class="reference external" href="../Reference_Manual/topo.command-module.html#n_bytes">n_bytes</a>, <a class="reference external" href="../Reference_Manual/topo.command-module.html#n_conns">n_conns</a>, <a class="reference external" href="../Reference_Manual/topo.command-module.html#print_sizes">print_sizes</a>: display size and memory usage of current network</li>
+</ul>
+</dd>
+<dt>GUI:</dt>
+<dd><ul class="first last simple">
+<li>moved progress bars, messages, warnings, and errors into the status bar for each window, to make it clear where the error or status issue arose</li>
+</ul>
+</dd>
+<dt>Plotting:</dt>
+<dd><ul class="first last simple">
+<li>more joint normalization options (JointProjections, AllTogether, Individually), to show relative differences in weight strength and activity</li>
+<li>PhaseDisparity plot</li>
+</ul>
+</dd>
+<dt>Component library:</dt>
+<dd><ul class="first last simple">
+<li>PatternGenerators: <a class="reference external" href="../Reference_Manual/topo.pattern.ExponentialDecay-class.html">ExponentialDecay</a>, <a class="reference external" href="../Reference_Manual/topo.pattern.HalfPlane-class.html">HalfPlane</a>, <a class="reference external" href="../Reference_Manual/topo.pattern.Arc-class.html">Arc</a>, <a class="reference external" href="../Reference_Manual/topo.pattern.Curve-class.html">Curve</a>, <a class="reference external" href="../Reference_Manual/topo.pattern.Rectangle-class.html">Rectangle</a> (now with smoothing), <a class="reference external" href="../Reference_Manual/topo.pattern.RawRectangle-class.html">RawRectangle</a> (no smoothing), <a class="reference external" href="../Reference_Manual/imagen.Sigmoid-class.html">Sigmoid</a>, <a class="reference external" href="../Reference_Manual/imagen.SigmoidedDoG-class.html">SigmoidedDoG</a> (for audio STRFs), <a class="reference external" href="../Reference_Manual/topo.pattern.PowerSpectrum-class.html">PowerSpectrum</a> (for frequency decomposition), <a class="reference external" href="../Reference_Manual/topo.pattern.Spectrogram-class.html">Spectrogram</a> (for frequency decomposition over time), <a class="reference external" href="../Reference_Manual/topo.pattern.audio.Audio-class.html">Audio</a> (for audio files), <a class="reference external" href="../Reference_Manual/topo.pattern.audio.AudioFolder-class.html">AudioFolder</a> (for directories of audio files)</li>
+<li>SpiralGrating, HyperbolicGrating, RadialGrating, ConcentricRings, and ArcCentered pattern families can be copied from <a class="reference external" href="../../contrib/hegdeessen.py">contrib/hegdeessen.py</a>; to move to topo.pattern in next release</li>
+<li>minor changes to PatternGenerator parameter passing to allow better nesting and composition</li>
+<li>misc: <a class="reference external" href="../Reference_Manual/topo.misc.util-module.html#linearly_interpolate">linearly_interpolate</a>, <a class="reference external" href="../Reference_Manual/topo.base.arrayutil-module.html#clip_upper">clip_upper</a></li>
+</ul>
+</dd>
+<dt>Example scripts:</dt>
+<dd><ul class="first last simple">
+<li>gcal.ty: robust and simple visual map development</li>
+<li>lissom_audio.py: example of auditory pathway</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="february-2009-version-0-9-6-released">
+<h2><strong>12 February 2009:</strong> Version 0.9.6 released<a class="headerlink" href="#february-2009-version-0-9-6-released" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>General improvements:</dt>
+<dd><ul class="first last simple">
+<li>significant performance improvements in simulations (nearly 2X overall), plotting (2X), and startup time</li>
+<li>minor bugfixes</li>
+<li>more options for <a class="reference external" href="../User_Manual/noise.html">adding noise</a> to ConnectionField shapes</li>
+<li>optional <a class="reference external" href="../Developer_Manual/optimization.html#line-by-line">line-by-line profiling</a></li>
+<li>optional <a class="reference external" href="http://www.cython.org">Cython</a> package for writing fast components</li>
+</ul>
+</dd>
+<dt>Command-line and batch:</dt>
+<dd><ul class="first last simple">
+<li>-v and -d options to print verbose and debugging messages</li>
+<li>new options to <a class="reference external" href="../Reference_Manual/topo.command.run_batch-class.html">run_batch</a> and better progress messages</li>
+<li>replaced most commands with <a class="reference external" href="../Reference_Manual/param.parameterized.ParameterizedFunction-class.html">ParameterizedFunction</a>s, which have documented, type and bound-checked arguments and allow inheritance of shared functionality</li>
+<li>replaced map measurement commands in <a class="reference external" href="../Reference_Manual/topo.command-module.html">topo.command</a> with simpler, general-purpose, easily .ty-file controllable versions (see lissom_oo_or.ty and lissom.ty for examples)</li>
+<li><a class="reference external" href="../Reference_Manual/topo.command.analysis.save_plotgroup-class.html">save_plotgroup</a>: more useful default values; results can be cached to avoid recomputation</li>
+<li><a class="reference external" href="../Reference_Manual/topo.command.analysis.measure_sine_pref-class.html">measure_sine_pref</a>: general purpose measurement for any preference that can be tested with a sine grating</li>
+<li>Changed locals to script-level parameters using <a class="reference external" href="../Reference_Manual/topo.misc.commandline.GlobalParams-class.html">GlobalParams</a>; see examples/lissom.ty</li>
+<li>Made <a class="reference external" href="../Reference_Manual/topo.command.pylabplots.gradientplot-class.html">gradientplot</a> and <a class="reference external" href="../Reference_Manual/topo.command.pylabplots.fftplot-class.html">fftplot</a> available in batch mode.</li>
+</ul>
+</dd>
+<dt>GUI:</dt>
+<dd><ul class="first last simple">
+<li>model editor supports non-Sheet EventProcessors and non-CFProjection EPConnections</li>
+<li>right-click option for plotting  tuning curves</li>
+<li>plot windows can be arranged in 2D, not just a row (see <a class="reference external" href="../Reference_Manual/topo.base.sheet.Sheet-class.html">Sheet</a>.row_precedence)</li>
+</ul>
+</dd>
+<dt>Example scripts:</dt>
+<dd><ul class="first last simple">
+<li>example file for <a class="reference external" href="../User_Manual/interfacing.html">interfacing to external simulators</a> (examples/perrinet_retina.ty)</li>
+<li>removed outdated or in-progress examples</li>
+<li>greatly simplified remaining example scripts</li>
+<li>now use <a class="reference external" href="../Reference_Manual/topo.misc.commandline.GlobalParams-class.html">GlobalParams</a> to support consistent option setting using -p</li>
+<li>allowed saving of local functions and instance method calls in snapshots</li>
+</ul>
+</dd>
+<dt>Component library:</dt>
+<dd><ul class="first last simple">
+<li>PatternGenerators: <a class="reference external" href="../Reference_Manual/topo.pattern.Translator-class.html">Translator</a>; mask_shape parameter also now makes it easy to specify a mask for any pattern, e.g. in the GUI</li>
+<li>TransferFns (formerly called OutputFns): <a class="reference external" href="../Reference_Manual/topo.transferfn.HalfRectifyAndPower-class.html">HalfRectifyAndPower</a>, <a class="reference external" href="../Reference_Manual/topo.transferfn.Hysteresis-class.html">Hysteresis</a>, and <a class="reference external" href="../Reference_Manual/topo.transferfn.HomeostaticResponse-class.html">HomeostaticResponse</a></li>
+<li>Sheets: <a class="reference external" href="../Reference_Manual/topo.sheet.ActivityCopy-class.html">ActivityCopy</a></li>
+<li>LearningFns: <a class="reference external" href="../Reference_Manual/topo.learningfn.optimized.CFPLF_BCMFixed_opt-class.html">CFPLF_BCMFixed_opt</a>, <a class="reference external" href="../Reference_Manual/topo.learningfn.optimized.CFPLF_Scaled_opt-class.html">CFPLF_Scaled_opt</a></li>
+<li>Added <a class="reference external" href="../Reference_Manual/param.HookList-class.html">HookList</a> parameters to <a class="reference external" href="../Reference_Manual/topo.analysis.featureresponses.FeatureResponses-class.html">FeatureResponses</a> and <a class="reference external" href="../Reference_Manual/topo.sheet.lissom.LISSOM-class.html">LISSOM</a> to make it easier to add user-defined functionality.</li>
+<li>Changed names and definitions of various similar concepts (OutputFn, before_presentation, update_command, plot_command, etc.) to reflect shared concept of Hooks and HookLists (lists of callables to run at specific spots in the code).</li>
+<li>Parameters: bounds can now be exclusive, optional support for None in most types</li>
+</ul>
+</dd>
+</dl>
+<p>We also provide a utility to simplify the process of <a class="reference external" href="../Downloads/update_script.html">updating
+scripts</a> that were written for version 0.9.5.</p>
+</div>
+<div class="section" id="september-2008-version-0-9-5-released">
+<h2><strong>05 September 2008:</strong> Version 0.9.5 <a class="reference external" href="../Downloads/index.html">released</a><a class="headerlink" href="#september-2008-version-0-9-5-released" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>General improvements:</dt>
+<dd><ul class="first last simple">
+<li>numerous bugfixes and performance improvements</li>
+<li>simulation can now be locked to real time</li>
+<li>simpler and more complete support for dynamic parameters</li>
+<li>updated to Python 2.5 and numpy 1.1.1.</li>
+<li>source code moved from CVS to Subversion (<a class="reference external" href="../Downloads/cvs.html">SVN</a>)</li>
+<li>automatic Windows and Mac <a class="reference external" href="http://buildbot.topographica.org">daily builds</a></li>
+<li>automatic running and startup <a class="reference external" href="http://buildbot.topographica.org">performance measurement</a></li>
+<li>contrib dir</li>
+<li>divisive and multiplicative connections</li>
+<li>simulation time is now a rational number for precision</li>
+<li>PyTables HDF5 interface</li>
+<li>more options for <a class="reference external" href="../User_Manual/noise.html">adding noise</a></li>
+</ul>
+</dd>
+<dt>Command-line and batch:</dt>
+<dd><ul class="first last simple">
+<li>simplified example file syntax (see examples/lissom_oo_or.ty and som_retinotopy.py)</li>
+<li>command prompt uses <a class="reference external" href="http://ipython.scipy.org/">IPython</a> for better debugging, help</li>
+<li>simulation name set automatically from .ty script name by default</li>
+<li>command-line options can be called explicitly</li>
+</ul>
+</dd>
+<dt>GUI:</dt>
+<dd><ul class="first last simple">
+<li>model editor fully supports dynamic parameters (described in the lissom_oo_or tutorial)</li>
+<li>plot windows can be docked into main window</li>
+<li>uses tk8.5 for anti-aliased fonts</li>
+</ul>
+</dd>
+<dt>Plotting:</dt>
+<dd><ul class="first last simple">
+<li>new preference map types (Hue, Direction, Speed)</li>
+<li>combined (joint) plots using contour and arrow overlays</li>
+<li>example of generating activity movies (examples/lissom_or_movie.ty)</li>
+</ul>
+</dd>
+<dt>Example scripts:</dt>
+<dd><ul class="first last simple">
+<li>example files for robotics interfacing (<a class="reference external" href="../Reference_Manual/topo.misc.playerrobot-module.html">misc/playerrobot.py</a>, <a class="reference external" href="../Reference_Manual/topo.misc.robotics-module.html">misc/robotics.py</a>)</li>
+<li>simulation, plots, and analysis for modelling of any combination of position, orientation, ocular dominance, stereoscopic disparity, motion direction, speed, spatial frequency, and color (examples/lissom.ty).</li>
+</ul>
+</dd>
+<dt>Component library:</dt>
+<dd><ul class="first last simple">
+<li>OutputFns: <a class="reference external" href="../Reference_Manual/topo.outputfn.PoissonSample-class.html">PoissonSample</a>, <a class="reference external" href="../Reference_Manual/topo.outputfn.ScalingOF-class.html">ScalingOF</a> (for homeostatic plasticity), <a class="reference external" href="../Reference_Manual/topo.outputfn.NakaRushton-class.html">NakaRushton</a> (for contrast gain control) <a class="reference external" href="../Reference_Manual/topo.outputfn.AttributeTrackingOF-class.html">AttributeTrackingOF</a> (for analyzing or plotting values over time)</li>
+<li>PatternGenerator: <a class="reference external" href="../Reference_Manual/topo.misc.robotics.CameraImage-class.html">CameraImage</a> (for real-time camera inputs)</li>
+<li>CoordMapper: <a class="reference external" href="../Reference_Manual/topo.coordmapper.Jitter-class.html">Jitter</a></li>
+<li>SheetMasks: <a class="reference external" href="../Reference_Manual/topo.base.projection.AndMask-class.html">AndMask</a>, <a class="reference external" href="../Reference_Manual/topo.base.projection.OrMask-class.html">OrMask</a>, <a class="reference external" href="../Reference_Manual/topo.base.projection.CompositeSheetMask-class.html">CompositeSheetMask</a></li>
+<li>command: <a class="reference external" href="../Reference_Manual/topo.command.analysis-module.html#decode_feature">decode_feature</a> (for estimating perceived values) (e.g. for calculating aftereffects)</li>
+<li>functions for analyzing V1 complex cells</li>
+<li><a class="reference external" href="../Reference_Manual/topo.base.functionfamily.PipelineOF-class.html">PipelineOF</a> OutputFns can now be constructed easily using +</li>
+<li><a class="reference external" href="../Reference_Manual/topo.numbergen.NumberGenerator-class.html">NumberGenerator</a>s can now be constructed using +,-,/,*,abs etc.</li>
+</ul>
+</dd>
+</dl>
+<p>We also provide a utility to <a class="reference external" href="../Downloads/update_script.html">update scripts</a> that were written for
+version 0.9.4.</p>
+</div>
+<div class="section" id="october-2007-version-0-9-4-released">
+<h2><strong>26 October 2007:</strong> Version 0.9.4 <a class="reference external" href="../Downloads/index.html">released</a><a class="headerlink" href="#october-2007-version-0-9-4-released" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>General improvements:</dt>
+<dd><ul class="first last simple">
+<li>numerous bugfixes</li>
+<li>set up <a class="reference external" href="http://buildbot.topographica.org">automatic daily builds</a></li>
+</ul>
+</dd>
+<dt>Example scripts:</dt>
+<dd><ul class="first last simple">
+<li>new whisker barrel cortex simulation&nbsp;(using transparent Matlab wrapper)</li>
+<li>new elastic net ocular dominance simulation</li>
+<li>new spiking example; still needs generalizing</li>
+</ul>
+</dd>
+<dt>Command-line and batch:</dt>
+<dd><ul class="first last simple">
+<li><a class="reference external" href="../User_Manual/batch.html">batch mode</a> for running multiple similar simulations</li>
+<li><a class="reference external" href="../User_Manual/commandline.html#saving-bitmaps">saving bitmaps</a> from script/command-line (for batch runs)</li>
+<li>script/command-line <a class="reference external" href="../User_Manual/commandline.html#scripting-gui">control over GUI</a></li>
+<li>added auto-import option (-a and -g) to save typing</li>
+</ul>
+</dd>
+<dt>GUI:</dt>
+<dd><ul class="first last simple">
+<li>greatly simplified adding GUI code</li>
+<li>added progress bars, scroll bars, window icons</li>
+<li>new Step button on console</li>
+</ul>
+</dd>
+<dt>Plotting:</dt>
+<dd><ul class="first last simple">
+<li><a class="reference external" href="../User_Manual/plotting.html#rfplots">reverse-correlation RF mapping</a></li>
+<li><a class="reference external" href="../User_Manual/commandline.html#3d-plotting">3D wireframe plotting</a> (in right-click menu)</li>
+<li>gradient plots, histogram plots (in right-click menu)</li>
+<li><a class="reference external" href="../User_Manual/plotting.html#measuring-preference-maps">simplified bitmap plotting</a> (removed template classes)</li>
+<li>GUI plots can be saved as PNG or EPS (right-click menu)</li>
+<li>automatic collection of plots for animations (see ./topographica examples/lissom_or_movie.ty)</li>
+</ul>
+</dd>
+<dt>Component library:</dt>
+<dd><ul class="first last simple">
+<li>new <a class="reference external" href="../Reference_Manual/topo.coordmapper-module.html">coordmapper</a>s (Grid, Pipeline, Polar/Cartesian)</li>
+</ul>
+</dd>
+</dl>
+<p>Screenshots: <a class="reference external" href="../_static/071018_plotting1_ubuntu.png">plotting 1</a>, <a class="reference external" href="../_static/071018_plotting2_ubuntu.png">plotting 2</a>, <a class="reference external" href="../_static/071018_modeleditor_ubuntu.png">updated model editor screenshot</a>.</p>
+</div>
+<div class="section" id="april-2007-version-0-9-3-released">
+<h2><strong>23 April 2007:</strong> Version 0.9.3 <a class="reference external" href="../Downloads/index.html">released</a><a class="headerlink" href="#april-2007-version-0-9-3-released" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>General improvements:</dt>
+<dd><ul class="first last simple">
+<li>numerous bugfixes</li>
+<li>significant optimizations (~5 times faster)</li>
+<li>compressed snapshots (1/3 as large)</li>
+<li>much-improved reference manual</li>
+</ul>
+</dd>
+<dt>Component library:</dt>
+<dd><ul class="first last simple">
+<li>adding noise to any calculation</li>
+<li>lesioning units and non-rectangular sheet shapes (see PatternCombine)</li>
+<li>basic auditory pattern generation</li>
+<li>greatly simplified SOM support</li>
+<li>more dynamic parameters (such as ExponentialDecay)</li>
+<li>flexible mapping of ConnectionField centers between sheets</li>
+</ul>
+</dd>
+<dt>Example scripts:</dt>
+<dd><ul class="first last simple">
+<li>examples that more closely match published simulations</li>
+<li>new simulations for face processing and for self-organization from natural images</li>
+</ul>
+</dd>
+<dt>GUI:</dt>
+<dd><ul class="first last simple">
+<li>Better OS X and Windows support</li>
+<li>progress reporting for map measurement</li>
+<li>dynamic display of coordinates in plots</li>
+<li>stop button to interrupt training safely</li>
+<li>ability to plot and analyze during training</li>
+<li>right-click menu for analysis of bitmap plots</li>
+<li>saving current simulation as an editable .ty script</li>
+</ul>
+</dd>
+<dt>Command-line and batch:</dt>
+<dd><ul class="first last simple">
+<li>site-specific commands in ~/.topographicarc</li>
+<li>simple functions for doing optimization</li>
+</ul>
+</dd>
+<dt>Plotting:</dt>
+<dd><ul class="first last simple">
+<li>spatial frequency map plots</li>
+<li>tuning curve plots</li>
+<li>FFT transforms (in right-click menu)</li>
+</ul>
+</dd>
+</dl>
+<p>Screenshots: <a class="reference external" href="../_static/topographica-0.9.3_ubuntu.png">Plotting</a>, <a class="reference external" href="../_static/topographica-0.9.3_modeleditor_ubuntu.png">Model editor screenshot</a>.</p>
+</div>
+<div class="section" id="november-2006-topographica-talk-at-pycon">
+<h2><strong>29 November 2006:</strong> Topographica talk at PyCon<a class="headerlink" href="#november-2006-topographica-talk-at-pycon" title="Permalink to this headline">¶</a></h2>
+<p>There will be a short talk on Topographica at
+the <a class="reference external" href="http://us.pycon.org/TX2007/">PyCon 2007</a> convention, February 23-25, 2007.</p>
+</div>
+<div class="section" id="november-2006-version-0-9-2-released">
+<h2><strong>22 November 2006:</strong> Version 0.9.2 <a class="reference external" href="../Downloads/index.html">released</a><a class="headerlink" href="#november-2006-version-0-9-2-released" title="Permalink to this headline">¶</a></h2>
+<p>Includes numerous
+bugfixes (e.g. to support GCC 4.1.x compilers), much more complete
+user manual, more useful reference manual, more sample models,
+flexible joint normalization across Projections, arbitrary control
+of mapping CF centers (see CoordinateMapperFn), Composite and
+Selector patterns to allow flexible combinations of input patterns,
+homeostatic learning and output functions, sigmoid and generalized
+logistic output functions, and a new disparity map example
+(including a random dot stereogram input pattern).</p>
+</div>
+<div class="section" id="november-2006-gcc-4-1-x-problems-reported">
+<h2><strong>02 November 2006:</strong> GCC 4.1.x problems reported<a class="headerlink" href="#november-2006-gcc-4-1-x-problems-reported" title="Permalink to this headline">¶</a></h2>
+<p>Some users have reported problems when using
+optimized code on systems with the most recent GCC 4.1.x C/C++
+compilers. We have added a patch to the included weave
+inline-compilation package that should fix the problem, currently
+available only on the most recent CVS version of Topographica.
+Affected users may need to do a <a class="reference external" href="../Downloads/cvs.html">CVS</a> update, then &#8220;make -C
+external weave-uninstall ; make&#8221;. These changes will be included in
+the next official release.</p>
+</div>
+<div class="section" id="july-2006-version-0-9-1-released">
+<h2><strong>23 July 2006:</strong> Version 0.9.1 <a class="reference external" href="../Downloads/index.html">released</a><a class="headerlink" href="#july-2006-version-0-9-1-released" title="Permalink to this headline">¶</a></h2>
+<p>This is a bugfix
+release only, upgrading the included Tcl/Tk package to correct a
+syntax error in its configure script, which had been preventing
+compilation on platforms using bash 3.1 (such as Ubuntu 6.06). There
+is no benefit to updating if 0.9.0 already runs on your platform.</p>
+</div>
+<div class="section" id="june-2006-version-0-9-0-released">
+<h2><strong>07 June 2006:</strong> Version 0.9.0 <a class="reference external" href="../Downloads/index.html">released</a><a class="headerlink" href="#june-2006-version-0-9-0-released" title="Permalink to this headline">¶</a></h2>
+<p>Includes numerous
+bugfixes, context-sensitive (balloon) help for nearly every
+parameter and control, full Windows support (<a class="reference external" href="../_static/060607_topographica_win_screenshot.png">screenshot</a>), full
+Mac OS X support, downloadable installation files, significant
+performance increases (7X faster on the main example scripts, with
+more speedups to come), faster startup, better memory management,
+simpler programming interface, improved state saving (e.g. no longer
+requiring the original script), independently controllable random
+number streams, plot window histories, more library components (e.g.
+Oja rule, CPCA, covariance), prototype spiking neuron support, and
+much-improved <a class="reference external" href="../User_Manual/modeleditor.html">model editor</a>.</p>
+</div>
+<div class="section" id="may-2006-new-book-computational-maps-in-the-visual-cortex-available">
+<h2><strong>15 May 2006:</strong> New book <a class="reference external" href="http://computationalmaps.org">Computational Maps in the Visual Cortex</a> available<a class="headerlink" href="#may-2006-new-book-computational-maps-in-the-visual-cortex-available" title="Permalink to this headline">¶</a></h2>
+<p>Includes background on modeling computational
+maps, a review of visual cortex models, and <a class="reference external" href="http://computationalmaps.org/docs/chapter5.pdf">an extended set of
+examples of the types of models supported by Topographica</a>.</p>
+</div>
+<div class="section" id="february-2006-version-0-8-2-released">
+<h2><strong>20 February 2006:</strong> Version 0.8.2 released<a class="headerlink" href="#february-2006-version-0-8-2-released" title="Permalink to this headline">¶</a></h2>
+<p>Includes numerous
+bugfixes, circular receptive fields, shared-weight projections,
+<a class="reference external" href="../Tutorials/lissom_oo_or.html">tutorial with ON/OFF LGN model</a>, <a class="reference external" href="../Tutorials/som_retinotopy.html">SOM retinotopy tutorial</a>,
+Euclidean-distance-based response and learning functions,
+density-independent SOM parameters, <a class="reference external" href="../Downloads/cvs.html#osx">Mac OS X instructions</a>,
+<a class="reference external" href="../Developer_Manual/index.html">developer manual</a>, <a class="reference external" href="../User_Manual/index.html">partial user manual</a>, much-improved <a class="reference external" href="../_static/060220_model_editor_screen_shot.png">model
+editor (screenshot)</a>, <a class="reference external" href="../User_Manual/commandline.html#pylab">generic Matlab-style plotting</a>, topographic grid
+plotting, RGB plots, user-controllable plot sorting, plot color
+keys, and progress reports during learning. <a class="reference external" href="../_static/060220_topographica_screen_shot.png">See the Linux
+screenshot</a>.</p>
+</div>
+<div class="section" id="december-2005-version-0-8-1-released">
+<h2><strong>22 December 2005:</strong> Version 0.8.1 released<a class="headerlink" href="#december-2005-version-0-8-1-released" title="Permalink to this headline">¶</a></h2>
+<p>Includes numerous
+bugfixes, more flexible plotting (including weight colorization),
+user-controllable optimization, properties panels, more-useful
+<a class="reference external" href="../Reference_Manual/index.html">reference manual</a>, image input patterns, and a prototype graphical
+model editor.</p>
+</div>
+<div class="section" id="november-2005-new-site-launched-with-topographica-version-0-8-0">
+<h2><strong>8 November 2005:</strong> New site launched with Topographica version 0.8.0<a class="headerlink" href="#november-2005-new-site-launched-with-topographica-version-0-8-0" title="Permalink to this headline">¶</a></h2>
+<p>Includes a new <a class="reference external" href="../Tutorials/lissom_oo_or.html">LISSOM tutorial</a>. (<a class="reference external" href="../_static/051107_topographica_screen_shot_white.png">Linux screenshot</a>).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="#">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">News</a><ul>
+<li><a class="reference internal" href="#may-2013-new-web-site"><strong>2 May 2013:</strong> New web site</a></li>
+<li><a class="reference internal" href="#nov-2012-version-0-9-8-released"><strong>23 Nov 2012:</strong> Version 0.9.8 released</a></li>
+<li><a class="reference internal" href="#oct-2012-topographica-development-moved-from-sourceforge-svn-to-github-git"><strong>3 Oct 2012:</strong> Topographica development moved from SourceForge SVN to GitHub git.</a></li>
+<li><a class="reference internal" href="#jul-2012-new-subprojects-at-github"><strong>18 Jul 2012:</strong> New subprojects at GitHub</a></li>
+<li><a class="reference internal" href="#july-2010-version-0-9-7-released"><strong>18 July 2010:</strong> Version 0.9.7 released</a></li>
+<li><a class="reference internal" href="#february-2009-version-0-9-6-released"><strong>12 February 2009:</strong> Version 0.9.6 released</a></li>
+<li><a class="reference internal" href="#september-2008-version-0-9-5-released"><strong>05 September 2008:</strong> Version 0.9.5 released</a></li>
+<li><a class="reference internal" href="#october-2007-version-0-9-4-released"><strong>26 October 2007:</strong> Version 0.9.4 released</a></li>
+<li><a class="reference internal" href="#april-2007-version-0-9-3-released"><strong>23 April 2007:</strong> Version 0.9.3 released</a></li>
+<li><a class="reference internal" href="#november-2006-topographica-talk-at-pycon"><strong>29 November 2006:</strong> Topographica talk at PyCon</a></li>
+<li><a class="reference internal" href="#november-2006-version-0-9-2-released"><strong>22 November 2006:</strong> Version 0.9.2 released</a></li>
+<li><a class="reference internal" href="#november-2006-gcc-4-1-x-problems-reported"><strong>02 November 2006:</strong> GCC 4.1.x problems reported</a></li>
+<li><a class="reference internal" href="#july-2006-version-0-9-1-released"><strong>23 July 2006:</strong> Version 0.9.1 released</a></li>
+<li><a class="reference internal" href="#june-2006-version-0-9-0-released"><strong>07 June 2006:</strong> Version 0.9.0 released</a></li>
+<li><a class="reference internal" href="#may-2006-new-book-computational-maps-in-the-visual-cortex-available"><strong>15 May 2006:</strong> New book Computational Maps in the Visual Cortex available</a></li>
+<li><a class="reference internal" href="#february-2006-version-0-8-2-released"><strong>20 February 2006:</strong> Version 0.8.2 released</a></li>
+<li><a class="reference internal" href="#december-2005-version-0-8-1-released"><strong>22 December 2005:</strong> Version 0.8.1 released</a></li>
+<li><a class="reference internal" href="#november-2005-new-site-launched-with-topographica-version-0-8-0"><strong>8 November 2005:</strong> New site launched with Topographica version 0.8.0</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Home</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../Downloads/index.html"
+                        title="next chapter">Downloads</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/News/index.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Downloads/index.html" title="Downloads"
+             >next</a></li>
+        <li class="right" >
+          <a href="../index.html" title="Home"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

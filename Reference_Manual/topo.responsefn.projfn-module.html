@@ -1,0 +1,207 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.responsefn.projfn &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-responsefn-projfn">
+<h1>topo.responsefn.projfn<a class="headerlink" href="#topo-responsefn-projfn" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance9cc735fe36.svg" usemap="#inheritance9cc735fe36" class="inheritance"/></div><map id="inheritance9cc735fe36" name="inheritance9cc735fe36">
+</map>
+<div class="section" id="module-topo.responsefn.projfn">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.responsefn.projfn" title="Permalink to this headline">¶</a></h2>
+<p>Projection-level response functions.</p>
+<p>For CFProjections, these function objects compute a response matrix
+when given an input pattern and a set of ConnectionField objects.</p>
+<dl class="class">
+<dt id="topo.responsefn.projfn.CFPRF_EuclideanDistance">
+<em class="property">class </em><tt class="descclassname">topo.responsefn.projfn.</tt><tt class="descname">CFPRF_EuclideanDistance</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/responsefn/projfn.html#CFPRF_EuclideanDistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.responsefn.projfn.CFPRF_EuclideanDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.cf-module.html#topo.base.cf.CFPResponseFn" title="topo.base.cf.CFPResponseFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPResponseFn</span></tt></a></p>
+<p>Euclidean-distance&#8211;based response function.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.responsefn.projfn.CFPRF_ActivityBased">
+<em class="property">class </em><tt class="descclassname">topo.responsefn.projfn.</tt><tt class="descname">CFPRF_ActivityBased</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/responsefn/projfn.html#CFPRF_ActivityBased"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.responsefn.projfn.CFPRF_ActivityBased" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.cf-module.html#topo.base.cf.CFPResponseFn" title="topo.base.cf.CFPResponseFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPResponseFn</span></tt></a></p>
+<p>Calculate the activity of each unit nonlinearly based on the input activity.</p>
+<p>The activity is calculated from the input activity, the weights,
+and a strength that is a function of the input activity. This
+allows connections to have either an excitatory or inhibitory
+effect, depending on the activity entering the unit in question.</p>
+<p>The strength function is a generalized logistic curve (Richards&#8217;
+curve), a flexible function for specifying a nonlinear growth
+curve:</p>
+<p>y = l + ( u /(1 + b exp(-r (x - 2m)) ^ (1 / b)) )</p>
+<p>This function has five parameters:</p>
+<div class="highlight-python"><pre>* l: the lower asymptote, i.e. the value at infinity;
+* u: the upper asymptote minus l, i.e. (u + l) is the value at minus infinity;
+* m: the time of maximum growth;
+* r: the growth rate;
+* b: affects near which asymptote maximum growth occurs.</pre>
+</div>
+<p>Richards, F.J. 1959 A flexible growth function for empirical use.
+J. Experimental Botany 10: 290&#8211;300, 1959.
+<a class="reference external" href="http://en.wikipedia.org/wiki/Generalised_logistic_curve">http://en.wikipedia.org/wiki/Generalised_logistic_curve</a></p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">b</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=2, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Controls position of maximum growth</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DotProduct DotProduct00271&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>ResponseFn to apply to each CF individually.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">m</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.25, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Time of maximum growth.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">l</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=-1.3, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Value at infinity</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">r</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=-200, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Growth rate, controls the gradient</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">u</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.2, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>(u + l) is the value at minus infinity</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.responsefn.projfn.CFPRF_Plugin">
+<em class="property">class </em><tt class="descclassname">topo.responsefn.projfn.</tt><tt class="descname">CFPRF_Plugin</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.responsefn.projfn.CFPRF_Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.cf-module.html#topo.base.cf.CFPResponseFn" title="topo.base.cf.CFPResponseFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPResponseFn</span></tt></a></p>
+<p>Generic large-scale response function based on a simple single-CF function.</p>
+<p>Applies the single_cf_fn to each CF in turn.  For the default
+single_cf_fn of DotProduct(), does a basic dot product of each CF with the
+corresponding slice of the input array.  This function is likely
+to be slow to run, but it is easy to extend with any arbitrary
+single-CF response function.</p>
+<p>The single_cf_fn must be a function f(X,W) that takes two
+identically shaped matrices X (the input) and W (the
+ConnectionField weights) and computes a scalar activation value
+based on those weights.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DotProduct DotProduct00022&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a ResponseFn that will be applied to each CF individually.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.responsefn.projfn</a><ul>
+<li><a class="reference internal" href="#module-topo.responsefn.projfn">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.responsefn.projfn-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

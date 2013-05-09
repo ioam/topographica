@@ -1,0 +1,249 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Test suite &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="Developer Manual" href="index.html" />
+    <link rel="next" title="Making Releases" href="releases.html" />
+    <link rel="prev" title="Refactoring" href="refactoring.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="releases.html" title="Making Releases"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="refactoring.html" title="Refactoring"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="test-suite">
+<h1>Test suite<a class="headerlink" href="#test-suite" title="Permalink to this headline">¶</a></h1>
+<p>Every Python module should have a corresponding unit test in
+<tt class="docutils literal"><span class="pre">tests/</span></tt>. The tests should be nearly exhaustive, in the sense that
+it should be unlikely that a good-faith re-implementation of the
+module would pass the tests but have significant bugs. Obviously,
+truly exhaustive tests capable of detecting arbitrary (e.g.
+deliberate) errors would be impractical.</p>
+<p>The default set of unit tests that are run must complete very
+quickly, with no extraneous output, no GUI windows popping up, etc.,
+because these tests are (and should be) run automatically many times
+each day during active development. All the output from such tests
+must be checked automatically, with any output generated for the
+user representing something the user really does have to do
+something about.</p>
+<p>Additional more expensive tests, GUI tests, or those requiring user
+input or user examination of the output are also encouraged, but all
+these must be kept separate from the main automated regression
+tests.</p>
+<p>Note that, due to previous oversights, one cannot assume that any
+existing file has a corresponding test file already. Moreover,
+existing test files should <em>not</em> be assumed to be exhaustive or even
+particularly useful; they vary a lot in how comprehensive they are.
+So please always check the test file when coding, especially when
+debugging, because it probably needs work too. You can check how
+well a particular test file covers a particular file by running
+coverage. Here is an example of checking to see how well
+topo/tests/testimage.py covers topo/pattern/image.py:</p>
+<div class="highlight-python"><pre>./topographica -c "import topo.tests;t=topo.tests.run_coverage( \   runner_fn=topo.tests.run_named,runner_args=('testimage.py',), \   targets=['topo/pattern/image.py'])"</pre>
+</div>
+<div class="section" id="unittests-and-doctests">
+<h2>Unittests and Doctests<a class="headerlink" href="#unittests-and-doctests" title="Permalink to this headline">¶</a></h2>
+<p>Topographica&#8217;s test suite supports test cases that use Python&#8217;s
+<a class="reference external" href="http://docs.python.org/lib/module-unittest.html">unittest</a> module or its <a class="reference external" href="http://docs.python.org/lib/module-doctest.html">doctest</a> module. Unittest provides a
+framework for writing test cases as objects containing a set of test
+methods plus common initialization and clean-up code. This framework
+is useful for constructing heavy-duty tests, but can be cumbersome
+when only a simple set of correctness tests are required. All
+unittests in modules with names matching the pattern
+<tt class="docutils literal"><span class="pre">topo/tests/test*.py</span></tt> can be automatically discovered and run by
+the topographica command <tt class="docutils literal"><span class="pre">topo.tests.run()</span></tt></p>
+<p>Python&#8217;s doctest module allows tests to be specified as a sequence
+of Python expressions to be evaluated, each followed by the expected
+result of the command. The entire sequence should be formatted like
+a trace of an interactive python session. For example:</p>
+<div class="highlight-python"><pre>&gt;&gt;&gt; def f(x):
+...    return x+1
+...
+&gt;&gt;&gt; f(3)
+4
+&gt;&gt;&gt; f(2)
+3
+&gt;&gt;&gt; f('foo')
+Traceback (most recent call last):
+  File "", line 1, in ?
+  File "", line 2, in f
+TypeError: cannot concatenate 'str' and 'int' objects
+&gt;&gt;&gt;</pre>
+</div>
+<p>As long as each command produces the expected output (including any
+errors), the test passes. See the <a class="reference external" href="http://docs.python.org/lib/module-doctest.html">doctest documentation</a> for
+details. As with unittest testsuites, all doctest files with names
+matching <tt class="docutils literal"><span class="pre">topo/tests/test*.txt</span></tt> can be found and run automatically
+with the function <tt class="docutils literal"><span class="pre">topo.tests.run()</span></tt>.</p>
+<p>Important notes:</p>
+<ul class="simple">
+<li>To construct a doctest file from an interactive topographica
+trace, the entire <tt class="docutils literal"><span class="pre">topographica_tXXX</span></tt> prefix must be removed
+from every line. Lines with the prefix will be ignored.</li>
+<li>The testrunner used by <tt class="docutils literal"><span class="pre">topo.tests.run()</span></tt> will happily run an
+empty doctest file and report no errors (since there were no
+tests). Make sure to manually check new or modified doctest files
+with <tt class="docutils literal"><span class="pre">doctest.testfile(filename,verbose=True)</span></tt> to make sure
+that the tests are actually being run before running
+<tt class="docutils literal"><span class="pre">make</span> <span class="pre">tests</span></tt> or <tt class="docutils literal"><span class="pre">topo.tests.run()</span></tt>.</li>
+<li>Topographica does not currently run doctests embedded in code
+documentation.</li>
+</ul>
+</div>
+<div class="section" id="automatic-testing">
+<h2>Automatic testing<a class="headerlink" href="#automatic-testing" title="Permalink to this headline">¶</a></h2>
+<p>Currently, topographica is periodically checked out, built, and
+tested on Linux, OS X, and Windows (automatically, using
+<a class="reference external" href="http://buildbot.net/">buildbot</a>). The results of these builds and tests can be seen at
+<a class="reference external" href="http://buildbot.topographica.org/">buildbot.topographica.org</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Test suite</a><ul>
+<li><a class="reference internal" href="#unittests-and-doctests">Unittests and Doctests</a></li>
+<li><a class="reference internal" href="#automatic-testing">Automatic testing</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="refactoring.html"
+                        title="previous chapter">Refactoring</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="releases.html"
+                        title="next chapter">Making Releases</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Developer_Manual/testing.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="releases.html" title="Making Releases"
+             >next</a></li>
+        <li class="right" >
+          <a href="refactoring.html" title="Refactoring"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >Developer Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

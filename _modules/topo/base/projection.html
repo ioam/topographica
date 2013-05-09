@@ -1,0 +1,803 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.projection &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.base.projection</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Projection and related classes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span><span class="n">asarray</span><span class="p">,</span><span class="n">ones</span><span class="p">,</span><span class="n">sometrue</span><span class="p">,</span> <span class="n">logical_and</span><span class="p">,</span> <span class="n">logical_or</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">overridable_property</span>
+
+<span class="kn">from</span> <span class="nn">topo.misc.keyedlist</span> <span class="kn">import</span> <span class="n">KeyedList</span> <span class="c"># CEBALERT: not in base</span>
+
+<span class="kn">from</span> <span class="nn">sheet</span> <span class="kn">import</span> <span class="n">Sheet</span>
+<span class="kn">from</span> <span class="nn">simulation</span> <span class="kn">import</span> <span class="n">EPConnection</span>
+<span class="kn">from</span> <span class="nn">functionfamily</span> <span class="kn">import</span> <span class="n">TransferFn</span>
+<span class="kn">from</span> <span class="nn">sheetview</span> <span class="kn">import</span> <span class="n">ProjectionView</span>
+
+<div class="viewcode-block" id="SheetMask"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.SheetMask">[docs]</a><span class="k">class</span> <span class="nc">SheetMask</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An abstract class that defines a mask over a ProjectionSheet object.</span>
+
+<span class="sd">    This class is typically used for optimization, where mask</span>
+<span class="sd">    indicates which neurons are active and should be processed</span>
+<span class="sd">    further. A mask can also be used for lesion experiments, to</span>
+<span class="sd">    specify which units should be kept inactive.</span>
+
+<span class="sd">    See the code for CFProjection and CFResponseFn to see how this</span>
+<span class="sd">    class can be used to restrict the computation to only those</span>
+<span class="sd">    neurons that the Mask lists as active.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># JPALERT: Is there anything about this class that assumes its</span>
+    <span class="c"># sheet is a ProjectionSheet?</span>
+
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+    <span class="k">def</span> <span class="nf">_set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">overridable_property</span><span class="p">(</span><span class="n">_get_data</span><span class="p">,</span><span class="n">_set_data</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">    Ensure that whenever somebody accesses the data they are not None.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span>
+    <span class="k">def</span> <span class="nf">_set_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sheet</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span> <span class="o">=</span> <span class="n">sheet</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="n">sheet</span> <span class="o">=</span> <span class="n">overridable_property</span><span class="p">(</span><span class="n">_get_sheet</span><span class="p">,</span><span class="n">_set_sheet</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sheet</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SheetMask</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span> <span class="o">=</span> <span class="n">sheet</span>
+
+    <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mask</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AndMask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span><span class="p">,</span><span class="n">submasks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="p">,</span><span class="n">mask</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mask</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">OrMask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet</span><span class="p">,</span><span class="n">submasks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="p">,</span><span class="n">mask</span><span class="p">])</span>
+
+    <span class="c"># JABALERT: Shouldn&#39;t this just keep one matrix around and zero it out,</span>
+    <span class="c"># instead of allocating a new one each time?</span>
+<div class="viewcode-block" id="SheetMask.reset"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.SheetMask.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize mask to default value (with no neurons masked out).&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SheetMask.calculate"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.SheetMask.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate a new mask based on the activity of the sheet.</span>
+
+<span class="sd">        For instance, in an algorithm like LISSOM that is based on a</span>
+<span class="sd">        process of feedforward activation followed by lateral settling,</span>
+<span class="sd">        the calculation is done at the beginning of each iteration after</span>
+<span class="sd">        the feedforward activity has been calculated.</span>
+
+<span class="sd">        Subclasses should override this method to compute some non-default</span>
+<span class="sd">        mask.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+    <span class="c"># JABALERT: Not clear what the user should do with this.</span></div>
+<div class="viewcode-block" id="SheetMask.update"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.SheetMask.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the current mask based on the current activity and a previous mask.</span>
+
+<span class="sd">        Should be called only if calculate() has already been called since the last</span>
+<span class="sd">        reset(); potentially faster to compute than redoing the entire calculate().</span>
+
+<span class="sd">        Subclasses should override this method to compute some non-default</span>
+<span class="sd">        mask.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="CompositeSheetMask"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.CompositeSheetMask">[docs]</a><span class="k">class</span> <span class="nc">CompositeSheetMask</span><span class="p">(</span><span class="n">SheetMask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SheetMask that computes its value from other SheetMasks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span>  <span class="bp">True</span>
+
+    <span class="n">submasks</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="n">SheetMask</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sheet</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CompositeSheetMask</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">submasks</span><span class="p">,</span> <span class="s">&quot;A composite mask must have at least one submask.&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_combine_submasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A method that combines the submasks.</span>
+
+<span class="sd">        Subclasses should override this method to do their respective</span>
+<span class="sd">        composite calculations.  The result should be stored in self.data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">_set_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sheet</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">submasks</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">sheet</span> <span class="o">=</span> <span class="n">sheet</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CompositeSheetMask</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_set_sheet</span><span class="p">(</span><span class="n">sheet</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">submasks</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_combine_submasks</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">submasks</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_combine_submasks</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">submasks</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_combine_submasks</span><span class="p">()</span>
+
+
+</div>
+<div class="viewcode-block" id="AndMask"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.AndMask">[docs]</a><span class="k">class</span> <span class="nc">AndMask</span><span class="p">(</span><span class="n">CompositeSheetMask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A composite SheetMask that computes its value as the logical AND (i.e. intersection) of its sub-masks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_combine_submasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="nb">reduce</span><span class="p">(</span><span class="n">logical_and</span><span class="p">,(</span><span class="n">m</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">submasks</span><span class="p">)),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="OrMask"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.OrMask">[docs]</a><span class="k">class</span> <span class="nc">OrMask</span><span class="p">(</span><span class="n">CompositeSheetMask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A composite SheetMask that computes its value as the logical OR (i.e. union) of its sub-masks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_combine_submasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="nb">reduce</span><span class="p">(</span><span class="n">logical_or</span><span class="p">,(</span><span class="n">m</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">submasks</span><span class="p">)),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="Projection"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection">[docs]</a><span class="k">class</span> <span class="nc">Projection</span><span class="p">(</span><span class="n">EPConnection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A projection from a Sheet into a ProjectionSheet.</span>
+
+<span class="sd">    Projections are required to support the activate() method, which</span>
+<span class="sd">    will construct a matrix the same size as the target</span>
+<span class="sd">    ProjectionSheet, from an input matrix of activity from the source</span>
+<span class="sd">    Sheet.  Other than that, a Projection may be of any type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span><span class="o">=</span><span class="bp">True</span>
+
+    <span class="n">strength</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="n">src_port</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">)</span>
+
+    <span class="n">dest_port</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">)</span>
+
+    <span class="n">output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">class_</span><span class="o">=</span><span class="n">TransferFn</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function(s) applied to the Projection activity after it is computed.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">plastic</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Whether or not to update the internal state on each call.</span>
+<span class="s">        Allows plasticity to be turned off during analysis, and then re-enabled.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">activity_group</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">add</span><span class="p">),</span> <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Grouping and precedence specifier for computing activity from</span>
+<span class="s">       Projections.  In a ProjectionSheet, all Projections in the</span>
+<span class="s">       same activity_group will be summed, and then the results from</span>
+<span class="s">       each group will be combined in the order of the activity_group</span>
+<span class="s">       using the operator specified by the activity_operator.  For</span>
+<span class="s">       instance, if there are two Projections with</span>
+<span class="s">       activity_group==(0.2,numpy.add) and two with</span>
+<span class="s">       activity_group==(0.6,numpy.divide), activity</span>
+<span class="s">       from the first two will be added together, and the result</span>
+<span class="s">       divided by the sum of the second two.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># CEBALERT: precedence should probably be defined at some higher level</span>
+    <span class="c"># (and see other classes where it&#39;s defined, e.g. Sheet)</span>
+    <span class="n">precedence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Projection</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plasticity_setting_stack</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="Projection.activate"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_activity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute an activity matrix for output, based on the specified input_activity.</span>
+
+<span class="sd">        Subclasses must override this method to whatever it means to</span>
+<span class="sd">        calculate activity in that subclass.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="Projection.learn"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.learn">[docs]</a>    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function has to be re-implemented by sub-classes, if they wish</span>
+<span class="sd">        to support learning.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="Projection.apply_learn_output_fns"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.apply_learn_output_fns">[docs]</a>    <span class="k">def</span> <span class="nf">apply_learn_output_fns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">active_units_mask</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sub-classes can implement this function if they wish to</span>
+<span class="sd">        perform an operation after learning has completed, such as</span>
+<span class="sd">        normalizing weight values across different projections.</span>
+
+<span class="sd">        The active_units_mask argument determines whether or not to</span>
+<span class="sd">        apply the output_fn to non-responding units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+</div>
+<div class="viewcode-block" id="Projection.override_plasticity_state"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.override_plasticity_state">[docs]</a>    <span class="k">def</span> <span class="nf">override_plasticity_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_plasticity_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Temporarily override plasticity of medium and long term internal</span>
+<span class="sd">        state.</span>
+
+<span class="sd">        This function should be implemented by all subclasses so that</span>
+<span class="sd">        it preserves the ability of the Projection to compute</span>
+<span class="sd">        activity, i.e. to operate over a short time scale, while</span>
+<span class="sd">        preventing any lasting changes to the state.</span>
+
+<span class="sd">        For instance, if new_plasticity_state is False, in a</span>
+<span class="sd">        Projection with modifiable connection weights, the values of</span>
+<span class="sd">        those weights should temporarily be made fixed and unchanging</span>
+<span class="sd">        after this call.  For a Projection with automatic</span>
+<span class="sd">        normalization, homeostatic plasticity, or other features that</span>
+<span class="sd">        depend on a history of events (rather than just the current</span>
+<span class="sd">        item being processed), changes in those properties would be</span>
+<span class="sd">        disabled temporarily.  Setting the plasticity state to False</span>
+<span class="sd">        is useful during analysis operations (e.g. map measurement)</span>
+<span class="sd">        that would otherwise change the state of the underlying</span>
+<span class="sd">        network.</span>
+
+<span class="sd">        Any process that does not have any lasting state, such as</span>
+<span class="sd">        those affecting only the current activity level, should not</span>
+<span class="sd">        be affected by this call.</span>
+
+<span class="sd">        By default, this call simply calls override_plasticity_state()</span>
+<span class="sd">        on the Projection&#39;s output_fn, and sets the &#39;plastic&#39;</span>
+<span class="sd">        parameter to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plasticity_setting_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="o">=</span><span class="n">new_plasticity_state</span>
+
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="s">&#39;override_plasticity_state&#39;</span><span class="p">):</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">override_plasticity_state</span><span class="p">(</span><span class="n">new_plasticity_state</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Projection.restore_plasticity_state"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.restore_plasticity_state">[docs]</a>    <span class="k">def</span> <span class="nf">restore_plasticity_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Restore previous plasticity state of medium and long term</span>
+<span class="sd">        internal state after a override_plasticity_state call.</span>
+
+<span class="sd">        This function should be implemented by all subclasses to</span>
+<span class="sd">        remove the effect of the most recent override_plasticity_state call,</span>
+<span class="sd">        e.g. to reenable plasticity of any type that was disabled.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plasticity_setting_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="s">&#39;restore_plasticity_state&#39;</span><span class="p">):</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">restore_plasticity_state</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Projection.get_projection_view"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.get_projection_view">[docs]</a>    <span class="k">def</span> <span class="nf">get_projection_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the activity in a single projection&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ProjectionView</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span><span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="o">.</span><span class="n">bounds</span><span class="p">),</span><span class="bp">self</span><span class="p">,</span><span class="n">timestamp</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Projection.n_bytes"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.n_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimate the memory bytes taken by this Projection.</span>
+
+<span class="sd">        By default, counts only the activity array, but subclasses</span>
+<span class="sd">        should implement this method to include also the bytes taken</span>
+<span class="sd">        by weight arrays and any similar arrays, as a rough lower</span>
+<span class="sd">        bound from which memory requirements and memory usage patterns</span>
+<span class="sd">        can be estimated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">return</span> <span class="n">rows</span><span class="o">*</span><span class="n">cols</span>
+
+</div>
+<div class="viewcode-block" id="Projection.n_conns"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.Projection.n_conns">[docs]</a>    <span class="k">def</span> <span class="nf">n_conns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the size of this projection, in number of connections.</span>
+
+<span class="sd">        Must be implemented by subclasses, if only to declare that no</span>
+<span class="sd">        connections are stored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+</div></div>
+<div class="viewcode-block" id="ProjectionSheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet">[docs]</a><span class="k">class</span> <span class="nc">ProjectionSheet</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Sheet whose activity is computed using Projections from other sheets.</span>
+
+<span class="sd">    A standard ProjectionSheet expects its input to be generated from</span>
+<span class="sd">    other Sheets. Upon receiving an input event, the ProjectionSheet</span>
+<span class="sd">    interprets the event data to be (a copy of) an activity matrix</span>
+<span class="sd">    from another sheet.  The ProjectionSheet provides a copy of this</span>
+<span class="sd">    matrix to each Projection from that input Sheet, asking each one</span>
+<span class="sd">    to compute their own activity in response.  The same occurs for</span>
+<span class="sd">    any other pending input events.</span>
+
+<span class="sd">    After all events have been processed for a given time, the</span>
+<span class="sd">    ProjectionSheet computes its own activity matrix using its</span>
+<span class="sd">    activate() method, which by default sums all its Projections&#39;</span>
+<span class="sd">    activity matrices and passes the result through user-specified</span>
+<span class="sd">    output_fns() before sending it out on the default output port.</span>
+<span class="sd">    The activate() method can be overridden to sum some of the</span>
+<span class="sd">    projections, multiply that by the sum of other projections, etc.,</span>
+<span class="sd">    to model modulatory or other more complicated types of connections.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dest_ports</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+
+    <span class="n">src_ports</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Activity&#39;</span><span class="p">]</span>
+
+    <span class="c"># CEBALERT: why isn&#39;t this a parameter of Sheet?</span>
+    <span class="c"># Should be a MaskParameter for safety</span>
+    <span class="c">#mask = ClassSelectorParameter(SheetMask,default=SheetMask(),instantiate=True,doc=&quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">SheetMask</span><span class="p">(),</span><span class="n">instantiate</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        SheetMask object for computing which units need to be computed further.</span>
+<span class="s">        The object should be an instance of SheetMask, and will</span>
+<span class="s">        compute which neurons will be considered active for the</span>
+<span class="s">        purposes of further processing.  The default mask effectively</span>
+<span class="s">        disables all masking, but subclasses can use this mask to</span>
+<span class="s">        implement optimizations, non-rectangular Sheet shapes,</span>
+<span class="s">        lesions, etc.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c"># CEBALERT: not sure what to call this, and the default should</span>
+    <span class="c"># actually be False. True to match existing behavior.  Not sure</span>
+    <span class="c"># this parameter is necessary; clean up with NeighborhoodMask.</span>
+    <span class="c"># (Plus same comment as mask: why not parameter of sheet?)</span>
+    <span class="n">allow_skip_non_responding_units</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If true, then units that are inactive after the response</span>
+<span class="s">        function has been called can be skipped in subsequent</span>
+<span class="s">        processing. Whether or not the units will actually be skipped</span>
+<span class="s">        depends on the implementation of learning and learning output</span>
+<span class="s">        functions.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">sheet</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">*</span><span class="mf">0.0</span>
+
+    <span class="k">def</span> <span class="nf">_dest_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        See EventProcessor&#39;s _dest_connect(); raises an error if conn is not</span>
+<span class="sd">        a Projection.  Subclasses of ProjectionSheet that know how to handle</span>
+<span class="sd">        other types of Connections should override this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">Projection</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_dest_connect</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;ProjectionSheets only accept Projections, not other types of connection.&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProjectionSheet.input_event"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.input_event">[docs]</a>    <span class="k">def</span> <span class="nf">input_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">conn</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Accept input from some sheet.  Call .present_input() to</span>
+<span class="sd">        compute the stimulation from that sheet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s">&quot;Received input from </span><span class="si">%s</span><span class="s"> on dest_port </span><span class="si">%s</span><span class="s"> via connection </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">dest_port</span><span class="p">),</span><span class="n">conn</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">present_input</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">conn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">True</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_port_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">portlist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns True if the given key matches any port on the given list.</span>
+
+<span class="sd">        A port is considered a match if the port is == to the key,</span>
+<span class="sd">        or if the port is a tuple whose first element is == to the key,</span>
+<span class="sd">        or if both the key and the port are tuples whose first elements are ==.</span>
+
+<span class="sd">        This approach allows connections to be grouped using tuples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">port</span><span class="o">=</span><span class="n">portlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">port</span> <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">portlist</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">port</span> <span class="o">==</span> <span class="n">key</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)</span>  <span class="ow">and</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">port</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)</span>  <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]))]</span>
+
+
+    <span class="k">def</span> <span class="nf">_grouped_in_projections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ptype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionary of lists of incoming Projections, grouped by type.</span>
+
+<span class="sd">        Each projection of type &lt;ptype&gt; is grouped according to the</span>
+<span class="sd">        name of the port, into a single list within the dictionary.</span>
+
+<span class="sd">        The entry None will contain those that are not of type</span>
+<span class="sd">        &lt;ptype&gt;, while the other entries will contain a list of</span>
+<span class="sd">        Projections, each of which has type ptype.</span>
+
+<span class="sd">        Example: to obtain the lists of projections that should be</span>
+<span class="sd">        jointly normalised together, call</span>
+<span class="sd">        __grouped_in_projection(&#39;JointNormalize&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">in_proj</span> <span class="o">=</span> <span class="n">KeyedList</span><span class="p">()</span>
+        <span class="n">in_proj</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span> <span class="c"># Independent (ungrouped) connections</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">dest_port</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">Projection</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Skipping non-Projection &quot;</span><span class="o">+</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">ptype</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">in_proj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="n">in_proj</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">in_proj</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+            <span class="c">#elif isinstance(d,tuple):</span>
+            <span class="c">#    raise ValueError(&quot;Unable to determine appropriate action for dest_port: %s (connection %s).&quot; % (d,c.name))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">in_proj</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">in_proj</span>
+
+
+<div class="viewcode-block" id="ProjectionSheet.activate"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Collect activity from each projection, combine it to calculate</span>
+<span class="sd">        the activity for this sheet, and send the result out.</span>
+
+<span class="sd">        Subclasses may override this method to whatever it means to</span>
+<span class="sd">        calculate activity in that subclass.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">*=</span> <span class="mf">0.0</span>
+        <span class="n">tmp_dict</span><span class="o">=</span><span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">activity_group</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">dest_port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;Activity&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">tmp_dict</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">activity_group</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="n">tmp_dict</span><span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">activity_group</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">=</span><span class="p">[]</span>
+                <span class="n">tmp_dict</span><span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">activity_group</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">tmp_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">priority</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">tmp_activity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.0</span>
+
+            <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">tmp_dict</span><span class="p">[</span><span class="n">priority</span><span class="p">]:</span>
+                <span class="n">tmp_activity</span> <span class="o">+=</span> <span class="n">proj</span><span class="o">.</span><span class="n">activity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">=</span><span class="n">tmp_dict</span><span class="p">[</span><span class="n">priority</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">activity_group</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">,</span><span class="n">tmp_activity</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+                <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ProjectionSheet.process_current_time"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.process_current_time">[docs]</a>    <span class="k">def</span> <span class="nf">process_current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called by the simulation after all the events are processed for the</span>
+<span class="sd">        current time but before time advances.  Allows the event processor</span>
+<span class="sd">        to send any events that must be sent before time advances to drive</span>
+<span class="sd">        the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_input</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="ProjectionSheet.learn"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.learn">[docs]</a>    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        By default, call the learn() and apply_learn_output_fns()</span>
+<span class="sd">        methods on every Projection to this Sheet.</span>
+
+<span class="sd">        Any other type of learning can be implemented by overriding this method.</span>
+<span class="sd">        Called from self.process_current_time() _after_ activity has</span>
+<span class="sd">        been propagated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span><span class="n">Projection</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Skipping non-Projection &quot;</span><span class="o">+</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">proj</span><span class="o">.</span><span class="n">learn</span><span class="p">()</span>
+                <span class="n">proj</span><span class="o">.</span><span class="n">apply_learn_output_fns</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="ProjectionSheet.present_input"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.present_input">[docs]</a>    <span class="k">def</span> <span class="nf">present_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_activity</span><span class="p">,</span><span class="n">conn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provide the given input_activity to each in_projection that has a dest_port</span>
+<span class="sd">        equal to the specified port, asking each one to compute its activity.</span>
+
+<span class="sd">        The sheet&#39;s own activity is not calculated until activate()</span>
+<span class="sd">        is called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="n">input_activity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ProjectionSheet.projections"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.projections">[docs]</a>    <span class="k">def</span> <span class="nf">projections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Return either a named input p, or a dictionary</span>
+<span class="sd">        {projection_name, projection} of all the in_connections for</span>
+<span class="sd">        this ProjectionSheet.</span>
+
+<span class="sd">        A minor convenience function for finding projections by name;</span>
+<span class="sd">        the sheet&#39;s list of in_connections usually provides simpler</span>
+<span class="sd">        access to the Projections.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">c</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ProjectionSheet.override_plasticity_state"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.override_plasticity_state">[docs]</a>    <span class="k">def</span> <span class="nf">override_plasticity_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_plasticity_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Temporarily override plasticity state of medium and long term</span>
+<span class="sd">        internal state.</span>
+
+<span class="sd">        This function should be implemented by all subclasses so that</span>
+<span class="sd">        when new_plasticity_state=False, it preserves the ability of</span>
+<span class="sd">        the ProjectionSheet to compute activity, i.e. to operate over</span>
+<span class="sd">        a short time scale, while preventing any lasting changes to</span>
+<span class="sd">        the state.</span>
+
+<span class="sd">        Any process that does not have any lasting state, such as</span>
+<span class="sd">        those affecting only the current activity level, should not</span>
+<span class="sd">        be affected by this call.</span>
+
+<span class="sd">        By default, calls override_plasticity_state() on the</span>
+<span class="sd">        ProjectionSheet&#39;s output_fns and all of its incoming</span>
+<span class="sd">        Projections, and also enables the &#39;plastic&#39; parameter for this</span>
+<span class="sd">        ProjectionSheet.  The old value of the plastic parameter is</span>
+<span class="sd">        saved to an internal stack to be restored by</span>
+<span class="sd">        restore_plasticity_state().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">override_plasticity_state</span><span class="p">(</span><span class="n">new_plasticity_state</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="s">&#39;override_plasticity_state&#39;</span><span class="p">):</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">override_plasticity_state</span><span class="p">(</span><span class="n">new_plasticity_state</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="c"># Could instead check for a override_plasticity_state method</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span><span class="n">Projection</span><span class="p">):</span>
+                <span class="n">proj</span><span class="o">.</span><span class="n">override_plasticity_state</span><span class="p">(</span><span class="n">new_plasticity_state</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">restore_plasticity_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectionSheet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">restore_plasticity_state</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="s">&#39;restore_plasticity_state&#39;</span><span class="p">):</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">restore_plasticity_state</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span><span class="n">Projection</span><span class="p">):</span>
+                <span class="n">proj</span><span class="o">.</span><span class="n">restore_plasticity_state</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ProjectionSheet.n_bytes"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.n_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimate the memory bytes taken by this Sheet and its Projections.</span>
+
+<span class="sd">        Typically, this number will include the activity array and any</span>
+<span class="sd">        similar arrays, plus memory taken by all incoming Projections.</span>
+<span class="sd">        It will not usually include memory taken by the Python</span>
+<span class="sd">        dictionary or various &quot;housekeeping&quot; attributes, which usually</span>
+<span class="sd">        contribute only a small amount to the memory requirements.</span>
+<span class="sd">        Thus this value should be considered only a rough lower bound</span>
+<span class="sd">        from which memory requirements and memory usage patterns can</span>
+<span class="sd">        be estimated.</span>
+
+<span class="sd">        Subclasses should reimplement this method if they store a</span>
+<span class="sd">        significant amount of data other than in the activity array</span>
+<span class="sd">        and the projections.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">+</span> \
+               <span class="nb">sum</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">n_bytes</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">Projection</span><span class="p">)])</span>
+
+</div>
+<div class="viewcode-block" id="ProjectionSheet.n_conns"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.ProjectionSheet.n_conns">[docs]</a>    <span class="k">def</span> <span class="nf">n_conns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Count the total size of all incoming projections, in number of connections.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">n_conns</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_connections</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">Projection</span><span class="p">)])</span>
+
+
+<span class="c"># CEBALERT: untested</span></div></div>
+<div class="viewcode-block" id="NeighborhoodMask"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.projection-module.html#topo.base.projection.NeighborhoodMask">[docs]</a><span class="k">class</span> <span class="nc">NeighborhoodMask</span><span class="p">(</span><span class="n">SheetMask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SheetMask where the mask includes a neighborhood around active neurons.</span>
+
+<span class="sd">    Given a radius and a threshold, considers a neuron active if at</span>
+<span class="sd">    least one neuron in the radius is over the threshold.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Threshold for considering a neuron active.</span>
+<span class="s">       This value should be small to avoid discarding significantly active</span>
+<span class="s">       neurons.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Radius in Sheet coordinates around active neurons to consider</span>
+<span class="s">       neighbors active as well.  Using a larger radius ensures that</span>
+<span class="s">       the calculation will be unaffected by the mask, but it will</span>
+<span class="s">       reduce any computational benefit from the mask.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sheet</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NeighborhoodMask</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c"># JAHACKALERT: Not sure whether this is OK. Another way to do</span>
+        <span class="c"># this would be to ask for the sheet coordinates of each unit</span>
+        <span class="c"># inside the loop.</span>
+
+        <span class="c"># transforms the sheet bounds with bounds2slice() and then</span>
+        <span class="c"># uses this to cut out the activity window</span>
+        <span class="n">ignore1</span><span class="p">,</span><span class="n">matradius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ignore2</span><span class="p">,</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">matradius</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">matradius</span><span class="o">-</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+                <span class="n">rr</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">r</span><span class="o">-</span><span class="n">matradius</span><span class="p">)</span>
+                <span class="n">cc</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">c</span><span class="o">-</span><span class="n">matradius</span><span class="p">)</span>
+                <span class="n">neighbourhood</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">activity</span><span class="p">[</span><span class="n">rr</span><span class="p">:</span><span class="n">r</span><span class="o">+</span><span class="n">matradius</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">cc</span><span class="p">:</span><span class="n">c</span><span class="o">+</span><span class="n">matradius</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">sometrue</span><span class="p">(</span><span class="n">neighbourhood</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/base/projection.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

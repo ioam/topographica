@@ -1,0 +1,168 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.transferfn.optimized &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-transferfn-optimized">
+<h1>topo.transferfn.optimized<a class="headerlink" href="#topo-transferfn-optimized" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance775de93f23.svg" usemap="#inheritance775de93f23" class="inheritance"/></div><map id="inheritance775de93f23" name="inheritance775de93f23">
+</map>
+<div class="section" id="module-topo.transferfn.optimized">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.transferfn.optimized" title="Permalink to this headline">¶</a></h2>
+<p>Output functions (see basic.py) and projection-level output functions
+(see projfn.py) written in C to optimize performance.</p>
+<p>Requires the weave package; without it unoptimized versions are used.</p>
+<dl class="class">
+<dt id="topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt">
+<em class="property">class </em><tt class="descclassname">topo.transferfn.optimized.</tt><tt class="descname">CFPOF_DivisiveNormalizeL1_opt</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/transferfn/optimized.html#CFPOF_DivisiveNormalizeL1_opt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.cf-module.html#topo.base.cf.CFPOutputFn" title="topo.base.cf.CFPOutputFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPOutputFn</span></tt></a></p>
+<p>Performs divisive normalization of the weights of all cfs.
+Intended to be equivalent to, but faster than,
+CFPOF_DivisiveNormalizeL1.</p>
+<p><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;DivisiveNormalizeL1 DivisiveNormalizeL100294&gt;, instantiate=False, pickle_default_value=True, precedence=None, readonly=True</em>)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1">
+<em class="property">class </em><tt class="descclassname">topo.transferfn.optimized.</tt><tt class="descname">CFPOF_DivisiveNormalizeL1</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/transferfn/optimized.html#CFPOF_DivisiveNormalizeL1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.transferfn.optimized.CFPOF_DivisiveNormalizeL1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.cf-module.html#topo.base.cf.CFPOutputFn" title="topo.base.cf.CFPOutputFn"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFPOutputFn</span></tt></a></p>
+<p>Non-optimized version of CFPOF_DivisiveNormalizeL1_opt.</p>
+<p>Same as CFPOF_Plugin(single_cf_fn=DivisiveNormalizeL1()), except
+that it supports joint normalization using the norm_total
+property of ConnectionField.</p>
+<p><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=True, default=&lt;DivisiveNormalizeL1 DivisiveNormalizeL100295&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.transferfn.optimized.DivisiveNormalizeL1_opt">
+<tt class="descclassname">topo.transferfn.optimized.</tt><tt class="descname">DivisiveNormalizeL1_opt</tt><a class="headerlink" href="#topo.transferfn.optimized.DivisiveNormalizeL1_opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">DivisiveNormalizeL1</span></tt></p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.transferfn.optimized</a><ul>
+<li><a class="reference internal" href="#module-topo.transferfn.optimized">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.transferfn.optimized-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

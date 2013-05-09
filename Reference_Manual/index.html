@@ -1,0 +1,256 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Reference Manual &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="reference-manual">
+<h1>Reference Manual<a class="headerlink" href="#reference-manual" title="Permalink to this headline">¶</a></h1>
+<p>This reference manual contains detailed documentation of each
+component making up Topographica, assuming that the user is already
+familiar with basic Topographica usage. (See the <a class="reference external" href="../User_Manual/index.html">User Manual</a> and
+<a class="reference external" href="../Tutorials/index.html">Tutorials</a> for such an introduction.) The reference manual is
+generated directly from documentation and declarations in the source
+code, and is often much more verbose than necessary, because many
+little-used yet often-duplicated methods are listed for each class.
+Still, the reference for a given component does provide a
+comprehensive listing of all attributes and methods, inherited or
+otherwise, which is difficult to obtain from the source code
+directly and is not covered by the User Manual or Tutorials.</p>
+<p>Topographica&#8217;s components can be categorized into subprojects
+(available separately), core packages (required for Topographica),
+library packages (useful families of components not required for
+Topographica itself), and other <a class="reference external" href="../Downloads/dependencies.html">external dependencies</a> (documented
+separately). Everything but the external dependencies is documented
+at the <a class="reference external" href="hierarchy.html">main reference manual page</a>, but the different
+categories of objects are broken down here in a way that&#8217;s easier to
+follow.</p>
+<div class="section" id="subprojects">
+<h2>Subprojects<a class="headerlink" href="#subprojects" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><a class="reference external" href="param-module.html">param</a></dt>
+<dd>Support for objects with user-controllable attributes</dd>
+<dt><a class="reference external" href="paramtk-module.html">paramtk</a></dt>
+<dd>Optional Tk GUI support for param</dd>
+<dt><a class="reference external" href="numbergen-module.html">numbergen</a></dt>
+<dd>Support for generating streams of scalars, e.g. random
+distributions; currently available through the imagen module
+(below)</dd>
+<dt><a class="reference external" href="imagen-module.html">imagen</a></dt>
+<dd>Support for generating 1D, and 2D patterns, and for defining
+mappings between continuous 2D space and finite matrices</dd>
+</dl>
+<p>The param, paramtk, numbergen, and imagen modules are each developed
+and maintained separately from Topographica, because they are
+general-purpose packages that can be useful for a wide variety of
+Python programs. However, they are documented together with
+Topographica because they were developed alongside Topographica and
+are used extensively within Topographica.</p>
+</div>
+<div class="section" id="core-topographica-packages">
+<h2>Core Topographica packages<a class="headerlink" href="#core-topographica-packages" title="Permalink to this headline">¶</a></h2>
+<p>The Topographica simulator itself is implemented in a set of
+interrelated packages:</p>
+<dl class="docutils">
+<dt><a class="reference external" href="topo.base-module.html">base</a></dt>
+<dd>Core Topographica-specific functions and classes</dd>
+<dt><a class="reference external" href="topo.plotting-module.html">plotting</a></dt>
+<dd>Visualization functions and classes</dd>
+<dt><a class="reference external" href="topo.analysis-module.html">analysis</a></dt>
+<dd>Analysis functions and classes (besides plotting)</dd>
+<dt><a class="reference external" href="topo.misc-module.html">misc</a></dt>
+<dd>Miscellaneous independent utility functions and classes</dd>
+<dt><a class="reference external" href="topo.tkgui-module.html">tkgui</a></dt>
+<dd>Tk-based graphical user interface (GUI)</dd>
+</dl>
+<p>The <strong>base</strong> directory contains the most fundamental Topographica
+classes, implementing basic functionality such as Sheets (arrays of
+units), Projections (large groups of connections between Sheets),
+ConnectionFields (spatially localized groups of connections to one
+unit), and the event-driven Simulation. It relies heavily on the
+generic support for Parameters (user-controllable attributes) from
+the <strong>param</strong> subproject. Together the files in <tt class="docutils literal"><span class="pre">base</span></tt> are
+independent of the rest of the files in <tt class="docutils literal"><span class="pre">topo/</span></tt>, and act as the
+primary programming interface on which Topographica is built. The
+rest of the directories add components used in specific models, or
+add graphical interfaces.</p>
+</div>
+<div class="section" id="library">
+<h2>Library<a class="headerlink" href="#library" title="Permalink to this headline">¶</a></h2>
+<p>Beyond the basic simulator implemented in the core packages,
+Topographica provides an extensive and extensible library of classes
+that can be used to implement models of various neural systems:</p>
+<dl class="docutils">
+<dt><a class="reference external" href="topo.sheet-module.html">sheet</a></dt>
+<dd>Sheet classes: 2D arrays of processing units</dd>
+<dt><a class="reference external" href="topo.projection-module.html">projection</a></dt>
+<dd>Projection classes: connections between Sheets</dd>
+<dt><a class="reference external" href="topo.ep-module.html">ep</a></dt>
+<dd>EventProcessor classes: other simulation objects</dd>
+<dt><a class="reference external" href="topo.transferfn-module.html">transferfn</a></dt>
+<dd>Output functions: apply to matrices to do e.g. normalization or
+squashing</dd>
+<dt><a class="reference external" href="topo.responsefn-module.html">responsefn</a></dt>
+<dd>Calculate the response of a unit or a Projection</dd>
+<dt><a class="reference external" href="topo.learningfn-module.html">learningfn</a></dt>
+<dd>Adjust weights for a unit or a Projection</dd>
+<dt><a class="reference external" href="topo.coordmapper-module.html">coordmapper</a></dt>
+<dd>Determine mapping from one Projection to another</dd>
+<dt><a class="reference external" href="topo.command-module.html">command</a></dt>
+<dd>High-level user commands</dd>
+</dl>
+<p>All of the library components are optional, in the sense that they
+can be deleted or ignored or replaced with custom versions without
+affecting the code in any of the core packages. (Of course, any
+specific model that depends on the component would not be able to
+function without it!)</p>
+<p>Each of the library directories can be extended with new classes by
+simply defining them in your own files, and then making sure that
+your file has been run or imported before you start the GUI or use
+the new class in your .ty file. I.e., user-defined classes of these
+types have the same status as those shipped with Topographica &#8211;
+just make sure they have been defined, and Topographica will find
+them and use them just like its own classes.</p>
+<p>Many of the components come in multiple varieties, to be used at
+different levels in a model. For instance, there are learning
+functions that operate on a single unit (type LearningFn), and ones
+that operate on an entire CFProjection (type CFPLearningFn). The
+lower level components can be used by providing them to a &#8220;Plugin&#8221;
+version of the higher level component, which will apply the lower
+level version to each unit. For instance, a LearningFn can be used
+with a CFPLearningFn of type CFPLF_Plugin, and will be applied the
+same to each unit individually.</p>
+<p>Some components also come with an optimized version, usually written
+in C for speed. The fastest, but least flexible, components will be
+high-level components written in C, such as CFPLF_Hebbian_opt.</p>
+<p>Apart from the Topographica-specific modules described above,
+Topographica also uses many <a class="reference external" href="../Downloads/dependencies.html">external libraries</a>, each documented
+separately.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="#">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Reference Manual</a><ul>
+<li><a class="reference internal" href="#subprojects">Subprojects</a></li>
+<li><a class="reference internal" href="#core-topographica-packages">Core Topographica packages</a></li>
+<li><a class="reference internal" href="#library">Library</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/index.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

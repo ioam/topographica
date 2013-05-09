@@ -1,0 +1,226 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.generatorsheet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-misc-generatorsheet">
+<h1>topo.misc.generatorsheet<a class="headerlink" href="#topo-misc-generatorsheet" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancec6315a0e3d.svg" usemap="#inheritancec6315a0e3d" class="inheritance"/></div><map id="inheritancec6315a0e3d" name="inheritancec6315a0e3d">
+</map>
+<div class="section" id="module-topo.misc.generatorsheet">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.misc.generatorsheet" title="Permalink to this headline">¶</a></h2>
+<p>GeneratorSheet: a sheet with a pattern generator.</p>
+<dl class="class">
+<dt id="topo.misc.generatorsheet.GeneratorSheet">
+<em class="property">class </em><tt class="descclassname">topo.misc.generatorsheet.</tt><tt class="descname">GeneratorSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/generatorsheet.html#GeneratorSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.generatorsheet.GeneratorSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.sheet-module.html#topo.base.sheet.Sheet" title="topo.base.sheet.Sheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheet.Sheet</span></tt></a></p>
+<p>Sheet for generating a series of 2D patterns.</p>
+<p>Typically generates the patterns by choosing parameters from a
+random distribution, but can use any mechanism.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">period</span></tt> (<em>allow_None=False, bounds=(0, None), constant=True, default=1, inclusive_bounds=(False, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Delay (in Simulation time) between generating new input patterns.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">phase</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Delay after the start of the Simulation (at time zero) before
+        generating an input pattern.  For a clocked, feedforward simulation,
+        one would typically want to use a small nonzero phase and use delays less
+        than the user-visible step size (typically 1.0), so that inputs are
+        generated and processed before this step is complete.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">input_generator</span></tt> (<em>allow_None=False, constant=False, default=&lt;Constant Constant00036&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Specifies a particular PatternGenerator type to use when creating patterns.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.misc.generatorsheet.GeneratorSheet.generate">
+<tt class="descname">generate</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/generatorsheet.html#GeneratorSheet.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.generatorsheet.GeneratorSheet.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the output and send it out the Activity port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.generatorsheet.GeneratorSheet.pop_input_generator">
+<tt class="descname">pop_input_generator</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/generatorsheet.html#GeneratorSheet.pop_input_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.generatorsheet.GeneratorSheet.pop_input_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discard the current input_generator, and retrieve the previous one from the stack.</p>
+<p>Warns if no input_generator is available on the stack.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.generatorsheet.GeneratorSheet.push_input_generator">
+<tt class="descname">push_input_generator</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/generatorsheet.html#GeneratorSheet.push_input_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.generatorsheet.GeneratorSheet.push_input_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push the current input_generator onto a stack for future retrieval.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.generatorsheet.GeneratorSheet.set_input_generator">
+<tt class="descname">set_input_generator</tt><big>(</big><em>new_ig</em>, <em>push_existing=False</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/generatorsheet.html#GeneratorSheet.set_input_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.generatorsheet.GeneratorSheet.set_input_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the input_generator, overwriting the existing one by default.</p>
+<p>If push_existing is false, the existing input_generator is
+discarded permanently.  Otherwise, the existing one is put
+onto a stack, and can later be restored by calling
+pop_input_generator.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.misc.generatorsheet</a><ul>
+<li><a class="reference internal" href="#module-topo.misc.generatorsheet">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.misc.generatorsheet-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

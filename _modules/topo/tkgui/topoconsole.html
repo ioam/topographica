@@ -1,0 +1,956 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui.topoconsole &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="topo.tkgui" href="../tkgui.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" accesskey="U">topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tkgui.topoconsole</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">TopoConsole class file.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c"># CB: does the status bar need to keep saying &#39;ok&#39;? Sometimes</span>
+<span class="c"># positive feedback is useful, but &#39;ok&#39; doesn&#39;t seem too helpful.</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">__main__</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">import</span> <span class="nn">string</span>
+
+<span class="kn">from</span> <span class="nn">Tkinter</span> <span class="kn">import</span> <span class="n">Frame</span><span class="p">,</span> <span class="n">Button</span><span class="p">,</span> \
+     <span class="n">LEFT</span><span class="p">,</span> <span class="n">YES</span><span class="p">,</span> <span class="n">Label</span><span class="p">,</span> <span class="n">DISABLED</span><span class="p">,</span> \
+     <span class="n">NORMAL</span><span class="p">,</span> <span class="n">DoubleVar</span>
+<span class="kn">from</span> <span class="nn">tkFileDialog</span> <span class="kn">import</span> <span class="n">asksaveasfilename</span><span class="p">,</span><span class="n">askopenfilename</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">normalize_path</span><span class="p">,</span><span class="n">resolve_path</span>
+<span class="kn">import</span> <span class="nn">paramtk</span> <span class="kn">as</span> <span class="nn">tk</span>
+
+
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.plotgroup</span> <span class="kn">import</span> <span class="n">plotgroups</span><span class="p">,</span> <span class="n">FeatureCurvePlotGroup</span>
+<span class="kn">from</span> <span class="nn">topo.misc.keyedlist</span> <span class="kn">import</span> <span class="n">KeyedList</span>
+<span class="kn">from</span> <span class="nn">topo.misc.commandline</span> <span class="kn">import</span> <span class="n">sim_name_from_filename</span>
+<span class="kn">import</span> <span class="nn">topo.misc.genexamples</span>
+<span class="kn">import</span> <span class="nn">topo.command</span>
+
+<span class="kn">import</span> <span class="nn">topo.tkgui</span>
+
+<span class="kn">from</span> <span class="nn">templateplotgrouppanel</span> <span class="kn">import</span> <span class="n">TemplatePlotGroupPanel</span>
+<span class="kn">from</span> <span class="nn">featurecurvepanel</span> <span class="kn">import</span> <span class="n">FeatureCurvePanel</span>
+<span class="kn">from</span> <span class="nn">projectionpanel</span> <span class="kn">import</span> <span class="n">CFProjectionPanel</span><span class="p">,</span><span class="n">ProjectionActivityPanel</span><span class="p">,</span><span class="n">ConnectionFieldsPanel</span><span class="p">,</span><span class="n">RFProjectionPanel</span>
+<span class="kn">from</span> <span class="nn">testpattern</span> <span class="kn">import</span> <span class="n">TestPattern</span>
+<span class="kn">from</span> <span class="nn">editor</span> <span class="kn">import</span> <span class="n">ModelEditor</span>
+
+
+<span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="o">.</span><span class="n">window_icon_path</span> <span class="o">=</span> <span class="n">resolve_path</span><span class="p">(</span><span class="s">&#39;tkgui/icons/topo.xbm&#39;</span><span class="p">)</span>
+
+<span class="n">SCRIPT_FILETYPES</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;Topographica scripts&#39;</span><span class="p">,</span><span class="s">&#39;*.ty&#39;</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s">&#39;Python scripts&#39;</span><span class="p">,</span><span class="s">&#39;*.py&#39;</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s">&#39;All files&#39;</span><span class="p">,</span><span class="s">&#39;*&#39;</span><span class="p">)]</span>
+<span class="n">SAVED_FILE_EXTENSION</span> <span class="o">=</span> <span class="s">&#39;.typ&#39;</span>
+<span class="n">SAVED_FILETYPES</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;Topographica saved networks&#39;</span><span class="p">,</span>
+                    <span class="s">&#39;*&#39;</span><span class="o">+</span><span class="n">SAVED_FILE_EXTENSION</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s">&#39;All files&#39;</span><span class="p">,</span><span class="s">&#39;*&#39;</span><span class="p">)]</span>
+
+<span class="n">turl</span> <span class="o">=</span> <span class="s">&quot;http://topographica.org/&quot;</span>
+<span class="n">userman</span> <span class="o">=</span> <span class="s">&quot;User_Manual/index.html&quot;</span>
+<span class="n">tuts</span> <span class="o">=</span> <span class="s">&quot;Tutorials/index.html&quot;</span>
+<span class="n">refman</span> <span class="o">=</span> <span class="s">&quot;Reference_Manual/index.html&quot;</span>
+<span class="n">plotman</span> <span class="o">=</span> <span class="s">&quot;User_Manual/plotting.html&quot;</span>
+
+<span class="c"># for deb on ubuntu; will need to check others</span>
+<span class="n">pkgdoc</span> <span class="o">=</span> <span class="s">&quot;/usr/share/doc/topographica/doc/&quot;</span>
+
+<span class="c"># Documentation locations: locally built and web urls.</span>
+<span class="n">user_manual_locations</span>      <span class="o">=</span> <span class="p">(</span><span class="s">&#39;doc/&#39;</span><span class="o">+</span><span class="n">userman</span><span class="p">,</span>
+                              <span class="n">pkgdoc</span><span class="o">+</span><span class="n">userman</span><span class="p">,</span>
+                              <span class="n">turl</span><span class="o">+</span><span class="n">userman</span><span class="p">)</span>
+<span class="n">tutorials_locations</span>        <span class="o">=</span> <span class="p">(</span><span class="s">&#39;doc/&#39;</span><span class="o">+</span><span class="n">tuts</span><span class="p">,</span>
+                              <span class="n">pkgdoc</span><span class="o">+</span><span class="n">tuts</span><span class="p">,</span>
+                              <span class="n">turl</span><span class="o">+</span><span class="n">tuts</span><span class="p">)</span>
+<span class="n">reference_manual_locations</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;doc/&#39;</span><span class="o">+</span><span class="n">refman</span><span class="p">,</span>
+                              <span class="n">pkgdoc</span><span class="o">+</span><span class="n">refman</span><span class="p">,</span>
+                              <span class="n">turl</span><span class="o">+</span><span class="n">refman</span><span class="p">)</span>
+<span class="n">python_doc_locations</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;http://www.python.org/doc/&#39;</span><span class="p">,)</span>
+<span class="n">topo_www_locations</span> <span class="o">=</span> <span class="p">(</span><span class="n">turl</span><span class="p">,)</span>
+<span class="n">plotting_help_locations</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;doc/&#39;</span><span class="o">+</span><span class="n">plotman</span><span class="p">,</span>
+                           <span class="n">pkgdoc</span><span class="o">+</span><span class="n">plotman</span><span class="p">,</span>
+                           <span class="n">turl</span><span class="o">+</span><span class="n">plotman</span><span class="p">)</span>
+
+<span class="c"># If a particular plotgroup_template needs (or works better with) a</span>
+<span class="c"># specific subclass of PlotPanel, the writer of the new subclass</span>
+<span class="c"># or the plotgroup_template can declare here that that template</span>
+<span class="c"># should use a specific PlotPanel subclass.  For example:</span>
+<span class="c">#   plotpanel_classes[&#39;Hue Pref Map&#39;] = HuePreferencePanel</span>
+<span class="n">plotpanel_classes</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="c"># CEBALERT: why are the other plotpanel_classes updates at the end of this file?</span>
+
+
+
+
+<span class="k">def</span> <span class="nf">open_plotgroup_panel</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span><span class="n">plotgroup</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">class_</span><span class="o">.</span><span class="n">valid_context</span><span class="p">():</span>
+        <span class="n">win</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">some_area</span><span class="o">.</span><span class="n">new_window</span><span class="p">()</span>
+        <span class="n">panel</span> <span class="o">=</span> <span class="n">class_</span><span class="p">(</span><span class="n">win</span><span class="p">,</span><span class="n">plotgroup</span><span class="o">=</span><span class="n">plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">panel</span><span class="o">.</span><span class="n">dock</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">some_area</span><span class="o">.</span><span class="n">eject</span><span class="p">(</span><span class="n">win</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">some_area</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">win</span><span class="p">)</span>
+
+        <span class="n">panel</span><span class="o">.</span><span class="n">refresh_title</span><span class="p">()</span>
+
+        <span class="n">panel</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">expand</span><span class="o">=</span><span class="s">&#39;yes&#39;</span><span class="p">,</span><span class="n">fill</span><span class="o">=</span><span class="s">&#39;both&#39;</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">sizeright</span><span class="p">()</span>
+
+        <span class="c">#frame.sizeright()</span>
+
+        <span class="c">#topo.guimain.messageBar.message(&#39;state&#39;, &#39;OK&#39;)</span>
+        <span class="k">return</span> <span class="n">panel</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span>
+            <span class="s">&#39;No suitable objects in this simulation for this operation.&#39;</span><span class="p">)</span>
+
+
+
+
+
+<div class="viewcode-block" id="PlotsMenuEntry"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.PlotsMenuEntry">[docs]</a><span class="k">class</span> <span class="nc">PlotsMenuEntry</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores information about a Plots menu command</span>
+<span class="sd">    (including the command itself, and the plotgroup template).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plotgroup</span><span class="p">,</span><span class="n">class_</span><span class="o">=</span><span class="n">TemplatePlotGroupPanel</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store the template, and set the class that will be created by this menu entry</span>
+
+<span class="sd">        If users want to extend the Plot Panel classes, then they</span>
+<span class="sd">        should add entries to the plotpanel_classes dictionary.</span>
+<span class="sd">        If no entry is defined there, then the default class is used.</span>
+
+<span class="sd">        The class_ is overridden for any special cases listed in this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PlotsMenuEntry</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span> <span class="o">=</span> <span class="n">plotgroup</span>
+
+        <span class="c"># Special cases.  These classes are specific to the topo/tkgui</span>
+        <span class="c"># directory and therefore this link must be made within the tkgui</span>
+        <span class="c"># files.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="p">,</span><span class="n">FeatureCurvePlotGroup</span><span class="p">):</span>
+            <span class="n">class_</span> <span class="o">=</span> <span class="n">plotpanel_classes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">FeatureCurvePanel</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_</span> <span class="o">=</span> <span class="n">plotpanel_classes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">class_</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiate the class_ (used as menu commands&#39; &#39;command&#39; attribute).</span>
+
+<span class="sd">        Keyword args are passed to the class_.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_plotgroup</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="p">)</span>
+
+        <span class="c"># CB: hack to share plot_templates with the current</span>
+        <span class="c"># plotgroup in plotgroups</span>
+        <span class="n">new_plotgroup</span><span class="o">.</span><span class="n">plot_templates</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">plotgroups</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">plot_templates</span>
+
+        <span class="k">return</span> <span class="n">open_plotgroup_panel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_</span><span class="p">,</span><span class="n">new_plotgroup</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+<span class="c"># Notebook only available for Tkinter&gt;=8.5</span></div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">paramtk.tilewrapper</span> <span class="kn">import</span> <span class="n">Notebook</span>
+<div class="viewcode-block" id="DockManager"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.DockManager">[docs]</a>    <span class="k">class</span> <span class="nc">DockManager</span><span class="p">(</span><span class="n">Notebook</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Manages windows that can be tabs in a notebook, or toplevels.&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+            <span class="n">Notebook</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="n">cnf</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">def</span> <span class="nf">_set_tab_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">win</span><span class="p">,</span><span class="n">title</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">[</span><span class="n">win</span><span class="p">],</span><span class="n">text</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_set_toplevel_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">win</span><span class="p">,</span><span class="n">title</span><span class="p">):</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;: &quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">prefix</span><span class="o">+</span><span class="n">title</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;wm&quot;</span><span class="p">,</span><span class="s">&quot;title&quot;</span><span class="p">,</span><span class="n">win</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span><span class="n">title</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">[</span><span class="n">child</span><span class="p">]</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabs</span><span class="p">())</span>
+            <span class="n">Notebook</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">child</span><span class="p">,</span><span class="n">cnf</span><span class="o">=</span><span class="n">cnf</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="c">##     def unhide(self,win):</span>
+    <span class="c">##         if win in self._tab_ids:</span>
+    <span class="c">##             self.tab(self._tab_ids[win],state=&#39;normal&#39;)</span>
+
+        <span class="k">def</span> <span class="nf">new_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">win</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">status</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c">#self.consume(win)</span>
+            <span class="k">return</span> <span class="n">win</span>
+
+        <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">win</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">win</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&#39;wm&#39;</span><span class="p">,</span><span class="s">&#39;forget&#39;</span><span class="p">,</span><span class="n">win</span><span class="o">.</span><span class="n">_w</span><span class="p">)</span>
+                <span class="n">win</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_tab_title</span><span class="p">(</span><span class="n">win</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">win</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">eject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">win</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">win</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">forget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">[</span><span class="n">win</span><span class="p">])</span>
+
+                <span class="c"># manage my tab ids (HACK)</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">[</span><span class="n">win</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">-=</span><span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tab_ids</span><span class="p">[</span><span class="n">w</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&#39;wm&#39;</span><span class="p">,</span><span class="s">&#39;manage&#39;</span><span class="p">,</span><span class="n">win</span><span class="o">.</span><span class="n">_w</span><span class="p">)</span>
+                <span class="n">win</span><span class="o">.</span><span class="n">renew</span><span class="p">()</span>
+                <span class="n">win</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_toplevel_title</span><span class="p">(</span><span class="n">win</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">win</span>
+</div>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">FakeDockManager</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_set_tab_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">def</span> <span class="nf">_set_toplevel_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">win</span><span class="p">,</span><span class="n">title</span><span class="p">):</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;: &quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">prefix</span><span class="o">+</span><span class="n">title</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s">&quot;wm&quot;</span><span class="p">,</span><span class="s">&quot;title&quot;</span><span class="p">,</span><span class="n">win</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">def</span> <span class="nf">new_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">win</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">status</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">win</span>
+        <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">win</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">def</span> <span class="nf">eject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">win</span><span class="p">):</span>
+            <span class="n">win</span><span class="o">.</span><span class="n">renew</span><span class="p">()</span>
+            <span class="n">win</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_toplevel_title</span><span class="p">(</span><span class="n">win</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">win</span>
+
+    <span class="n">DockManager</span> <span class="o">=</span> <span class="n">FakeDockManager</span>
+
+
+<span class="c"># This is really a hack. There doesn&#39;t seem to be any easy way to tie</span>
+<span class="c"># an exception to the window from which it originated. (I couldn&#39;t</span>
+<span class="c"># find an example of tkinter software displaying a gui exception on</span>
+<span class="c"># the originating window.)</span>
+<span class="k">def</span> <span class="nf">_tkinter_report_exception</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
+    <span class="n">exc</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tb</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_value</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_traceback</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;(</span><span class="si">%s</span><span class="s">) </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="n">val</span><span class="p">)</span>
+    <span class="c"># If the supplied widget has no master, it&#39;s probably the Tk</span>
+    <span class="c"># instance. In that case, resort to the &#39;last-one-set&#39; hack (see</span>
+    <span class="c"># CEBALERT &quot;provide a way of allowing other gui components&quot; in</span>
+    <span class="c"># topo/param/tk.py).</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">widget</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">_last_one_set</span>
+
+    <span class="n">stat</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="n">widget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">widget</span><span class="o">.</span><span class="n">master</span><span class="p">):</span>
+        <span class="c"># CEBALERT: should rename all status bars to the same thing</span>
+        <span class="c"># (status_bar)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span><span class="s">&#39;status&#39;</span><span class="p">):</span>
+            <span class="n">stat</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">status</span>
+            <span class="k">break</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span><span class="s">&#39;messageBar&#39;</span><span class="p">):</span>
+            <span class="n">stat</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">messageBar</span>
+            <span class="k">break</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">master</span>
+
+    <span class="k">if</span> <span class="n">stat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">stat</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">guimain</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># BK-NOTE: Default is now to display full trace always. Any user</span>
+    <span class="c"># errors should be caught as special exception cases</span>
+
+    <span class="c"># BK-ALERT: Want to raise errors vs print, however this currently crashes ipython.</span>
+    <span class="c">#raise</span>
+
+    <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">traceback</span>
+    <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+
+
+<span class="kn">import</span> <span class="nn">Tkinter</span>
+
+<div class="viewcode-block" id="TopoConsole"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole">[docs]</a><span class="k">class</span> <span class="nc">TopoConsole</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="p">,</span><span class="n">tk</span><span class="o">.</span><span class="n">TkParameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main window for the Tk-based GUI.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_getmenubar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">menubar</span>
+
+    <span class="n">menubar</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_getmenubar</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">menu_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Allow dictionary-style access to the menu bar.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="p">[</span><span class="n">menu_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">root</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">root</span><span class="p">,</span><span class="n">status</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">TkParameterized</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">root</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c"># Instead of displaying tracebacks on the commandline, try to display</span>
+        <span class="c"># them on the originating window.</span>
+        <span class="c"># CEBALERT: on destroy(), ought to revert this</span>
+        <span class="n">Tkinter</span><span class="o">.</span><span class="n">Misc</span><span class="o">.</span><span class="n">_report_exception</span><span class="o">=</span><span class="n">_tkinter_report_exception</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh_panels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_widgets</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="c"># If -g passed *before* scripts on commandline, this is useless.</span>
+                                  <span class="c"># So topo.misc.commandline sets the title as its last action (if -g)</span>
+
+
+
+        <span class="c"># catch click on the &#39;x&#39;: offers choice to quit or not</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">quit_topographica</span><span class="p">)</span>
+
+
+        <span class="c">##########</span>
+        <span class="c">### Make cascade menus open automatically on linux when the mouse</span>
+        <span class="c">### is over the menu title.</span>
+        <span class="c">### [Tkinter-discuss] Cascade menu issue</span>
+        <span class="c">### http://mail.python.org/pipermail/tkinter-discuss/2006-August/000864.html</span>
+        <span class="k">if</span> <span class="n">topo</span><span class="o">.</span><span class="n">tkgui</span><span class="o">.</span><span class="n">system_platform</span> <span class="ow">is</span> <span class="s">&#39;linux&#39;</span><span class="p">:</span>
+            <span class="n">activate_cascade</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">            if {[%W cget -type] != {menubar} &amp;&amp; [%W type active] == {cascade}} {</span>
+<span class="s">                %W postcascade active</span>
+<span class="s">               }</span>
+<span class="s">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bind_class</span><span class="p">(</span><span class="s">&quot;Menu&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;&lt;MenuSelect&gt;&gt;&quot;</span><span class="p">,</span> <span class="n">activate_cascade</span><span class="p">)</span>
+        <span class="c">##########</span>
+
+        <span class="c"># Install warning and message handling</span>
+        <span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">Parameterized</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__orig_P_warning</span> <span class="o">=</span> <span class="n">Parameterized</span><span class="o">.</span><span class="n">warning</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__orig_P_message</span> <span class="o">=</span> <span class="n">Parameterized</span><span class="o">.</span><span class="n">message</span>
+        <span class="nb">type</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">Parameterized</span><span class="p">,</span><span class="s">&#39;warning&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">gui_warning</span><span class="p">)</span>
+        <span class="nb">type</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">Parameterized</span><span class="p">,</span><span class="s">&#39;message&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">gui_message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gui_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">stat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_status_bar</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">stat</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__orig_P_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gui_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">stat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_status_bar</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">stat</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__orig_P_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">newtitle</span> <span class="o">=</span> <span class="s">&quot;Topographica&quot;</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">:</span> <span class="n">newtitle</span><span class="o">+=</span><span class="s">&quot;: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">t</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">newtitle</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_init_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c">## CEBALERT: now we can have multiple operations at the same time,</span>
+        <span class="c">## status bar could be improved to show all tasks?</span>
+
+        <span class="c"># CEBALERT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">some_area</span> <span class="o">=</span> <span class="n">DockManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">some_area</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="s">&quot;both&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c">### Balloon, for pop-up help</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balloon</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Balloon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="c">### Top-level (native) menu bar</span>
+        <span class="c">#self.menubar = tk.ControllableMenu(self.content)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="p">)</span>
+
+        <span class="c">#self.menu_balloon = Balloon(topo.tkgui.root)</span>
+
+        <span class="c"># no menubar in tile yet</span>
+        <span class="c"># http://news.hping.org/comp.lang.tcl.archive/4679.html</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__simulation_menu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_plots_menu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_plots_menu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__help_menu</span><span class="p">()</span>
+
+
+        <span class="c">### Running the simulation</span>
+        <span class="n">run_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="n">run_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s">&#39;top&#39;</span><span class="p">,</span><span class="n">fill</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="n">padx</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="n">pady</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_frame</span> <span class="o">=</span> <span class="n">run_frame</span>
+
+        <span class="n">Label</span><span class="p">(</span><span class="n">run_frame</span><span class="p">,</span><span class="n">text</span><span class="o">=</span><span class="s">&#39;Run for: &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">LEFT</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_for_var</span><span class="o">=</span><span class="n">DoubleVar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_for_var</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">run_for</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">TaggedSlider</span><span class="p">(</span><span class="n">run_frame</span><span class="p">,</span>
+                               <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_for_var</span><span class="p">,</span>
+                               <span class="n">tag_width</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+                               <span class="n">slider_length</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+                               <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">20000</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balloon</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">run_for</span><span class="p">,</span><span class="s">&quot;Duration to run the simulation, e.g. 0.0500, 1.0, or 20000.&quot;</span><span class="p">)</span>
+        <span class="n">run_for</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">LEFT</span><span class="p">,</span><span class="n">fill</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="n">expand</span><span class="o">=</span><span class="n">YES</span><span class="p">)</span>
+        <span class="n">run_for</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s">&quot;&lt;Return&gt;&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">)</span>
+
+        <span class="c"># When return is pressed, the TaggedSlider updates itself...but we also want to run</span>
+        <span class="c"># the simulation in this case.</span>
+        <span class="n">run_frame</span><span class="o">.</span><span class="n">optional_action</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_simulation</span>
+
+        <span class="n">go_button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">run_frame</span><span class="p">,</span><span class="n">text</span><span class="o">=</span><span class="s">&quot;Go&quot;</span><span class="p">,</span>
+                           <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">)</span>
+        <span class="n">go_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">LEFT</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">balloon</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">go_button</span><span class="p">,</span><span class="s">&quot;Run the simulation for the specified duration.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">run_frame</span><span class="p">,</span><span class="n">text</span><span class="o">=</span><span class="s">&quot;Step&quot;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balloon</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_button</span><span class="p">,</span><span class="s">&quot;Run the simulation through the time at which the next events are processed.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">LEFT</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizeright</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">__simulation_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the simulation menu options to the menubar.&quot;&quot;&quot;</span>
+        <span class="n">simulation_menu</span> <span class="o">=</span> <span class="n">ControllableMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="p">,</span><span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Simulation&#39;</span><span class="p">,</span><span class="n">menu</span><span class="o">=</span><span class="n">simulation_menu</span><span class="p">)</span>
+
+        <span class="n">simulation_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Run script&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_script</span><span class="p">)</span>
+        <span class="n">simulation_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Save script&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">save_script_repr</span><span class="p">)</span>
+        <span class="n">simulation_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Load snapshot&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">load_snapshot</span><span class="p">)</span>
+        <span class="n">simulation_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Save snapshot&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">save_snapshot</span><span class="p">)</span>
+        <span class="c">#simulation_menu.add_command(label=&#39;Reset&#39;,command=self.reset_network)</span>
+        <span class="n">simulation_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Test Pattern&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">open_test_pattern</span><span class="p">)</span>
+
+        <span class="n">simulation_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Model Editor&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">open_model_editor</span><span class="p">)</span>
+        <span class="n">simulation_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Quit&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">quit_topographica</span><span class="p">)</span>
+
+
+
+    <span class="k">def</span> <span class="nf">open_test_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">open_plotgroup_panel</span><span class="p">(</span><span class="n">TestPattern</span><span class="p">)</span>
+
+
+
+
+
+
+    <span class="k">def</span> <span class="nf">__create_plots_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the plot menu to the menubar, with Basic plots on the menu itself and</span>
+<span class="sd">        others in cascades by category (the plots come from plotgroup_templates).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plots_menu</span> <span class="o">=</span> <span class="n">ControllableMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="p">,</span><span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Plots&#39;</span><span class="p">,</span><span class="n">menu</span><span class="o">=</span><span class="n">plots_menu</span><span class="p">)</span>
+
+
+    <span class="c"># CEBALERT: should split other menus in same way as plots (create/refresh)</span>
+    <span class="k">def</span> <span class="nf">refresh_plots_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">plots_menu</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;Plots&#39;</span><span class="p">]</span>
+        <span class="n">plots_menu</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&#39;end&#39;</span><span class="p">)</span>
+
+        <span class="c"># create menu entries, and get list of categories</span>
+        <span class="n">entries</span><span class="o">=</span><span class="n">KeyedList</span><span class="p">()</span> <span class="c"># keep the order of plotgroup_templates (which is also KL)</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span><span class="n">plotgroup</span> <span class="ow">in</span> <span class="n">plotgroups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">entries</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">PlotsMenuEntry</span><span class="p">(</span><span class="n">plotgroup</span><span class="p">)</span>
+            <span class="n">categories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">category</span><span class="p">)</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">categories</span><span class="p">))</span>
+
+
+        <span class="c"># The Basic category items appear on the menu itself.</span>
+        <span class="k">assert</span> <span class="s">&#39;Basic&#39;</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">,</span> <span class="s">&quot;&#39;Basic&#39; is the category for the standard Plots menu entries.&quot;</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span><span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">category</span><span class="o">==</span><span class="s">&#39;Basic&#39;</span><span class="p">:</span>
+                    <span class="n">plots_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">__call__</span><span class="p">)</span>
+
+        <span class="n">categories</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;Basic&#39;</span><span class="p">)</span>
+
+        <span class="n">plots_menu</span><span class="o">.</span><span class="n">add_separator</span><span class="p">()</span>
+
+        <span class="c"># Add the other categories to the menu as cascades, and the plots of each category to</span>
+        <span class="c"># their cascades.</span>
+        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
+            <span class="n">category_menu</span> <span class="o">=</span> <span class="n">ControllableMenu</span><span class="p">(</span><span class="n">plots_menu</span><span class="p">,</span><span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">plots_menu</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">category</span><span class="p">,</span><span class="n">menu</span><span class="o">=</span><span class="n">category_menu</span><span class="p">)</span>
+
+            <span class="c"># could probably search more efficiently than this</span>
+            <span class="k">for</span> <span class="n">label</span><span class="p">,</span><span class="n">entry</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">entries</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">category</span><span class="o">==</span><span class="n">category</span><span class="p">:</span>
+                    <span class="n">category_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">__call__</span><span class="p">)</span>
+
+
+        <span class="n">plots_menu</span><span class="o">.</span><span class="n">add_separator</span><span class="p">()</span>
+
+        <span class="n">plots_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Help&quot;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="o">=</span><span class="n">plotting_help_locations</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_location</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+
+    <span class="k">def</span> <span class="nf">__help_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the help menu options.&quot;&quot;&quot;</span>
+
+        <span class="n">help_menu</span> <span class="o">=</span> <span class="n">ControllableMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="p">,</span><span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;help&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Help&#39;</span><span class="p">,</span><span class="n">menu</span><span class="o">=</span><span class="n">help_menu</span><span class="p">)</span>
+
+        <span class="n">help_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;About&#39;</span><span class="p">,</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">new_about_window</span><span class="p">)</span>
+        <span class="n">help_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;User Manual&quot;</span><span class="p">,</span>
+                              <span class="n">command</span><span class="o">=</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="o">=</span><span class="n">user_manual_locations</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_location</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+        <span class="n">help_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Tutorials&quot;</span><span class="p">,</span>
+                              <span class="n">command</span><span class="o">=</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="o">=</span><span class="n">tutorials_locations</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_location</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+        <span class="n">help_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Examples&quot;</span><span class="p">,</span>
+                              <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_example_script</span><span class="p">)</span>
+
+        <span class="n">help_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Reference Manual&quot;</span><span class="p">,</span>
+                              <span class="n">command</span><span class="o">=</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="o">=</span><span class="n">reference_manual_locations</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_location</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+        <span class="n">help_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Topographica.org&quot;</span><span class="p">,</span>
+                              <span class="n">command</span><span class="o">=</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="o">=</span><span class="n">topo_www_locations</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_location</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+        <span class="n">help_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Python documentation&quot;</span><span class="p">,</span>
+                              <span class="n">command</span><span class="o">=</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="o">=</span><span class="n">python_doc_locations</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_location</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+
+
+
+<div class="viewcode-block" id="TopoConsole.quit_topographica"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.quit_topographica">[docs]</a>    <span class="k">def</span> <span class="nf">quit_topographica</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">check</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">exit_status</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Quit topographica.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span> <span class="ow">or</span> <span class="p">(</span><span class="n">check</span> <span class="ow">and</span> <span class="n">tk</span><span class="o">.</span><span class="n">askyesno</span><span class="p">(</span><span class="s">&quot;Quit Topographica&quot;</span><span class="p">,</span><span class="s">&quot;Really quit?&quot;</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+            <span class="c"># matplotlib&#39;s tk backend starts its own Tk instances; we</span>
+            <span class="c"># need to close these ourselves (at least to avoid error</span>
+            <span class="c"># message about &#39;unusual termination&#39; in Windows).</span>
+            <span class="k">try</span><span class="p">:</span> <span class="c"># not that there should be an error, but just in case...</span>
+                <span class="kn">import</span> <span class="nn">matplotlib._pylab_helpers</span>
+                <span class="k">for</span> <span class="n">figman</span> <span class="ow">in</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">_pylab_helpers</span><span class="o">.</span><span class="n">Gcf</span><span class="o">.</span><span class="n">get_all_fig_managers</span><span class="p">():</span>
+                    <span class="n">figman</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">print</span> <span class="s">&quot;Quit selected; exiting&quot;</span>
+
+            <span class="c"># Workaround for obscure problem on some UNIX systems</span>
+            <span class="c"># as of 4/2007, probably including Fedora Core 5.</span>
+            <span class="c"># On these systems, if Topographica is started from a</span>
+            <span class="c"># bash prompt and then quit from the Tkinter GUI (as</span>
+            <span class="c"># opposed to using Ctrl-D in the terminal), the</span>
+            <span class="c"># terminal would suppress echoing of all future user</span>
+            <span class="c"># input.  stty sane restores the terminal to sanity,</span>
+            <span class="c"># but it is not clear why this is necessary.</span>
+            <span class="c"># For more info:</span>
+            <span class="c"># http://groups.google.com/group/comp.lang.python/browse_thread/thread/68d0f33c8eb2e02d</span>
+            <span class="k">if</span> <span class="n">topo</span><span class="o">.</span><span class="n">tkgui</span><span class="o">.</span><span class="n">system_platform</span><span class="o">==</span><span class="s">&quot;linux&quot;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&#39;EMACS&#39;</span><span class="p">)</span><span class="o">!=</span><span class="s">&#39;t&#39;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;stty sane&quot;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+            <span class="c"># CEBALERT: re. above. Shouldn&#39;t we be able to store the</span>
+            <span class="c"># output of &quot;stty --save&quot; before starting the gui, then</span>
+            <span class="c"># ensure that when the gui exits (however badly it</span>
+            <span class="c"># happens) run &quot;stty saved_settings&quot;?</span>
+
+            <span class="c"># CEBALERT: there was no call to self.master.destroy()</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">exit_status</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="TopoConsole.run_script"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.run_script">[docs]</a>    <span class="k">def</span> <span class="nf">run_script</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dialog to run a user-selected script</span>
+
+<span class="sd">        The script is exec&#39;d in __main__.__dict__ (i.e. as if it were specified on the commandline.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="n">askopenfilename</span><span class="p">(</span><span class="n">initialdir</span><span class="o">=</span><span class="n">normalize_path</span><span class="p">(),</span><span class="n">filetypes</span><span class="o">=</span><span class="n">SCRIPT_FILETYPES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">script</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,(),</span><span class="bp">None</span><span class="p">):</span> <span class="c"># (representing the various ways no script was selected in the dialog)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Run canceled&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">execfile</span><span class="p">(</span><span class="n">script</span><span class="p">,</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Ran &#39;</span> <span class="o">+</span> <span class="n">script</span><span class="p">)</span>
+            <span class="n">sim_name_from_filename</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c"># CEBALERT: duplicates most of run_script()</span></div>
+    <span class="k">def</span> <span class="nf">run_example_script</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+
+        <span class="n">script</span> <span class="o">=</span> <span class="n">askopenfilename</span><span class="p">(</span><span class="n">initialdir</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">genexamples</span><span class="o">.</span><span class="n">find_examples</span><span class="p">(),</span>
+                                 <span class="n">filetypes</span><span class="o">=</span><span class="n">SCRIPT_FILETYPES</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">script</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,(),</span><span class="bp">None</span><span class="p">):</span> <span class="c"># (representing the various ways no script was selected in the dialog)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;No example opened&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">execfile</span><span class="p">(</span><span class="n">script</span><span class="p">,</span><span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Ran &#39;</span> <span class="o">+</span> <span class="n">script</span><span class="p">)</span>
+            <span class="n">sim_name_from_filename</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+
+
+    <span class="k">def</span> <span class="nf">save_script_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">script_name</span> <span class="o">=</span> <span class="n">asksaveasfilename</span><span class="p">(</span><span class="n">filetypes</span><span class="o">=</span><span class="n">SCRIPT_FILETYPES</span><span class="p">,</span>
+                                        <span class="n">initialdir</span><span class="o">=</span><span class="n">normalize_path</span><span class="p">(),</span>
+                                        <span class="n">initialfile</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span><span class="o">+</span><span class="s">&quot;_script_repr.ty&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">script_name</span><span class="p">:</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">save_script_repr</span><span class="p">(</span><span class="n">script_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Script saved to &#39;</span> <span class="o">+</span> <span class="n">script_name</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TopoConsole.load_snapshot"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.load_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">load_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dialog to load a user-selected snapshot (see topo.command.load_snapshot() ).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">askopenfilename</span><span class="p">(</span><span class="n">initialdir</span><span class="o">=</span><span class="n">normalize_path</span><span class="p">(),</span><span class="n">filetypes</span><span class="o">=</span><span class="n">SAVED_FILETYPES</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">snapshot_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,(),</span><span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;No snapshot loaded.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">dynamicinfo</span><span class="p">(</span><span class="s">&#39;Loading snapshot (may take some time)...&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">load_snapshot</span><span class="p">(</span><span class="n">snapshot_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Loaded snapshot &#39;</span> <span class="o">+</span> <span class="n">snapshot_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="TopoConsole.save_snapshot"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.save_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">save_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dialog to save a snapshot (see topo.command.save_snapshot() ).</span>
+
+<span class="sd">        Adds the file extension .typ if not already present.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">asksaveasfilename</span><span class="p">(</span><span class="n">filetypes</span><span class="o">=</span><span class="n">SAVED_FILETYPES</span><span class="p">,</span>
+                                          <span class="n">initialdir</span><span class="o">=</span><span class="n">normalize_path</span><span class="p">(),</span>
+                                          <span class="n">initialfile</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span><span class="o">+</span><span class="s">&quot;.typ&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">snapshot_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,(),</span><span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;No snapshot saved.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">snapshot_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.typ&#39;</span><span class="p">):</span>
+                <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">snapshot_name</span> <span class="o">+</span> <span class="n">SAVED_FILE_EXTENSION</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">dynamicinfo</span><span class="p">(</span><span class="s">&#39;Saving snapshot (may take some time)...&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span>
+            <span class="n">topo</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">save_snapshot</span><span class="p">(</span><span class="n">snapshot_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Snapshot saved to &#39;</span> <span class="o">+</span> <span class="n">snapshot_name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="TopoConsole.auto_refresh"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.auto_refresh">[docs]</a>    <span class="k">def</span> <span class="nf">auto_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Refresh all windows in auto_refresh_panels.</span>
+
+<span class="sd">        Panels can add and remove themselves to the list; those in the list</span>
+<span class="sd">        will have their refresh() method called whenever this console&#39;s</span>
+<span class="sd">        autorefresh() is called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">win</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh_panels</span><span class="p">:</span>
+            <span class="n">win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_step_button_state</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span>
+
+
+    <span class="c">### CEBERRORALERT: why doesn&#39;t updatecommand(&quot;display=True&quot;) for an</span>
+    <span class="c">### orientation preference map measurement work with the</span>
+    <span class="c">### hierarchical example? I guess this is the reason I thought the</span>
+    <span class="c">### updating never worked properly (or I really did break it</span>
+    <span class="c">### recently - or I&#39;m confused)...</span></div>
+<div class="viewcode-block" id="TopoConsole.refresh_activity_windows"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.refresh_activity_windows">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_activity_windows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update any windows with a plotgroup_key ending in &#39;Activity&#39;.</span>
+
+<span class="sd">        Used primarily for debugging long scripts that present a lot of activity patterns.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">win</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh_panels</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;.*Activity$&#39;</span><span class="p">,</span><span class="n">win</span><span class="o">.</span><span class="n">plotgroup</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">win</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="TopoConsole.open_model_editor"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.open_model_editor">[docs]</a>    <span class="k">def</span> <span class="nf">open_model_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start the Model editor.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ModelEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">new_about_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">win</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">AppWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">withdraw</span><span class="p">()</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;About Topographica&quot;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">win</span><span class="p">,</span><span class="n">text</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">about</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span><span class="n">justify</span><span class="o">=</span><span class="n">LEFT</span><span class="p">)</span>
+        <span class="n">text</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">LEFT</span><span class="p">)</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">deiconify</span><span class="p">()</span>
+        <span class="c">#self.messageBar.message(&#39;state&#39;, &#39;OK&#39;)</span>
+
+<div class="viewcode-block" id="TopoConsole.open_location"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.open_location">[docs]</a>    <span class="k">def</span> <span class="nf">open_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to open one of the specified locations in a new window of the default</span>
+<span class="sd">        browser. See webbrowser module for more information.</span>
+
+<span class="sd">        locations should be a tuple.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># CB: could have been a list. This is only here because if locations is set</span>
+        <span class="c"># to a string, it will loop over the characters of the string.</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span><span class="nb">tuple</span><span class="p">),</span><span class="s">&quot;locations must be a tuple.&quot;</span>
+
+        <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">existing_location</span> <span class="o">=</span> <span class="n">resolve_path</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+                <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">existing_location</span><span class="p">,</span><span class="n">new</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">autoraise</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Opened local file &#39;</span><span class="o">+</span><span class="n">existing_location</span><span class="o">+</span><span class="s">&#39; in browser.&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="c">###</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">location</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;http&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">location</span><span class="p">,</span><span class="n">new</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">autoraise</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&#39;Opened remote location &#39;</span><span class="o">+</span><span class="n">location</span><span class="o">+</span><span class="s">&#39; in browser.&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="c">###</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="s">&quot;Could not open any of </span><span class="si">%s</span><span class="s"> in a browser.&quot;</span><span class="o">%</span><span class="n">locations</span><span class="p">)</span>
+
+
+    <span class="c"># CEBALERT: need to take care of removing old messages automatically?</span>
+    <span class="c"># (Otherwise callers might always have to pass &#39;ok&#39;.)</span></div>
+    <span class="k">def</span> <span class="nf">status_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">m</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TopoConsole.run_simulation"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.run_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span> <span class="c"># event=None allows use as callback</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the simulation for the duration specified in the</span>
+<span class="sd">        &#39;run for&#39; taggedslider.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fduration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_for_var</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_progress_window</span><span class="p">(</span><span class="n">timer</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">timer</span><span class="p">)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run_and_time</span><span class="p">(</span><span class="n">fduration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span><span class="p">()</span>
+
+
+    <span class="c"># CEBERRORALERT: Step button does strange things at time==0.</span>
+    <span class="c"># E.g. for lissom_oo_or, nothing appears to happen. For</span>
+    <span class="c"># hierarchical, runs to time==10.</span></div>
+    <span class="k">def</span> <span class="nf">run_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
+            <span class="c"># JP: step button should be disabled if there are no events,</span>
+            <span class="c"># but just in case...</span>
+            <span class="k">return</span>
+
+        <span class="c"># JPALERT: This should really use .run_and_time() but it doesn&#39;t support</span>
+        <span class="c"># run(until=...)</span>
+        <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">until</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_refresh</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_step_button_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step_button</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">NORMAL</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step_button</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">DISABLED</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_status_bar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="c"># Hack to find appropriate status bar: Go back through frames</span>
+        <span class="c"># until a widget with a status bar is found, and return it.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s">&#39;f_locals&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="s">&#39;self&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">f_locals</span><span class="p">:</span>
+                        <span class="n">o</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="s">&#39;self&#39;</span><span class="p">]</span>
+                        <span class="c"># (temporary hack til ScrolledFrame cleaned up)</span>
+                        <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="o">!=</span><span class="s">&#39;ScrolledFrame&#39;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">o</span><span class="p">,</span><span class="s">&#39;messageBar&#39;</span><span class="p">):</span>
+                                <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">messageBar</span>
+                            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">o</span><span class="p">,</span><span class="s">&#39;status&#39;</span><span class="p">):</span>
+                                <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">status</span>
+                    <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c">#print &quot;GUI INTERNAL WARNING: failed to determine window on which to display message.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">messageBar</span>
+
+
+<div class="viewcode-block" id="TopoConsole.open_progress_window"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.TopoConsole.open_progress_window">[docs]</a>    <span class="k">def</span> <span class="nf">open_progress_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">timer</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provide a convenient link to progress bars.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">stat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_status_bar</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">stat</span><span class="o">.</span><span class="n">open_progress_window</span><span class="p">(</span><span class="n">timer</span><span class="o">=</span><span class="n">timer</span><span class="p">,</span><span class="n">sim</span><span class="o">=</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">)</span>
+
+
+
+<span class="c"># CEBALERT: of course dictionary access is used as an alternative to</span>
+<span class="c"># the config method or whatever it&#39;s called! So this could cause</span>
+<span class="c"># serious confusion to someone trying to set config options using the</span>
+<span class="c"># dictionary style access rather than .config()! Either document</span>
+<span class="c"># clearly or abandon, and get() and set() to access menu entries by</span>
+<span class="c"># name.</span></div></div>
+<div class="viewcode-block" id="ControllableMenu"><a class="viewcode-back" href="../../../Reference_Manual/topo.tkgui.topoconsole-module.html#topo.tkgui.topoconsole.ControllableMenu">[docs]</a><span class="k">class</span> <span class="nc">ControllableMenu</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">Menu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Menu, but where entries are accessible by name (using</span>
+<span class="sd">    dictionary-style access).</span>
+
+<span class="sd">    ** Not truly compatible with Tkinter; work in progress **</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">named_commands</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">!=</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">plotpanel_classes</span><span class="p">[</span><span class="s">&#39;Connection Fields&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ConnectionFieldsPanel</span>
+    <span class="n">plotpanel_classes</span><span class="p">[</span><span class="s">&#39;RF Projection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RFProjectionPanel</span>
+    <span class="n">plotpanel_classes</span><span class="p">[</span><span class="s">&#39;Projection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFProjectionPanel</span>
+    <span class="n">plotpanel_classes</span><span class="p">[</span><span class="s">&#39;Projection Activity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ProjectionActivityPanel</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/tkgui/topoconsole.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../tkgui.html" >topo.tkgui</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

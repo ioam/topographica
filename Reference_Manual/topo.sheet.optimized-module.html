@@ -1,0 +1,277 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet.optimized &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-sheet-optimized">
+<h1>topo.sheet.optimized<a class="headerlink" href="#topo-sheet-optimized" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance03c0df95af.svg" usemap="#inheritance03c0df95af" class="inheritance"/></div><map id="inheritance03c0df95af" name="inheritance03c0df95af">
+</map>
+<div class="section" id="module-topo.sheet.optimized">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.sheet.optimized" title="Permalink to this headline">¶</a></h2>
+<p>Inline-optimized Sheet classes</p>
+<dl class="function">
+<dt id="topo.sheet.optimized.compute_joint_norm_totals">
+<tt class="descclassname">topo.sheet.optimized.</tt><tt class="descname">compute_joint_norm_totals</tt><big>(</big><em>projlist</em>, <em>active_units_mask=True</em><big>)</big><a class="headerlink" href="#topo.sheet.optimized.compute_joint_norm_totals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute norm_total for each CF in each projection from a group to
+be normalized jointly.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.optimized.SettlingCFSheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.optimized.</tt><tt class="descname">SettlingCFSheet</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.sheet.optimized.SettlingCFSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.sheet-module.html#topo.sheet.JointNormalizingCFSheet" title="topo.sheet.JointNormalizingCFSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.sheet.JointNormalizingCFSheet</span></tt></a></p>
+<p>A JointNormalizingCFSheet implementing the idea of settling.</p>
+<p>Breaks continuous time up into discrete iterations, each
+consisting of a series of activations, up to a fixed number of
+settling steps.  Settling is controlled by the tsettle parameter;
+once that number of settling steps has been reached, an external
+input is required before the sheet will activate again.</p>
+<p>See the LISSOM algorithm (Sirosh and Miikkulainen, Biological
+Cybernetics 71:66-78, 1994) for one example of its usage.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">continuous_learning</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to modify the weights after every settling step.
+        If false, waits until settling is completed before doing learning.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.6, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">mask_init_time</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Determines when a new mask is initialized in each new iteration.
+
+        The mask is reset whenever new input comes in.  Once the
+        activation_count (see tsettle) reaches mask_init_time, the mask
+        is initialized to reflect the current activity profile.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">beginning_of_iteration</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callables to be executed at the beginning of each iteration.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">tsettle</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of times to activate the SettlingCFSheet sheet for each external input event.
+
+        A counter is incremented each time an input is received from any
+        source, and once the counter reaches tsettle, the last activation
+        step is skipped so that there will not be any further recurrent
+        activation.  The next external (i.e., afferent or feedback)
+        event will then start the counter over again.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_initialization_weights_output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If not empty, weights output_fns that will replace the
+        existing ones after an initial normalization step.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">end_of_iteration</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callables to be executed at the end of each iteration.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">joint_norm_fn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to use to compute the norm_total for each CF in each
+        projection from a group to be normalized jointly.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">measure_maps</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to include this Sheet when measuring various maps to create SheetViews.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">strict_tsettle</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, delay sending output until activation_count reaches this value.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sheet.optimized.SettlingCFSheet.process_current_time">
+<tt class="descname">process_current_time</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.optimized.SettlingCFSheet.process_current_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass the accumulated stimulation through self.output_fns and
+send it out on the default output port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.optimized.SettlingCFSheet.send_output">
+<tt class="descname">send_output</tt><big>(</big><em>src_port=None</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#topo.sheet.optimized.SettlingCFSheet.send_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send some data out to all connections on the given src_port.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.optimized.NeighborhoodMask">
+<em class="property">class </em><tt class="descclassname">topo.sheet.optimized.</tt><tt class="descname">NeighborhoodMask</tt><big>(</big><em>sheet</em>, <em>**params</em><big>)</big><a class="headerlink" href="#topo.sheet.optimized.NeighborhoodMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.projection-module.html#topo.base.projection.SheetMask" title="topo.base.projection.SheetMask"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.SheetMask</span></tt></a></p>
+<p>A SheetMask where the mask includes a neighborhood around active neurons.</p>
+<p>Given a radius and a threshold, considers a neuron active if at
+least one neuron in the radius is over the threshold.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">threshold</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1e-05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Threshold for considering a neuron active.
+       This value should be small to avoid discarding significantly active
+       neurons.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">radius</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Radius in Sheet coordinates around active neurons to consider
+       neighbors active as well.  Using a larger radius ensures that
+       the calculation will be unaffected by the mask, but it will
+       reduce any computational benefit from the mask.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.sheet.optimized</a><ul>
+<li><a class="reference internal" href="#module-topo.sheet.optimized">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.sheet.optimized-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

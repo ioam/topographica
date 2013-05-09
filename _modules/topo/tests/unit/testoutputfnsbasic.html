@@ -1,0 +1,520 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.unit.testoutputfnsbasic &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tests.unit.testoutputfnsbasic</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">TestFeatureMap</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c"># To do:</span>
+<span class="c"># - Remove the commented line from when it was calling a function</span>
+<span class="c"># - finish to transform the call to be to a procedure in the last test</span>
+<span class="c"># - Also clean up the original file to this purpose</span>
+
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">PiecewiseLinear</span><span class="p">,</span> <span class="n">DivisiveNormalizeL1</span>
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">DivisiveNormalizeL2</span><span class="p">,</span> <span class="n">DivisiveNormalizeLinf</span>
+<span class="kn">from</span> <span class="nn">topo.transferfn</span> <span class="kn">import</span> <span class="n">DivisiveNormalizeLp</span><span class="p">,</span> <span class="n">HomeostaticMaxEnt</span>
+
+<span class="kn">from</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">import</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_array_equal</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
+
+<span class="kn">from</span> <span class="nn">topo.tests.utils</span> <span class="kn">import</span> <span class="n">assert_array_not_equal</span>
+
+<span class="k">class</span> <span class="nc">TestPiecewiseLinear</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.99</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">1.001</span><span class="p">,</span><span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.6</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="mf">11.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span> <span class="o">=</span> <span class="n">PiecewiseLinear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span> <span class="o">=</span> <span class="n">PiecewiseLinear</span><span class="p">(</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn3</span> <span class="o">=</span> <span class="n">PiecewiseLinear</span><span class="p">(</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper_bound</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_piecewiselinear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Test as a procedure</span>
+
+        <span class="n">fn1_a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.99</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.6</span><span class="p">]])</span>
+
+        <span class="n">fn2_a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]])</span>
+
+        <span class="n">fn3_a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.99</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">1.001</span><span class="p">,</span><span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.6</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn3_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TestDivisiveNormalizeL1</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="mf">11.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span> <span class="o">=</span> <span class="n">DivisiveNormalizeL1</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span> <span class="o">=</span> <span class="n">DivisiveNormalizeL1</span><span class="p">(</span><span class="n">norm_value</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_divisive_sum_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Test as a procedure</span>
+
+        <span class="n">fn1_a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="mf">3.0</span>
+
+        <span class="n">fn1_a2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="mf">27.0</span>
+
+        <span class="n">fn2_a1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span><span class="o">*</span><span class="mf">4.0</span>
+
+        <span class="n">fn2_a2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="mf">27.0</span><span class="p">)</span><span class="o">*</span><span class="mf">4.0</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="mf">11.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TestDivisiveLengthNormalize</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span> <span class="o">=</span> <span class="n">DivisiveNormalizeL2</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span> <span class="o">=</span> <span class="n">DivisiveNormalizeL2</span><span class="p">(</span><span class="n">norm_value</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_divisive_length_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Test as a procedure</span>
+
+        <span class="n">eucl_norm_a1</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">0.3</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.6</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.7</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.8</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.4</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c"># eucl_norm_a2 = sqrt(307)</span>
+
+        <span class="n">fn1_a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="n">eucl_norm_a1</span>
+        <span class="n">fn1_a2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">307</span><span class="p">)</span>
+        <span class="n">fn2_a1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="n">eucl_norm_a1</span><span class="p">)</span><span class="o">*</span><span class="mf">4.0</span>
+        <span class="n">fn2_a2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">307</span><span class="p">))</span><span class="o">*</span><span class="mf">4.0</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TestDivisiveMaxNormalize</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span> <span class="o">=</span> <span class="n">DivisiveNormalizeLinf</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span> <span class="o">=</span> <span class="n">DivisiveNormalizeLinf</span><span class="p">(</span><span class="n">norm_value</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_divisive_max_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Test as a procedure:</span>
+
+        <span class="n">fn1_a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="mf">0.8</span>
+        <span class="n">fn1_a2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="mf">11.0</span>
+        <span class="n">fn2_a1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="mf">0.8</span><span class="p">)</span><span class="o">*</span><span class="mf">3.0</span>
+        <span class="n">fn2_a2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="mf">11.0</span><span class="p">)</span><span class="o">*</span><span class="mf">3.0</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TestDivisiveLpNormalize</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="c"># The default value of p is 2, so in this case, same as L2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span> <span class="o">=</span> <span class="n">DivisiveNormalizeLp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span> <span class="o">=</span> <span class="n">DivisiveNormalizeLp</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn3</span> <span class="o">=</span> <span class="n">DivisiveNormalizeLp</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span><span class="n">norm_value</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_divisive_lp_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c">### JCALERT! As already said above; this method does not work as a procedure</span>
+        <span class="c">### because of a problem when using x *= factor instead of x = x * factor</span>
+        <span class="c">### it is not understood why because it does work fine in all others transferfn?</span>
+        <span class="c">### Therefore it is only tested as a function</span>
+
+        <span class="c"># Test as a function</span>
+
+        <span class="n">eucl_norm_a1</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">0.3</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.6</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.7</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.8</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.4</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">fn1_a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="n">eucl_norm_a1</span>
+        <span class="n">fn1_a2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">307</span><span class="p">)</span>
+
+        <span class="n">l3norm_a1</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="mf">0.3</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">0.6</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">0.7</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">0.8</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">0.4</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">0.2</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span>
+        <span class="n">l3norm_a2</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="mf">2.0</span><span class="o">+</span><span class="mf">7.0</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">4.0</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">3.0</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">11.0</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">2.0</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">5.0</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mf">9.0</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span>
+        <span class="n">fn2_a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="n">l3norm_a1</span>
+        <span class="n">fn2_a2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="n">l3norm_a2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="n">l4norm_a1</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="mf">0.3</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">0.6</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">0.7</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">0.8</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">0.4</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">0.2</span><span class="o">**</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">4.0</span><span class="p">)</span>
+        <span class="n">l4norm_a2</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="mf">1.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">1.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">7.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">4.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">3.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">11.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">2.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">5.0</span><span class="o">**</span><span class="mf">4.0</span><span class="o">+</span><span class="mf">9.0</span><span class="o">**</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">4.0</span><span class="p">)</span>
+        <span class="n">fn3_a1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">/</span><span class="n">l4norm_a1</span><span class="p">)</span><span class="o">*</span><span class="mf">2.0</span>
+        <span class="n">fn3_a2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">/</span><span class="n">l4norm_a2</span><span class="p">)</span><span class="o">*</span><span class="mf">2.0</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn3_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn3_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="c"># The rest of this procedure might be redundant (already covered above)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn1_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn2_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="o">-</span><span class="mf">11.0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn3_a1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item1</span><span class="p">,</span><span class="n">item2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span><span class="n">fn3_a2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="TestTransferFnWithRandomState"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testoutputfnsbasic-module.html#topo.tests.unit.testoutputfnsbasic.TestTransferFnWithRandomState">[docs]</a><span class="k">class</span> <span class="nc">TestTransferFnWithRandomState</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Currently just tests whether random generator state is handled</span>
+<span class="sd">    by state_push() and state_pop().&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.2</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span> <span class="o">=</span> <span class="n">HomeostaticMaxEnt</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">test_random_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">a1</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c">###</span>
+        <span class="c"># CEBALERT: hack because homeostaticmaxent doesn&#39;t get some</span>
+        <span class="c"># of its state until it&#39;s been called once!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+
+        <span class="n">start_array</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+
+        <span class="c">## save the state then generate some results...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+        <span class="n">res1</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+        <span class="n">res2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+
+        <span class="c"># (check results do actually change so the test is valid)</span>
+        <span class="n">assert_array_not_equal</span><span class="p">(</span><span class="n">res1</span><span class="p">,</span><span class="n">res2</span><span class="p">)</span>
+
+        <span class="n">a2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">start_array</span><span class="p">)</span>
+
+        <span class="c">### ...then restore the state &amp; check results are the same</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span><span class="o">.</span><span class="n">state_pop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span><span class="p">(</span><span class="n">a2</span><span class="p">)</span>
+        <span class="n">assert_array_equal</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span><span class="n">res1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hme</span><span class="p">(</span><span class="n">a2</span><span class="p">)</span>
+        <span class="n">assert_array_equal</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span><span class="n">res2</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">nose</span>
+	<span class="n">nose</span><span class="o">.</span><span class="n">runmodule</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../News/index.html">News</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../../Links/index.html">Links</a></li>
+<li><a href="../../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/tests/unit/testoutputfnsbasic.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

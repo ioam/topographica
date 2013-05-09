@@ -1,0 +1,333 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>numbergen &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="numbergen">
+<h1>numbergen<a class="headerlink" href="#numbergen" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancef1ac05fc54.svg" usemap="#inheritancef1ac05fc54" class="inheritance"/></div><map id="inheritancef1ac05fc54" name="inheritancef1ac05fc54">
+</map>
+<div class="section" id="module-numbergen">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-numbergen" title="Permalink to this headline">¶</a></h2>
+<p>Callable objects that generate numbers according to different distributions.</p>
+<dl class="class">
+<dt id="numbergen.NormalRandom">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">NormalRandom</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#NormalRandom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.NormalRandom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.RandomDistribution" title="numbergen.RandomDistribution"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.RandomDistribution</span></tt></a></p>
+<p>Normally distributed (Gaussian) random number.</p>
+<p>Specified with mean mu and standard deviation sigma.
+See the random module for further details.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mu</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Mean value.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">sigma</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Standard deviation.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.BinaryOperator">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">BinaryOperator</tt><big>(</big><em>lhs</em>, <em>rhs</em>, <em>operator</em>, <em>reverse=False</em>, <em>**args</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#BinaryOperator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.BinaryOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.NumberGenerator" title="numbergen.NumberGenerator"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.NumberGenerator</span></tt></a></p>
+<p>Applies any binary operator to NumberGenerators or numbers to yield a NumberGenerator.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.UniformRandom">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">UniformRandom</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#UniformRandom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.UniformRandom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.RandomDistribution" title="numbergen.RandomDistribution"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.RandomDistribution</span></tt></a></p>
+<p>Specified with lbound and ubound; when called, return a random
+number in the range [lbound, ubound).</p>
+<p>See the random module for further details.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">lbound</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>inclusive lower bound</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ubound</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>exclusive upper bound</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.VonMisesRandom">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">VonMisesRandom</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#VonMisesRandom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.VonMisesRandom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.RandomDistribution" title="numbergen.RandomDistribution"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.RandomDistribution</span></tt></a></p>
+<p>Circularly normal distributed random number.</p>
+<p>If kappa is zero, this distribution reduces to a uniform random
+angle over the range 0 to 2*pi.  Otherwise, it is concentrated to
+a greater or lesser degree (determined by kappa) around the mean
+mu.  For large kappa (narrow peaks), this distribution approaches
+the Gaussian (normal) distribution with variance 1/kappa.  See the
+random module for further details.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mu</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Mean value, in the range 0 to 2*pi.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">kappa</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Concentration (inverse variance).</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.Choice">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">Choice</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#Choice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.Choice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.RandomDistribution" title="numbergen.RandomDistribution"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.RandomDistribution</span></tt></a></p>
+<p>Return a random element from the specified list of choices.</p>
+<p>Accepts items of any type, though they are typically numbers.
+See the choice() function in the random module for further details.</p>
+<dl class="docutils">
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">choices</span></tt> (<em>bounds=(0, None), constant=False, default=[0, 1], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of items from which to select.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.UniformRandomInt">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">UniformRandomInt</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#UniformRandomInt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.UniformRandomInt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.RandomDistribution" title="numbergen.RandomDistribution"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.RandomDistribution</span></tt></a></p>
+<p>Specified with lbound and ubound; when called, return a random
+number in the inclusive range [lbound, ubound].</p>
+<p>See the randint function in the random module for further details.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">lbound</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>inclusive lower bound</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ubound</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1000, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>inclusive upper bound</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.BoundedNumber">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">BoundedNumber</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#BoundedNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.BoundedNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.NumberGenerator" title="numbergen.NumberGenerator"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.NumberGenerator</span></tt></a></p>
+<p>Function object that silently enforces numeric bounds on values
+returned by a callable object.</p>
+<dl class="docutils">
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">generator</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Object to call to generate values.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>constant=False, default=(None, None), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Legal range for the value returned, as a pair.
+        
+        The default bounds are (None,None), meaning there are actually
+        no bounds.  One or both bounds can be set by specifying a
+        value.  For instance, bounds=(None,10) means there is no lower
+        bound, and an upper bound of 10.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.TimeDependentValue">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">TimeDependentValue</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#TimeDependentValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.TimeDependentValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.NumberGenerator" title="numbergen.NumberGenerator"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.NumberGenerator</span></tt></a></p>
+<p>Classes of function objects computing a value given a time function.</p>
+<dl class="docutils">
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">time_fn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to generate the time used for calculating values.</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="numbergen.TimeDependentValue.time_fn">
+<em class="property">static </em><tt class="descname">time_fn</tt><big>(</big><big>)</big><a class="headerlink" href="#numbergen.TimeDependentValue.time_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dummy time function for use as a default; always returns zero.
+For actual use, will need to supply a more useful time function.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.UnaryOperator">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">UnaryOperator</tt><big>(</big><em>operand</em>, <em>operator</em>, <em>**args</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#UnaryOperator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.UnaryOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.NumberGenerator" title="numbergen.NumberGenerator"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.NumberGenerator</span></tt></a></p>
+<p>Applies any unary operator to a NumberGenerator to yield another NumberGenerator.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.RandomDistribution">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">RandomDistribution</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#RandomDistribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.RandomDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.NumberGenerator" title="numbergen.NumberGenerator"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.NumberGenerator</span></tt></a></p>
+<p>Python&#8217;s random module provides the Random class, which can be
+instantiated to give an object that can be asked to generate
+numbers from any of several different random distributions
+(e.g. uniform, Gaussian).</p>
+<p>To make it easier to use these, Numbergen provides here a
+hierarchy of classes, each tied to a particular random
+distribution. This allows setting parameters on creation rather
+than passing them each call, and allows pickling to work properly.</p>
+<p>The underlying random.Random() instance and all its methods can be
+accessed from the &#8216;random_generator&#8217; attribute.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.UniformRandomOffset">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">UniformRandomOffset</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#UniformRandomOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.UniformRandomOffset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.RandomDistribution" title="numbergen.RandomDistribution"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.RandomDistribution</span></tt></a></p>
+<p>Identical to UniformRandom, but specified by mean and range.
+When called, return a random number in the range
+[mean - range/2, mean + range/2).</p>
+<p>See the random module for further details.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">range</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Difference of maximum and minimum value</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">mean</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Mean value</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.NumberGenerator">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">NumberGenerator</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#NumberGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.NumberGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Abstract base class for any object that when called produces a number.</p>
+<p>Primarily provides support for using NumberGenerators in simple
+arithmetic expressions, such as abs((x+y)/z), where x,y,z are
+NumberGenerators or numbers.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="numbergen.ExponentialDecay">
+<em class="property">class </em><tt class="descclassname">numbergen.</tt><tt class="descname">ExponentialDecay</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/numbergen.html#ExponentialDecay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numbergen.ExponentialDecay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbergen.TimeDependentValue" title="numbergen.TimeDependentValue"><tt class="xref py py-class docutils literal"><span class="pre">numbergen.TimeDependentValue</span></tt></a></p>
+<p>Function object that provides a value that decays according to an
+exponential function, based on a given time function.</p>
+<p>Returns starting_value*base^(-time/time_constant).</p>
+<p>See <a class="reference external" href="http://en.wikipedia.org/wiki/Exponential_decay">http://en.wikipedia.org/wiki/Exponential_decay</a>.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ending_value</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Value used for time infinity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">base</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=2.71828182846, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Base of the exponent; the default yields starting_value*exp(-t/time_constant).
+        Another popular choice of base is 2, which allows the
+        time_constant to be interpreted as a half-life.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">time_fn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to generate the time used for calculating values.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">time_constant</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=10000, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Time scale for the exponential; large values give slow decay.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">starting_value</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False, time_fn=None</em>)</dt>
+<dd>Value used for time zero.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">numbergen</a><ul>
+<li><a class="reference internal" href="#module-numbergen">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/numbergen-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

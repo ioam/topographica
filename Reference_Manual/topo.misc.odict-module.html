@@ -1,0 +1,710 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.odict &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-misc-odict">
+<h1>topo.misc.odict<a class="headerlink" href="#topo-misc-odict" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancecc9184d1e2.svg" usemap="#inheritancecc9184d1e2" class="inheritance"/></div><map id="inheritancecc9184d1e2" name="inheritancecc9184d1e2">
+</map>
+<div class="section" id="module-topo.misc.odict">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.misc.odict" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="topo.misc.odict.OrderedDict">
+<em class="property">class </em><tt class="descclassname">topo.misc.odict.</tt><tt class="descname">OrderedDict</tt><big>(</big><em>init_val=()</em>, <em>strict=False</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></a></p>
+<p>A class of dictionary that keeps the insertion order of keys.</p>
+<p>All appropriate methods return keys, items, or values in an ordered way.</p>
+<p>All normal dictionary methods are available. Update and comparison is
+restricted to other OrderedDict objects.</p>
+<p>Various sequence methods are available, including the ability to explicitly
+mutate the key ordering.</p>
+<p>__contains__ tests:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="ow">in</span> <span class="n">d</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">4</span> <span class="ow">in</span> <span class="n">d</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+<p>__getitem__ tests:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))[</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))[</span><span class="mi">4</span><span class="p">]</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError</span>: <span class="n">4</span>
+</pre></div>
+</div>
+<p>__len__ tests:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">())</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))))</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+<p>get tests:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 3), (3, 2), (2, 1)])</span>
+</pre></div>
+</div>
+<p>has_key tests:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.clear" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.copy" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="go">OrderedDict([(1, 3), (3, 2), (2, 1)])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.index">
+<tt class="descname">index</tt><big>(</big><em>key</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the position of the specified key in the OrderedDict.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.insert">
+<tt class="descname">insert</tt><big>(</big><em>index</em>, <em>key</em>, <em>value</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes <tt class="docutils literal"><span class="pre">index</span></tt>, <tt class="docutils literal"><span class="pre">key</span></tt>, and <tt class="docutils literal"><span class="pre">value</span></tt> as arguments.</p>
+<p>Sets <tt class="docutils literal"><span class="pre">key</span></tt> to <tt class="docutils literal"><span class="pre">value</span></tt>, so that <tt class="docutils literal"><span class="pre">key</span></tt> is at position <tt class="docutils literal"><span class="pre">index</span></tt> in
+the OrderedDict.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(4, 0), (1, 3), (3, 2), (2, 1)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(2, 1), (4, 0), (1, 3), (3, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(2, 1), (4, 0), (1, 3), (3, 2), (8, 1)])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.items">
+<tt class="descname">items</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.items" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="docutils literal"><span class="pre">items</span></tt> returns a list of tuples representing all the
+<tt class="docutils literal"><span class="pre">(key,</span> <span class="pre">value)</span></tt> pairs in the dictionary.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="go">[(1, 3), (3, 2), (2, 1)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="go">[]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.iteritems">
+<tt class="descname">iteritems</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.iteritems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.iteritems" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">(1, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">(3, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">(2, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">StopIteration</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.iterkeys">
+<tt class="descname">iterkeys</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.iterkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.iterkeys" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ii</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">StopIteration</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.itervalues">
+<tt class="descname">itervalues</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.itervalues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.itervalues" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">iv</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iv</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iv</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iv</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iv</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">StopIteration</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.keys">
+<tt class="descname">keys</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of keys in the <tt class="docutils literal"><span class="pre">OrderedDict</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">[1, 3, 2]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.pop">
+<tt class="descname">pop</tt><big>(</big><em>key</em>, <em>*args</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>No dict.pop in Python 2.2, gotta reimplement it</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 3), (2, 1)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError</span>: <span class="n">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">TypeError</span>: <span class="n">pop expected at most 2 arguments, got 3</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.popitem">
+<tt class="descname">popitem</tt><big>(</big><em>i=-1</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.popitem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.popitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete and return an item specified by index, not a random one as in
+dict. The index is -1 by default (the last item).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+<span class="go">(2, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 3), (3, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">(1, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">OrderedDict</span><span class="p">()</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError: &#39;popitem()</span>: <span class="n">dictionary is empty&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">IndexError: popitem()</span>: <span class="n">index 2 not valid</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.rename">
+<tt class="descname">rename</tt><big>(</big><em>old_key</em>, <em>new_key</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename the key for a given value, without modifying sequence order.</p>
+<p>For the case where new_key already exists this raise an exception,
+since if new_key exists, it is ambiguous as to what happens to the
+associated values, and the position of new_key in the sequence.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">od</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">od</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">od</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">od</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="go">[(&#39;a&#39;, 1), (&#39;b&#39;, 2)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">od</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">od</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="go">[(&#39;a&#39;, 1), (&#39;c&#39;, 2)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">od</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">ValueError: New key already exists</span>: <span class="n">&#39;a&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">od</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError</span>: <span class="n">&#39;d&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.reverse">
+<tt class="descname">reverse</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.reverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse the order of the OrderedDict.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(2, 1), (3, 2), (1, 3)])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.setdefault">
+<tt class="descname">setdefault</tt><big>(</big><em>key</em>, <em>defval=None</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.setdefault"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.setdefault" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 3), (3, 2), (2, 1), (4, None)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 3), (3, 2), (2, 1), (4, None), (5, 0)])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.setitems">
+<tt class="descname">setitems</tt><big>(</big><em>items</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.setitems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.setitems" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method allows you to set the items in the dict.</p>
+<p>It takes a list of tuples - of the same sort returned by the <tt class="docutils literal"><span class="pre">items</span></tt>
+method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setitems</span><span class="p">(((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(3, 1), (2, 3), (1, 2)])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.setkeys">
+<tt class="descname">setkeys</tt><big>(</big><em>keys</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.setkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.setkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="docutils literal"><span class="pre">setkeys</span></tt> all ows you to pass in a new list of keys which will
+replace the current set. This must contain the same set of keys, but
+need not be in the same order.</p>
+<p>If you pass in new keys that don&#8217;t match, a <tt class="docutils literal"><span class="pre">KeyError</span></tt> will be
+raised.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">[1, 3, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setkeys</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 3), (2, 1), (3, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setkeys</span><span class="p">([</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">])</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError</span>: <span class="n">&#39;Keylist is not the same as current keylist.&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.setvalues">
+<tt class="descname">setvalues</tt><big>(</big><em>values</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.setvalues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.setvalues" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can pass in a list of values, which will replace the
+current list. The value list must be the same len as the OrderedDict.</p>
+<p>(Or a <tt class="docutils literal"><span class="pre">ValueError</span></tt> is raised.)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setvalues</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 1), (3, 2), (2, 3)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setvalues</span><span class="p">([</span><span class="mi">6</span><span class="p">])</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">ValueError</span>: <span class="n">Value list is not the same length as the OrderedDict.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.sort">
+<tt class="descname">sort</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort the key order in the OrderedDict.</p>
+<p>This method takes the same arguments as the <tt class="docutils literal"><span class="pre">list.sort</span></tt> method on
+your version of Python.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 4), (2, 2), (3, 3), (4, 1)])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.update">
+<tt class="descname">update</tt><big>(</big><em>from_od</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update from another OrderedDict or sequence of (key, value) pairs</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">OrderedDict([(1, 3), (0, 1), (3, 2), (2, 1)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">TypeError</span>: <span class="n">undefined order, cannot get items from dict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">TypeError</span>: <span class="n">cannot convert dictionary update sequence element &quot;4&quot; to a 2-item sequence</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.misc.odict.OrderedDict.values">
+<tt class="descname">values</tt><big>(</big><em>values=None</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#OrderedDict.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.OrderedDict.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of all the values in the OrderedDict.</p>
+<p>Optionally you can pass in a list of values, which will replace the
+current list. The value list must be the same len as the OrderedDict.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+<span class="go">[3, 2, 1]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.odict.SequenceOrderedDict">
+<em class="property">class </em><tt class="descclassname">topo.misc.odict.</tt><tt class="descname">SequenceOrderedDict</tt><big>(</big><em>init_val=()</em>, <em>strict=True</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/odict.html#SequenceOrderedDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.odict.SequenceOrderedDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.misc.odict.OrderedDict" title="topo.misc.odict.OrderedDict"><tt class="xref py py-class docutils literal"><span class="pre">topo.misc.odict.OrderedDict</span></tt></a></p>
+<p>Experimental version of OrderedDict that has a custom object for <tt class="docutils literal"><span class="pre">keys</span></tt>,
+<tt class="docutils literal"><span class="pre">values</span></tt>, and <tt class="docutils literal"><span class="pre">items</span></tt>.</p>
+<p>These are callable sequence objects that work as methods, or can be
+manipulated directly as sequences.</p>
+<p>Test for <tt class="docutils literal"><span class="pre">keys</span></tt>, <tt class="docutils literal"><span class="pre">items</span></tt> and <tt class="docutils literal"><span class="pre">values</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">SequenceOrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">[1, 2, 3]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">[1, 2, 3]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setkeys</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(3, 4), (2, 3), (1, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setkeys</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[:]</span>
+<span class="go">[1, 2, 3]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(2, 3), (1, 2), (3, 4)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">[3, 1, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(3, 4), (1, 2), (2, 3)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">SequenceOrderedDict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">SequenceOrderedDict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">keys</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">keys</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">keys</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">keys</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">keys</span> <span class="o">&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">keys</span> <span class="o">&lt;</span> <span class="n">b</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;a&#39;</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">keys</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;c&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">]</span>
+<span class="go">[3, 1, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span>
+<span class="go">[1, 2, 3]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">SequenceOrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(3, 4), (2, 3), (1, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">[3, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError</span>: <span class="n">&#39;Keylist is not the same as current keylist.&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">SequenceOrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span>
+<span class="go">[2, 3, 4]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+<span class="go">[2, 3, 4]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setvalues</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(1, 4), (2, 3), (3, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">[2, 3, 4]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">TypeError</span>: <span class="n">Can&#39;t delete items from values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">7</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+<span class="go">[2, 3, 4]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span>
+<span class="go">[2, 3, 7]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span>
+<span class="go">[7, 3, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span>
+<span class="go">[2, 3, 7]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;anything&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">TypeError</span>: <span class="n">Can&#39;t append items to values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(1, 1), (2, 2), (3, 3)])</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">SequenceOrderedDict</span><span class="p">(((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(1, 2), (2, 3), (3, 4)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="go">[(1, 2), (2, 3), (3, 4)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">setitems</span><span class="p">([(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span> <span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(3, 4), (2, 3), (1, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">(3, 4)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">[(3, 4), (2, 3)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(3, 4), (6, 3), (1, 2)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(3, 4), (9, 9), (1, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span>
+<span class="go">SequenceOrderedDict([(3, 4), (1, 2)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">]</span>
+<span class="go">[(3, 4), (1, 2)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">count</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(1, 2), (3, 4)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(1, 2), (3, 4)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(1, 2), (3, 4), (5, 6)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(0, 0), (1, 2), (3, 4), (5, 6)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(0, 0), (1, 2), (3, 4), (7, 8), (5, 6)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+<span class="go">(5, 6)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(0, 0), (1, 2), (3, 4), (7, 8)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">remove</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(0, 0), (3, 4), (7, 8)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[(0, 0), (3, 4), (7, 8), (1, 2), (5, 6)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.misc.odict</a><ul>
+<li><a class="reference internal" href="#module-topo.misc.odict">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.misc.odict-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

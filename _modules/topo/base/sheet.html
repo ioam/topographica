@@ -1,0 +1,427 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.sheet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.base.sheet</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Neural sheet objects and associated functions.</span>
+
+<span class="sd">The Sheet class is the base class for EventProcessors that simulate</span>
+<span class="sd">topographically mapped sheets of units (neurons or columns).  A Sheet</span>
+<span class="sd">is an EventProcessor that maintains a rectangular array of activity</span>
+<span class="sd">values, and sends the contents of this array as the data element in</span>
+<span class="sd">events.</span>
+
+<span class="sd">The Sheet itself is a SheetCoordinateSystem, so that units may be</span>
+<span class="sd">accessed by sheet or matrix coordinates. In general, however, sheets</span>
+<span class="sd">should be thought of as having arbitrary density and sheet coordinates</span>
+<span class="sd">should be used wherever possible, except when the code needs direct</span>
+<span class="sd">access to a specific unit.  By adhering to this convention, one should</span>
+<span class="sd">be able to write and debug a simulation at a low density, and then</span>
+<span class="sd">scale it up to run at higher densities (or down for lower densities)</span>
+<span class="sd">simply by changing e.g. Sheet.nominal_density.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span><span class="n">array</span><span class="p">,</span><span class="n">arange</span><span class="p">,</span><span class="n">meshgrid</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">float64</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">simulation</span> <span class="kn">import</span> <span class="n">EventProcessor</span>
+<span class="kn">from</span> <span class="nn">sheetcoords</span> <span class="kn">import</span> <span class="n">SheetCoordinateSystem</span>
+<span class="kn">from</span> <span class="nn">boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">BoundingRegionParameter</span>
+<span class="kn">from</span> <span class="nn">functionfamily</span> <span class="kn">import</span> <span class="n">TransferFn</span>
+
+
+<span class="n">activity_type</span> <span class="o">=</span> <span class="n">float64</span>
+
+<span class="c"># (disable W0223 because input_event is deliberately still not implemented)</span>
+<div class="viewcode-block" id="Sheet"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet">[docs]</a><span class="k">class</span> <span class="nc">Sheet</span><span class="p">(</span><span class="n">EventProcessor</span><span class="p">,</span><span class="n">SheetCoordinateSystem</span><span class="p">):</span>  <span class="c"># pylint: disable-msg=W0223</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The generic base class for neural sheets.</span>
+
+<span class="sd">    See SheetCoordinateSystem for how Sheet represents space, and</span>
+<span class="sd">    EventProcessor for how Sheet handles time.</span>
+
+<span class="sd">    output_fns are functions that take an activity matrix and produce</span>
+<span class="sd">    an identically shaped output matrix. The default is having no</span>
+<span class="sd">    output_fns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">nominal_bounds</span> <span class="o">=</span> <span class="n">BoundingRegionParameter</span><span class="p">(</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            User-specified BoundingBox of the Sheet coordinate area</span>
+<span class="s">            covered by this Sheet.  The left and right bounds--if</span>
+<span class="s">            specified--will always be observed, but the top and bottom</span>
+<span class="s">            bounds may be adjusted to ensure the density in the y</span>
+<span class="s">            direction is the same as the density in the x direction.</span>
+<span class="s">            In such a case, the top and bottom bounds are adjusted</span>
+<span class="s">            so that the center y point remains the same, and each</span>
+<span class="s">            bound is as close as possible to its specified value. The</span>
+<span class="s">            actual value of this Parameter is not adjusted, but the</span>
+<span class="s">            true bounds may be found from the &#39;bounds&#39; attribute</span>
+<span class="s">            of this object.</span>
+<span class="s">            &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">nominal_density</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">constant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            User-specified number of processing units per 1.0 distance</span>
+<span class="s">            horizontally or vertically in Sheet coordinates. The actual</span>
+<span class="s">            number may be different because of discretization; the matrix</span>
+<span class="s">            needs to tile the plane exactly, and for that to work the</span>
+<span class="s">            density might need to be adjusted.  For instance, an area of 3x2</span>
+<span class="s">            cannot have a density of 2 in each direction. The true density</span>
+<span class="s">            may be obtained from either the xdensity or ydensity attribute</span>
+<span class="s">            (since these are identical for a Sheet).</span>
+<span class="s">            &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">plastic</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            Setting this to False tells the Sheet not to change its</span>
+<span class="s">            permanent state (e.g. any connection weights) based on</span>
+<span class="s">            incoming events.</span>
+<span class="s">            &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">precedence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            Allows a sorting order for Sheets, e.g. in the GUI.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">row_precedence</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            Allows grouping of Sheets before sorting precedence is</span>
+<span class="s">            applied, e.g. for two-dimensional plots in the GUI.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">layout_location</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">NumericTuple</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">precedence</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            Location for this Sheet in an arbitrary pixel-based space</span>
+<span class="s">            in which Sheets can be laid out for visualization.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">class_</span><span class="o">=</span><span class="n">TransferFn</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Output function(s) to apply (if apply_output_fns is true) to this Sheet&#39;s activity.&quot;</span><span class="p">)</span>
+
+    <span class="n">apply_output_fns</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;Whether to apply the output_fn after computing an Activity matrix.&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xdensity</span>
+
+    <span class="n">density</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_density</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;The sheet&#39;s true density (i.e. the xdensity, which is equal to the ydensity for a Sheet.)&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize this object as an EventProcessor, then also as</span>
+<span class="sd">        a SheetCoordinateSystem with equal xdensity and ydensity.</span>
+
+<span class="sd">        sheet_views is a dictionary that stores SheetViews,</span>
+<span class="sd">        i.e. representations of the sheet for use by analysis or plotting</span>
+<span class="sd">        code.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">EventProcessor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c"># Initialize this object as a SheetCoordinateSystem, with</span>
+        <span class="c"># the same density along y as along x.</span>
+        <span class="n">SheetCoordinateSystem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nominal_bounds</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nominal_density</span><span class="p">)</span>
+
+        <span class="n">n_units</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lbrt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">xdensity</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_units</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+           <span class="s">&quot;Sheet bounds and density must be specified such that the &quot;</span><span class="o">+</span> \
+           <span class="s">&quot;sheet has at least one unit in each direction; &quot;</span> \
+           <span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span> <span class="s">&quot; does not.&quot;</span><span class="p">)</span>
+
+        <span class="c"># setup the activity matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">activity_type</span><span class="p">)</span>
+
+        <span class="c"># For non-plastic inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__saved_activity</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plasticity_setting_stack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_views</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="c">### JABALERT: This should be deleted now that sheet_views is public</span>
+    <span class="c">### JC: shouldn&#39;t we keep that, or at least write a function in</span>
+    <span class="c">### utils that deletes a value in a dictinnary without returning an</span>
+    <span class="c">### error if the key is not in the dict?  I leave for the moment,</span>
+    <span class="c">### and have to ask Jim to advise.</span>
+<div class="viewcode-block" id="Sheet.release_sheet_view"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.release_sheet_view">[docs]</a>    <span class="k">def</span> <span class="nf">release_sheet_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">view_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete the dictionary entry with key entry &#39;view_name&#39; to save</span>
+<span class="sd">        memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_views</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">view_name</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">[</span><span class="n">view_name</span><span class="p">]</span>
+
+
+    <span class="c"># CB: what to call this? sheetcoords()? sheetcoords_of_grid()? idxsheetcoords()?</span></div>
+<div class="viewcode-block" id="Sheet.sheetcoords_of_idx_grid"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.sheetcoords_of_idx_grid">[docs]</a>    <span class="k">def</span> <span class="nf">sheetcoords_of_idx_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an array of x-coordinates and an array of y-coordinates</span>
+<span class="sd">        corresponding to the activity matrix of the sheet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">C</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="n">arange</span><span class="p">(</span><span class="n">ncols</span><span class="p">),</span>
+                       <span class="n">arange</span><span class="p">(</span><span class="n">nrows</span><span class="p">))</span>
+
+        <span class="n">X</span><span class="p">,</span><span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">C</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span>
+
+
+    <span class="c"># CB: check whether we need this function any more.</span></div>
+<div class="viewcode-block" id="Sheet.row_col_sheetcoords"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.row_col_sheetcoords">[docs]</a>    <span class="k">def</span> <span class="nf">row_col_sheetcoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an array of Y-coordinates corresponding to the rows of</span>
+<span class="sd">        the activity matrix of the sheet, and an array of</span>
+<span class="sd">        X-coordinates corresponding to the columns.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># The row and column centers are returned in matrix (not</span>
+        <span class="c"># sheet) order (hence the reversals below).</span>
+        <span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrixidx2sheet</span><span class="p">(</span><span class="n">arange</span><span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">arange</span><span class="p">(</span><span class="n">ncols</span><span class="p">))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+    <span class="c"># CBALERT: to be removed once other code uses</span>
+    <span class="c"># row_col_sheetcoords() or sheetcoords_of_idx_grid().</span></div>
+    <span class="k">def</span> <span class="nf">sheet_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_col_sheetcoords</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">sheet_cols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_col_sheetcoords</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+
+    <span class="c"># CEBALERT: haven&#39;t really thought about what to put in this. The</span>
+    <span class="c"># way it is now, subclasses could make a super.activate() call to</span>
+    <span class="c"># avoid repeating some stuff.</span>
+<div class="viewcode-block" id="Sheet.activate"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Collect activity from each projection, combine it to calculate</span>
+<span class="sd">        the activity for this sheet, and send the result out.</span>
+
+<span class="sd">        Subclasses will need to override this method to whatever it</span>
+<span class="sd">        means to calculate activity in that subclass.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+                <span class="n">of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_output</span><span class="p">(</span><span class="n">src_port</span><span class="o">=</span><span class="s">&#39;Activity&#39;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Sheet.state_push"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.state_push">[docs]</a>    <span class="k">def</span> <span class="nf">state_push</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the current state of this sheet to an internal stack.</span>
+
+<span class="sd">        This method is used by operations that need to test the</span>
+<span class="sd">        response of the sheet without permanently altering its state,</span>
+<span class="sd">        e.g. for measuring maps or probing the current behavior</span>
+<span class="sd">        non-invasively.  By default, only the activity pattern of this</span>
+<span class="sd">        sheet is saved, but subclasses should add saving for any</span>
+<span class="sd">        additional state that they maintain, or strange bugs are</span>
+<span class="sd">        likely to occur.  The state can be restored using state_pop().</span>
+
+<span class="sd">        Note that Sheets that do learning need not save the</span>
+<span class="sd">        values of all connection weights, if any, because</span>
+<span class="sd">        plasticity can be turned off explicitly.  Thus this method</span>
+<span class="sd">        is intended only for shorter-term state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__saved_activity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">))</span>
+        <span class="n">EventProcessor</span><span class="o">.</span><span class="n">state_push</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="s">&#39;state_push&#39;</span><span class="p">):</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">state_push</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Sheet.state_pop"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.state_pop">[docs]</a>    <span class="k">def</span> <span class="nf">state_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pop the most recently saved state off the stack.</span>
+
+<span class="sd">        See state_push() for more details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__saved_activity</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">EventProcessor</span><span class="o">.</span><span class="n">state_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">of</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="s">&#39;state_pop&#39;</span><span class="p">):</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">state_pop</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Sheet.activity_len"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.activity_len">[docs]</a>    <span class="k">def</span> <span class="nf">activity_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of items that have been saved by state_push().&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__saved_activity</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Sheet.override_plasticity_state"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.override_plasticity_state">[docs]</a>    <span class="k">def</span> <span class="nf">override_plasticity_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_plasticity_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Temporarily override plasticity of medium and long term internal state.</span>
+
+<span class="sd">        This function should be implemented by all subclasses so that</span>
+<span class="sd">        it preserves the ability of the Sheet to compute activity,</span>
+<span class="sd">        i.e. to operate over a short time scale, while preventing any</span>
+<span class="sd">        lasting changes to the state (if new_plasticity_state=False).</span>
+
+<span class="sd">        Any operation that does not have any lasting state, such as</span>
+<span class="sd">        those affecting only the current activity level, should not</span>
+<span class="sd">        be affected by this call.</span>
+
+<span class="sd">        By default, simply saves a copy of the plastic flag to an</span>
+<span class="sd">        internal stack (so that it can be restored by</span>
+<span class="sd">        restore_plasticity_state()), and then sets plastic to</span>
+<span class="sd">        new_plasticity_state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plasticity_setting_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span><span class="o">=</span><span class="n">new_plasticity_state</span>
+
+</div>
+<div class="viewcode-block" id="Sheet.restore_plasticity_state"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.restore_plasticity_state">[docs]</a>    <span class="k">def</span> <span class="nf">restore_plasticity_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Restores plasticity of medium and long term internal state after</span>
+<span class="sd">        a override_plasticity_state call.</span>
+
+<span class="sd">        This function should be implemented by all subclasses to</span>
+<span class="sd">        remove the effect of the most recent override_plasticity_state call,</span>
+<span class="sd">        i.e. to restore plasticity of any type that was overridden.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plastic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plasticity_setting_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Sheet.n_bytes"><a class="viewcode-back" href="../../../Reference_Manual/topo.base.sheet-module.html#topo.base.sheet.Sheet.n_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">n_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a lower bound for the memory taken by this sheet, in bytes.</span>
+
+<span class="sd">        Typically, this number will include the activity array and any</span>
+<span class="sd">        similar arrays, plus any other significant data owned (in some</span>
+<span class="sd">        sense) by this Sheet.  It will not usually include memory</span>
+<span class="sd">        taken by the Python dictionary or various &quot;housekeeping&quot;</span>
+<span class="sd">        attributes, which usually contribute only a small amount to</span>
+<span class="sd">        the memory requirements.</span>
+
+<span class="sd">        Subclasses should reimplement this method if they store a</span>
+<span class="sd">        significant amount of data other than in the activity array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">nbytes</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/base/sheet.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

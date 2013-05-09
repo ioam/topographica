@@ -1,0 +1,414 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.inlinec &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.misc.inlinec</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Interface class for inline C/C++ functions.  Based on the SciPy Weave package.</span>
+
+<span class="sd">Weave (from SciPy) allows programmers to implement Python methods or</span>
+<span class="sd">functions using C code written as a string in the Python file.  This</span>
+<span class="sd">is generally done to speed up code that would be slow if written</span>
+<span class="sd">directly in Python.  Because not all users can be assumed to have a</span>
+<span class="sd">working C/C++ compiler, it is crucial for such optimizations to be</span>
+<span class="sd">optional.  This file provides an interface for processing the inline</span>
+<span class="sd">C/C++ code in a way that can gracefully revert back to the</span>
+<span class="sd">unoptimized version when Weave is not available.</span>
+
+<span class="sd">The fallback is implemented by making use of the way Python allows</span>
+<span class="sd">function names to be overwritten, as in these simple examples:</span>
+
+<span class="sd">  def x(y = 5): return y</span>
+<span class="sd">  def x2(y = 6): return y*y</span>
+<span class="sd">  print &#39;x:&#39;, x(), &#39;x2:&#39;, x2()  # Result -- x: 5 x2: 36</span>
+<span class="sd">  x = x2</span>
+<span class="sd">  print &#39;x:&#39;, x(), &#39;x2:&#39;, x2()  # Result -- x: 36 x2: 36</span>
+
+<span class="sd">In this file, inline() is overwritten to call inline_weave() if Weave</span>
+<span class="sd">is available.  If Weave is not available, inline() will raise a</span>
+<span class="sd">NotImplementedError exception.  For a program to be usable without</span>
+<span class="sd">Weave, just test inlinec.optimized after defining each optimized</span>
+<span class="sd">component, replacing it with a non-optimized equivalent if</span>
+<span class="sd">inlinec.optimized is False.</span>
+
+<span class="sd">For more information on weave, see:</span>
+<span class="sd">http://old.scipy.org/documentation/weave/weaveusersguide.html</span>
+
+<span class="sd">Some of the C functions also support OpenMP, which allows them to use</span>
+<span class="sd">multiple threads automatically on multi-core machines to give better</span>
+<span class="sd">performance.  To enable OpenMP support for those functions, set</span>
+<span class="sd">openmp=True in the main namespace before importing this file, and</span>
+<span class="sd">(optionally) set openmp_threads to the number of threads desired.  If</span>
+<span class="sd">openmp_threads is not set, then a thread will be allocated for each</span>
+<span class="sd">available core by default.</span>
+
+<span class="sd">Note that in order to use OpenMP, the C functions are obliged to use the</span>
+<span class="sd">thread-safe portions of the Python/Numpy C API. In general, the Python</span>
+<span class="sd">C API cannot be assumed to be thread safe.  Calls to PyObject_SetAttrString</span>
+<span class="sd">are a common hazard which can often be avoided using LOOKUP_FROM_SLOT_OFFSET.</span>
+<span class="sd">This makes use of Python&#39;s __slots__ mechanism with the added benefit of</span>
+<span class="sd">bypassing the GIL.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+<span class="c"># If import_weave is not defined, or is set to True, will attempt to</span>
+<span class="c"># import weave.  Set import_weave to False if you want to avoid weave</span>
+<span class="c"># altogether, e.g. if your installation is broken.</span>
+<span class="kn">import</span> <span class="nn">__main__</span>
+<span class="n">import_weave</span> <span class="o">=</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;import_weave&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># Dictionary of strings used to allow optional substituions</span>
+<span class="c"># (e.g. pragmas) into inline C code.</span>
+<span class="c">#</span>
+<span class="c"># CB: default value is empty string for convenience of not</span>
+<span class="c"># having to do e.g.</span>
+<span class="c"># if openmp:</span>
+<span class="c">#     c_decorators[&#39;xyz&#39;]=&#39;abc&#39;</span>
+<span class="c"># else:</span>
+<span class="c">#     c_decorators[&#39;xyz&#39;]=&#39;&#39;</span>
+<span class="n">c_decorators</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+
+<span class="c"># Setting to true will cause OpenMP to be used while compiling some C</span>
+<span class="c"># code (search for cfs_loop_pragma to see which routines use</span>
+<span class="c"># OpenMP). Good multi-threaded performance requires a machine with</span>
+<span class="c"># separate memory subsystems for each core, such as a Xeon. See Marco</span>
+<span class="c"># Elver&#39;s report at http://homepages.inf.ed.ac.uk/s0787712/stuff/melver_project-report.pdf.</span>
+<span class="n">openmp_threads</span> <span class="o">=</span> <span class="n">__main__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;openmp_threads&#39;</span><span class="p">,</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="c"># Variable that will be used to report whether weave was successfully</span>
+<span class="c"># imported (below).</span>
+<span class="n">weave_imported</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="c"># Variable that will be used to report whether simple compilation test</span>
+<span class="c"># was successful.</span>
+<span class="n">compiled</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">def</span> <span class="nf">inline</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span><span class="o">**</span><span class="n">nparams</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+
+<span class="c">##########</span>
+<span class="c"># Windows: hack to allow weave to work when a user name contains a</span>
+<span class="c"># space (see</span>
+<span class="c"># http://thread.gmane.org/gmane.comp.python.scientific.devel/14275)</span>
+<span class="k">if</span> <span class="n">import_weave</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;win&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># catch the initial use of USERNAME by weave</span>
+            <span class="n">original_user</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;USERNAME&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;USERNAME&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">original_user</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="c"># now dynamically patch weave and restore USERNAME</span>
+            <span class="kn">import</span> <span class="nn">scipy.weave.catalog</span>
+            <span class="n">iam</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">weave</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">whoami</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">scipy</span><span class="o">.</span><span class="n">weave</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">whoami</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">iam</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&quot;USERNAME&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">original_user</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+<span class="c">##########</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">import_weave</span><span class="p">:</span>
+        <span class="c"># We supply weave separately with the source distribution, but</span>
+        <span class="c"># e.g. the ubuntu package uses scipy.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">weave</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">weave</span>  <span class="c"># pyflakes:ignore (try/except import)</span>
+
+        <span class="n">weave_imported</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># Default parameters to add to the inline_weave() call.</span>
+    <span class="n">inline_named_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;extra_compile_args&#39;</span><span class="p">:[</span><span class="s">&#39;-O2&#39;</span><span class="p">,</span><span class="s">&#39;-Wno-unused-variable -fomit-frame-pointer&#39;</span><span class="p">,</span><span class="s">&#39;-funroll-loops&#39;</span><span class="p">],</span>
+        <span class="s">&#39;extra_link_args&#39;</span><span class="p">:[</span><span class="s">&#39;-lstdc++&#39;</span><span class="p">],</span>
+        <span class="s">&#39;compiler&#39;</span><span class="p">:</span><span class="s">&#39;gcc&#39;</span><span class="p">,</span>
+        <span class="s">&#39;verbose&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">openmp_threads</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">c_decorators</span><span class="p">[</span><span class="s">&#39;cfs_loop_pragma&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;#pragma omp parallel for schedule(guided, 8)&quot;</span>
+        <span class="n">inline_named_params</span><span class="p">[</span><span class="s">&#39;extra_compile_args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-fopenmp&#39;</span><span class="p">)</span>
+        <span class="n">inline_named_params</span><span class="p">[</span><span class="s">&#39;extra_link_args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-fopenmp&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">inline_weave</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span><span class="o">**</span><span class="n">nparams</span><span class="p">):</span>
+        <span class="n">named_params</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">inline_named_params</span><span class="p">)</span> <span class="c"># Make copy of defaults.</span>
+        <span class="n">named_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nparams</span><span class="p">)</span>             <span class="c"># Add newly passed named parameters.</span>
+        <span class="n">weave</span><span class="o">.</span><span class="n">inline</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span><span class="o">**</span><span class="n">named_params</span><span class="p">)</span>
+
+    <span class="c"># Overwrites stub definition with full Weave definition</span>
+    <span class="n">inline</span> <span class="o">=</span> <span class="n">inline_weave</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># CEBALERT: where does &#39;caution&#39; fit in our warnings system? (Also</span>
+    <span class="c"># used in other places in this file.)</span>
+    <span class="k">print</span> <span class="s">&#39;Caution: Unable to import Weave.  Will use non-optimized versions of most components.&#39;</span>
+
+
+<span class="k">if</span> <span class="n">weave_imported</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">random</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># to force recompilation each time</span>
+        <span class="n">inline</span><span class="p">(</span><span class="s">&#39;double x=</span><span class="si">%s</span><span class="s">;&#39;</span><span class="o">%</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+        <span class="n">compiled</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Caution: Unable to use Weave to compile: </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">. Will use non-optimized versions of most components.&quot;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+<span class="c"># Flag available for all to use to test whether to use the inline</span>
+<span class="c"># versions or not.</span>
+<span class="n">optimized</span> <span class="o">=</span> <span class="n">weave_imported</span> <span class="ow">and</span> <span class="n">compiled</span>
+
+<span class="n">warn_for_each_unoptimized_component</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="c"># JABALERT: I can&#39;t see any reason why this function accepts names rather</span>
+<span class="c"># than the more pythonic option of accepting objects, from which names</span>
+<span class="c"># can be extracted if necessary.</span>
+<div class="viewcode-block" id="provide_unoptimized_equivalent"><a class="viewcode-back" href="../../../Reference_Manual/topo.misc.inlinec-module.html#topo.misc.inlinec.provide_unoptimized_equivalent">[docs]</a><span class="k">def</span> <span class="nf">provide_unoptimized_equivalent</span><span class="p">(</span><span class="n">optimized_name</span><span class="p">,</span> <span class="n">unoptimized_name</span><span class="p">,</span> <span class="n">local_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If not using optimization, replace the optimized component with its unoptimized equivalent.</span>
+
+<span class="sd">    The objects named by optimized_name and unoptimized_name should be</span>
+<span class="sd">    plug-compatible.  The local_dict argument should be given the</span>
+<span class="sd">    contents of locals(), so that this function can replace the</span>
+<span class="sd">    optimized version with the unoptimized one in the namespace from</span>
+<span class="sd">    which it has been called.</span>
+
+<span class="sd">    As an example, calling this function as::</span>
+
+<span class="sd">      provide_unoptimized_equivalent(&quot;sort_opt&quot;,&quot;sort&quot;,locals())</span>
+
+<span class="sd">    is equivalent to putting the following code directly into the</span>
+<span class="sd">    calling location::</span>
+
+<span class="sd">      if not optimized:</span>
+<span class="sd">        sort_opt = sort</span>
+<span class="sd">        print &#39;module: Inline-optimized components not available; using sort instead of sort_opt.&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">optimized</span><span class="p">:</span>
+        <span class="n">local_dict</span><span class="p">[</span><span class="n">optimized_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_dict</span><span class="p">[</span><span class="n">unoptimized_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">warn_for_each_unoptimized_component</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">: Inline-optimized components not available; using </span><span class="si">%s</span><span class="s"> instead of </span><span class="si">%s</span><span class="s">.&#39;</span> \
+                  <span class="o">%</span> <span class="p">(</span><span class="n">local_dict</span><span class="p">[</span><span class="s">&#39;__name__&#39;</span><span class="p">],</span> <span class="n">optimized_name</span><span class="p">,</span> <span class="n">unoptimized_name</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">optimized</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">warn_for_each_unoptimized_component</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;Note: Inline-optimized components are currently disabled; see topo.misc.inlinec&quot;</span>
+
+
+<span class="c"># Definitions useful for working with optimized Python code;</span>
+<span class="c"># prepend to the code for an inlinec call if you want to use them.</span>
+<span class="n">c_header</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">/* Declaration for interfacing to numpy floats */</span>
+<span class="s">typedef double npfloat;</span>
+
+<span class="s">/* For a given class cls and an attribute attr, defines a variable</span>
+<span class="s">   attr_offset containing the offset of that attribute in the class&#39;s</span>
+<span class="s">   __slots__ data structure. */</span>
+<span class="s">#define DECLARE_SLOT_OFFSET(attr,cls) </span><span class="se">\</span>
+<span class="s">  PyMemberDescrObject *attr ## _descr = (PyMemberDescrObject *)PyObject_GetAttrString(cls,#attr); </span><span class="se">\</span>
+<span class="s">  Py_ssize_t attr ## _offset = attr ## _descr-&gt;d_member-&gt;offset; </span><span class="se">\</span>
+<span class="s">  Py_DECREF(attr ## _descr)</span>
+
+<span class="s">/* After a previous declaration of DECLARE_SLOT_OFFSET, for an</span>
+<span class="s">   instance obj of that class and the given attr, retrieves the value</span>
+<span class="s">   of that attribute from its slot. */</span>
+<span class="s">#define LOOKUP_FROM_SLOT_OFFSET(type,attr,obj) </span><span class="se">\</span>
+<span class="s">  PyArrayObject *attr ## _obj = *((PyArrayObject **)((char *)obj + attr ## _offset)); </span><span class="se">\</span>
+<span class="s">  type *attr = (type *)(attr ## _obj-&gt;data)</span>
+
+<span class="s">/* LOOKUP_FROM_SLOT_OFFSET without declaring data variable */</span>
+<span class="s">#define LOOKUP_FROM_SLOT_OFFSET_UNDECL_DATA(type,attr,obj) </span><span class="se">\</span>
+<span class="s">  PyArrayObject *attr ## _obj = *((PyArrayObject **)((char *)obj + attr ## _offset));</span>
+
+<span class="s">/* Same as LOOKUP_FROM_SLOT_OFFSET but ensures the array is contiguous.</span>
+<span class="s">   Must call DECREF_CONTIGUOUS_ARRAY(attr) to release temporary.</span>
+<span class="s">   Does PyArray_FLOAT need to be an argument for this to work with doubles? */</span>
+
+<span class="s">// This code is optimized for contiguous arrays, which are typical,</span>
+<span class="s">// but we make it work for noncontiguous arrays (e.g. views) by</span>
+<span class="s">// creating a contiguous copy if necessary.</span>
+<span class="s">//</span>
+<span class="s">// CEBALERT: I think there are better alternatives</span>
+<span class="s">// e.g. PyArray_GETCONTIGUOUS (PyArrayObject*) (PyObject* op)</span>
+<span class="s">// (p248 of numpybook), which only acts if necessary...</span>
+<span class="s">// Do we have a case where we know this code is being</span>
+<span class="s">// called, so that I can test it easily?</span>
+
+<span class="s">// CEBALERT: weights_obj appears below. Doesn&#39;t that mean this thing</span>
+<span class="s">// will only work when attr is weights?</span>
+
+<span class="s">#define CONTIGUOUS_ARRAY_FROM_SLOT_OFFSET(type,attr,obj) </span><span class="se">\</span>
+<span class="s">  PyArrayObject *attr ## _obj = *((PyArrayObject **)((char *)obj + attr ## _offset)); </span><span class="se">\</span>
+<span class="s">  type *attr = 0; </span><span class="se">\</span>
+<span class="s">  PyArrayObject * attr ## _array = 0; </span><span class="se">\</span>
+<span class="s">  if(PyArray_ISCONTIGUOUS(weights_obj)) </span><span class="se">\</span>
+<span class="s">      attr = (type *)(attr ## _obj-&gt;data); </span><span class="se">\</span>
+<span class="s">  else { </span><span class="se">\</span>
+<span class="s">      attr ## _array = (PyArrayObject*) PyArray_ContiguousFromObject((PyObject*)attr ## _obj,PyArray_FLOAT,2,2); </span><span class="se">\</span>
+<span class="s">      attr = (type *) attr ## _array-&gt;data; </span><span class="se">\</span>
+<span class="s">  }</span>
+
+<span class="s">#define DECREF_CONTIGUOUS_ARRAY(attr) </span><span class="se">\</span>
+<span class="s">   if(attr ## _array != 0) { </span><span class="se">\</span>
+<span class="s">       Py_DECREF(attr ## _array); }</span>
+
+<span class="s">#define UNPACK_FOUR_TUPLE(type,i1,i2,i3,i4,tuple) </span><span class="se">\</span>
+<span class="s">  type i1 = *tuple++; </span><span class="se">\</span>
+<span class="s">  type i2 = *tuple++; </span><span class="se">\</span>
+<span class="s">  type i3 = *tuple++; </span><span class="se">\</span>
+<span class="s">  type i4 = *tuple</span>
+
+<span class="s">#define MASK_THRESHOLD 0.5</span>
+
+<span class="s">#define SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2) </span><span class="se">\</span>
+<span class="s">  LOOKUP_FROM_SLOT_OFFSET(float,mask,cf); </span><span class="se">\</span>
+<span class="s">  double total = 0.0; </span><span class="se">\</span>
+<span class="s">  float* weights_init = weights; </span><span class="se">\</span>
+<span class="s">  for (int i=rr1; i&lt;rr2; ++i) { </span><span class="se">\</span>
+<span class="s">    for (int j=cc1; j&lt;cc2; ++j) { </span><span class="se">\</span>
+<span class="s">      if (*(mask++) &gt;= MASK_THRESHOLD) { </span><span class="se">\</span>
+<span class="s">        total += fabs(*weights_init); </span><span class="se">\</span>
+<span class="s">      } </span><span class="se">\</span>
+<span class="s">      ++weights_init; </span><span class="se">\</span>
+<span class="s">    } </span><span class="se">\</span>
+<span class="s">  } </span><span class="se">\</span>
+<span class="s">  _norm_total[0] = total</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># Simple test</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">inline</span><span class="p">(</span><span class="s">&#39;printf(&quot;Hello World!!</span><span class="se">\\</span><span class="s">n&quot;);&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../News/index.html">News</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../Links/index.html">Links</a></li>
+<li><a href="../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/misc/inlinec.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,267 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.patterngenerator &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="imagen-patterngenerator">
+<h1>imagen.patterngenerator<a class="headerlink" href="#imagen-patterngenerator" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance5a1c78b06b.svg" usemap="#inheritance5a1c78b06b" class="inheritance"/></div><map id="inheritance5a1c78b06b" name="inheritance5a1c78b06b">
+</map>
+<div class="section" id="module-imagen.patterngenerator">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-imagen.patterngenerator" title="Permalink to this headline">¶</a></h2>
+<p>PatternGenerator abstract class and basic example concrete class.</p>
+<dl class="class">
+<dt id="imagen.patterngenerator.Constant">
+<em class="property">class </em><tt class="descclassname">imagen.patterngenerator.</tt><tt class="descname">Constant</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/imagen/patterngenerator.html#Constant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.patterngenerator.Constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#imagen.patterngenerator.PatternGenerator" title="imagen.patterngenerator.PatternGenerator"><tt class="xref py py-class docutils literal"><span class="pre">imagen.patterngenerator.PatternGenerator</span></tt></a></p>
+<p>Constant pattern generator, i.e., a solid, uniform field of the same value.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False, time_fn=None</em>)</dt>
+<dd>X-coordinate location of pattern center.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.1, readonly=False, time_fn=None</em>)</dt>
+<dd>Multiplicative strength of input pattern, defaulting to 1.0</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">orientation</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_fn=None</em>)</dt>
+<dd>Polar angle of pattern, i.e., the orientation in the Cartesian coordinate
+        system, with zero at 3 o&#8217;clock and increasing counterclockwise.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Optional object (expected to be an array) with which to multiply the
+        pattern array after it has been created, before any output_fns are
+        applied. This can be used to shape the pattern.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>BoundingBox of the area in which the pattern is generated.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">xdensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=10, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_fn=None</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the x direction.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=0.08, readonly=False</em>)</dt>
+<dd>Optional function(s) to apply to the pattern array after it has been created.
+        Can be used for normalization, thresholding, etc.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">mask_shape</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=0.06, readonly=False</em>)</dt>
+<dd>Optional PatternGenerator used to construct a mask to be applied to
+        the pattern.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.11, readonly=False, time_fn=None</em>)</dt>
+<dd>Additive offset to input pattern, defaulting to 0.0</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False, time_fn=None</em>)</dt>
+<dd>Y-coordinate location of pattern center.</dd>
+<dt><em>param Composite</em> <tt class="docutils literal"><span class="pre">position</span></tt> (<em>attribs=[&#8216;x&#8217;, &#8216;y&#8217;], constant=False, default=None, instantiate=False, objtype=&lt;class &#8216;imagen.patterngenerator.PatternGenerator&#8217;&gt;, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Coordinates of location of pattern center.
+        Provides a convenient way to set the x and y parameters together
+        as a tuple (x,y), but shares the same actual storage as x and y
+        (and thus only position OR x and y need to be specified).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ydensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=10, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_fn=None</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the y direction.
+        Typically the same as the xdensity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.3, readonly=False, time_fn=None</em>)</dt>
+<dd>Determines the overall size of the pattern.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="imagen.patterngenerator.PatternGenerator">
+<em class="property">class </em><tt class="descclassname">imagen.patterngenerator.</tt><tt class="descname">PatternGenerator</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/imagen/patterngenerator.html#PatternGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.patterngenerator.PatternGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A class hierarchy for callable objects that can generate 2D patterns.</p>
+<p>Once initialized, PatternGenerators can be called to generate a
+value or a matrix of values from a 2D function, typically
+accepting at least x and y.</p>
+<p>A PatternGenerator&#8217;s Parameters can make use of Parameter&#8217;s
+precedence attribute to specify the order in which they should
+appear, e.g. in a GUI. The precedence attribute has a nominal
+range of 0.0 to 1.0, with ordering going from 0.0 (first) to 1.0
+(last), but any value is allowed.</p>
+<p>The orientation and layout of the pattern matrices is defined by
+the SheetCoordinateSystem class, which see.</p>
+<p>Note that not every parameter defined for a PatternGenerator will
+be used by every subclass.  For instance, a Constant pattern will
+ignore the x, y, orientation, and size parameters, because the
+pattern does not vary with any of those parameters.  However,
+those parameters are still defined for all PatternGenerators, even
+Constant patterns, to allow PatternGenerators to be scaled, rotated,
+translated, etc. uniformly.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.2, readonly=False, time_fn=None</em>)</dt>
+<dd>X-coordinate location of pattern center.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">scale</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.1, readonly=False, time_fn=None</em>)</dt>
+<dd>Multiplicative strength of input pattern, defaulting to 1.0</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">orientation</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.4, readonly=False, time_fn=None</em>)</dt>
+<dd>Polar angle of pattern, i.e., the orientation in the Cartesian coordinate
+        system, with zero at 3 o&#8217;clock and increasing counterclockwise.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Optional object (expected to be an array) with which to multiply the
+        pattern array after it has been created, before any output_fns are
+        applied. This can be used to shape the pattern.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">bounds</span></tt> (<em>constant=False, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>BoundingBox of the area in which the pattern is generated.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">xdensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=10, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_fn=None</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the x direction.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=0.08, readonly=False</em>)</dt>
+<dd>Optional function(s) to apply to the pattern array after it has been created.
+        Can be used for normalization, thresholding, etc.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">mask_shape</span></tt> (<em>allow_None=True, constant=False, default=None, instantiate=True, pickle_default_value=True, precedence=0.06, readonly=False</em>)</dt>
+<dd>Optional PatternGenerator used to construct a mask to be applied to
+        the pattern.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">offset</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.11, readonly=False, time_fn=None</em>)</dt>
+<dd>Additive offset to input pattern, defaulting to 0.0</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.21, readonly=False, time_fn=None</em>)</dt>
+<dd>Y-coordinate location of pattern center.</dd>
+<dt><em>param Composite</em> <tt class="docutils literal"><span class="pre">position</span></tt> (<em>attribs=[&#8216;x&#8217;, &#8216;y&#8217;], constant=False, default=None, instantiate=False, objtype=&lt;class &#8216;imagen.patterngenerator.PatternGenerator&#8217;&gt;, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Coordinates of location of pattern center.
+        Provides a convenient way to set the x and y parameters together
+        as a tuple (x,y), but shares the same actual storage as x and y
+        (and thus only position OR x and y need to be specified).</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">ydensity</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=10, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=-1, readonly=False, time_fn=None</em>)</dt>
+<dd>Density (number of samples per 1.0 length) in the y direction.
+        Typically the same as the xdensity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">size</span></tt> (<em>allow_None=False, bounds=(0.0, None), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=0.3, readonly=False, time_fn=None</em>)</dt>
+<dd>Determines the overall size of the pattern.</dd>
+</dl>
+<dl class="method">
+<dt id="imagen.patterngenerator.PatternGenerator.function">
+<tt class="descname">function</tt><big>(</big><em>p</em><big>)</big><a class="reference internal" href="../_modules/imagen/patterngenerator.html#PatternGenerator.function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.patterngenerator.PatternGenerator.function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to draw a pattern that will then be scaled and rotated.</p>
+<p>Instead of implementing __call__ directly, PatternGenerator
+subclasses will typically implement this helper function used
+by __call__, because that way they can let __call__ handle the
+scaling and rotation for them.  Alternatively, __call__ itself
+can be reimplemented entirely by a subclass (e.g. if it does
+not need to do any scaling or rotation), in which case this
+function will be ignored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imagen.patterngenerator.PatternGenerator.set_matrix_dimensions">
+<tt class="descname">set_matrix_dimensions</tt><big>(</big><em>bounds</em>, <em>xdensity</em>, <em>ydensity</em><big>)</big><a class="reference internal" href="../_modules/imagen/patterngenerator.html#PatternGenerator.set_matrix_dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imagen.patterngenerator.PatternGenerator.set_matrix_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the dimensions of the matrix into which the pattern will be drawn.
+Users of this class should call this method rather than changing
+the bounds, xdensity, and ydensity parameters directly.  Subclasses
+can override this method to update any internal data structures that
+may depend on the matrix dimensions.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">imagen.patterngenerator</a><ul>
+<li><a class="reference internal" href="#module-imagen.patterngenerator">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/imagen.patterngenerator-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

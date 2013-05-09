@@ -1,0 +1,267 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FAQ &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="next" title="Links" href="../Links/index.html" />
+    <link rel="prev" title="Current work" href="../Future_Work/current.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Links/index.html" title="Links"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="../Future_Work/current.html" title="Current work"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="faq">
+<h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="frequently-asked-questions-about-topographica">
+<h2>Frequently Asked Questions about Topographica<a class="headerlink" href="#frequently-asked-questions-about-topographica" title="Permalink to this headline">¶</a></h2>
+<p>Here we collect together some answers to general questions about
+Topographica. If you have a problem that isn&#8217;t answered below,
+please feel free to ask us (either in one of our <a class="reference external" href="../Forums/index.html">forums</a>, or by
+email).</p>
+<ol class="arabic">
+<li><p class="first"><strong>Q:</strong> <em>How can I get access to the actual data shown in the
+various plots, etc.?</em></p>
+<p><strong>A:</strong> The main objects in the simulation can be accessed through
+the <tt class="docutils literal"><span class="pre">topo.sim</span></tt> attribute. For instance, if you have a sheet
+named <tt class="docutils literal"><span class="pre">'V1'</span></tt>, it can be accessed as <tt class="docutils literal"><span class="pre">topo.sim.V1</span></tt>. From there
+the projections, weights, etc. for that unit can be obtained. See
+the <a class="reference external" href="../User_Manual/commandline.html">Command line</a> section of the user manual for more
+information, including how to plot such data manually.</p>
+</li>
+<li><p class="first"><strong>Q:</strong> <em>After upgrading Topographica or editing some of its
+files, I get errors when loading a saved snapshot.</em></p>
+<p><strong>A:</strong> As of 0.9.5, Topographica saves the state by using
+Python&#8217;s pickling procedure, which saves <em>everything</em> in the
+current simulation. The disadvantage of this approach is that
+changes in the definition of any of the classes used (apart from
+changing parameter values or strictly adding code) can cause the
+reloading to fail. Whenever possible, we provide legacy snapshot
+support that maps from the old definition into the new one, and
+so snapshots <em>should</em> continue to be loadable. However, if you
+have trouble with a particular file, please file a bug report so
+that we can extend the legacy support to be able to load it. We
+may eventually set up an XML or HDF5-based archival storage
+format, but this is difficult to achieve with the fast pace of
+Topographica development.</p>
+</li>
+<li><p class="first"><strong>Q:</strong> <em>What models or algorithms does Topographica support?</em></p>
+<p><strong>A:</strong> Topographica is built in a highly modular fashion, and
+thus it can support an effectively infinite number of algorithms
+with little or no change to the underlying code. For instance,
+there is no particular Topographica component that implements the
+SOM algorithm &#8211; instead, a SOM network like
+examples/som_retinotopy.ty is simply built from:</p>
+<ol class="arabic simple">
+<li>An input pattern specified from a large library of possible
+<a class="reference external" href="../Reference_Manual/topo.base.patterngenerator.PatternGenerator-class.html">PatternGenerator</a>s</li>
+<li>A general-purpose <a class="reference external" href="../Reference_Manual/topo.sheet.GeneratorSheet-class.html">GeneratorSheet</a> for presenting input
+patterns</li>
+<li>A general-purpose weight projection class <a class="reference external" href="../Reference_Manual/topo.base.cf.CFProjection-class.html">CFProjection</a></li>
+<li>A general-purpose array of units <a class="reference external" href="../Reference_Manual/topo.base.cf.CFSheet-class.html">CFSheet</a></li>
+<li>A specialized transfer function (<a class="reference external" href="../Reference_Manual/topo.transferfn.misc.KernelMax-class.html">KernelMax</a>) that picks a
+winning unit and activates the rest according to a
+user-specified kernel function (also implemented as a
+<a class="reference external" href="../Reference_Manual/topo.base.patterngenerator.PatternGenerator-class.html">PatternGenerator</a>).</li>
+</ol>
+<p>This approach makes it simple to change specific aspects of a
+model (e.g. to choose a different <a class="reference external" href="../Reference_Manual/topo.base.patterngenerator.PatternGenerator-class.html">PatternGenerator</a> for the
+kernel function) without necessarily requiring any new code, as
+long as the new function has already been written for any
+previous model. For this example, only the KernelMax function
+(about 50 lines of Python code) was added specifically for
+supporting SOM; the other components were all already used in a
+wide variety of other models.</p>
+</li>
+<li><p class="first"><strong>Q:</strong> <em>I think I&#8217;ve found a problem with Topographica. What
+should I do now?</em></p>
+<p><strong>A:</strong> Topographica is continuously changing to support active
+research, so problems can occur. To be sure you have found a
+problem with Topographica itself, and to help us fix it quickly,
+please follow our guidelines for <a class="reference external" href="../Forums/problems.html">Reporting specific problems
+with Topographica</a>.</p>
+</li>
+<li><p class="first"><strong>Q:</strong> <em>pip failed while processing dependencies. What can I do
+now?</em></p>
+<p><strong>A:</strong> pip can sometimes encounter problems while processing
+dependencies. In such cases, installation will stop at the failed
+dependency, so it is usually straightforward to identify and fix
+the problem. Below we list some possibilities for solving pip
+problems:</p>
+<ul class="simple">
+<li>pip dependency-processing problems can sometimes be solved by
+installing the individual dependencies before running
+<tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">topographica</span></tt>:
+<tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">numpy;</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">PIL</span></tt> (then, optionally,
+other recommended dependencies). Once these are installed,
+repeat the <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">topographica</span></tt> command.</li>
+<li>Binaries of Topographica&#8217;s required dependencies (NumPy and
+PIL) as well as optional dependencies (MatPlotLib, gmpy,
+SciPy) are available for many platforms, using the native
+package manager for your platform (if available) or
+self-installing .exe files (for Windows). Once installed,
+repeat the <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">topographica</span></tt> command. Note that
+it&#8217;s not always obvious how to make sure that separate
+installations like this all use the same copy of Python as
+Topographica is using, but doing so is necessary for this
+approach to work.</li>
+<li>If a binary is not available for your platform, you should
+check the dependency&#8217;s installation instructions for your
+platform. Usually, you will need to make sure that you have
+typical code-building tools (e.g. a C/C++ compiler). Your
+distribution will usually have such tools available, e.g. the
+&#8220;build-essential&#8221; package on Ubuntu or <a class="reference external" href="http://developer.apple.com/technologies/tools/xcode.html">Xcode</a> on Mac. You
+will also need the Python headers, for which it might be
+necessary to install your distribution&#8217;s &#8220;python-dev&#8221; or
+&#8220;python-devel&#8221; package.</li>
+</ul>
+</li>
+<li><p class="first"><strong>Q:</strong> <em>On my Mac, the GUI windows take a long time to refresh,
+seeming to bounce around for a while. Why is this?</em></p>
+<p><strong>A:</strong> There is a bug in some versions of Tcl/Tk on OS X that
+causes Tkinter to perform very slowly. You could try installing a
+newer version of Tcl/Tk (e.g. ActiveTcl), but you would need to
+make sure your copy of Python is built against it. Please feel
+free to contact Topographica&#8217;s developers if you would like more
+help with this problem.</p>
+</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="#">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">FAQ</a><ul>
+<li><a class="reference internal" href="#frequently-asked-questions-about-topographica">Frequently Asked Questions about Topographica</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../Future_Work/current.html"
+                        title="previous chapter">Current work</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../Links/index.html"
+                        title="next chapter">Links</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/FAQ/index.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../Links/index.html" title="Links"
+             >next</a></li>
+        <li class="right" >
+          <a href="../Future_Work/current.html" title="Current work"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

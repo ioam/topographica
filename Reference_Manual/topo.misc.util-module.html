@@ -1,0 +1,301 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.misc.util &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-misc-util">
+<h1>topo.misc.util<a class="headerlink" href="#topo-misc-util" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance4018997248.svg" usemap="#inheritance4018997248" class="inheritance"/></div><map id="inheritance4018997248" name="inheritance4018997248">
+</map>
+<div class="section" id="module-topo.misc.util">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.misc.util" title="Permalink to this headline">¶</a></h2>
+<p>General utility functions and classes.</p>
+<dl class="class">
+<dt id="topo.misc.util.MultiFile">
+<em class="property">class </em><tt class="descclassname">topo.misc.util.</tt><tt class="descname">MultiFile</tt><big>(</big><em>*file_like_objs</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#MultiFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.MultiFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>For all file_like_objs passed on initialization, provides a
+convenient way to call any of file&#8217;s methods (on all of them).</p>
+<p>E.g. The following would cause &#8216;test&#8217; to be written into two
+files, as well as to stdout:</p>
+<p>import sys
+f1 = open(&#8216;file1&#8217;,&#8217;w&#8217;)
+f2 = open(&#8216;file2&#8217;,&#8217;w&#8217;)
+m = MultiFile(f1,f2,sys.stdout)
+m.write(&#8216;test&#8217;)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.NxN">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">NxN</tt><big>(</big><em>tuple</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#NxN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.NxN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a tuple (X1,X2,...,Xn) to a string &#8216;X1xX2x...xXn&#8217;</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.misc.util.Struct">
+<em class="property">class </em><tt class="descclassname">topo.misc.util.</tt><tt class="descname">Struct</tt><big>(</big><em>**entries</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#Struct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.Struct" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple structure class, taking keyword args and assigning them to attributes.</p>
+<p>For instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="n">bar</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">foo</span>
+<span class="go">&#39;a&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">bar</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<p>From <a class="reference external" href="http://www.norvig.com/python-iaq.html">http://www.norvig.com/python-iaq.html</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.centroid">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">centroid</tt><big>(</big><em>pts</em>, <em>weights</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the centroid of a weighted set of points as an array.</p>
+<p>The pts argument should be an array of points, one per row,
+and weights should be a vector of weights.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.flat_indices">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">flat_indices</tt><big>(</big><em>shape</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#flat_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.flat_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the indices needed to address or loop over all
+the elements of a 1D or 2D matrix with the given shape. E.g.:</p>
+<p>flat_indices((3,)) == [0,1,2]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.flatten">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">flatten</tt><big>(</big><em>l</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens a list.</p>
+<p>Written by Bearophile as published on the www.python.org newsgroups.
+Pulled into Topographica 3/5/2005.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.frange">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">frange</tt><big>(</big><em>start</em>, <em>end=None</em>, <em>inc=1.0</em>, <em>inclusive=False</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#frange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.frange" title="Permalink to this definition">¶</a></dt>
+<dd><p>A range function that accepts float increments.</p>
+<p>Otherwise, works just as the inbuilt range() function.  If
+inclusive is False, as in the default, the range is exclusive (not
+including the end value), as in the inbuilt range(). If inclusive
+is true, the range may include the end value.</p>
+<p>&#8216;All theoretic restrictions apply, but in practice this is
+more useful than in theory.&#8217;</p>
+<p>From: <a class="reference external" href="http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/66472">http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/66472</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.idx2rowcol">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">idx2rowcol</tt><big>(</big><em>idx</em>, <em>shape</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#idx2rowcol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.idx2rowcol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a flat matrix index and a 2D matrix shape, return the (row,col)
+coordinates of the index.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.linearly_interpolate">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">linearly_interpolate</tt><big>(</big><em>table</em>, <em>value</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#linearly_interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.linearly_interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate an appropriate value from the given list of values, by number.</p>
+<p>Assumes the table is a list of items to be returned for integer values,
+and interpolates between those items for non-integer values.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.profile">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">profile</tt><big>(</big><em>command</em>, <em>n=50</em>, <em>sorting=('cumulative'</em>, <em>'time')</em>, <em>strip_dirs=False</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Profile the given command (supplied as a string), printing
+statistics about the top n functions when ordered according to
+sorting.</p>
+<p>sorting defaults to ordering by cumulative time and then internal
+time; see <a class="reference external" href="http://docs.python.org/lib/profile-stats.html">http://docs.python.org/lib/profile-stats.html</a> for other
+sorting options.</p>
+<p>By default, the complete paths of files are not shown. If there
+are multiple files with the same name, you might wish to set
+strip_dirs=False to make it easier to follow the output.</p>
+<p>Examples:</p>
+<ul class="simple">
+<li>profile loading a simulation:</li>
+</ul>
+<p>profile(&#8216;execfile(&#8220;examples/hierarchical.ty&#8221;)&#8217;)</p>
+<ul class="simple">
+<li>profile running an already loaded simulation:</li>
+</ul>
+<p>profile(&#8216;topo.sim.run(10)&#8217;)</p>
+<ul class="simple">
+<li>profile running a whole simulation:</li>
+</ul>
+<p>profile(&#8216;execfile(&#8220;examples/lissom_oo_or.ty&#8221;);topo.sim.run(20000)&#8217;)</p>
+<ul class="simple">
+<li>profile running a simulation, but from the commandline:</li>
+</ul>
+<p>./topographica examples/hierarchical.ty -c &#8220;from topo.misc.util import profile; profile(&#8216;topo.sim.run(10)&#8217;)&#8221;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.rowcol2idx">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">rowcol2idx</tt><big>(</big><em>r</em>, <em>c</em>, <em>shape</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#rowcol2idx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.rowcol2idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a row, column, and matrix shape, return the corresponding index
+into the flattened (raveled) matrix.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.shortclassname">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">shortclassname</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#shortclassname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.shortclassname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the class name of x as a string with the leading package information removed.</p>
+<p>E.g. if x is of type &#8220;&lt;class &#8216;topo.base.sheet.Sheet&#8217;&gt;&#8221;, returns
+&#8220;Sheet&#8221;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.signabs">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">signabs</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#signabs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.signabs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split x into its sign and absolute value.</p>
+<p>Returns a tuple (sign(x),abs(x)).  Note: sign(0) = 1, unlike
+numpy.sign.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.weighted_sample">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">weighted_sample</tt><big>(</big><em>seq</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#weighted_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.weighted_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select randomly from the given sequence.</p>
+<p>The weights, if given, should be a sequence the same length as
+seq, as would be passed to weighted_sample_idx().</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.misc.util.weighted_sample_idx">
+<tt class="descclassname">topo.misc.util.</tt><tt class="descname">weighted_sample_idx</tt><big>(</big><em>weights</em><big>)</big><a class="reference internal" href="../_modules/topo/misc/util.html#weighted_sample_idx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.misc.util.weighted_sample_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an integer generated by sampling the discrete distribution
+represented by the sequence of weights.</p>
+<p>The integer will be in the range [0,len(weights)).  The weights
+need not sum to unity, but can contain any non-negative values
+(e.g., [1 1 1 100] is a valid set of weights).</p>
+<p>To use weights from a 2D numpy array w, specify w.ravel() (not the
+w.flat iterator).</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.misc.util</a><ul>
+<li><a class="reference internal" href="#module-topo.misc.util">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.misc.util-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

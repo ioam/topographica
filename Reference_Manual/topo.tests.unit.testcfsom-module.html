@@ -1,0 +1,176 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.unit.testcfsom &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-tests-unit-testcfsom">
+<h1>topo.tests.unit.testcfsom<a class="headerlink" href="#topo-tests-unit-testcfsom" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance3f61a81af3.svg" usemap="#inheritance3f61a81af3" class="inheritance"/></div><map id="inheritance3f61a81af3" name="inheritance3f61a81af3">
+</map>
+<div class="section" id="module-topo.tests.unit.testcfsom">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.tests.unit.testcfsom" title="Permalink to this headline">¶</a></h2>
+<p>See test_cfsom(self) and ImagePoster for an example of how to use and call
+the PlotEngine system from a simulation.</p>
+<dl class="class">
+<dt id="topo.tests.unit.testcfsom.ImageSaver">
+<em class="property">class </em><tt class="descclassname">topo.tests.unit.testcfsom.</tt><tt class="descname">ImageSaver</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/tests/unit/testcfsom.html#ImageSaver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tests.unit.testcfsom.ImageSaver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.simulation-module.html#topo.base.simulation.EventProcessor" title="topo.base.simulation.EventProcessor"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.simulation.EventProcessor</span></tt></a></p>
+<p>A Sheet that receives activity matrices and saves them as bitmaps.
+Each time an ImageSaver sheet receives an input event on any input
+port, it saves it to a file.  The file name is determined by:</p>
+<blockquote>
+<div>&lt;file_prefix&gt;&lt;name&gt;_&lt;port&gt;_&lt;time&gt;.&lt;file_format&gt;</div></blockquote>
+<p>Where &lt;name&gt; is the name of the ImageSaver object, &lt;port&gt; is the
+name of the input port used, and &lt;time&gt; is the current simulation time.</p>
+<dl class="docutils">
+<dt>Parameters::</dt>
+<dd><dl class="first docutils">
+<dt>file_prefix = (default &#8216;&#8217;) A path or other prefix for the</dt>
+<dd>filename.</dd>
+<dt>file_format = (default &#8216;ppm&#8217;) The file type to use when saving</dt>
+<dd>the image. (can be any image format understood by PIL)</dd>
+</dl>
+<p>time_format = (default &#8216;%f&#8217;) The format string for the time.
+pixel_scale = (default 255) The amount to scale the</p>
+<blockquote>
+<div>activity. Used as parameter to PIL&#8217;s Image.putdata().</div></blockquote>
+<dl class="last docutils">
+<dt>pixel_offset = (default 0) The zero-offset for each pixel. Used as</dt>
+<dd>parameter to PIL&#8217;s Image.putdata()</dd>
+</dl>
+</dd>
+</dl>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">pixel_scale</span></tt> (<em>constant=False, default=255, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">file_format</span></tt> (<em>constant=False, default=ppm, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">file_prefix</span></tt> (<em>constant=False, default=, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">time_format</span></tt> (<em>constant=False, default=%f, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<p><em>param Parameter</em> <tt class="docutils literal"><span class="pre">pixel_offset</span></tt> (<em>constant=False, default=0, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.tests.unit.testcfsom</a><ul>
+<li><a class="reference internal" href="#module-topo.tests.unit.testcfsom">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.tests.unit.testcfsom-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

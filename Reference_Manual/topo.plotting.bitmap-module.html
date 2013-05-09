@@ -1,0 +1,265 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.plotting.bitmap &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-plotting-bitmap">
+<h1>topo.plotting.bitmap<a class="headerlink" href="#topo-plotting-bitmap" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance580fb0a561.svg" usemap="#inheritance580fb0a561" class="inheritance"/></div><map id="inheritance580fb0a561" name="inheritance580fb0a561">
+</map>
+<div class="section" id="module-topo.plotting.bitmap">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.plotting.bitmap" title="Permalink to this headline">¶</a></h2>
+<p>Topographica Bitmap Class.</p>
+<p>Encapsulates the PIL Image class so that an input matrix can be displayed
+as a bitmap image without needing to know about PIL proper.</p>
+<p>There are three different base image Classes which inherit Bitmap:</p>
+<p>PaletteBitmap  - 1 2D Matrix, 1 1D Color Map
+HSVBitmap    - 3 2D Matrices, Color (H), Confidence (S), Strength (V)
+RGBBitmap    - 3 2D Matrices, Red, Green, Blue Channels.</p>
+<p>All maps are assumed to be on a nominal range of 0.0 to 1.0.  Matrices
+are passed in as part of the constructor and the image is generaed.
+For more information, see the documentation for each of the Bitmap
+classes.</p>
+<p>The encapsulated PIL Image is accessible through the .bitmap attribute.</p>
+<dl class="class">
+<dt id="topo.plotting.bitmap.Bitmap">
+<em class="property">class </em><tt class="descclassname">topo.plotting.bitmap.</tt><tt class="descname">Bitmap</tt><big>(</big><em>image</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#Bitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.Bitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Wrapper class for the PIL Image class.</p>
+<p>The main purpose for this base class is to provide a consistent
+interface for defining bitmaps constructed in various different
+ways.  The resulting bitmap is a PIL Image object that can be
+accessed using the normal PIL interface.</p>
+<p>If subclasses use the _arrayToImage() function provided, any
+pixels larger than the maximum that can be displayed will
+be counted before they are clipped; these are stored in the
+clipped_pixels attribute.</p>
+<dl class="method">
+<dt id="topo.plotting.bitmap.Bitmap.show">
+<tt class="descname">show</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#Bitmap.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.Bitmap.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renaming of Image.show() for the Bitmap.bitmap attribute.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.plotting.bitmap.Bitmap.zoom">
+<tt class="descname">zoom</tt><big>(</big><em>factor</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#Bitmap.zoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.Bitmap.zoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a resized Image object, given the input &#8216;factor&#8217;
+parameter.  1.0 is the same size, 2.0 is doubling the height
+and width, 0.5 is 1/2 the original size.  The original Image
+is not changed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.bitmap.PaletteBitmap">
+<em class="property">class </em><tt class="descclassname">topo.plotting.bitmap.</tt><tt class="descname">PaletteBitmap</tt><big>(</big><em>inArray</em>, <em>palette=None</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#PaletteBitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.PaletteBitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.bitmap.Bitmap" title="topo.plotting.bitmap.Bitmap"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.bitmap.Bitmap</span></tt></a></p>
+<p>Bitmap constructed using a single 2D array.</p>
+<p>The image is monochrome by default, but more colorful images can
+be constructed by specifying a Palette.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.bitmap.HSVBitmap">
+<em class="property">class </em><tt class="descclassname">topo.plotting.bitmap.</tt><tt class="descname">HSVBitmap</tt><big>(</big><em>hue</em>, <em>sat</em>, <em>val</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#HSVBitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.HSVBitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.bitmap.Bitmap" title="topo.plotting.bitmap.Bitmap"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.bitmap.Bitmap</span></tt></a></p>
+<p>Bitmap constructed from 3 2D arrays, for hue, saturation, and value.</p>
+<p>The hue matrix determines the pixel colors.  The saturation matrix
+determines how strongly the pixels are saturated for each hue,
+i.e. how colorful the pixels appear.  The value matrix determines
+how bright each pixel is.</p>
+<p>An RGB image is constructed from the HSV matrices using
+hsv_to_rgb; the resulting image is of the same type that is
+constructed by RGBBitmap, and can be used in the same way.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.bitmap.RGBBitmap">
+<em class="property">class </em><tt class="descclassname">topo.plotting.bitmap.</tt><tt class="descname">RGBBitmap</tt><big>(</big><em>rMapArray</em>, <em>gMapArray</em>, <em>bMapArray</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#RGBBitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.RGBBitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.bitmap.Bitmap" title="topo.plotting.bitmap.Bitmap"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.bitmap.Bitmap</span></tt></a></p>
+<p>Bitmap constructed from three 2D arrays, for red, green, and blue.</p>
+<p>Each matrix is used as the corresponding channel of an RGB image.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.bitmap.MontageBitmap">
+<em class="property">class </em><tt class="descclassname">topo.plotting.bitmap.</tt><tt class="descname">MontageBitmap</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#MontageBitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.MontageBitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.bitmap.Bitmap" title="topo.plotting.bitmap.Bitmap"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.bitmap.Bitmap</span></tt></a></p>
+<p>A bitmap composed of tiles containing other bitmaps.</p>
+<p>Bitmaps are scaled to fit in the given tile size, and tiled
+right-to-left, top-to-bottom into the given number of rows and columns.</p>
+<dl class="docutils">
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">title_pos</span></tt> (<em>constant=False, default=(10, 10), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The position of the upper left corner of the title in each tile.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">resize_filter</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The filter used for resizing the images.  Defaults
+       to NEAREST.  See PIL Image module documentation for other
+       options and their meanings.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">rows</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=2, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The number of rows in the montage.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">bg_color</span></tt> (<em>constant=False, default=(0, 0, 0), instantiate=False, length=3, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The background color for the montage, as (r,g,b).</dd>
+<dt><em>param Dict</em> <tt class="docutils literal"><span class="pre">title_options</span></tt> (<em>allow_None=False, constant=False, default={}, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Dictionary of options for drawing the titles.  Dict should
+        contain keyword options for the PIL draw.text method.  Possible
+        options include &#8216;fill&#8217; (fill color), &#8216;outline&#8217; (outline color),
+        and &#8216;font&#8217; (an ImageFont font instance).  The PIL defaults will
+        be used for any omitted options.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">hooks</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A list of functions, one per tile, that take a PIL image as
+        input and return a PIL image as output.  The hooks are applied
+        to the tile images before resizing.  The value None can be
+        inserted as a placeholder where no hook function is needed.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">cols</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=2, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The number of columns in the montage.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">bitmaps</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The list of bitmaps to compose.</dd>
+<dt><em>param Composite</em> <tt class="docutils literal"><span class="pre">shape</span></tt> (<em>attribs=[&#8216;rows&#8217;, &#8216;cols&#8217;], constant=False, default=None, instantiate=False, objtype=&lt;class &#8216;topo.plotting.bitmap.MontageBitmap&#8217;&gt;, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The shape of the montage. Same as (self.rows,self.cols).</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">titles</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>A list of titles to overlay on the tiles.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">tile_size</span></tt> (<em>constant=False, default=(100, 100), instantiate=False, length=2, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The size in pixels of a tile in the montage.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">margin</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The size in pixels of the margin to put around each
+        tile in the montage.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.plotting.bitmap.DrawBitmap">
+<em class="property">class </em><tt class="descclassname">topo.plotting.bitmap.</tt><tt class="descname">DrawBitmap</tt><big>(</big><em>primitive_matrix</em>, <em>box_size</em><big>)</big><a class="reference internal" href="../_modules/topo/plotting/bitmap.html#DrawBitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.plotting.bitmap.DrawBitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.plotting.bitmap.Bitmap" title="topo.plotting.bitmap.Bitmap"><tt class="xref py py-class docutils literal"><span class="pre">topo.plotting.bitmap.Bitmap</span></tt></a></p>
+<p>Bitmap with primitives drawn for each unit
+The input matrix has a list of primitives and relative arguments
+for each unit.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.plotting.bitmap</a><ul>
+<li><a class="reference internal" href="#module-topo.plotting.bitmap">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.plotting.bitmap-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

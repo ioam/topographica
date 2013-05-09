@@ -1,0 +1,328 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tkgui.projectionpanel &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-tkgui-projectionpanel">
+<h1>topo.tkgui.projectionpanel<a class="headerlink" href="#topo-tkgui-projectionpanel" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritance10172fd8d9.svg" usemap="#inheritance10172fd8d9" class="inheritance"/></div><map id="inheritance10172fd8d9" name="inheritance10172fd8d9">
+</map>
+<div class="section" id="module-topo.tkgui.projectionpanel">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.tkgui.projectionpanel" title="Permalink to this headline">¶</a></h2>
+<p>PlotgroupPanels for displaying ProjectionSheet plotgroups.</p>
+<dl class="class">
+<dt id="topo.tkgui.projectionpanel.CFProjectionPanel">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.projectionpanel.</tt><tt class="descname">CFProjectionPanel</tt><big>(</big><em>master</em>, <em>plotgroup</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/projectionpanel.html#CFProjectionPanel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.projectionpanel.CFProjectionPanel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.projectionpanel.ProjectionPanel</span></tt></p>
+<p>Panel for displaying CFProjections.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">gui_desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Value to provide for PlotGroup.desired_maximum_plot_height for
+        PlotGroups opened by the GUI.  Determines the initial, default
+        scaling for the PlotGroup.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">dock</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>on console or not</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Fwd</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/forward-2.0.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Move forward through the history of all the plots shown in this window.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">strength_only</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, disables all but the Strength channel of each plot,
+disabling all color coding for Strength/Hue/Confidence plots.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">maximum_plot_history_length</span></tt> (<em>allow_None=False, bounds=(-1, None), constant=False, default=20, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Value of maximum plots history length. Larger number means a longer history 
+        is kept and hence more memory is used. A length of -1 means keep all.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Reduce</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/viewmag-_2.1.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Reduce the displayed size of the current plots by about 20%.
+        A minimum size that preserves at least one pixel per unit is
+        enforced, to ensure that no data is lost when displaying.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Enlarge</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/viewmag+_2.2.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Increase the displayed size of the current plots by about 20%.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Refresh</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/redo-small.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Refresh the current plot (i.e. force the current plot to be regenerated
+        by executing pre_plot_hooks and plot_hooks).</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Back</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/back-2.0.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Move backward through the history of all the plots shown in
+        this window.  When showing a historical plot, some functions
+        will be disabled, because the original data is no longer
+        available.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">pretty_parameters</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Whether to format parameter names, or display the
+        variable names instead.
+
+        Example use:
+          TkParameterized.pretty_parameters=False
+    
+        (This causes all Parameters throughout the GUI to be displayed
+        with variable names.)</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Redraw</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/redo-small.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Redraw the plot from existing data (i.e. execute plot_hooks only).</dd>
+</dl>
+<dl class="attribute">
+<dt id="topo.tkgui.projectionpanel.CFProjectionPanel.projection_type">
+<tt class="descname">projection_type</tt><a class="headerlink" href="#topo.tkgui.projectionpanel.CFProjectionPanel.projection_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">CFProjection</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.projectionpanel.PlotMatrixPanel">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.projectionpanel.</tt><tt class="descname">PlotMatrixPanel</tt><big>(</big><em>master</em>, <em>plotgroup</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/projectionpanel.html#PlotMatrixPanel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.projectionpanel.PlotMatrixPanel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.tkgui.projectionpanel.ProjectionSheetPanel" title="topo.tkgui.projectionpanel.ProjectionSheetPanel"><tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.projectionpanel.ProjectionSheetPanel</span></tt></a></p>
+<p>PlotGroupPanel for visualizing an array of bitmaps, such as for
+a projection involving a matrix of units.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">gui_desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Value to provide for PlotGroup.desired_maximum_plot_height for
+        PlotGroups opened by the GUI.  Determines the initial, default
+        scaling for the PlotGroup.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">dock</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>on console or not</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Fwd</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/forward-2.0.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Move forward through the history of all the plots shown in this window.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">strength_only</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, disables all but the Strength channel of each plot,
+disabling all color coding for Strength/Hue/Confidence plots.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">maximum_plot_history_length</span></tt> (<em>allow_None=False, bounds=(-1, None), constant=False, default=20, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Value of maximum plots history length. Larger number means a longer history 
+        is kept and hence more memory is used. A length of -1 means keep all.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Reduce</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/viewmag-_2.1.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Reduce the displayed size of the current plots by about 20%.
+        A minimum size that preserves at least one pixel per unit is
+        enforced, to ensure that no data is lost when displaying.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Enlarge</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/viewmag+_2.2.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Increase the displayed size of the current plots by about 20%.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Refresh</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/redo-small.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Refresh the current plot (i.e. force the current plot to be regenerated
+        by executing pre_plot_hooks and plot_hooks).</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Back</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/back-2.0.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Move backward through the history of all the plots shown in
+        this window.  When showing a historical plot, some functions
+        will be disabled, because the original data is no longer
+        available.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">pretty_parameters</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Whether to format parameter names, or display the
+        variable names instead.
+
+        Example use:
+          TkParameterized.pretty_parameters=False
+    
+        (This causes all Parameters throughout the GUI to be displayed
+        with variable names.)</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Redraw</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/redo-small.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Redraw the plot from existing data (i.e. execute plot_hooks only).</dd>
+</dl>
+<dl class="method">
+<dt id="topo.tkgui.projectionpanel.PlotMatrixPanel.display_labels">
+<tt class="descname">display_labels</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/projectionpanel.html#PlotMatrixPanel.display_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.projectionpanel.PlotMatrixPanel.display_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do not display labels for these plots.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.tkgui.projectionpanel.PlotMatrixPanel.display_plots">
+<tt class="descname">display_plots</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/projectionpanel.html#PlotMatrixPanel.display_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.projectionpanel.PlotMatrixPanel.display_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>CFProjectionPanel requires a 2D grid of plots.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.tkgui.projectionpanel.ProjectionSheetPanel">
+<em class="property">class </em><tt class="descclassname">topo.tkgui.projectionpanel.</tt><tt class="descname">ProjectionSheetPanel</tt><big>(</big><em>master</em>, <em>plotgroup</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/projectionpanel.html#ProjectionSheetPanel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.projectionpanel.ProjectionSheetPanel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">topo.tkgui.templateplotgrouppanel.TemplatePlotGroupPanel</span></tt></p>
+<p>Abstract base class for panels relating to ProjectionSheets.</p>
+<dl class="docutils">
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">gui_desired_maximum_plot_height</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=150, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Value to provide for PlotGroup.desired_maximum_plot_height for
+        PlotGroups opened by the GUI.  Determines the initial, default
+        scaling for the PlotGroup.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">dock</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>on console or not</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Fwd</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/forward-2.0.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Move forward through the history of all the plots shown in this window.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">strength_only</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, disables all but the Strength channel of each plot,
+disabling all color coding for Strength/Hue/Confidence plots.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">maximum_plot_history_length</span></tt> (<em>allow_None=False, bounds=(-1, None), constant=False, default=20, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Value of maximum plots history length. Larger number means a longer history 
+        is kept and hence more memory is used. A length of -1 means keep all.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Reduce</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/viewmag-_2.1.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Reduce the displayed size of the current plots by about 20%.
+        A minimum size that preserves at least one pixel per unit is
+        enforced, to ensure that no data is lost when displaying.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Enlarge</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/viewmag+_2.2.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Increase the displayed size of the current plots by about 20%.</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Refresh</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/redo-small.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Refresh the current plot (i.e. force the current plot to be regenerated
+        by executing pre_plot_hooks and plot_hooks).</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Back</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/back-2.0.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Move backward through the history of all the plots shown in
+        this window.  When showing a historical plot, some functions
+        will be disabled, because the original data is no longer
+        available.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">pretty_parameters</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Whether to format parameter names, or display the
+        variable names instead.
+
+        Example use:
+          TkParameterized.pretty_parameters=False
+    
+        (This causes all Parameters throughout the GUI to be displayed
+        with variable names.)</dd>
+<dt><em>param Button</em> <tt class="docutils literal"><span class="pre">Redraw</span></tt> (<em>constant=False, default=None, image_path=tkgui/icons/redo-small.png, instantiate=False, pickle_default_value=True, precedence=None, readonly=False, size=(20, 20)</em>)</dt>
+<dd>Redraw the plot from existing data (i.e. execute plot_hooks only).</dd>
+</dl>
+<dl class="attribute">
+<dt id="topo.tkgui.projectionpanel.ProjectionSheetPanel.projection_type">
+<tt class="descname">projection_type</tt><a class="headerlink" href="#topo.tkgui.projectionpanel.ProjectionSheetPanel.projection_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Projection</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.tkgui.projectionpanel.ProjectionSheetPanel.sheet_type">
+<tt class="descname">sheet_type</tt><a class="headerlink" href="#topo.tkgui.projectionpanel.ProjectionSheetPanel.sheet_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">ProjectionSheet</span></tt></p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="topo.tkgui.projectionpanel.ProjectionSheetPanel.valid_context">
+<em class="property">classmethod </em><tt class="descname">valid_context</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/projectionpanel.html#ProjectionSheetPanel.valid_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.projectionpanel.ProjectionSheetPanel.valid_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if there is at least one instance of
+projection_type among all projections in the simulation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.tkgui.projectionpanel.cmp_projections">
+<tt class="descclassname">topo.tkgui.projectionpanel.</tt><tt class="descname">cmp_projections</tt><big>(</big><em>p1</em>, <em>p2</em><big>)</big><a class="reference internal" href="../_modules/topo/tkgui/projectionpanel.html#cmp_projections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.tkgui.projectionpanel.cmp_projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Comparison function for Plots.
+It compares the precedence number first and then the src_name and name attributes.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.tkgui.projectionpanel</a><ul>
+<li><a class="reference internal" href="#module-topo.tkgui.projectionpanel">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.tkgui.projectionpanel-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

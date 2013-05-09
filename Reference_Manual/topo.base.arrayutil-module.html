@@ -1,0 +1,229 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.base.arrayutil &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-base-arrayutil">
+<h1>topo.base.arrayutil<a class="headerlink" href="#topo-base-arrayutil" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancefb77bc0bf5.svg" usemap="#inheritancefb77bc0bf5" class="inheritance"/></div><map id="inheritancefb77bc0bf5" name="inheritancefb77bc0bf5">
+</map>
+<div class="section" id="module-topo.base.arrayutil">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.base.arrayutil" title="Permalink to this headline">¶</a></h2>
+<p>General utility functions and classes for Topographica that require numpy.</p>
+<dl class="class">
+<dt id="topo.base.arrayutil.DivideWithConstant">
+<em class="property">class </em><tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">DivideWithConstant</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#DivideWithConstant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.DivideWithConstant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Divide two scalars or arrays with a constant (c) offset on the
+denominator to allow setting the gain or to avoid divide-by-zero
+issues.  The non-constant part of the denominator (y) is clipped
+to ensure that it has only positive values.</p>
+<p><em>param Number</em> <tt class="docutils literal"><span class="pre">c</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.L2norm">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">L2norm</tt><big>(</big><em>v</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#L2norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.L2norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the L2 norm of the vector v.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.add_border">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">add_border</tt><big>(</big><em>matrix</em>, <em>width=1</em>, <em>value=0.0</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#add_border"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.add_border" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new matrix consisting of the given matrix with a border
+or margin of the given width filled with the given value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.arg">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">arg</tt><big>(</big><em>z</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#arg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.arg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the complex argument (phase) of z.
+(z in radians.)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.array_argmax">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">array_argmax</tt><big>(</big><em>arr</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#array_argmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.array_argmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the coordinates of the maximum element in the given array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.centroid">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">centroid</tt><big>(</big><em>array_2D</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the centroid (center of gravity) for a 2D array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.clip_lower">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">clip_lower</tt><big>(</big><em>arr</em>, <em>lower_bound</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#clip_lower"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.clip_lower" title="Permalink to this definition">¶</a></dt>
+<dd><p>In-place, one-sided version of numpy.clip().</p>
+<p>i.e. numpy.clip(arr,a_min=lower_bound,out=arr) if it existed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.clip_upper">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">clip_upper</tt><big>(</big><em>arr</em>, <em>upper_bound</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#clip_upper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.clip_upper" title="Permalink to this definition">¶</a></dt>
+<dd><p>In-place, one-sided version of numpy.clip().</p>
+<p>i.e. numpy.clip(arr,a_max=upper_bound,out=arr) if it existed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.divisive_normalization">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">divisive_normalization</tt><big>(</big><em>weights</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#divisive_normalization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.divisive_normalization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divisively normalize an array to sum to 1.0</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.octave_output">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">octave_output</tt><big>(</big><em>filename</em>, <em>mat</em>, <em>name='mat'</em>, <em>owner=''</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#octave_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.octave_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given matrix to a new file of the given name, in Octave format.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.octave_str">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">octave_str</tt><big>(</big><em>mat</em>, <em>name='mat'</em>, <em>owner=''</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#octave_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.octave_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the given Numpy matrix in Octave format, listing the given
+matrix name and the object that owns it (if any).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.ufunc_script_repr">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">ufunc_script_repr</tt><big>(</big><em>f</em>, <em>imports</em>, <em>prefix=None</em>, <em>settings=None</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#ufunc_script_repr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.ufunc_script_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a runnable representation of the numpy ufunc f, and an
+import statement for its module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.base.arrayutil.wrap">
+<tt class="descclassname">topo.base.arrayutil.</tt><tt class="descname">wrap</tt><big>(</big><em>lower</em>, <em>upper</em>, <em>x</em><big>)</big><a class="reference internal" href="../_modules/topo/base/arrayutil.html#wrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.base.arrayutil.wrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Circularly alias the numeric value x into the range [lower,upper).</p>
+<p>Valid for cyclic quantities like orientations or hues.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.base.arrayutil</a><ul>
+<li><a class="reference internal" href="#module-topo.base.arrayutil">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.base.arrayutil-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

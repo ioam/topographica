@@ -1,0 +1,356 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sparse.sparsecf &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-sparse-sparsecf">
+<h1>topo.sparse.sparsecf<a class="headerlink" href="#topo-sparse-sparsecf" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancee1b2df4fe6.svg" usemap="#inheritancee1b2df4fe6" class="inheritance"/></div><map id="inheritancee1b2df4fe6" name="inheritancee1b2df4fe6">
+</map>
+<div class="section" id="module-topo.sparse.sparsecf">
+<span id="module"></span><h2>Module<a class="headerlink" href="#module-topo.sparse.sparsecf" title="Permalink to this headline">¶</a></h2>
+<p>Basic SparseCFProjection with associated sparse CFs and output,
+response, and learning function. If sparse component cannot be imported,
+SparseCFProjection will fall back to a basic dense CFProjection.</p>
+<p>CFSOF and CFSLF Plugin function allow any single CF output function to
+be applied to the sparse CFs, but may suffer a serious performance
+loss.  For real work, such functions should be implemented at the
+Cython or C++ level.</p>
+<dl class="function">
+<dt id="topo.sparse.sparsecf.CFPLF_Hebbian_Sparse">
+<tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFPLF_Hebbian_Sparse</tt><big>(</big><em>projection</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFPLF_Hebbian_Sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFPLF_Hebbian_Sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sparse CF Projection learning function applying Hebbian learning
+to the weights in a projection.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.sparse.sparsecf.CFPLF_Hebbian_Sparse_opt">
+<tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFPLF_Hebbian_Sparse_opt</tt><big>(</big><em>projection</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFPLF_Hebbian_Sparse_opt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFPLF_Hebbian_Sparse_opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sparse CF Projection learning function, which calls an optimized Hebbian
+learning function while skipping over inactive units.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.sparse.sparsecf.CFPOF_DivisiveNormalizeL1_Sparse">
+<tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFPOF_DivisiveNormalizeL1_Sparse</tt><big>(</big><em>projection</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFPOF_DivisiveNormalizeL1_Sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFPOF_DivisiveNormalizeL1_Sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sparse CF Projection output function applying L1 divisive normalization
+to individual CFs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.sparse.sparsecf.CFPRF_DotProduct_Sparse">
+<tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFPRF_DotProduct_Sparse</tt><big>(</big><em>projection</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFPRF_DotProduct_Sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFPRF_DotProduct_Sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sparse CF Projection response function calculating the dot-product
+between incoming activities and CF weights.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.sparse.sparsecf.CFPRF_DotProduct_Sparse_opt">
+<tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFPRF_DotProduct_Sparse_opt</tt><big>(</big><em>projection</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFPRF_DotProduct_Sparse_opt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFPRF_DotProduct_Sparse_opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sparse CF Projection response function calculating the dot-product
+between incoming activities and CF weights. Optimization skips
+inactive units if a certain percentage of neurons is inactive.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sparse.sparsecf.CFSPLF_Plugin">
+<em class="property">class </em><tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFSPLF_Plugin</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPLF_Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPLF_Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>CFSPLearningFunction applying the specified single_cf_fn to each Sparse CF.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;Hebbian Hebbian00277&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a LearningFn that will be applied to each CF individually.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sparse.sparsecf.CFSPLF_Plugin.constant_sum_connection_rate">
+<tt class="descname">constant_sum_connection_rate</tt><big>(</big><em>n_units</em>, <em>learning_rate</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPLF_Plugin.constant_sum_connection_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPLF_Plugin.constant_sum_connection_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the learning rate for a single connection assuming that
+the total rate is to be divided evenly among all the units in
+the connection field.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sparse.sparsecf.CFSPOF_Plugin">
+<em class="property">class </em><tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFSPOF_Plugin</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPOF_Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPOF_Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Applies the specified single_cf_fn to each SparseCF in the SparseCFProjection.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityTF IdentityTF00278&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a TransferFn that will be applied to each CF individually.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sparse.sparsecf.CFSPOF_Prune">
+<em class="property">class </em><tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFSPOF_Prune</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPOF_Prune"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPOF_Prune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.sparse.sparsecf.CFSPOF_Plugin" title="topo.sparse.sparsecf.CFSPOF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.sparse.sparsecf.CFSPOF_Plugin</span></tt></a></p>
+<p>Prunes specified percentage of connections from CFs in SparseCFProjection
+at specified interval.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityTF IdentityTF00278&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a TransferFn that will be applied to each CF individually.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">percentile</span></tt> (<em>allow_None=False, bounds=(0, 100), constant=False, default=10.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Percentile boundary below which connections will be pruned.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">interval</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1000, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Time interval at which pruning step will be applied.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sparse.sparsecf.CFSPOF_SproutRetract">
+<em class="property">class </em><tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFSPOF_SproutRetract</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPOF_SproutRetract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPOF_SproutRetract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.sparse.sparsecf.CFSPOF_Plugin" title="topo.sparse.sparsecf.CFSPOF_Plugin"><tt class="xref py py-class docutils literal"><span class="pre">topo.sparse.sparsecf.CFSPOF_Plugin</span></tt></a></p>
+<p>Sprouting and retraction weights output function. At a preset time
+interval, the function removes and adds connections based on a
+piecewise function, which determines the number of connections to
+alter and the sprouting and retraction ratios, eventually allowing
+connections to converge on the target_sparsity. The function
+ensures the full turnover_rate is applied at the maximal distances
+from the target sparsity, i.e. at 0% and 100% density. As the
+projection approaches the target sparsity, it will asymptote, but a
+residual turnover will ensure that a fixed amount of connections
+will continue to sprout and retract.</p>
+<p>Retraction deletes the x lowest weights, while sprouting applies a
+convolution with a Gaussian kernel to the existing connections,
+growing connections at locations with the highest probabilities.</p>
+<p>Still experimental and not scientifically validated.</p>
+<dl class="docutils">
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">interval</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=1000, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Time interval between sprout/retract steps.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">turnover_rate</span></tt> (<em>allow_None=False, bounds=(0, 1.0), constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Percentage of weights to change per interval, assuming
+        currently fully dense and target is fully sparse.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;IdentityTF IdentityTF00278&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a TransferFn that will be applied to each CF individually.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">target_sparsity</span></tt> (<em>allow_None=False, bounds=(0, 1.0), constant=False, default=0.15, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Sparsity level at which sprouting and retraction cancel out.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">kernel_sigma</span></tt> (<em>allow_None=False, bounds=(0.0, 10.0), constant=False, default=1.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Gaussian spatial variance for weights to diffuse per interval.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">residual_turnover</span></tt> (<em>allow_None=False, bounds=(0, 1.0), constant=False, default=0.01, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Constant turnover rate independent of current sparsity.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">disk_mask</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Limits connection sprouting to a disk.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sparse.sparsecf.CFSPOF_SproutRetract.calc_ratios">
+<tt class="descname">calc_ratios</tt><big>(</big><em>temp_weights</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPOF_SproutRetract.calc_ratios"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPOF_SproutRetract.calc_ratios" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses a piecewise linear function to determine the unit
+proportion of sprouting and retraction and the associated
+turnover rates.</p>
+<p>Above the target sparsity the sprout/retract ratio scales
+linearly up to maximal density, i.e. at full density 100% of
+the turnover is put into retraction while at full sparsity
+all the turnover is put into sprouting new connections. At
+the target density sprouting and retraction are equal.</p>
+<p>The turnover is determined also determined by the piecewise
+linear function. At maximal distance from the target sparsity,
+i.e. at full sparsity or density, the full turnover rate will
+be used and as the target sparsity is approached from either
+side this term decays to zero. Therefore, a residual turnover
+is introduced to ensure that even at the target sparsity some
+connections continue to sprout and retract.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sparse.sparsecf.CFSPOF_SproutRetract.prune">
+<tt class="descname">prune</tt><big>(</big><em>temp_weights</em>, <em>prune_idx</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPOF_SproutRetract.prune"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPOF_SproutRetract.prune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retracts n connections with the lowest weights, where n is
+determined by the piecewise linear function in the calc_ratios
+method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sparse.sparsecf.CFSPOF_SproutRetract.sprout">
+<tt class="descname">sprout</tt><big>(</big><em>temp_weights</em>, <em>mask</em>, <em>sprout_count</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPOF_SproutRetract.sprout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPOF_SproutRetract.sprout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a Gaussian blur to the existing connection field,
+selecting the n units with the highest probabilities to sprout
+new connections, where n is set by the sprout_count. New
+connections are initialized at the minimal strength of the
+current CF.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sparse.sparsecf.CFSPRF_Plugin">
+<em class="property">class </em><tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">CFSPRF_Plugin</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#CFSPRF_Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.CFSPRF_Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>Generic large-scale response function based on a simple single-CF function.</p>
+<p>Applies the single_cf_fn to each CF in turn.  For the default single_cf_fn
+of DotProduct(), does a basic dot product of each CF with the corresponding
+slice of the input array.  This function is likely to be slow to run, but
+it is easy to extend with any arbitrary single-CF response function.</p>
+<p>The single_cf_fn must be a function f(X,W) that takes two identically
+shaped matrices X (the input) and W (the CF weights) and computes a scalar
+activation value based on those weights.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">single_cf_fn</span></tt> (<em>allow_None=False, constant=False, default=&lt;DotProduct DotProduct00279&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Accepts a ResponseFn that will be applied to each CF individually.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sparse.sparsecf.SparseConnectionField">
+<em class="property">class </em><tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">SparseConnectionField</tt><big>(</big><em>template</em>, <em>input_sheet</em>, <em>projection</em>, <em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#SparseConnectionField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.SparseConnectionField" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="param.parameterized-module.html#param.parameterized.Parameterized" title="param.parameterized.Parameterized"><tt class="xref py py-class docutils literal"><span class="pre">param.parameterized.Parameterized</span></tt></a></p>
+<p>A set of weights on one input Sheet.</p>
+<p>Each ConnectionField contributes to the activity of one unit on
+the output sheet, and is normally used as part of a Projection
+including many other ConnectionFields.</p>
+<dl class="docutils">
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">weights_generator</span></tt> (<em>allow_None=False, constant=True, default=&lt;Constant Constant00280&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Generates initial weights values.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=0.08, readonly=False</em>)</dt>
+<dd>Optional function(s) to apply to the pattern array after it has been created.
+        Can be used for normalization, thresholding, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">y</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Sheet Y coordinate of CF</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">x</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.0, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Sheet X coordinate of CF</dd>
+</dl>
+<p><em>param Integer</em> <tt class="docutils literal"><span class="pre">min_matrix_radius</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</p>
+<dl class="attribute">
+<dt id="topo.sparse.sparsecf.SparseConnectionField.weights">
+<tt class="descname">weights</tt><a class="headerlink" href="#topo.sparse.sparsecf.SparseConnectionField.weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>get_weights accesses the sparse CF matrix and returns the CF
+in dense form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.sparse.sparsecf.compute_sparse_joint_norm_totals">
+<tt class="descclassname">topo.sparse.sparsecf.</tt><tt class="descname">compute_sparse_joint_norm_totals</tt><big>(</big><em>projlist</em>, <em>active_units_mask=True</em><big>)</big><a class="reference internal" href="../_modules/topo/sparse/sparsecf.html#compute_sparse_joint_norm_totals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sparse.sparsecf.compute_sparse_joint_norm_totals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute norm_total for each CF in each projection from a group to be
+normalized jointly.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.sparse.sparsecf</a><ul>
+<li><a class="reference internal" href="#module-topo.sparse.sparsecf">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.sparse.sparsecf-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

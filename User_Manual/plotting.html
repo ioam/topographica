@@ -1,0 +1,503 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plotting and visualization &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="User Manual" href="index.html" />
+    <link rel="next" title="Topographica Model Editor" href="modeleditor.html" />
+    <link rel="prev" title="Generating patterns" href="patterns.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="modeleditor.html" title="Topographica Model Editor"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="patterns.html" title="Generating patterns"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="plotting-and-visualization">
+<h1>Plotting and visualization<a class="headerlink" href="#plotting-and-visualization" title="Permalink to this headline">¶</a></h1>
+<p>Topographica includes a general-purpose system for managing and
+plotting visualizations of Sheets and Projections. New types of
+plots can be added easily, without any GUI programming, allowing
+users to visualize any quantities of interest.</p>
+<div class="section" id="basic-plots">
+<h2>Basic plots<a class="headerlink" href="#basic-plots" title="Permalink to this headline">¶</a></h2>
+<p>The basic plots useful for nearly any model are demonstrated in the
+<a class="reference external" href="../Tutorials/lissom_oo_or.html">LISSOM tutorial</a>:</p>
+<dl class="docutils">
+<dt><a class="reference external" href="../Tutorials/lissom_oo_or.html#activity-plot">Activity</a></dt>
+<dd>Plots the activity level of each unit.</dd>
+<dt><a class="reference external" href="../Tutorials/lissom_oo_or.html#connectionfields-plot">Connection Fields</a></dt>
+<dd>Plots the strength of each weight in each ConnectionField of one
+unit.</dd>
+<dt><a class="reference external" href="../Tutorials/lissom_oo_or.html#projection-plot">Projection</a></dt>
+<dd>Plots an array of ConnectionFields making up a Projection to one
+Sheet.</dd>
+<dt><a class="reference external" href="../Tutorials/som_retinotopy.html#projection-activity-plot">ProjectionActivity</a></dt>
+<dd>Plots the contribution from each Projection to the activity of one
+Sheet.</dd>
+</dl>
+<p>As an example, the most commonly used plot is Activity:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/lissom_oo_or_10000_activity_mono_pointer.png" />
+</div>
+<p>This group of plots (a &#8220;PlotGroup&#8221;) includes one plot per Sheet, and
+this particular simulation has four Sheets. Each plot is a bitmap
+representation of the matrix that makes up that Sheet. Moving the
+mouse over each image will show the coordinates at that location, as
+well as the value of the plot at that point. Note that two sets of
+coordinates are shown: integer <a class="reference external" href="space.html#matrix-coords">matrix coordinates</a>, which show the
+internal layout of units within the Sheet, starting at the upper
+left, and floating-point <a class="reference external" href="space.html#sheet-coords">sheet coordinates</a>, which show the
+Topographica density-independent coordinates used when specifying
+parameters in scripts and the GUI (with 0.0,0.0 usually at the
+center). Right clicking at the location shown (usually control-click
+on a 1-button Mac system) would allow the user to open a
+ConnectionField plot for the indicated unit, as well as run other
+analyses or visualizations of this unit or Sheet.</p>
+<p>If you have measured an orientation map, the Activity plot shows
+other information as well:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/lissom_oo_or_10000_activity.png" />
+</div>
+<p>Here the color of each unit in V1 is determined by that unit&#8217;s
+orientation preference, so that one can see that different input
+orientations result in different types of neurons activated.
+measure_or_pref() changes the activity plot so that it is actually
+specified as a combination of three SheetViews on different
+<em>channels</em>:</p>
+<ul class="simple">
+<li>Strength: Activity</li>
+<li>Hue: OrientationPreference</li>
+<li>Confidence: OrientationSelectivity</li>
+</ul>
+<p>That is, the primary plot (the Strength channel) is Activity, but it
+is colorized with the OrientationPreference (the Hue channel). The
+amount of colorization depends on the OrientationSelectivity (the
+Confidence channel), which is appropriate because unselective
+neurons then show up white. The monochrome plot shown first above
+was obtained by toggling the &#8220;Strength only&#8221; button, which disables
+Hue and Confidence so that the result is as it was before running
+measure_or_pref().</p>
+<p>For a plot with multiple channels, moving the mouse over the bitmap
+will show the values in all of the available channels, and the
+right-click menu will allow you to see what channels are available,
+and to plot or analyze any of the channels independently.</p>
+<p>The color coding can be changed to some other plot using the
+convenience function Subplotting.set_subplots:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo.command.analysis</span> <span class="kn">import</span> <span class="n">Subplotting</span>
+<span class="n">Subplotting</span><span class="o">.</span><span class="n">set_subplots</span><span class="p">(</span><span class="s">&quot;Direction&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or disabled entirely:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo.command.analysis</span> <span class="kn">import</span> <span class="n">Subplotting</span>
+<span class="n">Subplotting</span><span class="o">.</span><span class="n">set_subplots</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="preference-map-plots">
+<h2>Preference map plots<a class="headerlink" href="#preference-map-plots" title="Permalink to this headline">¶</a></h2>
+<p>The basic plots display data that is already available within
+Topographica, to visualize the structure or behavior of the model
+directly. Another important type of visualization is preference map
+plots, which measure and show the input patterns to which a neural
+unit responds most strongly. That is, they are an indirect
+measurement based on actively providing a stimulus and measuring the
+response. These maps are calculated using a <a class="reference external" href="#adding-a-new-plot">general-purpose
+preference map analysis package</a>, described below, and are
+primarily specified in <a class="reference external" href="../Reference_Manual/topo.command.analysis-module.html">topo/command/analysis.py</a>. The available
+plots include:</p>
+<dl class="docutils">
+<dt>Position Preference</dt>
+<dd>Measure preference for the X and Y position of a Gaussian.</dd>
+<dt>Center of Gravity</dt>
+<dd>Measure the center of gravity of each ConnectionField in a
+Projection to one Sheet.</dd>
+<dt><a class="reference external" href="../Tutorials/lissom_oo_or.html#orientationpreference-plot">Orientation Preference</a></dt>
+<dd>Measure preference for sine grating orientation.</dd>
+<dt>Ocular Preference</dt>
+<dd>Measure preference for sine gratings between two eyes.</dd>
+<dt>Spatial Frequency Preference</dt>
+<dd>Measure preference for sine grating frequency.</dd>
+<dt>Direction Preference, Speed Preference</dt>
+<dd>Measure motion direction and speed for drifting sine gratings.</dd>
+<dt>PhaseDisparity Preference</dt>
+<dd>Measure preference for sine gratings differing in phase between two
+sheets.</dd>
+<dt>Hue Preference</dt>
+<dd>Measure preference for color.</dd>
+</dl>
+</div>
+<div class="section" id="receptive-fields-plots">
+<span id="rfplots"></span><h2>Receptive fields plots<a class="headerlink" href="#receptive-fields-plots" title="Permalink to this headline">¶</a></h2>
+<p>Often, rather than a Connection Field (a set of weights from one
+Projection between two Sheets), you will want to know the Receptive
+Field (RF) of a unit &#8211; the locations to which it responds on an
+input sheet, even across multiple projections (i.e., multiple
+synapses).</p>
+<p>Such plots can be measured using the RF Projection plot, which uses
+reverse correlation to estimate which units on an input sheet cause
+the strongest response of a unit in a later sheet. It works just
+like a <a class="reference external" href="../Tutorials/lissom_oo_or.html#projection-plot">Projection</a> plot, except that it takes much, much longer to measure (as it
+requires presenting a large number of test patterns), is not
+specific to any particular Projection, and is an estimate rather
+than a visualization of a set of weights. Example result for an
+ON/OFF LISSOM network trained on oriented Gaussians:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/rf_projection.png" />
+</div>
+<p>Once the RFs have been measured, the RF can be visualized for a
+particular unit by right clicking on that unit in any plot window,
+and selecting a Receptive Fields plot. Sample result:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/rf_matrixplot.png" />
+</div>
+</div>
+<div class="section" id="tuning-curve-plots">
+<h2>Tuning curve plots<a class="headerlink" href="#tuning-curve-plots" title="Permalink to this headline">¶</a></h2>
+<p>The above plots are all visualized as a two-dimensional array of
+values. Other common plots are visualized as a set of
+one-dimensional curves, including:</p>
+<dl class="docutils">
+<dt>Orientation Tuning Fullfield</dt>
+<dd>Plot orientation tuning curves for a specific unit, measured using
+full-field sine gratings. Although the data takes a long time to
+collect, once it is ready the plots are available immediately for
+any unit.</dd>
+<dt>Orientation Tuning</dt>
+<dd>Measure orientation tuning for a specific unit at different
+contrasts, using a pattern chosen to match the preferences of that
+unit.</dd>
+<dt>Size Tuning</dt>
+<dd>Measure the size preference for a specific unit.</dd>
+<dt>Contrast Response</dt>
+<dd>Measure the contrast response function for a specific unit.</dd>
+</dl>
+<p>Each of these plots shows the properties of one user-selectable
+unit. For instance, the Orientation Tuning Fullfield plot shows how
+the response of that unit varies with orientation and contrast:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/or_tuning.png" />
+</div>
+<p>Here each curve represents one value of contrast tested, and each
+data point on the curve represents the response of this unit to an
+input of the specified contrast and orientation, as a maximum over
+all phases tested.</p>
+<p>The tuning curve plots are measured just as the preference map plots
+are (and using the same code), but they are visualized in a
+different way.</p>
+</div>
+<div class="section" id="changing-existing-plots">
+<h2>Changing existing plots<a class="headerlink" href="#changing-existing-plots" title="Permalink to this headline">¶</a></h2>
+<p>The available plots are all specified in a general way that allows
+users to change the details of how the data is visualized. Each plot
+is part of a PlotGroup that specifies a list of commands (&#8216;hooks&#8217;)
+to run to generate the data, and then how to visualize the results
+for all the Sheets in the simulation at once.</p>
+<p>The list of hooks used is shown in the plot window as &#8220;Pre plot
+hooks&#8221;, where users can change the parameters of existing hooks, and
+add or remove hooks. For instance, if you want to reduce the number
+of sine grating phases used when measuring orientation maps, say,
+from 18 to 8, you can right click on the list of hooks, choose
+Properties, and then, in the new window displaying the list entries,
+right click on the <tt class="docutils literal"><span class="pre">measure_sine_pref.instance()</span></tt> entry:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/edit_list.png" />
+</div>
+<p>This will give you a properties window for that item:</p>
+<div class="figure align-center">
+<img alt="" src="../_images/list_item_properties.png" />
+</div>
+<p>Here you can reduce the number of phases by dragging the appropriate
+slider. The next time the plot is refreshed, the new value will be
+used instead.</p>
+<p>The properties window for a list entry shows what parameters are
+available; hovering the mouse over a parameter name gives a brief
+description. More detail about various commands is available in
+<a class="reference external" href="../Reference_Manual/topo.command.analysis-module.html">topo/command/analysis.py</a> and <a class="reference external" href="../Reference_Manual/topo.command.pylabplot-module.html">topo/command/pylabplot.py</a>.</p>
+<p>Some plots also use &#8220;Plot hooks&#8221;, called after the &#8220;Pre plot hooks&#8221;,
+to actually visualize the results. For instance, some commands
+generate data for all units in a Sheet, but the PlotGroup displays
+results from only a single sheet; in this case the plot hooks
+(usually much quicker to run than the pre-plot hooks) are called
+whenever a new unit is selected.</p>
+<p>If you often need to change the parameters for map or curve
+measurement, then you can do that easily without modifying your copy
+of Topographica by putting appropriate lines into the .ty script to
+which they apply. For instance, the default parameters used in most
+preference map measurement commands present each pattern for only a
+very short duration and turn off the response function, which works
+well with the example files because doing so results in a linear
+response (no threshold function and no lateral interactions) and
+thus makes the results independent of the input scale and offset. If
+this approach is not valid for your own model, then you can change
+the duration for which sine gratings are presented to 1.0, and turn
+on the response function by default:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo.analysis.featureresponses</span> <span class="kn">import</span> <span class="n">MeasureResponseCommand</span>
+<span class="n">MeasureResponseCommand</span><span class="o">.</span><span class="n">duration</span><span class="o">=</span><span class="mf">1.0</span>
+<span class="n">MeasureResponseCommand</span><span class="o">.</span><span class="n">apply_output_fns</span><span class="o">=</span><span class="bp">True</span>
+</pre></div>
+</div>
+<p>These values are actually Topographica&#8217;s defaults, and thus omitting
+all code in your .ty file to do with MeasureResponseCommand would
+also have the same effect. In any case, the specific parameters here
+can be anything you want, and you can do it for any plot group.</p>
+<p>Similarly, you can change the specific types of data used in each
+plot. For instance, you can remove the default OrientationPreference
+subplot from Activity plots using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo.plotting.plotgroup</span> <span class="kn">import</span> <span class="n">plotgroups</span>
+<span class="n">plotgroups</span><span class="p">[</span><span class="s">&quot;Activity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">plot_templates</span><span class="p">[</span><span class="s">&quot;Activity&quot;</span><span class="p">][</span><span class="s">&quot;Hue&quot;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+<span class="n">plotgroups</span><span class="p">[</span><span class="s">&quot;Activity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">plot_templates</span><span class="p">[</span><span class="s">&quot;Activity&quot;</span><span class="p">][</span><span class="s">&quot;Confidence&quot;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span>
+</pre></div>
+</div>
+<p>(which is what Subplotting.set_subplots() does, for Activity and
+several other types of plots).</p>
+<p>You can also put lines like these into your <a class="reference external" href="scripts.html#user-configuration-file">user configuration
+file</a>, if you find that you always want different defaults than
+Topographica&#8217;s, for all scripts that you run.</p>
+</div>
+<div class="section" id="adding-a-new-plot">
+<span id="measuring-preference-maps"></span><h2>Adding a new plot<a class="headerlink" href="#adding-a-new-plot" title="Permalink to this headline">¶</a></h2>
+<p>The types of plots included with Topographica are only examples, and
+it is quite straightforward to add a new type of preference map
+plot. As a reference, here is an implementation of Orientation
+Preference plots:</p>
+<div class="highlight-python"><pre>1. pg= create_plotgroup(name='Orientation Preference',category="Preference Maps",
+                        doc='Measure preference for sine grating orientation.',
+2.                  command='measure_or_pref()')
+3. pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
+4. pg.add_plot('Orientation Preference&amp;Selectivity',[('Hue','OrientationPreference'),
+                                                     ('Confidence','OrientationSelectivity')])
+5. pg.add_plot('Orientation Selectivity',[('Strength','OrientationSelectivity')])
+6. pg.add_static_image('Color Key','topo/command/or_key_white_vert_small.png')
+
+
+7. def measure_or_pref(num_phase=18,num_orientation=4,frequencies=[2.4],
+                       scale=0.3,offset=0.0,display=False,weighted_average=True,
+8.                 pattern_presenter=PatternPresenter(pattern_generator=SineGrating(),
+                           apply_output_fns=False,duration=0.175)):
+       step_phase=2*pi/num_phase
+       step_orientation=pi/num_orientation
+
+9. feature_values = [Feature(name="frequency",values=frequencies),
+                         Feature(name="orientation",range=(0.0,pi),step=step_orientation,cyclic=True),
+                         Feature(name="phase",range=(0.0,2*pi),step=step_phase,cyclic=True)]
+
+10.param_dict = {"scale":scale,"offset":offset}
+11.x=FeatureMaps(feature_values)
+       x.collect_feature_responses(pattern_presenter,param_dict,display,weighted_average)</pre>
+</div>
+<p>What the first part of this code (the PlotGroup specification) does
+is:</p>
+<ol class="arabic simple">
+<li>Declare that the Orientation Preference plot group should go on
+the Preference Maps menu, with the indicated help string</li>
+<li>Declare that before trying to plot this data, generate it by
+calling the command &#8220;measure_or_pref&#8221;, which is defined next.</li>
+<li>To this plot group, add up to one plot per Sheet named
+&#8220;Orientation Preference&#8221;, plotting any SheetView named
+OrientationPreference, using a color plot (as the Hue channel).</li>
+<li>Add up to one more plot per Sheet, this time plotting the
+Orientation in the Hue channel and the Orientation Selectivity in
+the Confidence channel (so that unselective neurons show up
+white).</li>
+<li>Add up to one more plot per Sheet, this time plotting the the
+Orientation Selectivity by itself in grayscale (as a Strength).</li>
+<li>Add a color key as a static image appended to every plot.</li>
+</ol>
+<p>The rest of the code specifies the actual procedure for measuring
+the appropriate data:</p>
+<ol class="arabic simple" start="7">
+<li>Declare the parameters accepted by measure_or_pref()</li>
+<li>Define the default object that will generate input patterns, in
+this case sine gratings (but any other PatternGenerator can also
+be used).</li>
+<li>Specify the ranges of parameter values to be tested &#8211; each of
+these defines one possible map (FrequencyPreference,
+OrientationPreference, and PhasePreference, in this case). The
+contents of each map will be an estimate of the value of this
+parameter that will most strongly activate the corresponding
+unit.</li>
+<li>Add a few more parameter values that will not be varied (and
+thus will not generate preference maps).</li>
+<li>Present all combinations of feature values and collate the
+responses.</li>
+</ol>
+<p>The preference for any input pattern can be measured using nearly
+identical code, just selecting a different PatternGenerator and
+specifying a different list of features to vary. For each feature,
+you will need to know the range and number of steps you want to
+test, plus whether it is cyclic (i.e. wraps back around to zero
+eventually, and is thus best visualized as a Hue).</p>
+<p>Note that the selectivity is by default boosted significantly so
+that combined plots will be visible, because the selectivity scales
+are essentially arbitrary. To change the scaling in specific cases,
+you can adjust the FeatureMaps.selectivity_multiplier parameter:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo.analysis.featureresponses</span> <span class="kn">import</span> <span class="n">FeatureMaps</span>
+<span class="n">FeatureMaps</span><span class="o">.</span><span class="n">selectivity_multiplier</span><span class="o">=</span><span class="mf">1.0</span>
+</pre></div>
+</div>
+<p>Also note that the Orientation Preference plot code above shows just
+one possible way of implementing such a plot; in Topographica
+itself, a hierarchy of classes is used to simplify the definition of
+multiple types of plots.</p>
+<p>Additionally, the data for plotting can also be calculated in any
+other way (ignoring FeatureMaps and PatternPresenter altogether), as
+long as it results in a SheetView added to the appropriate
+sheet_views dictionary and specified in the template. For instance,
+the <a class="reference external" href="../Reference_Manual/topo.command.analysis-module.html#measure_cog">measure_cog</a> command used in Center of Gravity plots simply
+looks at each ConnectionField individually, computes its center of
+gravity, and builds a SheetView out of that (rather than presenting
+any input patterns).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Plotting and visualization</a><ul>
+<li><a class="reference internal" href="#basic-plots">Basic plots</a></li>
+<li><a class="reference internal" href="#preference-map-plots">Preference map plots</a></li>
+<li><a class="reference internal" href="#receptive-fields-plots">Receptive fields plots</a></li>
+<li><a class="reference internal" href="#tuning-curve-plots">Tuning curve plots</a></li>
+<li><a class="reference internal" href="#changing-existing-plots">Changing existing plots</a></li>
+<li><a class="reference internal" href="#adding-a-new-plot">Adding a new plot</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="patterns.html"
+                        title="previous chapter">Generating patterns</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="modeleditor.html"
+                        title="next chapter">Topographica Model Editor</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/User_Manual/plotting.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="modeleditor.html" title="Topographica Model Editor"
+             >next</a></li>
+        <li class="right" >
+          <a href="patterns.html" title="Generating patterns"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

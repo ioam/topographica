@@ -1,0 +1,1111 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.sheet &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="topo-sheet">
+<h1>topo.sheet<a class="headerlink" href="#topo-sheet" title="Permalink to this headline">¶</a></h1>
+<div class="inheritance_box"><img src="../_images/inheritancee08cba1177.svg" usemap="#inheritancee08cba1177" class="inheritance"/></div><map id="inheritancee08cba1177" name="inheritancee08cba1177">
+</map>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="topo.sheet.lissom-module.html">topo.sheet.lissom</a></li>
+<li><a class="reference external" href="topo.sheet.optimized-module.html">topo.sheet.optimized</a></li>
+<li><a class="reference external" href="topo.sheet.slissom-module.html">topo.sheet.slissom</a></li>
+<li><a class="reference external" href="topo.sheet.saccade-module.html">topo.sheet.saccade</a></li>
+<li><a class="reference external" href="topo.sheet.composer-module.html">topo.sheet.composer</a></li>
+<li><a class="reference external" href="topo.sheet.ptztracker-module.html">topo.sheet.ptztracker</a></li>
+</ul>
+</div>
+<div class="section" id="module">
+<h2>Module<a class="headerlink" href="#module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-topo.sheet"></span><p>Sheet classes.</p>
+<p>A Sheet is a two-dimensional arrangement of processing units,
+typically modeling a neural region or a subset of cells in a neural
+region.  Any new Sheet classes added to this directory will
+automatically become available for any model.</p>
+<dl class="class">
+<dt id="topo.sheet.Sheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">Sheet</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.sheet.Sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.simulation-module.html#topo.base.simulation.EventProcessor" title="topo.base.simulation.EventProcessor"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.simulation.EventProcessor</span></tt></a>, <a class="reference internal" href="imagen.sheetcoords-module.html#imagen.sheetcoords.SheetCoordinateSystem" title="imagen.sheetcoords.SheetCoordinateSystem"><tt class="xref py py-class docutils literal"><span class="pre">imagen.sheetcoords.SheetCoordinateSystem</span></tt></a></p>
+<p>The generic base class for neural sheets.</p>
+<p>See SheetCoordinateSystem for how Sheet represents space, and
+EventProcessor for how Sheet handles time.</p>
+<p>output_fns are functions that take an activity matrix and produce
+an identically shaped output matrix. The default is having no
+output_fns.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sheet.Sheet.activate">
+<tt class="descname">activate</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect activity from each projection, combine it to calculate
+the activity for this sheet, and send the result out.</p>
+<p>Subclasses will need to override this method to whatever it
+means to calculate activity in that subclass.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.activity_len">
+<tt class="descname">activity_len</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.activity_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of items that have been saved by state_push().</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.sheet.Sheet.density">
+<tt class="descname">density</tt><a class="headerlink" href="#topo.sheet.Sheet.density" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sheet&#8217;s true density (i.e. the xdensity, which is equal to the ydensity for a Sheet.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.n_bytes">
+<tt class="descname">n_bytes</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.n_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a lower bound for the memory taken by this sheet, in bytes.</p>
+<p>Typically, this number will include the activity array and any
+similar arrays, plus any other significant data owned (in some
+sense) by this Sheet.  It will not usually include memory
+taken by the Python dictionary or various &#8220;housekeeping&#8221;
+attributes, which usually contribute only a small amount to
+the memory requirements.</p>
+<p>Subclasses should reimplement this method if they store a
+significant amount of data other than in the activity array.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.override_plasticity_state">
+<tt class="descname">override_plasticity_state</tt><big>(</big><em>new_plasticity_state</em><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.override_plasticity_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporarily override plasticity of medium and long term internal state.</p>
+<p>This function should be implemented by all subclasses so that
+it preserves the ability of the Sheet to compute activity,
+i.e. to operate over a short time scale, while preventing any
+lasting changes to the state (if new_plasticity_state=False).</p>
+<p>Any operation that does not have any lasting state, such as
+those affecting only the current activity level, should not
+be affected by this call.</p>
+<p>By default, simply saves a copy of the plastic flag to an
+internal stack (so that it can be restored by
+restore_plasticity_state()), and then sets plastic to
+new_plasticity_state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.release_sheet_view">
+<tt class="descname">release_sheet_view</tt><big>(</big><em>view_name</em><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.release_sheet_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the dictionary entry with key entry &#8216;view_name&#8217; to save
+memory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.restore_plasticity_state">
+<tt class="descname">restore_plasticity_state</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.restore_plasticity_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restores plasticity of medium and long term internal state after
+a override_plasticity_state call.</p>
+<p>This function should be implemented by all subclasses to
+remove the effect of the most recent override_plasticity_state call,
+i.e. to restore plasticity of any type that was overridden.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.row_col_sheetcoords">
+<tt class="descname">row_col_sheetcoords</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.row_col_sheetcoords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array of Y-coordinates corresponding to the rows of
+the activity matrix of the sheet, and an array of
+X-coordinates corresponding to the columns.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.sheetcoords_of_idx_grid">
+<tt class="descname">sheetcoords_of_idx_grid</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.sheetcoords_of_idx_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array of x-coordinates and an array of y-coordinates
+corresponding to the activity matrix of the sheet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.state_pop">
+<tt class="descname">state_pop</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.state_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pop the most recently saved state off the stack.</p>
+<p>See state_push() for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.Sheet.state_push">
+<tt class="descname">state_push</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.Sheet.state_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the current state of this sheet to an internal stack.</p>
+<p>This method is used by operations that need to test the
+response of the sheet without permanently altering its state,
+e.g. for measuring maps or probing the current behavior
+non-invasively.  By default, only the activity pattern of this
+sheet is saved, but subclasses should add saving for any
+additional state that they maintain, or strange bugs are
+likely to occur.  The state can be restored using state_pop().</p>
+<p>Note that Sheets that do learning need not save the
+values of all connection weights, if any, because
+plasticity can be turned off explicitly.  Thus this method
+is intended only for shorter-term state.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.SettlingCFSheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">SettlingCFSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#SettlingCFSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.SettlingCFSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.sheet.JointNormalizingCFSheet" title="topo.sheet.JointNormalizingCFSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.sheet.JointNormalizingCFSheet</span></tt></a></p>
+<p>A JointNormalizingCFSheet implementing the idea of settling.</p>
+<p>Breaks continuous time up into discrete iterations, each
+consisting of a series of activations, up to a fixed number of
+settling steps.  Settling is controlled by the tsettle parameter;
+once that number of settling steps has been reached, an external
+input is required before the sheet will activate again.</p>
+<p>See the LISSOM algorithm (Sirosh and Miikkulainen, Biological
+Cybernetics 71:66-78, 1994) for one example of its usage.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">continuous_learning</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to modify the weights after every settling step.
+        If false, waits until settling is completed before doing learning.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.6, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">mask_init_time</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Determines when a new mask is initialized in each new iteration.
+
+        The mask is reset whenever new input comes in.  Once the
+        activation_count (see tsettle) reaches mask_init_time, the mask
+        is initialized to reflect the current activity profile.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">beginning_of_iteration</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callables to be executed at the beginning of each iteration.</dd>
+<dt><em>param Integer</em> <tt class="docutils literal"><span class="pre">tsettle</span></tt> (<em>allow_None=False, bounds=(0, None), constant=False, default=8, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Number of times to activate the SettlingCFSheet sheet for each external input event.
+
+        A counter is incremented each time an input is received from any
+        source, and once the counter reaches tsettle, the last activation
+        step is skipped so that there will not be any further recurrent
+        activation.  The next external (i.e., afferent or feedback)
+        event will then start the counter over again.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">post_initialization_weights_output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If not empty, weights output_fns that will replace the
+        existing ones after an initial normalization step.</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">end_of_iteration</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>List of callables to be executed at the end of each iteration.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">joint_norm_fn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to use to compute the norm_total for each CF in each
+        projection from a group to be normalized jointly.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">measure_maps</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to include this Sheet when measuring various maps to create SheetViews.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">strict_tsettle</span></tt> (<em>constant=False, default=None, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If non-None, delay sending output until activation_count reaches this value.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sheet.SettlingCFSheet.process_current_time">
+<tt class="descname">process_current_time</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#SettlingCFSheet.process_current_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.SettlingCFSheet.process_current_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass the accumulated stimulation through self.output_fns and
+send it out on the default output port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.SettlingCFSheet.send_output">
+<tt class="descname">send_output</tt><big>(</big><em>src_port=None</em>, <em>data=None</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#SettlingCFSheet.send_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.SettlingCFSheet.send_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send some data out to all connections on the given src_port.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.CFSheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">CFSheet</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.sheet.CFSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.projection-module.html#topo.base.projection.ProjectionSheet" title="topo.base.projection.ProjectionSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.projection.ProjectionSheet</span></tt></a></p>
+<p>A ProjectionSheet providing access to the ConnectionFields in its CFProjections.</p>
+<p>CFSheet is a Sheet built from units indexed by Sheet coordinates
+(x,y).  Each unit can have one or more ConnectionFields on another
+Sheet (via this sheet&#8217;s CFProjections).  Thus CFSheet is a more
+concrete version of a ProjectionSheet; a ProjectionSheet does not
+require that there be units or weights of any kind.  Unless you
+need access to the underlying ConnectionFields for visualization
+or analysis, CFSheet and ProjectionSheet are interchangeable.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">measure_maps</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to include this Sheet when measuring various maps to create SheetViews.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sheet.CFSheet.update_unit_view">
+<tt class="descname">update_unit_view</tt><big>(</big><em>x</em>, <em>y</em>, <em>proj_name=''</em><big>)</big><a class="headerlink" href="#topo.sheet.CFSheet.update_unit_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the list of UnitView objects for a particular unit in this CFSheet.
+(There is one UnitView for each Projection to this CFSheet).</p>
+<p>Each UnitView is then added to the sheet_views of its source sheet.
+It returns the list of all UnitViews for the given unit.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.GeneratorSheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">GeneratorSheet</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.sheet.GeneratorSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.sheet-module.html#topo.base.sheet.Sheet" title="topo.base.sheet.Sheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheet.Sheet</span></tt></a></p>
+<p>Sheet for generating a series of 2D patterns.</p>
+<p>Typically generates the patterns by choosing parameters from a
+random distribution, but can use any mechanism.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">period</span></tt> (<em>allow_None=False, bounds=(0, None), constant=True, default=1, inclusive_bounds=(False, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Delay (in Simulation time) between generating new input patterns.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">phase</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Delay after the start of the Simulation (at time zero) before
+        generating an input pattern.  For a clocked, feedforward simulation,
+        one would typically want to use a small nonzero phase and use delays less
+        than the user-visible step size (typically 1.0), so that inputs are
+        generated and processed before this step is complete.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">input_generator</span></tt> (<em>allow_None=False, constant=False, default=&lt;Constant Constant00036&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Specifies a particular PatternGenerator type to use when creating patterns.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sheet.GeneratorSheet.generate">
+<tt class="descname">generate</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.GeneratorSheet.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the output and send it out the Activity port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.GeneratorSheet.pop_input_generator">
+<tt class="descname">pop_input_generator</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.GeneratorSheet.pop_input_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discard the current input_generator, and retrieve the previous one from the stack.</p>
+<p>Warns if no input_generator is available on the stack.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.GeneratorSheet.push_input_generator">
+<tt class="descname">push_input_generator</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.GeneratorSheet.push_input_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push the current input_generator onto a stack for future retrieval.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.GeneratorSheet.set_input_generator">
+<tt class="descname">set_input_generator</tt><big>(</big><em>new_ig</em>, <em>push_existing=False</em><big>)</big><a class="headerlink" href="#topo.sheet.GeneratorSheet.set_input_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the input_generator, overwriting the existing one by default.</p>
+<p>If push_existing is false, the existing input_generator is
+discarded permanently.  Otherwise, the existing one is put
+onto a stack, and can later be restored by calling
+pop_input_generator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.ProjectionSheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">ProjectionSheet</tt><big>(</big><em>**params</em><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.sheet-module.html#topo.base.sheet.Sheet" title="topo.base.sheet.Sheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheet.Sheet</span></tt></a></p>
+<p>A Sheet whose activity is computed using Projections from other sheets.</p>
+<p>A standard ProjectionSheet expects its input to be generated from
+other Sheets. Upon receiving an input event, the ProjectionSheet
+interprets the event data to be (a copy of) an activity matrix
+from another sheet.  The ProjectionSheet provides a copy of this
+matrix to each Projection from that input Sheet, asking each one
+to compute their own activity in response.  The same occurs for
+any other pending input events.</p>
+<p>After all events have been processed for a given time, the
+ProjectionSheet computes its own activity matrix using its
+activate() method, which by default sums all its Projections&#8217;
+activity matrices and passes the result through user-specified
+output_fns() before sending it out on the default output port.
+The activate() method can be overridden to sum some of the
+projections, multiply that by the sum of other projections, etc.,
+to model modulatory or other more complicated types of connections.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+</dl>
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.activate">
+<tt class="descname">activate</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect activity from each projection, combine it to calculate
+the activity for this sheet, and send the result out.</p>
+<p>Subclasses may override this method to whatever it means to
+calculate activity in that subclass.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.input_event">
+<tt class="descname">input_event</tt><big>(</big><em>conn</em>, <em>data</em><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.input_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accept input from some sheet.  Call .present_input() to
+compute the stimulation from that sheet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.learn">
+<tt class="descname">learn</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.learn" title="Permalink to this definition">¶</a></dt>
+<dd><p>By default, call the learn() and apply_learn_output_fns()
+methods on every Projection to this Sheet.</p>
+<p>Any other type of learning can be implemented by overriding this method.
+Called from self.process_current_time() _after_ activity has
+been propagated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.n_bytes">
+<tt class="descname">n_bytes</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.n_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the memory bytes taken by this Sheet and its Projections.</p>
+<p>Typically, this number will include the activity array and any
+similar arrays, plus memory taken by all incoming Projections.
+It will not usually include memory taken by the Python
+dictionary or various &#8220;housekeeping&#8221; attributes, which usually
+contribute only a small amount to the memory requirements.
+Thus this value should be considered only a rough lower bound
+from which memory requirements and memory usage patterns can
+be estimated.</p>
+<p>Subclasses should reimplement this method if they store a
+significant amount of data other than in the activity array
+and the projections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.n_conns">
+<tt class="descname">n_conns</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.n_conns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count the total size of all incoming projections, in number of connections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.override_plasticity_state">
+<tt class="descname">override_plasticity_state</tt><big>(</big><em>new_plasticity_state</em><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.override_plasticity_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporarily override plasticity state of medium and long term
+internal state.</p>
+<p>This function should be implemented by all subclasses so that
+when new_plasticity_state=False, it preserves the ability of
+the ProjectionSheet to compute activity, i.e. to operate over
+a short time scale, while preventing any lasting changes to
+the state.</p>
+<p>Any process that does not have any lasting state, such as
+those affecting only the current activity level, should not
+be affected by this call.</p>
+<p>By default, calls override_plasticity_state() on the
+ProjectionSheet&#8217;s output_fns and all of its incoming
+Projections, and also enables the &#8216;plastic&#8217; parameter for this
+ProjectionSheet.  The old value of the plastic parameter is
+saved to an internal stack to be restored by
+restore_plasticity_state().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.present_input">
+<tt class="descname">present_input</tt><big>(</big><em>input_activity</em>, <em>conn</em><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.present_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide the given input_activity to each in_projection that has a dest_port
+equal to the specified port, asking each one to compute its activity.</p>
+<p>The sheet&#8217;s own activity is not calculated until activate()
+is called.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.process_current_time">
+<tt class="descname">process_current_time</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.process_current_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by the simulation after all the events are processed for the
+current time but before time advances.  Allows the event processor
+to send any events that must be sent before time advances to drive
+the simulation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.ProjectionSheet.projections">
+<tt class="descname">projections</tt><big>(</big><em>name=None</em><big>)</big><a class="headerlink" href="#topo.sheet.ProjectionSheet.projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return either a named input p, or a dictionary
+{projection_name, projection} of all the in_connections for
+this ProjectionSheet.</p>
+<p>A minor convenience function for finding projections by name;
+the sheet&#8217;s list of in_connections usually provides simpler
+access to the Projections.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.SequenceGeneratorSheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">SequenceGeneratorSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#SequenceGeneratorSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.SequenceGeneratorSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.misc.generatorsheet-module.html#topo.misc.generatorsheet.GeneratorSheet" title="topo.misc.generatorsheet.GeneratorSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.misc.generatorsheet.GeneratorSheet</span></tt></a></p>
+<p>Sheet that generates a timed sequence of patterns.</p>
+<p>This sheet will repeatedly generate the input_sequence, with the
+given onsets.  The sequence is repeated every self.period time
+units.  If the total length of the sequence is longer than
+self.period, a warning is issued and the sequence repeats
+immediately after completion.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">period</span></tt> (<em>allow_None=False, bounds=(0, None), constant=True, default=1, inclusive_bounds=(False, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Delay (in Simulation time) between generating new input patterns.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">phase</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.05, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Delay after the start of the Simulation (at time zero) before
+        generating an input pattern.  For a clocked, feedforward simulation,
+        one would typically want to use a small nonzero phase and use delays less
+        than the user-visible step size (typically 1.0), so that inputs are
+        generated and processed before this step is complete.</dd>
+<dt><em>param List</em> <tt class="docutils literal"><span class="pre">input_sequence</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>The sequence of patterns to generate.  Must be a list of
+          (onset,generator) tuples. An empty list defaults to the
+          single tuple: (0,self.input_generator), resulting in
+          identical behavior to an ordinary GeneratorSheet.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param ClassSelector</em> <tt class="docutils literal"><span class="pre">input_generator</span></tt> (<em>allow_None=False, constant=False, default=&lt;Constant Constant00036&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Specifies a particular PatternGenerator type to use when creating patterns.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.JointNormalizingCFSheet">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">JointNormalizingCFSheet</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#JointNormalizingCFSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.JointNormalizingCFSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.cf-module.html#topo.base.cf.CFSheet" title="topo.base.cf.CFSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.cf.CFSheet</span></tt></a></p>
+<p>A type of CFSheet extended to support joint sum-based normalization.</p>
+<p>For L1 normalization, joint normalization means normalizing the
+sum of (the absolute values of) all weights in a set of
+corresponding CFs in different Projections, rather than only
+considering weights in the same CF.</p>
+<p>This class provides a mechanism for grouping Projections (see
+_port_match and _grouped_in_projections) and a learn() function
+that computes the joint sums.  Joint normalization also requires
+having ConnectionField store and return a norm_total for each
+neuron, and having an TransferFn that will respect this norm_total
+rather than the strict total of the ConnectionField&#8217;s weights.  At
+present, CFPOF_DivisiveNormalizeL1 and
+CFPOF_DivisiveNormalizeL1_opt do use norm_total; others can be
+extended to do something similar if necessary.</p>
+<p>To enable joint normalization, you can declare that all the
+incoming connections that should be normalized together each
+have a dest_port of:</p>
+<p>dest_port=(&#8216;Activity&#8217;,&#8217;JointNormalize&#8217;, &#8216;AfferentGroup1&#8217;),</p>
+<p>Then all those that have this dest_port will be normalized
+together, as long as an appropriate TransferFn is being used.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">joint_norm_fn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to use to compute the norm_total for each CF in each
+        projection from a group to be normalized jointly.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">measure_maps</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to include this Sheet when measuring various maps to create SheetViews.</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="topo.sheet.JointNormalizingCFSheet.joint_norm_fn">
+<em class="property">static </em><tt class="descname">joint_norm_fn</tt><big>(</big><em>projlist</em>, <em>active_units_mask=True</em><big>)</big><a class="headerlink" href="#topo.sheet.JointNormalizingCFSheet.joint_norm_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute norm_total for each CF in each projection from a group to
+be normalized jointly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.JointNormalizingCFSheet.learn">
+<tt class="descname">learn</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#JointNormalizingCFSheet.learn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.JointNormalizingCFSheet.learn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the learn() method on every Projection to the Sheet, and
+call the output functions (jointly if necessary).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.ActivityCopy">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">ActivityCopy</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#ActivityCopy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.ActivityCopy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="topo.base.sheet-module.html#topo.base.sheet.Sheet" title="topo.base.sheet.Sheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.base.sheet.Sheet</span></tt></a></p>
+<p>Copies incoming Activity patterns to its activity matrix and output port.</p>
+<p>Trivial Sheet class that is useful primarily as a placeholder for
+data that is computed elsewhere but that you want to appear as a
+Sheet, e.g. when wrapping an external simulation.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.1, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.JointNormalizingCFSheet_Continuous">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">JointNormalizingCFSheet_Continuous</tt><big>(</big><em>**params</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#JointNormalizingCFSheet_Continuous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.JointNormalizingCFSheet_Continuous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#topo.sheet.JointNormalizingCFSheet" title="topo.sheet.JointNormalizingCFSheet"><tt class="xref py py-class docutils literal"><span class="pre">topo.sheet.JointNormalizingCFSheet</span></tt></a></p>
+<p>CFSheet that runs continuously, with no &#8216;resting&#8217; periods between pattern presentations.</p>
+<p>Note that learning occurs only when the time is a whole number.</p>
+<dl class="docutils">
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">apply_output_fns</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to apply the output_fn after computing an Activity matrix.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows a sorting order for Sheets, e.g. in the GUI.</dd>
+<dt><em>param BoundingRegionParameter</em> <tt class="docutils literal"><span class="pre">nominal_bounds</span></tt> (<em>constant=True, default=BoundingBox(radius=0.5), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified BoundingBox of the Sheet coordinate area
+            covered by this Sheet.  The left and right bounds&#8211;if
+            specified&#8211;will always be observed, but the top and bottom
+            bounds may be adjusted to ensure the density in the y
+            direction is the same as the density in the x direction.
+            In such a case, the top and bottom bounds are adjusted
+            so that the center y point remains the same, and each
+            bound is as close as possible to its specified value. The
+            actual value of this Parameter is not adjusted, but the
+            true bounds may be found from the &#8216;bounds&#8217; attribute
+            of this object.</dd>
+<dt><em>param Parameter</em> <tt class="docutils literal"><span class="pre">mask</span></tt> (<em>constant=False, default=&lt;SheetMask SheetMask00019&gt;, instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>SheetMask object for computing which units need to be computed further.
+        The object should be an instance of SheetMask, and will
+        compute which neurons will be considered active for the
+        purposes of further processing.  The default mask effectively
+        disables all masking, but subclasses can use this mask to
+        implement optimizations, non-rectangular Sheet shapes,
+        lesions, etc.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">row_precedence</span></tt> (<em>allow_None=False, bounds=None, constant=False, default=0.5, inclusive_bounds=(True, True), instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Allows grouping of Sheets before sorting precedence is
+            applied, e.g. for two-dimensional plots in the GUI.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">plastic</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Setting this to False tells the Sheet not to change its
+            permanent state (e.g. any connection weights) based on
+            incoming events.</dd>
+<dt><em>param Number</em> <tt class="docutils literal"><span class="pre">nominal_density</span></tt> (<em>allow_None=False, bounds=None, constant=True, default=10, inclusive_bounds=(True, True), instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>User-specified number of processing units per 1.0 distance
+            horizontally or vertically in Sheet coordinates. The actual
+            number may be different because of discretization; the matrix
+            needs to tile the plane exactly, and for that to work the
+            density might need to be adjusted.  For instance, an area of 3x2
+            cannot have a density of 2 in each direction. The true density
+            may be obtained from either the xdensity or ydensity attribute
+            (since these are identical for a Sheet).</dd>
+<dt><em>param HookList</em> <tt class="docutils literal"><span class="pre">output_fns</span></tt> (<em>bounds=(0, None), constant=False, default=[], instantiate=True, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Output function(s) to apply (if apply_output_fns is true) to this Sheet&#8217;s activity.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">allow_skip_non_responding_units</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>If true, then units that are inactive after the response
+        function has been called can be skipped in subsequent
+        processing. Whether or not the units will actually be skipped
+        depends on the implementation of learning and learning output
+        functions.</dd>
+<dt><em>param NumericTuple</em> <tt class="docutils literal"><span class="pre">layout_location</span></tt> (<em>constant=False, default=(-1, -1), instantiate=False, length=2, pickle_default_value=True, precedence=-1, readonly=False</em>)</dt>
+<dd>Location for this Sheet in an arbitrary pixel-based space
+            in which Sheets can be laid out for visualization.</dd>
+<dt><em>param Callable</em> <tt class="docutils literal"><span class="pre">joint_norm_fn</span></tt> (<em>constant=False, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Function to use to compute the norm_total for each CF in each
+        projection from a group to be normalized jointly.</dd>
+<dt><em>param Boolean</em> <tt class="docutils literal"><span class="pre">measure_maps</span></tt> (<em>allow_None=False, bounds=(0, 1), constant=False, default=True, instantiate=False, pickle_default_value=True, precedence=None, readonly=False</em>)</dt>
+<dd>Whether to include this Sheet when measuring various maps to create SheetViews.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="topo.sheet.compute_joint_norm_totals">
+<tt class="descclassname">topo.sheet.</tt><tt class="descname">compute_joint_norm_totals</tt><big>(</big><em>projlist</em>, <em>active_units_mask=True</em><big>)</big><a class="reference internal" href="../_modules/topo/sheet.html#compute_joint_norm_totals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#topo.sheet.compute_joint_norm_totals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute norm_total for each CF in each projection from a group to
+be normalized jointly.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="topo.sheet.BoundingBox">
+<em class="property">class </em><tt class="descclassname">topo.sheet.</tt><tt class="descname">BoundingBox</tt><big>(</big><em>**args</em><big>)</big><a class="headerlink" href="#topo.sheet.BoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="imagen.boundingregion-module.html#imagen.boundingregion.BoundingRegion" title="imagen.boundingregion.BoundingRegion"><tt class="xref py py-class docutils literal"><span class="pre">imagen.boundingregion.BoundingRegion</span></tt></a></p>
+<p>A rectangular bounding box defined either by two points forming
+an axis-aligned rectangle (or simply a radius for a square).</p>
+<dl class="method">
+<dt id="topo.sheet.BoundingBox.contains">
+<tt class="descname">contains</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#topo.sheet.BoundingBox.contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given point is contained within the
+bounding box, where all boundaries of the box are
+considered to be inclusive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.BoundingBox.contains_exclusive">
+<tt class="descname">contains_exclusive</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#topo.sheet.BoundingBox.contains_exclusive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the given point is contained within the
+bounding box, where the bottom and right boundaries are
+considered exclusive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.BoundingBox.containsbb_exclusive">
+<tt class="descname">containsbb_exclusive</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#topo.sheet.BoundingBox.containsbb_exclusive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given BoundingBox x is contained within the
+bounding box, where at least one of the boundaries of the box has
+to be exclusive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.BoundingBox.containsbb_inclusive">
+<tt class="descname">containsbb_inclusive</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#topo.sheet.BoundingBox.containsbb_inclusive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given BoundingBox x is contained within the
+bounding box, including cases of exact match.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.BoundingBox.lbrt">
+<tt class="descname">lbrt</tt><big>(</big><big>)</big><a class="headerlink" href="#topo.sheet.BoundingBox.lbrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>return left,bottom,right,top values for the BoundingBox.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="topo.sheet.BoundingBox.upperexclusive_contains">
+<tt class="descname">upperexclusive_contains</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#topo.sheet.BoundingBox.upperexclusive_contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the given point is contained within the
+bounding box, where the right and upper boundaries
+are exclusive, and the left and lower boundaries are
+inclusive.  Useful for tiling a plane into non-overlapping
+regions.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="topo.sheet.activity_type">
+<tt class="descclassname">topo.sheet.</tt><tt class="descname">activity_type</tt><a class="headerlink" href="#topo.sheet.activity_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">float64</span></tt></p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+<li><a href="index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">topo.sheet</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module">Module</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/Reference_Manual/topo.sheet-module.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../User_Manual/index.html">User Manual</a></li>
+
+
+
+
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

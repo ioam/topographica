@@ -1,0 +1,494 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.unit.testplot &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tests.unit.testplot</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Test for the Plot class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">from</span> <span class="nn">topo.plotting</span> <span class="kn">import</span> <span class="n">plot</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheet</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.bitmap</span> <span class="kn">import</span> <span class="n">RGBBitmap</span><span class="p">,</span> <span class="n">HSVBitmap</span>
+<span class="c">#from testsheetview import ImageGenerator</span>
+
+<span class="n">SHOW_PLOTS</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="c">### JC: My new imports</span>
+<span class="kn">from</span> <span class="nn">topo.plotting.plot</span> <span class="kn">import</span> <span class="n">TemplatePlot</span><span class="p">,</span> <span class="n">make_template_plot</span>
+<span class="kn">import</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">as</span> <span class="nn">Numeric</span>
+<span class="kn">from</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">divide</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">ones</span><span class="p">,</span><span class="n">reshape</span><span class="p">,</span><span class="n">array</span>
+<span class="kn">from</span> <span class="nn">topo.base.boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">topo.base.sheetview</span> <span class="kn">import</span> <span class="n">SheetView</span>
+<span class="kn">import</span> <span class="nn">numpy.oldnumeric.mlab</span> <span class="kn">as</span> <span class="nn">MLab</span>
+<span class="kn">import</span> <span class="nn">numpy.oldnumeric.random_array</span> <span class="kn">as</span> <span class="nn">RandomArray</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
+
+
+<span class="c">### This function is defined here, where it might be useful for testing</span>
+<span class="c">### Plot</span>
+<div class="viewcode-block" id="matrix_hsv_to_rgb"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.unit.testplot-module.html#topo.tests.unit.testplot.matrix_hsv_to_rgb">[docs]</a><span class="k">def</span> <span class="nf">matrix_hsv_to_rgb</span><span class="p">(</span><span class="n">hMapArray</span><span class="p">,</span><span class="n">sMapArray</span><span class="p">,</span><span class="n">vMapArray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    First matrix sets the Hue (Color).</span>
+<span class="sd">    Second marix sets the Sauration (How much color)</span>
+<span class="sd">    Third matrix sets the Value (How bright the pixel will be)</span>
+
+<span class="sd">    The three input matrices should all be the same size, and have</span>
+<span class="sd">    been normalized to 1.  There should be no side-effects on the</span>
+<span class="sd">    original input matrices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">hMapArray</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">rmat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">hMapArray</span><span class="p">,</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">gmat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">sMapArray</span><span class="p">,</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">bmat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">vMapArray</span><span class="p">,</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="c">## This code should never be seen.  It means that calling code did</span>
+    <span class="c">## not take the precaution of clipping the input matrices.</span>
+    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">rmat</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span><span class="n">gmat</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span><span class="n">bmat</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;HSVBitmap inputs exceed 1. Clipping to 1.0&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">rmat</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">rmat</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">rmat</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">gmat</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">gmat</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">gmat</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">bmat</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">bmat</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">bmat</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c"># List comprehensions were not used because they were slower.</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">rgb</span> <span class="o">=</span> <span class="n">hsv_to_rgb</span><span class="p">(</span><span class="n">rmat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">],</span><span class="n">gmat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">],</span><span class="n">bmat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">rmat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">gmat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">bmat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">rmat</span><span class="p">,</span> <span class="n">gmat</span><span class="p">,</span> <span class="n">bmat</span><span class="p">)</span>
+
+
+
+<span class="c">### JCALERT !he file should be rewritten according to new changes in Plot.</span>
+</div>
+<span class="k">class</span> <span class="nc">TestPlot</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c">### Simple case: we only pass a dictionnary to Plot()</span>
+        <span class="c">### that does not belong to a Sheet:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c">### SheetView1:</span>
+        <span class="c">### Find a way to assign randomly the matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix1</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span><span class="n">Float</span><span class="p">)</span> <span class="o">+</span> <span class="n">RandomArray</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds1</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view1</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds1</span><span class="p">),</span>
+                                      <span class="n">src_name</span><span class="o">=</span><span class="s">&#39;TestInputParam&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key1</span> <span class="o">=</span> <span class="s">&#39;sv1&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view1</span>
+
+        <span class="c">### SheetView2:</span>
+        <span class="c">### Find a way to assign randomly the matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix2</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span><span class="n">Float</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds2</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view2</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds2</span><span class="p">),</span>
+                                      <span class="n">src_name</span><span class="o">=</span><span class="s">&#39;TestInputParam&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;sv2&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view2</span>
+
+        <span class="c">### SheetView3:</span>
+        <span class="c">### Find a way to assign randomly the matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix3</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span><span class="n">Float</span><span class="p">)</span> <span class="o">+</span> <span class="n">RandomArray</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds3</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view3</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix3</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds3</span><span class="p">),</span>
+                                      <span class="n">src_name</span><span class="o">=</span><span class="s">&#39;TestInputParam&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key3</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;sv3&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s">&#39;hello&#39;</span><span class="p">,(</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view3</span>
+
+        <span class="c">### SheetView4: for testing clipping + different bounding box</span>
+        <span class="c">### Find a way to assign randomly the matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix4</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span><span class="n">Float</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.6</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds4</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span><span class="o">-</span><span class="mf">0.7</span><span class="p">),(</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.7</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view4</span> <span class="o">=</span> <span class="n">SheetView</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix4</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds4</span><span class="p">),</span>
+                                      <span class="n">src_name</span><span class="o">=</span><span class="s">&#39;TestInputParam&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key4</span> <span class="o">=</span> <span class="s">&#39;sv4&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key4</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_view4</span>
+
+        <span class="c">### JCALERT! for the moment we can only pass a triple when creating plot</span>
+        <span class="c">### adding more sheetView to test when plot will be fixed for accepting</span>
+        <span class="c">### as much as you want.</span>
+
+        <span class="c"># plot0: empty plot + no sheetviewdict passed: error or empty plot?</span>
+        <span class="c">### JCALERT! It has to be fixed what to do in this case in plot..</span>
+        <span class="c">### disabled test for the moment.</span>
+        <span class="c">#self.plot0 = Plot((None,None,None),None,name=&#39;plot0&#39;)</span>
+        <span class="c">### CATCH EXCEPTION</span>
+
+        <span class="n">plot_channels1</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
+        <span class="c"># plot1: empty plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot1</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot1&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_channels2</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
+        <span class="c"># plot2: sheetView 1, no normalize, no clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot2</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot2&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_channels3</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
+        <span class="c"># plot3: sheetView 1+2, no normalize, no clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot3</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels3</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot3&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_channels4</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">}</span>
+        <span class="c"># plot4: sheetView 1+2+3, no normalize , no clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot4</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels4</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot4&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_channels5</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">}</span>
+        <span class="c"># plot5: sheetView 1+3, no normalize, no clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot5</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels5</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot5&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_channels6</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">}</span>
+        <span class="c"># plot6: sheetView 2+3, no normalize , no clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot6</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels6</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot6&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_channels7</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key4</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">}</span>
+        <span class="c"># plot7: sheetView 1+2+3, no normalize , clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot7</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels7</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot7&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_channels8</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">}</span>
+        <span class="c"># plot8: sheetView 1+2+3, normalize , no clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot8</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels8</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">view_dict</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">normalize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot8&#39;</span><span class="p">)</span>
+
+        <span class="c">### JCALERT! FOR THE MOMENT I TAKE THE DEFAULT FOR NORMALIZE.</span>
+        <span class="c">### WE WILL SEE IF IT REMAINS IN PLOT FIRST.</span>
+
+        <span class="c">### also makes a sheet to test realease_sheetviews</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_view1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_view2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_view3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key4</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet_view4</span>
+
+        <span class="n">plot_channels9</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Strength&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key1</span><span class="p">,</span><span class="s">&#39;Hue&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key2</span><span class="p">,</span><span class="s">&#39;Confidence&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">key3</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot9</span> <span class="o">=</span> <span class="n">make_template_plot</span><span class="p">(</span><span class="n">plot_channels9</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">sheet_views</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;plot9&#39;</span><span class="p">)</span>
+
+
+
+
+    <span class="k">def</span> <span class="nf">test_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="c">#       ### JCALERT! make a test for plot0</span>
+
+<span class="c">#       # plot 1</span>
+<span class="c">#       test = None</span>
+<span class="c">#       self.assertEqual(self.plot1,test)</span>
+
+<span class="c">#       # plot 2</span>
+<span class="c">#       sat = zeros((10,10),Float)</span>
+<span class="c">#       hue = zeros((10,10),Float)</span>
+<span class="c">#       val = self.matrix1</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+<span class="c">#       for each1,each2 in zip(self.plot2.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+<span class="c">#       # plot 3</span>
+<span class="c">#       sat = ones((10,10),Float)</span>
+<span class="c">#       hue = zeros((10,10),Float) + 0.3</span>
+<span class="c">#       val = self.matrix1</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+<span class="c">#       for each1,each2 in zip(self.plot3.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+<span class="c">#       # plot 4</span>
+<span class="c">#       sat = self.matrix3</span>
+<span class="c">#       hue = zeros((10,10),Float) + 0.3</span>
+<span class="c">#       val = self.matrix1</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+<span class="c">#       for each1,each2 in zip(self.plot4.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+<span class="c">#       # plot 5</span>
+<span class="c">#       sat = zeros((10,10),Float)</span>
+<span class="c">#       hue = zeros((10,10),Float)</span>
+<span class="c">#       val = self.matrix1</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+<span class="c">#       for each1,each2 in zip(self.plot5.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+<span class="c">#       # plot 6</span>
+<span class="c">#       sat = self.matrix3</span>
+<span class="c">#       hue = zeros((10,10),Float) + 0.3</span>
+<span class="c">#       val = ones((10,10),Float)</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+<span class="c">#       for each1,each2 in zip(self.plot6.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+<span class="c">#       # plot 7</span>
+<span class="c">#       sat = self.matrix3</span>
+<span class="c">#       hue = zeros((10,10),Float) + 0.3</span>
+<span class="c">#       val = self.matrix4</span>
+
+<span class="c">#         val = MLab.clip(val,0.0,1.0)</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+<span class="c">#       for each1,each2 in zip(self.plot7.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+
+<span class="c">#       # plot 8</span>
+<span class="c">#       sat = self.matrix3</span>
+<span class="c">#       hue = zeros((10,10),Float) + 0.3</span>
+<span class="c">#       val = self.matrix1</span>
+
+<span class="c">#       val = divide(val,float(max(val.ravel())))</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+
+<span class="c">#       for each1,each2 in zip(self.plot8.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+
+
+
+<span class="c">#       # plot 9</span>
+<span class="c">#       sat = self.matrix3</span>
+<span class="c">#       hue = zeros((10,10),Float) + 0.3</span>
+<span class="c">#       val = self.matrix1</span>
+
+<span class="c">#       test = matrix_hsv_to_rgb(hue,sat,val)</span>
+<span class="c">#       for each1,each2 in zip(self.plot9.rgb_matrices,test):</span>
+<span class="c">#           for each3,each4 in zip(each1.ravel(),each2.ravel()):</span>
+<span class="c">#               self.assertAlmostEqual(each3,each4)</span>
+
+<span class="c"># #### Think about doing a plot test using sheet_dict and a sheet?</span>
+<span class="c"># ### Ask Jim if it is really necessary...</span>
+
+<span class="c">#     def test_release_sheetviews(self):</span>
+
+<span class="c">#       self.plot9.release_sheetviews()</span>
+
+<span class="c">#       test=self.sheet.sheet_views.get(self.key1,None)</span>
+<span class="c">#       self.assertEqual(test,None)</span>
+<span class="c">#       test=self.sheet.sheet_views.get(self.key2,None)</span>
+<span class="c">#       self.assertEqual(test,None)</span>
+<span class="c">#       test=self.sheet.sheet_views.get(self.key3,None)</span>
+<span class="c">#       self.assertEqual(test,None)</span>
+<span class="c">#       test=self.sheet.sheet_views.get(self.key4,None)</span>
+<span class="c">#       self.assertEqual(test,self.sheet_view4)</span>
+
+
+<span class="c">#     def test_matrix_hsv_to_rgb(self):</span>
+<span class="c">#         a = [j for i in range(256) for j in range(256)]</span>
+<span class="c">#         b = [i for i in range(256) for j in range(256)]</span>
+<span class="c">#         c = [max(i,j) for i in range(256) for j in range(256)]</span>
+<span class="c">#         a = Numeric.reshape(a,(256,256)) / 255.0</span>
+<span class="c">#         b = Numeric.reshape(b,(256,256)) / 255.0</span>
+<span class="c">#         c = Numeric.reshape(c,(256,256)) / 255.0</span>
+<span class="c">#         (h,s,v) = matrix_hsv_to_rgb(a,b,c)</span>
+<span class="c">#         rgb = RGBMap(h,s,v)</span>
+<span class="c">#         # rgb.show()</span>
+
+<span class="c">#     def test_matrix_hsv_to_rgb2(self):</span>
+<span class="c">#         h = Numeric.array([[0.0,0.0],[0.0,0.0]])</span>
+<span class="c">#         s = Numeric.array([[0.0,0.0],[0.0,0.0]])</span>
+<span class="c">#         v = Numeric.array([[0.5,0.5],[0.5,0.5]])</span>
+<span class="c">#         h_orig = Numeric.array(h)</span>
+<span class="c">#         s_orig = Numeric.array(s)</span>
+<span class="c">#         v_orig = Numeric.array(v)</span>
+<span class="c">#         r,g,b = matrix_hsv_to_rgb(h,s,v)</span>
+<span class="c">#         rgb_target = Numeric.array([[0.5,0.5],[0.5,0.5]])</span>
+<span class="c">#         self.assertEqual(h,h_orig)</span>
+<span class="c">#         self.assertEqual(s,s_orig)</span>
+<span class="c">#         self.assertEqual(v,v_orig)</span>
+
+
+<span class="c">### JC: THIS CODE IS LEFT TEMPORARY IN CASE IT IS OF ANY USE IN NEAR FUTURE</span>
+
+<span class="c">#         x = plot.Plot((&#39;Activity&#39;,None,None),plot.COLORMAP,self.s2)</span>
+<span class="c">#         for o in dir():</span>
+<span class="c">#             # pprint(o)</span>
+<span class="c">#             if isinstance(o,plot.Plot):</span>
+<span class="c">#                 o.warning(&#39;Found &#39;, o.name)</span>
+
+<span class="c">#         input = ImageGenerator(filename=&#39;topo/tests/testsheetview.ppm&#39;,</span>
+<span class="c">#                          density=100,</span>
+<span class="c">#                          bounds=BoundingBox(points=((-0.8,-0.8),(0.8,0.8))))</span>
+<span class="c">#         sv = input.sheet_view(&#39;Activity&#39;)</span>
+
+<span class="c">#         # Defined sheetview in the R channel</span>
+<span class="c">#         plot1 = plot.Plot((None,None,sv),plot.COLORMAP)</span>
+<span class="c">#         p_tuple = plot1.plot()</span>
+<span class="c">#         (r, g, b) = p_tuple.matrices</span>
+<span class="c">#         map = RGBMap(r,g,b)</span>
+<span class="c">#         if SHOW_PLOTS: map.show()</span>
+
+
+<span class="c">#     def test_HSV_plot(self):</span>
+<span class="c">#         input = ImageGenerator(filename=&#39;topo/tests/testsheetview.ppm&#39;,</span>
+<span class="c">#                          density=100,</span>
+<span class="c">#                          bounds=BoundingBox(points=((-0.8,-0.8),(0.8,0.8))))</span>
+<span class="c">#         sv = input.sheet_view(&#39;Activity&#39;)</span>
+
+<span class="c">#         # Defined sheetview in the R channel</span>
+<span class="c">#         plot1 = plot.Plot((sv,sv,sv),plot.HSV)</span>
+<span class="c">#         p_tuple = plot1.plot()</span>
+<span class="c">#         (r, g, b) = p_tuple.matrices</span>
+<span class="c">#         map = HSVMap(r,g,b)</span>
+<span class="c">#         if SHOW_PLOTS: map.show()</span>
+
+<span class="c">#     def test_plottemplate(self):</span>
+<span class="c">#         pt = plot.PlotTemplate()</span>
+<span class="c">#         pt = plot.PlotTemplate({&#39;Strength&#39;   : None,</span>
+<span class="c">#                                 &#39;Hue&#39;        : &#39;HueP&#39;,</span>
+<span class="c">#                                 &#39;Confidence&#39; : None})</span>
+<span class="c">#         pt = plot.PlotTemplate(channels={&#39;Strength&#39;   : None,</span>
+<span class="c">#                                          &#39;Hue&#39;        : &#39;HueP&#39;,</span>
+<span class="c">#                                          &#39;Confidence&#39; : None})</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">nose</span>
+	<span class="n">nose</span><span class="o">.</span><span class="n">runmodule</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../News/index.html">News</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../../Links/index.html">Links</a></li>
+<li><a href="../../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/tests/unit/testplot.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

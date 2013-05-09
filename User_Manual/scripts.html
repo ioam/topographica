@@ -1,0 +1,373 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Starting Topographica scripts interactively &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../index.html" />
+    <link rel="up" title="User Manual" href="index.html" />
+    <link rel="next" title="Topographica Command Line" href="commandline.html" />
+    <link rel="prev" title="Topographica spatial coordinate systems" href="space.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="commandline.html" title="Topographica Command Line"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="space.html" title="Topographica spatial coordinate systems"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" accesskey="U">User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="starting-topographica-scripts-interactively">
+<h1>Starting Topographica scripts interactively<a class="headerlink" href="#starting-topographica-scripts-interactively" title="Permalink to this headline">¶</a></h1>
+<p>Once you have <a class="reference external" href="../Downloads/index.html">installed Topographica</a> you are ready to try running
+it. You can choose to run Topographica interactively (with or
+without a graphical display), or in &#8216;batch mode&#8217;. This section
+introduces how to run Topographica interactively; batch mode is
+described <a class="reference external" href="batch.html">separately</a>.</p>
+<div class="section" id="starting-topographica">
+<h2>Starting Topographica<a class="headerlink" href="#starting-topographica" title="Permalink to this headline">¶</a></h2>
+<p>To start Topographica with one of our example scripts, on most
+systems just open a terminal window and type <tt class="docutils literal"><span class="pre">topographica</span> <span class="pre">-g</span></tt>
+(Windows: double click on the desktop Topographica icon). Once
+Topographica has loaded, you can then click on Help, followed by
+Examples, to choose an example script to run. We have tutorials for
+<a class="reference external" href="../Tutorials/lissom_oo_or.html">lissom_oo_or.ty</a> and <a class="reference external" href="../Tutorials/som_retinotopy.html">som_retinotopy.ty</a>, which make a good
+starting point for using Topographica.</p>
+<p>Alternatively, instead of selecting an example from the GUI, you can
+pass the name of a script to run when you start Topographica from
+the terminal, e.g.</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span class="n">topographica</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">some_script</span><span class="o">.</span><span class="n">ty</span> <span class="o">-</span><span class="n">g</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>(Windows users can use the <a class="reference external" href="../Downloads/win32notes.html">command prompt</a>, although on Windows it
+is usually easier to use the GUI menus.) This command will run a
+script located at the specified path.</p>
+<p id="copy-examples">To be able to run the examples easily, you will first need to get
+your own personal copy of the example scripts:</p>
+<blockquote>
+<div><div class="highlight-python"><pre>topographica -c "from topo.misc.genexamples import copy_examples; copy_examples()"</pre>
+</div>
+</div></blockquote>
+<p>During installation, the Topographica example scripts are installed
+into a location that varies by operating system and installation
+type; this command copies those to an examples subdirectory of your
+<a class="reference external" href="#output-path">output path</a> (see below), typically
+<tt class="docutils literal"><span class="pre">~/Documents/Topographica/examples</span></tt> (or
+<tt class="docutils literal"><span class="pre">~/topographica/examples</span></tt> for release 0.9.7 or earlier).</p>
+<p>Now you can run an example script using a command like the
+following:</p>
+<blockquote>
+<div><div class="highlight-python"><pre>topographica ~/Documents/Topographica/examples/som_retinotopy.ty -g</pre>
+</div>
+</div></blockquote>
+<p>Topographica can also be run without the GUI by omitting the <tt class="docutils literal"><span class="pre">-g</span></tt>
+flag from the startup command.</p>
+<p>Finally, note that the first time Topographica is run on a given
+example, there may be a short pause while the program compiles some
+of the optimized components used in that example. (Some components,
+generally those with <tt class="docutils literal"><span class="pre">_opt</span></tt> in their names, use code written in
+C++ internally for speed, and this code must be compiled.) The
+compiled versions are stored in <tt class="docutils literal"><span class="pre">~/.python26_compiled/</span></tt> on most
+systems (or in the temporary directory <tt class="docutils literal"><span class="pre">%TEMP%\%USERNAME%</span></tt> on
+Windows), and they will be reused on the next run unless the source
+files have changed. Thus you should only notice such pauses the
+first time you use a particular component, at which time you may
+also notice various inscrutable messages from the compiler. These
+messages vary depending on platform (because they come from the
+compiler), and may generally be ignored.</p>
+</div>
+<div class="section" id="output-path">
+<span id="outputpath"></span><h2>Output path<a class="headerlink" href="#output-path" title="Permalink to this headline">¶</a></h2>
+<p>By default, output from Topographica is stored in a particular
+folder, which is typically a folder named &#8220;Topographica&#8221; inside your
+home directory&#8217;s documents folder. The name and location of the
+documents folder depends on your platform, e.g. &#8220;My Documents&#8221; on
+some versions of Windows, or &#8220;Documents&#8221; on most other platforms.
+Topographica attempts to determine the platform-specific documents
+folder, or falls back to <tt class="docutils literal"><span class="pre">~/Documents/Topographica</span></tt>. The output
+path is printed on startup when running topographica interactively.
+(Windows users should see our notes about the <a class="reference external" href="../Downloads/win32notes.html">command prompt</a>.)</p>
+<p>For release 0.9.7 and earlier, the default output path is instead
+always <tt class="docutils literal"><span class="pre">~/topographica</span></tt>.</p>
+<p>You can override the default output path by setting the value of
+<a class="reference external" href="../Reference_Manual/param.normalize_path-class.html">param.normalize_path</a>&#8216;s <tt class="docutils literal"><span class="pre">prefix</span></tt> parameter, e.g.:</p>
+<blockquote>
+<div><div class="highlight-python"><pre>import param param.normalize_path.prefix = "/some/other/path/"</pre>
+</div>
+</div></blockquote>
+<p>To override the default location every time you use Topographica,
+you can put these two lines in a <a class="reference external" href="#user-configuration-file">user configuration file</a>.</p>
+</div>
+<div class="section" id="user-configuration-file">
+<h2>User configuration file<a class="headerlink" href="#user-configuration-file" title="Permalink to this headline">¶</a></h2>
+<p>On startup, Topographica will look for and run the following files
+in order:</p>
+<blockquote>
+<div><p><tt class="docutils literal"><span class="pre">~/.topographicarc</span></tt> (typically for UNIX/Linux/Mac OS X
+systems)</p>
+<p><tt class="docutils literal"><span class="pre">%USERPROFILE%\topographica.ini</span></tt> (on Windows, where
+<tt class="docutils literal"><span class="pre">%USERPROFILE%</span></tt> is typically <tt class="docutils literal"><span class="pre">C:\Users\username</span></tt> on Vista/7
+or <tt class="docutils literal"><span class="pre">c:\Documents</span> <span class="pre">and</span> <span class="pre">Settings\username</span></tt> on XP).</p>
+</div></blockquote>
+<p>If you want to have any code run every time you start Topographica,
+you can create the appropriate user configuration file for your
+platform and add your preferred startup commands to it. The user
+configuration file is particularly useful for overriding various
+default settings such as the <a class="reference external" href="#output-path">output path</a> (as described above), or
+the <a class="reference external" href="commandline.html#promptformat">command prompt format</a>. The file can contain any valid Python
+code.</p>
+</div>
+<div class="section" id="topographica-scripts">
+<span id="ty-files"></span><h2>Topographica Scripts<a class="headerlink" href="#topographica-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Topographica scripts consist of a collection of Python commands,
+usually intended to define and build a particular model. Our
+convention is to give script filenames the suffix <tt class="docutils literal"><span class="pre">.ty</span></tt> to
+distinguish them from ordinary Python scripts (conventionally
+<tt class="docutils literal"><span class="pre">.py</span></tt> files).</p>
+<p>As illustrated above, we provide a number of sample scripts in the
+examples/ directory, but you are free to write your own and run them
+in just the same way. The same commands are valid in script files as
+at the <a class="reference external" href="commandline.html">commandline</a>: running a script file is equivalent to
+entering the commands manually at the commandline.</p>
+<p>Our example scripts, while quite various, have some common sections,
+and we anticipate that your own scripts will also contain some of
+these. The first such section is the list of imports.</p>
+<div class="section" id="imports">
+<h3>Imports<a class="headerlink" href="#imports" title="Permalink to this headline">¶</a></h3>
+<p>Python requires that each command and class be imported (i.e.,
+loaded and declared) from the appropriate file before use. This
+avoids confusion between similar commands defined in different files
+(see the Python documentation for <a class="reference external" href="http://docs.python.org/2/tutorial/modules.html">more information about
+imports</a>). Therefore, most scripts begin with a list of imports
+similar to the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span> <span class="n">sqrt</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">param</span>
+
+<span class="kn">from</span> <span class="nn">topo</span> <span class="kn">import</span> <span class="n">learningfn</span><span class="p">,</span><span class="n">numbergen</span><span class="p">,</span><span class="n">transferfn</span><span class="p">,</span><span class="n">pattern</span><span class="p">,</span>\
+                 <span class="n">projection</span><span class="p">,</span><span class="n">responsefn</span><span class="p">,</span><span class="n">sheet</span>
+</pre></div>
+</div>
+<p>As described in the <a class="reference external" href="overview.html#class-hierarchies">overview</a>, Topographica provides a number of
+component libraries such as <a class="reference external" href="../Reference_Manual/topo.pattern-module.html">pattern</a>, <a class="reference external" href="../Reference_Manual/topo.numbergen-module.html">numbergen</a>, and so on.
+Within each of these, a number of related classes and functions are
+available. Topographica uses Python&#8217;s idea of &#8216;namespaces&#8217; to make
+expressions written for use with Topographica more readable. For
+example, Topographica provides a class called UniformRandom, used to
+generate a sequence of numbers from a uniform random distribution.
+Topographica also provides a class with the same name that is used
+to generate two-dimensional patterns. The two are in different
+files: the first is topo/numbergen/basic.py, and the second is
+topo/pattern/random.py. Were you to type the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">topo.numbergen</span> <span class="kn">import</span> <span class="n">UniformRandom</span>
+<span class="kn">from</span> <span class="nn">topo.pattern.random</span> <span class="kn">import</span> <span class="n">UniformRandom</span>
+</pre></div>
+</div>
+<p>you would only have access to the pattern.random version in your
+script (and at the commandline), because its name would have
+overwritten the numbergen version. To avoid this kind of confusion,
+we recommend not importing classnames alone for library components,
+but instead qualifying the names. Using the
+<tt class="docutils literal"><span class="pre">from</span> <span class="pre">topo</span> <span class="pre">import</span> <span class="pre">numbergen</span></tt> style of import allows you to refer
+to <tt class="docutils literal"><span class="pre">numbergen.UniformRandom</span></tt> throughout your script, which, while
+involving more typing, cuts out confusion about which class you
+might be referring to (making your script easier to read and less
+prone to errors).</p>
+</div>
+</div>
+<div class="section" id="startup-options">
+<h2>Startup options<a class="headerlink" href="#startup-options" title="Permalink to this headline">¶</a></h2>
+<p>Topographica accepts a number of startup options. Details are
+available by passing -h to Topographica (<tt class="docutils literal"><span class="pre">topographica</span> <span class="pre">-h</span></tt>), but a
+few in particular are often useful. We have already seen <tt class="docutils literal"><span class="pre">-g</span></tt>,
+which starts an interactive session with the GUI. To run a script
+interactively without the GUI, pass <tt class="docutils literal"><span class="pre">-i</span></tt> instead of <tt class="docutils literal"><span class="pre">-g</span></tt>. (Note
+that <tt class="docutils literal"><span class="pre">-g</span></tt>, as well as starting the GUI, also imports a number of
+useful commands; you can use <tt class="docutils literal"><span class="pre">-a</span></tt> as described in the
+<a class="reference external" href="commandline.html">commandline</a> section to perform the same without the GUI.)</p>
+<p>Please note that when writing a script, you should not rely on
+anything to have been automatically imported (as is done by <tt class="docutils literal"><span class="pre">-g</span></tt>
+and <tt class="docutils literal"><span class="pre">-a</span></tt>), because other users will not necessarily start
+Topographica in the same way as you: scripts should explicitly
+import everything they need.</p>
+<p>In addition to startup options for the Topographica program, scripts
+themselves can also be controlled by options passed at startup. For
+instance, many of our examples read parameters that can optionally
+be set at startup, such as <tt class="docutils literal"><span class="pre">retina_density</span></tt>, <tt class="docutils literal"><span class="pre">lgn_density</span></tt>, and
+<tt class="docutils literal"><span class="pre">cortex_density</span></tt>, e.g.:</p>
+<div class="highlight-python"><pre>topographica -i -p retina_density=12 -p cortex_density=12 \
+~/Documents/Topographica/examples/lissom_oo_or.ty</pre>
+</div>
+<p>In this case, we are specifying that the retina and V1 sheets in a
+LISSOM simulation should have a density of 12 rather than the
+default of 24 and 48, respectively. Using lower densities is useful
+during initial testing or exploration of a model; higher densities
+can be used to produce results for publication.</p>
+<p>Your own scripts can read any startup parameters you require (see
+<a class="reference external" href="../Reference_Manual/topo.misc.commandline.GlobalParams-class.html">GlobalParams</a> and our example scripts for how to read any such
+parameter). Note that startup parameters must be set before the
+script is executed, i.e. they should be passed on the commandline
+before the script.</p>
+<p>In addition to setting startup parameters, arbitrary Python commands
+can be specified at the commandline by using the <tt class="docutils literal"><span class="pre">-c</span></tt> option. For
+instance:</p>
+<div class="highlight-python"><pre>topographica -c 'from topo.command.analysis import measure_sine_pref'\
+-c 'measure_sine_pref.num_directions=12' ~/Documents/Topographica/examples/tiny.ty</pre>
+</div>
+<p>would import <tt class="docutils literal"><span class="pre">measure_sine_pref</span></tt> and set its <tt class="docutils literal"><span class="pre">num_directions</span></tt>
+attribute to <tt class="docutils literal"><span class="pre">12</span></tt>, and then execute the <tt class="docutils literal"><span class="pre">tiny.ty</span></tt> example
+script. As with ordinary Python commands, you can use a semicolon
+<tt class="docutils literal"><span class="pre">;</span></tt> to separate statements within one command.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../index.html">Home</a></li>
+<li><a href="../News/index.html">News</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+<li><a href="../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../Forums/index.html">Forums</a></li>
+<li><a href="../Team_Members/index.html">Team Members</a></li>
+<li><a href="../Future_Work/index.html">Future Work</a></li>
+<li><a href="../FAQ/index.html">FAQ</a></li>
+<li><a href="../Links/index.html">Links</a></li>
+<li><a href="../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li><a class="reference internal" href="#">Starting Topographica scripts interactively</a><ul>
+<li><a class="reference internal" href="#starting-topographica">Starting Topographica</a></li>
+<li><a class="reference internal" href="#output-path">Output path</a></li>
+<li><a class="reference internal" href="#user-configuration-file">User configuration file</a></li>
+<li><a class="reference internal" href="#topographica-scripts">Topographica Scripts</a><ul>
+<li><a class="reference internal" href="#imports">Imports</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#startup-options">Startup options</a></li>
+</ul>
+</li>
+</ul>
+
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="space.html"
+                        title="previous chapter">Topographica spatial coordinate systems</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="commandline.html"
+                        title="next chapter">Topographica Command Line</a></p>
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/User_Manual/scripts.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="commandline.html" title="Topographica Command Line"
+             >next</a></li>
+        <li class="right" >
+          <a href="space.html" title="Topographica spatial coordinate systems"
+             >previous</a> |</li>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../Downloads/index.html">Downloads</a></li>
+<li><a href="../Tutorials/index.html">Tutorials</a></li>
+<li><a href="index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="index.html" >User Manual</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

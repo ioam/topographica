@@ -1,0 +1,543 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topo.tests.reference.lissom_log_parser &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topo.tests.reference.lissom_log_parser</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for getting C++ LISSOM data and comparing them</span>
+<span class="sd">with Topographica&#39;s.</span>
+
+<span class="sd">Before using these functions, you should set filename_base to</span>
+<span class="sd">give the base filename path of the C++ LISSOM files, e.g.</span>
+<span class="sd">&#39;topo/tests/reference/or_map_topo.&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># CEBHACKALERT: filename should change</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">atan2</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
+<span class="kn">import</span> <span class="nn">topo</span>
+<span class="kn">from</span> <span class="nn">topo.tests.utils</span> <span class="kn">import</span> <span class="n">array_almost_equal</span>
+
+<span class="kn">from</span> <span class="nn">topo.base.arrayutil</span> <span class="kn">import</span> <span class="n">arg</span>
+
+<span class="n">filename_base</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">dprint</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span><span class="n">d</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">d</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">txt</span>
+
+
+
+<span class="n">precision</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="get_input_params"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.reference.lissom_log_parser-module.html#topo.tests.reference.lissom_log_parser.get_input_params">[docs]</a><span class="k">def</span> <span class="nf">get_input_params</span><span class="p">(</span><span class="n">old_compat</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Return iterators over list of float values for C++ LISSOM&#39;s cx,</span>
+<span class="sd">    cy, and theta for multiple eyes, as well as sign.</span>
+
+
+<span class="sd">    Expects log file with values held in lines like this::</span>
+
+<span class="sd">      &#39;Iteration: 000000  [Eye0 [Obj0 cx:02.1 cy:11.6 theta:074.0]]\n&#39;</span>
+
+<span class="sd">    or this:</span>
+
+<span class="sd">      &#39;Iteration: 000000  [Eye0 [Obj0 cx:23.4 cy:10.0 theta:059.6]]  [Eye1 [Obj0 cx:22.6 cy:10.5 theta:059.6]]  [Eye2 [Obj0 cx:21.7 cy:11.1 theta:059.6]]  [Eye3 [Obj0 cx:20.8 cy:11.6 theta:059.6]]\n&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logfile</span> <span class="o">=</span> <span class="n">filename_base</span><span class="o">+</span><span class="s">&#39;log&#39;</span>
+    <span class="k">print</span> <span class="s">&quot;Reading input params from </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">logfile</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="c"># first iter is test in c++ lissom; use to get num eyes</span>
+    <span class="n">n_eyes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;Eye&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">::])</span>
+
+    <span class="n">input_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span><span class="nb">dict</span><span class="p">(</span><span class="n">cx</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span><span class="n">cy</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span><span class="n">theta</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span><span class="n">sign</span><span class="o">=</span><span class="nb">list</span><span class="p">()))</span>
+                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_eyes</span><span class="p">)])</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span><span class="p">,</span><span class="n">lineno</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">))):</span>
+        <span class="n">eyes</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;Eye&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">::]</span>
+        <span class="k">for</span> <span class="n">eye</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">eyes</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="n">n_eyes</span><span class="p">)):</span>
+
+            <span class="c"># e.g. eye=&#39;1 [Obj0 cx:-0.2 cy:13.8 theta:011.7]]  [&#39;</span>
+            <span class="n">cx</span><span class="p">,</span><span class="n">cy</span><span class="p">,</span><span class="n">theta</span> <span class="o">=</span><span class="p">[</span><span class="n">W</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                          <span class="k">for</span> <span class="n">W</span> <span class="ow">in</span> <span class="n">eye</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">old_compat</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;cx&#39;</span><span class="p">,</span><span class="s">&#39;cy&#39;</span><span class="p">,</span><span class="s">&#39;theta&#39;</span><span class="p">]:</span>
+                    <span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">X</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">locals</span><span class="p">()[</span><span class="n">X</span><span class="p">]),</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span> <span class="c"># old compat: log file with degrees etc</span>
+                <span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;cx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cx</span><span class="p">))</span>
+                <span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;cy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cy</span><span class="p">))</span>
+                <span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;theta&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+
+            <span class="k">del</span> <span class="n">cx</span><span class="p">;</span> <span class="k">del</span> <span class="n">cy</span><span class="p">;</span> <span class="k">del</span> <span class="n">theta</span>
+
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">eyes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span> <span class="c"># CeBALERLT: not general (assuming motion just because more than 1 eye)</span>
+
+            <span class="c">##### get sign</span>
+            <span class="n">X1</span><span class="o">=</span><span class="nb">complex</span><span class="p">(</span><span class="n">input_params</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;cx&#39;</span><span class="p">][</span><span class="n">lineno</span><span class="p">],</span>
+                       <span class="n">input_params</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;cy&#39;</span><span class="p">][</span><span class="n">lineno</span><span class="p">])</span>
+            <span class="n">X2</span><span class="o">=</span><span class="nb">complex</span><span class="p">(</span><span class="n">input_params</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">eyes</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;cx&#39;</span><span class="p">][</span><span class="n">lineno</span><span class="p">],</span>
+                       <span class="n">input_params</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">eyes</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;cy&#39;</span><span class="p">][</span><span class="n">lineno</span><span class="p">])</span>
+
+            <span class="n">realdir</span><span class="o">=</span><span class="n">arg</span><span class="p">(</span><span class="n">X2</span><span class="o">-</span><span class="n">X1</span><span class="p">)</span>
+
+            <span class="c"># for 0&lt;=realdir&lt;2pi (instead of -pi&lt;=realdir&lt;pi)</span>
+            <span class="k">if</span> <span class="n">realdir</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span><span class="n">realdir</span><span class="o">+=</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span>
+
+            <span class="n">topo_dir</span> <span class="o">=</span> <span class="n">input_params</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;theta&#39;</span><span class="p">][</span><span class="n">lineno</span><span class="p">]</span><span class="o">+</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span> <span class="c"># dir that will be given to topographica</span>
+
+            <span class="c"># if realdir &amp; topo_dir aren&#39;t the same, it&#39;s because</span>
+            <span class="c"># c lissom used sign=-1 (&amp; the dirs will be pi apart)</span>
+
+            <span class="n">E</span><span class="o">=</span><span class="mf">0.05</span> <span class="c"># (imprecision from getting dir from 1-dp positions)</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">realdir</span><span class="o">-</span><span class="n">topo_dir</span><span class="p">)</span><span class="o">&lt;</span><span class="n">E</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">pi</span><span class="o">-</span><span class="n">E</span><span class="o">&lt;=</span><span class="nb">abs</span><span class="p">(</span><span class="n">realdir</span><span class="o">-</span><span class="n">topo_dir</span><span class="p">)</span><span class="o">&lt;</span><span class="n">pi</span><span class="o">+</span><span class="n">E</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="bp">False</span> <span class="c"># if using speed=0, just replace this line with s=0</span>
+                <span class="c"># CEBALERT: should actually handle that case!</span>
+            <span class="c">#####</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_eyes</span><span class="p">):</span>
+                <span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;sign&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">input_params</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">val</span><span class="p">]</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">input_params</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">val</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span><span class="n">input_params</span>
+
+
+
+<span class="c"># CEBALERT: this kind of function probably exists somewhere already.</span>
+</div>
+<div class="viewcode-block" id="get_matrix"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.reference.lissom_log_parser-module.html#topo.tests.reference.lissom_log_parser.get_matrix">[docs]</a><span class="k">def</span> <span class="nf">get_matrix</span><span class="p">(</span><span class="n">matrix_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an array containing the data in the specified C++ LISSOM .matrix</span>
+<span class="sd">    file.</span>
+
+<span class="sd">    Ignores lines that start with a hash (#).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">matrix_file</span><span class="p">)</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+    <span class="c"># maybe should be setting a typecode of &#39;f&#39;, or maybe they should</span>
+    <span class="c"># actually be FixedPoint numbers...</span>
+    <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="unsituate"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.reference.lissom_log_parser-module.html#topo.tests.reference.lissom_log_parser.unsituate">[docs]</a><span class="k">def</span> <span class="nf">unsituate</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="n">expected_diameter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the view of matrix that contains all non-zero rows and</span>
+<span class="sd">    columns (a guess at how to unsituate a weights matrix).</span>
+
+<span class="sd">    expected_diameter can be specifed as an optional check.</span>
+
+<span class="sd">    ** This function will fail if the weights matrix itself has a</span>
+<span class="sd">    ** border row or column of zeros (or, less likely, a row or</span>
+<span class="sd">    ** column of zeros somewhere inside the weights matrix).</span>
+<span class="sd">    ** Never report that this function is broken: fix it, or</span>
+<span class="sd">    ** update c++ lissom.</span>
+
+<span class="sd">    e.g. for matrix</span>
+<span class="sd">    0 0 0 0 0.0 0.0 0.0 0.0</span>
+<span class="sd">    0 0 0 0 0.0 0.1 0.0 0.0</span>
+<span class="sd">    0.0 0.0 0.1 0.2 0.3 0.0</span>
+<span class="sd">    0 0 0 0 0.0 0.1 0.0 0.0</span>
+<span class="sd">    0 0 0 0 0.0 0.0 0.0 0.0</span>
+
+<span class="sd">    will return matrix[1:4,2:5] i.e.</span>
+<span class="sd">    0.0 0.1 0.0</span>
+<span class="sd">    0.1 0.2 0.3</span>
+<span class="sd">    0.0 0.1 0.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nonzeror</span><span class="p">,</span><span class="n">nonzeroc</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()</span>
+    <span class="n">rstart</span> <span class="o">=</span> <span class="n">nonzeror</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">rstop</span> <span class="o">=</span> <span class="n">nonzeror</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">cstart</span> <span class="o">=</span> <span class="n">nonzeroc</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">cstop</span> <span class="o">=</span> <span class="n">nonzeroc</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">expected_diameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">ctop</span><span class="o">-</span><span class="n">cstart</span><span class="o">==</span><span class="n">rstop</span><span class="o">-</span><span class="n">rstart</span><span class="o">==</span><span class="n">expected_diamater</span><span class="p">,</span><span class="s">&quot;situate_c_matrix() couldn&#39;t guess how to situate </span><span class="si">%s</span><span class="s">&quot;</span>
+
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">[</span><span class="n">rstart</span><span class="p">:</span><span class="n">rstop</span><span class="p">,</span><span class="n">cstart</span><span class="p">:</span><span class="n">cstop</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="compare_elements"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.reference.lissom_log_parser-module.html#topo.tests.reference.lissom_log_parser.compare_elements">[docs]</a><span class="k">def</span> <span class="nf">compare_elements</span><span class="p">(</span><span class="n">topo_matrix</span><span class="p">,</span><span class="n">lissom_matrix</span><span class="p">,</span><span class="n">max_dp</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the smallest number of decimal places to which all</span>
+<span class="sd">    corresponding elements of a C++ lissom and topographica matrix match.</span>
+
+<span class="sd">    max_dp specifies the greatest number of decimal places to try.</span>
+
+<span class="sd">    Returns -1 if they don&#39;t match to at least 1 decimal place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">+</span><span class="s">&quot;: &quot;</span>
+    <span class="c"># CB: this could be a general function, but I doubt anybody would use it.</span>
+    <span class="c"># Plus the hackalert below would have to be fixed.</span>
+    <span class="k">assert</span> <span class="n">topo_matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">lissom_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">topographica array shape </span><span class="si">%s</span><span class="s">, but c++ matrix shape </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">topo_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">lissom_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">match_at</span><span class="o">=-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">dp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">max_dp</span><span class="o">+</span><span class="mi">1</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c"># CBHACKALERT: aren&#39;t lissom_matrix values and topo_matrix values already floats?</span>
+        <span class="c"># Seems like whatever I do in get_matrix (e.g. use typecode=&#39;f&#39;), unless I do astype(float)</span>
+        <span class="c"># here, the comparisons do not work properly.</span>
+        <span class="k">if</span> <span class="n">array_almost_equal</span><span class="p">(</span><span class="n">topo_matrix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span><span class="n">lissom_matrix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span><span class="n">dp</span><span class="p">):</span>
+            <span class="n">match_at</span> <span class="o">=</span> <span class="n">dp</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">match_at</span>
+
+
+</div>
+<div class="viewcode-block" id="check_weights"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.reference.lissom_log_parser-module.html#topo.tests.reference.lissom_log_parser.check_weights">[docs]</a><span class="k">def</span> <span class="nf">check_weights</span><span class="p">(</span><span class="n">sheet_name</span><span class="p">,</span><span class="n">proj_name</span><span class="p">,</span><span class="n">unit</span><span class="p">,</span><span class="n">slices</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">required_dp</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span><span class="n">display</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assert that corresponding elements of the C++ lissom and</span>
+<span class="sd">    Topographica weights of unit in proj_name (which projects into</span>
+<span class="sd">    sheet_name) match to at least required_dp.</span>
+
+<span class="sd">    If required_dp is 0, simply prints the smallest number of decimal</span>
+<span class="sd">    places to which the two corresponding elements match.</span>
+
+<span class="sd">    If specified, slices must be a tuple of slice objects specifying</span>
+<span class="sd">    where the weights are (C++ lissom does not situate weights in its</span>
+<span class="sd">    .matrix files; check_weights uses unsituate() to guess, but if</span>
+<span class="sd">    it&#39;s wrong you can override with slices).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cTIME</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%06d</span><span class="s">&quot;</span><span class="o">%</span><span class="nb">long</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">cREGION</span> <span class="o">=</span> <span class="n">sheet_name</span>
+    <span class="n">cCONN</span> <span class="o">=</span> <span class="n">proj_name</span>
+    <span class="n">cUNIT</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%03d</span><span class="s">_</span><span class="si">%03d</span><span class="s">&quot;</span><span class="o">%</span><span class="n">unit</span>
+
+    <span class="n">c_matrix_filename</span><span class="o">=</span><span class="n">filename_base</span><span class="o">+</span><span class="n">cTIME</span><span class="o">+</span><span class="s">&#39;.wts.&#39;</span><span class="o">+</span><span class="n">cREGION</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="n">cCONN</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="n">cUNIT</span><span class="o">+</span><span class="s">&#39;.matrix&#39;</span>
+    <span class="n">comparing_what</span> <span class="o">=</span> <span class="n">proj_name</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; t=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;Comparing </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">comparing_what</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;Reading C++ data from </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">c_matrix_filename</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+
+    <span class="n">topo_weights</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span><span class="o">.</span><span class="n">projections</span><span class="p">()[</span><span class="n">proj_name</span><span class="p">]</span><span class="o">.</span><span class="n">cfs</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span><span class="o">.</span><span class="n">weights</span>
+    <span class="n">situated_c_weights</span> <span class="o">=</span> <span class="n">get_matrix</span><span class="p">(</span><span class="n">c_matrix_filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">slices</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">c_weights</span> <span class="o">=</span> <span class="n">unsituate</span><span class="p">(</span><span class="n">situated_c_weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">c_weights</span> <span class="o">=</span> <span class="n">situated_c_weights</span><span class="p">[</span><span class="n">slices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">slices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="n">match_dp</span> <span class="o">=</span> <span class="n">compare_elements</span><span class="p">(</span><span class="n">topo_weights</span><span class="p">,</span><span class="n">c_weights</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="n">comparing_what</span><span class="p">)</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;...matched to &quot;</span><span class="o">+</span><span class="sb">`match_dp`</span><span class="o">+</span><span class="s">&quot; d.p.&quot;</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+    <span class="c"># could return comparing_what &amp; dp if that information is to be used for something else</span>
+
+    <span class="k">if</span> <span class="n">required_dp</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">match_dp</span><span class="o">&gt;=</span><span class="n">required_dp</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: required match to </span><span class="si">%s</span><span class="s"> d.p. but got </span><span class="si">%s</span><span class="s"> d.p.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">comparing_what</span><span class="p">,</span><span class="n">required_dp</span><span class="p">,</span><span class="n">match_dp</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="check_activities"><a class="viewcode-back" href="../../../../Reference_Manual/topo.tests.reference.lissom_log_parser-module.html#topo.tests.reference.lissom_log_parser.check_activities">[docs]</a><span class="k">def</span> <span class="nf">check_activities</span><span class="p">(</span><span class="n">sheet_name</span><span class="p">,</span><span class="n">required_dp</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">display</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print the smallest number of decimal places to which all</span>
+<span class="sd">    corresponding elements of the C++ lissom and Topographica</span>
+<span class="sd">    activities of sheet_name match.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cTIME</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%06d</span><span class="s">&quot;</span><span class="o">%</span><span class="nb">long</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">cREGION</span> <span class="o">=</span> <span class="n">sheet_name</span>
+
+    <span class="n">c_matrix_filename</span><span class="o">=</span><span class="n">filename_base</span><span class="o">+</span><span class="n">cTIME</span><span class="o">+</span><span class="s">&#39;p000.&#39;</span><span class="o">+</span><span class="n">cREGION</span><span class="o">+</span><span class="s">&#39;_Activity.matrix&#39;</span>
+    <span class="n">comparing_what</span> <span class="o">=</span> <span class="n">sheet_name</span> <span class="o">+</span> <span class="s">&quot; activity t=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;Comparing </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">comparing_what</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;Reading c++ data from </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">c_matrix_filename</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+
+    <span class="n">topo_act</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span><span class="o">.</span><span class="n">activity</span>
+    <span class="n">c_act</span> <span class="o">=</span> <span class="n">get_matrix</span><span class="p">(</span><span class="n">c_matrix_filename</span><span class="p">)</span>
+
+    <span class="n">match_dp</span> <span class="o">=</span> <span class="n">compare_elements</span><span class="p">(</span><span class="n">topo_act</span><span class="p">,</span><span class="n">c_act</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="n">comparing_what</span><span class="p">)</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;...matched to &quot;</span><span class="o">+</span><span class="sb">`match_dp`</span><span class="o">+</span><span class="s">&quot; d.p.&quot;</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+    <span class="c"># could return comparing_what &amp; dp if that information is to be used for something else</span>
+
+    <span class="k">if</span> <span class="n">required_dp</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">match_dp</span><span class="o">&gt;=</span><span class="n">required_dp</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: required match to </span><span class="si">%s</span><span class="s"> d.p. but got </span><span class="si">%s</span><span class="s"> d.p.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">comparing_what</span><span class="p">,</span><span class="n">required_dp</span><span class="p">,</span><span class="n">match_dp</span><span class="p">)</span>
+
+
+</div>
+<span class="k">def</span> <span class="nf">check_size</span><span class="p">(</span><span class="n">sheet_name</span><span class="p">,</span><span class="n">proj_name</span><span class="p">,</span><span class="n">unit</span><span class="p">,</span><span class="n">slices</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">display</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">cTIME</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%06d</span><span class="s">&quot;</span><span class="o">%</span><span class="nb">long</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">cREGION</span> <span class="o">=</span> <span class="n">sheet_name</span>
+    <span class="n">cCONN</span> <span class="o">=</span> <span class="n">proj_name</span>
+    <span class="n">cUNIT</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%03d</span><span class="s">_</span><span class="si">%03d</span><span class="s">&quot;</span><span class="o">%</span><span class="n">unit</span>
+
+    <span class="n">c_matrix_filename</span><span class="o">=</span><span class="n">filename_base</span><span class="o">+</span><span class="n">cTIME</span><span class="o">+</span><span class="s">&#39;.wts.&#39;</span><span class="o">+</span><span class="n">cREGION</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="n">cCONN</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="n">cUNIT</span><span class="o">+</span><span class="s">&#39;.matrix&#39;</span>
+    <span class="n">comparing_what</span> <span class="o">=</span> <span class="n">proj_name</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; t=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;Comparing sizes of </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">comparing_what</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+    <span class="n">dprint</span><span class="p">(</span><span class="s">&quot;Reading C++ data from </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">c_matrix_filename</span><span class="p">,</span><span class="n">display</span><span class="p">)</span>
+
+    <span class="n">topo_weights</span> <span class="o">=</span> <span class="n">topo</span><span class="o">.</span><span class="n">sim</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span><span class="o">.</span><span class="n">projections</span><span class="p">()[</span><span class="n">proj_name</span><span class="p">]</span><span class="o">.</span><span class="n">cfs</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span><span class="o">.</span><span class="n">weights</span>
+    <span class="n">situated_c_weights</span> <span class="o">=</span> <span class="n">get_matrix</span><span class="p">(</span><span class="n">c_matrix_filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">slices</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">c_weights</span> <span class="o">=</span> <span class="n">unsituate</span><span class="p">(</span><span class="n">situated_c_weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">c_weights</span> <span class="o">=</span> <span class="n">situated_c_weights</span><span class="p">[</span><span class="n">slices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">slices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="k">assert</span> <span class="n">topo_weights</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">c_weights</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: topographica array shape </span><span class="si">%s</span><span class="s">, but c++ matrix shape </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">comparing_what</span><span class="p">,</span><span class="n">topo_weights</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">c_weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+
+
+
+<span class="k">def</span> <span class="nf">_set_clissom_params</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">out_dir</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">out_dir</span><span class="o">+</span><span class="s">&quot;/</span><span class="si">%s</span><span class="s">.param&quot;</span><span class="o">%</span><span class="n">name</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c"># could we go all the way and try to write</span>
+        <span class="c"># the entire params file...?</span>
+        <span class="k">if</span> <span class="s">&#39;set inh_rad&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">line</span><span class="o">=</span><span class="s">&quot;set inh_rad=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;inh_rad&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;set BaseRN&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">line</span><span class="o">=</span><span class="s">&quot;set BaseRN=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;BaseRN&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;set BaseN&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">line</span><span class="o">=</span><span class="s">&quot;set BaseN=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;BaseN&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;set rf_radius&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">line</span><span class="o">=</span><span class="s">&quot;set rf_radius=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;rf_radius&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;set exc_rad&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">line</span><span class="o">=</span><span class="s">&quot;set exc_rad=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;exc_rad&#39;</span><span class="p">]</span>
+        <span class="c"># exc_rad</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+
+<span class="c"># Command to generate lissom data for comparisons</span>
+<span class="k">def</span> <span class="nf">_clissomcmd</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">check</span> <span class="o">=</span> <span class="s">&quot; -c &#39;call save_all_units.command&#39; -c &#39;plot filename_format=$$$${default_filename_format} save_matrices=True&#39; &quot;</span>
+
+    <span class="k">def</span> <span class="nf">training_check</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot; -c &#39;training t+</span><span class="si">%s</span><span class="s">&#39; </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">check</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">step_check</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s">&quot; -c &#39;step&#39; </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">check</span>
+
+
+    <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;./lissom5 display=0 </span><span class="si">%s</span><span class="s">.param -c &quot;call set_thresholds.command&quot; -c &quot;ppm_weight_scale_type=PPM_WtScale_Fixed&quot; -c &quot;Region::ppm_weight_fixed_multiplier=1&quot; -c &#39;PlotGroup::Weights::filename_format=&quot;$$$${filebase}.$$$${06iteration}.wts.$$$${current_region}.$$$${current_plot}.$$$${03current_ui}_$$$${03current_uj}&quot;&#39; -c &quot;cmd::ppm_plots=False&quot; -c &quot;cmd::plot_unit::weight_situate=False&quot; &quot;&quot;&quot;</span><span class="o">%</span><span class="n">name</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">check</span> <span class="c"># 0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">):</span> <span class="c"># 5</span>
+        <span class="n">cmd</span><span class="o">+=</span><span class="n">step_check</span><span class="p">()</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">95</span><span class="p">)</span> <span class="c">#100</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">98</span><span class="p">)</span> <span class="c">#198</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c">#200</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span> <span class="c">#350</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span> <span class="c">#500</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span> <span class="c">#800</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="c">#1000</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span> <span class="c"># 5000</span>
+        <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">1500</span><span class="p">)</span> <span class="c">#6500</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">1500</span><span class="p">)</span> <span class="c">#8000</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span> <span class="c">#13000</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">3000</span><span class="p">)</span> <span class="c">#16000</span>
+
+    <span class="n">cmd</span><span class="o">+=</span><span class="n">training_check</span><span class="p">(</span><span class="mi">4000</span><span class="p">)</span> <span class="c">#20000</span>
+
+    <span class="k">return</span> <span class="n">cmd</span>
+
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">param</span> <span class="kn">import</span> <span class="n">normalize_path</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="k">def</span> <span class="nf">initialize_clissom_data</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">out_dir</span><span class="o">=</span><span class="n">normalize_path</span><span class="p">(</span><span class="s">&quot;topo/tests/reference/</span><span class="si">%s</span><span class="s">_BaseN</span><span class="si">%s</span><span class="s">_BaseRN</span><span class="si">%s</span><span class="s">/&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;BaseN&#39;</span><span class="p">],</span>
+                                                                        <span class="n">kw</span><span class="p">[</span><span class="s">&#39;BaseRN&#39;</span><span class="p">]))</span>
+    <span class="k">global</span> <span class="n">filename_base</span>
+    <span class="n">filename_base</span> <span class="o">=</span> <span class="n">out_dir</span><span class="o">+</span><span class="s">&quot;/</span><span class="si">%s</span><span class="s">.&quot;</span><span class="o">%</span><span class="n">name</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">out_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+        <span class="n">clissom_support_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&quot;topo/tests/reference/support_clissom/*&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">clissom_support_files</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;cp </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">out_dir</span><span class="p">))</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;cp topo/tests/reference/</span><span class="si">%s</span><span class="s">.param </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">out_dir</span><span class="p">))</span>
+        <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;gzip -dc lissom5.gz &gt; lissom5&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;chmod +x </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="s">&quot;lissom5&quot;</span><span class="p">)</span>
+
+        <span class="n">_set_clissom_params</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">out_dir</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&quot;------------------------------------------------------------&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;Generating c++ lissom results in </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">out_dir</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">_clissomcmd</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">c</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;------------------------------------------------------------&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Skipping c++ lissom data generation: results already exist in </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">out_dir</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../News/index.html">News</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../../../Forums/index.html">Forums</a></li>
+<li><a href="../../../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../../../Links/index.html">Links</a></li>
+<li><a href="../../../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/topo/tests/reference/lissom_log_parser.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../../../index.html">Home</a></li>
+<li><a href="../../../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

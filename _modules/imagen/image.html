@@ -1,0 +1,517 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>imagen.image &mdash; The Topographica Neural Map Simulator</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/topo.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.98',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/topo.js"></script>
+    <link rel="top" title="The Topographica Neural Map Simulator" href="../../index.html" />
+    <link rel="up" title="imagen" href="../imagen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" accesskey="U">imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for imagen.image</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PatternGenerators based on bitmap images stored in files.</span>
+
+<span class="sd">Requires the Python Imaging Library (PIL).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">Image</span>
+<span class="kn">import</span> <span class="nn">ImageOps</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy.oldnumeric</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">ravel</span><span class="p">,</span> <span class="n">ones</span>
+
+<span class="kn">import</span> <span class="nn">param</span>
+<span class="kn">from</span> <span class="nn">param.parameterized</span> <span class="kn">import</span> <span class="n">overridable_property</span>
+
+<span class="kn">from</span> <span class="nn">boundingregion</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">patterngenerator</span> <span class="kn">import</span> <span class="n">PatternGenerator</span>
+<span class="kn">from</span> <span class="nn">sheetcoords</span> <span class="kn">import</span> <span class="n">SheetCoordinateSystem</span>
+<span class="kn">from</span> <span class="nn">transferfn</span> <span class="kn">import</span> <span class="n">DivisiveNormalizeLinf</span><span class="p">,</span><span class="n">TransferFn</span>
+
+
+<div class="viewcode-block" id="ImageSampler"><a class="viewcode-back" href="../../Reference_Manual/imagen.image-module.html#imagen.image.ImageSampler">[docs]</a><span class="k">class</span> <span class="nc">ImageSampler</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Parameterized</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class of objects that, when called, sample an image.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__abstract</span><span class="o">=</span><span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">_get_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># CB: In general, might need to consider caching to avoid</span>
+        <span class="c"># loading of image/creation of scs and application of wpofs</span>
+        <span class="c"># every time/whatever the sampler does to set up the image</span>
+        <span class="c"># before sampling</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span>
+
+    <span class="k">def</span> <span class="nf">_set_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">image</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">image</span>
+
+    <span class="k">def</span> <span class="nf">_del_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span>
+
+    <span class="c"># As noted by JP in FastImageSampler, this isn&#39;t easy to figure out.</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">image</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sheet_xdensity</span><span class="p">,</span><span class="n">sheet_ydensity</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="n">image</span> <span class="o">=</span> <span class="n">overridable_property</span><span class="p">(</span><span class="n">_get_image</span><span class="p">,</span><span class="n">_set_image</span><span class="p">,</span><span class="n">_del_image</span><span class="p">)</span>
+
+
+
+<span class="c"># CEBALERT: ArraySampler?</span></div>
+<div class="viewcode-block" id="PatternSampler"><a class="viewcode-back" href="../../Reference_Manual/imagen.image-module.html#imagen.image.PatternSampler">[docs]</a><span class="k">class</span> <span class="nc">PatternSampler</span><span class="p">(</span><span class="n">ImageSampler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When called, resamples - according to the size_normalization</span>
+<span class="sd">    parameter - an image at the supplied (x,y) sheet coordinates.</span>
+
+<span class="sd">    (x,y) coordinates outside the image are returned as the background</span>
+<span class="sd">    value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">whole_pattern_output_fns</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">HookList</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="n">TransferFn</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="p">[],</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Functions to apply to the whole image before any sampling is done.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">background_value_fn</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Callable</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Function to compute an appropriate background value. Must accept</span>
+<span class="s">        an array and return a scalar.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">size_normalization</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ObjectSelector</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;original&#39;</span><span class="p">,</span>
+        <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;original&#39;</span><span class="p">,</span><span class="s">&#39;stretch_to_fit&#39;</span><span class="p">,</span><span class="s">&#39;fit_shortest&#39;</span><span class="p">,</span><span class="s">&#39;fit_longest&#39;</span><span class="p">],</span>
+        <span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Determines how the pattern is scaled initially, relative to the</span>
+<span class="s">        default retinal dimension of 1.0 in sheet coordinates:</span>
+
+<span class="s">        &#39;stretch_to_fit&#39;: scale both dimensions of the pattern so they</span>
+<span class="s">        would fill a Sheet with bounds=BoundingBox(radius=0.5) (disregards</span>
+<span class="s">        the original&#39;s aspect ratio).</span>
+
+<span class="s">        &#39;fit_shortest&#39;: scale the pattern so that its shortest dimension</span>
+<span class="s">        is made to fill the corresponding dimension on a Sheet with</span>
+<span class="s">        bounds=BoundingBox(radius=0.5) (maintains the original&#39;s aspect</span>
+<span class="s">        ratio, filling the entire bounding box).</span>
+
+<span class="s">        &#39;fit_longest&#39;: scale the pattern so that its longest dimension is</span>
+<span class="s">        made to fill the corresponding dimension on a Sheet with</span>
+<span class="s">        bounds=BoundingBox(radius=0.5) (maintains the original&#39;s</span>
+<span class="s">        aspect ratio, fitting the image into the bounding box but not</span>
+<span class="s">        necessarily filling it).</span>
+
+<span class="s">        &#39;original&#39;: no scaling is applied; each pixel of the pattern</span>
+<span class="s">        corresponds to one matrix unit of the Sheet on which the</span>
+<span class="s">        pattern being displayed.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scs</span><span class="o">.</span><span class="n">activity</span>
+
+    <span class="k">def</span> <span class="nf">_set_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">image</span><span class="p">):</span>
+        <span class="c"># Stores a SheetCoordinateSystem with an activity matrix</span>
+        <span class="c"># representing the image</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">Float</span><span class="p">)</span>
+
+        <span class="n">rows</span><span class="p">,</span><span class="n">cols</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scs</span> <span class="o">=</span> <span class="n">SheetCoordinateSystem</span><span class="p">(</span><span class="n">xdensity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">ydensity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                                         <span class="n">bounds</span><span class="o">=</span><span class="n">BoundingBox</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="n">cols</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span><span class="o">-</span><span class="n">rows</span><span class="o">/</span><span class="mf">2.0</span><span class="p">),</span>
+                                                                    <span class="p">(</span> <span class="n">cols</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">rows</span><span class="o">/</span><span class="mf">2.0</span><span class="p">))))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scs</span><span class="o">.</span><span class="n">activity</span><span class="o">=</span><span class="n">image</span>
+
+    <span class="k">def</span> <span class="nf">_del_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scs</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sheet_xdensity</span><span class="p">,</span> <span class="n">sheet_ydensity</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return pixels from the supplied image at the given Sheet (x,y)</span>
+<span class="sd">        coordinates.</span>
+
+<span class="sd">        The image is assumed to be a NumPy array or other object that</span>
+<span class="sd">        exports the NumPy buffer interface (i.e. can be converted to a</span>
+<span class="sd">        NumPy array by passing it to numpy.array(), e.g. Image.Image).</span>
+<span class="sd">        The whole_pattern_output_fns are applied to the image before</span>
+<span class="sd">        any sampling is done.</span>
+
+<span class="sd">        To calculate the sample, the image is scaled according to the</span>
+<span class="sd">        size_normalization parameter, and any supplied width and</span>
+<span class="sd">        height. sheet_xdensity and sheet_ydensity are the xdensity and</span>
+<span class="sd">        ydensity of the sheet on which the pattern is to be drawn.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># CEB: could allow image=None in args and have &#39;if image is</span>
+        <span class="c"># not None: self.image=image&#39; here to avoid re-initializing the</span>
+        <span class="c"># image.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">=</span><span class="n">image</span>
+
+        <span class="k">for</span> <span class="n">wpof</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">whole_pattern_output_fns</span><span class="p">:</span>
+            <span class="n">wpof</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_value_fn</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">background_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">background_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_value_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+
+        <span class="n">pattern_rows</span><span class="p">,</span><span class="n">pattern_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">width</span><span class="o">==</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">height</span><span class="o">==</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">pattern_cols</span><span class="o">==</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">pattern_rows</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">Float</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">background_value</span>
+
+        <span class="c"># scale the supplied coordinates to match the pattern being at density=1</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="n">sheet_xdensity</span> <span class="c"># deliberately don&#39;t operate in place (so as not to change supplied x &amp; y)</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="o">*</span><span class="n">sheet_ydensity</span>
+
+        <span class="c"># scale according to initial pattern size_normalization selected (size_normalization)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__apply_size_normalization</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sheet_xdensity</span><span class="p">,</span><span class="n">sheet_ydensity</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">size_normalization</span><span class="p">)</span>
+
+        <span class="c"># scale according to user-specified width and height</span>
+        <span class="n">x</span><span class="o">/=</span><span class="n">width</span>
+        <span class="n">y</span><span class="o">/=</span><span class="n">height</span>
+
+        <span class="c"># now sample pattern at the (r,c) corresponding to the supplied (x,y)</span>
+        <span class="n">r</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scs</span><span class="o">.</span><span class="n">sheet2matrixidx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="c"># (where(cond,x,y) evaluates x whether cond is True or False)</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pattern_rows</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">out</span><span class="o">=</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pattern_cols</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">out</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>
+        <span class="n">left</span><span class="p">,</span><span class="n">bottom</span><span class="p">,</span><span class="n">right</span><span class="p">,</span><span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scs</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">lbrt</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span><span class="o">&gt;=</span><span class="n">left</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="o">&lt;</span><span class="n">right</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span><span class="o">&gt;</span><span class="n">bottom</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span><span class="o">&lt;=</span><span class="n">top</span><span class="p">),</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">],</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">background_value</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__apply_size_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">sheet_xdensity</span><span class="p">,</span><span class="n">sheet_ydensity</span><span class="p">,</span><span class="n">size_normalization</span><span class="p">):</span>
+        <span class="n">pattern_rows</span><span class="p">,</span><span class="n">pattern_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c"># Instead of an if-test, could have a class of this type of</span>
+        <span class="c"># function (c.f. OutputFunctions, etc)...</span>
+        <span class="k">if</span> <span class="n">size_normalization</span><span class="o">==</span><span class="s">&#39;original&#39;</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">elif</span> <span class="n">size_normalization</span><span class="o">==</span><span class="s">&#39;stretch_to_fit&#39;</span><span class="p">:</span>
+            <span class="n">x_sf</span><span class="p">,</span><span class="n">y_sf</span> <span class="o">=</span> <span class="n">pattern_cols</span><span class="o">/</span><span class="n">sheet_xdensity</span><span class="p">,</span> <span class="n">pattern_rows</span><span class="o">/</span><span class="n">sheet_ydensity</span>
+            <span class="n">x</span><span class="o">*=</span><span class="n">x_sf</span><span class="p">;</span> <span class="n">y</span><span class="o">*=</span><span class="n">y_sf</span>
+
+        <span class="k">elif</span> <span class="n">size_normalization</span><span class="o">==</span><span class="s">&#39;fit_shortest&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pattern_rows</span><span class="o">&lt;</span><span class="n">pattern_cols</span><span class="p">:</span>
+                <span class="n">sf</span> <span class="o">=</span> <span class="n">pattern_rows</span><span class="o">/</span><span class="n">sheet_ydensity</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sf</span> <span class="o">=</span> <span class="n">pattern_cols</span><span class="o">/</span><span class="n">sheet_xdensity</span>
+            <span class="n">x</span><span class="o">*=</span><span class="n">sf</span><span class="p">;</span><span class="n">y</span><span class="o">*=</span><span class="n">sf</span>
+
+        <span class="k">elif</span> <span class="n">size_normalization</span><span class="o">==</span><span class="s">&#39;fit_longest&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pattern_rows</span><span class="o">&lt;</span><span class="n">pattern_cols</span><span class="p">:</span>
+                <span class="n">sf</span> <span class="o">=</span> <span class="n">pattern_cols</span><span class="o">/</span><span class="n">sheet_xdensity</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sf</span> <span class="o">=</span> <span class="n">pattern_rows</span><span class="o">/</span><span class="n">sheet_ydensity</span>
+            <span class="n">x</span><span class="o">*=</span><span class="n">sf</span><span class="p">;</span><span class="n">y</span><span class="o">*=</span><span class="n">sf</span>
+
+
+
+</div>
+<div class="viewcode-block" id="edge_average"><a class="viewcode-back" href="../../Reference_Manual/imagen.image-module.html#imagen.image.edge_average">[docs]</a><span class="k">def</span> <span class="nf">edge_average</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="s">&quot;Return the mean value around the edge of an array.&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ravel</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">top_edge</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">bottom_edge</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">left_edge</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">right_edge</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">edge_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">top_edge</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">bottom_edge</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">left_edge</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">right_edge</span><span class="p">)</span>
+        <span class="n">num_values</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">top_edge</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">bottom_edge</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">left_edge</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">right_edge</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">edge_sum</span><span class="p">)</span><span class="o">/</span><span class="n">num_values</span>
+
+
+</div>
+<div class="viewcode-block" id="FastImageSampler"><a class="viewcode-back" href="../../Reference_Manual/imagen.image-module.html#imagen.image.FastImageSampler">[docs]</a><span class="k">class</span> <span class="nc">FastImageSampler</span><span class="p">(</span><span class="n">ImageSampler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A fast-n-dirty image sampler using Python Imaging Library</span>
+<span class="sd">    routines.  Currently this sampler doesn&#39;t support user-specified</span>
+<span class="sd">    size_normalization or cropping but rather simply scales and crops</span>
+<span class="sd">    the image to fit the given matrix size without distorting the</span>
+<span class="sd">    aspect ratio of the original picture.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sampling_method</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">Image</span><span class="o">.</span><span class="n">NEAREST</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">       Python Imaging Library sampling method for resampling an image.</span>
+<span class="s">       Defaults to Image.NEAREST.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">image</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s">&#39;L&#39;</span><span class="p">,</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">putdata</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">image</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sheet_xdensity</span><span class="p">,</span> <span class="n">sheet_ydensity</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">=</span><span class="n">image</span>
+
+        <span class="c"># JPALERT: Right now this ignores all options and just fits the image into given array.</span>
+        <span class="c"># It needs to be fleshed out to properly size and crop the</span>
+        <span class="c"># image given the options. (maybe this class needs to be</span>
+        <span class="c"># redesigned?  The interface to this function is pretty inscrutable.)</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">ImageOps</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_method</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="n">im</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">Float</span><span class="p">)</span>
+
+
+
+<span class="c"># Would be best called Image, but that causes confusion with Image&#39;s Image</span></div>
+<div class="viewcode-block" id="GenericImage"><a class="viewcode-back" href="../../Reference_Manual/imagen.image-module.html#imagen.image.GenericImage">[docs]</a><span class="k">class</span> <span class="nc">GenericImage</span><span class="p">(</span><span class="n">PatternGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic 2D image generator.</span>
+
+<span class="sd">    Generates a pattern from a Python Imaging Library image object.</span>
+<span class="sd">    Subclasses should override the _get_image method to produce the</span>
+<span class="sd">    image object.</span>
+
+<span class="sd">    The background value is calculated as an edge average: see</span>
+<span class="sd">    edge_average().  Black-bordered images therefore have a black</span>
+<span class="sd">    background, and white-bordered images have a white</span>
+<span class="sd">    background. Images with no border have a background that is less</span>
+<span class="sd">    of a contrast than a white or black one.</span>
+
+<span class="sd">    At present, rotation, size_normalization, etc. just resample; it</span>
+<span class="sd">    would be nice to support some interpolation options as well.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__abstract</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">aspect_ratio</span>  <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+        <span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">2.0</span><span class="p">),</span><span class="n">precedence</span><span class="o">=</span><span class="mf">0.31</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Ratio of width to height; size*aspect_ratio gives the width.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">size</span>  <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span><span class="n">softbounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">2.0</span><span class="p">),</span>
+        <span class="n">precedence</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Height of the image.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">pattern_sampler</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">ClassSelector</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="n">ImageSampler</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">PatternSampler</span><span class="p">(</span><span class="n">background_value_fn</span><span class="o">=</span><span class="n">edge_average</span><span class="p">,</span>
+                               <span class="n">size_normalization</span><span class="o">=</span><span class="s">&#39;fit_shortest&#39;</span><span class="p">,</span>
+                               <span class="n">whole_pattern_output_fns</span><span class="o">=</span><span class="p">[</span><span class="n">DivisiveNormalizeLinf</span><span class="p">()]),</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        The PatternSampler to use to resample/resize the image.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">cache_image</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Boolean</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        If False, discards the image and pattern_sampler after drawing the pattern each time,</span>
+<span class="s">        to make it possible to use very large databases of images without</span>
+<span class="s">        running out of memory.&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="c"># CEB: not currently possible, because _get_image needs access to p</span>
+    <span class="c">#image = property(_get_image,_set_image,_del_image,doc=&quot; &quot;)</span>
+
+    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+        <span class="n">height</span>   <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">width</span>    <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">aspect_ratio</span><span class="o">*</span><span class="n">height</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pattern_sampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_image</span><span class="p">(</span><span class="n">p</span><span class="p">),</span><span class="n">p</span><span class="o">.</span><span class="n">pattern_x</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">pattern_y</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">xdensity</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">ydensity</span><span class="p">),</span>
+                                   <span class="nb">float</span><span class="p">(</span><span class="n">width</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">height</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">cache_image</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern_sampler</span><span class="o">.</span><span class="n">image</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c">### support pickling of Image.Image</span>
+
+    <span class="c"># CEBALERT: almost identical code to that in topo.plotting.bitmap.Bitmap.</span>
+    <span class="c"># Can we instead patch PIL? (Note that we can&#39;t use copy_reg as we do for</span>
+    <span class="c"># e.g. numpy ufuncs because Image&#39;s Image is not a new-style class. So patching</span>
+    <span class="c"># PIL is probably the only option to handle this problem in one place.)</span>
+
+    <span class="c"># CEB: by converting to string and back, we probably incur some speed</span>
+    <span class="c"># penalty on copy()ing GenericImages (since __getstate__ and __setstate__ are</span>
+    <span class="c"># used for copying, unless __copy__ and __deepcopy__ are defined instead).</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the object&#39;s state (as in the superclass), but replace</span>
+<span class="sd">        the &#39;_image&#39; attribute&#39;s Image with a string representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">GenericImage</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s">&#39;_image&#39;</span> <span class="ow">in</span> <span class="n">state</span> <span class="ow">and</span> <span class="n">state</span><span class="p">[</span><span class="s">&#39;_image&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">StringIO</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">StringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s">&#39;_image&#39;</span><span class="p">]</span>
+            <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">format</span> <span class="ow">or</span> <span class="s">&#39;TIFF&#39;</span><span class="p">)</span> <span class="c"># format could be None (we should probably just not save in that case)</span>
+            <span class="n">state</span><span class="p">[</span><span class="s">&#39;_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the object&#39;s state (as in the superclass), but replace</span>
+<span class="sd">        the &#39;_image&#39; string with an actual Image object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># CEBALERT: Need to figure out how state[&#39;_image&#39;] could ever</span>
+        <span class="c"># actually be None; apparently it is sometimes (see SF</span>
+        <span class="c"># #2276819).</span>
+        <span class="k">if</span> <span class="s">&#39;_image&#39;</span> <span class="ow">in</span> <span class="n">state</span> <span class="ow">and</span> <span class="n">state</span><span class="p">[</span><span class="s">&#39;_image&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">StringIO</span>
+            <span class="n">state</span><span class="p">[</span><span class="s">&#39;_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">StringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s">&#39;_image&#39;</span><span class="p">]))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GenericImage</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="FileImage"><a class="viewcode-back" href="../../Reference_Manual/imagen.image-module.html#imagen.image.FileImage">[docs]</a><span class="k">class</span> <span class="nc">FileImage</span><span class="p">(</span><span class="n">GenericImage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2D Image generator that reads the image from a file.</span>
+
+<span class="sd">    The image at the supplied filename is converted to grayscale if it</span>
+<span class="sd">    is not already a grayscale image. See Image&#39;s Image class for</span>
+<span class="sd">    details of supported image file formats.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Filename</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&#39;images/ellen_arthur.pgm&#39;</span><span class="p">,</span><span class="n">precedence</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">        File path (can be relative to Param&#39;s base path) to a bitmap image.</span>
+<span class="s">        The image can be in any format accepted by PIL, e.g. PNG, JPG, TIFF, or PGM.</span>
+<span class="s">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the last_filename attribute, used to hold the last</span>
+<span class="sd">        filename. This allows reloading an existing image to be</span>
+<span class="sd">        avoided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileImage</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_filename</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If necessary as indicated by the parameters, get a new image,</span>
+<span class="sd">        assign it to self._image and return True.  If no new image is</span>
+<span class="sd">        needed, return False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">filename</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">last_filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_filename</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">ImageOps</span><span class="o">.</span><span class="n">grayscale</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/topo-banner7.png" alt="Logo"/>
+            </a></p>
+<ul class="global-toc">
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../News/index.html">News</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+<li><a href="../../Reference_Manual/index.html">Reference Manual</a></li>
+<li><a href="../../Developer_Manual/index.html">Developer Manual</a></li>
+<li><a href="../../Forums/index.html">Forums</a></li>
+<li><a href="../../Team_Members/index.html">Team Members</a></li>
+<li><a href="../../Future_Work/index.html">Future Work</a></li>
+<li><a href="../../FAQ/index.html">FAQ</a></li>
+<li><a href="../../Links/index.html">Links</a></li>
+<li><a href="../../Home/pubs.html">Publications</a></li>
+</ul>
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+
+
+<h3>This Page</h3>
+<ul class="this-page-menu">
+	<li><a	href="https://github.com/wiktr/topographica/edit/doc/doc/_modules/imagen/image.rst" rel="nofollow">Edit on GitHub</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../Downloads/index.html">Downloads</a></li>
+<li><a href="../../Tutorials/index.html">Tutorials</a></li>
+<li><a href="../../User_Manual/index.html">User Manual</a></li>
+
+
+<li><ul class="parents">
+
+
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../imagen.html" >imagen</a> &raquo;</li>
+
+</ul></li>
+
+
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, IOAM.
+      Last updated on May 09, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
