@@ -190,10 +190,10 @@ class runscript(param.ParameterizedFunction):
     the 'tiny.ty' script in the currently active namespace.
     """
 
-    ns = param.Parameter(default=globals(), doc="""
+    ns = param.Parameter(default={}, doc="""
         The namespace in which the script is to be executed.""")
 
-    push = param.Callable(default=lambda x: x, doc="""
+    push = param.Callable(doc="""
         Hook to push the updated namespace for handling more
         complicated namespaces, such as IPython Notebook.""")
 
