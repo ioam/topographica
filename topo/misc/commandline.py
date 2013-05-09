@@ -315,7 +315,9 @@ topo_parser.add_option("-i","--interactive",action="callback",callback=i_action,
 def v_action(option,opt_str,value,parser):
     """Callback function for the -v option."""
     import param.parameterized
+    import logging
     param.parameterized.min_print_level=param.parameterized.VERBOSE
+    logging.getLogger().setLevel(param.parameterized.VERBOSE)
     print "Enabling verbose message output."
 
 topo_parser.add_option("-v","--verbose",action="callback",callback=v_action,dest="verbose",default=False,help="""\
@@ -325,7 +327,9 @@ enable verbose messaging output.""")
 def d_action(option,opt_str,value,parser):
     """Callback function for the -d option."""
     import param.parameterized
+    import logging
     param.parameterized.min_print_level=param.parameterized.DEBUG
+    logging.getLogger().setLevel(logging.DEBUG)
     print "Enabling debugging message output."
 
 topo_parser.add_option("-d","--debug",action="callback",callback=d_action,dest="debug",default=False,help="""\
