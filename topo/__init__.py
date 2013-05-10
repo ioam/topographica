@@ -62,6 +62,9 @@ sys.path = [os.path.join(basepath, '../', 'external', 'lancet')] + sys.path
 
 import param
 
+# Patch for versions of param prior to 10 May 2013
+param.main=param.Parameterized(name="main")
+
 def version_int(v):
     """
     Convert a version four-tuple to a format that can be used to compare
@@ -97,7 +100,7 @@ def _find_version():
             git_output = release_file.read()
             release_file.close()
         except IOError:
-            param.Parameterized().warning("""\
+            param.main.warning("""\
 Unable to determine the version information for this copy of Topographica.
 
 For an official release, the version information is stored in a file
@@ -295,7 +298,7 @@ try:
     _mpq_pickle_support()
 except ImportError:
     import topo.misc.fixedpoint as fixedpoint
-    param.Parameterized().warning('gmpy.mpq not available; using slower fixedpoint.FixedPoint for simulation time.')
+    param.main.warning('gmpy.mpq not available; using slower fixedpoint.FixedPoint for simulation time.')
     Simulation.time_type = fixedpoint.FixedPoint
     Simulation.time_type_args = (4,)  # gives precision=4
 
