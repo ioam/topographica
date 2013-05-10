@@ -15,7 +15,6 @@ import param
 from param.parameterized import Parameterized
 from topo.base.simulation import OptionalSingleton
 
-
 try:
     # By default, use a non-GUI backend for matplotlib.
     from matplotlib import rcParams
@@ -381,6 +380,9 @@ exception. See IPython documentation for further details.""")
 # Keeps track of whether something has been performed, when deciding whether to assume -i
 something_executed=False
 
+# Dummy object used for user messages about OpenMP
+openmp_main=Parameterized(name="OpenMP")
+
 def c_action(option,opt_str,value,parser):
     """Callback function for the -c option."""
     #print "Processing %s '%s'" % (opt_str,value)
@@ -390,7 +392,7 @@ def c_action(option,opt_str,value,parser):
     openmp_settings_names = ['openmp_threads', 'openmp_min_threads', 'openmp_max_threads']
     openmp_present = [True for k in openmp_settings_names if (k in __main__.__dict__)]
     if openmp_present and parser.values.gui:
-        print "\nWARNING: For OpenMP settings to be used properly they need to be specified after the -g flag."
+        openmp_main.warning("For OpenMP settings to be used properly they need to be specified before the -g flag.")
 
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
@@ -491,30 +493,31 @@ def get_omp_num_threads(openmp_threads, openmp_min_threads, openmp_max_threads):
         if total_cores == 1: return (1, 1)
         if total_cores == 2: return (2, 2)
     except:
-        print "Cannot import multiprocessing to determine number of cores."
+        openmp_main.message("Cannot import multiprocessing to determine number of cores.")
         total_cores = None
 
     if total_cores and (-openmp_threads >= (total_cores-1)):
-        print "OpenMP: Topographica needs a positive number of threads to execute!"
+        openmp_main.warning("Needs a positive number of threads to execute.")
         return (1, total_cores)
 
     if (openmp_threads <= 0) and total_cores:      openmp_threads = total_cores + openmp_threads
     if (openmp_threads <= 0) and not total_cores:  return (None, total_cores)
 
     if (total_cores is not None) and (openmp_threads > total_cores):
-        print "OpenMP: More threads specified than cores detected."; return (total_cores, total_cores)
+        openmp_main.warning("More threads specified than cores detected.")
+        return (total_cores, total_cores)
 
     if openmp_threads < openmp_min_threads:
-        print "OpenMP: Using minimum number of allowed threads."
+        openmp_main.message("Using minimum number of allowed threads.")
         openmp_threads = openmp_min_threads
 
     if (openmp_max_threads is None): return (openmp_threads, total_cores)
 
     elif (openmp_max_threads < openmp_min_threads):
-        print"OpenMP: Maximum allowed threads lower than minimum allowed threads. Ignoring maximum limit."
+        openmp_main.warning("Maximum allowed threads lower than minimum allowed threads. Ignoring maximum limit.")
         return (openmp_threads, total_cores)
     elif (openmp_threads > openmp_max_threads):
-        print "OpenMP: Using maximum number of allowed threads."
+        openmp_main.message("Using maximum number of allowed threads.")
         return (openmp_max_threads, total_cores)
     else:
         return (openmp_threads, total_cores)
@@ -574,16 +577,16 @@ def process_argv(argv):
                                                          openmp_max_threads)
 
         if num_threads is None:
-            print "OpenMP: Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use."
+            openmp_main.message("Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use.")
         elif num_threads == 'NSLOTS':
             os.environ['OMP_NUM_THREADS'] =  os.environ['NSLOTS']
-            print "NSLOTS environment variable found; overriding any other thread settings and using N=%s threads" % os.environ['NSLOTS']
+            openmp_main.message("NSLOTS environment variable found; overriding any other thread settings and using N=%s threads" % os.environ['NSLOTS'])
 
         elif total_cores is None:
-            print "OpenMP: Using %d threads" % num_threads
+            openmp_main.message("Using %d threads" % num_threads)
             os.environ['OMP_NUM_THREADS'] =  str(num_threads)
         else:
-            print "OpenMP: Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores)
+            openmp_main.message("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
             os.environ['OMP_NUM_THREADS'] =  str(num_threads)
 
     # If no scripts and no commands were given, pretend -i was given.
