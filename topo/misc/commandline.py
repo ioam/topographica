@@ -316,9 +316,10 @@ def v_action(option,opt_str,value,parser):
     """Callback function for the -v option."""
     from param import parameterized
     parameterized.Parameterized().message("Enabling verbose message output.")
-    parameterized.get_logger().setLevel(parameterized.VERBOSE)
-    # Only used by older versions of the param package, before 9 May 2013:
-    parameterized.min_print_level=parameterized.VERBOSE 
+    if hasattr(parameterized,'get_logger'): 
+        parameterized.get_logger().setLevel(parameterized.VERBOSE)
+    else: # For versions of the param package before 9 May 2013
+        parameterized.min_print_level=parameterized.VERBOSE
 
 topo_parser.add_option("-v","--verbose",action="callback",callback=v_action,dest="verbose",default=False,help="""\
 enable verbose messaging output.""")
@@ -328,9 +329,10 @@ def d_action(option,opt_str,value,parser):
     """Callback function for the -d option."""
     from param import parameterized
     parameterized.Parameterized().message("Enabling debugging message output.")
-    parameterized.get_logger().setLevel(parameterized.DEBUG)
-    # Only used by older versions of the param package, before 9 May 2013:
-    parameterized.min_print_level=parameterized.DEBUG
+    if hasattr(parameterized,'get_logger'): 
+        parameterized.get_logger().setLevel(parameterized.DEBUG)
+    else: # For versions of the param package before 9 May 2013
+        parameterized.min_print_level=parameterized.DEBUG
 
 topo_parser.add_option("-d","--debug",action="callback",callback=d_action,dest="debug",default=False,help="""\
 enable debugging message output (implies --verbose).""")
