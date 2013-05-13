@@ -330,9 +330,9 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         # Install warning and message handling
         from param.parameterized import Parameterized
         self.__orig_P_warning = Parameterized.warning
-        self.__orig_P_message = Parameterized.message
+        #self.__orig_P_message = Parameterized.message
         type.__setattr__(Parameterized,'warning',self.gui_warning)
-        type.__setattr__(Parameterized,'message',self.gui_message)
+        #type.__setattr__(Parameterized,'message',self.gui_message)
 
     def gui_warning(self,*args):
         stat = self.__get_status_bar()
