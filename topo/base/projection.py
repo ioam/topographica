@@ -407,7 +407,6 @@ class ProjectionSheet(Sheet):
 
         This approach allows connections to be grouped using tuples.
         """
-        port=portlist[0]
         return [port for port in portlist
                 if (port == key or
                     (isinstance(key,tuple)  and key[0] == port) or

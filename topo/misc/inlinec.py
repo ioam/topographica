@@ -135,7 +135,7 @@ try:
         weave.inline(*params,**named_params)
 
     # Overwrites stub definition with full Weave definition
-    inline = inline_weave
+    inline = inline_weave # pyflakes:ignore (try/except import)
 
 except ImportError:
     # CEBALERT: where does 'caution' fit in our warnings system? (Also

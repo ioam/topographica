@@ -2341,7 +2341,7 @@ if __name__ == '__main__':
         _sizeof_Cdouble  = calcsize('d')  #PYCHOK OK
         _sizeof_Csize_t  = calcsize('Z')  #PYCHOK OK
         _sizeof_Cssize_t = calcsize('z')  #PYCHOK OK
-        t = [t for t in locals().items() if t[0].startswith('_sizeof_')]
+        t = [t for t in locals().items() if t[0].startswith('_sizeof_')] # pyflakes:ignore
         _printf('%s%d C sizes: (bytes) ... -C', linesep, len(t))
         for n, v in _sorted(t):
             _printf(' sizeof(%s): %r', n[len('_sizeof_'):], v)

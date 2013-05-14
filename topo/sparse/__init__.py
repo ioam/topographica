@@ -18,6 +18,6 @@ try:
           include_dirs=[rootpath+'/external/',numpy.get_include()],
           cmdclass = {'build_ext':build_ext}, script_args = setup_args)
 
-    from topo.sparse import sparse #pyflakes:ignore (this import is intentional)
+    from topo.sparse import sparse # pyflakes:ignore (try/except import)
 except ImportError:
     print "WARNING: Install distutils and Cython to build sparse extension."

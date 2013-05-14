@@ -826,5 +826,5 @@ class SparseCFProjection(CFProjection):
 
 if not use_sparse:
     print "WARNING: Sparse component could not be imported, replacing SparseCFProjection with regular CFProjection"
-    def SparseCFProjection(*args, **kwargs):
+    def SparseCFProjection(*args, **kwargs): # pyflakes:ignore (optimized version provided)
         return CFProjection(*args,**kwargs)
