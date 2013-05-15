@@ -12,7 +12,7 @@ from math import pi
 from colorsys import hsv_to_rgb
 
 import numpy
-from numpy import zeros, empty, object_, size, vectorize, fromfunction
+from numpy import zeros, empty, object_, size, vectorize, fromfunction, array
 from numpy.oldnumeric import Float
 
 import param
@@ -25,7 +25,7 @@ from topo.base.cf import CFSheet
 from topo.base.functionfamily import PatternDrivenAnalysis
 from topo.base.sheet import Sheet, activity_type
 from topo.base.sheetview import SheetView
-from topo.command import pattern_present,restore_input_generators, save_input_generators
+from topo.command import restore_input_generators, save_input_generators
 from topo.misc.distribution import Distribution, DistributionStatisticFn, DSF_MaxValue, DSF_WeightedAverage
 from topo.misc.util import cross_product, frange
 from topo import pattern
@@ -878,7 +878,7 @@ class PatternPresenter(param.Parameterized):
         for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
             inputs[sheet_name]=pattern.Constant(scale=0)
 
-        pattern_present(inputs, self.duration, plastic=False,
+        measure_response(inputs, duration=self.duration, plastic=False,
                      apply_output_fns=self.apply_output_fns)
 
 
@@ -1043,7 +1043,135 @@ class Subplotting(param.Parameterized):
 
 
 
-class MeasureResponseCommand(ParameterizedFunction):
+class PatternPresentingCommand(ParameterizedFunction):
+    """Parameterized command for presenting input patterns"""
+
+    duration = param.Number(default=None,doc="""
+        If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of PatternPresenter.""")
+
+    sheet_views_prefix = param.String(default="",doc="""
+        Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.""")
+
+
+def update_activity(sheet_views_prefix=''):
+    """
+    Make a map of neural activity available for each sheet, for use in template-based plots.
+
+    This command simply asks each sheet for a copy of its activity
+    matrix, and then makes it available for plotting.  Of course, for
+    some sheets providing this information may be non-trivial, e.g. if
+    they need to average over recent spiking activity.
+    """
+    for sheet in topo.sim.objects(Sheet).values():
+        activity_copy = array(sheet.activity)
+        new_view = SheetView((activity_copy,sheet.bounds),
+                              sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
+        sheet.sheet_views[sheet_views_prefix+'Activity']=new_view
+
+
+class measure_response(PatternPresentingCommand):
+    """
+    This command presents the specified test patterns for the
+    specified duration and saves the resulting activity to the
+    appropriate SheetViews. Originally, this was the implementation of
+    the pattern_present command, which is still available in
+    topo.command and operates by wrapping a call to this class.
+
+    Given a set of input patterns, installs them into the specified
+    GeneratorSheets, runs the simulation for the specified length of
+    time, then restores the original patterns and the original
+    simulation time.  Thus this input is not considered part of the
+    regular simulation, and is usually for testing purposes.
+
+    As a special case, if 'inputs' is just a single pattern, and not
+    a dictionary, it is presented to all GeneratorSheets.
+
+    If a simulation is not provided, the active simulation, if one
+    exists, is requested.
+
+    If this process is interrupted by the user, the temporary patterns
+    may still be installed on the retina.
+
+    In order to to see the sequence of values presented, you may use
+    the back arrow history mechanism in the GUI. Note that the GUI's
+    Activity window must be open and the display parameter set to true
+    (display=True).
+    """
+
+    inputs = param.Dict(default={}, doc="""
+     A dictionary of GeneratorSheetName:PatternGenerator pairs to be
+    installed into the specified GeneratorSheets""")
+
+    plastic=param.Boolean(default=False, doc="""
+    If plastic is False, overwrites the existing values of
+    Sheet.plastic to disable plasticity, then reenables plasticity.""")
+
+    overwrite_previous=param.Boolean(default=False, doc="""
+    If overwrite_previous is true, the given inputs overwrite those
+    previously defined.""")
+
+    apply_output_fns=param.Boolean(default=True)
+
+    def __call__(self, inputs={}, **params_to_override):
+
+        p=ParamOverrides(self, dict(params_to_override, inputs=inputs))
+        # ensure EPs get started (if pattern_present is called before the simulation is run())
+        topo.sim.run(0.0)
+
+        if not p.overwrite_previous:
+            save_input_generators()
+
+        if not p.plastic:
+            # turn off plasticity everywhere
+            for sheet in topo.sim.objects(Sheet).values():
+                 sheet.override_plasticity_state(new_plasticity_state=False)
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                if hasattr(each,'measure_maps'):
+                   if each.measure_maps:
+                       each.apply_output_fns = False
+
+        # Register the inputs on each input sheet
+        generatorsheets = topo.sim.objects(GeneratorSheet)
+
+        if not isinstance(p.inputs,dict):
+            for g in generatorsheets.values():
+                g.set_input_generator(p.inputs)
+        else:
+            for each in p.inputs.keys():
+                if generatorsheets.has_key(each):
+                    generatorsheets[each].set_input_generator(p.inputs[each])
+                else:
+                    param.Parameterized().warning(
+                        '%s not a valid Sheet name for pattern_present.' % each)
+
+        topo.sim.event_push()
+        # CBENHANCEMENT: would be nice to break this up for visualizing motion
+        duration = p.duration if (p.duration is not None) else 1.0
+        topo.sim.run(duration)
+        topo.sim.event_pop()
+
+        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
+
+        if not p.plastic:
+            for sheet in topo.sim.objects(Sheet).values():
+                sheet.restore_plasticity_state()
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                each.apply_output_fns = True
+
+        if not p.overwrite_previous:
+            restore_input_generators()
+
+        update_activity(p.sheet_views_prefix)
+
+class MeasureResponseCommand(PatternPresentingCommand):
     """Parameterized command for presenting input patterns and measuring responses."""
 
     scale = param.Number(default=1.0,softbounds=(0.0,2.0),doc="""
@@ -1079,16 +1207,6 @@ class MeasureResponseCommand(ParameterizedFunction):
         If non-None, pattern_presenter.apply_output_fns will be
         set to this value.  Provides a simple way to set
         this commonly changed option of PatternPresenter.""")
-
-    duration = param.Number(default=None,doc="""
-        If non-None, pattern_presenter.duration will be
-        set to this value.  Provides a simple way to set
-        this commonly changed option of PatternPresenter.""")
-
-    sheet_views_prefix = param.String(default="",doc="""
-        Optional prefix to add to the name under which results are
-        stored in sheet_views. Can be used e.g. to distinguish maps as
-        originating from a particular GeneratorSheet.""")
 
     generator_sheets = param.List(default=[],doc="""
         pattern_presenter.generator_sheets will be set to this value.

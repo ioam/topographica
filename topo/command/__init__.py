@@ -209,88 +209,6 @@ class runscript(param.ParameterizedFunction):
 
         self.push(ns)
 
-
-def pattern_present(inputs={},duration=1.0,plastic=False,overwrite_previous=False,apply_output_fns=True):
-    """
-    Present the specified test patterns for the specified duration.
-
-    Given a set of input patterns (dictionary of
-    GeneratorSheetName:PatternGenerator pairs), installs them into the
-    specified GeneratorSheets, runs the simulation for the specified
-    length of time, then restores the original patterns and the
-    original simulation time.  Thus this input is not considered part
-    of the regular simulation, and is usually for testing purposes.
-
-    As a special case, if 'inputs' is just a single pattern, and not
-    a dictionary, it is presented to all GeneratorSheets.
-
-    If a simulation is not provided, the active simulation, if one
-    exists, is requested.
-
-    If this process is interrupted by the user, the temporary patterns
-    may still be installed on the retina.
-
-    If overwrite_previous is true, the given inputs overwrite those
-    previously defined.
-
-    If plastic is False, overwrites the existing values of Sheet.plastic
-    to disable plasticity, then reenables plasticity.
-
-    In order to to see the sequence of values presented, use the back arrow
-    history mechanism in the GUI. Note that the GUI's Activity window must
-    be open and the display parameter set to true (display=True).
-    """
-    # ensure EPs get started (if pattern_present is called before the simulation is run())
-    topo.sim.run(0.0)
-
-
-    if not overwrite_previous:
-        save_input_generators()
-
-    if not plastic:
-        # turn off plasticity everywhere
-        for sheet in topo.sim.objects(Sheet).values():
-             sheet.override_plasticity_state(new_plasticity_state=False)
-
-    if not apply_output_fns:
-        for each in topo.sim.objects(Sheet).values():
-            if hasattr(each,'measure_maps'):
-               if each.measure_maps:
-                   each.apply_output_fns = False
-
-    # Register the inputs on each input sheet
-    generatorsheets = topo.sim.objects(GeneratorSheet)
-    if not isinstance(inputs,dict):
-        for g in generatorsheets.values():
-            g.set_input_generator(inputs)
-    else:
-        for each in inputs.keys():
-            if generatorsheets.has_key(each):
-                generatorsheets[each].set_input_generator(inputs[each])
-            else:
-                param.Parameterized().warning(
-                    '%s not a valid Sheet name for pattern_present.' % each)
-
-    topo.sim.event_push()
-    # CBENHANCEMENT: would be nice to break this up for visualizing motion
-    topo.sim.run(duration)
-    topo.sim.event_pop()
-
-    # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
-
-    if not plastic:
-        for sheet in topo.sim.objects(Sheet).values():
-            sheet.restore_plasticity_state()
-
-    if not apply_output_fns:
-        for each in topo.sim.objects(Sheet).values():
-            each.apply_output_fns = True
-
-
-    if not overwrite_previous:
-        restore_input_generators()
-
-
 # This class is left around to support older snapshots: All snapshots
 # since 0.9.7 up until r11545 (addition of UnpickleEnvironmentCreator)
 # have a pickled instance of this class. We maintain the same behavior
@@ -944,6 +862,47 @@ def print_sizes():
 PatternDrivenAnalysis.pre_presentation_hooks.append(wipe_out_activity)
 PatternDrivenAnalysis.pre_presentation_hooks.append(clear_event_queue)
 
+
+def pattern_present(inputs={}, duration=1.0, plastic=False,
+                    overwrite_previous=False, apply_output_fns=True, **kwargs):
+    """
+    Given a set of input patterns (dictionary of
+    GeneratorSheetName:PatternGenerator pairs), installs them into the
+    specified GeneratorSheets, runs the simulation for the specified
+    length of time, then restores the original patterns and the
+    original simulation time.  Thus this input is not considered part
+    of the regular simulation, and is usually for testing purposes.
+
+    As a special case, if 'inputs' is just a single pattern, and not
+    a dictionary, it is presented to all GeneratorSheets.
+
+    If a simulation is not provided, the active simulation, if one
+    exists, is requested.
+
+    If this process is interrupted by the user, the temporary patterns
+    may still be installed on the retina.
+
+    If overwrite_previous is true, the given inputs overwrite those
+    previously defined.
+
+    If plastic is False, overwrites the existing values of Sheet.plastic
+    to disable plasticity, then reenables plasticity.
+
+    In order to to see the sequence of values presented, you may use
+    the back arrow history mechanism in the GUI. Note that the GUI's
+    Activity window must be open and the display parameter set to true
+    (display=True).
+
+    Alternatively, the activity response of the sheets may be obtained
+    from the sheet_views dictionary of the respective sheets.
+
+    This function is a backward compatibility wrapper of the
+    measure_response class.
+    """
+    from analysis import measure_response
+    measure_response(inputs=inputs, duration=duration, plastic=plastic,
+                                  overwrite_previous=overwrite_previous,
+                                  apply_output_fns=apply_output_fns, **kwargs)
 
 # maybe an explicit list would be better?
 import types
