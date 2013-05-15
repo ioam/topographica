@@ -42,21 +42,6 @@ class TestSheetView(unittest.TestCase):
         # Define a type 1 SheetView, with matrix and bounding box.
         sv3 = SheetView((self.s.activity, self.s.bounds))
         sv4 = SheetView((self.s2.activity,self.s2.bounds))
-        # Define a type 2 SheetView,
-        sv5 = SheetView((ADD,((sv3,None),(sv4,None))))
-        sv6 = SheetView((ADD,[(sv3,None),
-                              (sv4,None),
-                              (self.s2.activity,self.s2.bounds)]))
-        sv7 = SheetView((SUBTRACT,[(sv3,None),
-                              (sv4,None),
-                              (self.s2.activity,self.s2.bounds)]))
-
-        # Define a type 3 SheetView
-        sv8 = SheetView((self.s,'Activity'))
-        if DEV:
-            sv3.message(sv3.view())
-            sv6.message('sv6.debug', sv6._view_list)
-            sv6.message(sv6.view())
 
 
 # CEBALERT: replace with test using FileImage
