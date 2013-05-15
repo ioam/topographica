@@ -32,6 +32,15 @@ from functionfamily import TransferFn
 
 activity_type = float64
 
+class AttrDict(dict):
+    """
+    A dictionary type object that supports attribute access (e.g. for
+    IPython tab completion).
+    """
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
 # (disable W0223 because input_event is deliberately still not implemented)
 class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
     """
@@ -127,7 +136,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         # For non-plastic inputs
         self.__saved_activity = []
         self._plasticity_setting_stack = []
-        self.sheet_views = {}
+        self.sheet_views =  AttrDict()
+        self.views = self.sheet_views
 
 
     ### JABALERT: This should be deleted now that sheet_views is public
