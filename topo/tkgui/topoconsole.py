@@ -644,7 +644,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             self.messageBar.response('Snapshot saved to ' + snapshot_name)
 
 
-    def auto_refresh(self):
+    def auto_refresh(self, update=True):
         """
         Refresh all windows in auto_refresh_panels.
 
@@ -653,7 +653,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         autorefresh() is called.
         """
         for win in self.auto_refresh_panels:
-            win.refresh()
+            win.refresh(update)
 
         self.set_step_button_state()
         self.update_idletasks()

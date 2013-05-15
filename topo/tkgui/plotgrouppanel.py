@@ -409,12 +409,12 @@ Many hooks accept 'display=True' so that the progress can be viewed in an open A
 
 
     @with_busy_cursor
-    def refresh_plots(self):
+    def refresh_plots(self, update=True):
         """
         Call plotgroup's make_plots with update=True (i.e. run
         pre_plot_hooks and plot_hooks), then display the result.
         """
-        self.plotgroup.make_plots(update=True)
+        self.plotgroup.make_plots(update)
         self.update_plot_frame()
         self.add_to_plotgroups_history()
 

@@ -161,11 +161,11 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         self.conditional_refresh()
 
 
-    def refresh(self):
+    def refresh(self, update=True):
         """
         Simply update the plots: skip all handling of history.
         """
-        self.refresh_plots()
+        self.refresh_plots(update)
 
 
     def present_pattern(self):
@@ -182,7 +182,7 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
                            for sheet in self.plotgroup.sheets()])
         pattern_present(input_dict,self.duration,
                         plastic=self.plastic,overwrite_previous=False)
-        topo.guimain.auto_refresh()
+        topo.guimain.auto_refresh(update=False)
         for f in self.post_presentation_hooks: f()
         topo.sim.state_pop()
 
