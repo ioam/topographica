@@ -11,9 +11,7 @@ import copy
 from math import pi
 from colorsys import hsv_to_rgb
 
-import numpy
-from numpy import zeros, empty, object_, size, vectorize, fromfunction, array
-from numpy.oldnumeric import Float
+import numpy as np
 
 import param
 from param.parameterized import ParameterizedFunction, ParamOverrides
@@ -56,9 +54,9 @@ class DistributionMatrix(param.Parameterized):
     def __init__(self,matrix_shape,axis_range=(0.0,1.0), cyclic=False,keep_peak=True):
         """Initialize the internal data structure: a matrix of Distribution objects."""
         self.axis_range=axis_range
-        new_distribution = vectorize(lambda x: Distribution(axis_range,cyclic,keep_peak),
+        new_distribution = np.vectorize(lambda x: Distribution(axis_range,cyclic,keep_peak),
                                      doc="Return a Distribution instance for each element of x.")
-        self.distribution_matrix = new_distribution(empty(matrix_shape))
+        self.distribution_matrix = new_distribution(np.empty(matrix_shape))
 
 
     def update(self, new_values, bin):
@@ -68,7 +66,7 @@ class DistributionMatrix(param.Parameterized):
         ### actually modifies the distribution_matrix, but that has
         ### not yet been done.  Alternatively, it could use a different
         ### function name altogether (e.g. update(x,y)).
-        self.distribution_matrix + fromfunction(vectorize(lambda i,j: {bin:new_values[i,j]}),
+        self.distribution_matrix + np.fromfunction(np.vectorize(lambda i,j: {bin:new_values[i,j]}),
                                                 new_values.shape)
 
     def apply_DSF( self, dsf ):
@@ -88,7 +86,7 @@ class DistributionMatrix(param.Parameterized):
         for k, maps in r0.items():
             result[ k ] = {}
             for m in maps.keys():
-                result[ k ][ m ]    = zeros( shape, Float )
+                result[ k ][ m ]    = np.zeros( shape, np.float64 )
 
         for i in range( shape[ 0 ] ):
             for j in range( shape[ 1 ] ):
@@ -112,8 +110,8 @@ class FullMatrix(param.Parameterized):
         self.features = features
         self.dimensions = ()
         for f in features:
-            self.dimensions = self.dimensions + (size(f.values),)
-        self.full_matrix = empty(self.dimensions,object_)
+            self.dimensions = self.dimensions + (np.size(f.values),)
+        self.full_matrix = np.empty(self.dimensions,np.object_)
 
 
     def update(self, new_values, feature_value_permutation):
@@ -186,7 +184,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         FeatureResponses._fullmatrix = {}
         for sheet in self.sheets_to_measure():
             self._featureresponses[sheet] = {}
-            self._activities[sheet]=zeros(sheet.shape)
+            self._activities[sheet]=np.zeros(sheet.shape)
             for f in features:
                 # CEBERRORALERT: line below is missing at least
                 # "keep_peak=f.keep_peak". Couldn't these things be
@@ -301,11 +299,11 @@ class ReverseCorrelation(FeatureResponses):
         # surely there's a way to get an array of 0s for each element without
         # looping? (probably had same question for distributionmatrix).
         for sheet in self.sheets_to_measure():
-            self._featureresponses[sheet]= numpy.ones(sheet.activity.shape,dtype=object)
+            self._featureresponses[sheet]= np.ones(sheet.activity.shape,dtype=object)
             rows,cols = sheet.activity.shape
             for r in range(rows):
                 for c in range(cols):
-                    self._featureresponses[sheet][r,c] = numpy.zeros(self.input_sheet.shape) # need to specify dtype?
+                    self._featureresponses[sheet][r,c] = np.zeros(self.input_sheet.shape) # need to specify dtype?
 
 
     def collect_feature_responses(self,pattern_presenter,param_dict,display,feature_values):
@@ -499,7 +497,7 @@ class FeatureCurves(FeatureResponses):
         self.measure_responses(pattern_presenter,param_dict,features,display)
         self.sheet.curve_dict[self.x_axis][curve_label]={}
         for key in self._featureresponses[self.sheet][self.x_axis].distribution_matrix[0,0]._data.iterkeys():
-            y_axis_values = zeros(self.sheet.shape,activity_type)
+            y_axis_values = np.zeros(self.sheet.shape,activity_type)
             for i in range(rows):
                 for j in range(cols):
                     y_axis_values[i,j] = self._featureresponses[self.sheet][self.x_axis].distribution_matrix[i,j].get_value(key)
@@ -1067,7 +1065,7 @@ def update_activity(sheet_views_prefix=''):
     they need to average over recent spiking activity.
     """
     for sheet in topo.sim.objects(Sheet).values():
-        activity_copy = array(sheet.activity)
+        activity_copy = np.array(sheet.activity)
         new_view = SheetView((activity_copy,sheet.bounds),
                               sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
         sheet.sheet_views[sheet_views_prefix+'Activity']=new_view
