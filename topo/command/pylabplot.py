@@ -1287,7 +1287,7 @@ class measure_orientation_contrast(UnitCurveCommand):
         sheet=p.sheet
         for coord in p.coords:
             self.or_surrounds=[]
-            orientation=p.orientation_center
+            orientation=pi*self._sheetview_unit(sheet,coord,'OrientationPreference',default=p.orientation_center/pi)
             self.orientationcenter=orientation
 
             for i in xrange(0,self.num_orientation):
