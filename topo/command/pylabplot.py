@@ -57,7 +57,7 @@ from topo.command import Command
 
 
 
-class PylabPlotCommand(Command):
+class PylabPlotCommand(Co  mmand):
     """Parameterized command for plotting using Matplotlib/Pylab."""
 
     file_dpi = param.Number(
@@ -1184,6 +1184,62 @@ create_plotgroup(template_plot_type="curve",name='Contrast Response',category="T
         plot_hooks=[tuning_curve.instance(x_axis="contrast",unit="%")],
         prerequisites=['OrientationPreference','XPreference'])
 
+
+class measure_frequency_response(UnitCurveCommand):
+    """
+    Measure spatial frequency preference of one unit of a sheet.
+
+    Uses an constant circular sine grating stimulus at the preferred
+    with varying spatial frequency orientation and retinal position
+    of the specified unit. Orientation and position preference must
+    be calulated before measuring size response.
+
+    The curve can be plotted at various different values of the
+    contrast (or actually any other parameter) of the stimulus.  If
+    using contrast and the network contains an LGN layer, then one
+    would usually specify weber_contrast as the contrast_parameter. If
+    there is no explicit LGN, then scale (offset=0.0) can be used to
+    define the contrast.  Other relevant contrast definitions (or
+    other parameters) can also be used, provided they are defined in
+    PatternPresenter and the units parameter is changed as
+    appropriate.
+    """
+
+    x_axis = param.String(default="frequency",constant=True)
+
+    static_parameters = param.List(default=["orientation","x","y"])
+
+    num_freq = param.Integer(default=20,bounds=(1,None),softbounds=(1,50),
+                              doc="Number of different sizes to test.")
+
+    max_freq = param.Number(default=10.0,bounds=(0.1,None),softbounds=(1,50),
+                              doc="Maximum extent of the grating")
+
+    def __call__(self,**params):
+        p=ParamOverrides(self,params)
+        self.params('sheet').compute_default()
+        sheet=p.sheet
+
+        for coord in p.coords:
+            # Orientations are stored as a normalized value beween 0
+            # and 1, so we scale them by pi to get the true orientations.
+            self.orientation=pi*self._sheetview_unit(sheet,coord,'OrientationPreference')
+            self.x=self._sheetview_unit(sheet,coord,'XPreference',default=coord[0])
+            self.y=self._sheetview_unit(sheet,coord,'YPreference',default=coord[1])
+            self._compute_curves(p,sheet)
+
+    def _feature_list(self,p):
+        return [Feature(name="orientation",values=[self.orientation],cyclic=True),
+                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
+                Feature(name="frequency",range=(0.0,p.max_freq),step=p.max_freq/p.num_freq,cyclic=False),
+                Feature(name="size",values=[p.size])]
+
+
+create_plotgroup(template_plot_type="curve",name='Frequency Tuning',category="Tuning Curves",
+        doc='Measure the spatial frequency preference for a specific unit.',
+        pre_plot_hooks=[measure_frequency_response.instance()],
+                 plot_hooks=[tuning_curve.instance(x_axis="frequency",unit="cycles per unit distance")],
+        prerequisites=['OrientationPreference','XPreference'])
 
 
 class measure_orientation_contrast(UnitCurveCommand):
