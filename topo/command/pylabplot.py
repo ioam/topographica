@@ -22,16 +22,11 @@ except ImportError:
     from topo.command import ImportErrorRaisingFakeModule
     pylab = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
-
-import numpy
 from math import pi
-# JABALERT: Import all of these from numpy instead?
-from numpy.oldnumeric import sqrt, array, transpose, argmin, cos, sin, log10, Float
-from numpy import outer,arange,ones,zeros
 
+import numpy as np
 from numpy.fft.fftpack import fft2
 from numpy.fft.helper import fftshift
-from numpy import abs
 
 import topo
 from topo.base.sheetview import SheetView
@@ -57,7 +52,7 @@ from topo.command import Command
 
 
 
-class PylabPlotCommand(Co  mmand):
+class PylabPlotCommand(Command):
     """Parameterized command for plotting using Matplotlib/Pylab."""
 
     file_dpi = param.Number(
@@ -237,8 +232,8 @@ class matrixplot3d(PylabPlotCommand):
 
         # Construct matrices for r and c values
         rn,cn = mat.shape
-        c = outer(ones(rn),arange(cn*1.0))
-        r = outer(arange(rn*1.0),ones(cn))
+        c = np.outer(np.ones(rn),np.arange(cn*1.0))
+        r = np.outer(np.arange(rn*1.0),np.ones(cn))
 
         if type=="wireframe":
             ax.plot_wireframe(r,c,mat)
@@ -311,8 +306,8 @@ def matrixplot3d_gnuplot(mat,title=None,outputfilename="tmp.ps"):
     psviewer="gv" # Should be a parameter, or handled better somehow
     g = Gnuplot.Gnuplot(debug=0) #debug=1: output commands to stderr
     r,c = mat.shape
-    x = arange(r*1.0)
-    y = arange(c*1.0)
+    x = np.arange(r*1.0)
+    y = np.arange(c*1.0)
     # The .tolist() command is necessary to avoid bug in gnuplot-py,
     # which will otherwise convert a 2D float array into integers (!)
     m = numpy.asarray(mat,dtype="float32").tolist()
@@ -389,10 +384,10 @@ class gradientplot(matrixplot):
             #
             # Make it increase as gradient reaches the halfway point,
             # and decrease from there
-            dx = 0.5*cyclic_range-abs(dx-0.5*cyclic_range)
-            dy = 0.5*cyclic_range-abs(dy-0.5*cyclic_range)
+            dx = 0.5*cyclic_range-np.abs(dx-0.5*cyclic_range)
+            dy = 0.5*cyclic_range-np.abs(dy-0.5*cyclic_range)
 
-        super(gradientplot,self).__call__(sqrt(dx*dx+dy*dy),**p)
+        super(gradientplot,self).__call__(np.sqrt(dx*dx+dy*dy),**p)
 
 
 
@@ -405,7 +400,7 @@ class fftplot(matrixplot):
 
     def __call__(self,data,**params):
         p=ParamOverrides(self,params)
-        fft_plot=1-abs(fftshift(fft2(data-0.5, s=None, axes=(-2,-1))))
+        fft_plot=1-np.abs(fftshift(fft2(data-0.5, s=None, axes=(-2,-1))))
         super(fftplot,self).__call__(fft_plot,**p)
 
 
@@ -488,13 +483,13 @@ class topographic_grid(PylabPlotCommand):
                 pylab.ioff()
                 for r,c in zip(y[::p.skip],x[::p.skip]):
                     pylab.plot(c,r,"k-")
-                for r,c in zip(transpose(y)[::p.skip],transpose(x)[::p.skip]):
+                for r,c in zip(np.transpose(y)[::p.skip],np.transpose(x)[::p.skip]):
                     pylab.plot(c,r,"k-")
 
                 # Force last line avoid leaving cells open
                 if p.skip != 1:
                     pylab.plot(x[-1],y[-1],"k-")
-                    pylab.plot(transpose(x)[-1],transpose(y)[-1],"k-")
+                    pylab.plot(np.transpose(x)[-1],np.transpose(y)[-1],"k-")
 
                 pylab.xlabel('x')
                 pylab.ylabel('y')
@@ -553,22 +548,22 @@ class overlaid_plots(PylabPlotCommand):
                     pylab.axis('off')
 
                     for (t,pref,sel,c) in p.overlay:
-                        v = pylab.flipud(sheet.sheet_views[pref].view()[0])
+                        v = np.flipud(sheet.sheet_views[pref].view()[0])
 
                         if (t=='contours'):
                             pylab.contour(v,[sel,sel],colors=c,linewidths=2)
 
                         if (t=='arrows'):
-                            s = pylab.flipud(sheet.sheet_views[sel].view()[0])
-                            scale=int(pylab.ceil(log10(len(v))))
-                            X=pylab.array([x for x in xrange(len(v)/scale)])
-                            v_sc=pylab.zeros((len(v)/scale,len(v)/scale))
-                            s_sc=pylab.zeros((len(v)/scale,len(v)/scale))
+                            s = np.flipud(sheet.sheet_views[sel].view()[0])
+                            scale=int(np.ceil(np.log10(len(v))))
+                            X=np.array([x for x in xrange(len(v)/scale)])
+                            v_sc=np.zeros((len(v)/scale,len(v)/scale))
+                            s_sc=np.zeros((len(v)/scale,len(v)/scale))
                             for i in X:
                                 for j in X:
                                     v_sc[i][j]=v[scale*i][scale*j]
                                     s_sc[i][j]=s[scale*i][scale*j]
-                            pylab.quiver(scale*X,scale*X,-cos(2*pi*v_sc)*s_sc,-sin(2*pi*v_sc)*s_sc,color=c,edgecolors=c,minshaft=3,linewidths=1)
+                            pylab.quiver(scale*X,scale*X,-np.cos(2*pi*v_sc)*s_sc,-np.sin(2*pi*v_sc)*s_sc,color=c,edgecolors=c,minshaft=3,linewidths=1)
 
                     p.title='%s overlaid with %s at time %s' %(plot.name,pref,topo.sim.timestr())
                     if isint: pylab.ion()
@@ -633,9 +628,9 @@ class tuning_curve(PylabPlotCommand):
         y.append(ticks[0])
         x.append(0)
         for i in xrange(0,num_ticks):
-            y.append(y[-1]+numpy.pi/(num_ticks+1));
-            x.append(x[-1]+numpy.pi/(num_ticks+1));
-        y.append(y[-1]+numpy.pi/(num_ticks+1));
+            y.append(y[-1]+np.pi/(num_ticks+1));
+            x.append(x[-1]+np.pi/(num_ticks+1));
+        y.append(y[-1]+np.pi/(num_ticks+1));
         x.append(3.14)
         return (x,y)
 
@@ -717,7 +712,7 @@ class cyclic_tuning_curve(tuning_curve):
             x_values= sorted(curve.keys())
             y_values=[curve[key].view()[0][i_value,j_value] for key in x_values]
 
-            min_arg=argmin(y_values)
+            min_arg=np.argmin(y_values)
             x_min=x_values[min_arg]
             y_min=y_values[min_arg]
             y_values=self._rotate(y_values, n=min_arg)
@@ -862,7 +857,7 @@ class plot_modulation_ratio(PylabPlotCommand):
             v1s = complexity(fullmatrix[topo.sim[simple_sheet_name]]).flatten()
             v1c = complexity(fullmatrix[topo.sim[complex_sheet_name]]).flatten()
             #double the number of complex cells to reflect large width of layer 2/3
-            v1c = numpy.concatenate((array(v1c),array(v1c)),axis=1)
+            v1c = np.concatenate((np.array(v1c),np.array(v1c)),axis=1)
             pylab.figure()
             n = pylab.subplot(311)
             pylab.hist(v1s,bins)
@@ -875,7 +870,7 @@ class plot_modulation_ratio(PylabPlotCommand):
 	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
 
 	    n = pylab.subplot(313)
-            pylab.hist(numpy.concatenate((array(v1s),array(v1c)),axis=1),bins)
+            pylab.hist(np.concatenate((np.array(v1s),np.array(v1c)),axis=1),bins)
             pylab.axis([0,2.0,0,4100])
 	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
 
@@ -960,8 +955,8 @@ class measure_cog(ParameterizedFunction):
 
         sheet=proj.dest
         rows,cols=sheet.activity.shape
-        xpref=zeros((rows,cols),Float)
-        ypref=zeros((rows,cols),Float)
+        xpref=np.zeros((rows,cols),np.float64)
+        ypref=np.zeros((rows,cols),np.float64)
 
         for r in xrange(rows):
             for c in xrange(cols):
