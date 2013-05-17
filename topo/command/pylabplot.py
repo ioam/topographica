@@ -16,11 +16,11 @@ import param
 
 try:
     import matplotlib.ticker
-    import pylab
+    from matplotlib import pylab as plt
 except ImportError:
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
     from topo.command import ImportErrorRaisingFakeModule
-    pylab = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
+    plt = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
 from math import pi
 
@@ -101,7 +101,7 @@ class PylabPlotCommand(Command):
         # else there can be a switch based on the backend type.
         if title is not None:
             try:
-                manager = pylab.get_current_fig_manager()
+                manager = plt.get_current_fig_manager()
                 manager.window.title(title)
             except:
                 pass
@@ -115,14 +115,14 @@ class PylabPlotCommand(Command):
         set of parameters.
         """
 
-        pylab.show._needmain=False
+        plt.show._needmain=False
         if p.filename is not None:
             # JABALERT: need to reformat this as for other plots
             fullname=p.filename+p.filename_suffix+str(topo.sim.time())+"."+p.file_format
-            pylab.savefig(normalize_path(fullname), dpi=p.file_dpi)
+            plt.savefig(normalize_path(fullname), dpi=p.file_dpi)
         else:
             self._set_windowtitle(p.title)
-            pylab.show()
+            plt.show()
 
 
 
@@ -159,11 +159,11 @@ class vectorplot(PylabPlotCommand):
         p=ParamOverrides(self,params)
 
         if xvalues is not None:
-            pylab.plot(xvalues, vec, style, label=label)
+            plt.plot(xvalues, vec, style, label=label)
         else:
-            pylab.plot(vec, style, label=label)
+            plt.plot(vec, style, label=label)
 
-        pylab.grid(True)
+        plt.grid(True)
         self._generate_figure(p)
 
 
@@ -178,8 +178,8 @@ class matrixplot(PylabPlotCommand):
     or customized plots; this is just a simple example.
     """
 
-    plot_type = param.Callable(default=pylab.gray,doc="""
-        Matplotlib command to generate the plot, e.g. pylab.gray or pylab.hsv.""")
+    plot_type = param.Callable(default=plt.gray,doc="""
+        Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.""")
 
     extent = param.Parameter(default=None,doc="""
         Subregion of the matrix to plot, as a tuple (l,b,r,t).""")
@@ -188,7 +188,7 @@ class matrixplot(PylabPlotCommand):
     def __call__(self,mat,aspect=None,colorbar=True,**params):
         p=ParamOverrides(self,params)
 
-        pylab.figure(figsize=(5,5))
+        plt.figure(figsize=(5,5))
         p.plot_type()
 
         # Swap lbrt to lrbt to match pylab
@@ -198,8 +198,8 @@ class matrixplot(PylabPlotCommand):
             (l,b,r,t)=p.extent
             extent=(l,r,b,t)
 
-        pylab.imshow(mat,interpolation='nearest',aspect=aspect,extent=extent)
-        if colorbar and (mat.min()!= mat.max()): pylab.colorbar()
+        plt.imshow(mat,interpolation='nearest',aspect=aspect,extent=extent)
+        if colorbar and (mat.min()!= mat.max()): plt.colorbar()
         self._generate_figure(p)
 
 
@@ -227,7 +227,7 @@ class matrixplot3d(PylabPlotCommand):
 
         from mpl_toolkits.mplot3d import axes3d
 
-        fig = pylab.figure()
+        fig = plt.figure()
         ax = axes3d.Axes3D(fig)
 
         # Construct matrices for r and c values
@@ -267,7 +267,7 @@ class matrixplot3dx3(PylabPlotCommand):
     
         from mpl_toolkits.mplot3d import axes3d
 
-        fig = pylab.figure()
+        fig = plt.figure()
         ax = axes3d.Axes3D(fig)
     
         if type=="wireframe":
@@ -336,7 +336,7 @@ class histogramplot(PylabPlotCommand):
     """
     Compute and plot the histogram of the supplied data.
 
-    See help(pylab.hist) for help on the histogram function itself.
+    See help(plt.hist) for help on the histogram function itself.
 
     If given, colors is an iterable collection of matplotlib.colors
     (see help (matplotlib.colors) ) specifying the bar colors.
@@ -349,8 +349,8 @@ class histogramplot(PylabPlotCommand):
     def __call__(self,data,colors=None,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
 
-        pylab.figure(figsize=(4,2))
-        n,bins,bars = pylab.hist(data,**(p.extra_keywords()))
+        plt.figure(figsize=(4,2))
+        n,bins,bars = plt.hist(data,**(p.extra_keywords()))
 
         # if len(bars)!=len(colors), any extra bars won't have their
         # colors changed, or any extra colors will be ignored.
@@ -412,7 +412,7 @@ class autocorrelationplot(matrixplot):
     Example:: autocorrelationplot(topo.sim["V1"].sheet_views["OrientationPreference"].view()[0],filename="out")
     """
 
-    plot_type = param.Callable(default=pylab.autumn)
+    plot_type = param.Callable(default=plt.autumn)
 
     def __call__(self,data,**params):
         p=ParamOverrides(self,params)
@@ -471,35 +471,35 @@ class topographic_grid(PylabPlotCommand):
                 x = sheet.sheet_views[p.xsheet_view_name].view()[0]
                 y = sheet.sheet_views[p.ysheet_view_name].view()[0]
 
-                pylab.figure(figsize=(5,5))
+                plt.figure(figsize=(5,5))
 
                 # This one-liner works in Octave, but in matplotlib it
                 # results in lines that are all connected across rows and columns,
                 # so here we plot each line separately:
-                #   pylab.plot(x,y,"k-",transpose(x),transpose(y),"k-")
+                #   plt.plot(x,y,"k-",transpose(x),transpose(y),"k-")
                 # Here, the "k-" means plot in black using solid lines;
                 # see matplotlib for more info.
-                isint=pylab.isinteractive() # Temporarily make non-interactive for plotting
-                pylab.ioff()
+                isint=plt.isinteractive() # Temporarily make non-interactive for plotting
+                plt.ioff()
                 for r,c in zip(y[::p.skip],x[::p.skip]):
-                    pylab.plot(c,r,"k-")
+                    plt.plot(c,r,"k-")
                 for r,c in zip(np.transpose(y)[::p.skip],np.transpose(x)[::p.skip]):
-                    pylab.plot(c,r,"k-")
+                    plt.plot(c,r,"k-")
 
                 # Force last line avoid leaving cells open
                 if p.skip != 1:
-                    pylab.plot(x[-1],y[-1],"k-")
-                    pylab.plot(np.transpose(x)[-1],np.transpose(y)[-1],"k-")
+                    plt.plot(x[-1],y[-1],"k-")
+                    plt.plot(np.transpose(x)[-1],np.transpose(y)[-1],"k-")
 
-                pylab.xlabel('x')
-                pylab.ylabel('y')
+                plt.xlabel('x')
+                plt.ylabel('y')
                 # Currently sets the input range arbitrarily; should presumably figure out
                 # what the actual possible range is for this simulation (which would presumably
                 # be the maximum size of any GeneratorSheet?).
-                pylab.axis(p.axis)
+                plt.axis(p.axis)
                 p.title='Topographic mapping to '+sheet.name+' at time '+topo.sim.timestr()
 
-                if isint: pylab.ion()
+                if isint: plt.ion()
                 p.filename_suffix="_"+sheet.name
                 self._generate_figure(p)
 
@@ -540,18 +540,18 @@ class overlaid_plots(PylabPlotCommand):
                 plot=make_template_plot(template,sheet.sheet_views,sheet.xdensity,sheet.bounds,p.normalize,name=template[name])
                 if plot:
                     bitmap=plot.bitmap
-                    pylab.figure(figsize=(5,5))
-                    isint=pylab.isinteractive() # Temporarily make non-interactive for plotting
-                    pylab.ioff()                                         # Turn interactive mode off
+                    plt.figure(figsize=(5,5))
+                    isint=plt.isinteractive() # Temporarily make non-interactive for plotting
+                    plt.ioff()                                         # Turn interactive mode off
 
-                    pylab.imshow(bitmap.image,origin='lower',interpolation='nearest')
-                    pylab.axis('off')
+                    plt.imshow(bitmap.image,origin='lower',interpolation='nearest')
+                    plt.axis('off')
 
                     for (t,pref,sel,c) in p.overlay:
                         v = np.flipud(sheet.sheet_views[pref].view()[0])
 
                         if (t=='contours'):
-                            pylab.contour(v,[sel,sel],colors=c,linewidths=2)
+                            plt.contour(v,[sel,sel],colors=c,linewidths=2)
 
                         if (t=='arrows'):
                             s = np.flipud(sheet.sheet_views[sel].view()[0])
@@ -563,10 +563,10 @@ class overlaid_plots(PylabPlotCommand):
                                 for j in X:
                                     v_sc[i][j]=v[scale*i][scale*j]
                                     s_sc[i][j]=s[scale*i][scale*j]
-                            pylab.quiver(scale*X,scale*X,-np.cos(2*pi*v_sc)*s_sc,-np.sin(2*pi*v_sc)*s_sc,color=c,edgecolors=c,minshaft=3,linewidths=1)
+                            plt.quiver(scale*X,scale*X,-np.cos(2*pi*v_sc)*s_sc,-np.sin(2*pi*v_sc)*s_sc,color=c,edgecolors=c,minshaft=3,linewidths=1)
 
                     p.title='%s overlaid with %s at time %s' %(plot.name,pref,topo.sim.timestr())
-                    if isint: pylab.ion()
+                    if isint: plt.ion()
                     p.filename_suffix="_"+sheet.name
                     self._generate_figure(p)
 
@@ -596,7 +596,7 @@ class tuning_curve(PylabPlotCommand):
 
     # Can we list some alternatives here, if there are any
     # useful ones?
-    plot_type = param.Callable(default=pylab.plot,doc="""
+    plot_type = param.Callable(default=plt.plot,doc="""
         Matplotlib command to generate the plot.""")
 
     unit = param.String(default="",doc="""
@@ -641,13 +641,13 @@ class tuning_curve(PylabPlotCommand):
         for coordinate in p.coords:
             i_value,j_value=sheet.sheet2matrixidx(coordinate[0],coordinate[1])
 
-            pylab.figure(figsize=(7,7))
-            isint=pylab.isinteractive()
-            pylab.ioff()
+            plt.figure(figsize=(7,7))
+            isint=plt.isinteractive()
+            plt.ioff()
 
-            pylab.ylabel('Response',fontsize='large')
-            pylab.xlabel('%s (%s)' % (p.x_axis.capitalize(),p.unit),fontsize='large')
-            pylab.title('Sheet %s, coordinate(x,y)=(%0.3f,%0.3f) at time %s' %
+            plt.ylabel('Response',fontsize='large')
+            plt.xlabel('%s (%s)' % (p.x_axis.capitalize(),p.unit),fontsize='large')
+            plt.title('Sheet %s, coordinate(x,y)=(%0.3f,%0.3f) at time %s' %
                         (sheet.name,coordinate[0],coordinate[1],topo.sim.timestr()))
             p.title='%s: %s Tuning Curve' % (topo.sim.name,p.x_axis.capitalize())
 
@@ -657,13 +657,13 @@ class tuning_curve(PylabPlotCommand):
 
                 x_tick_values,ticks = self._reduce_ticks(ticks)
                 labels = [self._format_x_tick_label(x) for x in ticks]
-                pylab.xticks(x_tick_values, labels,fontsize='large')
-                pylab.yticks(fontsize='large')
+                plt.xticks(x_tick_values, labels,fontsize='large')
+                plt.yticks(fontsize='large')
                 p.plot_type(x_values, y_values, label=curve_label,lw=3.0)
                 self.first_curve=False
 
-            if isint: pylab.ion()
-            if p.legend: pylab.legend(loc=2)
+            if isint: plt.ion()
+            if p.legend: plt.legend(loc=2)
             self._generate_figure(p)
 
 
@@ -808,13 +808,13 @@ class plot_tracked_attributes(PylabPlotCommand):
 
         attrs = p.attrib_names if len(p.attrib_names)>0 else output_fn.attrib_names
         for a in attrs:
-            pylab.figure(figsize=(6,4))
-            isint=pylab.isinteractive()
-            pylab.ioff()
-            pylab.grid(True)
+            plt.figure(figsize=(6,4))
+            isint=plt.isinteractive()
+            plt.ioff()
+            plt.grid(True)
             ylabel=p.ylabel
-            pylab.ylabel(a+" "+ylabel)
-            pylab.xlabel('Iteration Number')
+            plt.ylabel(a+" "+ylabel)
+            plt.xlabel('Iteration Number')
 
             coords = p.units if len(p.units)>0 else output_fn.units
             for coord in coords:
@@ -822,15 +822,15 @@ class plot_tracked_attributes(PylabPlotCommand):
                 x_data=[x for (x,y) in output_fn.values[a][coord]]
                 if p.raw==True:
                     plot_data=zip(x_data,y_data)
-                    pylab.save(normalize_path(p.filename+a+'(%.2f, %.2f)' %(coord[0], coord[1])),plot_data,fmt='%.6f', delimiter=',')
+                    plt.save(normalize_path(p.filename+a+'(%.2f, %.2f)' %(coord[0], coord[1])),plot_data,fmt='%.6f', delimiter=',')
 
 
-                pylab.plot(x_data,y_data, label='Unit (%.2f, %.2f)' %(coord[0], coord[1]))
+                plt.plot(x_data,y_data, label='Unit (%.2f, %.2f)' %(coord[0], coord[1]))
                 (ymin,ymax)=p.ybounds
-                pylab.axis(xmin=init_time,xmax=final_time,ymin=ymin,ymax=ymax)
+                plt.axis(xmin=init_time,xmax=final_time,ymin=ymin,ymax=ymax)
 
-            if isint: pylab.ion()
-            pylab.legend(loc=0)
+            if isint: plt.ion()
+            plt.legend(loc=0)
             p.title=topo.sim.name+': '+a
             p.filename_suffix=a
             self._generate_figure(p)
@@ -858,20 +858,20 @@ class plot_modulation_ratio(PylabPlotCommand):
             v1c = complexity(fullmatrix[topo.sim[complex_sheet_name]]).flatten()
             #double the number of complex cells to reflect large width of layer 2/3
             v1c = np.concatenate((np.array(v1c),np.array(v1c)),axis=1)
-            pylab.figure()
-            n = pylab.subplot(311)
-            pylab.hist(v1s,bins)
-            pylab.axis([0,2.0,0,4100])
+            plt.figure()
+            n = plt.subplot(311)
+            plt.hist(v1s,bins)
+            plt.axis([0,2.0,0,4100])
 	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
 
-	    n = pylab.subplot(312)
-            pylab.hist(v1c,bins)
-            pylab.axis([0,2.0,0,4100])
+	    n = plt.subplot(312)
+            plt.hist(v1c,bins)
+            plt.axis([0,2.0,0,4100])
 	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
 
-	    n = pylab.subplot(313)
-            pylab.hist(np.concatenate((np.array(v1s),np.array(v1c)),axis=1),bins)
-            pylab.axis([0,2.0,0,4100])
+	    n = plt.subplot(313)
+            plt.hist(np.concatenate((np.array(v1s),np.array(v1c)),axis=1),bins)
+            plt.axis([0,2.0,0,4100])
 	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
 
         self._generate_figure(p)
