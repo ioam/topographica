@@ -28,6 +28,8 @@ import copy
 from numpy.oldnumeric import array, maximum
 from numpy import pi, sin, cos, nonzero, round, linspace, floor, ceil
 
+from imagen.random import UniformRandom
+
 import param
 from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
@@ -384,13 +386,75 @@ class measure_rfs(SingleInputResponseCommand):
                 Feature(name="y", range=y_range, step=-p.size),
                 Feature(name="scale", range=(-p.scale, p.scale), step=p.scale*2)]
 
-pg = create_plotgroup(name='RF Projection',category='Other',
+pg = create_plotgroup(name='RF Projection: XY',category='Other',
     doc='Measure receptive fields.',
     pre_plot_hooks=[measure_rfs.instance(display=True,
     pattern_presenter=PatternPresenter(RawRectangle(size=0.01,aspect_ratio=1.0)))],
     normalize='Individually')
 
 pg.add_plot('RFs',[('Strength','RFs')])
+
+
+
+class measure_wnrfs(SingleInputResponseCommand):
+    """
+    Map receptive fields by reverse correlation.
+
+    Presents a large collection of input patterns, typically pixel by pixel on
+    and off, keeping track of which units in the specified input_sheet were
+    active when each unit in other Sheets in the simulation was active.  This
+    data can then be used to plot receptive fields for each unit.  Note that
+    the results are true receptive fields, not the connection fields usually
+    presented in lieu of receptive fields, because they take all circuitry in
+    between the input and the target unit into account.
+
+    Note also that it is crucial to set the scale parameter properly when using
+    units with a hard activation threshold (as opposed to a smooth sigmoid),
+    because the input pattern used here may not be a very effective way to
+    drive the unit to activate.  The value should be set high enough that the
+    target units activate at least some of the time there is a pattern on the
+    input.
+    """
+    static_parameters = param.List(default=["scale","offset"])
+
+    presentations = param.Number(default=100)
+
+    weighted_average =  param.Boolean(default=True)
+
+    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
+            doc="""Function that will be used to analyze the distributions of unit responses.""" )
+
+    pattern_presenter = param.Callable(default=PatternPresenter(UniformRandom()))
+
+    sheet = param.ObjectSelector(default=None,doc="""
+        Name of the sheet to use in measurements.""")
+        
+    __abstract = True
+
+    def __call__(self,**params):
+        self.params('input_sheet').compute_default()
+        p=ParamOverrides(self,params)
+        x=ReverseCorrelation(self._feature_list(p),input_sheet=p.input_sheet)
+        static_params = dict([(s,p[s]) for s in p.static_parameters])
+
+        if p.duration is not None:
+            p.pattern_presenter.duration=p.duration
+        if p.apply_output_fns is not None:
+            p.pattern_presenter.apply_output_fns=p.apply_output_fns
+        x.collect_feature_responses(p.pattern_presenter,static_params,p.display,self._feature_list(p))
+
+
+    def _feature_list(self,p):
+        return [Feature(name="presentation", range=(0, p.presentations), step = 1.0),
+        Feature(name="scale", values=[p.scale])]
+
+pg = create_plotgroup(name='RF Projection: White Noise',category='Other',
+    doc='Measure white noise receptive fields.',
+    pre_plot_hooks=[measure_wnrfs.instance(display=True)],
+    normalize='Individually')
+
+pg.add_plot('RFs',[('Strength','RFs')])
+
 
 
 # Helper function for measuring direction maps

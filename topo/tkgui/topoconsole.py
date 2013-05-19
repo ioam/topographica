@@ -813,7 +813,8 @@ class ControllableMenu(tk.Menu):
 
 if __name__ != '__main__':
     plotpanel_classes['Connection Fields'] = ConnectionFieldsPanel
-    plotpanel_classes['RF Projection'] = RFProjectionPanel
+    plotpanel_classes['RF Projection: XY'] = RFProjectionPanel
+    plotpanel_classes['RF Projection: White Noise'] = RFProjectionPanel
     plotpanel_classes['Projection'] = CFProjectionPanel
     plotpanel_classes['Projection Activity'] = ProjectionActivityPanel
 

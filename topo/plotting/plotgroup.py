@@ -1294,7 +1294,8 @@ needed.
 
 plotgroup_types = {'Connection Fields': ConnectionFieldsPlotGroup,
                    'Projection': CFProjectionPlotGroup,
-                   'RF Projection': RFProjectionPlotGroup,
+                   'RF Projection: XY': RFProjectionPlotGroup,
+                   'RF Projection: White Noise': RFProjectionPlotGroup,
                    'Retinotopy': RetinotopyPlotGroup,
                    'Projection Activity': ProjectionActivityPlotGroup}
 

@@ -289,6 +289,8 @@ class ReverseCorrelation(FeatureResponses):
 
     input_sheet = param.Parameter(default=None)
 
+    continue_measurement = param.Boolean(default=True)
+
     # JABALERT: Should _featureresponses be renamed here?; It's a different
     # data structure using different indexing (r,c instead of feature).
     def initialize_featureresponses(self,features): # CB: doesn't need features!
@@ -296,14 +298,22 @@ class ReverseCorrelation(FeatureResponses):
         self._featureresponses = {}
         assert hasattr(self.input_sheet,'shape')
 
+        input_sheet_views = self.input_sheet.sheet_views
+
         # surely there's a way to get an array of 0s for each element without
         # looping? (probably had same question for distributionmatrix).
         for sheet in self.sheets_to_measure():
-            self._featureresponses[sheet]= np.ones(sheet.activity.shape,dtype=object)
             rows,cols = sheet.activity.shape
+            coords = ((r,c) for r in range(rows) for c in range(cols))
+            has_views = all(self._rf_valid_view(input_sheet_views,sheet,r,c) for (r,c) in coords)
+            self._featureresponses[sheet]= np.ones(sheet.activity.shape,dtype=object)
             for r in range(rows):
                 for c in range(cols):
-                    self._featureresponses[sheet][r,c] = np.zeros(self.input_sheet.shape) # need to specify dtype?
+                    if has_views:
+                        key = self._rf_view_key(sheet,r,c)
+                        self._featureresponses[sheet][r,c] = input_sheet_views[key].view()[0]
+                    else:
+                        self._featureresponses[sheet][r,c] = np.zeros(self.input_sheet.shape) # need to specify dtype?
 
 
     def collect_feature_responses(self,pattern_presenter,param_dict,display,feature_values):
@@ -314,12 +324,12 @@ class ReverseCorrelation(FeatureResponses):
             input_bounds = self.input_sheet.bounds
             input_sheet_views = self.input_sheet.sheet_views
 
-            for ii in range(rows):
-                for jj in range(cols):
-                    view = SheetView((self._featureresponses[sheet][ii,jj],input_bounds),
-                                     sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
-                    x,y = sheet.matrixidx2sheet(ii,jj)
-                    key = ('RFs',sheet.name,x,y)
+            for r in range(rows):
+                for c in range(cols):
+                    view = SheetView((self._featureresponses[sheet][r,c],input_bounds),
+                                     self.input_sheet.name,sheet.precedence,
+                                     topo.sim.time(),sheet.row_precedence)
+                    key = self._rf_view_key(sheet,r,c)
                     input_sheet_views[key]=view
 
 
@@ -370,6 +380,17 @@ class ReverseCorrelation(FeatureResponses):
             for ii in range(rows):
                 for jj in range(cols):
                     self._featureresponses[sheet][ii,jj]+=sheet.activity[ii,jj]*self.input_sheet.activity
+
+    def _rf_view_key(self, sheet, r, c):
+        x,y = sheet.matrixidx2sheet(r,c)
+        return ('RFs',sheet.name,x,y)
+
+    def _rf_valid_view(self,sheet_views,sheet,r,c):
+        key = self._rf_view_key(sheet,r,c)
+        if sheet_views.get(key, False):
+            return sheet_views[key].timestamp == topo.sim.time()
+        else:
+            return False
 
 
 class FeatureMaps(FeatureResponses):
