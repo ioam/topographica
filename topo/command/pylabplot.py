@@ -310,7 +310,7 @@ def matrixplot3d_gnuplot(mat,title=None,outputfilename="tmp.ps"):
     y = np.arange(c*1.0)
     # The .tolist() command is necessary to avoid bug in gnuplot-py,
     # which will otherwise convert a 2D float array into integers (!)
-    m = numpy.asarray(mat,dtype="float32").tolist()
+    m = np.asarray(mat,dtype="float32").tolist()
     #g("set parametric")
     g("set data style lines")
     g("set hidden3d")
@@ -374,8 +374,8 @@ class gradientplot(matrixplot):
         p=ParamOverrides(self,params)
 
         r,c = data.shape
-        dx = numpy.diff(data,1,axis=1)[0:r-1,0:c-1]
-        dy = numpy.diff(data,1,axis=0)[0:r-1,0:c-1]
+        dx = np.diff(data,1,axis=1)[0:r-1,0:c-1]
+        dy = np.diff(data,1,axis=0)[0:r-1,0:c-1]
 
         if cyclic: # Wrap into the specified range
             # Convert negative differences to an equivalent positive value
@@ -1269,7 +1269,7 @@ class measure_orientation_contrast(UnitCurveCommand):
 
     x_axis = param.String(default='orientationsurround',constant=True)
 
-    orientation_center = param.Number(default=0.0,softbounds=(0.0,numpy.pi),doc="""
+    orientation_center = param.Number(default=0.0,softbounds=(0.0,pi),doc="""
         Orientation of the center grating patch""")
 
     units = param.String(default="%")
