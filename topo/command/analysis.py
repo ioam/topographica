@@ -47,7 +47,7 @@ from topo.plotting.plotgroup import create_plotgroup, plotgroups
 from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
 from topo.analysis.featureresponses import Feature, PatternPresenter, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
-from topo.analysis.featureresponses import update_activity, measure_response
+from topo.analysis.featureresponses import update_activity, update_sheet_activity, measure_response
 from topo.base.patterngenerator import PatternGenerator
 from topo.command import pattern_present
 
