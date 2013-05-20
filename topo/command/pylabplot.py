@@ -114,8 +114,8 @@ class PylabPlotCommand(Command):
         p should be a ParamOverrides instance containing the current
         set of parameters.
         """
-
         plt.show._needmain=False
+
         if p.filename is not None:
             # JABALERT: need to reformat this as for other plots
             fullname=p.filename+p.filename_suffix+str(topo.sim.time())+"."+p.file_format
@@ -626,12 +626,12 @@ class tuning_curve(PylabPlotCommand):
         y=  [];
         num_ticks = 5;
         y.append(ticks[0])
-        x.append(0)
+        x.append(self.x_values[0])
         for i in xrange(0,num_ticks):
             y.append(y[-1]+np.pi/(num_ticks+1));
             x.append(x[-1]+np.pi/(num_ticks+1));
         y.append(y[-1]+np.pi/(num_ticks+1));
-        x.append(3.14)
+        x.append(self.x_values[-1])
         return (x,y)
 
 
@@ -689,6 +689,26 @@ class cyclic_tuning_curve(tuning_curve):
     unit = param.String(default="degrees",doc="""
         String to use in labels to specify the units in which curves are plotted.""")
 
+    recenter = param.Boolean(default=True,doc="""
+        Centers the tuning curve around the maximally responding feature.""")
+
+    def __call__(self,**params):
+        p=ParamOverrides(self,params)
+        if p.recenter:
+            self.peak_argmax = 0
+            sheet = p.sheet
+            max_y = 0.0
+            for coordinate in p.coords:
+                i_value,j_value=sheet.sheet2matrixidx(coordinate[0],coordinate[1])
+                for curve_label in sorted(sheet.curve_dict[p.x_axis].keys()):
+                    x_values= sorted(sheet.curve_dict[p.x_axis][curve_label].keys())
+                    y_values = [sheet.curve_dict[p.x_axis][curve_label][key].view()[0][i_value,j_value] for key in x_values]
+                    if np.max(y_values) > max_y:
+                        max_y = np.max(y_values)
+                        self.peak_argmax = np.argmax(y_values)
+
+        super(cyclic_tuning_curve,self).__call__(**p)
+
 
     # This implementation should work for quantities periodic with
     # some multiple of pi that we want to express in degrees, but it
@@ -708,20 +728,20 @@ class cyclic_tuning_curve(tuning_curve):
         eventually be changed so that the preferred orientation is in
         the center.
         """
-        if self.first_curve==True:
+        if self.first_curve:
             x_values= sorted(curve.keys())
             y_values=[curve[key].view()[0][i_value,j_value] for key in x_values]
 
-            min_arg=np.argmin(y_values)
-            x_min=x_values[min_arg]
-            y_min=y_values[min_arg]
-            y_values=self._rotate(y_values, n=min_arg)
-            self.ticks=self._rotate(x_values, n=min_arg)
-            self.ticks+=[x_min]
-            x_max=min(x_values)+self.cyclic_range
-            x_values.append(x_max)
-            y_values.append(y_min)
+            if self.recenter:
+                rotate_n = self.peak_argmax+len(x_values)/2
+                y_values = self._rotate(y_values, n=rotate_n)
+                self.ticks=self._rotate(x_values, n=rotate_n)
+            else:
+                self.ticks = list(x_values)
 
+            self.ticks.append(self.ticks[0])
+            x_values.append(x_values[0]+self.cyclic_range)
+            y_values.append(y_values[0])
             self.x_values=x_values
         else:
             y_values=[curve[key].view()[0][i_value,j_value] for key in self.ticks]
@@ -1291,7 +1311,7 @@ class measure_orientation_contrast(UnitCurveCommand):
             self.orientationcenter=orientation
 
             for i in xrange(0,self.num_orientation):
-                self.or_surrounds.append(orientation+i*pi/(self.num_orientation))
+                self.or_surrounds.append((-pi/2)+i*pi/(self.num_orientation))
 
             self.x=self._sheetview_unit(sheet,coord,'XPreference',default=coord[0])
             self.y=self._sheetview_unit(sheet,coord,'YPreference',default=coord[1])
@@ -1306,7 +1326,7 @@ class measure_orientation_contrast(UnitCurveCommand):
 create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category="Tuning Curves",
                  doc='Measure the response of one unit to a center and surround sine grating disk.',
                  pre_plot_hooks=[measure_orientation_contrast.instance()],
-                 plot_hooks=[tuning_curve.instance(x_axis="orientationsurround",unit="%")],
+                 plot_hooks=[cyclic_tuning_curve.instance(x_axis="orientationsurround",unit="degrees",recenter=False)],
                  prerequisites=['OrientationPreference','XPreference'])
 
 
