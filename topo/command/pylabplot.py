@@ -1331,6 +1331,51 @@ create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category
                  prerequisites=['OrientationPreference','XPreference'])
 
 
+class measure_center_contrast(measure_orientation_contrast):
+    """
+    Measures response as a function of the contrast of the central
+    grating in the presence of an iso-oriented surround.
+    """
+
+    contrastcenter=param.NumericTuple(default=(0,2,20),doc="""Contrast range in logspace.""")
+
+    static_parameters = param.List(default=["x","y","sizecenter","sizesurround","orientationcenter","orientationsurround","thickness","contrastsurround"])
+
+    curve_parameters=param.Parameter([{"contrastsurround":100}],doc="""
+        List of parameter values for which to measure a curve.""")
+
+    x_axis = param.String(default='contrastcenter',constant=True)
+
+    def __call__(self,**params):
+        p=ParamOverrides(self,params)
+        self.params('sheet').compute_default()
+        sheet=p.sheet
+        for coord in p.coords:
+            orientation=pi*self._sheetview_unit(sheet,coord,'OrientationPreference',default=p.orientation_center/pi)
+            p.orientationcenter=orientation
+            p.orientationsurround=0.0
+
+            p.x=self._sheetview_unit(sheet,coord,'XPreference',default=coord[0])
+            p.y=self._sheetview_unit(sheet,coord,'YPreference',default=coord[1])
+
+            minc,maxc,stepc=p.contrastcenter
+            self.contrast_values = list(np.logspace(minc,maxc,stepc))
+
+            self._compute_curves(p,sheet)
+
+
+    def _feature_list(self,p):
+        return [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
+    	 	Feature(name="frequency",values=p.frequencies),
+		Feature(name="contrastcenter",values=self.contrast_values)]
+
+
+create_plotgroup(template_plot_type="curve",name='Center Contrast',category="Tuning Curves",
+                 doc='Measure the response of one unit to a center and surround sine grating disk.',
+                 pre_plot_hooks=[measure_center_contrast.instance()],
+                 plot_hooks=[tuning_curve.instance(x_axis="contrastcenter",unit="")],
+                 prerequisites=['OrientationPreference','XPreference'])
+
 
 class test_measure(UnitCurveCommand):
 
