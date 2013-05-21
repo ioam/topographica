@@ -619,6 +619,7 @@ class tuning_curve(PylabPlotCommand):
         """Return the x, y, and x ticks values for the specified curve from the curve_dict"""
         x_values=sorted(curve.keys())
         y_values=[curve[key].view()[0][i_value,j_value] for key in x_values]
+        self.x_values = x_values
         return x_values,y_values,x_values
 
     def _reduce_ticks(self,ticks):
