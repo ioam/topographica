@@ -419,16 +419,11 @@ class measure_wnrfs(SingleInputResponseCommand):
 
     presentations = param.Number(default=100)
 
-    weighted_average =  param.Boolean(default=True)
-
-    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
-            doc="""Function that will be used to analyze the distributions of unit responses.""" )
-
     pattern_presenter = param.Callable(default=PatternPresenter(UniformRandom()))
 
     sheet = param.ObjectSelector(default=None,doc="""
         Name of the sheet to use in measurements.""")
-        
+
     __abstract = True
 
     def __call__(self,**params):
