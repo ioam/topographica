@@ -1180,7 +1180,7 @@ class measure_response(PatternPresentingCommand):
         if not p.overwrite_previous:
             restore_input_generators()
 
-        update_activity(p.sheet_views_prefix)
+        update_activity(p.sheet_views_prefix, force=True)
 
 class MeasureResponseCommand(PatternPresentingCommand):
     """Parameterized command for presenting input patterns and measuring responses."""
