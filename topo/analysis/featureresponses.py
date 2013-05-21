@@ -1065,10 +1065,12 @@ def update_activity(sheet_views_prefix=''):
     they need to average over recent spiking activity.
     """
     for sheet in topo.sim.objects(Sheet).values():
-        activity_copy = np.array(sheet.activity)
-        new_view = SheetView((activity_copy,sheet.bounds),
-                              sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
-        sheet.sheet_views[sheet_views_prefix+'Activity']=new_view
+        # update only if plot_view is True.
+       if sheet.plot_view is True:
+           activity_copy = np.array(sheet.activity)
+           new_view = SheetView((activity_copy,sheet.bounds),
+                                sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
+           sheet.sheet_views[sheet_views_prefix+'Activity']=new_view
 
 
 class measure_response(PatternPresentingCommand):

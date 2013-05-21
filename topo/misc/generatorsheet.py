@@ -97,7 +97,12 @@ class GeneratorSheet(Sheet):
         # JABALERT: What does the [:] achieve here?  Copying the
         # values, instead of the pointer to the array?  Is that
         # guaranteed?
-        self.activity[:] = self.input_generator()
+        ac = self.input_generator()
+        if ac is not None:
+            self.activity[:] = ac
+        else:
+            print '***** Pattern generator has returned None. Is there a pattern generator attached? *****'
+            return # no point in going as no new activity
 
         if self.apply_output_fns:
             for of in self.output_fns:

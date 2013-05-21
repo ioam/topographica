@@ -103,6 +103,11 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
     apply_output_fns=param.Boolean(default=True,
         doc="Whether to apply the output_fn after computing an Activity matrix.")
 
+    # Note: if plot_view if changed to False after a SheetView for the sheet is created
+    # then sheetview is still displayed but not updated.
+    plot_view=param.Boolean(default=True,
+        doc="Whether to activity of the sheet is updated and viewable (see analysis.update_activity()).")
+
 
     def _get_density(self):
         return self.xdensity
@@ -299,4 +304,3 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         significant amount of data other than in the activity array.
         """
         return self.activity.nbytes
-
