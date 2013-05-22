@@ -331,7 +331,7 @@ class measure_rfs(SingleInputResponseCommand):
     	that are sampled per presentation.  The higher the value the coarser
     	the receptive field measurement will be.""")
 
-    sampling_area = param.NumericTuple(doc="""
+    sampling_area = param.NumericTuple(default=(0,0),doc="""
     	Dimensions of the area to be sampled during reverse correlation
         measured in units x and y on the input sheet centered around the origin
         and expressed as a tuple (x,y).""")
