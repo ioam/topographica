@@ -42,7 +42,10 @@ class SheetView(param.Parameterized):
         SheetView model. It is now easier to access the data and
         bounds attributes directly.
         """
-        return (self.data, self.bounds)
+        if hasattr(self, 'data'):
+            return (self.data, self.bounds)
+        else: # Necessary for backward compatibility with older snapshots.
+            return self._view_list[0]
 
     def __init__(self, (data, bounds), src_name=None, precedence=0.0,
                  timestamp=-1, row_precedence=0.5):
@@ -51,6 +54,7 @@ class SheetView(param.Parameterized):
                                        precedence = precedence,
                                        timestamp = timestamp,
                                        row_precedence = row_precedence)
+        self._view_list = []
         self.data = data
 
 
