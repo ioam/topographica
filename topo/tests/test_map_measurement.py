@@ -72,11 +72,13 @@ plotgroups_to_test = [
     ]
 
 
+from topo.base.sheet import MultiDict
+
 def _reset_views(sheet):
     if hasattr(sheet,'sheet_views'):
-        sheet.sheet_views = {}
+        sheet.sheet_views = MultiDict()
     if hasattr(sheet,'curve_dict'):
-        sheet.curve_dict = {}
+        sheet.curve_dict = MultiDict()
 
 
 def generate(plotgroup_names):

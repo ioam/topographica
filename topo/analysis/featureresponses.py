@@ -475,6 +475,8 @@ class FeatureMaps(FeatureResponses):
                         sheet.sheet_views[ name ]   = view
 
 
+from topo.base.sheet import MultiDict
+
 class FeatureCurves(FeatureResponses):
     """
     Measures and collects the responses to a set of features, for calculating tuning and similar curves.
@@ -505,8 +507,7 @@ class FeatureCurves(FeatureResponses):
         self.sheet=sheet
         self.x_axis=x_axis
         if hasattr(sheet, "curve_dict")==False:
-            sheet.curve_dict={}
-        sheet.curve_dict[x_axis]={}
+            sheet.curve_dict=MultiDict()
 
     def sheets_to_measure(self):
         return topo.sim.objects(CFSheet).values()
@@ -516,7 +517,6 @@ class FeatureCurves(FeatureResponses):
         rows,cols=self.sheet.shape
         bounding_box = self.sheet.bounds
         self.measure_responses(pattern_presenter,param_dict,features,display)
-        self.sheet.curve_dict[self.x_axis][curve_label]={}
         for key in self._featureresponses[self.sheet][self.x_axis].distribution_matrix[0,0]._data.iterkeys():
             y_axis_values = np.zeros(self.sheet.shape,activity_type)
             for i in range(rows):

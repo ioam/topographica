@@ -152,9 +152,6 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
             frequency_index = i
         i=i+1
     print sheet.curve_dict
-    if not sheet.curve_dict.has_key("orientationACDC"):
-        sheet.curve_dict["orientationACDC"]={}
-    sheet.curve_dict["orientationACDC"][curve_label]={}
 
     rows,cols = full_matrix.matrix_shape
     for o in xrange(size(full_matrix.features[orientation_index].values)):
