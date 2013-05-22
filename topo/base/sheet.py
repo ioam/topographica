@@ -52,8 +52,6 @@ class MultiDict(dict):
 
     depth = param.Integer(default=5)
 
-    map_type = param.Parameter(default=OrderedDict if OrderedDict else list)
-
     time_fn = param.Callable(default=lambda: None)
 
     def __init__(self):
@@ -113,11 +111,11 @@ class MultiDict(dict):
         if isinstance(val,tuple):
             if len(val) == 2:
                 (start, stop) = val
-                return self.map_type(el for el in self._buffer[self.timeslice(start, stop)])
+                return [el[1] for el in self._buffer[self.timeslice(start, stop)]]
             else:
                 return self._latest_items[val] # RFs keys use tuples
         if isinstance(val, slice):
-            return self.map_type(el for el in self._buffer[val])
+            return [el[1] for el in self._buffer[val]]
 
     def __setitem__(self, key, value):
         adict = self._get_latest_dict(self.time_fn())
@@ -131,7 +129,7 @@ class MultiDict(dict):
         """
         if len(self._buffer)==0 or self._buffer[-1][0] != timestamp:
             if len(self._buffer) == self.depth:
-                self._buffer.popitem(0)
+                self._buffer.pop(0)
             new_adict = AttrDict()
             timestamps = [el[0] for el in self._buffer]
             insert_index = bisect.bisect_left(timestamps, timestamp)
