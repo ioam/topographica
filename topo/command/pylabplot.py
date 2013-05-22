@@ -605,11 +605,14 @@ class tuning_curve(PylabPlotCommand):
     legend=param.Boolean(default=True, doc="""
         Whether or not to include a legend in the plot.""")
 
+    num_ticks=param.Number(default=4, doc="""
+        Number of tick marks on the X-axis.""")
+        
     __abstract = True
 
 
     def _format_x_tick_label(self,x):
-        return "%3.1f" % x
+        return "%g" % round(x,2)
 
     def _rotate(self, seq, n=1):
         n = n % len(seq) # n=hop interval
@@ -623,17 +626,13 @@ class tuning_curve(PylabPlotCommand):
         return x_values,y_values,x_values
 
     def _reduce_ticks(self,ticks):
-        x = [];
-        y=  [];
-        num_ticks = 5;
-        y.append(ticks[0])
-        x.append(self.x_values[0])
-        for i in xrange(0,num_ticks):
-            y.append(y[-1]+np.pi/(num_ticks+1));
-            x.append(x[-1]+np.pi/(num_ticks+1));
-        y.append(y[-1]+np.pi/(num_ticks+1));
-        x.append(self.x_values[-1])
-        return (x,y)
+        values = [];
+        values.append(self.x_values[0])
+        rangex = self.x_values[-1] - self.x_values[0]
+        for i in xrange(1,self.num_ticks+1):
+            values.append(values[-1]+rangex/(self.num_ticks));
+        labels = values
+        return (values,labels)
 
 
     def __call__(self,**params):
@@ -711,12 +710,25 @@ class cyclic_tuning_curve(tuning_curve):
         super(cyclic_tuning_curve,self).__call__(**p)
 
 
+    def _reduce_ticks(self,ticks):
+        values = []
+        labels =  []
+        labels.append(ticks[0])
+        values.append(self.x_values[0])
+        for i in xrange(0,self.num_ticks):
+            labels.append(labels[-1]+pi/(self.num_ticks+1.0))
+            values.append(values[-1]+pi/(self.num_ticks+1.0))
+        labels.append(labels[-1]+pi/(self.num_ticks+1.0))
+        values.append(self.x_values[-1])
+        return (values,labels)
+
+        
     # This implementation should work for quantities periodic with
     # some multiple of pi that we want to express in degrees, but it
     # will need to be reimplemented in a subclass to work with other
     # cyclic quantities.
     def _format_x_tick_label(self,x):
-        return str(int(180*x/pi))
+        return str(int(np.round(180*x/pi)))
 
 
     def _curve_values(self, i_value, j_value, curve):
@@ -739,7 +751,7 @@ class cyclic_tuning_curve(tuning_curve):
                 self.ticks=self._rotate(x_values, n=rotate_n)
             else:
                 self.ticks = list(x_values)
-
+                
             self.ticks.append(self.ticks[0])
             x_values.append(x_values[0]+self.cyclic_range)
             y_values.append(y_values[0])
@@ -1373,7 +1385,7 @@ class measure_center_contrast(measure_orientation_contrast):
 create_plotgroup(template_plot_type="curve",name='Center Contrast',category="Tuning Curves",
                  doc='Measure the response of one unit to a center and surround sine grating disk.',
                  pre_plot_hooks=[measure_center_contrast.instance()],
-                 plot_hooks=[tuning_curve.instance(x_axis="contrastcenter",unit="")],
+                 plot_hooks=[tuning_curve.instance(x_axis="contrastcenter",unit="%",plot_type=plt.semilogx)],
                  prerequisites=['OrientationPreference','XPreference'])
 
 
