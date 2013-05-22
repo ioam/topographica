@@ -1282,7 +1282,7 @@ class measure_orientation_contrast(UnitCurveCommand):
     """
 
     pattern_presenter = param.Callable(
-        default=PatternPresenter(pattern_generator=OrientationContrast(),
+        default=PatternPresenter(pattern_generator=OrientationContrast(surround_orientation_relative=True),
                                  contrast_parameter="weber_contrast"))
 
     size=None # Disabled unused parameter
