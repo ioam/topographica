@@ -1127,6 +1127,14 @@ class measure_response(PatternPresentingCommand):
 
     apply_output_fns=param.Boolean(default=True)
 
+    restore_state = param.Boolean(default=True, doc="""
+    If restore_state is true, the simulation events and sheet
+    activities are restored after the response is measured""")
+
+    restore_events = param.Boolean(default=True, doc="""
+    If restore_events is true, only the simulation events are restored
+    after the response is measured""")
+
     def __call__(self, inputs={}, **params_to_override):
 
         p=ParamOverrides(self, dict(params_to_override, inputs=inputs))
@@ -1161,14 +1169,16 @@ class measure_response(PatternPresentingCommand):
                     param.Parameterized().warning(
                         '%s not a valid Sheet name for pattern_present.' % each)
 
-        topo.sim.event_push()
-        # CBENHANCEMENT: would be nice to break this up for visualizing motion
+        if   p.restore_state:   topo.sim.state_push()
+        elif p.restore_events:  topo.sim.event_push()
+
         duration = p.duration if (p.duration is not None) else 1.0
         topo.sim.run(duration)
-        topo.sim.event_pop()
+
+        if   p.restore_state:   topo.sim.state_pop()
+        elif p.restore_events:  topo.sim.event_pop()
 
         # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
-
         if not p.plastic:
             for sheet in topo.sim.objects(Sheet).values():
                 sheet.restore_plasticity_state()

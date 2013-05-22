@@ -901,8 +901,9 @@ def pattern_present(inputs={}, duration=1.0, plastic=False,
     """
     from analysis import measure_response
     measure_response(inputs=inputs, duration=duration, plastic=plastic,
-                                  overwrite_previous=overwrite_previous,
-                                  apply_output_fns=apply_output_fns, **kwargs)
+                     overwrite_previous=overwrite_previous,
+                     apply_output_fns=apply_output_fns,
+                     restore_state=False, restore_events=True, **kwargs)
 
 # maybe an explicit list would be better?
 import types
