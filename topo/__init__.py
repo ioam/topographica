@@ -375,3 +375,11 @@ try:
     ip.extension_manager.load_extension('topo.misc.ipython')
 except:
     pass
+
+
+try:
+    from base.sheet import MultiDict
+    MultiDict.time_fn = sim.time
+except:
+    raise Exception('Could set MultiDict time_fn to topo.sim.time()')
+

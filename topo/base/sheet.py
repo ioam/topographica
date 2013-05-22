@@ -37,9 +37,119 @@ class AttrDict(dict):
     A dictionary type object that supports attribute access (e.g. for
     IPython tab completion).
     """
+
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
+import bisect
+try:
+    from collections import OrderedDict
+except:
+    OrderedDict = None
+
+class MultiDict(dict):
+
+    depth = param.Integer(default=5)
+
+    map_type = param.Parameter(default=OrderedDict if OrderedDict else list)
+
+    time_fn = param.Callable(default=lambda: None)
+
+    def __init__(self):
+        self._buffer = [] # List of tuples (timestamp, attrdict)
+        self._latest_items = {}
+
+    def get(self,key,default=None):
+        if key in self.keys():
+            return self._latest_items[key]
+        else:
+            return default
+
+    def keys(self):
+        return self._latest_items.keys()
+
+    def items(self):
+        return self._latest_items.items()
+
+    def __dir__(self):
+        """
+        Extend dir() to include the latest SheetViews.
+        """
+        default_dir = dir(type(self)) + list(self.__dict__)
+        return sorted(set(default_dir + self.keys()))
+
+    def __getattr__(self, name):
+        """
+        Provide a simpler attribute-like syntax for accesing the
+        latest SheetViews.
+        """
+        if name in self.keys():
+            return self._latest_items[name]
+        else:
+            raise AttributeError
+
+    def __contains__(self,key):
+        return key in self.keys()
+
+    def __getitem__(self, val):
+        """
+        If indexed by string, return corresponding value from latest
+        timeslice (backward compatible behavior).
+
+        If indexed by an integer return the attribute dictionary. Index
+
+        If indexed by (start, stop) tuple, where start and stop are
+        timestamps (or None) then return the attribute dictionaries
+        from the specified time interval as a list. When start or stop
+        are None the usual Python slicing semantics apply.
+
+        Usual slicing semantics supported.
+        """
+        if isinstance(val,str):
+            return self._latest_items[val]
+        if isinstance(val, int):
+            return self._buffer[val][1]
+        if isinstance(val,tuple):
+            if len(val) == 2:
+                (start, stop) = val
+                return self.map_type(el for el in self._buffer[self.timeslice(start, stop)])
+            else:
+                return self._latest_items[val] # RFs keys use tuples
+        if isinstance(val, slice):
+            return self.map_type(el for el in self._buffer[val])
+
+    def __setitem__(self, key, value):
+        adict = self._get_latest_dict(self.time_fn())
+        adict[key] = value
+        self._latest_items[key] = value
+
+    def _get_latest_dict(self, timestamp):
+        """
+        Returns the attribute dictionary corresponding to the
+        specified timestamp.
+        """
+        if len(self._buffer)==0 or self._buffer[-1][0] != timestamp:
+            if len(self._buffer) == self.depth:
+                self._buffer.popitem(0)
+            new_adict = AttrDict()
+            timestamps = [el[0] for el in self._buffer]
+            insert_index = bisect.bisect_left(timestamps, timestamp)
+            self._buffer.insert(insert_index, (timestamp, new_adict))
+            return new_adict
+        else:
+            (time, last_adict) = self._buffer[-1]
+            return last_adict
+
+    def timeslice(self, start=None, stop=None):
+        """
+        Returns the corresponding integer timeslice, given a time interval.
+        """
+        timestamps = [el[0] for el in self._buffer]
+        start_ind = None if (start is None) else bisect.bisect_left(timestamps, start)
+        stop_ind = None if (stop is None) else bisect.bisect_left(timestamps, stop)
+        return slice(start_ind, stop_ind)
+
 
 # (disable W0223 because input_event is deliberately still not implemented)
 class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
@@ -136,7 +246,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         # For non-plastic inputs
         self.__saved_activity = []
         self._plasticity_setting_stack = []
-        self.sheet_views =  AttrDict()
+        self.sheet_views = MultiDict()
         self.views = self.sheet_views
 
 
