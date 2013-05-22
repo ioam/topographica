@@ -32,7 +32,16 @@ from functionfamily import TransferFn
 
 activity_type = float64
 
-class AttrDict(dict):
+
+
+import bisect
+try:
+    from collections import OrderedDict, defaultdict
+except:
+    OrderedDict = None
+
+
+class AttrDict(defaultdict):
     """
     A dictionary type object that supports attribute access (e.g. for
     IPython tab completion).
@@ -42,11 +51,9 @@ class AttrDict(dict):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
-import bisect
-try:
-    from collections import OrderedDict
-except:
-    OrderedDict = None
+def attrtree():
+       ' Simple yet flexible tree datastructure '
+       return AttrDict(attrtree)
 
 class MultiDict(dict):
 
@@ -56,7 +63,7 @@ class MultiDict(dict):
 
     def __init__(self):
         self._buffer = [] # List of tuples (timestamp, attrdict)
-        self._latest_items = {}
+        self._latest_items = attrtree()
 
     def get(self,key,default=None):
         if key in self.keys():
@@ -130,7 +137,7 @@ class MultiDict(dict):
         if len(self._buffer)==0 or self._buffer[-1][0] != timestamp:
             if len(self._buffer) == self.depth:
                 self._buffer.pop(0)
-            new_adict = AttrDict()
+            new_adict = attrtree()
             timestamps = [el[0] for el in self._buffer]
             insert_index = bisect.bisect_left(timestamps, timestamp)
             self._buffer.insert(insert_index, (timestamp, new_adict))
