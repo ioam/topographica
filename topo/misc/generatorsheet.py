@@ -101,7 +101,10 @@ class GeneratorSheet(Sheet):
         if ac is not None:
             self.activity[:] = ac
         else:
-            print '***** Pattern generator has returned None. Is there a pattern generator attached? *****'
+            # Note that a generator may return a None if it has run out of patterns it is loading.
+            # Example is if the patterns are files that are loaded sequentially and are not re-used (e.g. the constructors
+            # are  discarded to save memory).
+            self.warning('Pattern generator {0} returned None. Unable to generate Activity pattern.'.format(self.input_generator.name))
             return # no point in going as no new activity
 
         if self.apply_output_fns:
