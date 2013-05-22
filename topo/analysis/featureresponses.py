@@ -309,7 +309,7 @@ class ReverseCorrelation(FeatureResponses):
             self._featureresponses[sheet]= np.ones(sheet.activity.shape,dtype=object)
             for r in range(rows):
                 for c in range(cols):
-                    if has_views:
+                    if has_views and self.continue_measurement:
                         key = self._rf_view_key(sheet,r,c)
                         self._featureresponses[sheet][r,c] = input_sheet_views[key].view()[0]
                     else:
