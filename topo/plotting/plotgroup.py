@@ -139,23 +139,6 @@ class PlotGroup(param.Parameterized):
         self.time = None
         self.filesaver = PlotGroupSaver(self)
 
-        # In the future, it might be good to be able to specify the
-        # plot rows and columns using tuples.  For instance, if three
-        # columns are desired with the plots laid out from left to
-        # right, we could use (None, 3).  If three rows are desired
-        # then (3, None).  Another method that would work is [3,2,4]
-        # would have the first row with 3, the second row with 2, the
-        # third row with 4, etc.  The default left-to-right ordering
-        # in one row could perhaps be represented as (None, Inf).
-        #
-        # Alternatively, we could add another precedence value, so
-        # that the usual precedence value controls where the plot
-        # appears left to right, while a rowprecedence value would
-        # control where it appears top to bottom.  All plots with the
-        # same rowprecedence would go on the same row, and the actual
-        # value of the rowprecedence would determine which row goes
-        # first.
-
 
     def _exec_pre_plot_hooks(self,**kw):
         for f in self.pre_plot_hooks:

@@ -32,6 +32,7 @@ from topo.plotting.plotgroup import plotgroups
 from topo.sheet import GeneratorSheet
 
 
+
 # CB: having a class called DistributionMatrix with an attribute
 # distribution_matrix to hold the distribution matrix seems silly.
 # Either rename distribution_matrix or make DistributionMatrix into
@@ -51,7 +52,8 @@ class DistributionMatrix(param.Parameterized):
     (which can be used as a preference map) and/or a selectivity
     map (which measures the peakedness of each distribution).
     """
-    def __init__(self,matrix_shape,axis_range=(0.0,1.0), cyclic=False,keep_peak=True):
+
+    def __init__(self,matrix_shape,axis_range=(0.0,1.0),cyclic=False,keep_peak=True):
         """Initialize the internal data structure: a matrix of Distribution objects."""
         self.axis_range=axis_range
         new_distribution = np.vectorize(lambda x: Distribution(axis_range,cyclic,keep_peak),
@@ -59,7 +61,7 @@ class DistributionMatrix(param.Parameterized):
         self.distribution_matrix = new_distribution(np.empty(matrix_shape))
 
 
-    def update(self, new_values, bin):
+    def update(self,new_values,bin):
         """Add a new matrix of histogram values for a given bin value."""
         ### JABHACKALERT!  The Distribution class should override +=,
         ### rather than + as used here, because this operation
@@ -69,7 +71,7 @@ class DistributionMatrix(param.Parameterized):
         self.distribution_matrix + np.fromfunction(np.vectorize(lambda i,j: {bin:new_values[i,j]}),
                                                 new_values.shape)
 
-    def apply_DSF( self, dsf ):
+    def apply_DSF(self,dsf):
         """
         Apply the given dsf DistributionStatisticFn on each element of the distribution_matrix
 
@@ -77,23 +79,23 @@ class DistributionMatrix(param.Parameterized):
         DistributionStatisticFn, but with matrices as values, instead of scalars
         """
 
-        shape   = self.distribution_matrix.shape
-        result  = {}
+        shape = self.distribution_matrix.shape
+        result = {}
 
         # this is an extra call to the dsf() DistributionStatisticFn, in order to retrieve
         # the dictionaries structure, and allocate the necessary matrices
-        r0      = dsf( self.distribution_matrix[ 0, 0 ] )
-        for k, maps in r0.items():
-            result[ k ] = {}
+        r0 = dsf(self.distribution_matrix[0,0])
+        for k,maps in r0.items():
+            result[k] = {}
             for m in maps.keys():
-                result[ k ][ m ]    = np.zeros( shape, np.float64 )
+                result[k][m] = np.zeros(shape,np.float64)
 
-        for i in range( shape[ 0 ] ):
-            for j in range( shape[ 1 ] ):
-                response        = dsf( self.distribution_matrix[ i, j ] )
-                for k, d in response.items():
-                    for item, item_value in d.items():
-                        result[ k ][ item ][ i, j ]  = item_value
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                response = dsf(self.distribution_matrix[i,j])
+                for k,d in response.items():
+                    for item,item_value in d.items():
+                        result[k][item][i,j] = item_value
 
         return result
 
@@ -110,17 +112,17 @@ class FullMatrix(param.Parameterized):
         self.features = features
         self.dimensions = ()
         for f in features:
-            self.dimensions = self.dimensions + (np.size(f.values),)
+            self.dimensions = self.dimensions+(np.size(f.values),)
         self.full_matrix = np.empty(self.dimensions,np.object_)
 
 
-    def update(self, new_values, feature_value_permutation):
+    def update(self,new_values,feature_value_permutation):
         """Add a new matrix of histogram values for a given bin value."""
         index = ()
         for f in self.features:
             for ff,value in feature_value_permutation:
                 if(ff == f.name):
-                    index = index + (f.values.index(value),)
+                    index = index+(f.values.index(value),)
         self.full_matrix[index] = new_values
 
 
@@ -171,11 +173,13 @@ class FeatureResponses(PatternDrivenAnalysis):
 
     _fullmatrix = {}
 
+
     def __init__(self,features,**params):
         super(FeatureResponses,self).__init__(**params)
         self.initialize_featureresponses(features)
         self.pre_analysis_session_hooks.append(save_input_generators)
         self.post_analysis_session_hooks.append(restore_input_generators)
+
 
     def initialize_featureresponses(self,features):
         """Create an empty DistributionMatrix for each feature and each sheet."""
@@ -238,13 +242,14 @@ class FeatureResponses(PatternDrivenAnalysis):
         # Run hooks after the analysis session
         for f in self.post_analysis_session_hooks: f()
 
+
     def present_permutation(self,permutation):
         """Present a pattern with the specified set of feature values."""
         for sheet in self.sheets_to_measure():
             self._activities[sheet]*=0
 
         # Calculate complete set of settings
-        permuted_settings = zip(self.feature_names, permutation)
+        permuted_settings = zip(self.feature_names,permutation)
         complete_settings = permuted_settings + \
             [(f.name,f.compute_fn(permuted_settings)) for f in self.features_to_compute]
 
@@ -272,11 +277,12 @@ class FeatureResponses(PatternDrivenAnalysis):
 
         self._update(complete_settings)
 
+
     def _update(self,current_values):
         # Update each DistributionMatrix with (activity,bin)
         for sheet in self.sheets_to_measure():
             for feature,value in current_values:
-                self._featureresponses[sheet][feature].update(self._activities[sheet], value)
+                self._featureresponses[sheet][feature].update(self._activities[sheet],value)
             FeatureResponses._fullmatrix[sheet].update(self._activities[sheet],current_values)
 
 
@@ -323,8 +329,6 @@ class ReverseCorrelation(FeatureResponses):
                     input_sheet_views[key]=view
 
 
-
-
     def measure_responses(self,pattern_presenter,param_dict,features,display):
         """Present the given input patterns and collate the responses."""
 
@@ -341,7 +345,7 @@ class ReverseCorrelation(FeatureResponses):
         """Present a pattern with the specified set of feature values."""
 
         # Calculate complete set of settings
-        permuted_settings = zip(self.feature_names, permutation)
+        permuted_settings = zip(self.feature_names,permutation)
         complete_settings = permuted_settings + \
             [(f.name,f.compute_fn(permuted_settings)) for f in self.features_to_compute]
 
@@ -363,6 +367,7 @@ class ReverseCorrelation(FeatureResponses):
 
         topo.sim.state_pop()
 
+
     # Ignores current_values; they simply provide distinct patterns on the retina
     def _update(self,current_values):
         for sheet in self.sheets_to_measure():
@@ -372,9 +377,10 @@ class ReverseCorrelation(FeatureResponses):
                     self._featureresponses[sheet][ii,jj]+=sheet.activity[ii,jj]*self.input_sheet.activity
 
 
+
 class FeatureMaps(FeatureResponses):
     """
-    Measures and collects the responses to a set of features for calculating feature maps.
+    Measure and collect the responses to a set of features, for calculating feature maps.
 
     For each feature and each sheet, the results are stored as a
     preference matrix and selectivity matrix in the sheet's
@@ -382,15 +388,19 @@ class FeatureMaps(FeatureResponses):
     or selectivity maps.
     """
 
-    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
-            doc=""" Function that will be used to analyze the distributions of unit responses.
-            Note that this default is orverriden by specific functions for features, if
-            specified in the Feature objects""" )
+    preference_fn = param.ClassSelector(DistributionStatisticFn,
+                                        default=DSF_WeightedAverage(),doc="""
+        Function for computing a scalar-valued preference,
+        selectivity, etc. from the distribution of responses.  Note
+        that this default is overridden by specific functions for
+        individual features, if specified in the Feature objects.""")
 
 
-    selectivity_multiplier = param.Number(default=17.0, doc="""
-            Scaling of the feature selectivity values applied in all feature dimensions.
-            The multiplier sets the output scaling.""")
+    selectivity_multiplier = param.Number(default=17.0,doc="""
+        Scaling of the feature selectivity values, applied in all
+        feature dimensions.  The multiplier sets the output
+        scaling.  The precise value is arbitrary, and set to match
+        historical usage.""")
 
 
     # CBENHANCEMENT: could allow full control over the generated names
@@ -398,11 +408,13 @@ class FeatureMaps(FeatureResponses):
     # ${prefix}${feature}${type} (where type is Preference or
     # Selectivity)
     sheet_views_prefix = param.String(default="",doc="""
-            Prefix to add to the name under which results are stored in sheet_views.""")
+        Prefix to add to the name under which results are stored in sheet_views.""")
+
 
     def __init__(self,features,**params):
         super(FeatureMaps,self).__init__(features,**params)
         self.features=features
+
 
     def collect_feature_responses(self,pattern_presenter,param_dict,display):
         """
@@ -416,10 +428,10 @@ class FeatureMaps(FeatureResponses):
         self.measure_responses(pattern_presenter,param_dict,self.features,display)
 
         for sheet in self.sheets_to_measure():
-            bounding_box    = sheet.bounds
-            sn              = sheet.name
-            sp              = sheet.precedence
-            sr              = sheet.row_precedence
+            bounding_box = sheet.bounds
+            sn = sheet.name
+            sp = sheet.precedence
+            sr = sheet.row_precedence
 
             for feature in self._featureresponses[sheet].keys():
             ### JCHACKALERT! This is temporary to avoid the positionpref plot to shrink
@@ -429,29 +441,30 @@ class FeatureMaps(FeatureResponses):
             ### I guess it is always cyclic value that we will color with hue in an hsv plot
             ### but still we should catch the error.
             ### Also, what happens in case of negative values?
-                fp                  = filter( lambda f: f.name==feature, self.features )[ 0 ]
-                ar                  = self._featureresponses[sheet][feature].distribution_matrix[0,0].axis_range
-                cyclic              = fp.cyclic
-                cyclic_range        = ar    if cyclic   else 1.0
-                preference_fn       = fp.preference_fn if fp.preference_fn is not None else self.preference_fn
+                fp = filter(lambda f: f.name==feature,self.features)[0]
+                ar = self._featureresponses[sheet][feature].distribution_matrix[0,0].axis_range
+                cyclic = fp.cyclic
+                cyclic_range = ar if cyclic else 1.0
+                preference_fn = fp.preference_fn if fp.preference_fn is not None else self.preference_fn
                 if self.selectivity_multiplier is not None:
-                    preference_fn.selectivity_scale = (preference_fn.selectivity_scale[0], self.selectivity_multiplier)
-                fr                  = self._featureresponses[sheet][feature]
-                response            = fr.apply_DSF( preference_fn )
-                base_name           = self.sheet_views_prefix + feature.capitalize()
+                    preference_fn.selectivity_scale = (preference_fn.selectivity_scale[0],self.selectivity_multiplier)
+                fr = self._featureresponses[sheet][feature]
+                response = fr.apply_DSF(preference_fn)
+                base_name = self.sheet_views_prefix + feature.capitalize()
 
-                for k, maps in response.items():
-                    t           = topo.sim.time()
-                    for map_name, map_view in maps.items():
-                        name                        = base_name + k + map_name.capitalize()
+                for k,maps in response.items():
+                    t = topo.sim.time()
+                    for map_name,map_view in maps.items():
+                        name = base_name + k + map_name.capitalize()
                         # JABALERT: Is this safe and general enough?
                         if map_name == 'selectivity':
-                            cyclic          = False
-                            cyclic_range    = None
-                        view                        = SheetView( (map_view, bounding_box), sn, sp, t, sr )
-                        view.cyclic                 = cyclic
-                        view.cyclic_range           = cyclic_range
-                        sheet.sheet_views[ name ]   = view
+                            cyclic = False
+                            cyclic_range = None
+                        view = SheetView((map_view,bounding_box),sn,sp,t,sr)
+                        view.cyclic = cyclic
+                        view.cyclic_range = cyclic_range
+                        sheet.sheet_views[name] = view
+
 
 
 class FeatureCurves(FeatureResponses):
@@ -475,20 +488,24 @@ class FeatureCurves(FeatureResponses):
     features.  The results can be accessed in the curve_dict,
     indexed by the curve_label and feature value.
     """
+
     post_collect_responses_hook = param.HookList(default=[],instantiate=False,doc="""
         List of callable objects to be run at the end of collect_feature_responses function.
         The functions should accept three parameters: FullMatrix, curve label, sheet""")
 
+
     def __init__(self,features,sheet,x_axis):
-        super(FeatureCurves, self).__init__(features)
+        super(FeatureCurves,self).__init__(features)
         self.sheet=sheet
         self.x_axis=x_axis
-        if hasattr(sheet, "curve_dict")==False:
+        if hasattr(sheet,"curve_dict")==False:
             sheet.curve_dict={}
         sheet.curve_dict[x_axis]={}
 
+
     def sheets_to_measure(self):
         return topo.sim.objects(CFSheet).values()
+
 
     def collect_feature_responses(self,features,pattern_presenter,param_dict,curve_label,display):
         self.initialize_featureresponses(features)
@@ -496,14 +513,18 @@ class FeatureCurves(FeatureResponses):
         bounding_box = self.sheet.bounds
         self.measure_responses(pattern_presenter,param_dict,features,display)
         self.sheet.curve_dict[self.x_axis][curve_label]={}
+
         for key in self._featureresponses[self.sheet][self.x_axis].distribution_matrix[0,0]._data.iterkeys():
             y_axis_values = np.zeros(self.sheet.shape,activity_type)
             for i in range(rows):
                 for j in range(cols):
                     y_axis_values[i,j] = self._featureresponses[self.sheet][self.x_axis].distribution_matrix[i,j].get_value(key)
-            Response = SheetView((y_axis_values,bounding_box), self.sheet.name , self.sheet.precedence, topo.sim.time(),self.sheet.row_precedence)
+            Response = SheetView((y_axis_values,bounding_box),self.sheet.name ,self.sheet.precedence,topo.sim.time(),self.sheet.row_precedence)
             self.sheet.curve_dict[self.x_axis][curve_label].update({key:Response})
+
         for f in self.post_collect_responses_hook: f(self._fullmatrix[self.sheet],curve_label,self.sheet)
+
+
 
 ###############################################################################
 ###############################################################################
@@ -511,41 +532,40 @@ class FeatureCurves(FeatureResponses):
 # Define user-level commands and helper classes for calling the above
 
 
-class Feature( param.Parameterized ):
+class Feature(param.Parameterized):
     """
-    Specifies several parameters required for generating a map of one input feature
-
+    Specifies several parameters required for generating a map of one input feature.
     """
 
-    name            = param.String( default="", doc="Name of the feature to test" )
+    name = param.String(default="",doc="Name of the feature to test")
 
-    cyclic          = param.Boolean( default=False, doc="""
-            Whether the range of this feature is cyclic (wraps around at the high end)""" )
+    cyclic = param.Boolean(default=False,doc="""
+            Whether the range of this feature is cyclic (wraps around at the high end)""")
 
-    compute_fn      = param.Callable( default=None, doc="""
+    compute_fn = param.Callable(default=None,doc="""
             If non-None, a function that when given a list of other parameter values,
-            computes and returns the value for this feature""" )
+            computes and returns the value for this feature""")
 
-    preference_fn   = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
+    preference_fn = param.ClassSelector(DistributionStatisticFn,default=DSF_WeightedAverage(),
             doc="""Function that will be used to analyze the distributions of unit response
             to this feature""")
 
-    range           = param.NumericTuple( default=(0,0), doc="""
-            lower and upper values for a feature, used to build a list of values,
-            together with the step parameter""" )
+    range = param.NumericTuple(default=(0,0), doc="""
+            lower and upper values for a feature,used to build a list of values,
+            together with the step parameter""")
 
-    step            = param.Number( default=0.0, doc="""
+    step = param.Number(default=0.0,doc="""
             increment used to build a list of values for this feature, together with
-            the range parameter""" )
+            the range parameter""")
 
-    offset          = param.Number( default=0.0, doc="offset to add to the values for this feature" )
+    offset = param.Number(default=0.0,doc="offset to add to the values for this feature")
 
-    values          = param.List(default=[], doc="""
+    values = param.List(default=[],doc="""
             explicit list of values for this feature, used in alternative to the range
-            and step parameters""" )
+            and step parameters""")
 
 
-    def __init__(self, **params ):
+    def __init__(self,**params):
         """
         Users can provide either a range and a step size, or a list of values.
         If a list of values is supplied, the range can be omitted unless the
@@ -559,20 +579,21 @@ class Feature( param.Parameterized ):
 
         """
 
-        super( Feature, self ).__init__( **params )
+        super(Feature,self).__init__(**params)
 
-        if len( self.values ):
+        if len(self.values):
             self.values = self.values if self.offset == 0 else [v+self.offset for v in self.values]
-            if self.range == ( 0, 0 ):
-                self.range = ( min(self.values), max(self.values) )
+            if self.range == (0,0):
+                self.range = (min(self.values),max(self.values))
         else:
-            if self.range == ( 0, 0 ):
+            if self.range == (0,0):
                 raise ValueError('The range or values must be specified.')
             low_bound,up_bound = self.range
-            self.values = frange( low_bound, up_bound, self.step, not self.cyclic )
+            self.values = frange(low_bound,up_bound,self.step,not self.cyclic)
             self.values = self.values if self.offset == 0 else \
                     [(v + self.offset) % (up_bound - low_bound) if self.cyclic else (v + self.offset)
                     for v in self.values]
+
 
 
 class PatternPresenter(param.Parameterized):
@@ -593,7 +614,7 @@ class PatternPresenter(param.Parameterized):
     # JABALERT: Needs documenting; apparently only for retinotopy?
     divisions = param.Parameter()
 
-    apply_output_fns = param.Boolean(default=True, doc="""
+    apply_output_fns = param.Boolean(default=True,doc="""
         When presenting a pattern, whether to apply each sheet's
         output function.  If False, for many networks the response
         will be linear, which requires fewer test patterns to measure
@@ -614,12 +635,12 @@ class PatternPresenter(param.Parameterized):
 
     # CEBALERT: generator_sheets=[] is probably a surprising way of
     # actually getting all the generator sheets.
-    generator_sheets = param.List(default=[], doc="""
+    generator_sheets = param.List(default=[],doc="""
         The set of GeneratorSheets onto which patterns will be drawn.
 
         By default (i.e. for an empty list), all GeneratorSheets in
-        the simulation will be used.
-        """)
+        the simulation will be used.""")
+
 
     def __init__(self,pattern_generator,**params):
         """
@@ -876,8 +897,9 @@ class PatternPresenter(param.Parameterized):
         for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
             inputs[sheet_name]=pattern.Constant(scale=0)
 
-        measure_response(inputs, duration=self.duration, plastic=False,
+        measure_response(inputs,duration=self.duration,plastic=False,
                      apply_output_fns=self.apply_output_fns)
+
 
 
 class Subplotting(param.Parameterized):
@@ -1021,7 +1043,7 @@ class Subplotting(param.Parameterized):
 #
 #      from topo.command.analysis import Feature
 #      from math import pi
-#      pre_plot_hooks=[measure_or_pref.instance( \
+#      pre_plot_hooks=[measure_or_pref.instance(\
 #         frequency_feature=Feature(name="frequency",values=frange(1.0,6.0,0.2)), \
 #         phase_feature=Feature(name="phase",range=(0.0,2*pi),step=2*pi/15,cyclic=True), \
 #         orientation_feature=Feature(name="orientation",range=(0.0,pi),step=pi/4,cyclic=True)])
@@ -1054,13 +1076,16 @@ class PatternPresentingCommand(ParameterizedFunction):
         stored in sheet_views. Can be used e.g. to distinguish maps as
         originating from a particular GeneratorSheet.""")
 
-def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
+
+
+def update_sheet_activity(sheet_name,sheet_views_prefix='',force=False):
     """
-    Updated the 'Activity' SheetView for a given sheet by name.
+    Update the 'Activity' SheetView for a given sheet by name.
 
     If force is False and the existing Activity SheetView isn't stale,
     this existing view is returned.
     """
+
     sheet = topo.sim.objects(Sheet)[sheet_name]
     if not force and sheet.sheet_views.get('Activity',False):
         existing_view = sheet.sheet_views['Activity']
@@ -1068,10 +1093,12 @@ def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
             return existing_view
 
     updated_view =  SheetView((np.array(sheet.activity),sheet.bounds),
-                              sheet.name,sheet.precedence,topo.sim.time(), sheet.row_precedence)
+                              sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
     sheet.sheet_views[sheet_views_prefix+'Activity'] = updated_view
 
-def update_activity(sheet_views_prefix='', force=False):
+
+
+def update_activity(sheet_views_prefix='',force=False):
     """
     Make a map of neural activity available for each sheet, for use in template-based plots.
 
@@ -1080,8 +1107,10 @@ def update_activity(sheet_views_prefix='', force=False):
     some sheets providing this information may be non-trivial, e.g. if
     they need to average over recent spiking activity.
     """
+
     for sheet_name in topo.sim.objects(Sheet).keys():
-        update_sheet_activity(sheet_name, sheet_views_prefix, force)
+        update_sheet_activity(sheet_name,sheet_views_prefix,force)
+
 
 
 class measure_response(PatternPresentingCommand):
@@ -1113,31 +1142,33 @@ class measure_response(PatternPresentingCommand):
     (display=True).
     """
 
-    inputs = param.Dict(default={}, doc="""
-     A dictionary of GeneratorSheetName:PatternGenerator pairs to be
-    installed into the specified GeneratorSheets""")
+    inputs = param.Dict(default={},doc="""
+        A dictionary of GeneratorSheetName:PatternGenerator pairs to be
+        installed into the specified GeneratorSheets""")
 
-    plastic=param.Boolean(default=False, doc="""
-    If plastic is False, overwrites the existing values of
-    Sheet.plastic to disable plasticity, then reenables plasticity.""")
+    plastic=param.Boolean(default=False,doc="""
+        If plastic is False, overwrites the existing values of
+        Sheet.plastic to disable plasticity, then reenables plasticity.""")
 
-    overwrite_previous=param.Boolean(default=False, doc="""
-    If overwrite_previous is true, the given inputs overwrite those
-    previously defined.""")
+    overwrite_previous=param.Boolean(default=False,doc="""
+        If overwrite_previous is true, the given inputs overwrite those
+        previously defined.""")
 
     apply_output_fns=param.Boolean(default=True)
 
-    restore_state = param.Boolean(default=True, doc="""
-    If restore_state is true, the simulation events and sheet
-    activities are restored after the response is measured""")
+    restore_state = param.Boolean(default=True,doc="""
+        If True, restore the state of both sheet activities and simulation events
+        after the response has been measured.  Implies restore_events.""")
 
-    restore_events = param.Boolean(default=True, doc="""
-    If restore_events is true, only the simulation events are restored
-    after the response is measured""")
+    restore_events = param.Boolean(default=True,doc="""
+        If True, restore simulation events after the response has been measured,
+        so that no simulation time will have elapsed.  Implied by
+        restore_state=True.""")
 
-    def __call__(self, inputs={}, **params_to_override):
 
-        p=ParamOverrides(self, dict(params_to_override, inputs=inputs))
+    def __call__(self,inputs={},**params_to_override):
+
+        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
         # ensure EPs get started (if pattern_present is called before the simulation is run())
         topo.sim.run(0.0)
 
@@ -1190,7 +1221,9 @@ class measure_response(PatternPresentingCommand):
         if not p.overwrite_previous:
             restore_input_generators()
 
-        update_activity(p.sheet_views_prefix, force=True)
+        update_activity(p.sheet_views_prefix,force=True)
+
+
 
 class MeasureResponseCommand(PatternPresentingCommand):
     """Parameterized command for presenting input patterns and measuring responses."""
@@ -1204,7 +1237,7 @@ class MeasureResponseCommand(PatternPresentingCommand):
     display = param.Boolean(default=False,doc="""
         Whether to update a GUI display (if any) during the map measurement.""")
 
-    weighted_average= param.Boolean(default=True, doc="""
+    weighted_average= param.Boolean(default=True,doc="""
         Whether to compute results using a weighted average, or just
         discrete values.  A weighted average can give more precise
         results, without being limited to a set of discrete values,
@@ -1224,7 +1257,7 @@ class MeasureResponseCommand(PatternPresentingCommand):
 
     subplot = param.String("",doc="""Name of map to register as a subplot, if any.""")
 
-    apply_output_fns = param.Boolean(default=None, doc="""
+    apply_output_fns = param.Boolean(default=None,doc="""
         If non-None, pattern_presenter.apply_output_fns will be
         set to this value.  Provides a simple way to set
         this commonly changed option of PatternPresenter.""")
@@ -1234,8 +1267,8 @@ class MeasureResponseCommand(PatternPresentingCommand):
         The default value of [] results in all GeneratorSheets being
         used.""")
 
-    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_MaxValue(),
-            doc="""Function that will be used to analyze the distributions of unit responses.""" )
+    preference_fn = param.ClassSelector(DistributionStatisticFn,default=DSF_MaxValue(),
+            doc="""Function that will be used to analyze the distributions of unit responses.""")
 
     __abstract = True
 
@@ -1290,8 +1323,8 @@ class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
 
     scale = param.Number(default=0.3)
 
-    preference_fn = param.ClassSelector( DistributionStatisticFn, default=DSF_WeightedAverage(),
-            doc="""Function that will be used to analyze the distributions of unit responses.""" )
+    preference_fn = param.ClassSelector(DistributionStatisticFn,default=DSF_WeightedAverage(),
+            doc="""Function that will be used to analyze the distributions of unit responses.""")
 
     __abstract = True
 
@@ -1322,7 +1355,6 @@ class PositionMeasurementCommand(MeasureResponseCommand):
     static_parameters = param.List(default=["scale","offset","size"])
 
     __abstract = True
-
 
 
 
@@ -1430,6 +1462,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
         return val
 
 
+
 class UnitCurveCommand(FeatureCurveCommand):
     """
     Measures tuning curve(s) of particular unit(s).
@@ -1446,6 +1479,7 @@ class UnitCurveCommand(FeatureCurveCommand):
         List of coordinates of units to measure.""")
 
     __abstract = True
+
 
 
 __all__ = [
