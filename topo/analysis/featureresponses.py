@@ -1076,6 +1076,8 @@ class PatternPresentingCommand(ParameterizedFunction):
         stored in sheet_views. Can be used e.g. to distinguish maps as
         originating from a particular GeneratorSheet.""")
 
+    __abstract = True
+
 
 
 def update_sheet_activity(sheet_name,sheet_views_prefix='',force=False):
