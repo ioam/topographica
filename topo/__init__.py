@@ -378,8 +378,9 @@ except:
 
 
 try:
-    from base.sheet import MultiDict
+    from base.sheet import MultiDict,AttrDict
     MultiDict.time_fn = sim.time
+    AttrDict.time_fn = sim.time
 except:
     raise Exception('Could set MultiDict time_fn to topo.sim.time()')
 

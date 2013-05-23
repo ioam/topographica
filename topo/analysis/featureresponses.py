@@ -392,7 +392,7 @@ class ReverseCorrelation(FeatureResponses):
 
     def _rf_valid_view(self,sheet_views,sheet,r,c):
         key = self._rf_view_key(sheet,r,c)
-        if sheet_views.get(key, False):
+        if sheet_views.get(key, False) and isinstance(sheet_views[key],SheetView):
             return sheet_views[key].timestamp == topo.sim.time()
         else:
             return False

@@ -41,15 +41,46 @@ except:
     OrderedDict = None
 
 
-class AttrDict(defaultdict):
+class AttrDict(defaultdict,param.Parameterized):
     """
     A dictionary type object that supports attribute access (e.g. for
     IPython tab completion).
     """
 
+    time_fn = param.Callable(default=lambda: None)
+
+    timestamp = param.Number(default=None)
+    
     def __init__(self, *args, **kwargs):
+        self.timestamp = self.time_fn()
         super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
+
+    def __dir__(self):
+        """
+        Extend dir() to include the latest SheetViews.
+        """
+        default_dir = dir(type(self)) + list(self.__dict__)
+        keys = [key.replace(' ','___').replace('%','pct').replace('=','eq') for key in self.keys() if isinstance(key,str)]
+        keys += [str(key).replace('.','_') for key in self.keys() if isinstance(key,float)]
+        return sorted(set(default_dir + keys))
+
+    def __getattr__(self, name):
+        """
+        Provide a simpler attribute-like syntax for accesing the
+        latest SheetViews.
+        """
+        if '___' in name:
+            name = name.replace('___','_')
+            name = name.replace('pct','%')        
+            name = name.replace('eq','=')
+            name = name.replace('_',' ')
+        if isinstance(name,str) and name[0].isdigit():
+            name = name.replace('_','.')
+            name = float(name)
+        if name in self.keys():
+            return self[name]
+        else:
+            raise AttributeError
 
 def attrtree():
        ' Simple yet flexible tree datastructure '
@@ -64,7 +95,8 @@ class MultiDict(dict):
     def __init__(self):
         self._buffer = [] # List of tuples (timestamp, attrdict)
         self._latest_items = attrtree()
-
+        self.initialized=True
+        
     def get(self,key,default=None):
         if key in self.keys():
             return self._latest_items[key]
@@ -82,21 +114,45 @@ class MultiDict(dict):
         Extend dir() to include the latest SheetViews.
         """
         default_dir = dir(type(self)) + list(self.__dict__)
-        return sorted(set(default_dir + self.keys()))
+        keys = [key for key in self.keys() if not isinstance(key,tuple)] 
+        keys += ['__'.join(str(el) for el in key).replace('.','_').replace('-','m')
+                 for key in self.keys() if isinstance(key,tuple) and len(key)==4]
+
+        return sorted(set(default_dir + keys))
 
     def __getattr__(self, name):
         """
         Provide a simpler attribute-like syntax for accesing the
         latest SheetViews.
         """
-        if name in self.keys():
-            return self._latest_items[name]
-        else:
-            raise AttributeError
+        if name.count('__') == 3:
+            name = name.replace('__m','__-')
+            name = name.split('__')
+            name[2] = float(name[2].replace('_','.'))
+            name[3] = float(name[3].replace('_','.'))
+            name = tuple(name)
+        if name in self.__dict__.keys():
+            return self.__dict__[name]
+        return self._latest_items[name]
+        
 
     def __contains__(self,key):
-        return key in self.keys()
+        return key in self._latest_items.keys()
 
+    def _update_latest_items(self):
+        # for idx,_buffer in enumerate(self._buffer): # OPTIMIZE to avoid overwriting of stale SheetViews
+        #     _buffer.keys() # IDENTIFY latest timestamp for each measurement (always overwrite AttrDict items as SheetViews and timestamp are too deeply recursive) maybe give attrdicts timestamps
+        for _buffer in self._buffer:
+            for key, item in _buffer[1].items():
+                self._latest_items[key] = item    
+
+    def _lookup_latest(self,val):
+        adict = self._get_latest_dict(self.time_fn())
+        if val not in adict.keys():
+            adict[val]
+        self._update_latest_items()
+        return self._latest_items[val]
+        
     def __getitem__(self, val):
         """
         If indexed by string, return corresponding value from latest
@@ -112,7 +168,7 @@ class MultiDict(dict):
         Usual slicing semantics supported.
         """
         if isinstance(val,str):
-            return self._latest_items[val]
+            return self._lookup_latest(val)
         if isinstance(val, int):
             return self._buffer[val][1]
         if isinstance(val,tuple):
@@ -120,15 +176,15 @@ class MultiDict(dict):
                 (start, stop) = val
                 return [el[1] for el in self._buffer[self.timeslice(start, stop)]]
             else:
-                return self._latest_items[val] # RFs keys use tuples
+                return self._lookup_latest(val) # RFs keys use tuples
         if isinstance(val, slice):
             return [el[1] for el in self._buffer[val]]
 
     def __setitem__(self, key, value):
         adict = self._get_latest_dict(self.time_fn())
         adict[key] = value
-        self._latest_items[key] = value
-
+        self._latest_items[key] = adict[key]
+        
     def _get_latest_dict(self, timestamp):
         """
         Returns the attribute dictionary corresponding to the
@@ -137,6 +193,7 @@ class MultiDict(dict):
         if len(self._buffer)==0 or self._buffer[-1][0] != timestamp:
             if len(self._buffer) == self.depth:
                 self._buffer.pop(0)
+            
             new_adict = attrtree()
             timestamps = [el[0] for el in self._buffer]
             insert_index = bisect.bisect_left(timestamps, timestamp)
