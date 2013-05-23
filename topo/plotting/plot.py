@@ -268,7 +268,7 @@ class TemplatePlot(Plot):
     def _get_shape_and_box(self):
         """
         Sub-function used by plot: get the matrix shape and the bounding box
-        of the SheetViews that constitue the TemplatePlot.
+        of the SheetViews that constitute the TemplatePlot.
         """
         for name in self.channels.values():
                 sv = self.view_dict.get(name,None)
