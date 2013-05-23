@@ -1158,7 +1158,7 @@ class measure_response(PatternPresentingCommand):
 
     apply_output_fns=param.Boolean(default=True)
 
-    restore_state = param.Boolean(default=True,doc="""
+    restore_state = param.Boolean(default=False,doc="""
         If True, restore the state of both sheet activities and simulation events
         after the response has been measured.  Implies restore_events.""")
 
