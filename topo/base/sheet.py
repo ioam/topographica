@@ -51,60 +51,49 @@ class AttrDict(defaultdict):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
-    # def __dir__(self):
-    #     """
-    #     Extend dir() to include the latest SheetViews.
-    #     """
-    #     default_dir = dir(type(self)) + list(self.__dict__)
-    #     #keys = [key.replace(' ','___').replace('%','pct').replace('=','eq') for key in self.keys() if isinstance(key,str)]
-    #     #keys += [str(key).replace('.','_') for key in self.keys() if isinstance(key,float)]
-    #     keys = [key for key in self.keys() if isinstance(key,str)]
-    #     return sorted(set(default_dir + keys))
-
-    # def __getattr__(self, name):
-    #     """
-    #     Provide a simpler attribute-like syntax for accesing the
-    #     latest SheetViews.
-    #     """
-    #     # if '___' in name:
-    #     #     name = name.replace('___','_')
-    #     #     name = name.replace('pct','%')
-    #     #     name = name.replace('eq','=')
-    #     #     name = name.replace('_',' ')
-    #     # if isinstance(name,str) and name[0].isdigit():
-    #     #     name = name.replace('_','.')
-    #     #     name = float(name)
-    #     if name in self.keys():
-    #         return self[name]
-    #     else:
-    #         raise AttributeError
 
 def attrtree():
-       ' Simple yet flexible tree datastructure '
-       return AttrDict(attrtree)
+    """
+    Returns AttrDict tree data structure by setting default item to
+    recurrently call this function.
+    """
+    return AttrDict(attrtree)
+
 
 class MultiDict(dict):
+    """
+    Implements a tree data structure with a variable length buffer and
+    an API exposing the most recent item matching a given key.
 
-    depth = param.Integer(default=5)
+    In addition to exposing the latest items to all regular dict
+    operations, MultiDict allows slicing operations in time.
+
+    Indexing by tuple:
+    e.g. topo.sim.V1.sheet_view[(start,stop)]
+    returns a list of tree data structures in the specified timeframe.
+
+    Indexing by integer:
+    e.g. topo.sim.V1.sheet_views[N]
+    returns tree datastructure in the Nth position of the buffer.
+
+    Indexing by integer slice:
+    e.g. topo.sim.V1.sheet_views[N:M]
+    returns tree datastructure in range from N to M of the buffer.
+
+    Indexing by string or four entry tuple:
+    e.g. topo.sim.V1.sheet_views['string'] or [('Type','Sheet',x,y)]
+    returns tree datastructure with key string.
+    """
+
+    buffer_width = param.Integer(default=5)
 
     time_fn = param.Callable(default=lambda: None)
 
     def __init__(self):
         self._buffer = [] # List of tuples (timestamp, attrdict)
-        self._latest_items = attrtree()
+        self._latest_items = AttrDict()
 
-    def get(self,key,default=None):
-        if key in self.keys():
-            return self._latest_items[key]
-        else:
-            return default
-
-    def keys(self):
-        return self._latest_items.keys()
-
-    def items(self):
-        return self._latest_items.items()
-
+        
     def __dir__(self):
         """
         Extend dir() to include the latest SheetViews.
@@ -112,42 +101,17 @@ class MultiDict(dict):
         default_dir = dir(type(self)) + list(self.__dict__)
         return sorted(set(default_dir + self.keys()))
 
-        #keys = [key for key in self.keys() if not isinstance(key,tuple)]
-        # keys += ['__'.join(str(el) for el in key).replace('.','_').replace('-','m')
-        #          for key in self.keys() if isinstance(key,tuple) and len(key)==4]
-
-        #return sorted(set(default_dir + keys))
 
     def __getattr__(self, name):
         """
         Provide a simpler attribute-like syntax for accesing the
-        latest SheetViews.
+        latest items.
         """
-        # if name.count('__') == 3:
-        #     name = name.replace('__m','__-')
-        #     name = name.split('__')
-        #     name[2] = float(name[2].replace('_','.'))
-        #     name[3] = float(name[3].replace('_','.'))
-        #     name = tuple(name)
         if '_latest_items' in self.__dict__.keys():
             if name in self.__dict__['_latest_items'].keys():
                 return self._latest_items[name]
         super(MultiDict,self).__getattr__(name)
-        # if name in self.__dict__.keys():
-        #     return self.__dict__[name]
-        # raise AttributeError
 
-
-    def __contains__(self,key):
-        return key in self._latest_items.keys()
-
-    def _update_latest_items(self):
-        # for idx,_buffer in enumerate(self._buffer): # OPTIMIZE to avoid overwriting of stale SheetViews
-        #     _buffer.keys() # IDENTIFY latest timestamp for each measurement (always overwrite AttrDict items as SheetViews and timestamp are too deeply recursive) maybe give attrdicts timestamps
-        self._latest_items = attrtree()
-        for _buffer in self._buffer:
-            for key, item in _buffer[1].items():
-                self._latest_items[key] = item
 
     def __getitem__(self, val):
         """
@@ -161,10 +125,10 @@ class MultiDict(dict):
         from the specified time interval as a list. When start or stop
         are None the usual Python slicing semantics apply.
 
-        Usual slicing semantics supported.
+        Python slicing also supported.
         """
         if isinstance(val,str):
-            if val not in self.keys():
+            if val not in self._latest_items.keys():
                 raise KeyError(val)
             return self._latest_items[val]
         if isinstance(val, int):
@@ -180,7 +144,12 @@ class MultiDict(dict):
         if isinstance(val, slice):
             return [el[1] for el in self._buffer[val]]
 
+        
     def __setitem__(self, key, value):
+        """
+        Creates entry in current buffer and in the latest items dict.
+        If add
+        """
         if value=={}:
             adict = self._get_latest_dict(self.time_fn())
             adict[key]
@@ -190,20 +159,25 @@ class MultiDict(dict):
             adict[key] = value
             self._latest_items[key] = adict[key]
 
+            
     def __delitem__(self,key):
+        """
+        Deletes item from entire buffer and updates latest items to
+        remove reference.
+        """
         for _buffer in self._buffer:
             del _buffer[1][key]
         self._update_latest_items()
 
+        
     def _get_latest_dict(self, timestamp):
         """
-        Returns the attribute dictionary corresponding to the
-        specified timestamp.
+        Returns the AttrDict corresponding to the specified timestsamp
+        or creates a new one if none matching the time stamp exist.
         """
         if len(self._buffer)==0 or self._buffer[-1][0] != timestamp:
-            if len(self._buffer) == self.depth:
+            if len(self._buffer) == self.buffer_width:
                 self._buffer.pop(0)
-
             new_adict = attrtree()
             timestamps = [el[0] for el in self._buffer]
             insert_index = bisect.bisect_left(timestamps, timestamp)
@@ -212,6 +186,55 @@ class MultiDict(dict):
         else:
             (time, last_adict) = self._buffer[-1]
             return last_adict
+
+
+    def _update_latest_items(self):
+        """
+        Resets and populates _latest_items with most recent items in
+        the buffer.
+
+        #PRNOTE: Could be optimized, currently goes through all items in the
+        data structure overwriting items older with newer items until
+        the tree is up to date.
+        """
+        self._latest_items = attrtree()
+        for _buffer in self._buffer:
+            for key, item in _buffer[1].items():
+                self._latest_items[key] = item
+
+        
+    def get(self,key,default=None):
+        """
+        Returns latest item matching specified key, if there is no
+        matching key returns supplied default or None.
+        """
+        if key in self.keys():
+            return self._latest_items[key]
+        else:
+            return default
+
+        
+    def has_key(self,key):
+        return True if key in self.keys() else False
+
+        
+    def keys(self):
+        """
+        Returns keys most recent items.
+        """
+        return self._latest_items.keys()
+
+        
+    def items(self):
+        """
+        Returns the most recent items.
+        """
+        return self._latest_items.items()
+
+        
+    def __contains__(self,key):
+        return key in self._latest_items.keys()
+
 
     def timeslice(self, start=None, stop=None):
         """
