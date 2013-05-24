@@ -1080,18 +1080,8 @@ def update_activity(sheet_views_prefix='', force=False):
     some sheets providing this information may be non-trivial, e.g. if
     they need to average over recent spiking activity.
     """
-<<<<<<< HEAD
-    for sheet in topo.sim.objects(Sheet).values():
-        # update only if plot_view is True.
-       if sheet.plot_view is True:
-           activity_copy = np.array(sheet.activity)
-           new_view = SheetView((activity_copy,sheet.bounds),
-                                sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
-           sheet.sheet_views[sheet_views_prefix+'Activity']=new_view
-=======
     for sheet_name in topo.sim.objects(Sheet).keys():
         update_sheet_activity(sheet_name, sheet_views_prefix, force)
->>>>>>> upstream/master
 
 
 class measure_response(PatternPresentingCommand):
