@@ -244,7 +244,10 @@ class HomeostaticResponse(TransferFnWithState):
 
     def _apply_threshold(self,x):
         """Applies the piecewise-linear thresholding operation to the activity."""
-        x -= self.t; clip_lower(x,0); x *= self.linear_slope
+        x -= self.t
+        clip_lower(x,0)
+        if self.linear_slope != 1.0:
+            x *= self.linear_slope 
 
 
     def _update_threshold(self, prev_t, x, prev_avg, smoothing, learning_rate, target_activity):
