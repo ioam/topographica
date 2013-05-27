@@ -25,7 +25,7 @@ import Image,ImageDraw
 
 import copy
 
-from numpy.oldnumeric import array, maximum
+from numpy.oldnumeric import maximum
 from numpy import pi, sin, cos, nonzero, round, linspace, floor, ceil
 
 import param
@@ -47,7 +47,7 @@ from topo.plotting.plotgroup import create_plotgroup, plotgroups
 from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
 from topo.analysis.featureresponses import Feature, PatternPresenter, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
-from topo.analysis.featureresponses import update_activity, update_sheet_activity, measure_response
+from topo.analysis.featureresponses import update_activity
 from topo.base.patterngenerator import PatternGenerator
 from topo.command import pattern_present
 
