@@ -898,7 +898,7 @@ class PatternPresenter(param.Parameterized):
             inputs[sheet_name]=pattern.Constant(scale=0)
 
         measure_response(inputs,duration=self.duration,plastic=False,
-                     apply_output_fns=self.apply_output_fns)
+                     apply_output_fns=self.apply_output_fns, restore_state=False, restore_events=True)
 
 
 
@@ -1158,7 +1158,7 @@ class measure_response(PatternPresentingCommand):
 
     apply_output_fns=param.Boolean(default=True)
 
-    restore_state = param.Boolean(default=False,doc="""
+    restore_state = param.Boolean(default=True,doc="""
         If True, restore the state of both sheet activities and simulation events
         after the response has been measured.  Implies restore_events.""")
 
