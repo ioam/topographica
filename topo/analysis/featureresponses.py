@@ -476,13 +476,9 @@ class FeatureMaps(FeatureResponses):
                     t = topo.sim.time()
                     for map_name,map_view in maps.items():
                         name = base_name + k + map_name.capitalize()
-                        # JABALERT: Is this safe and general enough?
-                        if map_name == 'selectivity':
-                            cyclic = False
-                            cyclic_range = None
                         view = SheetView((map_view,bounding_box),sn,sp,t,sr)
-                        view.cyclic = cyclic
-                        view.cyclic_range = cyclic_range
+                        view.cyclic                 = False if map_name == 'selectivity' else fp.cyclic
+                        view.cyclic_range           = None if map_name == 'selectivity' else cyclic_range
                         sheet.sheet_views[name] = view
 
 
@@ -918,7 +914,7 @@ class PatternPresenter(param.Parameterized):
             inputs[sheet_name]=pattern.Constant(scale=0)
 
         measure_response(inputs,duration=self.duration,plastic=False,
-                     apply_output_fns=self.apply_output_fns)
+                     apply_output_fns=self.apply_output_fns, restore_state=False, restore_events=True)
 
 
 
@@ -1178,7 +1174,7 @@ class measure_response(PatternPresentingCommand):
 
     apply_output_fns=param.Boolean(default=True)
 
-    restore_state = param.Boolean(default=False,doc="""
+    restore_state = param.Boolean(default=True,doc="""
         If True, restore the state of both sheet activities and simulation events
         after the response has been measured.  Implies restore_events.""")
 

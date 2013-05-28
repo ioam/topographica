@@ -110,7 +110,7 @@ less flexible development in C++.
 
 `Emergent`_
 
-Formerly called **PDP++**, Emergent focuses on simulating neural
+Formerly called PDP++, Emergent focuses on simulating neural
 networks of various types, for either engineering or cognitive
 science applications. Although there is support for networks
 arranged as maps (e.g. Kohonen SOMs), the interface is designed to

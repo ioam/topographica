@@ -704,6 +704,7 @@ class SomeTimer(param.Parameterized):
                                  duration=fduration,
                                  remaining=estimate)
 
+            ## JABALERT: Needs to be fixed to avoid calling topo from base/
             ## HACK refresh windows for camera in simulation time
             import topo
             if hasattr(topo, 'guimain'):
