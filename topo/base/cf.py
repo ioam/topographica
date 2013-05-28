@@ -668,11 +668,13 @@ class CFProjection(Projection):
         return self.cfs[r,c].get_bounds(self.src)
 
 
-    def get_view(self, sheet_x, sheet_y, timestamp):
+    def get_view(self, sheet_x, sheet_y, timestamp=None):
         """
         Return a single connection field UnitView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
+        if timestamp is None:
+            timestamp = self.src.simulation.time()
         matrix_data = np.zeros(self.src.activity.shape,dtype=np.float64)
         (r,c) = self.dest.sheet2matrixidx(sheet_x,sheet_y)
         r1,r2,c1,c2 = self.cfs[r,c].input_sheet_slice
