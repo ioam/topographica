@@ -456,13 +456,9 @@ class FeatureMaps(FeatureResponses):
                     t = topo.sim.time()
                     for map_name,map_view in maps.items():
                         name = base_name + k + map_name.capitalize()
-                        # JABALERT: Is this safe and general enough?
-                        if map_name == 'selectivity':
-                            cyclic = False
-                            cyclic_range = None
                         view = SheetView((map_view,bounding_box),sn,sp,t,sr)
-                        view.cyclic = cyclic
-                        view.cyclic_range = cyclic_range
+                        view.cyclic                 = False if map_name == 'selectivity' else fp.cyclic
+                        view.cyclic_range           = None if map_name == 'selectivity' else cyclic_range
                         sheet.sheet_views[name] = view
 
 
