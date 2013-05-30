@@ -900,10 +900,10 @@ def pattern_present(inputs={}, duration=1.0, plastic=False,
     from the sheet_views dictionary of the respective sheets.
 
     This function is a backward compatibility wrapper of the
-    measure_response class.
+    pattern_response class.
     """
-    from analysis import measure_response
-    measure_response(inputs=inputs, duration=duration, plastic=plastic,
+    from analysis import pattern_response
+    pattern_response(inputs=inputs, duration=duration, plastic=plastic,
                      overwrite_previous=overwrite_previous,
                      apply_output_fns=apply_output_fns,
                      restore_state=False, restore_events=True, **kwargs)

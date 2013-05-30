@@ -48,7 +48,7 @@ from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasur
 from topo.analysis.featureresponses import Feature, PatternPresenter, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
 from topo.analysis.featureresponses import update_activity
-from topo.analysis.featureresponses import update_sheet_activity, measure_response # pyflakes:ignore (API import)
+from topo.analysis.featureresponses import update_sheet_activity, pattern_response # pyflakes:ignore (API import)
 from topo.base.patterngenerator import PatternGenerator
 from topo.command import pattern_present
 

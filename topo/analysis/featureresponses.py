@@ -894,7 +894,7 @@ class PatternPresenter(param.Parameterized):
         for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
             inputs[sheet_name]=pattern.Constant(scale=0)
 
-        measure_response(inputs,duration=self.duration,plastic=False,
+        pattern_response(inputs,duration=self.duration,plastic=False,
                      apply_output_fns=self.apply_output_fns, restore_state=False, restore_events=True)
 
 
@@ -1112,7 +1112,7 @@ def update_activity(sheet_views_prefix='',force=False):
 
 
 
-class measure_response(PatternPresentingCommand):
+class pattern_response(PatternPresentingCommand):
     """
     This command presents the specified test patterns for the
     specified duration and saves the resulting activity to the
