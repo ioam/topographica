@@ -434,6 +434,7 @@ class FeatureMaps(FeatureResponses):
             sr = sheet.row_precedence
 
             for feature in self._featureresponses[sheet].keys():
+            ### JABALERT: I'm not sure what any of the text in the following alert means. :-)
             ### JCHACKALERT! This is temporary to avoid the positionpref plot to shrink
             ### Nevertheless we should think more about this (see alert in bitmap.py)
             ### When passing a sheet_view that is not cropped to 1 in the parameter hue of hsv_to_rgb
@@ -443,8 +444,7 @@ class FeatureMaps(FeatureResponses):
             ### Also, what happens in case of negative values?
                 fp = filter(lambda f: f.name==feature,self.features)[0]
                 ar = self._featureresponses[sheet][feature].distribution_matrix[0,0].axis_range
-                cyclic = fp.cyclic
-                cyclic_range = ar if cyclic else 1.0
+                cyclic_range = ar if fp.cyclic else 1.0
                 preference_fn = fp.preference_fn if fp.preference_fn is not None else self.preference_fn
                 if self.selectivity_multiplier is not None:
                     preference_fn.selectivity_scale = (preference_fn.selectivity_scale[0],self.selectivity_multiplier)
@@ -457,8 +457,9 @@ class FeatureMaps(FeatureResponses):
                     for map_name,map_view in maps.items():
                         name = base_name + k + map_name.capitalize()
                         view = SheetView((map_view,bounding_box),sn,sp,t,sr)
-                        view.cyclic                 = False if map_name == 'selectivity' else fp.cyclic
-                        view.cyclic_range           = None if map_name == 'selectivity' else cyclic_range
+                        # Special case: selectivity is not cyclic even if the feature is
+                        view.cyclic       = False if map_name == 'selectivity' else fp.cyclic
+                        view.cyclic_range = None  if map_name == 'selectivity' else cyclic_range
                         sheet.sheet_views[name] = view
 
 
