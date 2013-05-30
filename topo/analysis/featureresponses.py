@@ -171,6 +171,12 @@ class FeatureResponses(PatternDrivenAnalysis):
         so that results will be an average over the specified
         number of repetitions.""")
 
+
+    enable_fullmatrix = param.Boolean(default=False,doc="""
+        Determines whether or not store the full matrix of feature
+        responses as a class attribute.""")
+
+
     _fullmatrix = {}
 
 
@@ -185,7 +191,8 @@ class FeatureResponses(PatternDrivenAnalysis):
         """Create an empty DistributionMatrix for each feature and each sheet."""
         self._featureresponses = {}
         self._activities = {}
-        FeatureResponses._fullmatrix = {}
+        if self.enable_fullmatrix:
+            FeatureResponses._fullmatrix = {}
         for sheet in self.sheets_to_measure():
             self._featureresponses[sheet] = {}
             self._activities[sheet]=np.zeros(sheet.shape)
@@ -194,7 +201,8 @@ class FeatureResponses(PatternDrivenAnalysis):
                 # "keep_peak=f.keep_peak". Couldn't these things be
                 # passed around in a less fragile way?
                 self._featureresponses[sheet][f.name]=DistributionMatrix(sheet.shape,axis_range=f.range,cyclic=f.cyclic)
-            FeatureResponses._fullmatrix[sheet] = FullMatrix(sheet.shape,features)
+            if self.enable_fullmatrix:
+                FeatureResponses._fullmatrix[sheet] = FullMatrix(sheet.shape,features)
 
     def sheets_to_measure(self):
         """Return a list of the Sheets in the current simulation for which to collect responses."""
@@ -283,7 +291,8 @@ class FeatureResponses(PatternDrivenAnalysis):
         for sheet in self.sheets_to_measure():
             for feature,value in current_values:
                 self._featureresponses[sheet][feature].update(self._activities[sheet],value)
-            FeatureResponses._fullmatrix[sheet].update(self._activities[sheet],current_values)
+            if self.enable_fullmatrix:
+                FeatureResponses._fullmatrix[sheet].update(self._activities[sheet],current_values)
 
 
 
@@ -519,7 +528,10 @@ class FeatureCurves(FeatureResponses):
             Response = SheetView((y_axis_values,bounding_box),self.sheet.name ,self.sheet.precedence,topo.sim.time(),self.sheet.row_precedence)
             self.sheet.curve_dict[self.x_axis][curve_label].update({key:Response})
 
-        for f in self.post_collect_responses_hook: f(self._fullmatrix[self.sheet],curve_label,self.sheet)
+        if self.enable_fullmatrix:
+            for f in self.post_collect_responses_hook: f(self._fullmatrix[self.sheet],curve_label,self.sheet)
+        elif len(self.post_collect_responses_hook) > 0:
+            self.warning("Post_collect_responses_hooks require fullmatrix to be enabled.""")
 
 
 
