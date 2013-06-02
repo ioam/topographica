@@ -9,20 +9,23 @@ for a single sheet, and a view can be passed around independent of the
 originating source object.
 """
 
+try:      from imagen.dataviews import Cartesian2Dx
+except:   raise Exception("Imagen submodule needs to be updated - please run `git submodule update' and try again.")
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    from topo.misc.odict import OrderedDict
+except ImportError:
+    OrderedDict = None
+
 import param
 
-class SheetView(param.Parameterized):
+class SheetView(Cartesian2Dx):
     """
     Class provided for backward compatibility with earlier SheetView
     component.
     """
-
-    timestamp = param.Number(default=None, doc=
-        """ The initial timestamp. If None, the DataView will not all slicing of
-            a time interval and record method will be disabled.""")
-
-    bounds = param.Parameter(default=None, doc=
-        """ The bounds of the two dimensional coordinate system in which the data resides.""")
 
     src_name = param.String(default = None, allow_None=True)
 
@@ -35,6 +38,18 @@ class SheetView(param.Parameterized):
     cyclic_range = param.Parameter(None)
 
 
+    def __init__(self, (data, bounds), src_name=None, precedence=0.0,
+                 timestamp=-1, row_precedence=0.5, **kwargs):
+
+        self.map_type = OrderedDict
+        super(SheetView,self).__init__(bounds, src_name=src_name,
+                                       precedence=precedence,
+                                       timestamp = timestamp,
+                                       row_precedence = row_precedence,
+                                       **kwargs)
+        self.record(data.copy(), timestamp)
+
+
     def view(self):
         """
         Return the requested view as a (data, bbox) tuple.  Provided
@@ -42,20 +57,10 @@ class SheetView(param.Parameterized):
         SheetView model. It is now easier to access the data and
         bounds attributes directly.
         """
-        if hasattr(self, 'data'):
-            return (self.data, self.bounds)
+        if hasattr(self, '_data'):
+            return (self._data[-1], self.bounds)
         else: # Necessary for backward compatibility with older snapshots.
             return self._view_list[0]
-
-    def __init__(self, (data, bounds), src_name=None, precedence=0.0,
-                 timestamp=-1, row_precedence=0.5):
-        super(SheetView,self).__init__(bounds=bounds,
-                                       src_name = src_name,
-                                       precedence = precedence,
-                                       timestamp = timestamp,
-                                       row_precedence = row_precedence)
-        self._view_list = []
-        self.data = data
 
 
 def UnitView((data, bounds), x, y, projection, timestamp, **params):
