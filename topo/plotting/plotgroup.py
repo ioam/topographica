@@ -7,6 +7,7 @@ database, plus weight plots for one unit, and projections.
 """
 
 import copy
+from collections import Counter
 import Image
 
 import param
@@ -175,6 +176,45 @@ class PlotGroup(param.Parameterized):
 
         self._sort_plots()
         self.labels = self._generate_labels()
+
+
+    @property
+    def coords(self):
+        """
+        Calculate the plot grid layout from the precedences and row
+        precedences of the plots in the plotgroup. Returns two lists,
+        the first containing the coordinate index pairs and the second
+        list containing the respective plotgroup.
+        """
+        # The plots are first ordered by their precedence.
+        self._sort_plots()
+        # Row are indexed by row_precedence order.
+        precedences = sorted(set(p.row_precedence for p in self.plots))
+
+        coords=[]
+        column_counter = Counter()
+        for plot in self.plots:
+            # Find the row number based on the row_precedences
+            row = precedences.index(plot.row_precedence)
+            # Lookup the current column position of the row
+            col = column_counter[row]
+            # The next plot on this row will have to be in the next column
+            column_counter[row] +=1
+            coords.append((row, col, plot))
+        return coords
+
+    @property
+    def grid(self):
+        """
+        Return the plots of the plotgroup in grid format where a grid
+        is a list of rows. Each row in turn is a list of plots. The
+        rows are left padded with None as necessary.
+        """
+        coords = self.coords
+        rows = max(r for (r,_,_) in coords) + 1 if coords != [] else 0
+        cols = max(c for (_,c,_) in coords) + 1 if coords != [] else 0
+        unpadded_grid = [[p for (r,_, p) in coords if r==row] for row in range(rows)]
+        return [r + [None]*(cols-len(r)) for r in unpadded_grid]
 
 
 
