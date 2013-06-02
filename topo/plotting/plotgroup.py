@@ -7,7 +7,6 @@ database, plus weight plots for one unit, and projections.
 """
 
 import copy
-from collections import Counter
 import Image
 
 import param
@@ -192,7 +191,8 @@ class PlotGroup(param.Parameterized):
         precedences = sorted(set(p.row_precedence for p in self.plots))
 
         coords=[]
-        column_counter = Counter()
+        # Can use collections.Counter in Python >= 2.7
+        column_counter = dict((i,0) for i,_ in enumerate(precedences))
         for plot in self.plots:
             # Find the row number based on the row_precedences
             row = precedences.index(plot.row_precedence)
