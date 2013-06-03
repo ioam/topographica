@@ -180,14 +180,11 @@ class PlotGroup(param.Parameterized):
     @property
     def coords(self):
         """
-        Calculate the plot grid layout from the precedences and row
-        precedences of the plots in the plotgroup. Returns two lists,
-        the first containing the coordinate index pairs and the second
-        list containing the respective plotgroup.
+        Calculate the grid layout of the plots from their precedences
+        and row_precedences. Returns a list of triples (row, col, plot).
         """
-        # The plots are first ordered by their precedence.
+        # Plots are sorted first by precedence, then grouped by row_precedence
         self._sort_plots()
-        # Row are indexed by row_precedence order.
         precedences = sorted(set(p.row_precedence for p in self.plots))
 
         coords=[]
@@ -196,7 +193,7 @@ class PlotGroup(param.Parameterized):
         for plot in self.plots:
             # Find the row number based on the row_precedences
             row = precedences.index(plot.row_precedence)
-            # Lookup the current column position of the row
+            # Look up the current column position of the row
             col = column_counter[row]
             # The next plot on this row will have to be in the next column
             column_counter[row] +=1
@@ -206,9 +203,9 @@ class PlotGroup(param.Parameterized):
     @property
     def grid(self):
         """
-        Return the plots of the plotgroup in grid format where a grid
-        is a list of rows. Each row in turn is a list of plots. The
-        rows are left padded with None as necessary.
+        Return the plots in grid format, i.e., a list of rows, each of
+        which is a list of plots. The rows are left padded with None
+        as necessary.
         """
         coords = self.coords
         rows = max(r for (r,_,_) in coords) + 1 if coords != [] else 0

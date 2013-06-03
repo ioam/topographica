@@ -1126,11 +1126,8 @@ def update_activity(sheet_views_prefix='',force=False):
 
 class pattern_response(PatternPresentingCommand):
     """
-    This command presents the specified test patterns for the
-    specified duration and saves the resulting activity to the
-    appropriate SheetViews. Originally, this was the implementation of
-    the pattern_present command, which is still available in
-    topo.command and operates by wrapping a call to this class.
+    Present the specified test patterns for the specified duration 
+    and save the resulting activity to the appropriate SheetViews.
 
     Given a set of input patterns, installs them into the specified
     GeneratorSheets, runs the simulation for the specified length of
@@ -1138,32 +1135,27 @@ class pattern_response(PatternPresentingCommand):
     simulation time.  Thus this input is not considered part of the
     regular simulation, and is usually for testing purposes.
 
-    As a special case, if 'inputs' is just a single pattern, and not
-    a dictionary, it is presented to all GeneratorSheets.
-
-    If a simulation is not provided, the active simulation, if one
-    exists, is requested.
-
     If this process is interrupted by the user, the temporary patterns
     may still be installed on the retina.
 
-    In order to to see the sequence of values presented, you may use
-    the back arrow history mechanism in the GUI. Note that the GUI's
-    Activity window must be open and the display parameter set to true
-    (display=True).
+    If a GUI is accessible via topo.guimain, its
+    refresh_activity_windows method will be called after each pattern
+    presentation, to allow the results to be visualized.
     """
 
     inputs = param.Dict(default={},doc="""
         A dictionary of GeneratorSheetName:PatternGenerator pairs to be
-        installed into the specified GeneratorSheets""")
+        installed into the specified GeneratorSheets.  As a special
+        case, if a single pattern is supplied, rather than a dictionary,
+        it is presented to all GeneratorSheets.""")
 
     plastic=param.Boolean(default=False,doc="""
         If plastic is False, overwrites the existing values of
         Sheet.plastic to disable plasticity, then reenables plasticity.""")
 
     overwrite_previous=param.Boolean(default=False,doc="""
-        If overwrite_previous is true, the given inputs overwrite those
-        previously defined.""")
+        If overwrite_previous is true, the given inputs permanently
+        overwrite those previously defined in each GeneratorSheet.""")
 
     apply_output_fns=param.Boolean(default=True)
 
