@@ -11,6 +11,8 @@ import param
 
 from snapshots import PicklableClassAttributes
 
+from topo import version_int
+
 # CEBALERT: remove the extraneous "import param"s
 
 # CEB: Add note that snapshot can be re-saved, making updates
@@ -52,14 +54,17 @@ def _get_version(snapshot_release,snapshot_version):
             snapshot_version = snapshot_version.split(":")[0]
             snapshot_version = snapshot_version.split("M")[0]
         except AttributeError: # the version is a tuple, thus it's from git
-            snapshot_version = "%02d%02d%02d%05d" % snapshot_version
+            snapshot_version = version_int(snapshot_version)
 
-        if len(snapshot_version)>0:
+        # Make snapshot_version a string that only contains digits
+        if snapshot_version:
             try:
                 snapshot_version = int(snapshot_version)
                 found_version = True
             except ValueError:
                 pass
+		snapshot_version = str(snapshot_version)
+
 
     if not found_version:
         snapshot_version = releases[snapshot_release]

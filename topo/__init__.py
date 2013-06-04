@@ -72,10 +72,11 @@ def version_int(v):
     """
     return int("%02d%02d%02d%05d" % v)
 
-version = (0, 0, 0, 0)
-release = 0
-commit  = ""
-pickle_read_write_allowed = True
+def version_str(v):
+	"""
+	Convert a version four-tuple to a string format x.y.z
+	"""
+	return "%d.%d.%d" % (v[0], v[1], v[2])
 
 def _find_version():
     """
