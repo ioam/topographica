@@ -5,7 +5,7 @@ PYCHECKER = bin/pychecker --config doc/buildbot/pycheckrc
 
 GIT_DESCRIBE = $(shell git describe)
 RELEASE = $(shell echo ${GIT_DESCRIBE} | cut -d- -f1 | cut -c2-)
-GITVERSION = $(shell echo ${GIT_DESCRIBE} |  cut -d -f2)
+GITVERSION = $(shell echo ${GIT_DESCRIBE} |  cut -d- -f2)
 
 PYTHON = ${PREFIX}/bin/python
 
@@ -50,7 +50,7 @@ DIST_ZIP                   = ${DIST_DIRNAME}.zip
 
 
 # Default does not include doc, in case user lacks PHP
-default: ext-packages release-file topographica
+default: ext-packages topographica
 
 all: default reference-manual doc tests
 
