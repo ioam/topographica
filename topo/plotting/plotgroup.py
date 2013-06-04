@@ -204,7 +204,7 @@ class PlotGroup(param.Parameterized):
     def grid(self):
         """
         Return the plots in grid format, i.e., a list of rows, each of
-        which is a list of plots. The rows are left padded with None
+        which is a list of plots. The rows are right padded with None
         as necessary.
         """
         coords = self.coords
