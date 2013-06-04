@@ -254,10 +254,13 @@ class HomeostaticResponse(TransferFnWithState):
         """
         Applies exponential smoothing to the given current activity and previous
         smoothed value following the equations given in the report cited above.
+
+        If plastic is set to False, the running exponential average
+        values and thresholds are not updated.
         """
         y_avg = (1.0-smoothing)*x + smoothing*prev_avg
         t = prev_t + learning_rate * (y_avg - target_activity)
-        return (y_avg, t)
+        return (y_avg, t) if self.plastic else (prev_avg, prev_t)
 
 
     def __call__(self,x):
