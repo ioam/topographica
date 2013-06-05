@@ -92,7 +92,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
 
         super(TemplatePlotGroupPanel,self).__init__(master,plotgroup,**params)
 
-        self.pack_param('strength_only',parent=self.control_frame_1,
+        self.pack_param('strength_only',parent=self.standard_frame_top,
                         on_set=self.redraw_plots,side='right')
 
         # Display any plots that can be done with existing data, but

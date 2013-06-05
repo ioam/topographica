@@ -653,7 +653,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         autorefresh() is called.
         """
         for win in self.auto_refresh_panels:
-            win.refresh(update)
+            win.refresh()
 
         self.set_step_button_state()
         self.update_idletasks()

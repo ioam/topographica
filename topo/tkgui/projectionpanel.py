@@ -1,6 +1,9 @@
 """
 PlotgroupPanels for displaying ProjectionSheet plotgroups.
+
+$Id$
 """
+__version__='$Revision$'
 
 
 import ImageTk
@@ -15,7 +18,7 @@ import topo
 from topo.base.cf import CFProjection
 from topo.base.projection import ProjectionSheet, Projection
 from topo.misc.generatorsheet import GeneratorSheet
-
+        
 from templateplotgrouppanel import TemplatePlotGroupPanel
 
 
@@ -62,13 +65,13 @@ class ProjectionSheetPanel(TemplatePlotGroupPanel):
         super(ProjectionSheetPanel,self).__init__(master,plotgroup,**params)
 
         self.plotgroup.auto_refresh=False
-
-        self.pack_param('sheet',parent=self.control_frame_3,
+        
+        self.pack_param('sheet',parent=self.hooks_frame,
             on_modify=self.sheet_change,side='left',expand=1,
             widget_options={'new_default':True,
                             'sort_fn_args':{'cmp':lambda x, y: cmp(-x.precedence,-y.precedence)}})
 
-
+        
     def setup_plotgroup(self):
         super(ProjectionSheetPanel,self).setup_plotgroup()
         self.populate_sheet_param()
@@ -89,7 +92,7 @@ class ProjectionSheetPanel(TemplatePlotGroupPanel):
 
 class ProjectionActivityPanel(ProjectionSheetPanel):
 
-    def __init__(self,master,plotgroup,**params):
+    def __init__(self,master,plotgroup,**params):       
         super(ProjectionActivityPanel,self).__init__(master,plotgroup,**params)
         self.auto_refresh = True
 
@@ -116,11 +119,11 @@ class UnitsPanel(ProjectionSheetPanel):
         # - Need to couple taggedslider to a Number parameter in a better way
         # somewhere else.
         # - Clean up or document: passing the params, setting the bounds
-        #
-        # Also:
+        # 
+        # Also:        
         # e.g. bound on parameter is 0.5 but means <0.5, taggedslider
         #   still lets you set to 0.5 -> error
-
+            
     def sheet_change(self):
         # CEBHACKALERT: get an inconsequential but scary
         # cf-out-of-range error if you e.g. set y < -0.4 on sheet V1
@@ -130,12 +133,12 @@ class UnitsPanel(ProjectionSheetPanel):
 
         # CEBALERT: need to crop x,y (for e.g. going to smaller sheet) rather
         # than set to 0
-
+    
         if 'sheet' in self.initial_args: self.sheet=self.initial_args['sheet']
 
         for coord in ['x','y']:
             self._tkvars[coord].set(self.initial_args.get(coord,0.0))
-
+          
         l,b,r,t = self.sheet.bounds.lbrt()
         # CEBALERT: see "CEBERRORALERT: doesn't take account of
         # exclusive bounds" in topo/param/__init.__.py.
@@ -147,10 +150,10 @@ class UnitsPanel(ProjectionSheetPanel):
                             'y':(False,True)}
 
         for coord in ['x','y']:
-            param_obj=self.get_parameter_object(coord)
+            param_obj=self.get_parameter_object(coord)                
             param_obj.bounds = bounds[coord]
             param_obj.inclusive_bounds = inclusive_bounds[coord]
-
+            
             # (method can be called before x,y widgets added)
             if coord in self.representations:
                 w=self.representations[coord]['widget']
@@ -162,15 +165,15 @@ class UnitsPanel(ProjectionSheetPanel):
         super(UnitsPanel,self).sheet_change()
 ##############################################################################
 
-
+          
 class ConnectionFieldsPanel(UnitsPanel):
 
     projection_type = CFProjection
 
     def __init__(self,master,plotgroup,**params):
         super(ConnectionFieldsPanel,self).__init__(master,plotgroup,**params)
-        self.pack_param('situate',parent=self.control_frame_3,on_set=self.situate_change,side='left',expand=1)
-
+        self.pack_param('situate',parent=self.hooks_frame,on_set=self.situate_change,side='left',expand=1)
+        
     def situate_change(self):
         self.redraw_plots()
 
@@ -185,7 +188,7 @@ class PlotMatrixPanel(ProjectionSheetPanel):
     PlotGroupPanel for visualizing an array of bitmaps, such as for
     a projection involving a matrix of units.
     """
-
+    
     gui_desired_maximum_plot_height = param.Integer(default=5,bounds=(0,None),doc="""
         Value to provide for PlotGroup.desired_maximum_plot_height for
         PlotGroups opened by the GUI.  Determines the initial, default
@@ -200,7 +203,7 @@ class PlotMatrixPanel(ProjectionSheetPanel):
         self.plotgroup.update_maximum_plot_height()
         self.desired_maximum_plot_height = self.plotgroup.maximum_plot_height
 
-
+    
     def display_plots(self):
         """
         CFProjectionPanel requires a 2D grid of plots.
@@ -238,16 +241,16 @@ class PlotMatrixPanel(ProjectionSheetPanel):
         """Do not display labels for these plots."""
         pass
 
-
+    
 class RFProjectionPanel(PlotMatrixPanel):
 
     sheet_type = ProjectionSheet
 
     def __init__(self,master,plotgroup,**params):
         super(RFProjectionPanel,self).__init__(master,plotgroup,**params)
-        self.pack_param('input_sheet',parent=self.control_frame_3,
+        self.pack_param('input_sheet',parent=self.hooks_frame,
                         on_modify=self.redraw_plots,side='left',expand=1)
-
+                        
         self.pack_param('density',parent=self.control_frame_4)
 
     def setup_plotgroup(self):
@@ -262,19 +265,19 @@ class RFProjectionPanel(PlotMatrixPanel):
     def _plot_title(self):
         return 'RFs of %s on %s at time %s'%(self.sheet.name,self.plotgroup.input_sheet.name,
                                              topo.sim.timestr(self.plotgroup.time))
-
+    
 
 class ProjectionPanel(PlotMatrixPanel):
     def __init__(self,master,plotgroup,**params):
         super(ProjectionPanel,self).__init__(master,plotgroup,**params)
-        self.pack_param('projection',parent=self.control_frame_3,
+        self.pack_param('projection',parent=self.hooks_frame,
                         on_modify=self.redraw_plots,side='left',expand=1,
                         widget_options={'sort_fn_args':{'cmp':cmp_projections},
                                         'new_default':True})
+        
+        self.pack_param('density',parent=self.control_frame_4) 
 
-        self.pack_param('density',parent=self.control_frame_4)
-
-
+        
     def _plot_title(self):
         return self.projection.name + ' projection from ' + self.projection.src.name + ' to ' \
                + self.sheet.name + ' at time ' + topo.sim.timestr(self.plotgroup.time)
@@ -283,7 +286,7 @@ class ProjectionPanel(PlotMatrixPanel):
         super(ProjectionPanel,self).setup_plotgroup()
         self.populate_projection_param()
 
-
+        
     def sheet_change(self):
         self.refresh_projections()
         super(ProjectionPanel,self).sheet_change()
@@ -319,7 +322,7 @@ class ProjectionPanel(PlotMatrixPanel):
 ##         #################
 
 
-
+            
 class CFProjectionPanel(ProjectionPanel):
     """
     Panel for displaying CFProjections.
@@ -329,11 +332,11 @@ class CFProjectionPanel(ProjectionPanel):
 
     def __init__(self,master,plotgroup,**params):
         super(CFProjectionPanel,self).__init__(master,plotgroup,**params)
-        self.pack_param('situate',parent=self.control_frame_3,on_set=self.situate_change,side='left',expand=1)
+        self.pack_param('situate',parent=self.hooks_frame,on_set=self.situate_change,side='left',expand=1)
 
     def situate_change(self):
         self.redraw_plots()
-
+    
 
 
 

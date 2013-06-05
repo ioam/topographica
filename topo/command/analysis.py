@@ -47,7 +47,7 @@ from topo.plotting.plotgroup import create_plotgroup, plotgroups
 from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
 from topo.analysis.featureresponses import Feature, PatternPresenter, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
-from topo.analysis.featureresponses import update_activity, measure_response
+from topo.analysis.featureresponses import update_activity, update_sheet_activity, measure_response
 from topo.base.patterngenerator import PatternGenerator
 from topo.command import pattern_present
 
@@ -208,23 +208,6 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
 
     res = DSF_WeightedAverage()(d) if weighted_average else DSF_MaxValue()(d)
     return res['']['preference']
-
-
-
-# def update_activity():
-#     """
-#     Make a map of neural activity available for each sheet, for use in template-based plots.
-
-#     This command simply asks each sheet for a copy of its activity
-#     matrix, and then makes it available for plotting.  Of course, for
-#     some sheets providing this information may be non-trivial, e.g. if
-#     they need to average over recent spiking activity.
-#     """
-#     for sheet in topo.sim.objects(Sheet).values():
-#         activity_copy = array(sheet.activity)
-#         new_view = SheetView((activity_copy,sheet.bounds),
-#                               sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
-#         sheet.sheet_views['Activity']=new_view
 
 
 pg = create_plotgroup(name='Activity',category='Basic',

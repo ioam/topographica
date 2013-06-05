@@ -1054,8 +1054,24 @@ class PatternPresentingCommand(ParameterizedFunction):
         stored in sheet_views. Can be used e.g. to distinguish maps as
         originating from a particular GeneratorSheet.""")
 
+def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
+    """
+    Updated the 'Activity' SheetView for a given sheet by name.
 
-def update_activity(sheet_views_prefix=''):
+    If force is False and the existing Activity SheetView isn't stale,
+    this existing view is returned.
+    """
+    sheet = topo.sim.objects(Sheet)[sheet_name]
+    if not force and sheet.sheet_views.get('Activity',False):
+        existing_view = sheet.sheet_views['Activity']
+        if existing_view.timestamp == topo.sim.time():
+            return existing_view
+
+    updated_view =  SheetView((np.array(sheet.activity),sheet.bounds),
+                              sheet.name,sheet.precedence,topo.sim.time(), sheet.row_precedence)
+    sheet.sheet_views[sheet_views_prefix+'Activity'] = updated_view
+
+def update_activity(sheet_views_prefix='', force=False):
     """
     Make a map of neural activity available for each sheet, for use in template-based plots.
 
@@ -1064,11 +1080,8 @@ def update_activity(sheet_views_prefix=''):
     some sheets providing this information may be non-trivial, e.g. if
     they need to average over recent spiking activity.
     """
-    for sheet in topo.sim.objects(Sheet).values():
-        activity_copy = np.array(sheet.activity)
-        new_view = SheetView((activity_copy,sheet.bounds),
-                              sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
-        sheet.sheet_views[sheet_views_prefix+'Activity']=new_view
+    for sheet_name in topo.sim.objects(Sheet).keys():
+        update_sheet_activity(sheet_name, sheet_views_prefix, force)
 
 
 class measure_response(PatternPresentingCommand):
@@ -1167,7 +1180,7 @@ class measure_response(PatternPresentingCommand):
         if not p.overwrite_previous:
             restore_input_generators()
 
-        update_activity(p.sheet_views_prefix)
+        update_activity(p.sheet_views_prefix, force=True)
 
 class MeasureResponseCommand(PatternPresentingCommand):
     """Parameterized command for presenting input patterns and measuring responses."""
