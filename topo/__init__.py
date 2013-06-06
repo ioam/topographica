@@ -375,3 +375,14 @@ try:
     ip.extension_manager.load_extension('topo.misc.ipython')
 except:
     pass
+
+from topo.analysis.featureresponses import FeatureResponses, MeasureResponseCommand,FeatureCurveCommand, pattern_response
+from topo.command import restore_input_generators, save_input_generators
+
+FeatureResponses.pre_analysis_session_hooks.append(save_input_generators)
+FeatureResponses.post_analysis_session_hooks.append(restore_input_generators)
+FeatureResponses.pre_presentation_hooks.append(sim.state_push)
+FeatureResponses.post_presentation_hooks.append(sim.state_pop)
+
+MeasureResponseCommand.presenter_cmd = pattern_response
+

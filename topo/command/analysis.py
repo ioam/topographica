@@ -45,7 +45,7 @@ from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
 
 from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
-from topo.analysis.featureresponses import Feature, PatternPresenter, MeasureResponseCommand
+from topo.analysis.featureresponses import Feature, CoordinatedPatternGenerator, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
 from topo.analysis.featureresponses import update_activity
 from topo.analysis.featureresponses import update_sheet_activity, pattern_response # pyflakes:ignore (API import)
@@ -340,14 +340,11 @@ class measure_rfs(SingleInputResponseCommand):
     def __call__(self,**params):
         p=ParamOverrides(self,params)
         self.params('input_sheet').compute_default()
-        x=ReverseCorrelation(self._feature_list(p),input_sheet=p.input_sheet)
+        x=ReverseCorrelation(self._feature_list(p),input_sheet=p.input_sheet,duration=p.duration,
+                             pattern_response=p.pattern_response(**p.presentation_settings))
         static_params = dict([(s,p[s]) for s in p.static_parameters])
 
-        if p.duration is not None:
-            p.pattern_presenter.duration=p.duration
-        if p.apply_output_fns is not None:
-            p.pattern_presenter.apply_output_fns=p.apply_output_fns
-        x.collect_feature_responses(p.pattern_presenter,static_params,p.display,self._feature_list(p))
+        x.collect_feature_responses(p.pattern_presenter,static_params)
 
     def _feature_list(self,p):
 
@@ -370,8 +367,8 @@ class measure_rfs(SingleInputResponseCommand):
 
 pg = create_plotgroup(name='RF Projection',category='Other',
     doc='Measure receptive fields.',
-    pre_plot_hooks=[measure_rfs.instance(display=True,
-    pattern_presenter=PatternPresenter(RawRectangle(size=0.01,aspect_ratio=1.0)))],
+    pre_plot_hooks=[measure_rfs.instance(
+    pattern_presenter=CoordinatedPatternGenerator(RawRectangle(size=0.01,aspect_ratio=1.0)))],
     normalize='Individually')
 
 pg.add_plot('RFs',[('Strength','RFs')])
@@ -498,9 +495,9 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
 
 
 pg= create_plotgroup(name='Orientation Preference',category="Preference Maps",
-             doc='Measure preference for sine grating orientation.',
-             pre_plot_hooks=[measure_sine_pref.instance(
-                 preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi) ))] )
+                     doc='Measure preference for sine grating orientation.',
+                     pre_plot_hooks=[measure_sine_pref.instance(
+                         preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi) ))] )
 pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',
             [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
@@ -763,7 +760,7 @@ class measure_corner_or_pref(PositionMeasurementCommand):
 
     divisions=param.Integer(default=10)
 
-    pattern_presenter = param.Callable(PatternPresenter(gaussian_corner,apply_output_fns=False,duration=1.0))
+    pattern_coordinator = param.Callable(CoordinatedPatternGenerator(gaussian_corner))
 
     x_range=param.NumericTuple((-1.2,1.2))
 
@@ -825,7 +822,7 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
     key_img_fname=param.Filename(default='command/key_angles.png',doc=
         "Name of the file with the image used to code angles with hues.")
 
-    pattern_presenter=PatternPresenter(GaussiansCorner(aspect_ratio=4.0,cross=0.85),apply_output_fns=False,duration=1.0)
+    pattern_coordinator=CoordinatedPatternGenerator(GaussiansCorner(aspect_ratio=4.0,cross=0.85))
 
     static_parameters = param.List( default=[ "size", "scale", "offset" ] )
 
@@ -1032,7 +1029,6 @@ class frequency_mapper(PatternGenerator):
 class measure_frequency_preference(MeasureResponseCommand):
     """Measure a best frequency preference and selectivity map for auditory neurons."""
 
-    display = param.Boolean(True)
     static_parameters = param.List(default=["scale", "offset"])
 
 
@@ -1117,7 +1113,6 @@ class log_frequency_mapper(PatternGenerator):
 class measure_log_frequency_preference(MeasureResponseCommand):
     """Measure a best frequency preference and selectivity map for auditory neurons."""
 
-    display = param.Boolean(True)
     static_parameters = param.List(default=["scale", "offset"])
 
 
@@ -1209,7 +1204,6 @@ class latency_mapper(PatternGenerator):
 class measure_latency_preference(MeasureResponseCommand):
     """Measure a best onset latency preference and selectivity map for auditory neurons."""
 
-    display = param.Boolean(True)
     static_parameters = param.List(default=["scale", "offset"])
 
     def _feature_list(self,p):

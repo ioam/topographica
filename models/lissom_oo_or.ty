@@ -188,6 +188,7 @@ topo.sim.grid_layout([[None,    'V1',     None],
 
 # Measure feature maps based on unthresholded initial response for
 # speed and reliability
-from topo.analysis.featureresponses import MeasureResponseCommand
+from topo.analysis.featureresponses import MeasureResponseCommand, pattern_response
+#pattern_response.apply_output_fns = False
+MeasureResponseCommand.presenter_cmd.apply_output_fns = False
 MeasureResponseCommand.duration=0.175
-MeasureResponseCommand.apply_output_fns=False

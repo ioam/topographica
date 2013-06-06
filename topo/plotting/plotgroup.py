@@ -699,7 +699,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
     def _exec_pre_plot_hooks(self,**kw):
         self.params('sheet').compute_default()
         self._check_sheet_type()
-        super(ProjectionSheetPlotGroup,self)._exec_pre_plot_hooks(sheet=self.sheet,**kw)
+        super(ProjectionSheetPlotGroup,self)._exec_pre_plot_hooks(sheet=self.sheet.name,**kw)
 
 
     def _exec_plot_hooks(self,**kw):
@@ -980,7 +980,7 @@ class RFProjectionPlotGroup(GridPlotGroup):
 
     def _exec_pre_plot_hooks(self,**kw): # RFHACK
         self.params('input_sheet').compute_default()
-        super(RFProjectionPlotGroup,self)._exec_pre_plot_hooks(input_sheet=self.input_sheet,**kw)
+        super(RFProjectionPlotGroup,self)._exec_pre_plot_hooks(input_sheet=self.input_sheet.name,**kw)
 
 
 class TwoOrientationsPlotGroup( TemplatePlotGroup ):
@@ -1089,7 +1089,7 @@ class UnitMeasurementCommand(ProjectionSheetMeasurementCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params)
-        s = p.sheet
+        s = topo.sim[p.sheet]
         if s is not None:
             for x,y in p.coords:
                 s.update_unit_view(x,y,'' if p.projection is None else p.projection.name)

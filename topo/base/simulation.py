@@ -745,6 +745,37 @@ class SomeTimer(param.Parameterized):
         self.__measure(fduration,step)
 
 
+    def update_timer(self,name,current_presentation,total_presentations):
+        if current_presentation == 0:
+            self.recenttimes=[]
+
+        if current_presentation == total_presentations-1:
+            percent = 100
+            estimate = 0
+        else:
+            self.recenttimes.append(self.real_time_fn())
+
+            length = len(self.recenttimes)
+
+            if (length>self.estimate_interval):
+                self.recenttimes.pop(0)
+                length-=1
+
+            percent = 100.0*current_presentation/total_presentations
+            estimate = (total_presentations-current_presentation)* \
+                (self.recenttimes[-1]-self.recenttimes[0])/length
+
+        self.__pass_out_info(time=self.simulation_time_fn(),
+                             percent=percent,
+                             name=name,
+                             duration=1.0,
+                             remaining=estimate)
+
+        import topo
+        if hasattr(topo, 'guimain'):
+            topo.guimain.refresh_activity_windows()
+
+
 
 # CEBALERT: This singleton-producing mechanism is pretty complicated,
 # and it would be great if someone could simplify it. Getting all of

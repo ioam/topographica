@@ -108,7 +108,7 @@ class IdentityMF(CoordinateMapperFn):
         return x,y
 
 
-class PatternDrivenAnalysis(param.Parameterized):
+class PatternDrivenAnalysis(param.ParameterizedFunction):
     """
     Abstract base class for various stimulus-response types of analysis.
 
