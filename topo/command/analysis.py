@@ -338,13 +338,11 @@ class measure_rfs(SingleInputResponseCommand):
     __abstract = True
 
     def __call__(self,**params):
-        p=ParamOverrides(self,params)
+        p=ParamOverrides(self,params,allow_extra_keywords=True)
         self.params('input_sheet').compute_default()
-        x=ReverseCorrelation(self._feature_list(p),input_sheet=p.input_sheet,duration=p.duration,
-                             pattern_response=p.pattern_response(**p.presentation_settings))
-        static_params = dict([(s,p[s]) for s in p.static_parameters])
-
-        x.collect_feature_responses(p.pattern_presenter,static_params)
+        dict([(s,p[s]) for s in p.static_parameters])
+        ReverseCorrelation(self._feature_list(p),static_params,input_sheet=p.input_sheet,duration=p.duration,
+                           presenter_cmd=p.presenter_cmd(**p.extra_keywords()),pattern_coordinator=p.pattern_coordinator)
 
     def _feature_list(self,p):
 
@@ -366,9 +364,9 @@ class measure_rfs(SingleInputResponseCommand):
                 Feature(name="scale", range=(-p.scale, p.scale), step=p.scale*2)]
 
 pg = create_plotgroup(name='RF Projection',category='Other',
-    doc='Measure receptive fields.',
-    pre_plot_hooks=[measure_rfs.instance(
-    pattern_presenter=CoordinatedPatternGenerator(RawRectangle(size=0.01,aspect_ratio=1.0)))],
+doc='Measure receptive fields.',
+pre_plot_hooks=[measure_rfs.instance(
+    pattern_coordinator=CoordinatedPatternGenerator(RawRectangle(size=0.01,aspect_ratio=1.0)))],
     normalize='Individually')
 
 pg.add_plot('RFs',[('Strength','RFs')])

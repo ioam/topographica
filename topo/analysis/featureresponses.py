@@ -10,7 +10,6 @@ import copy
 
 from math import pi
 from colorsys import hsv_to_rgb
-import itertools
 
 import numpy as np
 
@@ -33,6 +32,7 @@ from topo.plotting.plotgroup import plotgroups
 from topo.sheet import GeneratorSheet
 
 
+activity_dtype = np.float64
 
 # CB: having a class called DistributionMatrix with an attribute
 # distribution_matrix to hold the distribution matrix seems silly.
@@ -187,10 +187,14 @@ class FeatureResponses(PatternDrivenAnalysis):
 
 
     presenter_cmd = param.Callable(default=None,instantiate=True,doc="""
-        """)
+        Presenter command responsible for presenting the input patterns
+        provided to it, returning measurement labels and collecting and
+        storing the measurement results in the appropriate place.""")
 
+        
     pattern_coordinator = param.Callable(default=None,instantiate=True,doc="""
-        """)
+    Coordinates the creation and linking of numerous simultaneously
+    presented input patterns, controlled by complex features.""")
 
 
     _fullmatrix = {}
@@ -200,7 +204,11 @@ class FeatureResponses(PatternDrivenAnalysis):
 
 
     def initialize_featureresponses(self,p):
-        """Create an empty DistributionMatrix for each feature and each sheet."""
+        """
+        Create an empty DistributionMatrix for each feature and each
+        measurement source, in addition to activity buffers and if
+        requested, the full matrix.
+        """
         self._featureresponses = {}
         self._activities = {}
 
@@ -216,13 +224,13 @@ class FeatureResponses(PatternDrivenAnalysis):
                 FeatureResponses._fullmatrix[response_label] = FullMatrix(shape,self.features)
 
 
-    def measure_responses(self,p,param_dict):
-        """Present the given input patterns and collate the responses."""
+    def measure_responses(self,p):
+        """
+        Generate feature permutations and present each in sequence.
+        """
 
         # Run hooks before the analysis session
         for f in p.pre_analysis_session_hooks: f()
-
-        self.param_dict=param_dict
 
         features_to_permute = [f for f in self.features if f.compute_fn is None]
         self.features_to_compute = [f for f in self.features if f.compute_fn is not None]
@@ -275,7 +283,10 @@ class FeatureResponses(PatternDrivenAnalysis):
 
 
     def _update(self,p,current_values):
-        # Update each DistributionMatrix with (activity,bin)
+        """
+        Update each DistributionMatrix with (activity,bin) and
+        populate the full matrix, if enabled.
+        """
         for response_label in self.response_shapes:
             for feature,value in current_values:
                 self._featureresponses[response_label][feature].update(self._activities[response_label],value)
@@ -286,12 +297,13 @@ class FeatureResponses(PatternDrivenAnalysis):
 
 class FeatureMaps(FeatureResponses):
     """
-    Measure and collect the responses to a set of features, for calculating feature maps.
+    Measure and collect the responses to a set of features, for
+    calculating feature maps.
 
-    For each feature and each sheet, the results are stored as a
-    preference matrix and selectivity matrix in the sheet's
-    sheet_views; these can then be plotted as preference
-    or selectivity maps.
+    For each feature and each measurement source, the results are
+    stored as a preference matrix and selectivity matrix in the
+    sheet's sheet_views; these can then be plotted as preference or
+    selectivity maps.
     """
 
     preference_fn = param.ClassSelector(DistributionStatisticFn,
@@ -321,18 +333,20 @@ class FeatureMaps(FeatureResponses):
         """
         Present the given input patterns and collate the responses.
 
-        Responses are statistics on the distributions of measure for every unit,
-        extracted by functions that are subclasses of DistributionStatisticFn, and could
-        be specified in each feature with the preference_fn parameter, otherwise the
+        Responses are statistics on the distributions of measure for
+        every unit, extracted by functions that are subclasses of
+        DistributionStatisticFn, and could be specified in each
+        feature with the preference_fn parameter, otherwise the
         default in self.preference_fn is used.
         """
         p = ParamOverrides(self,params)
         self.features=features
+        self.param_dict=param_dict
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
 
         self.initialize_featureresponses(p)
-        self.measure_responses(p,param_dict)
+        self.measure_responses(p)
         map_dict = {}
 
         for response_label in self.response_shapes:
@@ -362,7 +376,8 @@ class FeatureMaps(FeatureResponses):
 
 class FeatureCurves(FeatureResponses):
     """
-    Measures and collects the responses to a set of features, for calculating tuning and similar curves.
+    Measures and collects the responses to a set of features, for
+    calculating tuning and similar curves.
 
     These curves represent the response of a Sheet to patterns that
     are controlled by a set of features.  This class can collect data
@@ -378,8 +393,8 @@ class FeatureCurves(FeatureResponses):
     user-specified PatternPresenter by adding the parameters
     determining the curve (curve_param_dict) to a static list of
     parameters (param_dict), and then varying the specified set of
-    features.  The results can be accessed in the curve_dict,
-    indexed by the curve_label and feature value.
+    features.  The results can be accessed in the curve_dict, indexed
+    by the curve_label and feature value.
     """
 
     x_axis = param.String(default=None,doc="""
@@ -396,10 +411,11 @@ class FeatureCurves(FeatureResponses):
     def __call__(self,features,param_dict,**params):
         p = ParamOverrides(self,params)
         self.features=features
+        self.param_dict=param_dict
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
         self.initialize_featureresponses(p)
-        self.measure_responses(p,param_dict)
+        self.measure_responses(p)
         curve_dict = {}
         for response_label,shape in self.response_shapes.items():
             curve_dict[response_label] = {}
@@ -423,40 +439,34 @@ class ReverseCorrelation(FeatureResponses):
     """
     Calculate the receptive fields for all neurons using reverse correlation.
     """
-    # CB: Can't we have a better class hierarchy?
-
+    
     input_sheet = param.Parameter(default=None)
 
-    # JABALERT: Should _featureresponses be renamed here?; It's a different
-    # data structure using different indexing (r,c instead of feature).
+    
     def initialize_featureresponses(self,p):
         self._activities = {}
         self._featureresponses = {}
 
         for label,shape in self.response_shapes.items()+self.input_shapes.items():
-            self._activities[label]=np.zeros(shape)
+            self._activities[label]=np.zeros(shape,dtype=activity_dtype)
 
-        # surely there's a way to get an array of 0s for each element without
-        # looping? (probably had same question for distributionmatrix).
         for input_label,input_shape in self.input_shapes.items():
             self._featureresponses[input_label] = {}
             for response_label,response_shape in self.response_shapes.items():
-                self._featureresponses[input_label][response_label] = np.ones(response_shape,dtype=object)
                 rows,cols = response_shape
-                for r in range(rows):
-                    for c in range(cols):
-                        self._featureresponses[input_label][response_label][r,c] = np.zeros(input_shape) # need to specify dtype?
+                self._featureresponses[input_label][response_label] = np.array([[np.zeros(input_shape,dtype=activity_dtype) for r in rows]
+                                                                                for c in cols])
 
 
-    def collect_feature_responses(self,pattern_presenter,param_dict,feature_values):
+    def __call__(self,features,param_dict,**params):
         p = ParamOverrides(self,params)
         self.features=features
+        self.param_dict=param_dict
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
 
         self.initialize_featureresponses(p)
-
-        self.measure_responses(p,pattern_presenter,param_dict,feature_values)
+        self.measure_responses(p)
 
         rf_dict = {}
 
@@ -471,7 +481,7 @@ class ReverseCorrelation(FeatureResponses):
         p.presenter_cmd.collect_rf_measurements(rf_dict)
 
 
-    def present_permutation(self,p,permutation):
+    def present_permutation(self,p,permutation,permutation_num,total_steps):
         """Present a pattern with the specified set of feature values."""
 
         for label in self.response_shapes.keys()+self.input_shapes.keys():
@@ -489,10 +499,10 @@ class ReverseCorrelation(FeatureResponses):
 
         response_dict = p.presenter_cmd(inputs, duration=p.duration)
 
-        for f in p.post_presentation_hooks: f()
-
         for label,response in response_dict.items():
             self._activities[label]+=response
+
+        for f in p.post_presentation_hooks: f()
 
         self._update(p,complete_settings)
 
@@ -1288,8 +1298,8 @@ class pattern_response(PatternResponse):
                 data, cyclic, cyclic_range = item
                 view = SheetView((data.copy(),bounding_box),sn,sp,t,sr)
                 sheet.sheet_views[name] = view
-                view.cyclic = cyclic
-                view.cyclic_range = cyclic_range
+                view.cyclic = False #cyclic
+                view.cyclic_range = None#cyclic_range
                 sheet.sheet_views[name] = view
 
     def collect_curve_measurements(self,measurement_dict,x_axis):
@@ -1405,17 +1415,6 @@ class MeasureResponseCommand(PatternPresentingCommand):
             Subplotting.set_subplots(p.subplot,force=True)
 
         return fullmatrix
-
-    # def _filter_settings(self,params):
-    #     settings_dict = dict(self.presentation_settings)
-    #     remaining_params = dict([(k,v) for k,v in params.items() if k not in settings_dict])
-
-    #     for k in params:
-    #         if k in settings_dict:
-    #             settings_dict[k] = params[k]
-
-    #     self.presentation_settings = settings_dict.items()
-    #     params = settings_dict
 
 
     def _feature_list(self,p):
