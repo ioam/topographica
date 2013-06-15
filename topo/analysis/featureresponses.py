@@ -1336,7 +1336,7 @@ class pattern_response(PatternResponse):
                     key = ('RFs',sheet_name,x,y)
                     input_sheet_views[key]=view
 
-    @classmethod
+                    
     def get_feature_preference(self,sheet,feature,sheet_coord,default=0.0):
         """Return the feature preference for a particular unit."""
         sheet = topo.sim[sheet]
