@@ -1158,7 +1158,7 @@ class measure_contrast_response(UnitCurveCommand):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         presenter_cmd = p.presenter_cmd.instance(**p.extra_keywords())
         for coord in p.coords:
-            orientation=pi*presenter_cmd.get_feature_preference(p.sheet,'orientation',coord)
+            orientation=pi*p.presenter_cmd.get_feature_preference(p.sheet,'orientation',coord)
             self.curve_parameters=[{"orientation":orientation+ro} for ro in p.relative_orientations]
 
             self.x = presenter_cmd.get_feature_preference(p.sheet,'x',coord,default=coord[0])
@@ -1228,14 +1228,14 @@ class measure_orientation_contrast(UnitCurveCommand):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         for coord in p.coords:
             self.or_surrounds=[]
-            orientation=p.orientation_center
-            self.orientationcenter=orientation
+            orientation=pi*p.presenter_cmd.get_feature_preference(p.sheet,'orientation',coord,default=p.orientation_center)
+            p.orientationcenter=orientation
 
             for i in xrange(0,self.num_orientation):
                 self.or_surrounds.append(orientation+i*pi/(p.num_orientation))
 
-            self.x = presenter_cmd.get_feature_preference(sheet,'x',coord,default=coord[0])
-            self.y = presenter_cmd.get_feature_preference(sheet,'y',coord,default=coord[1])
+            p.x = p.presenter_cmd.get_feature_preference(p.sheet,'x',coord,default=coord[0])
+            p.y = p.presenter_cmd.get_feature_preference(p.sheet,'y',coord,default=coord[1])
 
             self._compute_curves(p)
 
