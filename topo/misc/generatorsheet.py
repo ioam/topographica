@@ -89,14 +89,9 @@ class GeneratorSheet(Sheet):
             self.warning('There is no previous input generator to restore.')
 
     def generate(self):
-        """
-        Generate the output and send it out the Activity port.
-        """
-        self.verbose("Generating a new pattern")
+        """Generate the output and send it out the Activity port."""
 
-        # JABALERT: What does the [:] achieve here?  Copying the
-        # values, instead of the pointer to the array?  Is that
-        # guaranteed?
+        self.verbose("Generating a new pattern")
         self.activity[:] = self.input_generator()
 
         if self.apply_output_fns:

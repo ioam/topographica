@@ -85,7 +85,6 @@ Topographica, such as this `2012 review paper`_.
     Developer_Manual/index
     Forums/index
     Team_Members/index
-    Future_Work/index
     FAQ/index
     Links/index
     Home/pubs

@@ -177,6 +177,43 @@ class PlotGroup(param.Parameterized):
         self.labels = self._generate_labels()
 
 
+    @property
+    def coords(self):
+        """
+        Calculate the grid layout of the plots from their precedences
+        and row_precedences. Returns a list of triples (row, col, plot).
+        """
+        # Plots are sorted first by precedence, then grouped by row_precedence
+        self._sort_plots()
+        precedences = sorted(set(p.row_precedence for p in self.plots))
+
+        coords=[]
+        # Can use collections.Counter in Python >= 2.7
+        column_counter = dict((i,0) for i,_ in enumerate(precedences))
+        for plot in self.plots:
+            # Find the row number based on the row_precedences
+            row = precedences.index(plot.row_precedence)
+            # Look up the current column position of the row
+            col = column_counter[row]
+            # The next plot on this row will have to be in the next column
+            column_counter[row] +=1
+            coords.append((row, col, plot))
+        return coords
+
+    @property
+    def grid(self):
+        """
+        Return the plots in grid format, i.e., a list of rows, each of
+        which is a list of plots. The rows are right padded with None
+        as necessary.
+        """
+        coords = self.coords
+        rows = max(r for (r,_,_) in coords) + 1 if coords != [] else 0
+        cols = max(c for (_,c,_) in coords) + 1 if coords != [] else 0
+        unpadded_grid = [[p for (r,_, p) in coords if r==row] for row in range(rows)]
+        return [r + [None]*(cols-len(r)) for r in unpadded_grid]
+
+
 
 ### In the rest of the file, whenever we do a loop through all the
 ### simulation's sheets, seems like we should have set the sheet

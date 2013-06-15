@@ -457,27 +457,6 @@ Many hooks accept 'display=True' so that the progress can be viewed in an open A
             self.redraw_plots()
 
 
-    ### JABALERT: Can we make it simpler to make plots be put onto multiple lines?
-    # (because this is just the smallest change I cpuld think of to
-    # support row precedence, without altering the existing code!)
-    def _determine_layout_of_plots(self,plots):
-        """Calculate self._rows and self._cols, together giving the grid position of each plot."""
-        distinct_precedences = sorted(set([p.row_precedence for p in plots]))
-
-        # 2*i because labels will occupy odd rows
-        precedence2row = dict([ (precedence,2*i)
-                                for precedence,i in zip(distinct_precedences,
-                                                        range(len(distinct_precedences)))])
-        # CB: a 2d array might have been clearer...
-        self._rows = [precedence2row[p.row_precedence] for p in plots]
-        self._cols = []
-
-        row_counts = dict([(row,0) for row in self._rows])
-        for row in self._rows:
-            self._cols.append(row_counts[row])
-            row_counts[row]+=1
-
-
     # CEBALERT: this method needs cleaning, along with its versions in subclasses.
     def display_plots(self):
         """
@@ -485,9 +464,9 @@ Many hooks accept 'display=True' so that the progress can be viewed in an open A
         This function should be redefined in subclasses for interesting
         things such as 2D grids.
         """
-        plots = self.plotgroup.plots
-        self._determine_layout_of_plots(plots)
-
+        self._rows = [r*2 for (r,_,_) in self.plotgroup.coords] # Alternate rows for labelling
+        self._cols = [c for (_,c,_) in self.plotgroup.coords]
+        plots =      [p for (_,_,p) in self.plotgroup.coords]
         self.zoomed_images = [ImageTk.PhotoImage(p.bitmap.image) for p in plots]
 
         new_sizes = [(str(zi.width()),
@@ -499,7 +478,6 @@ Many hooks accept 'display=True' so that the progress can be viewed in an open A
         # If the number of canvases or their sizes has changed, then
         # create a new set of canvases.  If the new images will fit into the
         # old canvases, reuse them (prevents flicker)
-
 
 
         if len(self.zoomed_images) != len(self.canvases) or \
