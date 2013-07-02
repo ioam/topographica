@@ -11,6 +11,8 @@ import param
 
 from snapshots import PicklableClassAttributes
 
+from topo import version_int
+
 # CEBALERT: remove the extraneous "import param"s
 
 # CEB: Add note that snapshot can be re-saved, making updates
@@ -44,6 +46,21 @@ releases = {"0.9.7": 11275}
 
 
 def _get_version(snapshot_release,snapshot_version):
+    """
+    Try to determine a single numerical version for use in looking up
+    patches in the support dictionary, given a snapshot's declared
+    release and version.
+
+    Because of the variety of different version formats that have been
+    in use over the different version-control systems over the years,
+    it's not always possible to make such a mapping.  E.g. versions
+    controlled by SVN would normally return topo.version like 11499,
+    which is clear, but also sometimes 11499:11503 or 11499M.
+    Versions from git checkouts of svn source would just say
+    "exported", while native git versions will have a four-tuple.  If
+    nothing else works, the numerical version associated with the
+    stated release is used.
+    """
 
     found_version = False
 
@@ -52,9 +69,10 @@ def _get_version(snapshot_release,snapshot_version):
             snapshot_version = snapshot_version.split(":")[0]
             snapshot_version = snapshot_version.split("M")[0]
         except AttributeError: # the version is a tuple, thus it's from git
-            snapshot_version = "%02d%02d%02d%05d" % snapshot_version
+            snapshot_version = version_int(snapshot_version)
 
-        if len(snapshot_version)>0:
+        # Convert to integer if snapshot_version contains only digits
+        if snapshot_version:
             try:
                 snapshot_version = int(snapshot_version)
                 found_version = True
@@ -73,15 +91,6 @@ class SnapshotSupport(object):
 
     @staticmethod
     def install(snapshot_release,snapshot_version=None):
-
-        # CEB: I think there's no simple way to tell what "version" of
-        # Topographica a snapshot comes from. When you're running
-        # Topographica from svn, you can try topo.version, but you'll
-        # get things like 11499:11503 or 11499M. If you use git,
-        # you'll see "exported". Therefore, we can't always have
-        # fine-grained control over what's loaded. We can at least use
-        # the release number for coarse-grained control, though.
-
         snapshot_version = _get_version(snapshot_release,snapshot_version)
 
         param.Parameterized().debug("Snapshot is from release %s (r%s)"%(snapshot_release,snapshot_version))

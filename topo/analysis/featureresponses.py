@@ -171,6 +171,12 @@ class FeatureResponses(PatternDrivenAnalysis):
         so that results will be an average over the specified
         number of repetitions.""")
 
+
+    enable_fullmatrix = param.Boolean(default=False,doc="""
+        Determines whether or not store the full matrix of feature
+        responses as a class attribute.""")
+
+
     _fullmatrix = {}
 
 
@@ -185,7 +191,8 @@ class FeatureResponses(PatternDrivenAnalysis):
         """Create an empty DistributionMatrix for each feature and each sheet."""
         self._featureresponses = {}
         self._activities = {}
-        FeatureResponses._fullmatrix = {}
+        if self.enable_fullmatrix:
+            FeatureResponses._fullmatrix = {}
         for sheet in self.sheets_to_measure():
             self._featureresponses[sheet] = {}
             self._activities[sheet]=np.zeros(sheet.shape)
@@ -194,7 +201,8 @@ class FeatureResponses(PatternDrivenAnalysis):
                 # "keep_peak=f.keep_peak". Couldn't these things be
                 # passed around in a less fragile way?
                 self._featureresponses[sheet][f.name]=DistributionMatrix(sheet.shape,axis_range=f.range,cyclic=f.cyclic)
-            FeatureResponses._fullmatrix[sheet] = FullMatrix(sheet.shape,features)
+            if self.enable_fullmatrix:
+                FeatureResponses._fullmatrix[sheet] = FullMatrix(sheet.shape,features)
 
     def sheets_to_measure(self):
         """Return a list of the Sheets in the current simulation for which to collect responses."""
@@ -283,7 +291,8 @@ class FeatureResponses(PatternDrivenAnalysis):
         for sheet in self.sheets_to_measure():
             for feature,value in current_values:
                 self._featureresponses[sheet][feature].update(self._activities[sheet],value)
-            FeatureResponses._fullmatrix[sheet].update(self._activities[sheet],current_values)
+            if self.enable_fullmatrix:
+                FeatureResponses._fullmatrix[sheet].update(self._activities[sheet],current_values)
 
 
 
@@ -454,6 +463,7 @@ class FeatureMaps(FeatureResponses):
             sr = sheet.row_precedence
 
             for feature in self._featureresponses[sheet].keys():
+            ### JABALERT: I'm not sure what any of the text in the following alert means. :-)
             ### JCHACKALERT! This is temporary to avoid the positionpref plot to shrink
             ### Nevertheless we should think more about this (see alert in bitmap.py)
             ### When passing a sheet_view that is not cropped to 1 in the parameter hue of hsv_to_rgb
@@ -463,8 +473,7 @@ class FeatureMaps(FeatureResponses):
             ### Also, what happens in case of negative values?
                 fp = filter(lambda f: f.name==feature,self.features)[0]
                 ar = self._featureresponses[sheet][feature].distribution_matrix[0,0].axis_range
-                cyclic = fp.cyclic
-                cyclic_range = ar if cyclic else 1.0
+                cyclic_range = ar if fp.cyclic else 1.0
                 preference_fn = fp.preference_fn if fp.preference_fn is not None else self.preference_fn
                 if self.selectivity_multiplier is not None:
                     preference_fn.selectivity_scale = (preference_fn.selectivity_scale[0],self.selectivity_multiplier)
@@ -477,8 +486,10 @@ class FeatureMaps(FeatureResponses):
                     for map_name,map_view in maps.items():
                         name = base_name + k + map_name.capitalize()
                         view = SheetView((map_view,bounding_box),sn,sp,t,sr)
-                        view.cyclic                 = False if map_name == 'selectivity' else fp.cyclic
-                        view.cyclic_range           = None if map_name == 'selectivity' else cyclic_range
+                        # JABALERT: Temporarily disabled as of 20130614 to work around a plotting problem
+                        # Special case: selectivity is not cyclic even if the feature is
+                        view.cyclic       = False #if map_name == 'selectivity' else fp.cyclic
+                        view.cyclic_range = None  #if map_name == 'selectivity' else cyclic_range
                         sheet.sheet_views[name] = view
 
 
@@ -538,7 +549,10 @@ class FeatureCurves(FeatureResponses):
             Response = SheetView((y_axis_values,bounding_box),self.sheet.name ,self.sheet.precedence,topo.sim.time(),self.sheet.row_precedence)
             self.sheet.curve_dict[self.x_axis][curve_label].update({key:Response})
 
-        for f in self.post_collect_responses_hook: f(self._fullmatrix[self.sheet],curve_label,self.sheet)
+        if self.enable_fullmatrix:
+            for f in self.post_collect_responses_hook: f(self._fullmatrix[self.sheet],curve_label,self.sheet)
+        elif len(self.post_collect_responses_hook) > 0:
+            self.warning("Post_collect_responses_hooks require fullmatrix to be enabled.""")
 
 
 
@@ -913,7 +927,7 @@ class PatternPresenter(param.Parameterized):
         for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
             inputs[sheet_name]=pattern.Constant(scale=0)
 
-        measure_response(inputs,duration=self.duration,plastic=False,
+        pattern_response(inputs,duration=self.duration,plastic=False,
                      apply_output_fns=self.apply_output_fns, restore_state=False, restore_events=True)
 
 
@@ -1131,13 +1145,10 @@ def update_activity(sheet_views_prefix='',force=False):
 
 
 
-class measure_response(PatternPresentingCommand):
+class pattern_response(PatternPresentingCommand):
     """
-    This command presents the specified test patterns for the
-    specified duration and saves the resulting activity to the
-    appropriate SheetViews. Originally, this was the implementation of
-    the pattern_present command, which is still available in
-    topo.command and operates by wrapping a call to this class.
+    Present the specified test patterns for the specified duration 
+    and save the resulting activity to the appropriate SheetViews.
 
     Given a set of input patterns, installs them into the specified
     GeneratorSheets, runs the simulation for the specified length of
@@ -1145,32 +1156,27 @@ class measure_response(PatternPresentingCommand):
     simulation time.  Thus this input is not considered part of the
     regular simulation, and is usually for testing purposes.
 
-    As a special case, if 'inputs' is just a single pattern, and not
-    a dictionary, it is presented to all GeneratorSheets.
-
-    If a simulation is not provided, the active simulation, if one
-    exists, is requested.
-
     If this process is interrupted by the user, the temporary patterns
     may still be installed on the retina.
 
-    In order to to see the sequence of values presented, you may use
-    the back arrow history mechanism in the GUI. Note that the GUI's
-    Activity window must be open and the display parameter set to true
-    (display=True).
+    If a GUI is accessible via topo.guimain, its
+    refresh_activity_windows method will be called after each pattern
+    presentation, to allow the results to be visualized.
     """
 
     inputs = param.Dict(default={},doc="""
         A dictionary of GeneratorSheetName:PatternGenerator pairs to be
-        installed into the specified GeneratorSheets""")
+        installed into the specified GeneratorSheets.  As a special
+        case, if a single pattern is supplied, rather than a dictionary,
+        it is presented to all GeneratorSheets.""")
 
     plastic=param.Boolean(default=False,doc="""
         If plastic is False, overwrites the existing values of
         Sheet.plastic to disable plasticity, then reenables plasticity.""")
 
     overwrite_previous=param.Boolean(default=False,doc="""
-        If overwrite_previous is true, the given inputs overwrite those
-        previously defined.""")
+        If overwrite_previous is true, the given inputs permanently
+        overwrite those previously defined in each GeneratorSheet.""")
 
     apply_output_fns=param.Boolean(default=True)
 
