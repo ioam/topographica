@@ -41,6 +41,7 @@ from topo.misc.distribution import Distribution, DistributionStatisticFn
 from topo.misc.distribution import DSF_MaxValue, DSF_BimodalPeaks
 from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit, DSF_BimodalVonMisesFit
 from topo.pattern import GaussiansCorner, Gaussian, RawRectangle, Composite, Constant
+from topo.pattern.random import UniformRandom
 from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
 
@@ -330,7 +331,7 @@ class measure_rfs(SingleInputResponseCommand):
     	that are sampled per presentation.  The higher the value the coarser
     	the receptive field measurement will be.""")
 
-    sampling_area = param.NumericTuple(doc="""
+    sampling_area = param.NumericTuple(default=(0,0),doc="""
     	Dimensions of the area to be sampled during reverse correlation
         measured in units x and y on the input sheet centered around the origin
         and expressed as a tuple (x,y).""")
@@ -339,10 +340,11 @@ class measure_rfs(SingleInputResponseCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
         self.params('input_sheet').compute_default()
-        dict([(s,p[s]) for s in p.static_parameters])
-        ReverseCorrelation(self._feature_list(p),static_params,input_sheet=p.input_sheet,duration=p.duration,
-                           presenter_cmd=p.presenter_cmd(**p.extra_keywords()),pattern_coordinator=p.pattern_coordinator)
+        static_params = dict([(s,p[s]) for s in p.static_parameters])
+        ReverseCorrelation(self._feature_list(p),param_dict=static_params,input_sheet=p.input_sheet,duration=p.duration,
+                           presenter_cmd=p.presenter_cmd,pattern_coordinator=p.pattern_coordinator)
 
     def _feature_list(self,p):
 
@@ -363,10 +365,45 @@ class measure_rfs(SingleInputResponseCommand):
                 Feature(name="y", range=y_range, step=-p.size),
                 Feature(name="scale", range=(-p.scale, p.scale), step=p.scale*2)]
 
+# pg = create_plotgroup(name='RF Projection',category='Other',
+# doc='Measure receptive fields.',
+# pre_plot_hooks=[measure_rfs.instance(
+#     pattern_coordinator=CoordinatedPatternGenerator(RawRectangle(size=0.01,aspect_ratio=1.0)))],
+#     normalize='Individually')
+
+class measure_wnrfs(measure_rfs):
+    """
+    Map receptive fields by reverse correlation.
+
+    Presents a large collection of input patterns, typically pixel by pixel on
+    and off, keeping track of which units in the specified input_sheet were
+    active when each unit in other Sheets in the simulation was active.  This
+    data can then be used to plot receptive fields for each unit.  Note that
+    the results are true receptive fields, not the connection fields usually
+    presented in lieu of receptive fields, because they take all circuitry in
+    between the input and the target unit into account.
+
+    Note also that it is crucial to set the scale parameter properly when using
+    units with a hard activation threshold (as opposed to a smooth sigmoid),
+    because the input pattern used here may not be a very effective way to
+    drive the unit to activate.  The value should be set high enough that the
+    target units activate at least some of the time there is a pattern on the
+    input.
+    """
+
+    static_parameters = param.List(default=["scale","offset"])
+
+    presentations = param.Number(default=100)
+
+    __abstract = True
+
+    def _feature_list(self,p):
+        return [Feature(name="presentation", range=(0, p.presentations), step = 1.0),
+        Feature(name="scale", values=[p.scale])]
+
 pg = create_plotgroup(name='RF Projection',category='Other',
-doc='Measure receptive fields.',
-pre_plot_hooks=[measure_rfs.instance(
-    pattern_coordinator=CoordinatedPatternGenerator(RawRectangle(size=0.01,aspect_ratio=1.0)))],
+    doc='Measure white noise receptive fields.',
+    pre_plot_hooks=[measure_wnrfs.instance(pattern_coordinator=CoordinatedPatternGenerator(UniformRandom()))],
     normalize='Individually')
 
 pg.add_plot('RFs',[('Strength','RFs')])

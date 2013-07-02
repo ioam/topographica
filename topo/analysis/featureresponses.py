@@ -442,10 +442,11 @@ class ReverseCorrelation(FeatureResponses):
     """
     Calculate the receptive fields for all neurons using reverse correlation.
     """
-    
+
     input_sheet = param.Parameter(default=None)
 
-    
+    continue_measurement = param.Boolean(default=True)
+
     def initialize_featureresponses(self,p):
         self._activities = {}
         self._featureresponses = {}
@@ -457,8 +458,8 @@ class ReverseCorrelation(FeatureResponses):
             self._featureresponses[input_label] = {}
             for response_label,response_shape in self.response_shapes.items():
                 rows,cols = response_shape
-                self._featureresponses[input_label][response_label] = np.array([[np.zeros(input_shape,dtype=activity_dtype) for r in rows]
-                                                                                for c in cols])
+                self._featureresponses[input_label][response_label] = np.array([[np.zeros(input_shape,dtype=activity_dtype) for r in range(rows)]
+                                                                                for c in range(cols)])
 
 
     def __call__(self,features,**params):
@@ -500,6 +501,7 @@ class ReverseCorrelation(FeatureResponses):
         inputs = p.pattern_coordinator(dict(permuted_settings),p.param_dict,self.input_shapes.keys())
 
         response_dict = p.presenter_cmd(inputs, duration=p.duration)
+        p.presenter_cmd.update_progress(permutation_num,total_steps)
 
         for label,response in response_dict.items():
             self._activities[label]+=response
