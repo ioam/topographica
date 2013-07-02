@@ -21,9 +21,11 @@ from topo.base.cf import CFProjection, CFSheet
 from topo.base.simulation import Simulation
 from topo.learningfn.optimized import CFPLF_Hebbian
 
-from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps
+from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps, pattern_response, CoordinatedPatternGenerator
 from topo.misc.distribution import DSF_WeightedAverage
 from topo.command.analysis import Feature
+
+from imagen import SineGrating, Disk
 
 # globals to use weighted_average, selectivity, vector_sum, which are not methods
 # of DistributionMatrix any more
@@ -214,7 +216,8 @@ class TestFeatureMaps(unittest.TestCase):
         self.feature_param = [Feature(name="phase",range=(0.0,1.0),values=[0.2,0.4,0.6],cyclic=False),
                               Feature(name="orientation",range=(0.0,1.0),step=0.5,cyclic=True)]
 
-        self.x = FeatureMaps(self.feature_param)
+        self.x = FeatureMaps(self.feature_param,presenter_cmd=pattern_response.instance(),
+                             pattern_coordinator=CoordinatedPatternGenerator(pattern_generator=SineGrating()))
         #print self.V1.activity
         #### test has to be written!!!
 

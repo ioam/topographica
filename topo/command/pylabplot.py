@@ -1228,7 +1228,7 @@ class measure_orientation_contrast(UnitCurveCommand):
             orientation=pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord,default=p.orientation_center)
             p.orientationcenter=orientation
 
-            for i in xrange(0,self.num_orientation):
+            for i in xrange(1,self.num_orientation):
                 self.or_surrounds.append(orientation+i*pi/(p.num_orientation))
 
             p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])

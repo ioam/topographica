@@ -386,5 +386,5 @@ FeatureResponses.post_analysis_session_hooks.append(restore_input_generators)
 FeatureResponses.pre_presentation_hooks.append(sim.state_push)
 FeatureResponses.post_presentation_hooks.append(sim.state_pop)
 
-MeasureResponseCommand.presenter_cmd = pattern_response
+MeasureResponseCommand.presenter_cmd = pattern_response.instance()
 

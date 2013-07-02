@@ -186,12 +186,17 @@ class FeatureResponses(PatternDrivenAnalysis):
         responses as a class attribute.""")
 
 
+    param_dict = param.Dict(default={},doc="""
+        Dictionary containing name value pairs of a feature, which is to
+        be varied across measurements.""")
+
+
     presenter_cmd = param.Callable(default=None,instantiate=True,doc="""
         Presenter command responsible for presenting the input patterns
         provided to it, returning measurement labels and collecting and
         storing the measurement results in the appropriate place.""")
 
-        
+
     pattern_coordinator = param.Callable(default=None,instantiate=True,doc="""
     Coordinates the creation and linking of numerous simultaneously
     presented input patterns, controlled by complex features.""")
@@ -266,7 +271,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         for i in xrange(0,p.repetitions):
             for f in p.pre_presentation_hooks: f()
 
-            inputs = p.pattern_coordinator(dict(permuted_settings),self.param_dict,self.input_shapes.keys())
+            inputs = p.pattern_coordinator(dict(permuted_settings),p.param_dict,self.input_shapes.keys())
             response_dict = p.presenter_cmd(inputs, duration=p.duration)
             p.presenter_cmd.update_progress(p.repetitions*permutation_num+i,total_steps)
 
@@ -329,7 +334,7 @@ class FeatureMaps(FeatureResponses):
         Prefix to add to the name under which results are stored in sheet_views.""")
 
 
-    def __call__(self,features,param_dict,**params):
+    def __call__(self,features,**params):
         """
         Present the given input patterns and collate the responses.
 
@@ -341,7 +346,6 @@ class FeatureMaps(FeatureResponses):
         """
         p = ParamOverrides(self,params)
         self.features=features
-        self.param_dict=param_dict
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
 
@@ -408,10 +412,9 @@ class FeatureCurves(FeatureResponses):
         Curve label, specifying the value along some feature dimension.""")
 
 
-    def __call__(self,features,param_dict,**params):
+    def __call__(self,features,**params):
         p = ParamOverrides(self,params)
         self.features=features
-        self.param_dict=param_dict
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
         self.initialize_featureresponses(p)
@@ -458,10 +461,9 @@ class ReverseCorrelation(FeatureResponses):
                                                                                 for c in cols])
 
 
-    def __call__(self,features,param_dict,**params):
+    def __call__(self,features,**params):
         p = ParamOverrides(self,params)
         self.features=features
-        self.param_dict=param_dict
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
 
@@ -495,7 +497,7 @@ class ReverseCorrelation(FeatureResponses):
         # Run hooks before and after pattern presentation.
         for f in p.pre_presentation_hooks: f()
 
-        inputs = p.pattern_coordinator(dict(permuted_settings),self.param_dict,self.input_shapes.keys())
+        inputs = p.pattern_coordinator(dict(permuted_settings),p.param_dict,self.input_shapes.keys())
 
         response_dict = p.presenter_cmd(inputs, duration=p.duration)
 
@@ -1045,22 +1047,6 @@ class Subplotting(param.Parameterized):
 #    flexible as it could be.
 
 
-class PatternPresentingCommand(ParameterizedFunction):
-    """Parameterized command for presenting input patterns"""
-
-    duration = param.Number(default=None,doc="""
-        If non-None, pattern_presenter.duration will be
-        set to this value.  Provides a simple way to set
-        this commonly changed option of CoordinatedPatternGenerator.""")
-
-    sheet_views_prefix = param.String(default="",doc="""
-        Optional prefix to add to the name under which results are
-        stored in sheet_views. Can be used e.g. to distinguish maps as
-        originating from a particular GeneratorSheet.""")
-
-    __abstract = True
-
-
 def update_sheet_activity(sheet_name,sheet_views_prefix='', create_sheetview=True):
     """
     Update the 'Activity' SheetView for a given sheet by name.
@@ -1095,7 +1081,8 @@ def update_activity(sheet_views_prefix='', create_sheetview=True):
         activity_dict[sheet_name] = activity
     return activity_dict
 
-class PatternResponse(ParameterizedFunction):
+
+class PatternPresentingCommand(ParameterizedFunction):
     """Abstract class defining the necessary methods that need to be
     implemented by any pattern_response callable."""
 
@@ -1104,10 +1091,154 @@ class PatternResponse(ParameterizedFunction):
         set to this value.  Provides a simple way to set
         this commonly changed option of CoordinatedPatternGenerator.""")
 
+    sheet = param.String(default=None)
+
+    input_sheet = param.String(default=None)
+
+    inputs = param.Dict(default={},doc="""
+        A dictionary of GeneratorSheetName:PatternGenerator pairs to be
+        installed into the specified GeneratorSheets""")
+
+    plastic=param.Boolean(default=False,doc="""
+        If plastic is False, overwrites the existing values of
+        Sheet.plastic to disable plasticity, then reenables plasticity.""")
+
+    overwrite_previous=param.Boolean(default=False,doc="""
+        If overwrite_previous is true, the given inputs overwrite those
+        previously defined.""")
+
+    __abstract = True
+
+
+class pattern_present(PatternPresentingCommand):
+
+    def __call__(self,inputs={},**params_to_override):
+        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
+        # ensure EPs get started (if pattern_present is called before the simulation is run())
+        topo.sim.run(0.0)
+
+        self.refresh_act_wins=False
+        if hasattr(topo,'guimain'):
+            self.refresh_act_wins=True
+
+        if not p.overwrite_previous:
+            save_input_generators()
+
+        if not p.plastic:
+            # turn off plasticity everywhere
+            for sheet in topo.sim.objects(Sheet).values():
+                 sheet.override_plasticity_state(new_plasticity_state=False)
+
+        # Register the inputs on each input sheet
+        generatorsheets = topo.sim.objects(GeneratorSheet)
+
+        if not isinstance(p.inputs,dict):
+            for g in generatorsheets.values():
+                g.set_input_generator(p.inputs)
+        else:
+            for each in p.inputs.keys():
+                if generatorsheets.has_key(each):
+                    generatorsheets[each].set_input_generator(p.inputs[each])
+                else:
+                    param.Parameterized().warning(
+                        '%s not a valid Sheet name for pattern_present.' % each)
+
+        duration = p.duration if (p.duration is not None) else 1.0
+        topo.sim.run(duration)
+
+        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
+        if not p.plastic:
+            for sheet in topo.sim.objects(Sheet).values():
+                sheet.restore_plasticity_state()
+
+        if not p.overwrite_previous:
+            restore_input_generators()
+
+
+class measure_response(PatternPresentingCommand):
+    """
+    Measuring the response to a pattern: 
+    More complete function that both presents a pattern and also
+    collects the response, generating SheetViews.  Also pushes and pops
+    the state, which is only meaningful because we are first grabbing the
+    activity and storing the sheet views.  Thus unlike 1, this is a
+    complete (albeit simple) measurement, not just a low-level tool.
+    """
+
+    restore_state = param.Boolean(default=False)
+
+    def __call__(self,inputs={},**params_to_override):
+        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
+        # ensure EPs get started (if pattern_response is called before the simulation is run())
+        topo.sim.run(0.0)
+
+        if self.restore_state:   topo.sim.state_push()
+
+        self.refresh_act_wins=False
+        if hasattr(topo,'guimain'):
+            self.refresh_act_wins=True
+
+        if not p.overwrite_previous:
+            save_input_generators()
+
+        if not p.plastic:
+            # turn off plasticity everywhere
+            for sheet in topo.sim.objects(Sheet).values():
+                 sheet.override_plasticity_state(new_plasticity_state=False)
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                if hasattr(each,'measure_maps'):
+                   if each.measure_maps:
+                       each.apply_output_fns = False
+
+        # Register the inputs on each input sheet
+        generatorsheets = topo.sim.objects(GeneratorSheet)
+
+        if not isinstance(p.inputs,dict):
+            for g in generatorsheets.values():
+                g.set_input_generator(p.inputs)
+        else:
+            for each in p.inputs.keys():
+                if generatorsheets.has_key(each):
+                    generatorsheets[each].set_input_generator(p.inputs[each])
+                else:
+                    param.Parameterized().warning(
+                        '%s not a valid Sheet name for pattern_present.' % each)
+
+        duration = p.duration if (p.duration is not None) else 1.0
+        topo.sim.run(duration)
+
+        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
+        if not p.plastic:
+            for sheet in topo.sim.objects(Sheet).values():
+                sheet.restore_plasticity_state()
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                each.apply_output_fns = True
+
+        if not p.overwrite_previous:
+            restore_input_generators()
+
+        keys = self.response_shapes().keys() + self.input_shapes().keys()
+        update_activity(p.sheet_views_prefix, create_sheetview = True)
+
+        if self.restore_state:   topo.sim.state_pop()
+
+
+
+class PatternResponseCommand(PatternPresentingCommand):
+    """Abstract class defining the necessary methods that need to be
+    implemented by any pattern_response callable."""
+
     sheet_views_prefix = param.String(default="",doc="""
         Optional prefix to add to the name under which results are
         stored in sheet_views. Can be used e.g. to distinguish maps as
         originating from a particular GeneratorSheet.""")
+
+    apply_output_fns=param.Boolean(default=True,doc="""
+        """)
 
     __abstract = True
 
@@ -1132,7 +1263,8 @@ class PatternResponse(ParameterizedFunction):
     def collect_rf_measurements(self,rf_dict):
         raise NotImplementedError
 
-class pattern_response(PatternResponse):
+
+class pattern_response(PatternResponseCommand):
     """
     This command presents the specified test patterns for the
     specified duration and saves the resulting activity to the
@@ -1160,25 +1292,6 @@ class pattern_response(PatternResponse):
     Activity window must be open.
     """
 
-    sheet = param.String(default=None)
-
-    input_sheet = param.String(default=None)
-
-    inputs = param.Dict(default={},doc="""
-        A dictionary of GeneratorSheetName:PatternGenerator pairs to be
-        installed into the specified GeneratorSheets""")
-
-    plastic=param.Boolean(default=False,doc="""
-        If plastic is False, overwrites the existing values of
-        Sheet.plastic to disable plasticity, then reenables plasticity.""")
-
-    overwrite_previous=param.Boolean(default=False,doc="""
-        If overwrite_previous is true, the given inputs overwrite those
-        previously defined.""")
-
-    apply_output_fns=param.Boolean(default=True,doc="""
-        """)
-
     ongoing_measurement = param.Boolean(default=False,doc="""
         Indicates whether pattern_response is currently being used in a measurement.
         If True and toggled to False will halt the measurement process.""")
@@ -1186,7 +1299,7 @@ class pattern_response(PatternResponse):
     def __call__(self,inputs={},**params_to_override):
 
         p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
-        # ensure EPs get started (if pattern_present is called before the simulation is run())
+        # ensure EPs get started (if pattern_response is called before the simulation is run())
         topo.sim.run(0.0)
 
         if not self.ongoing_measurement:   topo.sim.state_push()
@@ -1249,6 +1362,7 @@ class pattern_response(PatternResponse):
 
         return dict((k,v) for k,v in act_dict.items() if k in keys)
 
+
     def response_shapes(self):
         """Return a list of the Sheets in the current simulation for which to collect responses."""
         if self.sheet and self.sheet in topo.sim:
@@ -1271,9 +1385,11 @@ class pattern_response(PatternResponse):
                 self.warning("Warning specified input sheet does not exist, using all generator sheets instead.")
             return dict((s.name, s.shape) for s in topo.sim.objects(GeneratorSheet).values())
 
+
     @property
     def progress(self):
         return self._progress
+
 
     def update_progress(self,current,total_steps):
         if current == 0:
@@ -1336,7 +1452,7 @@ class pattern_response(PatternResponse):
                     key = ('RFs',sheet_name,x,y)
                     input_sheet_views[key]=view
 
-                    
+
     def get_feature_preference(self,sheet,feature,sheet_coord,default=0.0):
         """Return the feature preference for a particular unit."""
         sheet = topo.sim[sheet]
@@ -1356,7 +1472,25 @@ class pattern_response(PatternResponse):
         return val
 
 
-class MeasureResponseCommand(PatternPresentingCommand):
+class MeasurementCommand(ParameterizedFunction):
+    """Parameterized command for presenting input patterns"""
+
+    duration = param.Number(default=None,doc="""
+        If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of CoordinatedPatternGenerator.""")
+
+    response_views_prefix = param.String(default="",doc="""
+        Optional prefix to add to the name under which results are
+        stored as part of a measurement response.""")
+
+    presenter_cmd = param.Callable(default=None,instantiate=True,doc="""
+        """)
+
+    __abstract = True
+
+
+class MeasureResponseCommand(MeasurementCommand):
     """Parameterized command for presenting input patterns and measuring responses."""
 
     scale = param.Number(default=1.0,softbounds=(0.0,2.0),doc="""
@@ -1393,9 +1527,6 @@ class MeasureResponseCommand(PatternPresentingCommand):
     preference_fn = param.ClassSelector(DistributionStatisticFn,default=DSF_MaxValue(),
             doc="""Function that will be used to analyze the distributions of unit responses.""")
 
-    presenter_cmd = param.Callable(default=None,instantiate=True,doc="""
-        """)
-
     duration = param.Number(default=1.0)
 
     __abstract = True
@@ -1404,12 +1535,12 @@ class MeasureResponseCommand(PatternPresentingCommand):
     def __call__(self,**params):
         """Measure the response to the specified pattern and store the data in each sheet."""
         p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
         static_params = dict([(s,p[s]) for s in p.static_parameters])
         p.pattern_coordinator.generator_sheets=p.generator_sheets
-
-        fullmatrix = FeatureMaps(self._feature_list(p),static_params,pattern_coordinator=p.pattern_coordinator,
-                                 sheet_views_prefix=p.sheet_views_prefix,duration=p.duration,
-                                 presenter_cmd=p.presenter_cmd.instance(**p.extra_keywords()))
+        fullmatrix = FeatureMaps(self._feature_list(p),param_dict=static_params,pattern_coordinator=p.pattern_coordinator,
+                                 sheet_views_prefix=p.response_views_prefix,duration=p.duration,
+                                 presenter_cmd=p.presenter_cmd)
 
         if p.subplot != "":
             Subplotting.set_subplots(p.subplot,force=True)
@@ -1421,6 +1552,10 @@ class MeasureResponseCommand(PatternPresentingCommand):
         """Return the list of features to vary; must be implemented by each subclass."""
         raise NotImplementedError
 
+
+    def _set_presenter_overrides(self,p):
+        for override,value in p.extra_keywords().items():
+            p.presenter_cmd.set_param(override,value)
 
 
 class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
@@ -1536,12 +1671,13 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
     # the crossproduct of them?
     curve_parameters=param.Parameter([{"contrast":30},{"contrast":60},{"contrast":80},{"contrast":90}],doc="""
         List of parameter values for which to measure a curve.""")
-        
+
     __abstract = True
 
     def __call__(self,**params):
         """Measure the response to the specified pattern and store the data in each sheet."""
         p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
         self._compute_curves(p)
 
 
@@ -1555,8 +1691,8 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
             static_params = dict([(s,p[s]) for s in p.static_parameters])
             static_params.update(curve)
             curve_label="; ".join([('%s = '+val_format+'%s') % (n.capitalize(),v,p.units) for n,v in curve.items()])
-            FeatureCurves(self._feature_list(p),static_params,pattern_coordinator=p.pattern_coordinator,x_axis=p.x_axis,curve_label=curve_label,
-                          presenter_cmd=p.presenter_cmd.instance(**p.extra_keywords()))
+            FeatureCurves(self._feature_list(p),param_dict=static_params,pattern_coordinator=p.pattern_coordinator,x_axis=p.x_axis,
+                          curve_label=curve_label,presenter_cmd=p.presenter_cmd)
 
 
 

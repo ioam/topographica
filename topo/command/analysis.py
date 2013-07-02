@@ -274,7 +274,7 @@ class update_projectionactivity(ProjectionSheetMeasurementCommand):
     def __call__(self,**params):
         p=ParamOverrides(self,params)
         self.params('sheet').compute_default()
-        s = p.sheet
+        s = topo.sim[p.sheet]
         if s is not None:
             for conn in s.in_connections:
                 if not isinstance(conn,Projection):
