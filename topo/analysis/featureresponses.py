@@ -1156,6 +1156,8 @@ class pattern_present(PatternPresentingCommand):
         if not p.overwrite_previous:
             restore_input_generators()
 
+        update_activity("", create_sheetview = True)
+
 
 class measure_response(PatternPresentingCommand):
     """

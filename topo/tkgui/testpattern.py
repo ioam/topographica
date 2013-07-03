@@ -28,9 +28,9 @@ from topo.base.functionfamily import PatternDrivenAnalysis
 from topo.base.sheetview import SheetView
 from topo.base.patterngenerator import PatternGenerator, Constant
 from topo.misc.generatorsheet import GeneratorSheet
-from topo.command import pattern_present
 from topo.plotting.plot import make_template_plot
 from topo.plotting.plotgroup import SheetPlotGroup
+from topo.analysis.featureresponses import pattern_present
 
 from plotgrouppanel import SheetPanel
 
@@ -63,7 +63,7 @@ class TestPatternPlotGroup(SheetPlotGroup):
 
 
 
-class TestPattern(SheetPanel,PatternDrivenAnalysis):
+class TestPattern(SheetPanel):
 
     sheet_type = GeneratorSheet
 
@@ -174,15 +174,8 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         the specified length of time, then restore the original
         patterns.
         """
-        topo.sim.run(0.0)  # ensure EPs are start()ed
-
-        topo.sim.state_push()
-        for f in self.pre_presentation_hooks: f()
         input_dict = dict([(sheet.name,sheet.input_generator) \
                            for sheet in self.plotgroup.sheets()])
-        pattern_present(input_dict,self.duration,
+        pattern_present(input_dict,duration=self.duration,
                         plastic=self.plastic,overwrite_previous=False)
-        topo.guimain.auto_refresh(update=False)
-        for f in self.post_presentation_hooks: f()
-        topo.sim.state_pop()
 
