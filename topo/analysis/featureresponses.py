@@ -5,7 +5,6 @@ These classes implement map and tuning curve measurement based
 on measuring responses while varying features of an input pattern.
 """
 
-
 import copy
 
 from math import pi
@@ -138,36 +137,32 @@ class FullMatrix(param.Parameterized):
 # - Possibly -- make the __call__ methods have the same signature?
 # - Clean up the inheritance hierarchy?
 
+### Old Comments
 
-class FeatureResponses(PatternDrivenAnalysis):
-    """
-    Systematically vary input pattern feature values and collate the responses.
-
-    Each sheet has a DistributionMatrix for each feature that will be
-    tested.  The DistributionMatrix stores the distribution of
-    activity values for each unit in the sheet for that feature.  For
-    instance, if the features to be tested are orientation and phase,
-    we will create a DistributionMatrix for orientation and a
-    DistributionMatrix for phase for each sheet.  The orientation and
-    phase of the input are then systematically varied (when
-    measure_responses is called), and the responses of each unit
-    to each pattern are collected into the DistributionMatrix.
-
-    The resulting data can then be used to plot feature maps and
-    tuning curves, or for similar types of feature-based analyses.
-    """
+# Feature Responses
 
     # CEB: we might want to measure the map on a sheet due
     # to a specific projection, rather than measure the map due
     # to all projections.
 
-    duration = param.Number(default=1.0,doc="""
-        Amount of simulation time for which to present each test pattern.
-        By convention, most Topographica example files are designed to
-        have a suitable activity pattern computed by the
-        default time, but the duration will need to be changed for
-        other models that do not follow that convention or if a
-        linear response is desired.""")
+
+class FeatureResponses(PatternDrivenAnalysis):
+    """
+    Systematically vary input pattern feature values and collate the responses.
+
+    A DistributionMatrix for each measurement source and feature is
+    created.  The DistributionMatrix stores the distribution of
+    activity values for that feature.  For instance, if the features
+    to be tested are orientation and phase, we will create a
+    DistributionMatrix for orientation and a DistributionMatrix for
+    phase for each measurement source.  The orientation and phase of
+    the input are then systematically varied (when measure_responses
+    is called), and the responses of all units from a measurement
+    source to each pattern are collected into the DistributionMatrix.
+
+    The resulting data can then be used to plot feature maps and
+    tuning curves, or for similar types of feature-based analyses.
+    """
 
     repetitions = param.Integer(default=1,bounds=(1,None),doc="""
         How many times each stimulus will be presented.
@@ -180,30 +175,24 @@ class FeatureResponses(PatternDrivenAnalysis):
         so that results will be an average over the specified
         number of repetitions.""")
 
-
     store_fullmatrix = param.Boolean(default=False,doc="""
         Determines whether or not store the full matrix of feature
         responses as a class attribute.""")
 
-
     param_dict = param.Dict(default={},doc="""
         Dictionary containing name value pairs of a feature, which is to
         be varied across measurements.""")
-
 
     presenter_cmd = param.Callable(default=None,instantiate=True,doc="""
         Presenter command responsible for presenting the input patterns
         provided to it, returning measurement labels and collecting and
         storing the measurement results in the appropriate place.""")
 
-
     pattern_coordinator = param.Callable(default=None,instantiate=True,doc="""
-    Coordinates the creation and linking of numerous simultaneously
-    presented input patterns, controlled by complex features.""")
-
+        Coordinates the creation and linking of numerous simultaneously
+        presented input patterns, controlled by complex features.""")
 
     _fullmatrix = {}
-
 
     __abstract = True
 
@@ -224,7 +213,9 @@ class FeatureResponses(PatternDrivenAnalysis):
             self._featureresponses[response_label] = {}
             self._activities[response_label]=np.zeros(shape)
             for f in self.features:
-                self._featureresponses[response_label][f.name]=DistributionMatrix(shape,axis_range=f.range,cyclic=f.cyclic)
+                self._featureresponses[response_label][f.name]=DistributionMatrix(shape,
+                                                                                  axis_range=f.range,
+                                                                                  cyclic=f.cyclic)
             if p.store_fullmatrix:
                 FeatureResponses._fullmatrix[response_label] = FullMatrix(shape,self.features)
 
@@ -272,7 +263,7 @@ class FeatureResponses(PatternDrivenAnalysis):
             for f in p.pre_presentation_hooks: f()
 
             inputs = p.pattern_coordinator(dict(permuted_settings),p.param_dict,self.input_shapes.keys())
-            response_dict = p.presenter_cmd(inputs, duration=p.duration)
+            response_dict = p.presenter_cmd(inputs, **p.extra_keywords())
             p.presenter_cmd.update_progress(p.repetitions*permutation_num+i,total_steps)
 
             for response_label,response in response_dict.items():
@@ -330,8 +321,8 @@ class FeatureMaps(FeatureResponses):
     # using a format parameter. The default would be
     # ${prefix}${feature}${type} (where type is Preference or
     # Selectivity)
-    sheet_views_prefix = param.String(default="",doc="""
-        Prefix to add to the name under which results are stored in sheet_views.""")
+    measurement_prefix = param.String(default="",doc="""
+        Prefix to add to the name under which results are stored.""")
 
 
     def __call__(self,features,**params):
@@ -344,7 +335,7 @@ class FeatureMaps(FeatureResponses):
         feature with the preference_fn parameter, otherwise the
         default in self.preference_fn is used.
         """
-        p = ParamOverrides(self,params)
+        p = ParamOverrides(self,params,allow_extra_keywords=True)
         self.features=features
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
@@ -365,7 +356,7 @@ class FeatureMaps(FeatureResponses):
                     preference_fn.selectivity_scale = (preference_fn.selectivity_scale[0],self.selectivity_multiplier)
                 fr = self._featureresponses[response_label][feature]
                 response = fr.apply_DSF(preference_fn)
-                base_name = self.sheet_views_prefix + feature.capitalize()
+                base_name = self.measurement_prefix + feature.capitalize()
 
                 for k,maps in response.items():
                     for map_name,map_view in maps.items():
@@ -383,21 +374,21 @@ class FeatureCurves(FeatureResponses):
     Measures and collects the responses to a set of features, for
     calculating tuning and similar curves.
 
-    These curves represent the response of a Sheet to patterns that
-    are controlled by a set of features.  This class can collect data
-    for multiple curves, each with the same x axis.  The x axis
-    represents the main feature value that is being varied, such as
-    orientation.  Other feature values can also be varied, such as
-    contrast, which will result in multiple curves (one per unique
-    combination of other feature values).
+    These curves represent the response of a measurement source to
+    patterns that are controlled by a set of features.  This class can
+    collect data for multiple curves, each with the same x axis.  The
+    x axis represents the main feature value that is being varied,
+    such as orientation.  Other feature values can also be varied,
+    such as contrast, which will result in multiple curves (one per
+    unique combination of other feature values).
 
-    The sheet responses used to construct the curves will be stored in
-    a dictionary curve_dict kept in the Sheet of interest.  A
-    particular set of patterns is then constructed using a
-    user-specified PatternPresenter by adding the parameters
-    determining the curve (curve_param_dict) to a static list of
-    parameters (param_dict), and then varying the specified set of
-    features.  The results can be accessed in the curve_dict, indexed
+    The measured responses used to construct the curves will be passed
+    to the presenter_cmd to be stored.  A particular set of
+    patterns is then constructed using a user-specified
+    PatternPresenter by adding the parameters determining the curve
+    (curve_param_dict) to a static list of parameters (param_dict),
+    and then varying the specified set of features.  The results can
+    be accessed in the curve_dict passed to the presenter_cmd, indexed
     by the curve_label and feature value.
     """
 
@@ -413,7 +404,7 @@ class FeatureCurves(FeatureResponses):
 
 
     def __call__(self,features,**params):
-        p = ParamOverrides(self,params)
+        p = ParamOverrides(self,params,allow_extra_keywords=True)
         self.features=features
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
@@ -443,8 +434,6 @@ class ReverseCorrelation(FeatureResponses):
     Calculate the receptive fields for all neurons using reverse correlation.
     """
 
-    input_sheet = param.Parameter(default=None)
-
     continue_measurement = param.Boolean(default=True)
 
     def initialize_featureresponses(self,p):
@@ -463,7 +452,7 @@ class ReverseCorrelation(FeatureResponses):
 
 
     def __call__(self,features,**params):
-        p = ParamOverrides(self,params)
+        p = ParamOverrides(self,params,allow_extra_keywords=True)
         self.features=features
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
@@ -500,7 +489,7 @@ class ReverseCorrelation(FeatureResponses):
 
         inputs = p.pattern_coordinator(dict(permuted_settings),p.param_dict,self.input_shapes.keys())
 
-        response_dict = p.presenter_cmd(inputs, duration=p.duration)
+        response_dict = p.presenter_cmd(inputs, **p.extra_keywords())
         p.presenter_cmd.update_progress(permutation_num,total_steps)
 
         for label,response in response_dict.items():
@@ -508,11 +497,11 @@ class ReverseCorrelation(FeatureResponses):
 
         for f in p.post_presentation_hooks: f()
 
-        self._update(p,complete_settings)
+        self._update(p)
 
 
     # Ignores current_values; they simply provide distinct patterns on the retina
-    def _update(self,p,current_values):
+    def _update(self,p):
         for input_label in self.input_shapes:
             for response_label,response_shape in self.response_shapes.items():
                 rows,cols = response_shape
@@ -875,17 +864,6 @@ class CoordinatedPatternGenerator(param.Parameterized):
         #     inputs[sheet_name]=pattern.Constant(scale=0)
 
         return inputs
-
-
-class PatternPresenter(CoordinatedPatternGenerator):
-    """
-    For backward compatability.
-    """
-
-    def __call__(self, *args, **kwargs):
-        print "Using old PatternPresenter"
-        inputs = super(PatternPresenter,self).__call__(*args,**kwargs)
-        return pattern_response(inputs,duration=self.duration, plastic=False,  apply_output_fns=self.apply_output_fns, restore_state=False, restore_events=True)
 
 
 
@@ -1484,7 +1462,7 @@ class MeasurementCommand(ParameterizedFunction):
         set to this value.  Provides a simple way to set
         this commonly changed option of CoordinatedPatternGenerator.""")
 
-    response_views_prefix = param.String(default="",doc="""
+    measurement_prefix = param.String(default="",doc="""
         Optional prefix to add to the name under which results are
         stored as part of a measurement response.""")
 
@@ -1542,9 +1520,9 @@ class MeasureResponseCommand(MeasurementCommand):
         self._set_presenter_overrides(p)
         static_params = dict([(s,p[s]) for s in p.static_parameters])
         p.pattern_coordinator.generator_sheets=p.generator_sheets
-        fullmatrix = FeatureMaps(self._feature_list(p),param_dict=static_params,pattern_coordinator=p.pattern_coordinator,
-                                 sheet_views_prefix=p.response_views_prefix,duration=p.duration,
-                                 presenter_cmd=p.presenter_cmd)
+        fullmatrix = FeatureMaps(self._feature_list(p),duration=p.duration,
+                                 param_dict=static_params,pattern_coordinator=p.pattern_coordinator,
+                                 presenter_cmd=p.presenter_cmd,sheet_views_prefix=p.measurement_prefix)
 
         if p.subplot != "":
             Subplotting.set_subplots(p.subplot,force=True)
@@ -1673,8 +1651,8 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
     # JABALERT: Might want to accept a list of values for a given
     # parameter to make the simple case easier; then maybe could do
     # the crossproduct of them?
-    curve_parameters=param.Parameter([{"contrast":30},{"contrast":60},{"contrast":80},{"contrast":90}],doc="""
-        List of parameter values for which to measure a curve.""")
+    curve_parameters=param.Parameter([{"contrast":30},{"contrast":60},{"contrast":80},{"contrast":90}],
+                                     doc="""List of parameter values for which to measure a curve.""")
 
     __abstract = True
 
@@ -1695,9 +1673,9 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
             static_params = dict([(s,p[s]) for s in p.static_parameters])
             static_params.update(curve)
             curve_label="; ".join([('%s = '+val_format+'%s') % (n.capitalize(),v,p.units) for n,v in curve.items()])
-            FeatureCurves(self._feature_list(p),param_dict=static_params,pattern_coordinator=p.pattern_coordinator,x_axis=p.x_axis,
-                          curve_label=curve_label,presenter_cmd=p.presenter_cmd)
-
+            FeatureCurves(self._feature_list(p),curve_label=curve_label,param_dict=static_params,
+                          pattern_coordinator=p.pattern_coordinator,presenter_cmd=p.presenter_cmd,
+                          x_axis=p.x_axis)
 
 
     def _feature_list(self,p):
@@ -1707,15 +1685,15 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
 
 
 
-
 class UnitCurveCommand(FeatureCurveCommand):
     """
     Measures tuning curve(s) of particular unit(s).
     """
 
     pattern_coordinator = param.Callable(
-        default=CoordinatedPatternGenerator(pattern_generator=SineGrating(mask_shape=Disk(smoothing=0.0,size=1.0)),
-                                 contrast_parameter="weber_contrast"))
+        default=CoordinatedPatternGenerator(pattern_generator=SineGrating(mask_shape=Disk(smoothing=0.0,
+                                                                                          size=1.0)),
+                                            contrast_parameter="weber_contrast"))
 
     size=param.Number(default=0.5,bounds=(0,None),doc="""
         The size of the pattern to present.""")
