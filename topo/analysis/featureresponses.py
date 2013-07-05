@@ -192,6 +192,9 @@ class FeatureResponses(PatternDrivenAnalysis):
         Coordinates the creation and linking of numerous simultaneously
         presented input patterns, controlled by complex features.""")
 
+    measurement_prefix = param.String(default="",doc="""
+        Prefix to add to the name under which results are stored.""")
+        
     _fullmatrix = {}
 
     __abstract = True
@@ -321,9 +324,6 @@ class FeatureMaps(FeatureResponses):
     # using a format parameter. The default would be
     # ${prefix}${feature}${type} (where type is Preference or
     # Selectivity)
-    measurement_prefix = param.String(default="",doc="""
-        Prefix to add to the name under which results are stored.""")
-
 
     def __call__(self,features,**params):
         """
@@ -419,7 +419,7 @@ class FeatureCurves(FeatureResponses):
                 for i in range(rows):
                     for j in range(cols):
                         y_axis_values[i,j] = self._featureresponses[response_label][p.x_axis].distribution_matrix[i,j].get_value(key)
-                curve_dict[response_label][key] = (p.curve_label,y_axis_values)
+                curve_dict[response_label][key] = (p.measurement_prefix,p.curve_label,y_axis_values)
 
         p.presenter_cmd.collect_curve_measurements(curve_dict,p.x_axis)
 
@@ -1406,17 +1406,18 @@ class pattern_response(PatternResponseCommand):
             sheet=topo.sim[sheet_name]
             if not hasattr(sheet,'curve_dict'):
                 sheet.curve_dict = {}
-            if x_axis not in sheet.curve_dict:
-                sheet.curve_dict[x_axis] = {}
             bounding_box = sheet.bounds
             sp = sheet.precedence
             sr = sheet.row_precedence
             for x_val,y_data in curve_data.items():
-                curve_label,y_axis_values = y_data
-                if curve_label not in sheet.curve_dict[x_axis]:
-                    sheet.curve_dict[x_axis][curve_label]={}
+                prefix,curve_label,y_axis_values = y_data
+                measurement_label = prefix+x_axis
+                if measurement_label not in sheet.curve_dict:
+                    sheet.curve_dict[measurement_label] = {}
+                if curve_label not in sheet.curve_dict[measurement_label]:
+                    sheet.curve_dict[measurement_label][curve_label]={}
                 view = SheetView((y_axis_values,bounding_box),sheet_name,sp,t,sr)
-                sheet.curve_dict[x_axis][curve_label].update({x_val:view})
+                sheet.curve_dict[measurement_label][curve_label].update({x_val:view})
 
 
     def collect_rf_measurements(self,rf_dict):
@@ -1522,7 +1523,7 @@ class MeasureResponseCommand(MeasurementCommand):
         p.pattern_coordinator.generator_sheets=p.generator_sheets
         fullmatrix = FeatureMaps(self._feature_list(p),duration=p.duration,
                                  param_dict=static_params,pattern_coordinator=p.pattern_coordinator,
-                                 presenter_cmd=p.presenter_cmd,sheet_views_prefix=p.measurement_prefix)
+                                 presenter_cmd=p.presenter_cmd,measurement_prefix=p.measurement_prefix)
 
         if p.subplot != "":
             Subplotting.set_subplots(p.subplot,force=True)
@@ -1675,7 +1676,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
             curve_label="; ".join([('%s = '+val_format+'%s') % (n.capitalize(),v,p.units) for n,v in curve.items()])
             FeatureCurves(self._feature_list(p),curve_label=curve_label,param_dict=static_params,
                           pattern_coordinator=p.pattern_coordinator,presenter_cmd=p.presenter_cmd,
-                          x_axis=p.x_axis)
+                          x_axis=p.x_axis,measurement_prefix=p.measurement_prefix)
 
 
     def _feature_list(self,p):
