@@ -1427,8 +1427,8 @@ class pattern_response(PatternResponseCommand):
                 sheet = topo.sim[sheet_name]
                 for coord,data in coord_dict.items():
                     r,c = coord
-                    view = SheetView((data,input_bounds),
-                                     sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
+                    view = SheetView((data,input_bounds),input_sheet.name,input_sheet.precedence,
+                                     topo.sim.time(),input_sheet.row_precedence)
                     x,y = sheet.matrixidx2sheet(r,c)
                     key = ('RFs',sheet_name,x,y)
                     input_sheet_views[key]=view
