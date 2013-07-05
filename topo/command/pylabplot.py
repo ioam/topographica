@@ -603,11 +603,14 @@ class tuning_curve(PylabPlotCommand):
     legend=param.Boolean(default=True, doc="""
         Whether or not to include a legend in the plot.""")
 
+    num_ticks=param.Number(default=4, doc="""
+        Number of tick marks on the X-axis.""")
+
     __abstract = True
 
 
     def _format_x_tick_label(self,x):
-        return "%3.1f" % x
+        return "%g" % round(x,2)
 
     def _rotate(self, seq, n=1):
         n = n % len(seq) # n=hop interval
@@ -617,20 +620,17 @@ class tuning_curve(PylabPlotCommand):
         """Return the x, y, and x ticks values for the specified curve from the curve_dict"""
         x_values=sorted(curve.keys())
         y_values=[curve[key].view()[0][i_value,j_value] for key in x_values]
+        self.x_values = x_values
         return x_values,y_values,x_values
 
     def _reduce_ticks(self,ticks):
-        x = [];
-        y=  [];
-        num_ticks = 5;
-        y.append(ticks[0])
-        x.append(0)
-        for i in xrange(0,num_ticks):
-            y.append(y[-1]+np.pi/(num_ticks+1));
-            x.append(x[-1]+np.pi/(num_ticks+1));
-        y.append(y[-1]+np.pi/(num_ticks+1));
-        x.append(3.14)
-        return (x,y)
+        values = [];
+        values.append(self.x_values[0])
+        rangex = self.x_values[-1] - self.x_values[0]
+        for i in xrange(1,self.num_ticks+1):
+            values.append(values[-1]+rangex/(self.num_ticks))
+        labels = values
+        return (values,labels)
 
 
     def __call__(self,**params):
@@ -687,13 +687,47 @@ class cyclic_tuning_curve(tuning_curve):
     unit = param.String(default="degrees",doc="""
         String to use in labels to specify the units in which curves are plotted.""")
 
+    recenter = param.Boolean(default=True,doc="""
+        Centers the tuning curve around the maximally responding feature.""")
+
+
+    def __call__(self,**params):
+        p=ParamOverrides(self,params)
+        if p.recenter:
+            self.peak_argmax = 0
+            sheet = p.sheet
+            max_y = 0.0
+            for coordinate in p.coords:
+                i_value,j_value=sheet.sheet2matrixidx(coordinate[0],coordinate[1])
+                for curve_label in sorted(sheet.curve_dict[p.x_axis].keys()):
+                    x_values= sorted(sheet.curve_dict[p.x_axis][curve_label].keys())
+                    y_values = [sheet.curve_dict[p.x_axis][curve_label][key].view()[0][i_value,j_value] for key in x_values]
+                    if np.max(y_values) > max_y:
+                        max_y = np.max(y_values)
+                        self.peak_argmax = np.argmax(y_values)
+
+        super(cyclic_tuning_curve,self).__call__(**p)
+
+
+    def _reduce_ticks(self,ticks):
+        values = []
+        labels =  []
+        labels.append(ticks[0])
+        values.append(self.x_values[0])
+        for i in xrange(0,self.num_ticks):
+            labels.append(labels[-1]+pi/(self.num_ticks+1.0))
+            values.append(values[-1]+pi/(self.num_ticks+1.0))
+        labels.append(labels[-1]+pi/(self.num_ticks+1.0))
+        values.append(self.x_values[-1])
+        return (values,labels)
+
 
     # This implementation should work for quantities periodic with
     # some multiple of pi that we want to express in degrees, but it
     # will need to be reimplemented in a subclass to work with other
     # cyclic quantities.
     def _format_x_tick_label(self,x):
-        return str(int(180*x/np.pi))
+        return str(int(np.round(180*x/np.pi)))
 
 
     def _curve_values(self, i_value, j_value, curve):
@@ -706,19 +740,20 @@ class cyclic_tuning_curve(tuning_curve):
         eventually be changed so that the preferred orientation is in
         the center.
         """
-        if self.first_curve==True:
+        if self.first_curve:
             x_values= sorted(curve.keys())
             y_values=[curve[key].view()[0][i_value,j_value] for key in x_values]
 
-            min_arg=np.argmin(y_values)
-            x_min=x_values[min_arg]
-            y_min=y_values[min_arg]
-            y_values=self._rotate(y_values, n=min_arg)
-            self.ticks=self._rotate(x_values, n=min_arg)
-            self.ticks+=[x_min]
-            x_max=min(x_values)+self.cyclic_range
-            x_values.append(x_max)
-            y_values.append(y_min)
+            if self.recenter:
+                rotate_n = self.peak_argmax+len(x_values)/2
+                y_values = self._rotate(y_values, n=rotate_n)
+                self.ticks=self._rotate(x_values, n=rotate_n)
+            else:
+                self.ticks = list(x_values)
+
+            self.ticks.append(self.ticks[0])
+            x_values.append(x_values[0]+self.cyclic_range)
+            y_values.append(y_values[0])
 
             self.x_values=x_values
         else:
