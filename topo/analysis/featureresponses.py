@@ -126,17 +126,6 @@ class FullMatrix(param.Parameterized):
         self.full_matrix[index] = new_values
 
 
-
-
-# CB: FeatureResponses and ReverseCorrelation need cleanup; I began but haven't finished.
-# JABALERT: At least:
-# - Move features out of __init__ and into measure_responses
-# - Change measure_responses to __call__, as it's the only thing this
-#   class really does
-# - Make the other methods private (_) since they are for internal use
-# - Possibly -- make the __call__ methods have the same signature?
-# - Clean up the inheritance hierarchy?
-
 ### Old Comments
 
 # Feature Responses
@@ -200,7 +189,7 @@ class FeatureResponses(PatternDrivenAnalysis):
     __abstract = True
 
 
-    def initialize_featureresponses(self,p):
+    def _initialize_featureresponses(self,p):
         """
         Create an empty DistributionMatrix for each feature and each
         measurement source, in addition to activity buffers and if
@@ -223,7 +212,7 @@ class FeatureResponses(PatternDrivenAnalysis):
                 FeatureResponses._fullmatrix[response_label] = FullMatrix(shape,self.features)
 
 
-    def measure_responses(self,p):
+    def _measure_responses(self,p):
         """
         Generate feature permutations and present each in sequence.
         """
@@ -244,7 +233,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         p.presenter_cmd.ongoing_measurement = True
         for permutation_num,permutation in enumerate(self.permutations):
             if not p.presenter_cmd.ongoing_measurement: break
-            self.present_permutation(p,permutation,permutation_num,total_steps)
+            self._present_permutation(p,permutation,permutation_num,total_steps)
 
         p.presenter_cmd.ongoing_measurement = False
 
@@ -252,7 +241,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         for f in p.post_analysis_session_hooks: f()
 
 
-    def present_permutation(self,p,permutation,permutation_num,total_steps):
+    def _present_permutation(self,p,permutation,permutation_num,total_steps):
         """Present a pattern with the specified set of feature values."""
         for response_label in self.response_shapes:
             self._activities[response_label]*=0
@@ -340,8 +329,8 @@ class FeatureMaps(FeatureResponses):
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
 
-        self.initialize_featureresponses(p)
-        self.measure_responses(p)
+        self._initialize_featureresponses(p)
+        self._measure_responses(p)
         map_dict = {}
 
         for response_label in self.response_shapes:
@@ -408,8 +397,8 @@ class FeatureCurves(FeatureResponses):
         self.features=features
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
-        self.initialize_featureresponses(p)
-        self.measure_responses(p)
+        self._initialize_featureresponses(p)
+        self._measure_responses(p)
         curve_dict = {}
         for response_label,shape in self.response_shapes.items():
             curve_dict[response_label] = {}
@@ -436,7 +425,7 @@ class ReverseCorrelation(FeatureResponses):
 
     continue_measurement = param.Boolean(default=True)
 
-    def initialize_featureresponses(self,p):
+    def _initialize_featureresponses(self,p):
         self._activities = {}
         self._featureresponses = {}
 
@@ -458,8 +447,8 @@ class ReverseCorrelation(FeatureResponses):
         self.response_shapes = p.presenter_cmd.response_shapes()
         self.input_shapes = p.presenter_cmd.input_shapes()
 
-        self.initialize_featureresponses(p)
-        self.measure_responses(p)
+        self._initialize_featureresponses(p)
+        self._measure_responses(p)
 
         rf_dict = {}
 
@@ -474,7 +463,7 @@ class ReverseCorrelation(FeatureResponses):
         p.presenter_cmd.collect_rf_measurements(rf_dict)
 
 
-    def present_permutation(self,p,permutation,permutation_num,total_steps):
+    def _present_permutation(self,p,permutation,permutation_num,total_steps):
         """Present a pattern with the specified set of feature values."""
 
         for label in self.response_shapes.keys()+self.input_shapes.keys():
