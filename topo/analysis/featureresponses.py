@@ -194,7 +194,7 @@ class FeatureResponses(PatternDrivenAnalysis):
 
     measurement_prefix = param.String(default="",doc="""
         Prefix to add to the name under which results are stored.""")
-        
+
     _fullmatrix = {}
 
     __abstract = True
@@ -581,7 +581,10 @@ class Feature(param.Parameterized):
                     for v in self.values]
 
 
-
+# PJFRALERT: This class should eventually be replaced by higher level
+# features, which allow you to coordinate input patterns. As such it
+# currently still references input sheets and other Topographica
+# specific objects.
 class CoordinatedPatternGenerator(param.Parameterized):
     """
     Function object for presenting PatternGenerator-created patterns.
@@ -945,514 +948,6 @@ class Subplotting(param.Parameterized):
         if args != (): Subplotting.set_subplots(*(Subplotting._last_args))
 
 
-
-###############################################################################
-###############################################################################
-###############################################################################
-#
-# 20081017 JABNOTE: This implementation could be improved.
-#
-# It currently requires every subclass to implement the feature_list
-# method, which constructs a list of features using various parameters
-# to determine how many and which values each feature should have.  It
-# would be good to replace the feature_list method with a Parameter or
-# set of Parameters, since it is simply a special data structure, and
-# this would make more detailed control feasible for users. For
-# instance, instead of something like num_orientations being used to
-# construct the orientation Feature, the user could specify the
-# appropriate Feature directly, so that they could e.g. supply a
-# specific list of orientations instead of being limited to a fixed
-# spacing.
-#
-# However, when we implemented this, we ran into two problems:
-#
-# 1. It's difficult for users to modify an open-ended list of
-#     Features.  E.g., if features is a List:
-#
-#      features=param.List(doc="List of Features to vary""",default=[
-#          Feature(name="frequency",values=[2.4]),
-#          Feature(name="orientation",range=(0.0,pi),step=pi/4,cyclic=True),
-#          Feature(name="phase",range=(0.0,2*pi),step=2*pi/18,cyclic=True)])
-#
-#    then it it's easy to replace the entire list, but tough to
-#    change just one Feature.  Of course, features could be a
-#    dictionary, but that doesn't help, because when the user
-#    actually calls the function, they want the arguments to
-#    affect only that call, whereas looking up the item in a
-#    dictionary would only make permanent changes easy, not
-#    single-call changes.
-#
-#    Alternatively, one could make each feature into a separate
-#    parameter, and then collect them using a naming convention like:
-#
-#     def feature_list(self,p):
-#         fs=[]
-#         for n,v in self.get_param_values():
-#             if n in p: v=p[n]
-#             if re.match('^[^_].*_feature$',n):
-#                 fs+=[v]
-#         return fs
-#
-#    But that's quite hacky, and doesn't solve problem 2.
-#
-# 2. Even if the users can somehow access each Feature, the same
-#    problem occurs for the individual parts of each Feature.  E.g.
-#    using the separate feature parameters above, Spatial Frequency
-#    map measurement would require:
-#
-#      from topo.command.analysis import Feature
-#      from math import pi
-#      pre_plot_hooks=[measure_or_pref.instance(\
-#         frequency_feature=Feature(name="frequency",values=frange(1.0,6.0,0.2)), \
-#         phase_feature=Feature(name="phase",range=(0.0,2*pi),step=2*pi/15,cyclic=True), \
-#         orientation_feature=Feature(name="orientation",range=(0.0,pi),step=pi/4,cyclic=True)])
-#
-#    rather than the current, much more easily controllable implementation:
-#
-#      pre_plot_hooks=[measure_or_pref.instance(frequencies=frange(1.0,6.0,0.2),\
-#         num_phase=15,num_orientation=4)]
-#
-#    I.e., to change anything about a Feature, one has to supply an
-#    entirely new Feature, because otherwise the original Feature
-#    would be changed for all future calls.  Perhaps there's some way
-#    around this by copying objects automatically at the right time,
-#    but if so it's not obvious.  Meanwhile, the current
-#    implementation is reasonably clean and easy to use, if not as
-#    flexible as it could be.
-
-
-def update_sheet_activity(sheet_name,sheet_views_prefix='', create_sheetview=True):
-    """
-    Update the 'Activity' SheetView for a given sheet by name.
-
-    If force is False and the existing Activity SheetView isn't stale,
-    this existing view is returned.
-    """
-
-    sheet = topo.sim.objects(Sheet)[sheet_name]
-
-    if create_sheetview:
-        updated_view =  SheetView((np.array(sheet.activity),sheet.bounds),
-                                  sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
-        sheet.sheet_views[sheet_views_prefix+'Activity'] = updated_view
-
-    return sheet.activity
-
-
-
-def update_activity(sheet_views_prefix='', create_sheetview=True):
-    """
-    Make a map of neural activity available for each sheet, for use in template-based plots.
-
-    This command simply asks each sheet for a copy of its activity
-    matrix, and then makes it available for plotting.  Of course, for
-    some sheets providing this information may be non-trivial, e.g. if
-    they need to average over recent spiking activity.
-    """
-    activity_dict = {}
-    for sheet_name in topo.sim.objects(Sheet).keys():
-        activity = update_sheet_activity(sheet_name,sheet_views_prefix, create_sheetview)
-        activity_dict[sheet_name] = activity
-    return activity_dict
-
-
-class PatternPresentingCommand(ParameterizedFunction):
-    """Abstract class defining the necessary methods that need to be
-    implemented by any pattern_response callable."""
-
-    duration = param.Number(default=None,doc="""
-        If non-None, pattern_presenter.duration will be
-        set to this value.  Provides a simple way to set
-        this commonly changed option of CoordinatedPatternGenerator.""")
-
-    sheet = param.String(default=None)
-
-    input_sheet = param.String(default=None)
-
-    inputs = param.Dict(default={},doc="""
-        A dictionary of GeneratorSheetName:PatternGenerator pairs to be
-        installed into the specified GeneratorSheets""")
-
-    plastic=param.Boolean(default=False,doc="""
-        If plastic is False, overwrites the existing values of
-        Sheet.plastic to disable plasticity, then reenables plasticity.""")
-
-    overwrite_previous=param.Boolean(default=False,doc="""
-        If overwrite_previous is true, the given inputs overwrite those
-        previously defined.""")
-
-    __abstract = True
-
-
-class pattern_present(PatternPresentingCommand):
-
-    def __call__(self,inputs={},**params_to_override):
-        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
-        # ensure EPs get started (if pattern_present is called before the simulation is run())
-        topo.sim.run(0.0)
-
-        self.refresh_act_wins=False
-        if hasattr(topo,'guimain'):
-            self.refresh_act_wins=True
-
-        if not p.overwrite_previous:
-            save_input_generators()
-
-        if not p.plastic:
-            # turn off plasticity everywhere
-            for sheet in topo.sim.objects(Sheet).values():
-                 sheet.override_plasticity_state(new_plasticity_state=False)
-
-        # Register the inputs on each input sheet
-        generatorsheets = topo.sim.objects(GeneratorSheet)
-
-        if not isinstance(p.inputs,dict):
-            for g in generatorsheets.values():
-                g.set_input_generator(p.inputs)
-        else:
-            for each in p.inputs.keys():
-                if generatorsheets.has_key(each):
-                    generatorsheets[each].set_input_generator(p.inputs[each])
-                else:
-                    param.Parameterized().warning(
-                        '%s not a valid Sheet name for pattern_present.' % each)
-
-        duration = p.duration if (p.duration is not None) else 1.0
-        topo.sim.run(duration)
-
-        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
-        if not p.plastic:
-            for sheet in topo.sim.objects(Sheet).values():
-                sheet.restore_plasticity_state()
-
-        if not p.overwrite_previous:
-            restore_input_generators()
-
-        update_activity("", create_sheetview = True)
-
-
-class measure_response(PatternPresentingCommand):
-    """
-    Measuring the response to a pattern: 
-    More complete function that both presents a pattern and also
-    collects the response, generating SheetViews.  Also pushes and pops
-    the state, which is only meaningful because we are first grabbing the
-    activity and storing the sheet views.  Thus unlike 1, this is a
-    complete (albeit simple) measurement, not just a low-level tool.
-    """
-
-    restore_state = param.Boolean(default=False)
-
-    def __call__(self,inputs={},**params_to_override):
-        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
-        # ensure EPs get started (if pattern_response is called before the simulation is run())
-        topo.sim.run(0.0)
-
-        if self.restore_state:   topo.sim.state_push()
-
-        self.refresh_act_wins=False
-        if hasattr(topo,'guimain'):
-            self.refresh_act_wins=True
-
-        if not p.overwrite_previous:
-            save_input_generators()
-
-        if not p.plastic:
-            # turn off plasticity everywhere
-            for sheet in topo.sim.objects(Sheet).values():
-                 sheet.override_plasticity_state(new_plasticity_state=False)
-
-        if not p.apply_output_fns:
-            for each in topo.sim.objects(Sheet).values():
-                if hasattr(each,'measure_maps'):
-                   if each.measure_maps:
-                       each.apply_output_fns = False
-
-        # Register the inputs on each input sheet
-        generatorsheets = topo.sim.objects(GeneratorSheet)
-
-        if not isinstance(p.inputs,dict):
-            for g in generatorsheets.values():
-                g.set_input_generator(p.inputs)
-        else:
-            for each in p.inputs.keys():
-                if generatorsheets.has_key(each):
-                    generatorsheets[each].set_input_generator(p.inputs[each])
-                else:
-                    param.Parameterized().warning(
-                        '%s not a valid Sheet name for pattern_present.' % each)
-
-        duration = p.duration if (p.duration is not None) else 1.0
-        topo.sim.run(duration)
-
-        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
-        if not p.plastic:
-            for sheet in topo.sim.objects(Sheet).values():
-                sheet.restore_plasticity_state()
-
-        if not p.apply_output_fns:
-            for each in topo.sim.objects(Sheet).values():
-                each.apply_output_fns = True
-
-        if not p.overwrite_previous:
-            restore_input_generators()
-
-        keys = self.response_shapes().keys() + self.input_shapes().keys()
-        update_activity(p.sheet_views_prefix, create_sheetview = True)
-
-        if self.restore_state:   topo.sim.state_pop()
-
-
-
-class PatternResponseCommand(PatternPresentingCommand):
-    """Abstract class defining the necessary methods that need to be
-    implemented by any pattern_response callable."""
-
-    input_sheet = param.String(default="",doc="""
-        Name of generator sheet if measurement is to be carried out
-        using a specific input sheet""")
-
-    sheet_views_prefix = param.String(default="",doc="""
-        Optional prefix to add to the name under which results are
-        stored in sheet_views. Can be used e.g. to distinguish maps as
-        originating from a particular GeneratorSheet.""")
-
-    apply_output_fns=param.Boolean(default=True,doc="""
-        """)
-
-    __abstract = True
-
-    def __call__(self,inputs={},**params_to_override):
-        raise NotImplementedError
-
-    def response_shapes(self):
-        raise NotImplementedError
-
-    def input_shapes(self):
-        raise NotImplementedError
-
-    def update_progress(self,current):
-        raise NotImplementedError
-
-    def collect_map_measurements(self,measurement_dict):
-        raise NotImplementedError
-
-    def collect_curve_measurements(self,curve_dict):
-        raise NotImplementedError
-
-    def collect_rf_measurements(self,rf_dict):
-        raise NotImplementedError
-
-
-class pattern_response(PatternResponseCommand):
-    """
-    This command presents the specified test patterns for the
-    specified duration and saves the resulting activity to the
-    appropriate SheetViews. Originally, this was the implementation of
-    the pattern_present command, which is still available in
-    topo.command and operates by wrapping a call to this class.
-
-    Given a set of input patterns, installs them into the specified
-    GeneratorSheets, runs the simulation for the specified length of
-    time, then restores the original patterns and the original
-    simulation time.  Thus this input is not considered part of the
-    regular simulation, and is usually for testing purposes.
-
-    As a special case, if 'inputs' is just a single pattern, and not
-    a dictionary, it is presented to all GeneratorSheets.
-
-    If a simulation is not provided, the active simulation, if one
-    exists, is requested.
-
-    If this process is interrupted by the user, the temporary patterns
-    may still be installed on the retina.
-
-    In order to to see the sequence of values presented, you may use
-    the back arrow history mechanism in the GUI. Note that the GUI's
-    Activity window must be open.
-    """
-
-    ongoing_measurement = param.Boolean(default=False,doc="""
-        Indicates whether pattern_response is currently being used in a measurement.
-        If True and toggled to False will halt the measurement process.""")
-
-    def __call__(self,inputs={},**params_to_override):
-
-        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
-        # ensure EPs get started (if pattern_response is called before the simulation is run())
-        topo.sim.run(0.0)
-
-        if not self.ongoing_measurement:   topo.sim.state_push()
-
-        self.refresh_act_wins=False
-        if hasattr(topo,'guimain'):
-            self.refresh_act_wins=True
-
-        if not p.overwrite_previous:
-            save_input_generators()
-
-        if not p.plastic:
-            # turn off plasticity everywhere
-            for sheet in topo.sim.objects(Sheet).values():
-                 sheet.override_plasticity_state(new_plasticity_state=False)
-
-        if not p.apply_output_fns:
-            for each in topo.sim.objects(Sheet).values():
-                if hasattr(each,'measure_maps'):
-                   if each.measure_maps:
-                       each.apply_output_fns = False
-
-        # Register the inputs on each input sheet
-        generatorsheets = topo.sim.objects(GeneratorSheet)
-
-        if not isinstance(p.inputs,dict):
-            for g in generatorsheets.values():
-                g.set_input_generator(p.inputs)
-        else:
-            for each in p.inputs.keys():
-                if generatorsheets.has_key(each):
-                    generatorsheets[each].set_input_generator(p.inputs[each])
-                else:
-                    param.Parameterized().warning(
-                        '%s not a valid Sheet name for pattern_present.' % each)
-
-        if self.ongoing_measurement: topo.sim.event_push()
-
-        duration = p.duration if (p.duration is not None) else 1.0
-        topo.sim.run(duration)
-
-        if self.ongoing_measurement:   topo.sim.event_pop()
-
-        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
-        if not p.plastic:
-            for sheet in topo.sim.objects(Sheet).values():
-                sheet.restore_plasticity_state()
-
-        if not p.apply_output_fns:
-            for each in topo.sim.objects(Sheet).values():
-                each.apply_output_fns = True
-
-        if not p.overwrite_previous:
-            restore_input_generators()
-
-        keys = self.response_shapes().keys() + self.input_shapes().keys()
-        act_dict = update_activity(p.sheet_views_prefix, create_sheetview = not self.ongoing_measurement)
-
-        if not self.ongoing_measurement:   topo.sim.state_pop()
-
-        return dict((k,v) for k,v in act_dict.items() if k in keys)
-
-
-    def response_shapes(self):
-        """Return a list of the Sheets in the current simulation for which to collect responses."""
-        if self.sheet and self.sheet in topo.sim:
-            sheet = topo.sim[self.sheet]
-            return dict([(sheet.name,sheet.shape)])
-        else:
-            if self.sheet:
-                self.warning("Warning specified measurement sheet does not exist, using all sheets with measure_maps enabled.")
-            return dict((s.name, s.shape) for s in topo.sim.objects(Sheet).values()
-                    if (hasattr(s,'measure_maps') and s.measure_maps))
-
-
-    def input_shapes(self):
-        """Return a list of the Sheets in the current simulation for which to collect responses."""
-        if self.input_sheet and self.input_sheet in topo.sim:
-            input_sheet = topo.sim[self.input_sheet]
-            return dict([(input_sheet.name,input_sheet.shape)])
-        else:
-            if self.input_sheet:
-                self.warning("Warning specified input sheet does not exist, using all generator sheets instead.")
-            return dict((s.name, s.shape) for s in topo.sim.objects(GeneratorSheet).values())
-
-
-    @property
-    def progress(self):
-        return self._progress
-
-
-    def update_progress(self,current,total_steps):
-        if current == 0:
-            self.timer = copy.copy(topo.sim.timer)
-            if hasattr(topo,'guimain'):
-                topo.guimain.open_progress_window(self.timer)
-        if self.timer.stop:
-            self.ongoing_measurement = False
-        self._progress = float(current)/total_steps
-        self.timer.update_timer('Test',current,total_steps)
-
-
-    def collect_map_measurements(self,measurement_dict):
-        t = topo.sim.time()
-        for sheet_name,map_data in measurement_dict.items():
-            sheet = topo.sim[sheet_name]
-            bounding_box = sheet.bounds
-            sn = sheet.name
-            sp = sheet.precedence
-            sr = sheet.row_precedence
-            for name,item in map_data.items():
-                data, cyclic, cyclic_range = item
-                view = SheetView((data.copy(),bounding_box),sn,sp,t,sr)
-                sheet.sheet_views[name] = view
-                view.cyclic = False #cyclic
-                view.cyclic_range = None#cyclic_range
-                sheet.sheet_views[name] = view
-
-    def collect_curve_measurements(self,measurement_dict,x_axis):
-        t = topo.sim.time()
-        for sheet_name,curve_data in measurement_dict.items():
-            sheet=topo.sim[sheet_name]
-            if not hasattr(sheet,'curve_dict'):
-                sheet.curve_dict = {}
-            bounding_box = sheet.bounds
-            sp = sheet.precedence
-            sr = sheet.row_precedence
-            for x_val,y_data in curve_data.items():
-                prefix,curve_label,y_axis_values = y_data
-                measurement_label = prefix+x_axis
-                if measurement_label not in sheet.curve_dict:
-                    sheet.curve_dict[measurement_label] = {}
-                if curve_label not in sheet.curve_dict[measurement_label]:
-                    sheet.curve_dict[measurement_label][curve_label]={}
-                view = SheetView((y_axis_values,bounding_box),sheet_name,sp,t,sr)
-                sheet.curve_dict[measurement_label][curve_label].update({x_val:view})
-
-
-    def collect_rf_measurements(self,rf_dict):
-        for input_name,sheet_dict in rf_dict.items():
-            input_sheet = topo.sim[input_name]
-            input_sheet_views = input_sheet.sheet_views
-            input_bounds = input_sheet.bounds
-            for sheet_name,coord_dict in sheet_dict.items():
-                sheet = topo.sim[sheet_name]
-                for coord,data in coord_dict.items():
-                    r,c = coord
-                    view = SheetView((data,input_bounds),input_sheet.name,input_sheet.precedence,
-                                     topo.sim.time(),input_sheet.row_precedence)
-                    x,y = sheet.matrixidx2sheet(r,c)
-                    key = ('RFs',sheet_name,x,y)
-                    input_sheet_views[key]=view
-
-
-    def get_feature_preference(self,sheet,feature,sheet_coord,default=0.0):
-        """Return the feature preference for a particular unit."""
-        sheet = topo.sim[sheet]
-        matrix_coords = sheet.sheet2matrixidx(*sheet_coord)
-
-        map_name = feature.capitalize() + "Preference"
-
-        if(map_name in sheet.sheet_views):
-            pref = sheet.sheet_views[map_name].view()[0]
-            val = pref[matrix_coords]
-        else:
-            self.warning(("%s should be measured before plotting this tuning curve -- " +
-                          "using default value of %s for %s unit (%d,%d).") % \
-                         (map_name,default,sheet.name,sheet_coord[0],sheet_coord[1]))
-            val = default
-
-        return val
-
-
 class MeasurementCommand(ParameterizedFunction):
     """Parameterized command for presenting input patterns"""
 
@@ -1513,8 +1008,8 @@ class MeasureResponseCommand(MeasurementCommand):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
         static_params = dict([(s,p[s]) for s in p.static_parameters])
-        fullmatrix = FeatureMaps(self._feature_list(p),duration=p.duration,
-                                 param_dict=static_params,pattern_coordinator=p.pattern_coordinator,
+        fullmatrix = FeatureMaps(self._feature_list(p),param_dict=static_params,duration=p.duration,
+                                 pattern_coordinator=p.pattern_coordinator,
                                  presenter_cmd=p.presenter_cmd,measurement_prefix=p.measurement_prefix)
 
         if p.subplot != "":
@@ -1700,6 +1195,481 @@ class UnitCurveCommand(FeatureCurveCommand):
 
     __abstract = True
 
+
+###############################################################################
+###############################################################################
+###############################################################################
+#
+# 20081017 JABNOTE: This implementation could be improved.
+#
+# It currently requires every subclass to implement the feature_list
+# method, which constructs a list of features using various parameters
+# to determine how many and which values each feature should have.  It
+# would be good to replace the feature_list method with a Parameter or
+# set of Parameters, since it is simply a special data structure, and
+# this would make more detailed control feasible for users. For
+# instance, instead of something like num_orientations being used to
+# construct the orientation Feature, the user could specify the
+# appropriate Feature directly, so that they could e.g. supply a
+# specific list of orientations instead of being limited to a fixed
+# spacing.
+#
+# However, when we implemented this, we ran into two problems:
+#
+# 1. It's difficult for users to modify an open-ended list of
+#     Features.  E.g., if features is a List:
+#
+#      features=param.List(doc="List of Features to vary""",default=[
+#          Feature(name="frequency",values=[2.4]),
+#          Feature(name="orientation",range=(0.0,pi),step=pi/4,cyclic=True),
+#          Feature(name="phase",range=(0.0,2*pi),step=2*pi/18,cyclic=True)])
+#
+#    then it it's easy to replace the entire list, but tough to
+#    change just one Feature.  Of course, features could be a
+#    dictionary, but that doesn't help, because when the user
+#    actually calls the function, they want the arguments to
+#    affect only that call, whereas looking up the item in a
+#    dictionary would only make permanent changes easy, not
+#    single-call changes.
+#
+#    Alternatively, one could make each feature into a separate
+#    parameter, and then collect them using a naming convention like:
+#
+#     def feature_list(self,p):
+#         fs=[]
+#         for n,v in self.get_param_values():
+#             if n in p: v=p[n]
+#             if re.match('^[^_].*_feature$',n):
+#                 fs+=[v]
+#         return fs
+#
+#    But that's quite hacky, and doesn't solve problem 2.
+#
+# 2. Even if the users can somehow access each Feature, the same
+#    problem occurs for the individual parts of each Feature.  E.g.
+#    using the separate feature parameters above, Spatial Frequency
+#    map measurement would require:
+#
+#      from topo.command.analysis import Feature
+#      from math import pi
+#      pre_plot_hooks=[measure_or_pref.instance(\
+#         frequency_feature=Feature(name="frequency",values=frange(1.0,6.0,0.2)), \
+#         phase_feature=Feature(name="phase",range=(0.0,2*pi),step=2*pi/15,cyclic=True), \
+#         orientation_feature=Feature(name="orientation",range=(0.0,pi),step=pi/4,cyclic=True)])
+#
+#    rather than the current, much more easily controllable implementation:
+#
+#      pre_plot_hooks=[measure_or_pref.instance(frequencies=frange(1.0,6.0,0.2),\
+#         num_phase=15,num_orientation=4)]
+#
+#    I.e., to change anything about a Feature, one has to supply an
+#    entirely new Feature, because otherwise the original Feature
+#    would be changed for all future calls.  Perhaps there's some way
+#    around this by copying objects automatically at the right time,
+#    but if so it's not obvious.  Meanwhile, the current
+#    implementation is reasonably clean and easy to use, if not as
+#    flexible as it could be.
+
+### PJFRALERT: Functions and classes below will stay in Topographica
+
+def update_sheet_activity(sheet_name,sheet_views_prefix='', create_sheetview=True):
+    """
+    Update the 'Activity' SheetView for a given sheet by name.
+
+    If force is False and the existing Activity SheetView isn't stale,
+    this existing view is returned.
+    """
+
+    sheet = topo.sim.objects(Sheet)[sheet_name]
+
+    if create_sheetview:
+        updated_view =  SheetView((np.array(sheet.activity),sheet.bounds),
+                                  sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
+        sheet.sheet_views[sheet_views_prefix+'Activity'] = updated_view
+
+    return sheet.activity
+
+
+
+def update_activity(sheet_views_prefix='', create_sheetview=True):
+    """
+    Make a map of neural activity available for each sheet, for use in template-based plots.
+
+    This command simply asks each sheet for a copy of its activity
+    matrix, and then makes it available for plotting.  Of course, for
+    some sheets providing this information may be non-trivial, e.g. if
+    they need to average over recent spiking activity.
+    """
+    activity_dict = {}
+    for sheet_name in topo.sim.objects(Sheet).keys():
+        activity = update_sheet_activity(sheet_name,sheet_views_prefix, create_sheetview)
+        activity_dict[sheet_name] = activity
+    return activity_dict
+
+
+class PatternPresentingCommand(ParameterizedFunction):
+    """Abstract class defining the necessary methods that need to be
+    implemented by any pattern_response callable."""
+
+    duration = param.Number(default=None,doc="""
+        If non-None, pattern_presenter.duration will be
+        set to this value.  Provides a simple way to set
+        this commonly changed option of CoordinatedPatternGenerator.""")
+
+    sheet = param.String(default=None)
+
+    input_sheet = param.String(default=None)
+
+    inputs = param.Dict(default={},doc="""
+        A dictionary of GeneratorSheetName:PatternGenerator pairs to be
+        installed into the specified GeneratorSheets""")
+
+    plastic=param.Boolean(default=False,doc="""
+        If plastic is False, overwrites the existing values of
+        Sheet.plastic to disable plasticity, then reenables plasticity.""")
+
+    overwrite_previous=param.Boolean(default=False,doc="""
+        If overwrite_previous is true, the given inputs overwrite those
+        previously defined.""")
+
+    __abstract = True
+
+
+class pattern_present(PatternPresentingCommand):
+
+    def __call__(self,inputs={},**params_to_override):
+        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
+        # ensure EPs get started (if pattern_present is called before the simulation is run())
+        topo.sim.run(0.0)
+
+        self.refresh_act_wins=False
+        if hasattr(topo,'guimain'):
+            self.refresh_act_wins=True
+
+        if not p.overwrite_previous:
+            save_input_generators()
+
+        if not p.plastic:
+            # turn off plasticity everywhere
+            for sheet in topo.sim.objects(Sheet).values():
+                 sheet.override_plasticity_state(new_plasticity_state=False)
+
+        # Register the inputs on each input sheet
+        generatorsheets = topo.sim.objects(GeneratorSheet)
+
+        if not isinstance(p.inputs,dict):
+            for g in generatorsheets.values():
+                g.set_input_generator(p.inputs)
+        else:
+            for each in p.inputs.keys():
+                if generatorsheets.has_key(each):
+                    generatorsheets[each].set_input_generator(p.inputs[each])
+                else:
+                    param.Parameterized().warning(
+                        '%s not a valid Sheet name for pattern_present.' % each)
+
+        duration = p.duration if (p.duration is not None) else 1.0
+        topo.sim.run(duration)
+
+        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
+        if not p.plastic:
+            for sheet in topo.sim.objects(Sheet).values():
+                sheet.restore_plasticity_state()
+
+        if not p.overwrite_previous:
+            restore_input_generators()
+
+        update_activity("", create_sheetview = True)
+
+
+class measure_response(PatternPresentingCommand):
+    """
+    Measuring the response to a pattern: 
+    More complete function that both presents a pattern and also
+    collects the response, generating SheetViews.  Also pushes and pops
+    the state, which is only meaningful because we are first grabbing the
+    activity and storing the sheet views.  Thus unlike 1, this is a
+    complete (albeit simple) measurement, not just a low-level tool.
+    """
+
+    restore_state = param.Boolean(default=False)
+
+    def __call__(self,inputs={},**params_to_override):
+        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
+        # ensure EPs get started (if pattern_response is called before the simulation is run())
+        topo.sim.run(0.0)
+
+        if self.restore_state:   topo.sim.state_push()
+
+        self.refresh_act_wins=False
+        if hasattr(topo,'guimain'):
+            self.refresh_act_wins=True
+
+        if not p.overwrite_previous:
+            save_input_generators()
+
+        if not p.plastic:
+            # turn off plasticity everywhere
+            for sheet in topo.sim.objects(Sheet).values():
+                 sheet.override_plasticity_state(new_plasticity_state=False)
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                if hasattr(each,'measure_maps'):
+                   if each.measure_maps:
+                       each.apply_output_fns = False
+
+        # Register the inputs on each input sheet
+        generatorsheets = topo.sim.objects(GeneratorSheet)
+
+        if not isinstance(p.inputs,dict):
+            for g in generatorsheets.values():
+                g.set_input_generator(p.inputs)
+        else:
+            for each in p.inputs.keys():
+                if generatorsheets.has_key(each):
+                    generatorsheets[each].set_input_generator(p.inputs[each])
+                else:
+                    param.Parameterized().warning(
+                        '%s not a valid Sheet name for pattern_present.' % each)
+
+        duration = p.duration if (p.duration is not None) else 1.0
+        topo.sim.run(duration)
+
+        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
+        if not p.plastic:
+            for sheet in topo.sim.objects(Sheet).values():
+                sheet.restore_plasticity_state()
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                each.apply_output_fns = True
+
+        if not p.overwrite_previous:
+            restore_input_generators()
+
+        keys = self.response_shapes().keys() + self.input_shapes().keys()
+        update_activity(p.sheet_views_prefix, create_sheetview = True)
+
+        if self.restore_state:   topo.sim.state_pop()
+
+
+
+class pattern_response(PatternPresentingCommand):
+    """
+    This command presents the specified test patterns for the
+    specified duration and saves the resulting activity to the
+    appropriate SheetViews. Originally, this was the implementation of
+    the pattern_present command, which is still available in
+    topo.command and operates by wrapping a call to this class.
+
+    Given a set of input patterns, installs them into the specified
+    GeneratorSheets, runs the simulation for the specified length of
+    time, then restores the original patterns and the original
+    simulation time.  Thus this input is not considered part of the
+    regular simulation, and is usually for testing purposes.
+
+    As a special case, if 'inputs' is just a single pattern, and not
+    a dictionary, it is presented to all GeneratorSheets.
+
+    If a simulation is not provided, the active simulation, if one
+    exists, is requested.
+
+    If this process is interrupted by the user, the temporary patterns
+    may still be installed on the retina.
+
+    In order to to see the sequence of values presented, you may use
+    the back arrow history mechanism in the GUI. Note that the GUI's
+    Activity window must be open.
+    """
+
+    apply_output_fns=param.Boolean(default=True,doc="""
+        """)
+
+    ongoing_measurement = param.Boolean(default=False,doc="""
+        Indicates whether pattern_response is currently being used in a measurement.
+        If True and toggled to False will halt the measurement process.""")
+
+    sheet_views_prefix = param.String(default="",doc="""
+        Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.""")
+
+    def __call__(self,inputs={},**params_to_override):
+
+        p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
+        # ensure EPs get started (if pattern_response is called before the simulation is run())
+        topo.sim.run(0.0)
+
+        if not self.ongoing_measurement:   topo.sim.state_push()
+
+        self.refresh_act_wins=False
+        if hasattr(topo,'guimain'):
+            self.refresh_act_wins=True
+
+        if not p.overwrite_previous:
+            save_input_generators()
+
+        if not p.plastic:
+            # turn off plasticity everywhere
+            for sheet in topo.sim.objects(Sheet).values():
+                 sheet.override_plasticity_state(new_plasticity_state=False)
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                if hasattr(each,'measure_maps'):
+                   if each.measure_maps:
+                       each.apply_output_fns = False
+
+        # Register the inputs on each input sheet
+        generatorsheets = topo.sim.objects(GeneratorSheet)
+
+        if not isinstance(p.inputs,dict):
+            for g in generatorsheets.values():
+                g.set_input_generator(p.inputs)
+        else:
+            for each in p.inputs.keys():
+                if generatorsheets.has_key(each):
+                    generatorsheets[each].set_input_generator(p.inputs[each])
+                else:
+                    param.Parameterized().warning(
+                        '%s not a valid Sheet name for pattern_present.' % each)
+
+        if self.ongoing_measurement: topo.sim.event_push()
+
+        duration = p.duration if (p.duration is not None) else 1.0
+        topo.sim.run(duration)
+
+        if self.ongoing_measurement:   topo.sim.event_pop()
+
+        # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
+        if not p.plastic:
+            for sheet in topo.sim.objects(Sheet).values():
+                sheet.restore_plasticity_state()
+
+        if not p.apply_output_fns:
+            for each in topo.sim.objects(Sheet).values():
+                each.apply_output_fns = True
+
+        if not p.overwrite_previous:
+            restore_input_generators()
+
+        keys = self.response_shapes().keys() + self.input_shapes().keys()
+        act_dict = update_activity(p.sheet_views_prefix, create_sheetview = not self.ongoing_measurement)
+
+        if not self.ongoing_measurement:   topo.sim.state_pop()
+
+        return dict((k,v) for k,v in act_dict.items() if k in keys)
+
+
+    def response_shapes(self):
+        """Return a list of the Sheets in the current simulation for which to collect responses."""
+        if self.sheet and self.sheet in topo.sim:
+            sheet = topo.sim[self.sheet]
+            return dict([(sheet.name,sheet.shape)])
+        else:
+            if self.sheet:
+                self.warning("Warning specified measurement sheet does not exist, using all sheets with measure_maps enabled.")
+            return dict((s.name, s.shape) for s in topo.sim.objects(Sheet).values()
+                    if (hasattr(s,'measure_maps') and s.measure_maps))
+
+
+    def input_shapes(self):
+        """Return a list of the Sheets in the current simulation for which to collect responses."""
+        if self.input_sheet and self.input_sheet in topo.sim:
+            input_sheet = topo.sim[self.input_sheet]
+            return dict([(input_sheet.name,input_sheet.shape)])
+        else:
+            if self.input_sheet:
+                self.warning("Warning specified input sheet does not exist, using all generator sheets instead.")
+            return dict((s.name, s.shape) for s in topo.sim.objects(GeneratorSheet).values())
+
+
+    @property
+    def progress(self):
+        return self._progress
+
+
+    def update_progress(self,current,total_steps):
+        if current == 0:
+            self.timer = copy.copy(topo.sim.timer)
+            if hasattr(topo,'guimain'):
+                topo.guimain.open_progress_window(self.timer)
+        if self.timer.stop:
+            self.ongoing_measurement = False
+        self._progress = float(current)/total_steps
+        self.timer.update_timer('Test',current,total_steps)
+
+
+    def collect_map_measurements(self,measurement_dict):
+        t = topo.sim.time()
+        for sheet_name,map_data in measurement_dict.items():
+            sheet = topo.sim[sheet_name]
+            bounding_box = sheet.bounds
+            sn = sheet.name
+            sp = sheet.precedence
+            sr = sheet.row_precedence
+            for name,item in map_data.items():
+                data, cyclic, cyclic_range = item
+                view = SheetView((data.copy(),bounding_box),sn,sp,t,sr)
+                sheet.sheet_views[name] = view
+                view.cyclic = False #cyclic
+                view.cyclic_range = None#cyclic_range
+                sheet.sheet_views[name] = view
+
+    def collect_curve_measurements(self,measurement_dict,x_axis):
+        t = topo.sim.time()
+        for sheet_name,curve_data in measurement_dict.items():
+            sheet=topo.sim[sheet_name]
+            if not hasattr(sheet,'curve_dict'):
+                sheet.curve_dict = {}
+            bounding_box = sheet.bounds
+            sp = sheet.precedence
+            sr = sheet.row_precedence
+            for x_val,y_data in curve_data.items():
+                prefix,curve_label,y_axis_values = y_data
+                measurement_label = prefix+x_axis
+                if measurement_label not in sheet.curve_dict:
+                    sheet.curve_dict[measurement_label] = {}
+                if curve_label not in sheet.curve_dict[measurement_label]:
+                    sheet.curve_dict[measurement_label][curve_label]={}
+                view = SheetView((y_axis_values,bounding_box),sheet_name,sp,t,sr)
+                sheet.curve_dict[measurement_label][curve_label].update({x_val:view})
+
+
+    def collect_rf_measurements(self,rf_dict):
+        for input_name,sheet_dict in rf_dict.items():
+            input_sheet = topo.sim[input_name]
+            input_sheet_views = input_sheet.sheet_views
+            input_bounds = input_sheet.bounds
+            for sheet_name,coord_dict in sheet_dict.items():
+                sheet = topo.sim[sheet_name]
+                for coord,data in coord_dict.items():
+                    r,c = coord
+                    view = SheetView((data,input_bounds),input_sheet.name,input_sheet.precedence,
+                                     topo.sim.time(),input_sheet.row_precedence)
+                    x,y = sheet.matrixidx2sheet(r,c)
+                    key = ('RFs',sheet_name,x,y)
+                    input_sheet_views[key]=view
+
+
+    def get_feature_preference(self,sheet,feature,sheet_coord,default=0.0):
+        """Return the feature preference for a particular unit."""
+        sheet = topo.sim[sheet]
+        matrix_coords = sheet.sheet2matrixidx(*sheet_coord)
+
+        map_name = feature.capitalize() + "Preference"
+
+        if(map_name in sheet.sheet_views):
+            pref = sheet.sheet_views[map_name].view()[0]
+            val = pref[matrix_coords]
+        else:
+            self.warning(("%s should be measured before plotting this tuning curve -- " +
+                          "using default value of %s for %s unit (%d,%d).") % \
+                         (map_name,default,sheet.name,sheet_coord[0],sheet_coord[1]))
+            val = default
+
+        return val
 
 
 __all__ = [
