@@ -1048,6 +1048,7 @@ class measure_or_tuning(UnitCurveCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
         for coord in p.coords:
             p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
             p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
@@ -1098,6 +1099,7 @@ class measure_size_response(UnitCurveCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
         for coord in p.coords:
             # Orientations are stored as a normalized value beween 0
             # and 1, so we scale them by pi to get the true orientations.
@@ -1154,6 +1156,7 @@ class measure_contrast_response(UnitCurveCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
         for coord in p.coords:
             orientation=pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord)
             self.curve_parameters=[{"orientation":orientation+ro} for ro in p.relative_orientations]
@@ -1173,6 +1176,63 @@ create_plotgroup(template_plot_type="curve",name='Contrast Response',category="T
         doc='Measure the contrast response function for a specific unit.',
         pre_plot_hooks=[measure_contrast_response.instance()],
         plot_hooks=[tuning_curve.instance(x_axis="contrast",unit="%")],
+        prerequisites=['OrientationPreference','XPreference'])
+
+
+class measure_frequency_response(UnitCurveCommand):
+    """
+    Measure spatial frequency preference of one unit of a sheet.
+
+    Uses an constant circular sine grating stimulus at the preferred
+    with varying spatial frequency orientation and retinal position
+    of the specified unit. Orientation and position preference must
+    be calulated before measuring size response.
+
+    The curve can be plotted at various different values of the
+    contrast (or actually any other parameter) of the stimulus.  If
+    using contrast and the network contains an LGN layer, then one
+    would usually specify weber_contrast as the contrast_parameter. If
+    there is no explicit LGN, then scale (offset=0.0) can be used to
+    define the contrast.  Other relevant contrast definitions (or
+    other parameters) can also be used, provided they are defined in
+    PatternPresenter and the units parameter is changed as
+    appropriate.
+    """
+
+    x_axis = param.String(default="frequency",constant=True)
+
+    static_parameters = param.List(default=["orientation","x","y"])
+
+    num_freq = param.Integer(default=20,bounds=(1,None),softbounds=(1,50),
+                              doc="Number of different sizes to test.")
+
+    max_freq = param.Number(default=10.0,bounds=(0.1,None),softbounds=(1,50),
+                              doc="Maximum extent of the grating")
+
+    def __call__(self,**params):
+        p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
+
+        for coord in p.coords:
+            # Orientations are stored as a normalized value beween 0
+            # and 1, so we scale them by pi to get the true orientations.
+            p.orientation=pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord)
+            p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
+            p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
+
+            self._compute_curves(p)
+
+    def _feature_list(self,p):
+        return [Feature(name="orientation",values=[p.orientation],cyclic=True),
+                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
+                Feature(name="frequency",range=(0.0,p.max_freq),step=p.max_freq/p.num_freq,cyclic=False),
+                Feature(name="size",values=[p.size])]
+
+
+create_plotgroup(template_plot_type="curve",name='Frequency Tuning',category="Tuning Curves",
+        doc='Measure the spatial frequency preference for a specific unit.',
+        pre_plot_hooks=[measure_frequency_response.instance()],
+                 plot_hooks=[tuning_curve.instance(x_axis="frequency",unit="cycles per unit distance")],
         prerequisites=['OrientationPreference','XPreference'])
 
 
@@ -1223,12 +1283,13 @@ class measure_orientation_contrast(UnitCurveCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
         for coord in p.coords:
             self.or_surrounds=[]
             orientation=pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord,default=p.orientation_center)
             p.orientationcenter=orientation
 
-            for i in xrange(1,self.num_orientation):
+            for i in xrange(0,p.num_orientation):
                 self.or_surrounds.append(orientation+i*pi/(p.num_orientation))
 
             p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
@@ -1238,8 +1299,8 @@ class measure_orientation_contrast(UnitCurveCommand):
 
     def _feature_list(self,p):
         return [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
-    	 	Feature(name="frequency",values=p.frequencies),
-		Feature(name="orientationsurround",values=self.or_surrounds,cyclic=True)]
+                Feature(name="frequency",values=p.frequencies),
+                Feature(name="orientationsurround",values=self.or_surrounds,cyclic=True)]
 
 create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category="Tuning Curves",
                  doc='Measure the response of one unit to a center and surround sine grating disk.',
