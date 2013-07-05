@@ -950,7 +950,8 @@ class MeasurementCommand(ParameterizedFunction):
         stored as part of a measurement response.""")
 
     presenter_cmd = param.Callable(default=None,instantiate=True,doc="""
-        """)
+        Responsible for presenting patterns, returning and storing
+        measurements and meta-data associated with the measurement.""")
 
     __abstract = True
 
@@ -1085,12 +1086,6 @@ class SingleInputResponseCommand(MeasureResponseCommand):
     specified Sheet is simply used to determine various parameters.  In the future,
     it may be modified to draw the pattern on one input sheet only.
     """
-    # CBERRORALERT: Need to alter CoordinatedPatternGenerator to accept an input sheet,
-    # to allow it to be presented on only one sheet.
-
-    input_sheet = param.ObjectSelector(
-        default=None,doc="""
-        Name of the sheet where input should be drawn.""")
 
     scale = param.Number(default=30.0)
 
@@ -1112,10 +1107,6 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
     """A callable Parameterized command for measuring tuning curves."""
 
     num_orientation = param.Integer(default=12)
-
-    sheet = param.ObjectSelector(
-        default=None,doc="""
-        Name of the sheet to use in measurements.""")
 
     units = param.String(default='%',doc="""
         Units for labeling the curve_parameters in figure legends.
@@ -1325,6 +1316,11 @@ class PatternPresentingCommand(ParameterizedFunction):
 
 
 class pattern_present(PatternPresentingCommand):
+    """
+    Presents a pattern on the input sheet(s) and updates
+    SheetViews. Does not affect the state but can overwrite
+    the previous pattern if overwrite_previous is set to True.
+    """
 
     def __call__(self,inputs={},**params_to_override):
         p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
@@ -1371,14 +1367,14 @@ class pattern_present(PatternPresentingCommand):
         update_activity("", create_sheetview = True)
 
 
+
 class measure_response(PatternPresentingCommand):
     """
-    Measuring the response to a pattern: 
-    More complete function that both presents a pattern and also
-    collects the response, generating SheetViews.  Also pushes and pops
-    the state, which is only meaningful because we are first grabbing the
-    activity and storing the sheet views.  Thus unlike 1, this is a
-    complete (albeit simple) measurement, not just a low-level tool.
+    Measuring the response to a pattern: More complete function that
+    both presents a pattern and also collects the response, generating
+    SheetViews.  Also pushes and pops the state, which is only
+    meaningful because we are first grabbing the activity and storing
+    the sheet views.
     """
 
     restore_state = param.Boolean(default=False)
