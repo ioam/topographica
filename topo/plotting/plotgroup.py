@@ -1294,9 +1294,9 @@ class FeatureCurvePlotGroup(UnitPlotGroup):
         use the max timestamp as the plot label
         Displays a warning if not all curves have been measured at the same time.
         """
-        for x_axis in self.sheet.curve_dict.itervalues():
-            for curve_label in x_axis.itervalues():
-                timestamps = [SheetView.timestamp for SheetView in curve_label.itervalues()]
+        timestamps = [sheetview.timestamp for x_axis in self.sheet.curve_dict.itervalues()
+                      for curve_label in x_axis.itervalues()
+                      for sheetview in curve_label.itervalues()]
 
         if timestamps != []:
             self.time = max(timestamps)
