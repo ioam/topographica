@@ -1303,6 +1303,8 @@ class PatternPresentingCommand(ParameterizedFunction):
     implemented by any pattern_response callable.
     """
 
+    apply_output_fns = param.Boolean(default=True)
+
     duration = param.Number(default=None,doc="""
         If non-None, pattern_presenter.duration will be
         set to this value.  Provides a simple way to set
@@ -1389,7 +1391,16 @@ class measure_response(PatternPresentingCommand):
     the sheet views.
     """
 
+    apply_output_fns=param.Boolean(default=True,doc="""
+        Determines whether sheet output functions will be applied.
+        """)
+
     restore_state = param.Boolean(default=False)
+
+    sheet_views_prefix = param.String(default="",doc="""
+        Optional prefix to add to the name under which results are
+        stored in sheet_views. Can be used e.g. to distinguish maps as
+        originating from a particular GeneratorSheet.""")
 
     def __call__(self,inputs={},**params_to_override):
         p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
@@ -1445,7 +1456,6 @@ class measure_response(PatternPresentingCommand):
         if not p.overwrite_previous:
             restore_input_generators()
 
-        keys = self.response_shapes().keys() + self.input_shapes().keys()
         update_activity(p.sheet_views_prefix, create_sheetview = True)
 
         if self.restore_state:   topo.sim.state_pop()
