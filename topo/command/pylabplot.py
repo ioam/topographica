@@ -715,9 +715,9 @@ class cyclic_tuning_curve(tuning_curve):
         labels.append(ticks[0])
         values.append(self.x_values[0])
         for i in xrange(0,self.num_ticks):
-            labels.append(labels[-1]+pi/(self.num_ticks+1.0))
-            values.append(values[-1]+pi/(self.num_ticks+1.0))
-        labels.append(labels[-1]+pi/(self.num_ticks+1.0))
+            labels.append(labels[-1]+np.pi/(self.num_ticks+1.0))
+            values.append(values[-1]+np.pi/(self.num_ticks+1.0))
+        labels.append(labels[-1]+np.pi/(self.num_ticks+1.0))
         values.append(self.x_values[-1])
         return (values,labels)
 
