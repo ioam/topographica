@@ -447,7 +447,8 @@ class ReverseCorrelation(FeatureResponses):
             self._featureresponses[input_label] = {}
             for response_label,response_shape in self.response_shapes.items():
                 rows,cols = response_shape
-                self._featureresponses[input_label][response_label] = np.array([[np.zeros(input_shape,dtype=activity_dtype) for r in range(rows)]
+                self._featureresponses[input_label][response_label] = np.array([[np.zeros(input_shape,dtype=activity_dtype)
+                                                                                 for r in range(rows)]
                                                                                 for c in range(cols)])
 
 
@@ -599,13 +600,8 @@ class CoordinatedPatternGenerator(param.Parameterized):
     # JABALERT: Needs documenting; apparently only for retinotopy?
     divisions = param.Parameter()
 
-    # CEBALERT: generator_sheets=[] is probably a surprising way of
-    # actually getting all the generator sheets.
-    # generator_sheets = param.List(default=[],doc="""
-    #     The set of GeneratorSheets onto which patterns will be drawn.
-
-    #     By default (i.e. for an empty list), all GeneratorSheets in
-    #     the simulation will be used.""")
+    duration = param.Number(default=None,doc="""
+         Duration of pattern presentation, required for some motion stimuli.""")
 
 
     def __init__(self,pattern_generator,**params):
@@ -627,12 +623,10 @@ class CoordinatedPatternGenerator(param.Parameterized):
         for feature,value in features_values.iteritems():
             self.gen.__setattr__(feature,value)
 
-        # all_input_sheet_names = topo.sim.objects(GeneratorSheet).keys()
+        all_input_sheet_names = topo.sim.objects(GeneratorSheet).keys()
 
-        # if len(self.generator_sheets)>0:
-        #     input_sheet_names = [sheet.name for sheet in self.generator_sheets]
-        # else:
-        #     input_sheet_names = all_input_sheet_names
+        if len(input_sheet_names)==0:
+             input_sheet_names = all_input_sheet_names
 
         # Copy the given generator once for every GeneratorSheet
         inputs = dict.fromkeys(input_sheet_names)
@@ -860,8 +854,8 @@ class CoordinatedPatternGenerator(param.Parameterized):
                     g.scale=g.contrast
 
         # blank patterns for unused generator sheets
-        # for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
-        #     inputs[sheet_name]=pattern.Constant(scale=0)
+        for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
+            inputs[sheet_name]=pattern.Constant(scale=0)
 
         return inputs
 
@@ -1214,6 +1208,10 @@ class PatternResponseCommand(PatternPresentingCommand):
     """Abstract class defining the necessary methods that need to be
     implemented by any pattern_response callable."""
 
+    input_sheet = param.String(default="",doc="""
+        Name of generator sheet if measurement is to be carried out
+        using a specific input sheet""")
+
     sheet_views_prefix = param.String(default="",doc="""
         Optional prefix to add to the name under which results are
         stored in sheet_views. Can be used e.g. to distinguish maps as
@@ -1502,11 +1500,6 @@ class MeasureResponseCommand(MeasurementCommand):
 
     subplot = param.String("",doc="""Name of map to register as a subplot, if any.""")
 
-    generator_sheets = param.List(default=[],doc="""
-        pattern_presenter.generator_sheets will be set to this value.
-        The default value of [] results in all GeneratorSheets being
-        used.""")
-
     preference_fn = param.ClassSelector(DistributionStatisticFn,default=DSF_MaxValue(),
             doc="""Function that will be used to analyze the distributions of unit responses.""")
 
@@ -1520,7 +1513,6 @@ class MeasureResponseCommand(MeasurementCommand):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
         static_params = dict([(s,p[s]) for s in p.static_parameters])
-        p.pattern_coordinator.generator_sheets=p.generator_sheets
         fullmatrix = FeatureMaps(self._feature_list(p),duration=p.duration,
                                  param_dict=static_params,pattern_coordinator=p.pattern_coordinator,
                                  presenter_cmd=p.presenter_cmd,measurement_prefix=p.measurement_prefix)
@@ -1538,7 +1530,10 @@ class MeasureResponseCommand(MeasurementCommand):
 
     def _set_presenter_overrides(self,p):
         for override,value in p.extra_keywords().items():
-            p.presenter_cmd.set_param(override,value)
+            if override in p.presenter_cmd.params():
+                p.presenter_cmd.set_param(override,value)
+            if override in p.pattern_coordinator.params():
+                p.pattern_coordinator.set_param(override,value)
 
 
 class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
@@ -1656,6 +1651,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
                                      doc="""List of parameter values for which to measure a curve.""")
 
     __abstract = True
+
 
     def __call__(self,**params):
         """Measure the response to the specified pattern and store the data in each sheet."""
