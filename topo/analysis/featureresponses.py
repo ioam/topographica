@@ -49,8 +49,8 @@ class DistributionMatrix(param.Parameterized):
     update().
 
     The results can then be accessed as a matrix of weighted averages
-    (which can be used as a preference map) and/or a selectivity
-    map (which measures the peakedness of each distribution).
+    (which can be used as a preference map) and/or a selectivity map
+    (which measures the peakedness of each distribution).
     """
 
     def __init__(self,matrix_shape,axis_range=(0.0,1.0),cyclic=False,keep_peak=True):
@@ -73,10 +73,12 @@ class DistributionMatrix(param.Parameterized):
 
     def apply_DSF(self,dsf):
         """
-        Apply the given dsf DistributionStatisticFn on each element of the distribution_matrix
+        Apply the given dsf DistributionStatisticFn on each element of
+        the distribution_matrix
 
-        Return a dictionary of dictionaries, with the same structure of the called
-        DistributionStatisticFn, but with matrices as values, instead of scalars
+        Return a dictionary of dictionaries, with the same structure
+        of the called DistributionStatisticFn, but with matrices as
+        values, instead of scalars
         """
 
         shape = self.distribution_matrix.shape
@@ -103,8 +105,9 @@ class DistributionMatrix(param.Parameterized):
 
 class FullMatrix(param.Parameterized):
     """
-    Records the output of every unit in a sheet, for every combination of feature values.
-    Useful for collecting data for later analysis while presenting many input patterns.
+    Records the output of every unit in a sheet, for every combination
+    of feature values.  Useful for collecting data for later analysis
+    while presenting many input patterns.
     """
 
     def __init__(self,matrix_shape,features):
@@ -137,7 +140,8 @@ class FullMatrix(param.Parameterized):
 
 class FeatureResponses(PatternDrivenAnalysis):
     """
-    Systematically vary input pattern feature values and collate the responses.
+    Systematically vary input pattern feature values and collate the
+    responses.
 
     A DistributionMatrix for each measurement source and feature is
     created.  The DistributionMatrix stores the distribution of
@@ -372,13 +376,13 @@ class FeatureCurves(FeatureResponses):
     unique combination of other feature values).
 
     The measured responses used to construct the curves will be passed
-    to the presenter_cmd to be stored.  A particular set of
-    patterns is then constructed using a user-specified
-    PatternPresenter by adding the parameters determining the curve
-    (curve_param_dict) to a static list of parameters (param_dict),
-    and then varying the specified set of features.  The results can
-    be accessed in the curve_dict passed to the presenter_cmd, indexed
-    by the curve_label and feature value.
+    to the presenter_cmd to be stored.  A particular set of patterns
+    is then constructed using a user-specified PatternPresenter by
+    adding the parameters determining the curve (curve_param_dict) to
+    a static list of parameters (param_dict), and then varying the
+    specified set of features.  The results can be accessed in the
+    curve_dict passed to the presenter_cmd, indexed by the curve_label
+    and feature value.
     """
 
     x_axis = param.String(default=None,doc="""
@@ -542,15 +546,17 @@ class Feature(param.Parameterized):
 
     def __init__(self,**params):
         """
-        Users can provide either a range and a step size, or a list of values.
-        If a list of values is supplied, the range can be omitted unless the
-        default of the min and max in the list of values is not appropriate.
+        Users can provide either a range and a step size, or a list of
+        values.  If a list of values is supplied, the range can be
+        omitted unless the default of the min and max in the list of
+        values is not appropriate.
 
-        If non-None, the compute_fn should be a function that when given a list
-        of other parameter values, computes and returns the value for this feature.
+        If non-None, the compute_fn should be a function that when
+        given a list of other parameter values, computes and returns
+        the value for this feature.
 
-        If supplied, the offset is added to the given or computed values to allow
-        the starting value to be specified.
+        If supplied, the offset is added to the given or computed
+        values to allow the starting value to be specified.
 
         """
 
@@ -855,9 +861,10 @@ class CoordinatedPatternGenerator(param.Parameterized):
 
 class Subplotting(param.Parameterized):
     """
-    Convenience functions for handling subplots (such as colorized Activity plots).
-    Only needed for avoiding typing, as plots can be declared with their own
-    specific subplots without using these functions.
+    Convenience functions for handling subplots (such as colorized
+    Activity plots).  Only needed for avoiding typing, as plots can be
+    declared with their own specific subplots without using these
+    functions.
     """
 
     plotgroups_to_subplot=param.List(default=
@@ -1080,11 +1087,13 @@ class PositionMeasurementCommand(MeasureResponseCommand):
 
 class SingleInputResponseCommand(MeasureResponseCommand):
     """
-    A callable Parameterized command for measuring the response to input on a specified Sheet.
+    A callable Parameterized command for measuring the response to
+    input on a specified Sheet.
 
-    Note that at present the input is actually presented to all input sheets; the
-    specified Sheet is simply used to determine various parameters.  In the future,
-    it may be modified to draw the pattern on one input sheet only.
+    Note that at present the input is actually presented to all input
+    sheets; the specified Sheet is simply used to determine various
+    parameters.  In the future, it may be modified to draw the pattern
+    on one input sheet only.
     """
 
     scale = param.Number(default=30.0)
@@ -1273,7 +1282,8 @@ def update_sheet_activity(sheet_name,sheet_views_prefix='', create_sheetview=Tru
 
 def update_activity(sheet_views_prefix='', create_sheetview=True):
     """
-    Make a map of neural activity available for each sheet, for use in template-based plots.
+    Make a map of neural activity available for each sheet, for use in
+    template-based plots.
 
     This command simply asks each sheet for a copy of its activity
     matrix, and then makes it available for plotting.  Of course, for
@@ -1288,8 +1298,10 @@ def update_activity(sheet_views_prefix='', create_sheetview=True):
 
 
 class PatternPresentingCommand(ParameterizedFunction):
-    """Abstract class defining the necessary methods that need to be
-    implemented by any pattern_response callable."""
+    """
+    Abstract class defining the necessary methods that need to be
+    implemented by any pattern_response callable.
+    """
 
     duration = param.Number(default=None,doc="""
         If non-None, pattern_presenter.duration will be
@@ -1318,8 +1330,8 @@ class PatternPresentingCommand(ParameterizedFunction):
 class pattern_present(PatternPresentingCommand):
     """
     Presents a pattern on the input sheet(s) and updates
-    SheetViews. Does not affect the state but can overwrite
-    the previous pattern if overwrite_previous is set to True.
+    SheetViews. Does not affect the state but can overwrite the
+    previous pattern if overwrite_previous is set to True.
     """
 
     def __call__(self,inputs={},**params_to_override):
@@ -1469,11 +1481,13 @@ class pattern_response(PatternPresentingCommand):
     """
 
     apply_output_fns=param.Boolean(default=True,doc="""
+        Determines whether sheet output functions will be applied.
         """)
 
     ongoing_measurement = param.Boolean(default=False,doc="""
-        Indicates whether pattern_response is currently being used in a measurement.
-        If True and toggled to False will halt the measurement process.""")
+        Indicates whether pattern_response is currently being used in
+        a measurement.  If True and toggled to False will halt the
+        measurement process.""")
 
     sheet_views_prefix = param.String(default="",doc="""
         Optional prefix to add to the name under which results are
