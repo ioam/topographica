@@ -89,15 +89,26 @@ class GeneratorSheet(Sheet):
             self.warning('There is no previous input generator to restore.')
 
     def generate(self):
-        """Generate the output and send it out the Activity port."""
-
+        """
+        Generate the output and send it out the Activity port.
+        """
         self.verbose("Generating a new pattern")
-        self.activity[:] = self.input_generator()
 
-        if self.apply_output_fns:
-            for of in self.output_fns:
-                of(self.activity)
-        self.send_output(src_port='Activity',data=self.activity)
+        try:
+            ac = self.input_generator()
+        except StopIteration:
+            # Note that a generator may raise an exception StopIteration if it runs out of patterns.
+            # Example is if the patterns are files that are loaded sequentially and are not re-used (e.g. the constructors
+            # are  discarded to save memory).
+            self.warning('Pattern generator {0} returned None. Unable to generate Activity pattern.'.format(self.input_generator.name))
+            raise StopIteration;
+        else:
+            self.activity[:] = ac
+
+            if self.apply_output_fns:
+                for of in self.output_fns:
+                    of(self.activity)
+            self.send_output(src_port='Activity',data=self.activity)
 
 
     def start(self):
