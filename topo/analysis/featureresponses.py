@@ -1608,6 +1608,7 @@ class pattern_response(PatternPresentingCommand):
     def update_progress(self,current,total_steps):
         if current == 0:
             self.timer = copy.copy(topo.sim.timer)
+            self.timer.stop = False
             if hasattr(topo,'guimain'):
                 topo.guimain.open_progress_window(self.timer)
         if self.timer.stop:
