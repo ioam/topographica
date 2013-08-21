@@ -1336,6 +1336,8 @@ class pattern_present(PatternPresentingCommand):
     previous pattern if overwrite_previous is set to True.
     """
 
+    restore_events = param.Boolean(default=True)
+
     def __call__(self,inputs={},**params_to_override):
         p=ParamOverrides(self,dict(params_to_override,inputs=inputs))
         # ensure EPs get started (if pattern_present is called before the simulation is run())
@@ -1367,8 +1369,12 @@ class pattern_present(PatternPresentingCommand):
                     param.Parameterized().warning(
                         '%s not a valid Sheet name for pattern_present.' % each)
 
+        if p.restore_events:  topo.sim.event_push()
+
         duration = p.duration if (p.duration is not None) else 1.0
         topo.sim.run(duration)
+
+        if p.restore_events:  topo.sim.event_pop()
 
         # turn sheets' plasticity and output_fn plasticity back on if we turned it off before
         if not p.plastic:
