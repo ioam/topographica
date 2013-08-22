@@ -603,7 +603,7 @@ class tuning_curve(PylabPlotCommand):
     legend=param.Boolean(default=True, doc="""
         Whether or not to include a legend in the plot.""")
 
-    num_ticks=param.Number(default=4, doc="""
+    num_ticks=param.Number(default=5, doc="""
         Number of tick marks on the X-axis.""")
 
     __abstract = True
@@ -690,6 +690,8 @@ class cyclic_tuning_curve(tuning_curve):
     recenter = param.Boolean(default=True,doc="""
         Centers the tuning curve around the maximally responding feature.""")
 
+    relative_labels = param.Boolean(default=False,doc="""
+        Relabel the x-axis with values relative to the preferred.""")
 
     def __call__(self,**params):
         p=ParamOverrides(self,params)
@@ -712,13 +714,17 @@ class cyclic_tuning_curve(tuning_curve):
     def _reduce_ticks(self,ticks):
         values = []
         labels =  []
-        labels.append(ticks[0])
+        step = np.pi/(self.num_ticks-1)
+        if self.relative_labels:
+            labels.append(-90)
+            label_step = 180 / (self.num_ticks-1)
+        else:
+            labels.append(ticks[0])
+            label_step = step
         values.append(self.x_values[0])
-        for i in xrange(0,self.num_ticks):
-            labels.append(labels[-1]+np.pi/(self.num_ticks+1.0))
-            values.append(values[-1]+np.pi/(self.num_ticks+1.0))
-        labels.append(labels[-1]+np.pi/(self.num_ticks+1.0))
-        values.append(self.x_values[-1])
+        for i in xrange(0,self.num_ticks-1):
+            labels.append(labels[-1]+label_step)
+            values.append(values[-1]+step)
         return (values,labels)
 
 
@@ -727,6 +733,8 @@ class cyclic_tuning_curve(tuning_curve):
     # will need to be reimplemented in a subclass to work with other
     # cyclic quantities.
     def _format_x_tick_label(self,x):
+        if self.relative_labels:
+            return str(x)
         return str(int(np.round(180*x/np.pi)))
 
 
@@ -1276,9 +1284,9 @@ class measure_orientation_contrast(UnitCurveCommand):
     both disks.
     """
 
-    pattern_coordinator = param.Callable(
-        default=CoordinatedPatternGenerator(pattern_generator=OrientationContrast(),
-                                      contrast_parameter="weber_contrast"))
+    pattern_coordinator = param.Callable(default=CoordinatedPatternGenerator(
+            pattern_generator=OrientationContrast(surround_orientation_relative=True),
+            contrast_parameter="weber_contrast"))
 
     size=None # Disabled unused parameter
     # Maybe instead of the below, use size and some relative parameter, to allow easy scaling?
@@ -1300,10 +1308,11 @@ class measure_orientation_contrast(UnitCurveCommand):
     orientation_center = param.Number(default=0.0,softbounds=(0.0,np.pi),doc="""
         Orientation of the center grating patch""")
 
+    num_orientation = param.Integer(default=9)
+
     units = param.String(default="%")
 
     static_parameters = param.List(default=["x","y","sizecenter","sizesurround","orientationcenter","thickness","contrastcenter"])
-
     curve_parameters=param.Parameter([{"contrastsurround":30},{"contrastsurround":60},{"contrastsurround":80},{"contrastsurround":90}],doc="""
         List of parameter values for which to measure a curve.""")
 
@@ -1317,8 +1326,9 @@ class measure_orientation_contrast(UnitCurveCommand):
             orientation=np.pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord,default=p.orientation_center)
             p.orientationcenter=orientation
 
-            for i in xrange(0,p.num_orientation):
-                self.or_surrounds.append(orientation+i*np.pi/(p.num_orientation))
+            orientation_step = np.pi / (p.num_orientation-1)
+            for i in xrange(0,p.num_orientation-1):
+                self.or_surrounds.append(orientation-np.pi/2+i*orientation_step)
 
             p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
             p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
@@ -1333,7 +1343,7 @@ class measure_orientation_contrast(UnitCurveCommand):
 create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category="Tuning Curves",
                  doc='Measure the response of one unit to a center and surround sine grating disk.',
                  pre_plot_hooks=[measure_orientation_contrast.instance()],
-                 plot_hooks=[tuning_curve.instance(x_axis="orientationsurround",unit="%")],
+                 plot_hooks=[cyclic_tuning_curve.instance(x_axis="orientationsurround",recenter=False,relative_labels=True)],
                  prerequisites=['OrientationPreference','XPreference'])
 
 
