@@ -10,7 +10,6 @@ from StringIO import StringIO
 import numpy as np
 import param
 
-import IPython.nbformat.current
 
 def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_',
                     diff=True, invert=False, stale_time=None):
@@ -184,10 +183,11 @@ cf_display = Display(_get_weights)
 
 _loaded = False
 def load_ipython_extension(ip):
+    import IPython.nbformat.current
+    from topo.command import runscript
     # Load Imagen's IPython extension
     imagen.ipython.load_ipython_extension(ip)
 
-    from topo.command import runscript
     runscript.ns = ip.user_ns
     runscript.push = ip.push
 
