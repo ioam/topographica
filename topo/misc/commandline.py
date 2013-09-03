@@ -382,6 +382,7 @@ something_executed=False
 
 # Dummy object used for user messages about OpenMP
 openmp_main=Parameterized(name="OpenMP")
+is_openmp_set = False
 
 def c_action(option,opt_str,value,parser):
     """Callback function for the -c option."""
@@ -393,6 +394,8 @@ def c_action(option,opt_str,value,parser):
     openmp_present = [True for k in openmp_settings_names if (k in __main__.__dict__)]
     if openmp_present and parser.values.gui:
         openmp_main.warning("For OpenMP settings to be used properly they need to be specified before the -g flag.")
+    if __main__.__dict__.get('openmp'):
+        set_openmp()
 
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
@@ -405,6 +408,8 @@ def p_action(option,opt_str,value,parser):
     global_params.exec_in_context(value)
     global something_executed
     something_executed=True
+    if __main__.__dict__.get('openmp'):
+        set_openmp()
 
 topo_parser.add_option("-p","--set-parameter",action = "callback",callback=p_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
@@ -523,6 +528,41 @@ def get_omp_num_threads(openmp_threads, openmp_min_threads, openmp_max_threads):
         return (openmp_threads, total_cores)
 
 
+def set_openmp():
+    global is_openmp_set
+    if is_openmp_set:
+        return
+    is_openmp_set = True
+
+    # OpenMP settings and defaults
+    openmp_threads = __main__.__dict__.get('openmp_threads')
+    if (openmp_threads is None): openmp_threads=-1
+
+    openmp_min_threads = __main__.__dict__.get('openmp_min_threads')
+    if (openmp_min_threads is None): openmp_min_threads=2
+
+    openmp_max_threads = __main__.__dict__.get('openmp_max_threads')
+
+    if (openmp_threads != 1): # OpenMP is disabled if openmp_threads == 1
+
+        (num_threads, total_cores) = get_omp_num_threads(openmp_threads,
+                                                         openmp_min_threads,
+                                                         openmp_max_threads)
+
+        if num_threads is None:
+            openmp_main.message("Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use.")
+        elif num_threads == 'NSLOTS':
+            os.environ['OMP_NUM_THREADS'] =  os.environ['NSLOTS']
+            openmp_main.message("NSLOTS environment variable found; overriding any other thread settings and using N=%s threads" % os.environ['NSLOTS'])
+
+        elif total_cores is None:
+            openmp_main.message("Using %d threads" % num_threads)
+            os.environ['OMP_NUM_THREADS'] =  str(num_threads)
+        else:
+            openmp_main.message("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
+            os.environ['OMP_NUM_THREADS'] =  str(num_threads)
+
+
 ### Execute what is specified by the options.
 
 def process_argv(argv):
@@ -561,33 +601,8 @@ def process_argv(argv):
 
     global_params.check_for_unused_names()
 
-    # OpenMP settings and defaults
-    openmp_threads = __main__.__dict__.get('openmp_threads')
-    if (openmp_threads is None): openmp_threads=-1
-
-    openmp_min_threads = __main__.__dict__.get('openmp_min_threads')
-    if (openmp_min_threads is None): openmp_min_threads=2
-
-    openmp_max_threads = __main__.__dict__.get('openmp_max_threads')
-
-    if (openmp_threads != 1): # OpenMP is disabled if openmp_threads == 1
-
-        (num_threads, total_cores) = get_omp_num_threads(openmp_threads,
-                                                         openmp_min_threads,
-                                                         openmp_max_threads)
-
-        if num_threads is None:
-            openmp_main.message("Using OMP_NUM_THREADS environment variable if set. Otherwise, all cores in use.")
-        elif num_threads == 'NSLOTS':
-            os.environ['OMP_NUM_THREADS'] =  os.environ['NSLOTS']
-            openmp_main.message("NSLOTS environment variable found; overriding any other thread settings and using N=%s threads" % os.environ['NSLOTS'])
-
-        elif total_cores is None:
-            openmp_main.message("Using %d threads" % num_threads)
-            os.environ['OMP_NUM_THREADS'] =  str(num_threads)
-        else:
-            openmp_main.message("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
-            os.environ['OMP_NUM_THREADS'] =  str(num_threads)
+    if __main__.__dict__.get('openmp') is None:
+        set_openmp()
 
     # If no scripts and no commands were given, pretend -i was given.
     if not something_executed: interactive()
