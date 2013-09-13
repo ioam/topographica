@@ -101,7 +101,6 @@ class GeneratorSheet(Sheet):
             # Example is if the patterns are files that are loaded sequentially and are not re-used (e.g. the constructors
             # are  discarded to save memory).
             self.warning('Pattern generator {0} returned None. Unable to generate Activity pattern.'.format(self.input_generator.name))
-            raise StopIteration;
         else:
             self.activity[:] = ac
 
