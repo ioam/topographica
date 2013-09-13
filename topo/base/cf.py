@@ -35,23 +35,39 @@ from sheetview import UnitView
 from boundingregion import BoundingBox,BoundingRegionParameter
 
 
-# CEBALERT: shouldn't be necessary, and depends on the implementation
-# of numpy.vectorize
 def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     """
-    Simplify creation of numpy.vectorize(fn) objects where all outputs
-    have the same typecode.
+    Wrapper for Numpy.vectorize to make it work properly with different Numpy versions. 
     """
 
-    # This function exists because I cannot figure out how I am
-    # supposed to stop vectorize() calling fn one extra time at the
-    # start. (It's supposed to call an extra time at the start to
-    # determine the output types UNLESS the output types are
-    # specified.)
+    # Numpy.vectorize returns a callable object that applies the given
+    # fn to a list or array.  By default, Numpy.vectorize will call
+    # the supplied fn an extra time to determine the output types,
+    # which is a big problem for any function with side effects.
+    # Supplying arguments is supposed to avoid the problem, but as of
+    # Numpy 1.6.1 (and apparently since at least 1.1.1) this feature
+    # was broken:
+    #
+    # $ ./topographica -c "def f(x): print x" -c "import numpy" -c "numpy.vectorize(f,otypes=numpy.sctype2char(object)*1)([3,4])"
+    # 3
+    # 3
+    # 4
+    #
+    # Numpy 1.7.0 seems to fix the problem:
+    # $ ./topographica -c "def f(x): print x" -c "import numpy" -c "numpy.vectorize(f,otypes=numpy.sctype2char(object)*1)([3,4])"
+    # 3
+    # 4
+    #
+    # To make it work with all versions of Numpy, we use
+    # numpy.vectorize as-is for versions > 1.7.0, and a nasty hack for
+    # previous versions.
+    
+    # Simple Numpy 1.7.0 version:
+    if int(np.version.version[0]) >= 1 and int(np.version.version[2]) >= 7:
+        return np.vectorize(fn,otypes=np.sctype2char(output_type)*num_outputs, doc=doc)
 
+    # Otherwise, we have to mess with Numpy's internal data structures to make it work.
     vfn = np.vectorize(fn,doc=doc)
-    # stop vectorize calling fn an extra time at the start
-    # (works for our current numpy (1.1.1))
     vfn.nout=num_outputs # number of outputs of fn
     output_typecode = np.sctype2char(output_type)
     vfn.otypes=output_typecode*num_outputs # typecodes of outputs of fn
