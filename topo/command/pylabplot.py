@@ -1086,8 +1086,8 @@ class measure_or_tuning(UnitCurveCommand):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
         for coord in p.coords:
-            p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
-            p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
+            p.x = p.preference_lookup_fn('x',p.sheet,coord,default=coord[0])
+            p.y = p.preference_lookup_fn('y',p.sheet,coord,default=coord[1])
             self._compute_curves(p)
 
 
@@ -1139,9 +1139,9 @@ class measure_size_response(UnitCurveCommand):
         for coord in p.coords:
             # Orientations are stored as a normalized value beween 0
             # and 1, so we scale them by pi to get the true orientations.
-            p.orientation=np.pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord)
-            p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
-            p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
+            p.orientation=np.pi*p.preference_lookup_fn('orientation',p.sheet,coord)
+            p.x = p.preference_lookup_fn('x',p.sheet,coord,default=coord[0])
+            p.y = p.preference_lookup_fn('y',p.sheet,coord,default=coord[1])
             self._compute_curves(p)
 
 
@@ -1194,11 +1194,11 @@ class measure_contrast_response(UnitCurveCommand):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
         for coord in p.coords:
-            orientation=np.pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord)
+            orientation=np.pi*p.preference_lookup_fn('orientation',p.sheet,coord)
             self.curve_parameters=[{"orientation":orientation+ro} for ro in p.relative_orientations]
 
-            p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
-            p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
+            p.x = p.preference_lookup_fn('x',p.sheet,coord,default=coord[0])
+            p.y = p.preference_lookup_fn('y',p.sheet,coord,default=coord[1])
 
             self._compute_curves(p,val_format="%.4f")
 
@@ -1252,9 +1252,9 @@ class measure_frequency_response(UnitCurveCommand):
         for coord in p.coords:
             # Orientations are stored as a normalized value beween 0
             # and 1, so we scale them by pi to get the true orientations.
-            p.orientation=np.pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord)
-            p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
-            p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
+            p.orientation=np.pi*p.preference_lookup_fn('orientation',p.sheet,coord)
+            p.x = p.preference_lookup_fn('x',p.sheet,coord,default=coord[0])
+            p.y = p.preference_lookup_fn('y',p.sheet,coord,default=coord[1])
 
             self._compute_curves(p)
 
@@ -1323,15 +1323,15 @@ class measure_orientation_contrast(UnitCurveCommand):
         self._set_presenter_overrides(p)
         for coord in p.coords:
             self.or_surrounds=[]
-            orientation=np.pi*p.presenter_cmd.instance().get_feature_preference(p.sheet,'orientation',coord,default=p.orientation_center)
+            orientation=np.pi*p.preference_lookup_fn('orientation',p.sheet,coord,default=p.orientation_center)
             p.orientationcenter=orientation
 
             orientation_step = np.pi / (p.num_orientation-1)
             for i in xrange(0,p.num_orientation-1):
                 self.or_surrounds.append(orientation-np.pi/2+i*orientation_step)
 
-            p.x = p.presenter_cmd.instance().get_feature_preference(p.sheet,'x',coord,default=coord[0])
-            p.y = p.presenter_cmd.instance().get_feature_preference(p.sheet,'y',coord,default=coord[1])
+            p.x = p.preference_lookup_fn('x',p.sheet,coord,default=coord[0])
+            p.y = p.preference_lookup_fn('y',p.sheet,coord,default=coord[1])
 
             self._compute_curves(p)
 

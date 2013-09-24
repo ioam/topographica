@@ -378,13 +378,13 @@ except:
     pass
 
 
-from topo.analysis.featureresponses import FeatureResponses, MeasureResponseCommand,FeatureCurveCommand, pattern_response
-from topo.command import restore_input_generators, save_input_generators
+from topo.analysis.featureresponses import FeatureResponses, MeasureResponseCommand,FeatureCurveCommand, pattern_response, pre_measurement_hook, post_measurement_hook, get_feature_preference
 
-FeatureResponses.pre_analysis_session_hooks.append(save_input_generators)
-FeatureResponses.post_analysis_session_hooks.append(restore_input_generators)
 FeatureResponses.pre_presentation_hooks.append(sim.state_push)
 FeatureResponses.post_presentation_hooks.append(sim.state_pop)
+FeatureResponses.pre_measurement_cmd = pre_measurement_hook
+FeatureResponses.post_measurement_cmd = post_measurement_hook
 
-MeasureResponseCommand.presenter_cmd = pattern_response.instance()
-
+MeasureResponseCommand.preference_lookup_fn = get_feature_preference
+MeasureResponseCommand.ongoing_measurement_cmd = pattern_response.instance()
+FeatureCurveCommand.ongoing_measurement_cmd = pattern_response.instance()

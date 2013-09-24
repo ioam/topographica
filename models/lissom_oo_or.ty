@@ -188,13 +188,6 @@ topo.sim.grid_layout([[None,    'V1',     None],
 
 # Measure feature maps based on unthresholded initial response for
 # speed and reliability
-from topo.analysis.featureresponses import MeasureResponseCommand, FeatureCurveCommand, pattern_response
-from topo.command import pylabplot
-from topo.plotting.plotgroup import plotgroups
+from topo.analysis.featureresponses import MeasureResponseCommand, FeatureMaps, FeatureResponses,FeatureCurves
 
-MeasureResponseCommand.duration=0.175
-pattern_response.apply_output_fns = False
-for plotgroup in plotgroups:
-    for hook in plotgroup[1].pre_plot_hooks:
-        if isinstance(hook,FeatureCurveCommand):
-          hook.presenter_cmd.apply_output_fns = True
+FeatureMaps.set_cmd_overrides(apply_output_fns=False,duration=0.175)
