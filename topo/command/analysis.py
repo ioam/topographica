@@ -48,8 +48,8 @@ from topo.plotting.plotgroup import create_plotgroup, plotgroups
 from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
 from topo.analysis.featureresponses import Feature, CoordinatedPatternGenerator, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
-from topo.analysis.featureresponses import update_activity
-from topo.analysis.featureresponses import update_sheet_activity, pattern_response # pyflakes:ignore (API import)
+from topo.analysis.featureresponses import update_activity, pattern_present
+from topo.analysis.featureresponses import update_sheet_activity # pyflakes:ignore (API import)
 from topo.base.patterngenerator import PatternGenerator
 from topo.command import pattern_present
 
@@ -371,6 +371,8 @@ class measure_rfs(SingleInputResponseCommand):
 #     pattern_coordinator=CoordinatedPatternGenerator(RawRectangle(size=0.01,aspect_ratio=1.0)))],
 #     normalize='Individually')
 
+
+
 class measure_wnrfs(measure_rfs):
     """
     Map receptive fields by reverse correlation.
@@ -403,7 +405,7 @@ class measure_wnrfs(measure_rfs):
 
 pg = create_plotgroup(name='RF Projection',category='Other',
     doc='Measure white noise receptive fields.',
-    pre_plot_hooks=[measure_wnrfs.instance(pattern_coordinator=CoordinatedPatternGenerator(UniformRandom()))],
+    pre_plot_hooks=[measure_wnrfs.instance(pattern_coordinator=CoordinatedPatternGenerator(pattern_generator=UniformRandom()))],
     normalize='Individually')
 
 pg.add_plot('RFs',[('Strength','RFs')])
@@ -795,7 +797,7 @@ class measure_corner_or_pref(PositionMeasurementCommand):
 
     divisions=param.Integer(default=10)
 
-    pattern_coordinator = param.Callable(CoordinatedPatternGenerator(gaussian_corner))
+    pattern_coordinator = param.Callable(CoordinatedPatternGenerator(pattern_generator=gaussian_corner))
 
     x_range=param.NumericTuple((-1.2,1.2))
 
@@ -857,7 +859,7 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
     key_img_fname=param.Filename(default='command/key_angles.png',doc=
         "Name of the file with the image used to code angles with hues.")
 
-    pattern_coordinator=CoordinatedPatternGenerator(GaussiansCorner(aspect_ratio=4.0,cross=0.85))
+    pattern_coordinator=CoordinatedPatternGenerator(pattern_generator=GaussiansCorner(aspect_ratio=4.0,cross=0.85))
 
     static_parameters = param.List( default=[ "size", "scale", "offset" ] )
 

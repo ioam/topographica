@@ -176,7 +176,8 @@ class TestPattern(SheetPanel):
         """
         input_dict = dict([(sheet.name,sheet.input_generator) \
                            for sheet in self.plotgroup.sheets()])
-        pattern_present(input_dict,duration=self.duration,
-                        plastic=self.plastic,overwrite_previous=False)
+        pattern_present(inputs=input_dict,duration=self.duration,
+                        plastic=self.plastic,overwrite_previous=False,
+                        force_sheetview=True,restore_state=True)
         topo.guimain.auto_refresh(update=False)
 
