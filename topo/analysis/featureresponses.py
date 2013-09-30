@@ -129,15 +129,6 @@ class FullMatrix(param.Parameterized):
         self.full_matrix[index] = new_values
 
 
-### Old Comments
-
-# Feature Responses
-
-    # CEB: we might want to measure the map on a sheet due
-    # to a specific projection, rather than measure the map due
-    # to all projections.
-
-
 class FeatureResponses(PatternDrivenAnalysis):
     """
     Systematically vary input pattern feature values and collate the
@@ -157,6 +148,35 @@ class FeatureResponses(PatternDrivenAnalysis):
     tuning curves, or for similar types of feature-based analyses.
     """
 
+    cmd_overrides = param.Dict(default={},doc="""
+        Dictionary used to overwrite default values of the
+        pattern_presenting_cmd.""")
+
+    io_dimensions_hook = param.Callable(default=None,instantiate=True,doc="""
+        Interface function, which should return the name and dimensions
+        of the input and output sources for pattern presentation and
+        response measurement.""")
+
+    measurement_prefix = param.String(default="",doc="""
+        Prefix to add to the name under which results are stored.""")
+
+    measurement_storage_hook = param.Callable(default=None,instantiate=True,doc="""
+        Interface to store measurements after they have been completed.""")
+
+    param_dict = param.Dict(default={},doc="""
+        Dictionary containing name value pairs of a feature, which is to
+        be varied across measurements.""")
+
+    pattern_coordinator = param.Callable(default=None,instantiate=True,doc="""
+        Coordinates the creation and linking of numerous simultaneously
+        presented input patterns, controlled by complex features.""")
+
+    pattern_presenting_cmd = param.Callable(default=None,instantiate=True,doc="""
+        Presenter command responsible for presenting the input
+        patterns provided to it, returning measurement labels and
+        collecting and storing the measurement results in the
+        appropriate place.""")
+
     repetitions = param.Integer(default=1,bounds=(1,None),doc="""
         How many times each stimulus will be presented.
 
@@ -171,33 +191,6 @@ class FeatureResponses(PatternDrivenAnalysis):
     store_fullmatrix = param.Boolean(default=False,doc="""
         Determines whether or not store the full matrix of feature
         responses as a class attribute.""")
-
-    param_dict = param.Dict(default={},doc="""
-        Dictionary containing name value pairs of a feature, which is to
-        be varied across measurements.""")
-
-    io_dimensions_hook = param.Callable(default=None,instantiate=True,doc="""
-        Interface function, which should return the name and dimensions
-        of the input and output sources for pattern presentation and
-        response measurement.""")
-
-    pattern_presenting_cmd = param.Callable(default=None,instantiate=True,doc="""
-        Presenter command responsible for presenting the input
-        patterns provided to it, returning measurement labels and
-        collecting and storing the measurement results in the
-        appropriate place.""")
-
-    measurement_storage_hook = param.Callable(default=None,instantiate=True,doc="""
-        Interface to store measurements after they have been completed.""")
-
-    pattern_coordinator = param.Callable(default=None,instantiate=True,doc="""
-        Coordinates the creation and linking of numerous simultaneously
-        presented input patterns, controlled by complex features.""")
-
-    measurement_prefix = param.String(default="",doc="""
-        Prefix to add to the name under which results are stored.""")
-
-    cmd_overrides = param.Dict(default={})
 
     _fullmatrix = {}
 
@@ -297,6 +290,11 @@ class FeatureResponses(PatternDrivenAnalysis):
 
 
     def _apply_cmd_overrides(self,p):
+        """
+        Applies the cmd_overrides to the pattern_presenting_cmd and
+        the pattern_coordinator before launching a measurement.
+        """
+
         for override,value in p.cmd_overrides.items():
             if override in p.pattern_presenting_cmd.params():
                 p.pattern_presenting_cmd.set_param(override,value)
@@ -306,6 +304,10 @@ class FeatureResponses(PatternDrivenAnalysis):
 
     @bothmethod
     def set_cmd_overrides(self_or_cls,**overrides):
+        """
+        Allows setting of cmd_overrides at the class and instance
+        level.
+        """
         self_or_cls.cmd_overrides = dict(self_or_cls.cmd_overrides,**overrides)
 
 
@@ -328,13 +330,11 @@ class FeatureMaps(FeatureResponses):
         that this default is overridden by specific functions for
         individual features, if specified in the Feature objects.""")
 
-
     selectivity_multiplier = param.Number(default=17.0,doc="""
         Scaling of the feature selectivity values, applied in all
         feature dimensions.  The multiplier sets the output
         scaling.  The precise value is arbitrary, and set to match
         historical usage.""")
-
 
     # CBENHANCEMENT: could allow full control over the generated names
     # using a format parameter. The default would be
@@ -382,7 +382,7 @@ class FeatureMaps(FeatureResponses):
         if p.measurement_storage_hook:
             p.measurement_storage_hook(result_dict)
 
-        return self._fullmatrix, result_dict
+        return self._fullmatrix
 
 
 class FeatureCurves(FeatureResponses):
@@ -516,7 +516,7 @@ class ReverseCorrelation(FeatureResponses):
 
         response_dict = p.pattern_presenting_cmd(inputs,permutation_num,total_steps)
         p.pattern_presenting_cmd(inputs,self._activities,permutation_num,self.total_steps)
-        
+
         for f in p.post_presentation_hooks: f()
 
         self._update(p)
@@ -610,18 +610,21 @@ class Feature(param.Parameterized):
 # specific objects.
 class CoordinatedPatternGenerator(param.Parameterized):
     """
-    Function object for presenting PatternGenerator-created patterns.
-
     This class helps coordinate a set of patterns to be presented to a
     set of GeneratorSheets.  It provides a standardized way of
     generating a set of linked patterns for testing or analysis, such
     as when measuring preference maps or presenting test patterns.
     Subclasses can provide additional mechanisms for doing this in
     different ways.
-    """ 
+
+    This class should eventually be replaced with coordinated or
+    complex features, which handle special cases like different
+    contrasts, direction or hue values, requiring concerted changes to
+    the input pattern.
+    """
 
     pattern_generator = param.Callable(instantiate=True,default=None)
-    
+
     # JABALERT: Needs documenting, and probably also a clearer name
     contrast_parameter = param.Parameter('michelson_contrast')
 
@@ -631,30 +634,24 @@ class CoordinatedPatternGenerator(param.Parameterized):
     duration = param.Number(default=None,doc="""
          Duration of pattern presentation, required for some motion stimuli.""")
 
-
     def __init__(self,**params):
-        """
-        pattern_generator is the PatternGenerator that will be drawn
-        on the generator_sheets (the parameters of the
-        pattern_generator are specified during calls.
-        """
         super(CoordinatedPatternGenerator,self).__init__(**params)
 
 
-    def __call__(self,features_values,param_dict,input_sheet_names):
+    def __call__(self,features_values,param_dict,input_names):
         for param,value in param_dict.iteritems():
             setattr(self.pattern_generator,param,value)
 
         for feature,value in features_values.iteritems():
             setattr(self.pattern_generator,feature,value)
 
-        all_input_sheet_names = topo.sim.objects(GeneratorSheet).keys()
+        all_input_names = topo.sim.objects(GeneratorSheet).keys()
 
-        if len(input_sheet_names)==0:
-             input_sheet_names = all_input_sheet_names
+        if len(input_names)==0:
+             input_names = all_input_names
 
-        # Copy the given generator once for every GeneratorSheet
-        inputs = dict.fromkeys(input_sheet_names)
+        # Copy the given generator once for every input
+        inputs = dict.fromkeys(input_names)
         for k in inputs.keys():
             inputs[k]=copy.deepcopy(self.pattern_generator)
 
@@ -709,7 +706,7 @@ class CoordinatedPatternGenerator(param.Parameterized):
             # retinas for color are assumed
 
             rgb_retina = False
-            for name in input_sheet_names:
+            for name in input_names:
                 if not ('Red' in name or 'Green' in name or 'Blue' in name):
                     rgb_retina=True
 
@@ -741,7 +738,7 @@ class CoordinatedPatternGenerator(param.Parameterized):
             coordinate_x=[]
             coordinate_y=[]
             coordinates=[]
-            for name,i in zip(inputs.keys(),range(len(input_sheet_names))):
+            for name,i in zip(inputs.keys(),range(len(input_names))):
                 l,b,r,t = topo.sim[name].nominal_bounds.lbrt()
                 x_div=float(r-l)/(self.divisions*2)
                 y_div=float(t-b)/(self.divisions*2)
@@ -768,7 +765,7 @@ class CoordinatedPatternGenerator(param.Parameterized):
                 inputs[name].y = y_coord
 
         if features_values.has_key('retx'):
-            for name,i in zip(inputs.keys(),range(len(input_sheet_names))):
+            for name,i in zip(inputs.keys(),range(len(input_names))):
                 inputs[name].x = features_values['retx']
                 inputs[name].y = features_values['rety']
 
@@ -784,29 +781,6 @@ class CoordinatedPatternGenerator(param.Parameterized):
                     if not hasattr(self,'disparity_warned'):
                         self.warning('Unable to measure disparity preference, because disparity is defined only when there are inputs for Right and Left retinas.')
                         self.disparity_warned=True
-
-        ## Not yet used; example only
-        #if features_values.has_key("xdisparity"):
-        #    if len(input_sheet_names)!=2:
-        #        self.warning('Disparity is defined only when there are exactly two patterns')
-        #    else:
-        #        inputs[input_sheet_names[0]].x=inputs[input_sheet_names[0]].x - inputs[input_sheet_names[0]].xdisparity/2.0
-        #        inputs[input_sheet_names[1]].x=inputs[input_sheet_names[1]].x + inputs[input_sheet_names[1]].xdisparity/2.0
-        #
-        #        inputs={}
-        #        inputs[input_sheet_names[0]]=inputs[input_sheet_names[0]]
-        #        inputs[input_sheet_names[1]]=inputs[input_sheet_names[1]]
-        #
-        #if features_values.has_key("ydisparity"):
-        #    if len(input_sheet_names)!=2:
-        #        self.warning('Disparity is defined only when there are exactly two patterns')
-        #    else:
-        #        inputs[input_sheet_names[0]].y=inputs[input_sheet_names[0]].y - inputs[input_sheet_names[0]].ydisparity/2.0
-        #        inputs[input_sheet_names[1]].y=inputs[input_sheet_names[1]].y + inputs[input_sheet_names[1]].ydisparity/2.0
-        #
-        #        inputs={}
-        #        inputs[input_sheet_names[0]]=inputs[input_sheet_names[0]]
-        #        inputs[input_sheet_names[1]]=inputs[input_sheet_names[1]]
 
         if features_values.has_key("ocular"):
             for name in inputs.keys():
@@ -879,8 +853,8 @@ class CoordinatedPatternGenerator(param.Parameterized):
                     g.scale=g.contrast
 
         # blank patterns for unused generator sheets
-        for sheet_name in set(all_input_sheet_names).difference(set(input_sheet_names)):
-            inputs[sheet_name]=pattern.Constant(scale=0)
+        for input_name in set(all_input_names).difference(set(input_names)):
+            inputs[input_name]=pattern.Constant(scale=0)
 
         return inputs
 
@@ -971,8 +945,9 @@ class Subplotting(param.Parameterized):
         if args != (): Subplotting.set_subplots(*(Subplotting._last_args))
 
 
-class MeasurementCommand(ParameterizedFunction):
-    """Parameterized command for presenting input patterns"""
+
+class MeasureResponseCommand(ParameterizedFunction):
+    """Parameterized command for presenting input patterns and measuring responses."""
 
     duration = param.Number(default=None,doc="""
         If non-None, pattern_presenter.duration will be
@@ -983,38 +958,8 @@ class MeasurementCommand(ParameterizedFunction):
         Optional prefix to add to the name under which results are
         stored as part of a measurement response.""")
 
-    __abstract = True
-
-                
-    
-class MeasureResponseCommand(MeasurementCommand):
-    """Parameterized command for presenting input patterns and measuring responses."""
-
-    scale = param.Number(default=1.0,softbounds=(0.0,2.0),doc="""
-        Multiplicative strength of input pattern.""")
-
     offset = param.Number(default=0.0,softbounds=(-1.0,1.0),doc="""
         Additive offset to input pattern.""")
-
-    weighted_average= param.Boolean(default=True,doc="""
-        Whether to compute results using a weighted average, or just
-        discrete values.  A weighted average can give more precise
-        results, without being limited to a set of discrete values,
-        but the results can have systematic biases due to the
-        averaging, especially for non-cyclic parameters.""")
-
-    preference_lookup_fn = param.Callable(default=None,instantiate=True,doc="""
-        Callable object that will look up a preferred feature values.""")
-
-    static_parameters = param.List(class_=str,default=["scale","offset"],doc="""
-        List of names of parameters of this class to pass to the
-        pattern_presenter as static parameters, i.e. values that
-        will be fixed to a single value during measurement.""")
-
-    subplot = param.String("",doc="""Name of map to register as a subplot, if any.""")
-
-    preference_fn = param.ClassSelector(DistributionStatisticFn,default=DSF_MaxValue(),
-            doc="""Function that will be used to analyze the distributions of unit responses.""")
 
     pattern_coordinator = param.Callable(default=None,instantiate=True,doc="""
         Callable object that will present a parameter-controlled pattern to a
@@ -1028,9 +973,31 @@ class MeasureResponseCommand(MeasurementCommand):
         The attributes duration and apply_output_fns (if non-None) will
         be set on this object, and it should respect those if possible.""")
 
+    preference_fn = param.ClassSelector(DistributionStatisticFn,default=DSF_MaxValue(),
+           doc="""Function that will be used to analyze the distributions of unit responses.""")
+
+    preference_lookup_fn = param.Callable(default=None,instantiate=True,doc="""
+        Callable object that will look up a preferred feature values.""")
+
+    scale = param.Number(default=1.0,softbounds=(0.0,2.0),doc="""
+        Multiplicative strength of input pattern.""")
+
+    static_parameters = param.List(class_=str,default=["scale","offset"],doc="""
+        List of names of parameters of this class to pass to the
+        pattern_presenter as static parameters, i.e. values that
+        will be fixed to a single value during measurement.""")
+
+    subplot = param.String("",doc="""Name of map to register as a subplot, if any.""")
+
+    weighted_average= param.Boolean(default=True,doc="""
+        Whether to compute results using a weighted average, or just
+        discrete values.  A weighted average can give more precise
+        results, without being limited to a set of discrete values,
+        but the results can have systematic biases due to the
+        averaging, especially for non-cyclic parameters.""")
+
     __abstract = True
 
-    
     def __call__(self,**params):
         """Measure the response to the specified pattern and store the data in each sheet."""
         p=ParamOverrides(self,params,allow_extra_keywords=True)
@@ -1053,6 +1020,11 @@ class MeasureResponseCommand(MeasurementCommand):
 
 
     def _set_presenter_overrides(self,p):
+        """
+        Overrides parameters of the pattern_presenting_cmd and
+        pattern_coordinator, using extra_keywords passed into the
+        MeasurementResponseCommand.
+        """
         for override,value in p.extra_keywords().items():
             if override in p.pattern_presenting_cmd.params():
                 p.pattern_presenting_cmd.set_param(override,value)
@@ -1349,7 +1321,7 @@ def update_outputs(outputs={},sheet_views_prefix='', install_sheetview=True):
                           sheet.row_precedence)
 
 
-            
+
 class pattern_present(ParameterizedFunction):
     """
     Presents a pattern on the input sheet(s) and returns the
@@ -1358,8 +1330,29 @@ class pattern_present(ParameterizedFunction):
 
     May also be used to measure the response to a pattern by calling
     it with restore_events disabled and restore_state and
-    install_sheetview enabled, which will push and pop the simulation
-    state and install the response in the sheet_view dictionary.
+    force_sheetview enabled, which will push and pop the simulation
+    state and install the response in the sheet_view dictionary. The
+    measure_activity command in topo.command implements this
+    functionality.
+
+    Given a set of input patterns, installs them into the specified
+    GeneratorSheets, runs the simulation for the specified length of
+    time, then restores the original patterns and the original
+    simulation time.  Thus this input is not considered part of the
+    regular simulation, and is usually for testing purposes.
+
+    As a special case, if 'inputs' is just a single pattern, and not
+    a dictionary, it is presented to all GeneratorSheets.
+
+    If a simulation is not provided, the active simulation, if one
+    exists, is requested.
+
+    If this process is interrupted by the user, the temporary patterns
+    may still be installed on the retina.
+
+    In order to to see the sequence of values presented, you may use
+    the back arrow history mechanism in the GUI. Note that the GUI's
+    Activity window must be open.
     """
 
     apply_output_fns=param.Boolean(default=True,doc="""
@@ -1377,7 +1370,7 @@ class pattern_present(ParameterizedFunction):
 
     force_sheetview = param.Boolean(default=False,doc="""Determines
         whether to install a sheet view in the appropriate sheet_views
-        dict.""")
+        dict even when there is an existing sheetview.""")
 
     plastic=param.Boolean(default=False,doc="""
         If plastic is False, overwrites the existing values of
@@ -1387,16 +1380,22 @@ class pattern_present(ParameterizedFunction):
         If overwrite_previous is true, the given inputs overwrite those
         previously defined.""")
 
-    restore_events = param.Boolean(default=True)
+    restore_events = param.Boolean(default=True,doc="""
+        If True, restore simulation events after the response has been
+        measured, so that no simulation time will have elapsed.
+        Implied by restore_state=True.""")
 
-    restore_state = param.Boolean(default=False)
+    restore_state = param.Boolean(default=False,doc="""
+        If True, restore the state of both sheet activities and simulation events
+        after the response has been measured.  Implies restore_events.""")
 
     sheet_views_prefix = param.String(default="",doc="""
         Optional prefix to add to the name under which results are
         stored in sheet_views. Can be used e.g. to distinguish maps as
         originating from a particular GeneratorSheet.""")
 
-    update_activity_fn = param.Callable(default=update_activity)
+    update_activity_fn = param.Callable(default=update_activity,doc="""
+        Function used to update the current sheet activities.""")
 
     __abstract = True
 
@@ -1480,35 +1479,26 @@ class StoppedMeasurementError(Exception):
 
 class pattern_response(pattern_present):
     """
-    This command presents the specified test patterns for the
-    specified duration and saves the resulting activity to the
-    appropriate SheetViews. Originally, this was the implementation of
-    the pattern_present command, which is still available in
-    topo.command and operates by wrapping a call to this class.
+    This command is used to perform measurements, which require a
+    number of permutations to complete. The inputs and outputs are
+    defined as dictionaries corresponding to the generator sheets they
+    are to be presented on and the measurement sheets to record from
+    respectively. The update_activity_fn then accumulates the updated
+    activity into the appropriate entry in the outputs dictionary.
 
-    Given a set of input patterns, installs them into the specified
-    GeneratorSheets, runs the simulation for the specified length of
-    time, then restores the original patterns and the original
-    simulation time.  Thus this input is not considered part of the
-    regular simulation, and is usually for testing purposes.
-
-    As a special case, if 'inputs' is just a single pattern, and not
-    a dictionary, it is presented to all GeneratorSheets.
-
-    If a simulation is not provided, the active simulation, if one
-    exists, is requested.
-
-    If this process is interrupted by the user, the temporary patterns
-    may still be installed on the retina.
-
-    In order to to see the sequence of values presented, you may use
-    the back arrow history mechanism in the GUI. Note that the GUI's
-    Activity window must be open.
+    The command also makes sure that time, events and state are reset
+    after each presentation. If a GUI is found a timer will be opened
+    to display a progress bar and sheet_views will be made available
+    to the sheet to display activities.
     """
 
-    restore_state = param.Boolean(default=True)
+    restore_state = param.Boolean(default=True,doc="""
+        If True, restore the state of both sheet activities and
+        simulation events after the response has been measured.
+        Implies restore_events.""")
 
-    update_activity_fn = param.Callable(default=update_outputs)
+    update_activity_fn = param.Callable(default=update_outputs,doc="""
+        Function used to update the current sheet activities""")
 
     def __call__(self,inputs={},outputs={},current=0,total=0,**params_to_override):
         if current == 0:
@@ -1555,6 +1545,10 @@ def io_shapes(inputs=[],outputs=[]):
 
 
 def store_measurement(measurement_dict):
+    """
+    Interface function to install measurement results the appropriate
+    sheet_views or curve_dict dictionary.
+    """
 
     t = topo.sim.time()
 
