@@ -1564,8 +1564,8 @@ def store_measurement(measurement_dict):
                 data, cyclic, cyclic_range = item
                 view = SheetView((data,bounding_box),sn,sp,t,sr)
                 sheet.sheet_views[name] = view
-                view.cyclic = False #cyclic
-                view.cyclic_range = None#cyclic_range
+                view.cyclic = cyclic
+                view.cyclic_range = cyclic_range
                 sheet.sheet_views[name] = view
     elif "FeatureCurves" in measurement_dict:
         curves = measurement_dict['FeatureCurves']
