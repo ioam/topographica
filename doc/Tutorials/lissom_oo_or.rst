@@ -5,9 +5,14 @@ LISSOM Orientation Map
 This tutorial shows how to use the `Topographica`_ software package
 to explore a simple orientation map simulation using test patterns
 and weight plots. This particular example uses a `LISSOM model`_
-cortex. Although we focus on one model in this tutorial,
-Topographica provides support for many other models and is easily
-extensible for models not yet supported.
+cortex, which has been used extensively in publications 
+(e.g. `Miikkulainen et al., 2005 <http://computationalmaps.org>`_) 
+but is no longer recommended for new work, because it has been 
+superseded by the simpler but more robust 
+`GCAL model <../Tutorials/gcal.html>`_. Although we focus on one model
+in this tutorial, Topographica provides support for many other models
+and allows a very large family of models to be constructed from 
+the same components.
 
 This tutorial assumes that you have already followed the
 instructions for `obtaining and installing`_ Topographica. Also, you
