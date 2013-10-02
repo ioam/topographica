@@ -2,6 +2,17 @@
 News
 ****
 
+**2 Oct 2013:** New paper using Topographica
+============================================
+
+`Stevens et al. (J. Neuroscience 2013) <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_
+shows results from the GCAL model included with Topographica 
+(`examples/gcal.ty <https://github.com/ioam/topographica/blob/master/examples/gcal.ty>`_).  
+A complete example of replicating all results from the paper will be posted here soon, showing how to use 
+`Lancet <https://github.com/ioam/lancet>`_ to launch the simulations, collate the results, and 
+generate the final figures.  Meanwhile, the 
+`GCAL tutorial <../Tutorials/gcal.html>`_ shows how to explore a running GCAL model.
+
 **2 May 2013:** New web site
 ============================
 
