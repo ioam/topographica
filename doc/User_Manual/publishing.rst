@@ -198,22 +198,29 @@ please cite the following paper so that readers will know how to
 replicate your results and build upon them. (Plus, it is only polite
 to cite work done by others that you rely on!)
 
-    James A. Bednar. `Understanding Neural Maps with Topographica`_.
-    Brains, Minds, and Media, 3:bmm1402, 2008.
+    James A. Bednar.
+    `Topographica: Building and Analyzing Map-Level Simulations from
+    Python, C/C++, MATLAB, NEST, or NEURON Components. 
+    <http://dx.doi.org/10.3389/neuro.11.008.2009>`_
+    Frontiers in Neuroinformatics, 3:8, 2009.
 
 or in BibTeX format:
 
 ::
 
-    @Article{bednar:bmm08,
-      author   = "James A. Bednar",
-      title    = "Understanding Neural Maps with {Topographica}",
-      journal  = "Brains, Minds, and Media",
-      year     = 2008,
-      volume   = 3,
-      pages    = "bmm1402",
-      url      = "http://www.brains-minds-media.org/archive/1402",
+    @Article{bednar:fin09,
+      author  = "James A. Bednar",
+      title   = "{Topographica}: {B}uilding and Analyzing Map-Level
+                 Simulations from {Python}, {C/C++}, {MATLAB}, {NEST},
+                 or {NEURON} Components",
+      journal = "Frontiers in Neuroinformatics",
+      year    = 2009,
+      volume  = 3,
+      pages   = 8,
+      url     = "http://dx.doi.org/10.3389/neuro.11.008.2009",
     }
+
+
 
 .. _JPEG FAQ: http://www.faqs.org/faqs/jpeg-faq/part1/section-3.html
 .. _additive color mixing: http://en.wikipedia.org/wiki/Additive_color
@@ -222,4 +229,4 @@ or in BibTeX format:
 .. _batch mode: batch.html
 .. _save\_plotgroup: commandline.html#saving-bitmaps
 .. _appropriate bitmap format: #image-types
-.. _Understanding Neural Maps with Topographica: http://www.brains-minds-media.org/archive/1402
+

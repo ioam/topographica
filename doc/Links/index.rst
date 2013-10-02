@@ -22,28 +22,33 @@ of Edinburgh`_.
 If you use this software in work leading to an academic publication,
 please cite this reference:
 
-    James A. Bednar. `Understanding Neural Maps with Topographica`_.
-    Brains, Minds, and Media, 3:bmm1402, 2008.
+    James A. Bednar.
+    `Topographica: Building and Analyzing Map-Level Simulations from
+    Python, C/C++, MATLAB, NEST, or NEURON Components. 
+    <http://dx.doi.org/10.3389/neuro.11.008.2009>`_
+    Frontiers in Neuroinformatics, 3:8, 2009.
 
 or in BibTeX format:
 
 ::
 
-    @Article{bednar:bmm08,
-      author   = "James A. Bednar",
-      title    = "Understanding Neural Maps with {Topographica}",
-      journal  = "Brains, Minds, and Media",
-      year     = 2008,
-      volume   = 3,
-      pages    = "bmm1402",
-      url      = "http://www.brains-minds-media.org/archive/1402",
+    @Article{bednar:fin09,
+      author  = "James A. Bednar",
+      title   = "{Topographica}: {B}uilding and Analyzing Map-Level
+                 Simulations from {Python}, {C/C++}, {MATLAB}, {NEST},
+                 or {NEURON} Components",
+      journal = "Frontiers in Neuroinformatics",
+      year    = 2009,
+      volume  = 3,
+      pages   = 8,
+      url     = "http://dx.doi.org/10.3389/neuro.11.008.2009",
     }
 
 .. figure:: ../images/cmvc-cover-icon.jpg
    :align: right
    :alt: Computational Maps in the Visual Cortex (2005) Miikkulainen, Bednar, Choe, and Sirosh
 
-Many of the ideas in Topographica were
+Many of the ideas in Topographica were first
 developed in conjunction with our book:
 
     Risto Miikkulainen, James A. Bednar, Yoonsuck Choe, and Joseph
