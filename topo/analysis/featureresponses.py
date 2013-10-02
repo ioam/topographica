@@ -150,7 +150,7 @@ class FeatureResponses(PatternDrivenAnalysis):
 
     cmd_overrides = param.Dict(default={},doc="""
         Dictionary used to overwrite default values of the
-        pattern_presenting_cmd.""")
+        pattern_response_fn.""")
 
     io_dimensions_hook = param.Callable(default=None,instantiate=True,doc="""
         Interface function, which should return the name and dimensions
@@ -171,7 +171,7 @@ class FeatureResponses(PatternDrivenAnalysis):
         Coordinates the creation and linking of numerous simultaneously
         presented input patterns, controlled by complex features.""")
 
-    pattern_presenting_cmd = param.Callable(default=None,instantiate=True,doc="""
+    pattern_response_fn = param.Callable(default=None,instantiate=True,doc="""
         Presenter command responsible for presenting the input
         patterns provided to it, returning measurement labels and
         collecting and storing the measurement results in the
@@ -267,7 +267,7 @@ class FeatureResponses(PatternDrivenAnalysis):
             for f in p.pre_presentation_hooks: f()
 
             inputs = p.pattern_coordinator(dict(permuted_settings),p.param_dict,self.input_shapes.keys())
-            p.pattern_presenting_cmd(inputs,self._activities,p.repetitions*permutation_num+i,self.total_steps)
+            p.pattern_response_fn(inputs,self._activities,p.repetitions*permutation_num+i,self.total_steps)
 
             for f in p.post_presentation_hooks: f()
 
@@ -291,13 +291,13 @@ class FeatureResponses(PatternDrivenAnalysis):
 
     def _apply_cmd_overrides(self,p):
         """
-        Applies the cmd_overrides to the pattern_presenting_cmd and
+        Applies the cmd_overrides to the pattern_response_fn and
         the pattern_coordinator before launching a measurement.
         """
 
         for override,value in p.cmd_overrides.items():
-            if override in p.pattern_presenting_cmd.params():
-                p.pattern_presenting_cmd.set_param(override,value)
+            if override in p.pattern_response_fn.params():
+                p.pattern_response_fn.set_param(override,value)
             if override in p.pattern_coordinator.params():
                 p.pattern_coordinator.set_param(override,value)
 
@@ -514,8 +514,8 @@ class ReverseCorrelation(FeatureResponses):
 
         inputs = p.pattern_coordinator(dict(permuted_settings),p.param_dict,self.input_shapes.keys())
 
-        response_dict = p.pattern_presenting_cmd(inputs,permutation_num,total_steps)
-        p.pattern_presenting_cmd(inputs,self._activities,permutation_num,self.total_steps)
+        response_dict = p.pattern_response_fn(inputs,permutation_num,total_steps)
+        p.pattern_response_fn(inputs,self._activities,permutation_num,self.total_steps)
 
         for f in p.post_presentation_hooks: f()
 
@@ -967,7 +967,7 @@ class MeasureResponseCommand(ParameterizedFunction):
         The attributes duration and apply_output_fns (if non-None) will
         be set on this object, and it should respect those if possible.""")
 
-    pattern_presenting_cmd = param.Callable(default=None,instantiate=False,doc="""
+    pattern_response_fn = param.Callable(default=None,instantiate=False,doc="""
         Callable object that will present a parameter-controlled pattern to a
         set of Sheets.  Needs to be supplied by a subclass or in the call.
         The attributes duration and apply_output_fns (if non-None) will
@@ -1005,7 +1005,7 @@ class MeasureResponseCommand(ParameterizedFunction):
         static_params = dict([(s,p[s]) for s in p.static_parameters])
         fullmatrix = FeatureMaps(self._feature_list(p),param_dict=static_params,
                                  duration=p.duration,pattern_coordinator=p.pattern_coordinator,
-                                 pattern_presenting_cmd=p.pattern_presenting_cmd,
+                                 pattern_response_fn=p.pattern_response_fn,
                                  measurement_prefix=p.measurement_prefix)
 
         if p.subplot != "":
@@ -1021,13 +1021,13 @@ class MeasureResponseCommand(ParameterizedFunction):
 
     def _set_presenter_overrides(self,p):
         """
-        Overrides parameters of the pattern_presenting_cmd and
+        Overrides parameters of the pattern_response_fn and
         pattern_coordinator, using extra_keywords passed into the
         MeasurementResponseCommand.
         """
         for override,value in p.extra_keywords().items():
-            if override in p.pattern_presenting_cmd.params():
-                p.pattern_presenting_cmd.set_param(override,value)
+            if override in p.pattern_response_fn.params():
+                p.pattern_response_fn.set_param(override,value)
             if override in p.pattern_coordinator.params():
                 p.pattern_coordinator.set_param(override,value)
 
@@ -1161,7 +1161,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
             curve_label="; ".join([('%s = '+val_format+'%s') % (n.capitalize(),v,p.units) for n,v in curve.items()])
             FeatureCurves(self._feature_list(p),curve_label=curve_label,param_dict=static_params,
                           duration=p.duration,pattern_coordinator=p.pattern_coordinator,
-                          pattern_presenting_cmd=p.pattern_presenting_cmd,x_axis=p.x_axis,
+                          pattern_response_fn=p.pattern_response_fn,x_axis=p.x_axis,
                           measurement_prefix=p.measurement_prefix)
 
 

@@ -384,5 +384,5 @@ FeatureResponses.io_dimensions_hook = io_shapes
 FeatureResponses.measurement_storage_hook = store_measurement
 
 MeasureResponseCommand.preference_lookup_fn = get_feature_preference
-MeasureResponseCommand.pattern_presenting_cmd = pattern_response.instance()
-FeatureCurveCommand.pattern_presenting_cmd = pattern_response.instance()
+MeasureResponseCommand.pattern_response_fn = pattern_response.instance()
+FeatureCurveCommand.pattern_response_fn = pattern_response.instance()
