@@ -645,29 +645,13 @@ class CoordinatedPatternGenerator(param.Parameterized):
         for feature,value in features_values.iteritems():
             setattr(self.pattern_generator,feature,value)
 
-        all_input_names = topo.sim.objects(GeneratorSheet).keys()
-
-        if len(input_names)==0:
-             input_names = all_input_names
+        if len(input_names) == 0:
+            input_names = ['default']
 
         # Copy the given generator once for every input
         inputs = dict.fromkeys(input_names)
         for k in inputs.keys():
             inputs[k]=copy.deepcopy(self.pattern_generator)
-
-        ### JABALERT: Should replace these special cases with general
-        ### support for having meta-parameters controlling the
-        ### generation of different patterns for each GeneratorSheet.
-        ### For instance, we will also need to support xdisparity and
-        ### ydisparity, plus movement of patterns between two eyes, colors,
-        ### etc.  At the very least, it should be simple to control
-        ### differences in single parameters easily.  In addition,
-        ### these meta-parameters should show up as parameters for
-        ### this object, augmenting the parameters for each individual
-        ### pattern, e.g. in the Test Pattern window.  In this way we
-        ### should be able to provide general support for manipulating
-        ### both pattern parameters and parameters controlling
-        ### interaction between or differences between patterns.
 
         if 'direction' in features_values:
             import __main__
@@ -730,44 +714,6 @@ class CoordinatedPatternGenerator(param.Parameterized):
                     inputs[name] = rgbimages.ExtendToRGB(generator=inputs[name],
                                                          relative_channel_strengths=[r,g,b])
                 # CEBALERT: should warn as above if not a color network
-
-        #JL: This is only used for retinotopy measurement in jude laws contrib/jsldefs.py
-        #Also needs cleaned up
-        if features_values.has_key('retinotopy'):
-            #Calculates coordinates of the center of each patch to be presented
-            coordinate_x=[]
-            coordinate_y=[]
-            coordinates=[]
-            for name,i in zip(inputs.keys(),range(len(input_names))):
-                l,b,r,t = topo.sim[name].nominal_bounds.lbrt()
-                x_div=float(r-l)/(self.divisions*2)
-                y_div=float(t-b)/(self.divisions*2)
-                for i in range(self.divisions):
-                    if not bool(self.divisions%2):
-                        if bool(i%2):
-                            coordinate_x.append(i*x_div)
-                            coordinate_y.append(i*y_div)
-                            coordinate_x.append(i*-x_div)
-                            coordinate_y.append(i*-y_div)
-                    else:
-                        if not bool(i%2):
-                            coordinate_x.append(i*x_div)
-                            coordinate_y.append(i*y_div)
-                            coordinate_x.append(i*-x_div)
-                            coordinate_y.append(i*-y_div)
-                for x in coordinate_x:
-                    for y in coordinate_y:
-                        coordinates.append((x,y))
-
-                x_coord=coordinates[features_values['retinotopy']][0]
-                y_coord=coordinates[features_values['retinotopy']][1]
-                inputs[name].x = x_coord
-                inputs[name].y = y_coord
-
-        if features_values.has_key('retx'):
-            for name,i in zip(inputs.keys(),range(len(input_names))):
-                inputs[name].x = features_values['retx']
-                inputs[name].y = features_values['rety']
 
         if features_values.has_key("phasedisparity"):
             temp_phase1=features_values['phase']-features_values['phasedisparity']/2.0
@@ -851,10 +797,6 @@ class CoordinatedPatternGenerator(param.Parameterized):
                 for g in inputs.itervalues():
                     g.offset=0.0
                     g.scale=g.contrast
-
-        # blank patterns for unused generator sheets
-        for input_name in set(all_input_names).difference(set(input_names)):
-            inputs[input_name]=pattern.Constant(scale=0)
 
         return inputs
 
@@ -962,10 +904,8 @@ class MeasureResponseCommand(ParameterizedFunction):
         Additive offset to input pattern.""")
 
     pattern_coordinator = param.Callable(default=None,instantiate=True,doc="""
-        Callable object that will present a parameter-controlled pattern to a
-        set of Sheets.  Needs to be supplied by a subclass or in the call.
-        The attributes duration and apply_output_fns (if non-None) will
-        be set on this object, and it should respect those if possible.""")
+        Callable object that will generate input patterns coordinated
+        using a list of meta parameters.""")
 
     pattern_response_fn = param.Callable(default=None,instantiate=False,doc="""
         Callable object that will present a parameter-controlled pattern to a
@@ -1501,6 +1441,16 @@ class pattern_response(pattern_present):
         Function used to update the current sheet activities""")
 
     def __call__(self,inputs={},outputs={},current=0,total=0,**params_to_override):
+        all_input_names = topo.sim.objects(GeneratorSheet).keys()
+
+        if 'default' in inputs:
+            for input_name in all_input_names:
+                inputs[input_name] = inputs['default']
+            del inputs['default']
+
+        for input_name in set(all_input_names).difference(set(inputs.keys())):
+            inputs[input_name]=pattern.Constant(scale=0)
+
         if current == 0:
             self.timer = copy.copy(topo.sim.timer)
             self.timer.stop = False
