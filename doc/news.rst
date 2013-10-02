@@ -1,3 +1,6 @@
+**2 Oct 2013:** GCAL paper `(Stevens et al., J. Neuroscience 2013) <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_
+published, using the model runnable in the `GCAL tutorial <../Tutorials/gcal.html>`_.
+
 **2 May 2013:** New website_ launched.
 
 **23 Nov 2012:** Version 0.9.8 `released`_. Screenshots from
