@@ -52,7 +52,7 @@ CONCEPTS AND OVERVIEW
 `Buildbot <http://buildbot.net/buildbot/docs/0.8.7p1/manual/introduction.html>`_ is a `continuous integration <http://en.wikipedia.org/wiki/Continuous_integration>`_ tool used in Topographica
 to automatically monitor the build status and rerun regression tests.
 
-At the highest level, the buildbot consists of one master and multiple slaves. Put briefly, the master issues the commands and the slave execute
+At the highest level, the buildbot consists of one master and multiple slaves. Put briefly, the master issues the commands and the slaves execute
 them, reporting the results back to the master.
 
 Many possible configurations are possible; the slaves and the master can be on separate machines, share the same machine, or be part of a more
