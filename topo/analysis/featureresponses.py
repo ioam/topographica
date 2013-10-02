@@ -244,9 +244,9 @@ class FeatureResponses(PatternDrivenAnalysis):
         for permutation_num,permutation in enumerate(self.permutations):
             try:
                 self._present_permutation(p,permutation,permutation_num)
-            except StoppedMeasurementError as SME:
+            except MeasurementInterrupt as MI:
                 self.warning("Measurement was stopped after {current} out of {total} presentations. " \
-                             "Results may not be valid.".format(current=SME.current,total=SME.total))
+                             "Results may be incomplete.".format(current=MI.current,total=MI.total))
                 break
 
         # Run hooks after the analysis session
@@ -1464,7 +1464,7 @@ class pattern_present(ParameterizedFunction):
 
 
 
-class StoppedMeasurementError(Exception):
+class MeasurementInterrupt(Exception):
     """
     Exception raised when a measurement is stopped before
     completion. Stores the number of executed presentations and
@@ -1514,7 +1514,7 @@ class pattern_response(pattern_present):
         super(pattern_response,self).__call__(outputs=outputs,**p)
 
         if self.timer.stop:
-            raise StoppedMeasurementError(current,total)
+            raise MeasurementInterrupt(current,total)
 
 
 
