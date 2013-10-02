@@ -483,7 +483,7 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
 
         features += \
             [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True,
-                     preference_fn=DSF_WeightedAverage( value_scale=(0., 1/2.0/pi) ))]
+                     preference_fn=DSF_WeightedAverage())]
 
         if p.num_ocularity>1: features += \
             [Feature(name="ocular",range=(0.0,1.0),step=1.0/p.num_ocularity)]
@@ -518,10 +518,9 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
     subplot = param.String("Orientation")
 
     preference_fn = param.ClassSelector( DistributionStatisticFn,
-        default=DSF_WeightedAverage(value_scale=(0.0,1.0/pi)), doc="""
+        default=DSF_WeightedAverage(), doc="""
         Function that will be used to analyze the distributions of unit
-        responses. Sets value_scale to normalize orientation preference
-        values.""" )
+        responses.""" )
 
     def _feature_list(self,p):
 
@@ -534,7 +533,7 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
 pg= create_plotgroup(name='Orientation Preference',category="Preference Maps",
                      doc='Measure preference for sine grating orientation.',
                      pre_plot_hooks=[measure_sine_pref.instance(
-                         preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi) ))] )
+                         preference_fn=DSF_WeightedAverage())] )
 pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',
             [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
@@ -547,7 +546,7 @@ pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
 pg= create_plotgroup(name='vonMises Orientation Preference',category="Preference Maps",
              doc='Measure preference for sine grating orientation using von Mises fit.',
              pre_plot_hooks=[measure_sine_pref.instance(
-                 preference_fn=DSF_VonMisesFit( value_scale=(0., 1./pi) ),
+                 preference_fn=DSF_VonMisesFit(),
                  num_orientation=16)])
 pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',
@@ -561,7 +560,7 @@ pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
 pg= create_plotgroup(name='Bimodal Orientation Preference', category="Preference Maps",
              doc='Measure preference for sine grating orientation using bimodal von Mises fit.',
              pre_plot_hooks=[measure_sine_pref.instance(
-                 preference_fn=DSF_BimodalVonMisesFit( value_scale=(0., 1./pi) ),
+                 preference_fn=DSF_BimodalVonMisesFit(),
                  num_orientation=16)])
 pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',
@@ -590,7 +589,7 @@ pg.add_static_image('Color Key','command/two_or_key_vert.png')
 pg= create_plotgroup(name='Spatial Frequency Preference',category="Preference Maps",
              doc='Measure preference for sine grating orientation and frequency.',
              pre_plot_hooks=[measure_sine_pref.instance(
-                 preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi) ))] )
+                 preference_fn=DSF_WeightedAverage())] )
 pg.add_plot('Spatial Frequency Preference',[('Strength','FrequencyPreference')])
 pg.add_plot('Spatial Frequency Selectivity',[('Strength','FrequencySelectivity')])
 # Just calls measure_sine_pref to plot different maps.
@@ -661,7 +660,7 @@ class measure_dr_pref(SinusoidalMeasureResponseCommand):
     subplot = param.String("Direction")
 
     preference_fn = param.ClassSelector( DistributionStatisticFn,
-        default=DSF_WeightedAverage(value_scale=(0.0,1.0/(2*pi))), doc="""
+        default=DSF_WeightedAverage(), doc="""
         Function that will be used to analyze the distributions of
         unit responses. Sets value_scale to normalize direction
         preference values.""" )
@@ -816,7 +815,7 @@ class measure_corner_or_pref(PositionMeasurementCommand):
             Feature(name="x",range=p.x_range,step=width/p.divisions,preference_fn=self.preference_fn),
             Feature(name="y",range=p.y_range,step=height/p.divisions,preference_fn=self.preference_fn),
             Feature(name="orientation",range=(0,2*pi),step=2*pi/p.num_orientation,cyclic=True,
-                preference_fn=DSF_WeightedAverage(value_scale=(0., 1/2.0/pi))
+                preference_fn=DSF_WeightedAverage()
             )]
 
 
@@ -884,7 +883,7 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
             Feature( name="y",           range=p.y_range, step=y_step ),
             Feature( name="orientation", range=(0, 2*pi), step=o_step, cyclic=True ),
             Feature( name="angle",       range=a_range,   step=a_step,
-                    preference_fn=DSF_WeightedAverage( value_scale=( -angle_0, 1./(angle_1-angle_0) ) ) )
+                    preference_fn=DSF_WeightedAverage() )
 	]
 
 

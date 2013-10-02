@@ -225,6 +225,8 @@ class TemplatePlot(Plot):
         If the key is found in self.channels and the corresponding
         sheetview is found in self.view_dict, the view's matrix is
         returned; otherwise None is returned (with no error).
+        If the sheet_view derives from a cyclic distribution, and it
+        will be used as Hue, the matrix is normalized in range 0..1
         """
         sheet_view_key = self.channels.get(key,None)
         sv = self.view_dict.get(sheet_view_key, None)
@@ -233,6 +235,8 @@ class TemplatePlot(Plot):
         else:
             view = sv.view()
             matrix = view[0]
+            if key=='Hue' and sv.cyclic:
+                matrix /= sv.cyclic_range
 
             # Calculate timestamp for this plot
             timestamp = sv.timestamp
