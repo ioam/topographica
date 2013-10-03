@@ -466,10 +466,9 @@ class FeatureMaps(FeatureResponses):
                     for map_name,map_view in maps.items():
                         name = base_name + k + map_name.capitalize()
                         view = SheetView((map_view,bounding_box),sn,sp,t,sr)
-                        # JABALERT: Temporarily disabled as of 20130614 to work around a plotting problem
                         # Special case: selectivity is not cyclic even if the feature is
-                        view.cyclic       = False #if map_name == 'selectivity' else fp.cyclic
-                        view.cyclic_range = None  #if map_name == 'selectivity' else cyclic_range
+                        view.cyclic       = False if map_name == 'selectivity' else fp.cyclic
+                        view.cyclic_range = None  if map_name == 'selectivity' else cyclic_range
                         sheet.sheet_views[name] = view
 
 

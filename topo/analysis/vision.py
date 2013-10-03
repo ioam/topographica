@@ -285,7 +285,7 @@ class measure_and_analyze_complexity(measure_sine_pref):
 pg= create_plotgroup(name='Orientation Preference and Complexity',category="Preference Maps",
              doc='Measure preference for sine grating orientation.',
               pre_plot_hooks=[measure_and_analyze_complexity.instance(
-                             preference_fn=DSF_WeightedAverage( value_scale=(0., 1./pi),selectivity_scale=(0.,17.0)))])
+                  preference_fn=DSF_WeightedAverage(selectivity_scale=(0.,17.0)))])
 
 pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',[('Hue','OrientationPreference'),

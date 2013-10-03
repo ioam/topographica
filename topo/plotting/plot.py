@@ -234,7 +234,7 @@ class TemplatePlot(Plot):
             matrix = None
         else:
             view = sv.view()
-            matrix = view[0]
+            matrix = view[0].copy()
             if key=='Hue' and sv.cyclic:
                 matrix /= sv.cyclic_range
 
