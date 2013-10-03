@@ -5,7 +5,15 @@ Topographica IPython extension for notebook support. Load with:
 """
 import os, time, difflib
 from matplotlib import pyplot as plt
-from IPython.core.pylabtools import print_figure
+
+
+try:
+    from IPython.core.pylabtools import print_figure
+except:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest("IPython extension requires IPython >= 0.12")
+
+
 
 import imagen.ipython
 from topo.command import pylabplot, analysis

@@ -10,16 +10,18 @@ simulations:
 :doc:`gcal`
 
 How to run and test a simple orientation map simulation using the
-GCAL cortical model. The tutorial allows you to present various
-objects to a saved orientation map network, and to visualize and
-analyze the responses. It also shows how to develop a new simulation
-using different input patterns.
+GCAL cortical model from  
+`Stevens et al. (J. Neuroscience 2013) <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_.
+The tutorial allows you to present various objects to a saved
+orientation map network, and to visualize and analyze the
+responses. It also shows how to develop a new simulation using
+different input patterns.
 
 :doc:`lissom_oo_or`
 
-Same tutorial as for GCAL, but using the older, more complex, less
-robust LISSOM model, which has been more extensively described in
-publications.
+Same tutorial as for GCAL, but using the older, more complex, and less
+robust LISSOM model from
+`Miikkulainen et al. (2005) <http://computationalmaps.org>`_.
 
 :doc:`som_retinotopy`
 

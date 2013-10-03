@@ -5,6 +5,10 @@ Papers using or about Topographica
 Journal Articles
 ----------------
 
+-  Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar. 
+   `Mechanisms for stable, robust, and adaptive development of orientation
+   maps in the primary visual cortex`_. *Journal of Neuroscience*, 
+   33:15747-15766, 2013.
 -  James A. Bednar. `Building a mechanistic model of the development
    and function of the primary visual cortex`_. *Journal of
    Physiology (Paris)*, 106:194-211, 2012.
@@ -35,7 +39,7 @@ Book Chapters
 
 -  James A. Bednar. Topographica. In Dieter Jaeger and Ranu Jung,
    editors, *The Encyclopedia of Computational Neuroscience*.
-   Springer, 2013. In preparation.
+   Springer, 2013. In press.
 -  James A. Bednar. Constructing complex systems via activity-driven
    unsupervised Hebbian self-organization. In *Growing Adaptive
    Machines: Combining Development and Learning in Artificial Neural
@@ -43,7 +47,7 @@ Book Chapters
    Berlin, 2012. In press.
 -  James A. Bednar and Christopher E. Ball. Topographica. In
    Eugene M. Izhikevich, editor, *The Encyclopedia of Computational
-   Neuroscience*. *Scholarpedia*, 2012. In preparation.
+   Neuroscience*. *Scholarpedia*, 2013. In preparation.
 
 Conference Papers
 -----------------
@@ -127,6 +131,7 @@ MSc Theses
 Please send citations for any Topographica papers not listed above
 to `Jim Bednar`_ so that they can be included here.
 
+.. _Mechanisms for stable, robust, and adaptive development of orientation maps in the primary visual cortex: http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013
 .. _Building a mechanistic model of the development and function of the primary visual cortex: http://dx.doi.org/10.1016/j.jphysparis.2011.12.001
 .. _A model of the response of visual area V2 to combinations of orientations: http://dx.doi.org/10.3109/0954898X.2012.690167
 .. _Development of maps of simple and complex cells in the primary visual cortex: http://dx.doi.org/10.3389/fncom.2011.00017
