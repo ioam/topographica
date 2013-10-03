@@ -3,12 +3,15 @@ Topographica IPython extension for notebook support. Load with:
 
 %load_ext topo.misc.ipython
 """
-import os, time, difflib
+import topo
+import param
+import os, time, difflib, uuid
 from matplotlib import pyplot as plt
 
 
 try:
     from IPython.core.pylabtools import print_figure
+    from IPython.display import HTML, Javascript, display
 except:
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
@@ -20,6 +23,53 @@ from topo.command import pylabplot, analysis
 
 # Pylabplots should simply return a matplotlib figure when working with IPython
 pylabplot.PylabPlotCommand.display_window = False
+
+
+class ProgressBar(param.Parameterized):
+    """
+    A simple progress bar for IPython notebook inspired by the example
+    notebook "Progress Bars" available in IPython GitHub repository.
+    """
+
+    name = param.String(doc="The name given to the progress bar.")
+
+    def __init__(self, name, **kwargs):
+        super(ProgressBar,self).__init__(name = name, **kwargs)
+        self._divname = "%s-%s" % (name, uuid.uuid4())
+        html = ("""<b>%s progress</b><div style="border: 1px"""
+                """ solid black; width:500px">"""
+                """<div id="%s" style="background-color:grey;"""
+                """ width:0%%">&nbsp;</div></div>""")
+        display(HTML(html % (name, self._divname)))
+
+    def update(self, percentage):
+        " Update the progress bar to the given percentage value "
+        display(Javascript("$('div#%s').width('%i%%')"
+                           % (self._divname, percentage)))
+
+class RunProgress(ProgressBar):
+    """
+    Progress bar for running Topographica models in IPython notebook.
+    """
+
+    interval = param.Number(default=20,
+        doc="How often to update the progress bar in topo.sim.time units")
+
+    def __init__(self, interval=20, name="Training"):
+        super(RunProgress,self).__init__(name=name, interval=interval)
+
+    def run(self, duration):
+        """
+        Run topo.sim(duration), updating every interval duration.
+        """
+        completed = 0.0
+        while (duration - completed) >= self.interval:
+            topo.sim.run(self.interval)
+            completed += self.interval
+            self.update(100*(completed / duration))
+        topo.sim.run(duration - completed)
+        self.update(100)
+
 
 def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_',
                     diff=True, invert=False, stale_time=None):
