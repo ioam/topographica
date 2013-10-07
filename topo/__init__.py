@@ -193,14 +193,19 @@ if not os.path.exists(_default_output_path):
         if e.errno != errno.EEXIST:
             raise
 
-
-# Location of topo/ package. This kind of thing won't work with py2exe
-# etc. Need to see if we can get rid of it.
-_package_path = os.path.split(__file__)[0]
-_root_path = os.path.abspath(os.path.join(_package_path,'..'))
-
 param.normalize_path.prefix = _default_output_path
-# CEBALERT: _default_output_path shouldn't be in there, right?
+
+
+# Determine which paths to search for input files
+#
+# By default, searches in:
+# - the current working directory (the default value of param.resolve_path.search_paths),
+# - the output path (in case we want to reload a file we just saved, e.g. to reset weights)
+# - the parent of topo (to get images/, examples/, etc.)
+# - topo (for backwards compatibility, e.g. for finding color keys)
+#
+_package_path = os.path.split(__file__)[0] # location of topo
+_root_path = os.path.abspath(os.path.join(_package_path,'..')) # parent of topo
 param.resolve_path.search_paths+=[_default_output_path,_root_path,_package_path]
 
 
