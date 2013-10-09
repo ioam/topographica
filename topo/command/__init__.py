@@ -663,6 +663,9 @@ class run_batch(ParameterizedFunction):
         Function to control how the parameter names will appear in the
         output_directory's name.""")
 
+    metadata_dir = param.String(doc="""Specifies the name of a
+        subdirectory used to output metadata from run_batch if set.""")
+
 
     def _truncate(self,p,s):
         """
@@ -700,12 +703,15 @@ class run_batch(ParameterizedFunction):
         global_params.set_in_context(**p.extra_keywords())
 
         # Create output directories
-        if not os.path.isdir(normalize_path(p['output_directory'])):
-            try: os.mkdir(normalize_path(p['output_directory']))
+        if not os.path.isdir(normalize_path(p.output_directory)):
+            try: os.mkdir(normalize_path(p.output_directory))
             except OSError: pass   # Catches potential race condition (simultaneous run_batch runs)
 
         dirname = self._truncate(p,p.dirname_prefix+prefix)
-        normalize_path.prefix = normalize_path(os.path.join(p['output_directory'],dirname))
+        dirpath = normalize_path(os.path.join(p.output_directory,dirname))
+        normalize_path.prefix = dirpath
+        metadata_dir = os.path.join(normalize_path.prefix, p.metadata_dir)
+        simpath = os.path.join(metadata_dir, simname)
 
         if os.path.isdir(normalize_path.prefix):
             print "Batch run: Warning -- directory already exists!"
@@ -714,12 +720,12 @@ class run_batch(ParameterizedFunction):
 
             sys.exit(-1)
         else:
-            os.mkdir(normalize_path.prefix)
+            os.makedirs(metadata_dir)
             print "Batch run output will be in " + normalize_path.prefix
 
 
-        if p['vc_info']:
-            _print_vc_info(simname+".diffs")
+        if p.vc_info:
+            _print_vc_info(simpath + ".diffs")
 
         hostinfo = "Host: " + " ".join(platform.uname())
         topographicalocation = "Topographica: " + os.path.abspath(sys.argv[0])
@@ -749,7 +755,7 @@ class run_batch(ParameterizedFunction):
 
         # Shadow stdout to a .out file in the output directory, so that
         # print statements will go to both the file and to stdout.
-        batch_output = open(normalize_path(simname+".out"),'w')
+        batch_output = open(normalize_path(simpath+".out"),'w')
         batch_output.write(command_used_to_start+"\n")
         sys.stdout = MultiFile(batch_output,sys.stdout)
 
@@ -771,11 +777,11 @@ class run_batch(ParameterizedFunction):
         # Save a copy of the script file for reference
         shutil.copy2(script_file, normalize_path.prefix)
         shutil.move(normalize_path(scriptbase+".ty"),
-                    normalize_path(simname+".ty"))
+                    normalize_path(simpath+".ty"))
 
 
         # Default case: times is just a number that scales a standard list of times
-        times=p['times']
+        times=p.times
         if not isinstance(times,list):
             times=[t*times for t in [0,50,100,500,1000,2000,3000,4000,5000,10000]]
 
@@ -786,20 +792,22 @@ class run_batch(ParameterizedFunction):
             execfile(script_file,__main__.__dict__) #global_params.context
             global_params.check_for_unused_names()
             if p.save_global_params:
-                _save_parameters(p.extra_keywords(),simname+".global_params.pickle")
+                _save_parameters(p.extra_keywords(), simpath+".global_params.pickle")
             print_sizes()
             topo.sim.name=simname
 
             # Run each segment, doing the analysis and saving the script state each time
             for run_to in times:
                 topo.sim.run(run_to - topo.sim.time())
-                p['analysis_fn']()
+                p.analysis_fn()
+                normalize_path.prefix = metadata_dir
                 save_script_repr()
+                normalize_path.prefix = dirpath
                 elapsedtime=time.time()-starttime
                 param.Parameterized(name="run_batch").message(
                     "Elapsed real time %02d:%02d." % (int(elapsedtime/60),int(elapsedtime%60)))
 
-            if p['snapshot']:
+            if p.snapshot:
                save_snapshot()
 
         except:
