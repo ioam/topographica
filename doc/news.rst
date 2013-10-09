@@ -3,7 +3,9 @@ J. Neuroscience 2013) <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_
 published.  A complete example of replicating the paper will be posted
 here soon, showing how to launch the simulations, collate the results,
 and generate the final figures.  Meanwhile, the `GCAL tutorial
-<../Tutorials/gcal.html>`_ shows how to explore a running GCAL model.
+<../Tutorials/gcal.html>`_ shows how to explore a running GCAL model,
+and the `GCAL demo <http://homepages.inf.ed.ac.uk/jbednar/gcal_stab.html>`_
+shows how the model develops over time.
 
 **2 May 2013:** New website_ launched.
 
