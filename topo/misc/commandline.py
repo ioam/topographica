@@ -30,7 +30,7 @@ try:
     try:
          from IPython.terminal.embed import InteractiveShellEmbed as IPShell
     except ImportError: # Prior to IPython 1.0, InteractiveShellEmbed was found in the frontend package
-        from IPython.frontend.terminal.embed import InteractiveShellEmbed as IPShell
+        from IPython.frontend.terminal.embed import InteractiveShellEmbed as IPShell # pyflakes:ignore (try/except import)
     from IPython.config.loader import Config
     ipython_shell_interface = "InteractiveShellEmbed"
     try:
