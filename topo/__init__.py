@@ -65,6 +65,7 @@ import param
 # Patch for versions of param prior to 10 May 2013
 param.main=param.Parameterized(name="main")
 
+
 def version_int(v):
     """
     Convert a version four-tuple to a format that can be used to compare
@@ -72,11 +73,15 @@ def version_int(v):
     """
     return int("%02d%02d%02d%05d" % v)
 
+
+
 def version_str(v):
 	"""
 	Convert a version four-tuple to a string format x.y.z
 	"""
 	return "%d.%d.%d" % (v[0], v[1], v[2])
+
+
 
 def _find_version():
     """
@@ -85,44 +90,51 @@ def _find_version():
     information avaliable).
     """
 
-    pickle_allowed = True
-    git_output = "v0.0.0-0-"
-
-    (basepath,_) = os.path.split(os.path.abspath(__file__))
-
-    try:
-        git_process = Popen(["git", "describe"], stdout=PIPE, stderr=PIPE, cwd=basepath)
-        git_output = git_process.communicate()[0].strip()
-        if git_process.poll():
-            raise OSError
-    except OSError, CalledProcessError: #pyflakes:ignore (has to do with Python versions for CalledProcessError)
-        try:
-            release_file = open(basepath + "/.release")
-            git_output = release_file.read()
-            release_file.close()
-        except IOError:
-            param.main.warning("""\
+    version_warning = """\
 Unable to determine the version information for this copy of Topographica.
 
 For an official release, the version information is stored in a file
 named topo/.release.  For a development copy checked out from Git, the
 version is requested using "git describe".  Neither of these options
-was successful, perhaps because Git is not available on this machine.
-To work around this problem, either install Git on this machine, or
-temporarily use a machine that does have Git and run "topographica
-make-release-file", making sure you have write permissions on
-Topographica's root directory.
+was successful (output: "%s"), 
+perhaps because Git is not available on this machine.  To work around
+this problem, either install Git on this machine, or temporarily use a
+machine that does have Git and run "topographica make-release-file",
+making sure you have write permissions on Topographica's root
+directory.
 
 In the meantime, reading and saving snapshots will be disabled,
 because version information is necessary for determining how to
-interpret saved files.\n\n""")
-            pickle_allowed = False
-            git_output = "v0.0.0-0-"
+interpret saved files.\n\n""" 
 
-    (_version, count, _commit) = git_output[1:].split("-")
-    _version = _version.split(".")
-    _version = (int(_version[0]), int(_version[1]), int(_version[2]), int(count))
-    _release = version_int(_version)
+    version_string = None
+
+    (basepath,_) = os.path.split(os.path.abspath(__file__))
+
+    try:
+        git_process = Popen(["git", "describe"], stdout=PIPE, stderr=PIPE, cwd=basepath)
+        version_string = git_process.communicate()[0].strip()
+        if git_process.poll():
+            raise OSError
+
+    except OSError, CalledProcessError: #pyflakes:ignore (has to do with Python versions for CalledProcessError)
+        try:
+            release_file = open(basepath + "/.release")
+            version_string = release_file.read()
+            release_file.close()
+        except IOError:
+            pass
+
+    try:
+        (_version, count, _commit) = version_string[1:].split("-")
+        _version = _version.split(".")
+        _version = (int(_version[0]), int(_version[1]), int(_version[2]), int(count))
+        _release = version_int(_version)
+        pickle_allowed = True
+
+    except:
+        param.main.warning(version_warning % version_string)
+        (_version, _release, _commit, pickle_allowed) = (0,0,0,False)
 
     return (_version, _release, _commit, pickle_allowed)
 
