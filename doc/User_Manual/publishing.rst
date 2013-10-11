@@ -123,9 +123,13 @@ in white instead of black.
 Of course, it is possible to grab a screenshot of the Model Editor
 window as well, but this is not recommended because the result will
 have jagged lines, jagged text, and will usually be a much larger
-file than necessary. Once you have an Encapsulated PostScript image,
-you can convert it to PDF for use in a document using ``epstopdf``
-(free) or Adobe Acrobat Distiller (expensive).
+file than necessary. 
+
+Once you have an Encapsulated PostScript image, you can convert it to
+PDF for use in a document using ``epstopdf`` (free) or Adobe Acrobat
+Distiller (expensive).  You can also load it into a vector drawing
+program like Inkscape (free) to edit it, e.g. to add extra labels or
+to change the fonts.
 
 Preference Map plots
 ^^^^^^^^^^^^^^^^^^^^
