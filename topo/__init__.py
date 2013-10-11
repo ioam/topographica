@@ -112,7 +112,7 @@ interpret saved files.\n\n"""
     (basepath,_) = os.path.split(os.path.abspath(__file__))
 
     try:
-        git_process = Popen(["git", "describe"], stdout=PIPE, stderr=PIPE, cwd=basepath)
+        git_process = Popen(["git","describe","--long","--match","v*.*.*"], stdout=PIPE, stderr=PIPE, cwd=basepath)
         version_string = git_process.communicate()[0].strip()
         if git_process.poll():
             raise OSError
@@ -134,7 +134,7 @@ interpret saved files.\n\n"""
 
     except:
         param.main.warning(version_warning % version_string)
-        (_version, _release, _commit, pickle_allowed) = (0,0,0,False)
+        (_version, _release, _commit, pickle_allowed) = ((0,0,0,0),0,0,False)
 
     return (_version, _release, _commit, pickle_allowed)
 
