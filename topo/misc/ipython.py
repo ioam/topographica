@@ -5,7 +5,7 @@ Topographica IPython extension for notebook support. Load with:
 """
 import topo
 import param
-import os, time, difflib, uuid
+import os, time, difflib, uuid, sys
 from matplotlib import pyplot as plt
 
 
@@ -21,9 +21,10 @@ except:
 import imagen.ipython
 from topo.command import pylabplot, analysis
 
-# Pylabplots should simply return a matplotlib figure when working with IPython
-pylabplot.PylabPlotCommand.display_window = False
-
+# Pylabplots should return a matplotlib figure when working in Notebook
+# otherwise open display windows for the Topographica Tk GUI
+if not isinstance(sys.stdout, file):
+    pylabplot.PylabPlotCommand.display_window = False
 
 class ProgressBar(param.Parameterized):
     """
