@@ -143,82 +143,16 @@ interpret saved files.\n\n"""
 
 
 
-import errno
-import platform
-
-
-def _win_documents_path():
-    """
-    Return the Windows "My Documents" folder path, if available.
-    """
-    # Accesses the Windows API via ctypes
-    import ctypes
-    import ctypes.wintypes
-
-    CSIDL_PERSONAL = 0x0005
-    dll = ctypes.windll.shell32
-    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH + 1)
-    if dll.SHGetSpecialFolderPathW(None, buf, CSIDL_PERSONAL, False):
-        return buf.value.encode()
-    else:
-        raise ValueError
-
-
-def _xdg_documents_path():
-    """
-    Return the Linux/UNIX XDG "Documents" folder path, if available.
-    """
-    # Runs the xdg-user-dir command from xdg-utils
-    # (which comes with most Linux systems)
-
-    import subprocess
-    p = subprocess.Popen(["xdg-user-dir", "DOCUMENTS"], stdout=subprocess.PIPE)
-    path = p.communicate()[0].strip()
-    if path:
-        return path
-    else:
-        raise ValueError
-
-
-# Determine the appropriate location in which to create files
-# on this operating system
-_default_output_path = os.path.join(os.path.expanduser('~'),
-                                    'Documents', 'Topographica')
-try:
-    documents = _xdg_documents_path()
-    _default_output_path = os.path.join(documents, 'Topographica')
-except: pass
-
-if platform.system() == 'Windows':
-    try:
-        documents = _win_documents_path()
-        _default_output_path = os.path.join(documents, 'Topographica')
-    except: pass
-
-
-# Make sure the default output path exists
-if not os.path.exists(_default_output_path):
-    print "Creating %s"%_default_output_path
-    try:
-        os.makedirs(_default_output_path)
-    except OSError, e:
-        if e.errno != errno.EEXIST:
-            raise
-
-param.normalize_path.prefix = _default_output_path
-
-
 # Determine which paths to search for input files
 #
 # By default, searches in:
 # - the current working directory (the default value of param.resolve_path.search_paths),
-# - the output path (in case we want to reload a file we just saved, e.g. to reset weights)
 # - the parent of topo (to get images/, examples/, etc.)
 # - topo (for backwards compatibility, e.g. for finding color keys)
 #
 _package_path = os.path.split(__file__)[0] # location of topo
 _root_path = os.path.abspath(os.path.join(_package_path,'..')) # parent of topo
-param.resolve_path.search_paths+=[_default_output_path,_root_path,_package_path]
+param.resolve_path.search_paths+=[_root_path,_package_path]
 
 
 

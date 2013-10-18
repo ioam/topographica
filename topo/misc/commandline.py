@@ -12,6 +12,8 @@ import sys, __main__, math, os, re
 
 import topo
 import param
+
+from param import parameterized
 from param.parameterized import Parameterized
 from topo.base.simulation import OptionalSingleton
 
@@ -23,6 +25,8 @@ try:
 except ImportError:
     matplotlib_imported=False
 
+# Dummy object just for messages
+cmdline_main=Parameterized(name="CommandLine")
 
 ipython_shell_interface = None
 ipython_prompt_interface = None
@@ -284,6 +288,83 @@ processed in order left to right."
 topo_parser = OptionParser(usage=usage)
 
 
+import errno
+import platform
+
+def _win_documents_path():
+    """
+    Return the Windows "My Documents" folder path, if available.
+    """
+    # Accesses the Windows API via ctypes
+    import ctypes
+    import ctypes.wintypes
+
+    CSIDL_PERSONAL = 0x0005
+    dll = ctypes.windll.shell32
+    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH + 1)
+    if dll.SHGetSpecialFolderPathW(None, buf, CSIDL_PERSONAL, False):
+        return buf.value.encode()
+    else:
+        raise ValueError
+
+
+def _xdg_documents_path():
+    """
+    Return the Linux/UNIX XDG "Documents" folder path, if available.
+    """
+    # Runs the xdg-user-dir command from xdg-utils
+    # (which comes with most Linux systems)
+
+    import subprocess
+    p = subprocess.Popen(["xdg-user-dir", "DOCUMENTS"], stdout=subprocess.PIPE)
+    path = p.communicate()[0].strip()
+    if path:
+        return path
+    else:
+        raise ValueError
+
+
+
+def default_output_path():
+    """
+    Determine the appropriate default location in which to create
+    files on this operating system.
+    """
+
+    documents = os.path.join(os.path.expanduser('~'))
+    try:
+        documents = _xdg_documents_path()
+    except: pass
+    if platform.system() == 'Windows':
+        try:
+            documents = _win_documents_path()
+        except: pass
+    
+    return os.path.join(documents, 'Topographica')
+    
+
+
+def set_output_path(path):
+    """
+    Set the default output path to the specified path, creating it if
+    it does not exist and adding it to the input searching path (to
+    allow just-saved files to be reloaded).
+    """
+
+    if not os.path.exists(path):
+        cmdline_main.message("Creating %s"%path)
+        try:
+            os.makedirs(path)
+        except OSError, e:
+            if e.errno != errno.EEXIST:
+                cmdline_main.warning("Unable to set output path %s"%path)
+
+    param.normalize_path.prefix=path
+    
+    if not path in param.resolve_path.search_paths:
+        param.resolve_path.search_paths+=[path]
+
+
 def sim_name_from_filename(filename):
     """
     Set the simulation title from the given filename, if none has been
@@ -316,28 +397,26 @@ topo_parser.add_option("-i","--interactive",action="callback",callback=i_action,
 
 def v_action(option,opt_str,value,parser):
     """Callback function for the -v option."""
-    from param import parameterized
-    parameterized.Parameterized().message("Enabling verbose message output.")
+    cmdline_main.message("Enabling verbose message output.")
     if hasattr(parameterized,'get_logger'): 
         parameterized.get_logger().setLevel(parameterized.VERBOSE)
     else: # For versions of the param package before 9 May 2013
         parameterized.min_print_level=parameterized.VERBOSE
 
 topo_parser.add_option("-v","--verbose",action="callback",callback=v_action,dest="verbose",default=False,help="""\
-enable verbose messaging output.""")
+enable verbose messaging output""")
 
 
 def d_action(option,opt_str,value,parser):
     """Callback function for the -d option."""
-    from param import parameterized
-    parameterized.Parameterized().message("Enabling debugging message output.")
+    cmdline_main.message("Enabling debugging message output.")
     if hasattr(parameterized,'get_logger'): 
         parameterized.get_logger().setLevel(parameterized.DEBUG)
     else: # For versions of the param package before 9 May 2013
         parameterized.min_print_level=parameterized.DEBUG
 
 topo_parser.add_option("-d","--debug",action="callback",callback=d_action,dest="debug",default=False,help="""\
-enable debugging message output (implies --verbose).""")
+enable debugging message output (implies --verbose)""")
 
 
 
@@ -349,7 +428,16 @@ def l_action(option,opt_str,value,parser):
     install_legacy_support()
 
 topo_parser.add_option("-l","--legacy",action="callback",callback=l_action,dest="legacy",default=False,help="""\
-launch Topographica with legacy support enabled.""")
+launch Topographica with legacy support enabled""")
+
+
+def o_action(option,opt_str,value,parser):
+    """Callback function for the -o option."""
+    set_output_path(value)
+
+topo_parser.add_option("-o","--outputpath",action="callback",callback=o_action,type="string",
+		       default=param.normalize_path.prefix,dest="outputpath",metavar="\"<output-path>\"",
+		       help="set the default output path")
 
 
 def gui(start=True):
@@ -392,7 +480,7 @@ def c_action(option,opt_str,value,parser):
 
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
 		       default=[],dest="commands",metavar="\"<command>\"",
-		       help="string of arbitrary Python code to be executed in the main namespace.")
+		       help="string of arbitrary Python code to be executed in the main namespace")
 
 
 
@@ -464,7 +552,7 @@ def exec_startup_files():
     configpath = os.path.join(os.path.expanduser("~"),"Library","Application Support",'Topographica','topographica.config')
     for startup_file in (configpath,inipath):
         if os.path.exists(startup_file):
-            param.Parameterized().warning("Ignoring %s; location for startup file is %s (UNIX/Linux/Mac OS X) or %s (Windows)."%(startup_file,rcpath,inipath))
+            cmdline_main.warning("Ignoring %s; location for startup file is %s (UNIX/Linux/Mac OS X) or %s (Windows)."%(startup_file,rcpath,inipath))
 
 
 
@@ -479,8 +567,13 @@ def process_argv(argv):
     for (k,v) in global_constants.items():
         exec '%s = %s' % (k,v) in __main__.__dict__
 
+    # Allow param.normalize_path.prefix to be overridden in the
+    # startup files, but otherwise force it to exist before doing
+    # anything else
+    param.normalize_path.prefix = default_output_path()
     exec_startup_files()
-    
+    set_output_path(param.normalize_path.prefix)
+
     # Tell the user how many cores are in use, if available
     openmp_main=Parameterized(name="OpenMP") # Dummy object just for messages
     try:

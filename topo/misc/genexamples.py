@@ -137,7 +137,7 @@ def find_examples(specified_examples=None,dirs=None):
             # CEBALERT: ~/topographica/examples is out of date. I just
             # added the line below without testing it or removing the
             # ~/topographica line.
-            topo._default_output_path,
+            param.normalize_path.prefix,
             os.path.join(os.path.expanduser("~"),'topographica/examples'),
             # version-controlled topographica dir
             os.path.join(topo._package_path,"../examples"),
