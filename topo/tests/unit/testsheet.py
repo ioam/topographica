@@ -5,10 +5,11 @@ Unit tests for sheet and sheetcoords.
 import unittest
 from numpy import array
 
+from imagen.dataview import SheetView
+
 from topo.base.sheetcoords import SheetCoordinateSystem,Slice
 from topo.base.sheet import *
 from topo.base.boundingregion import BoundingBox
-from topo.base.sheetview import SheetView
 
 from nose.tools import istest, nottest
 
@@ -725,13 +726,13 @@ class ExtraSheetTests(unittest.TestCase):
         s = Sheet()
         s.activity = array([[1,2],[3,4]])
         # Call s.sheet_view(..) with a parameter
-        sv2 = SheetView((s.activity,s.bounds),
-                          src_name=s.name)
-        self.assertEqual(len(s.sheet_views.keys()),0)
-        s.sheet_views['Activity']=sv2
-        self.assertEqual(len(s.sheet_views.keys()),1)
+        sv2 = SheetView(s.activity,bounds=s.bounds,
+                        metadata=dict(src_name=s.name))
+        self.assertEqual(len(s.views.maps.keys()),0)
+        s.views.maps['Activity']=sv2
+        self.assertEqual(len(s.views.maps.keys()),1)
         s.release_sheet_view('Activity')
-        self.assertEqual(len(s.sheet_views.keys()),0)
+        self.assertEqual(len(s.views.maps.keys()),0)
 
 if __name__ == "__main__":
 	import nose

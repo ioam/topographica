@@ -56,6 +56,8 @@ from copy import copy, deepcopy
 import time
 import bisect
 
+from topo.misc.attrdict import AttrDict
+
 # CEBALERT: Is it dangerous to have 'Forever' implemented
 # like this? To start with, min(Forever,1) gives
 # FixedPoint('-1.00,2') i.e. Forever.
@@ -761,14 +763,17 @@ class SomeTimer(param.Parameterized):
                 self.recenttimes.pop(0)
                 length-=1
 
-            percent = 100.0*current_presentation/total_presentations
+            try:
+                percent = 100.0*current_presentation/total_presentations
+            except:
+                percent = 100
             estimate = (total_presentations-current_presentation)* \
                 (self.recenttimes[-1]-self.recenttimes[0])/length
 
-        self.__pass_out_info(time=self.simulation_time_fn(),
+        self.__pass_out_info(time=current_presentation,
                              percent=percent,
                              name=name,
-                             duration=1.0,
+                             duration=total_presentations,
                              remaining=estimate)
 
         import topo
@@ -1084,6 +1089,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         param.Parameterized.__init__(self,**params)
 
+        self.views = AttrDict()
 
         self._event_processors = {}
 
@@ -1161,6 +1167,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
             self._event_processors[ep_name] = ep
             ep.simulation = self
             self.eps_to_start.append(ep)
+
+            self.views[ep_name] = ep.views
 
 
     def __delitem__(self,ep_name):

@@ -16,6 +16,8 @@ import param
 from param import normalize_path
 from topo.misc.distribution import DSF_WeightedAverage
 
+from imagen.dataview import SheetView, FeatureRangeMap
+
 try:
     import matplotlib
     import pylab
@@ -29,7 +31,6 @@ except ImportError:
 
 import topo
 from topo.base.cf import CFSheet
-from topo.base.sheetview import SheetView
 from topo.plotting.plotgroup import create_plotgroup
 from topo.command.analysis import measure_sine_pref
 
@@ -151,12 +152,14 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
         if f.name == "frequency":
             frequency_index = i
         i=i+1
-    print sheet.curve_dict
-    if not sheet.curve_dict.has_key("orientationACDC"):
-        sheet.curve_dict["orientationACDC"]={}
-    sheet.curve_dict["orientationACDC"][curve_label]={}
+    metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
+                    src_name=sheet.name, timestamp=topo.sim.time())
+    if "orientationACDC" not in sheet.curves:
+        sheet.views.curves["orientationACDC"] = FeatureRangeMap(**metadata)
+    curve_storage = sheet.views.curves["orientationACDC"]
 
     rows,cols = full_matrix.matrix_shape
+
     for o in xrange(size(full_matrix.features[orientation_index].values)):
         s_w = zeros(full_matrix.matrix_shape)
         for x in range(rows):
@@ -171,15 +174,17 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
 
                 fft = numpy.fft.fft(or_response+or_response+or_response+or_response,2048)
                 first_har = 2048/len(or_response)
-                s_w[x][y] = numpy.maximum(2 *abs(fft[first_har]),abs(fft[0]))
-        s = SheetView((s_w,sheet.bounds), sheet.name , sheet.precedence, topo.sim.time(),sheet.row_precedence)
-        sheet.curve_dict["orientationACDC"][curve_label].update({full_matrix.features[orientation_index].values[o]:s})
+                s_w[x][y] = numpy.maximum(2*abs(fft[first_har]), abs(fft[0]))
+        sv = SheetView(s_w, sheet.bounds)
+        new_item = FeatureRangeMap({full_matrix.features[orientation_index].values[o]:sv},
+                                   **metadata)
+        curve_storage.add_item(curve_label, new_item)
 
 
 
 def phase_preference_scatter_plot(sheet_name,diameter=0.39):
     r = numbergen.UniformRandom(seed=1023)
-    preference_map = topo.sim[sheet_name].sheet_views['PhasePreference']
+    preference_map = topo.sim[sheet_name].views.maps['PhasePreference']
     offset_magnitude = 0.03
     datax = []
     datay = []
@@ -264,7 +269,15 @@ def analyze_complexity(full_matrix,simple_sheet_name,complex_sheet_name,filename
         # Divide by two to get into 0-1 scale - that means simple/complex boundry is now at 0.5
         complx = array(complexity(full_matrix[sheet]))/2.0
         # Should this be renamed to ModulationRatio?
-        sheet.sheet_views['ComplexSelectivity']=SheetView((complx,sheet.bounds), sheet.name , sheet.precedence, topo.sim.time(),sheet.row_precedence)
+        metadata=dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
+                      src_name=sheet.name, timestamp=topo.sim.time())
+        sv = SheetView(complx, sheet.bounds)
+        if 'ComplexSelectivity' not in sheet.views.maps:
+            sheet.views.maps['ComplexSelectivity'] = FeatureRangeMap(sv,
+                                                                     **metadata)
+        else:
+            sheet.views.maps['ComplexSelectivity'].add_item(topo.sim.time(),
+                                                            sv)
     import topo.command.pylabplot
     topo.command.pylabplot.plot_modulation_ratio(full_matrix,simple_sheet_name=simple_sheet_name,complex_sheet_name=complex_sheet_name,filename=filename)
 

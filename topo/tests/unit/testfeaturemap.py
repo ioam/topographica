@@ -21,7 +21,7 @@ from topo.base.cf import CFProjection, CFSheet
 from topo.base.simulation import Simulation
 from topo.learningfn.optimized import CFPLF_Hebbian
 
-from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps, pattern_response, CoordinatedPatternGenerator
+from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps, pattern_response
 from topo.misc.distribution import DSF_WeightedAverage
 from topo.command.analysis import Feature
 
@@ -217,7 +217,7 @@ class TestFeatureMaps(unittest.TestCase):
                               Feature(name="orientation",range=(0.0,1.0),step=0.5,cyclic=True)]
 
         self.x = FeatureMaps(self.feature_param,pattern_presenting_cmd=pattern_response.instance(),
-                             pattern_coordinator=CoordinatedPatternGenerator(pattern_generator=SineGrating()))
+                             pattern_generator=SineGrating())
         #print self.V1.activity
         #### test has to be written!!!
 

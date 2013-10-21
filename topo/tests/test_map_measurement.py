@@ -29,9 +29,19 @@ from param import resolve_path, normalize_path
 from topo.command.analysis import *
 from topo.command.pylabplot import *
 from topo.plotting.plotgroup import plotgroups
+from topo.misc.attrdict import AttrDict
 
 from nose.tools import nottest
 
+import re
+
+def unit_value(str):
+    m = re.match(r'([^\d]*)(\d*\.?\d+)([^\d]*)', str)
+    if m:
+        g = m.groups()
+        return ' '.join((g[0], g[2])).strip(), float(g[1])
+    else:
+        return int(str)
 
 # CEBALERT: change to be the all-in-one model eventually, and
 # uncomment all ocular/disparity/direction groups below.
@@ -73,10 +83,10 @@ plotgroups_to_test = [
 
 
 def _reset_views(sheet):
-    if hasattr(sheet,'sheet_views'):
-        sheet.sheet_views = {}
-    if hasattr(sheet,'curve_dict'):
-        sheet.curve_dict = {}
+    if hasattr(sheet.views,'maps'):
+        sheet.views.maps = AttrDict()
+    if hasattr(sheet.views,'curves'):
+        sheet.views.curves = AttrDict()
 
 
 def generate(plotgroup_names):
@@ -96,10 +106,10 @@ def generate(plotgroup_names):
 
         sheets_views = views[sheet.name] = {}
 
-        if hasattr(sheet,'sheet_views'):
-            sheets_views['sheet_views'] = sheet.sheet_views
-        if hasattr(sheet,'curve_dict'):
-            sheets_views['curve_dict'] = sheet.curve_dict
+        if hasattr(sheet.views,'maps'):
+            sheets_views['sheet_views'] = sheet.views.maps
+        if hasattr(sheet.views,'curves'):
+            sheets_views['curves'] = sheet.views.curves
 
         filename = normalize_path('tests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
                                                           name.replace(' ','_')))
@@ -108,8 +118,9 @@ def generate(plotgroup_names):
         pickle.dump((topo.version,views),f)
         f.close()
 
-def checkclose(label,topo_version,x,y):
+def checkclose(label,version,x,y):
     errors=[]
+    topo_version = "v{0}.{1}.{2} {3}".format(*version) if type(version) == tuple else version
     if not numpy.allclose(x,y,rtol=1e-05,atol=1e-07):
         print "...%s array is no longer close to the %s version:\n%s\n---\n%s" % (label,topo_version,x,y)
         errors=[label]
@@ -167,19 +178,19 @@ def test(plotgroup_names):
             previous_sheet_views = previous_views[sheet.name]['sheet_views']
             for view_name in previous_sheet_views:
                 failing_tests += checkclose(sheet.name + " " + view_name,topo_version,
-                                            sheet.sheet_views[view_name].view()[0],
+                                            sheet.views.maps[view_name].top.data,
                                             previous_sheet_views[view_name].view()[0])
-
+        import numpy as np
         if 'curve_dict' in previous_views[sheet.name]:
             previous_curve_dicts = previous_views[sheet.name]['curve_dict']
             # CB: need to cleanup var names e.g. val
             for curve_name in previous_curve_dicts:
                 for other_param in previous_curve_dicts[curve_name]:
+                    other_param_val = unit_value(other_param)[-1]
                     for val in previous_curve_dicts[curve_name][other_param]:
-                        failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),topo_version,
-                                                    sheet.curve_dict[curve_name][other_param][val].view()[0],
-                                                    previous_curve_dicts[curve_name][other_param][val].view()[0])
+                        new = sheet.views.curves[curve_name.capitalize()][other_param_val-0.01:other_param_val+0.01,val].values()[0].data
+                        old = previous_curve_dicts[curve_name][other_param][val].view()[0]
+                        failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),
+                                                    topo_version, new, old)
 
     if failing_tests != []: raise AssertionError, "Failed map tests: %s" % (failing_tests)
-
-

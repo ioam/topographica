@@ -1,11 +1,11 @@
 """
 GCAL
 
-Simple but robust single-population V1 model orientation map from: 
+Simple but robust single-population V1 model orientation map from:
 
-   Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar. 
+   Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar.
    Mechanisms for stable, robust, and adaptive development of orientation
-   maps in the primary visual cortex. 
+   maps in the primary visual cortex.
    Journal of Neuroscience 33:15747-15766, 2013.
    http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013
 """
@@ -216,6 +216,5 @@ topo.sim.grid_layout([[None,    'V1',     None],
 
 import topo.analysis.featureresponses
 topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier=2.0
-topo.analysis.featureresponses.FeatureCurveCommand.apply_output_fns=True
 topo.analysis.featureresponses.FeatureCurveCommand.curve_parameters=[{"contrast":1},{"contrast":10},{"contrast":30},{"contrast":50},{"contrast":100}]
 

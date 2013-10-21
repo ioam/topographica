@@ -19,7 +19,7 @@ import imagen.ipython
 from topo.command import pylabplot, analysis
 
 # Pylabplots should simply return a matplotlib figure when working with IPython
-pylabplot.PylabPlotCommand.display_window = False
+#pylabplot.PylabPlotCommand.display_window = False
 
 def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_',
                     diff=True, invert=False, stale_time=None):

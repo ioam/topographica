@@ -639,7 +639,7 @@ class TemplatePlotGroup(SheetPlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         return make_template_plot(plot_template,
-                                  kw['sheet'].sheet_views,
+                                  kw['sheet'].views.maps,
                                   kw['sheet'].xdensity,
                                   kw['sheet'].bounds,
                                   self.normalize,
@@ -736,7 +736,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
     def _exec_pre_plot_hooks(self,**kw):
         self.params('sheet').compute_default()
         self._check_sheet_type()
-        super(ProjectionSheetPlotGroup,self)._exec_pre_plot_hooks(sheet=self.sheet.name,**kw)
+        super(ProjectionSheetPlotGroup,self)._exec_pre_plot_hooks(outputs=[self.sheet.name],**kw)
 
 
     def _exec_plot_hooks(self,**kw):
@@ -785,7 +785,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):#sheet,proj
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].src.sheet_views,
+                                  kw['proj'].src.views.maps,
                                   kw['proj'].src.xdensity,
                                   None,
                                   self.normalize,
@@ -805,7 +805,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
     def _key(self,**kw):
         # the key for sheet_views
-        return (self.keyname,self.sheet.name,kw['proj'].name)
+        return kw['proj'].name+self.keyname
 
 
     def _kw_for_one_proj(self,proj):
@@ -866,8 +866,8 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 class ProjectionSheetMeasurementCommand(param.ParameterizedFunction):
     """A callable Parameterized command for measuring or plotting a specified Sheet."""
 
-    sheet = param.ObjectSelector(default=None,doc="""
-        Name of the sheet to use in measurements.""")
+    outputs = param.List(default=[],doc="""
+        List of sheets to use in measurements.""")
 
     __abstract = True
 
@@ -883,7 +883,7 @@ class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].dest.sheet_views,
+                                  kw['proj'].dest.views.maps,
                                   kw['proj'].dest.xdensity,
                                   kw['proj'].dest.bounds,
                                   self.normalize,
@@ -936,12 +936,13 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
 
 
     def _key(self,**kw):
-        return (self.keyname,self.sheet.name,kw['x'],kw['y'])
+        key = (self.keyname,self.sheet.name,kw['x'],kw['y'])
+        return key
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         return make_template_plot(self._channels(plot_template,**kw),
-                                  self.input_sheet.sheet_views,
+                                  self.sheet.views.maps,
                                   self.input_sheet.xdensity,
                                   self.input_sheet.bounds,
                                   self.normalize,
@@ -1017,7 +1018,22 @@ class RFProjectionPlotGroup(GridPlotGroup):
 
     def _exec_pre_plot_hooks(self,**kw): # RFHACK
         self.params('input_sheet').compute_default()
-        super(RFProjectionPlotGroup,self)._exec_pre_plot_hooks(input_sheet=self.input_sheet.name,**kw)
+        super(RFProjectionPlotGroup,self)._exec_pre_plot_hooks(inputs=[self.input_sheet.name],**kw)
+
+    def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        proj_view = "{input}_{keyname}".format(input=self.input_sheet.name,
+                                               keyname=self.keyname)
+
+        return make_template_plot(self._channels(plot_template, **kw),
+                                  getattr(self.sheet.views.rfs, proj_view, {}),
+                                  self.input_sheet.xdensity,
+                                  self.input_sheet.bounds,
+                                  self.normalize,
+                                  range_=kw['range_'])
+
+    def _key(self,**kw):
+        return kw['x'],kw['y']
+
 
 
 class TwoOrientationsPlotGroup( TemplatePlotGroup ):
@@ -1033,7 +1049,7 @@ class TwoOrientationsPlotGroup( TemplatePlotGroup ):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         return make_template_plot(plot_template,
-                                  kw['sheet'].sheet_views,
+                                  kw['sheet'].views.maps,
                                   self.unit_size,
                                   kw['sheet'].bounds,
                                   self.normalize,
@@ -1052,7 +1068,7 @@ class RetinotopyPlotGroup(TemplatePlotGroup):
     def _exec_pre_plot_hooks(self,**kw): # RFHACK
         self.params('input_sheet').compute_default()
         super(RetinotopyPlotGroup,self)._exec_pre_plot_hooks(
-            input_sheet=self.input_sheet,**kw)
+            inputs=[self.input_sheet.name],**kw)
 
 
 
@@ -1083,8 +1099,8 @@ class ProjectionPlotGroup(GridPlotGroup):
 
 
     # GridPlotGroup+ProjectionSheetPlotGroup
-    def _key(self,**kw):
-        return (self.keyname,self.sheet.name,kw['proj'].name,kw['x'],kw['y'])
+    def _key(self, **kw):
+        return kw['x'], kw['y']
 
 
     # ProjectionSheetPlotGroup
@@ -1092,7 +1108,7 @@ class ProjectionPlotGroup(GridPlotGroup):
         nodata = []
         for proj in projlist:
             d = self._kw_for_one_proj(proj)[0] # only checking one (x,y)
-            if self._key(**d) not in proj.src.sheet_views:
+            if self._key(**d) not in proj.dest.views.cfs[proj.name]:
                 nodata.append(proj.name)
         if len(nodata)>0:
             raise ValueError("Joint normalization cannot proceed unless data has been measured for all jointly normalized projections (no data for %s)"%nodata)
@@ -1126,10 +1142,11 @@ class UnitMeasurementCommand(ProjectionSheetMeasurementCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params)
-        s = topo.sim[p.sheet]
-        if s is not None:
-            for x,y in p.coords:
-                s.update_unit_view(x,y,'' if p.projection is None else p.projection.name)
+        for output in p.outputs:
+            s = getattr(topo.sim,output,None)
+            if s is not None:
+                for x,y in p.coords:
+                    s.update_unit_view(x,y,'' if p.projection is None else p.projection.name)
 
 
 
@@ -1157,7 +1174,7 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].src.sheet_views,
+                                  kw['proj'].dest.views.cfs[kw['proj'].name],
                                   kw['proj'].src.xdensity,
                                   kw['bounds'],
                                   self.normalize,
@@ -1252,12 +1269,12 @@ class ConnectionFieldsPlotGroup(UnitPlotGroup):
     ########## overridden
 
     def _key(self,**kw):
-        return (self.keyname,self.sheet.name,kw['proj'].name,self.x,self.y)
+        return self.x, self.y
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].src.sheet_views,
+                                  kw['proj'].dest.views.cfs[kw['proj'].name],
                                   kw['proj'].src.xdensity,
                                   kw['bounds'],
                                   self.normalize,
@@ -1282,11 +1299,11 @@ class FeatureCurvePlotGroup(UnitPlotGroup):
 
     def _exec_pre_plot_hooks(self,**kw):
         super(FeatureCurvePlotGroup,self)._exec_pre_plot_hooks(**kw)
-        self.get_curve_time()
+        #self.get_curve_time()
 
     def _exec_plot_hooks(self,**kw):
         super(FeatureCurvePlotGroup,self)._exec_plot_hooks(**kw)
-        self.get_curve_time()
+        #self.get_curve_time()
 
     def get_curve_time(self):
         """
@@ -1294,9 +1311,7 @@ class FeatureCurvePlotGroup(UnitPlotGroup):
         use the max timestamp as the plot label
         Displays a warning if not all curves have been measured at the same time.
         """
-        timestamps = [sheetview.timestamp for x_axis in self.sheet.curve_dict.itervalues()
-                      for curve_label in x_axis.itervalues()
-                      for sheetview in curve_label.itervalues()]
+        timestamps = [curve_view.timestamp for curve_view in self.sheet.views.curves.itervalues()]
 
         if timestamps != []:
             self.time = max(timestamps)

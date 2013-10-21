@@ -23,6 +23,10 @@ from copy import copy
 import numpy as np
 import param
 
+from imagen.dataview import FeatureRangeMap, SheetView, ProjectionGrid
+
+from topo.misc.attrdict import AttrDict
+
 import patterngenerator
 from patterngenerator import PatternGenerator
 from functionfamily import TransferFn,IdentityTF
@@ -31,13 +35,12 @@ from functionfamily import ResponseFn,DotProduct
 from functionfamily import CoordinateMapperFn,IdentityMF
 from projection import Projection,ProjectionSheet
 from sheetcoords import Slice
-from sheetview import UnitView
 from boundingregion import BoundingBox,BoundingRegionParameter
 
 
 def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     """
-    Wrapper for Numpy.vectorize to make it work properly with different Numpy versions. 
+    Wrapper for Numpy.vectorize to make it work properly with different Numpy versions.
     """
 
     # Numpy.vectorize returns a callable object that applies the given
@@ -61,7 +64,7 @@ def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     # To make it work with all versions of Numpy, we use
     # numpy.vectorize as-is for versions > 1.7.0, and a nasty hack for
     # previous versions.
-    
+
     # Simple Numpy 1.7.0 version:
     if int(np.version.version[0]) >= 1 and int(np.version.version[2]) >= 7:
         return np.vectorize(fn,otypes=np.sctype2char(output_type)*num_outputs, doc=doc)
@@ -616,6 +619,15 @@ class CFProjection(Projection):
         self.input_buffer = None
         self.activity = np.array(self.dest.activity)
 
+        if 'cfs' not in self.dest.views:
+            self.dest.views['cfs'] = AttrDict()
+        self.dest.views.cfs[self.name] = ProjectionGrid(bounds=self.src.bounds,
+                                                        shape=self.activity.shape,
+                                                        proj_name=self.name,
+                                                        proj_src_name=self.src.name,
+                                                        proj_dest_name=self.dest.name,
+                                                        timestamp=self.src.simulation.time())
+
 
     def _generate_coords(self):
         X,Y = self.dest.sheetcoords_of_idx_grid()
@@ -686,17 +698,23 @@ class CFProjection(Projection):
 
     def get_view(self, sheet_x, sheet_y, timestamp=None):
         """
-        Return a single connection field UnitView, for the unit
+        Return a single connection field SheetView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        matrix_data = np.zeros(self.src.activity.shape,dtype=np.float64)
-        (r,c) = self.dest.sheet2matrixidx(sheet_x,sheet_y)
-        r1,r2,c1,c2 = self.cfs[r,c].input_sheet_slice
-        matrix_data[r1:r2,c1:c2] = self.cfs[r,c].weights
+        matrix_data = np.zeros(self.src.activity.shape, dtype=np.float64)
+        (r, c) = self.dest.sheet2matrixidx(sheet_x, sheet_y)
+        r1, r2, c1, c2 = self.cfs[r, c].input_sheet_slice
+        matrix_data[r1:r2, c1:c2] = self.cfs[r, c].weights
 
-        return UnitView((matrix_data,self.src.bounds),sheet_x,sheet_y,self,timestamp)
+        sv = SheetView(matrix_data, self.src.bounds, roi=(r1, r2, c1, c2))
+
+        return FeatureRangeMap(sv, coords=(sheet_x, sheet_y),
+                               timestamp=timestamp, dest_name=self.dest.name,
+                               precedence=self.src.precedence,
+                               proj_name=self.name, src_name=self.src.name,
+                               row_precedence=self.src.row_precedence)
 
 
     def activate(self,input_activity):
@@ -914,16 +932,9 @@ class CFSheet(ProjectionSheet):
             if not isinstance(p,CFProjection):
                 self.debug("Skipping non-CFProjection "+p.name)
             elif proj_name == '' or p.name==proj_name:
-                v = p.get_view(x,y,self.simulation.time())
-                src = v.projection.src
-                key = ('Weights',v.projection.dest.name,v.projection.name,x,y)
-                v.proj_src_name = v.projection.src.name
-                src.sheet_views[key] = v
-
-
-    ### JCALERT! This should probably be deleted...
-    def release_unit_view(self,x,y):
-        self.release_sheet_view(('Weights',x,y))
+                v = p.get_view(x, y, self.simulation.time())
+                cfs = self.simulation.views[v.metadata.dest_name].cfs[v.metadata.proj_name]
+                cfs.add_item((x, y), v)
 
 
 

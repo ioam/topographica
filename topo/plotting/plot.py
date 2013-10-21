@@ -233,10 +233,9 @@ class TemplatePlot(Plot):
         if sv == None:
             matrix = None
         else:
-            view = sv.view()
-            matrix = view[0].copy()
-            if key=='Hue' and sv.cyclic:
-                matrix /= sv.cyclic_range
+            matrix = sv.top.data.copy()
+            if key=='Hue' and sv.metadata.cyclic_range is not None:
+                matrix /= sv.metadata.cyclic_range
 
             # Calculate timestamp for this plot
             timestamp = sv.timestamp
@@ -257,11 +256,11 @@ class TemplatePlot(Plot):
             sheet_view_key = self.channels.get(key,None)
             sv = self.view_dict.get(sheet_view_key, None)
             if sv != None:
-                 self.plot_src_name = sv.src_name
-                 self.precedence = sv.precedence
-                 self.row_precedence = sv.row_precedence
-                 if hasattr(sv,'proj_src_name'):
-                      self.proj_src_name=sv.proj_src_name
+                 self.plot_src_name = sv.metadata.src_name
+                 self.precedence = sv.metadata.precedence
+                 self.row_precedence = sv.metadata.row_precedence
+                 if hasattr(sv.metadata,'proj_src_name'):
+                      self.proj_src_name=sv.metadata.proj_src_name
 
 
     ### JCALERT: This could be inserted in the code of get_matrix
@@ -271,12 +270,12 @@ class TemplatePlot(Plot):
         of the SheetViews that constitute the TemplatePlot.
         """
         for name in self.channels.values():
-                sv = self.view_dict.get(name,None)
-                if sv != None:
-                     shape = sv.view()[0].shape
-                     box = sv.view()[1]
+            sv = self.view_dict.get(name, None)
+            if sv != None:
+                shape = sv.top.data.shape
+                box = sv.top.bounds
 
-        return shape,box
+        return shape, box
 
 
     # CEBALERT: needs simplification! (To begin work on joint

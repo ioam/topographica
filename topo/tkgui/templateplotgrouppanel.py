@@ -37,7 +37,7 @@ def available_plot_channels(plot):
     """
     available_channels = {}
     for name,channel in plot.channels.items():
-        if plot.view_dict.has_key(channel):
+        if channel in plot.view_dict:
             available_channels[name]=channel
     return available_channels
 
@@ -229,7 +229,7 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         m=plot._get_matrix(channel)
         view = plot.view_dict[plot.channels[channel]]
         topo.command.pylabplot.gradientplot(m,title="Gradient: " + description,
-                                              cyclic=view.cyclic,cyclic_range=view.cyclic_range)
+                                            cyclic_range=view.cyclic_range)
 
     def __print_matrix(self,channel):
         plot = self._right_click_info['plot']

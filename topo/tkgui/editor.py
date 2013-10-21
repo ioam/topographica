@@ -1372,7 +1372,7 @@ class EditorSheet(EditorEP):
                 # AL, the idea will be to allow any available plots to be shown on the sheet.
                 # eg m = self.simobj.sheet_views['OrientationPreference'].view()[0]
                 update_activity()
-                m = self.simobj.sheet_views['Activity'].view()[0]
+                m = self.simobj.views.maps['Activity'].top.data
                 if self.normalize == True:
                     m = self.normalize_plot(m)
                 matrix_width, matrix_height = self.element_count
@@ -1383,7 +1383,7 @@ class EditorSheet(EditorEP):
                         x1, y1 = x - a + (j * dX), y + a
                         x2, y2 = x1 - dY, y1 + dY
                         x3, x4 = x2 + dX, x1 + dX
-                        point = m[i][j]
+                        point = m[i,j]
                         if point < 0 : point = 0.0
                         if point > 1 : point = 1.0
                         col = '#' + (self.dec_to_hex_str(point, 3)) * 3

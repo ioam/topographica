@@ -26,32 +26,39 @@ import Image,ImageDraw
 import copy
 
 from numpy.oldnumeric import maximum
-from numpy import pi, sin, cos, nonzero, round, linspace, floor, ceil
+import numpy as np
 
 import param
 from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
 
+from imagen.dataview import SheetView
+
 import topo
 from topo.base.cf import Projection
 from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
-from topo.base.sheetview import SheetView
 from topo.misc.distribution import Distribution, DistributionStatisticFn
 from topo.misc.distribution import DSF_MaxValue, DSF_BimodalPeaks
-from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit, DSF_BimodalVonMisesFit
+from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit,\
+    DSF_BimodalVonMisesFit
 from topo.pattern import GaussiansCorner, Gaussian, RawRectangle, Composite, Constant
 from topo.pattern.random import UniformRandom
 from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
 
-from topo.plotting.plotgroup import UnitMeasurementCommand,ProjectionSheetMeasurementCommand
-from topo.analysis.featureresponses import Feature, CoordinatedPatternGenerator, MeasureResponseCommand
-from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, PositionMeasurementCommand, SingleInputResponseCommand
+from topo.plotting.plotgroup import UnitMeasurementCommand, \
+    ProjectionSheetMeasurementCommand
+from topo.analysis.featureresponses import Feature, MeasureResponseCommand
+from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, \
+    PositionMeasurementCommand, SingleInputResponseCommand
 from topo.analysis.featureresponses import update_activity, pattern_present
 from topo.analysis.featureresponses import update_sheet_activity # pyflakes:ignore (API import)
+from topo.analysis.featureresponses import contrast2scale,\
+    direction2translation, hue2rgbscale, ocular2leftrightscale,\
+    phasedisparity2leftrightphase
+
 from topo.base.patterngenerator import PatternGenerator
-from topo.command import pattern_present
 
 from topo.misc.patternfn import line
 
@@ -201,10 +208,10 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
 
     d = Distribution(axis_bounds, cyclic)
 
-    if not (preference_map in sheet.sheet_views):
+    if not (preference_map in sheet.views.maps):
         topo.sim.warning(preference_map + " should be measured before calling decode_feature.")
     else:
-        v = sheet.sheet_views[preference_map]
+        v = sheet.views.maps[preference_map]
         for (p,a) in zip(cropfn(v.view()[0]).ravel(),
                          cropfn(sheet.activity).ravel()): d.add({p:a})
 
@@ -212,10 +219,11 @@ def decode_feature(sheet, preference_map = "OrientationPreference", axis_bounds=
     return res['']['preference']
 
 
-pg = create_plotgroup(name='Activity',category='Basic',
-             doc='Plot the activity for all Sheets.', auto_refresh=True,
-             pre_plot_hooks=[update_activity], plot_immediately=True)
-pg.add_plot('Activity',[('Strength','Activity')])
+pg = create_plotgroup(name='Activity', category='Basic',
+                      doc='Plot the activity for all Sheets.',
+                      auto_refresh=True, pre_plot_hooks=[update_activity],
+                      plot_immediately=True)
+pg.add_plot('Activity', [('Strength', 'Activity')])
 
 
 def update_rgb_activities():
@@ -223,19 +231,24 @@ def update_rgb_activities():
     Make available Red, Green, and Blue activity matrices for all appropriate sheets.
     """
     for sheet in topo.sim.objects(Sheet).values():
+        metadata = dict(bounds=sheet.bounds,src_name=sheet.name,
+                        precedence=sheet.precedence,
+                        row_precedence=sheet.row_precedence,
+                        timestamp=topo.sim.time())
         for c in ['Red','Green','Blue']:
             # should this ensure all of r,g,b are present?
             if hasattr(sheet,'activity_%s'%c.lower()):
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
-                new_view = SheetView((activity_copy,sheet.bounds),
-                                     sheet.name,sheet.precedence,topo.sim.time(),sheet.row_precedence)
-                sheet.sheet_views['%sActivity'%c]=new_view
+                new_view = SheetView(activity_copy,**metadata)
+                sheet.views.maps['%sActivity'%c]=new_view
 
 
-pg = create_plotgroup(name='RGB',category='Other',
-             doc='Combine and plot the red, green, and blue activity for all appropriate Sheets.', auto_refresh=True,
-             pre_plot_hooks=[update_rgb_activities], plot_immediately=True)
-pg.add_plot('RGB',[('Red','RedActivity'),('Green','GreenActivity'),('Blue','BlueActivity')])
+pg = create_plotgroup(name='RGB', category='Other',
+             doc='Combine and plot the red, green, and blue activity for all appropriate Sheets.',
+             auto_refresh=True, pre_plot_hooks=[update_rgb_activities],
+             plot_immediately=True)
+pg.add_plot('RGB', [('Red', 'RedActivity'), ('Green', 'GreenActivity'),
+                    ('Blue', 'BlueActivity')])
 
 
 
@@ -246,11 +259,11 @@ class update_connectionfields(UnitMeasurementCommand):
     projection = param.ObjectSelector(default=None,constant=True)
 
 
-pg= create_plotgroup(name='Connection Fields',category="Basic",
+pg = create_plotgroup(name='Connection Fields', category="Basic",
                      doc='Plot the weight strength in each ConnectionField of a specific unit of a Sheet.',
                      pre_plot_hooks=[update_connectionfields],
                      plot_immediately=True, normalize='Individually', situate=True)
-pg.add_plot('Connection Fields',[('Strength','Weights')])
+pg.add_plot('Connection Fields', [('Strength', 'Weights')])
 
 
 
@@ -258,11 +271,11 @@ class update_projection(UnitMeasurementCommand):
     """A callable Parameterized command for measuring or plotting units from a Projection."""
 
 
-pg= create_plotgroup(name='Projection',category="Basic",
+pg = create_plotgroup(name='Projection', category="Basic",
            doc='Plot the weights of an array of ConnectionFields in a Projection.',
            pre_plot_hooks=[update_projection],
-           plot_immediately=False, normalize='Individually',sheet_coords=True)
-pg.add_plot('Projection',[('Strength','Weights')])
+           plot_immediately=False, normalize='Individually', sheet_coords=True)
+pg.add_plot('Projection', [('Strength', 'Weights')])
 
 
 
@@ -274,123 +287,46 @@ class update_projectionactivity(ProjectionSheetMeasurementCommand):
 
     def __call__(self,**params):
         p=ParamOverrides(self,params)
-        self.params('sheet').compute_default()
-        s = topo.sim[p.sheet]
-        if s is not None:
-            for conn in s.in_connections:
-                if not isinstance(conn,Projection):
-                    topo.sim.debug("Skipping non-Projection "+conn.name)
-                else:
-                    v = conn.get_projection_view(topo.sim.time())
-######################################################################
-## CEBALERT: when a TemplatePlot tp is created from a ProjectionView
-## pv, tp.plot_src_name comes ultimately from pv.projection.src.name,
-## but tp.plot_bounding_box comes from pv.projection.dest.bounds. So,
-## we get a plot with mismatched src_name and bounds. Fixing that here
-## is not the correct solution, but it allows the Projection Activity
-## GUI window to work.
-                    v.src_name = v.projection.dest.name
-## JABALERT: Similarly, probably not the right thing to do, but makes
-## the name of the src available for the plot to be labelled.
-                    v.proj_src_name = v.projection.src.name
-######################################################################
-                    key = ('ProjectionActivity',v.projection.dest.name,v.projection.name)
-                    v.projection.dest.sheet_views[key] = v
+        for sheet_name in p.outputs:
+            s = getattr(topo.sim,sheet_name,None)
+            if s is not None:
+                for conn in s.in_connections:
+                    if not isinstance(conn,Projection):
+                        topo.sim.debug("Skipping non-Projection "+conn.name)
+                    else:
+                        v = conn.get_projection_view(topo.sim.time())
+                        key = v.metadata.proj_name + 'ProjectionActivity'
+                        topo.sim[v.metadata.src_name].views.maps[key] = v
 
 
-pg =  create_plotgroup(name='Projection Activity',category="Basic",
-             doc='Plot the activity in each Projection that connects to a Sheet.',
-             pre_plot_hooks=[update_projectionactivity.instance()],
-             plot_immediately=True, normalize='Individually',auto_refresh=True)
-pg.add_plot('Projection Activity',[('Strength','ProjectionActivity')])
+pg = create_plotgroup(name='Projection Activity', category="Basic",
+                      doc='Plot the activity in each Projection that connects '
+                          'to a Sheet.',
+                      pre_plot_hooks=[update_projectionactivity.instance()],
+                      plot_immediately=True, normalize='Individually',
+                      auto_refresh=True)
+pg.add_plot('Projection Activity', [('Strength', 'ProjectionActivity')])
 
 
 class measure_rfs(SingleInputResponseCommand):
     """
     Map receptive fields by reverse correlation.
 
-    Presents a large collection of input patterns, typically pixel by pixel on
-    and off, keeping track of which units in the specified input_sheet were
-    active when each unit in other Sheets in the simulation was active.  This
-    data can then be used to plot receptive fields for each unit.  Note that
-    the results are true receptive fields, not the connection fields usually
-    presented in lieu of receptive fields, because they take all circuitry in
-    between the input and the target unit into account.
+    Presents a large collection of input patterns, typically white
+    noise, keeping track of which units in the specified input_sheet
+    were active when each unit in other Sheets in the simulation was
+    active.  This data can then be used to plot receptive fields for
+    each unit.  Note that the results are true receptive fields, not
+    the connection fields usually presented in lieu of receptive
+    fields, because they take all circuitry in between the input and
+    the target unit into account.
 
-    Note also that it is crucial to set the scale parameter properly when using
-    units with a hard activation threshold (as opposed to a smooth sigmoid),
-    because the input pattern used here may not be a very effective way to
-    drive the unit to activate.  The value should be set high enough that the
-    target units activate at least some of the time there is a pattern on the
-    input.
-    """
-    static_parameters = param.List(default=["offset","size"])
-
-    sampling_interval = param.Integer(default=1,bounds=(1,None),doc="""
-    	The sampling interval determines the number of units in the input sheet
-    	that are sampled per presentation.  The higher the value the coarser
-    	the receptive field measurement will be.""")
-
-    sampling_area = param.NumericTuple(default=(0,0),doc="""
-    	Dimensions of the area to be sampled during reverse correlation
-        measured in units x and y on the input sheet centered around the origin
-        and expressed as a tuple (x,y).""")
-
-    __abstract = True
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params,allow_extra_keywords=True)
-        self._set_presenter_overrides(p)
-        self.params('input_sheet').compute_default()
-        static_params = dict([(s,p[s]) for s in p.static_parameters])
-        ReverseCorrelation(self._feature_list(p),param_dict=static_params,input_sheet=p.input_sheet,duration=p.duration,
-                           presenter_cmd=p.presenter_cmd,pattern_coordinator=p.pattern_coordinator)
-
-    def _feature_list(self,p):
-
-        left, bottom, right, top = p.input_sheet.nominal_bounds.lbrt()
-        sheet_density = float(p.input_sheet.nominal_density)
-        x_units,y_units = p.input_sheet.shape
-
-        unit_size = 1.0 / sheet_density
-        p.size = unit_size * p.sampling_interval
-
-        if p.sampling_area == (0,0):
-            p.sampling_area = (x_units,y_units)
-
-        y_range = (top - (unit_size * floor((y_units-p.sampling_area[1])/2)), bottom + (unit_size * ceil((y_units-p.sampling_area[1])/2)))
-        x_range = (right - (unit_size * floor((x_units-p.sampling_area[0])/2)), left + (unit_size * ceil((x_units-p.sampling_area[0])/2)))
-
-        return [Feature(name="x", range=x_range, step=-p.size),
-                Feature(name="y", range=y_range, step=-p.size),
-                Feature(name="scale", range=(-p.scale, p.scale), step=p.scale*2)]
-
-# pg = create_plotgroup(name='RF Projection',category='Other',
-# doc='Measure receptive fields.',
-# pre_plot_hooks=[measure_rfs.instance(
-#     pattern_coordinator=CoordinatedPatternGenerator(RawRectangle(size=0.01,aspect_ratio=1.0)))],
-#     normalize='Individually')
-
-
-
-class measure_wnrfs(measure_rfs):
-    """
-    Map receptive fields by reverse correlation.
-
-    Presents a large collection of input patterns, typically pixel by pixel on
-    and off, keeping track of which units in the specified input_sheet were
-    active when each unit in other Sheets in the simulation was active.  This
-    data can then be used to plot receptive fields for each unit.  Note that
-    the results are true receptive fields, not the connection fields usually
-    presented in lieu of receptive fields, because they take all circuitry in
-    between the input and the target unit into account.
-
-    Note also that it is crucial to set the scale parameter properly when using
-    units with a hard activation threshold (as opposed to a smooth sigmoid),
-    because the input pattern used here may not be a very effective way to
-    drive the unit to activate.  The value should be set high enough that the
-    target units activate at least some of the time there is a pattern on the
-    input.
+    Note also that it is crucial to set the scale parameter properly
+    when using units with a hard activation threshold (as opposed to a
+    smooth sigmoid), because the input pattern used here may not be a
+    very effective way to drive the unit to activate.  The value
+    should be set high enough that the target units activate at least
+    some of the time there is a pattern on the input.
     """
 
     static_parameters = param.List(default=["scale","offset"])
@@ -399,16 +335,31 @@ class measure_wnrfs(measure_rfs):
 
     __abstract = True
 
-    def _feature_list(self,p):
-        return [Feature(name="presentation", range=(0, p.presentations), step = 1.0),
-        Feature(name="scale", values=[p.scale])]
+    def __call__(self,**params):
+        p=ParamOverrides(self,params,allow_extra_keywords=True)
+        self._set_presenter_overrides(p)
+        static_params = dict([(s,p[s]) for s in p.static_parameters])
+        ReverseCorrelation(self._feature_list(p), param_dict=static_params,
+                           inputs=p.inputs, outputs=p.outputs,
+                           duration=p.duration,
+                           pattern_response_fn=p.pattern_response_fn,
+                           pattern_generator=p.pattern_generator)
 
-pg = create_plotgroup(name='RF Projection',category='Other',
-    doc='Measure white noise receptive fields.',
-    pre_plot_hooks=[measure_wnrfs.instance(pattern_coordinator=CoordinatedPatternGenerator(pattern_generator=UniformRandom()))],
-    normalize='Individually')
 
-pg.add_plot('RFs',[('Strength','RFs')])
+    def _feature_list(self, p):
+        return [
+            Feature(name="presentation", range=(0, p.presentations), step=1.0),
+            Feature(name="scale", values=[p.scale])]
+
+
+pg = create_plotgroup(name='RF Projection', category='Other',
+                      doc='Measure white noise receptive fields.',
+                      pre_plot_hooks=[measure_rfs.instance(
+                          pattern_generator=UniformRandom())],
+                      normalize='Individually')
+
+pg.add_plot('RFs', [('Strength', 'RFs')])
+
 
 
 # Helper function for measuring direction maps
@@ -426,7 +377,7 @@ def compute_orientation_from_direction(current_values):
     different number of directions to test, to avoid that floating
     point boundary.
     """
-    return round(((dict(current_values)['direction'])+(pi/2)) % pi,13)
+    return np.round(((dict(current_values)['direction'])+(np.pi/2)) % np.pi, 13)
 
 
 
@@ -447,25 +398,33 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
     (such as hue and disparity).
     """
 
-    num_ocularity = param.Integer(default=1,bounds=(1,None),softbounds=(1,3),doc="""
+    max_speed = param.Number(default=2.0 / 24.0, bounds=(0, None), doc="""
+        The maximum speed to measure (with zero always the minimum).""")
+
+    metafeature_fns = param.HookList(
+        default=[contrast2scale, direction2translation])
+
+    num_ocularity = param.Integer(default=1, bounds=(1, None),
+                                  softbounds=(1, 3), doc="""
         Number of ocularity values to test; set to 1 to disable or 2 to enable.""")
 
-    num_disparity = param.Integer(default=1,bounds=(1,None),softbounds=(1,48),doc="""
+    num_disparity = param.Integer(default=1, bounds=(1, None),
+                                  softbounds=(1, 48), doc="""
         Number of disparity values to test; set to 1 to disable or e.g. 12 to enable.""")
 
-    num_hue = param.Integer(default=1,bounds=(1,None),softbounds=(1,48),doc="""
+    num_hue = param.Integer(default=1, bounds=(1, None), softbounds=(1, 48),
+                            doc="""
         Number of hues to test; set to 1 to disable or e.g. 8 to enable.""")
 
-    num_direction = param.Integer(default=0,bounds=(0,None),softbounds=(0,48),doc="""
+    num_direction = param.Integer(default=0, bounds=(0, None),
+                                  softbounds=(0, 48), doc="""
         Number of directions to test.  If nonzero, overrides num_orientation,
         because the orientation is calculated to be perpendicular to the direction.""")
 
-    num_speeds = param.Integer(default=4,bounds=(0,None),softbounds=(0,10),doc="""
+    num_speeds = param.Integer(default=4, bounds=(0, None), softbounds=(0, 10),
+                               doc="""
         Number of speeds to test (where zero means only static patterns).
         Ignored when num_direction=0.""")
-
-    max_speed = param.Number(default=2.0/24.0,bounds=(0,None),doc="""
-        The maximum speed to measure (with zero always the minimum).""")
 
     subplot = param.String("Orientation")
 
@@ -474,39 +433,50 @@ class measure_sine_pref(SinusoidalMeasureResponseCommand):
         # Always varies frequency and phase; everything else depends on parameters.
 
         features = \
-            [Feature(name="frequency",values=p.frequencies,
-                    preference_fn=DSF_WeightedAverage())]
-
-        if p.num_direction==0: features += \
-            [Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,
-                            cyclic=True, preference_fn=self.preference_fn)]
-
-        features += \
-            [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True,
+            [Feature(name="frequency", values=p.frequencies,
                      preference_fn=DSF_WeightedAverage())]
 
-        if p.num_ocularity>1: features += \
-            [Feature(name="ocular",range=(0.0,1.0),step=1.0/p.num_ocularity)]
+        if p.num_direction==0: features += \
+            [Feature(name="orientation", range=(0.0, np.pi),
+                     step=np.pi / p.num_orientation,
+                     cyclic=True, preference_fn=self.preference_fn)]
 
-        if p.num_disparity>1: features += \
-            [Feature(name="phasedisparity",range=(0.0,2*pi),step=2*pi/p.num_disparity,cyclic=True)]
+        features += \
+            [Feature(name="phase", range=(0.0, 2 * np.pi),
+                     step=2 * np.pi / p.num_phase, cyclic=True,
+                     preference_fn=DSF_WeightedAverage())]
 
-        if p.num_hue>1: features += \
-            [Feature(name="hue",range=(0.0,1.0),step=1.0/p.num_hue,cyclic=True)]
+        if p.num_ocularity > 1: features += \
+            [Feature(name="ocular", range=(0.0, 1.0),
+                     step=1.0 / p.num_ocularity)]
 
-        if p.num_direction>0 and p.num_speeds==0: features += \
-            [Feature(name="speed",values=[0],cyclic=False)]
+        if p.num_disparity > 1: features += \
+            [Feature(name="phasedisparity", range=(0.0, 2 * np.pi),
+                     step=2 * np.pi / p.num_disparity, cyclic=True)]
 
-        if p.num_direction>0 and p.num_speeds>0: features += \
-            [Feature(name="speed",range=(0.0,p.max_speed),step=float(p.max_speed)/p.num_speeds,cyclic=False)]
+        if p.num_hue > 1: features += \
+            [Feature(name="hue", range=(0.0, 1.0), step=1.0 / p.num_hue,
+                     cyclic=True)]
 
-        if p.num_direction>0:
+        if p.num_direction > 0 and p.num_speeds == 0: features += \
+            [Feature(name="speed", values=[0], cyclic=False)]
+
+        if p.num_direction > 0 and p.num_speeds > 0: features += \
+            [Feature(name="speed", range=(0.0, p.max_speed),
+                     step=float(p.max_speed) / p.num_speeds, cyclic=False)]
+
+        if p.num_direction > 0:
             # Compute orientation from direction
-            dr = Feature(name="direction",range=(0.0,2*pi),step=2*pi/p.num_direction,cyclic=True)
-            or_values = list(set([compute_orientation_from_direction([("direction",v)]) for v in dr.values]))
+            dr = Feature(name="direction", range=(0.0, 2 * np.pi),
+                         step=2 * np.pi / p.num_direction, cyclic=True)
+            or_values = list(set(
+                [compute_orientation_from_direction([("direction", v)]) for v in
+                 dr.values]))
             features += [dr, \
-                 Feature(name="orientation",range=(0.0,pi),values=or_values,cyclic=True,
-                         compute_fn=compute_orientation_from_direction,preference_fn=self.preference_fn)]
+                         Feature(name="orientation", range=(0.0, np.pi),
+                                 values=or_values, cyclic=True,
+                                 compute_fn=compute_orientation_from_direction,
+                                 preference_fn=self.preference_fn)]
 
         return features
 
@@ -517,189 +487,233 @@ class measure_or_pref(SinusoidalMeasureResponseCommand):
 
     subplot = param.String("Orientation")
 
-    preference_fn = param.ClassSelector( DistributionStatisticFn,
+    preference_fn = param.ClassSelector(DistributionStatisticFn,
         default=DSF_WeightedAverage(), doc="""
         Function that will be used to analyze the distributions of unit
         responses.""" )
 
-    def _feature_list(self,p):
+    def _feature_list(self, p):
+        return [Feature(name="frequency", values=p.frequencies),
+                Feature(name="orientation", range=(0.0, np.pi),
+                        step=np.pi / p.num_orientation,
+                        preference_fn=self.preference_fn, cyclic=True),
+                Feature(name="phase", range=(0.0, 2 * np.pi),
+                        step=2 * np.pi / p.num_phase, cyclic=True)]
 
-        return [Feature(name="frequency",values=p.frequencies),
-                Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,
-                        preference_fn=self.preference_fn,cyclic=True),
-                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
 
-
-pg= create_plotgroup(name='Orientation Preference',category="Preference Maps",
-                     doc='Measure preference for sine grating orientation.',
-                     pre_plot_hooks=[measure_sine_pref.instance(
-                         preference_fn=DSF_WeightedAverage())] )
-pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
+pg = create_plotgroup(name='Orientation Preference', category="Preference Maps",
+                      doc='Measure preference for sine grating orientation.',
+                      pre_plot_hooks=[measure_sine_pref.instance(
+                          preference_fn=DSF_WeightedAverage())])
+pg.add_plot('Orientation Preference', [('Hue', 'OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',
-            [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
-pg.add_plot('Orientation Selectivity',[('Strength','OrientationSelectivity')])
-pg.add_plot('Phase Preference',[('Hue','PhasePreference')])
-pg.add_plot('Phase Selectivity',[('Strength','PhaseSelectivity')])
-pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
-
-
-pg= create_plotgroup(name='vonMises Orientation Preference',category="Preference Maps",
-             doc='Measure preference for sine grating orientation using von Mises fit.',
-             pre_plot_hooks=[measure_sine_pref.instance(
-                 preference_fn=DSF_VonMisesFit(),
-                 num_orientation=16)])
-pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
-pg.add_plot('Orientation Preference&Selectivity',
-            [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
-pg.add_plot('Orientation Selectivity',[('Strength','OrientationSelectivity')])
-pg.add_plot('Phase Preference',[('Hue','PhasePreference')])
-pg.add_plot('Phase Selectivity',[('Strength','PhaseSelectivity')])
-pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
-
-
-pg= create_plotgroup(name='Bimodal Orientation Preference', category="Preference Maps",
-             doc='Measure preference for sine grating orientation using bimodal von Mises fit.',
-             pre_plot_hooks=[measure_sine_pref.instance(
-                 preference_fn=DSF_BimodalVonMisesFit(),
-                 num_orientation=16)])
-pg.add_plot('Orientation Preference',[('Hue','OrientationPreference')])
-pg.add_plot('Orientation Preference&Selectivity',
-            [('Hue','OrientationPreference'), ('Confidence','OrientationSelectivity')])
-pg.add_plot('Orientation Selectivity',[('Strength','OrientationSelectivity')])
-pg.add_plot('Second Orientation Preference', [('Hue','OrientationMode2Preference')])
-pg.add_plot('Second Orientation Preference&Selectivity',
-            [('Hue','OrientationMode2Preference'), ('Confidence','OrientationMode2Selectivity')])
-pg.add_plot('Second Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
+pg.add_plot('Phase Preference', [('Hue', 'PhasePreference')])
+pg.add_plot('Phase Selectivity', [('Strength', 'PhaseSelectivity')])
 pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
 
+pg = create_plotgroup(name='vonMises Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for sine grating orientation '
+                          'using von Mises fit.',
+                      pre_plot_hooks=[measure_sine_pref.instance(
+                          preference_fn=DSF_VonMisesFit(),
+                          num_orientation=16)])
+pg.add_plot('Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
+pg.add_plot('Phase Preference', [('Hue', 'PhasePreference')])
+pg.add_plot('Phase Selectivity', [('Strength', 'PhaseSelectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
 
-pg = create_plotgroup(name='Two Orientation Preferences',category='Preference Maps',
-    doc='Display the two most preferred orientations for each units, using bimodal von Mises fit.',
-    pre_plot_hooks=[measure_sine_pref.instance(
-         preference_fn=DSF_BimodalVonMisesFit(), num_orientation=16)])
-pg.add_plot( 'Two Orientation Preferences', [
-		( 'Or1',	'OrientationPreference' ),
-		( 'Sel1',	'OrientationSelectivity' ),
-		( 'Or2',	'OrientationMode2Preference' ),
-		( 'Sel2',	'OrientationMode2Selectivity' )
-])
-pg.add_static_image('Color Key','command/two_or_key_vert.png')
+pg = create_plotgroup(name='Bimodal Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for sine grating orientation '
+                          'using bimodal von Mises fit.',
+                      pre_plot_hooks=[measure_sine_pref.instance(
+                          preference_fn=DSF_BimodalVonMisesFit(),
+                          num_orientation=16)])
+pg.add_plot('Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
+pg.add_plot('Second Orientation Preference',
+            [('Hue', 'OrientationMode2Preference')])
+pg.add_plot('Second Orientation Preference&Selectivity',
+            [('Hue', 'OrientationMode2Preference'),
+             ('Confidence', 'OrientationMode2Selectivity')])
+pg.add_plot('Second Orientation Selectivity',
+            [('Strength', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
 
+pg = create_plotgroup(name='Two Orientation Preferences',
+                      category='Preference Maps',
+                      doc='Display the two most preferred orientations for '
+                          'each units, using bimodal von Mises fit.',
+                      pre_plot_hooks=[measure_sine_pref.instance(
+                          preference_fn=DSF_BimodalVonMisesFit(),
+                          num_orientation=16)])
+pg.add_plot('Two Orientation Preferences', [('Or1', 'OrientationPreference'),
+                                            ('Sel1', 'OrientationSelectivity'),
+                                            ('Or2', 'OrientationMode2Preference'),
+                                            ('Sel2', 'OrientationMode2Selectivity')])
 
-pg= create_plotgroup(name='Spatial Frequency Preference',category="Preference Maps",
-             doc='Measure preference for sine grating orientation and frequency.',
-             pre_plot_hooks=[measure_sine_pref.instance(
-                 preference_fn=DSF_WeightedAverage())] )
-pg.add_plot('Spatial Frequency Preference',[('Strength','FrequencyPreference')])
-pg.add_plot('Spatial Frequency Selectivity',[('Strength','FrequencySelectivity')])
+pg.add_static_image('Color Key', 'command/two_or_key_vert.png')
+
+pg = create_plotgroup(name='Spatial Frequency Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for sine grating orientation '
+                          'and frequency.',
+                      pre_plot_hooks=[measure_sine_pref.instance(
+                          preference_fn=DSF_WeightedAverage())])
+pg.add_plot('Spatial Frequency Preference',
+            [('Strength', 'FrequencyPreference')])
+pg.add_plot('Spatial Frequency Selectivity',
+            [('Strength', 'FrequencySelectivity')])
 # Just calls measure_sine_pref to plot different maps.
 
 
 class measure_od_pref(SinusoidalMeasureResponseCommand):
-    """Measure an ocular dominance preference map by collating the response to patterns."""
+    """
+    Measure an ocular dominance preference map by collating the response to patterns.
+    """
 
-    def _feature_list(self,p):
-        return [Feature(name="frequency",values=p.frequencies),
-                Feature(name="orientation",range=(0.0,pi),step=pi/p.num_orientation,cyclic=True),
-                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
-                Feature(name="ocular",range=(0.0,1.0),values=[0.0,1.0])]
+    metafeature_fns = param.HookList(
+        default=[contrast2scale, ocular2leftrightscale])
 
-pg= create_plotgroup(name='Ocular Preference',category="Preference Maps",
-             doc='Measure preference for sine gratings between two eyes.',
-             pre_plot_hooks=[measure_sine_pref.instance()])
-pg.add_plot('Ocular Preference',[('Strength','OcularPreference')])
-pg.add_plot('Ocular Selectivity',[('Strength','OcularSelectivity')])
+    def _feature_list(self, p):
+        return [Feature(name="frequency", values=p.frequencies),
+                Feature(name="orientation", range=(0.0, np.pi),
+                        step=np.pi / p.num_orientation, cyclic=True),
+                Feature(name="phase", range=(0.0, 2 * np.pi),
+                        step=2 * np.pi / p.num_phase, cyclic=True),
+                Feature(name="ocular", range=(0.0, 1.0), values=[0.0, 1.0])]
 
 
+pg = create_plotgroup(name='Ocular Preference', category="Preference Maps",
+                      doc='Measure preference for sine gratings between two '
+                          'eyes.',
+                      pre_plot_hooks=[measure_sine_pref.instance()])
+pg.add_plot('Ocular Preference', [('Strength', 'OcularPreference')])
+pg.add_plot('Ocular Selectivity', [('Strength', 'OcularSelectivity')])
 
 
 class measure_phasedisparity(SinusoidalMeasureResponseCommand):
     """Measure a phase disparity preference map by collating the response to patterns."""
 
-    num_disparity = param.Integer(default=12,bounds=(1,None),softbounds=(1,48),
+    metafeature_fns = param.HookList(default=[contrast2scale,
+                                              phasedisparity2leftrightphase])
+
+    num_disparity = param.Integer(default=12, bounds=(1, None),
+                                  softbounds=(1, 48),
                                   doc="Number of disparity values to test.")
 
-    orientation = param.Number(default=pi/2,softbounds=(0.0,2*pi),doc="""
+    orientation = param.Number(default=np.pi / 2, softbounds=(0.0, 2 * np.pi), doc="""
         Orientation of the test pattern; typically vertical to measure
         horizontal disparity.""")
 
-    static_parameters = param.List(default=["orientation","scale","offset"])
+    static_parameters = param.List(default=["orientation", "scale", "offset"])
 
-    def _feature_list(self,p):
-        return [Feature(name="frequency",values=p.frequencies),
-                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
-                Feature(name="phasedisparity",range=(0.0,2*pi),step=2*pi/p.num_disparity,cyclic=True)]
+    def _feature_list(self, p):
+        return [Feature(name="frequency", values=p.frequencies),
+                Feature(name="phase", range=(0.0, 2 * np.pi),
+                        step=2 * np.pi / p.num_phase, cyclic=True),
+                Feature(name="phasedisparity", range=(0.0, 2 * np.pi),
+                        step=2 * np.pi / p.num_disparity, cyclic=True)]
 
 
 pg= create_plotgroup(name='PhaseDisparity Preference',category="Preference Maps",doc="""
     Measure preference for sine gratings at a specific orentation differing in phase
     between two input sheets.""",
              pre_plot_hooks=[measure_phasedisparity.instance()],normalize='Individually')
-pg.add_plot('PhaseDisparity Preference',[('Hue','PhasedisparityPreference')])
+pg.add_plot('PhaseDisparity Preference', [('Hue', 'PhasedisparityPreference')])
 pg.add_plot('PhaseDisparity Preference&Selectivity',
-            [('Hue','PhasedisparityPreference'), ('Confidence','PhasedisparitySelectivity')])
-pg.add_plot('PhaseDisparity Selectivity',[('Strength','PhasedisparitySelectivity')])
-pg.add_static_image('Color Key','command/disp_key_white_vert_small.png')
-
+            [('Hue', 'PhasedisparityPreference'),
+             ('Confidence', 'PhasedisparitySelectivity')])
+pg.add_plot('PhaseDisparity Selectivity',
+            [('Strength', 'PhasedisparitySelectivity')])
+pg.add_static_image('Color Key', 'command/disp_key_white_vert_small.png')
 
 
 class measure_dr_pref(SinusoidalMeasureResponseCommand):
     """Measure a direction preference map by collating the response to patterns."""
 
+    metafeature_fns = param.HookList(default=[contrast2scale,
+                                              direction2translation])
+
     num_phase = param.Integer(default=12)
 
-    num_direction = param.Integer(default=6,bounds=(1,None),softbounds=(1,48),
+    num_direction = param.Integer(default=6, bounds=(1, None),
+                                  softbounds=(1, 48),
                                   doc="Number of directions to test.")
 
-    num_speeds = param.Integer(default=4,bounds=(0,None),softbounds=(0,10),doc="""
+    num_speeds = param.Integer(default=4, bounds=(0, None), softbounds=(0, 10),
+                               doc="""
         Number of speeds to test (where zero means only static patterns).""")
 
-    max_speed = param.Number(default=2.0/24.0,bounds=(0,None),doc="""
+    max_speed = param.Number(default=2.0 / 24.0, bounds=(0, None), doc="""
         The maximum speed to measure (with zero always the minimum).""")
 
     subplot = param.String("Direction")
 
-    preference_fn = param.ClassSelector( DistributionStatisticFn,
-        default=DSF_WeightedAverage(), doc="""
+    preference_fn = param.ClassSelector(DistributionStatisticFn,
+                                        default=DSF_WeightedAverage(), doc="""
         Function that will be used to analyze the distributions of
         unit responses. Sets value_scale to normalize direction
-        preference values.""" )
+        preference values.""")
 
 
     def _feature_list(self,p):
         # orientation is computed from direction
-        dr = Feature(name="direction",range=(0.0,2*pi),step=2*pi/p.num_direction,cyclic=True)
-        or_values = list(set([compute_orientation_from_direction([("direction",v)]) for v in dr.values]))
+        dr = Feature(name="direction", range=(0.0, 2 * np.pi),
+                     step=2 * np.pi / p.num_direction, cyclic=True)
+        or_values = list(set(
+            [compute_orientation_from_direction([("direction", v)]) for v in
+             dr.values]))
 
-        return [Feature(name="speed",values=[0],cyclic=False) if p.num_speeds is 0 else
-                Feature(name="speed",range=(0.0,p.max_speed),step=float(p.max_speed)/p.num_speeds,cyclic=False),
-                Feature(name="frequency",values=p.frequencies),
-                Feature(name="direction",range=(0.0,2*pi),step=2*pi/p.num_direction,cyclic=True,
+        return [Feature(name="speed", values=[0],
+                        cyclic=False) if p.num_speeds is 0 else
+                Feature(name="speed", range=(0.0, p.max_speed),
+                        step=float(p.max_speed) / p.num_speeds, cyclic=False),
+                Feature(name="frequency", values=p.frequencies),
+                Feature(name="direction", range=(0.0, 2 * np.pi),
+                        step=2 * np.pi / p.num_direction, cyclic=True,
                         preference_fn=self.preference_fn),
-                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
-                Feature(name="orientation",range=(0.0,pi),values=or_values,cyclic=True,
+                Feature(name="phase", range=(0.0, 2 * np.pi),
+                        step=2 * np.pi / p.num_phase, cyclic=True),
+                Feature(name="orientation", range=(0.0, np.pi), values=or_values,
+                        cyclic=True,
                         compute_fn=compute_orientation_from_direction)]
 
 
-pg= create_plotgroup(name='Direction Preference',category="Preference Maps",
-             doc='Measure preference for sine grating movement direction.',
-             pre_plot_hooks=[measure_dr_pref.instance()])
-pg.add_plot('Direction Preference',[('Hue','DirectionPreference')])
-pg.add_plot('Direction Preference&Selectivity',[('Hue','DirectionPreference'),
-                                                ('Confidence','DirectionSelectivity')])
-pg.add_plot('Direction Selectivity',[('Strength','DirectionSelectivity')])
-pg.add_plot('Speed Preference',[('Strength','SpeedPreference')])
-pg.add_plot('Speed Selectivity',[('Strength','SpeedSelectivity')])
-pg.add_static_image('Color Key','command/dr_key_white_vert_small.png')
-
+pg = create_plotgroup(name='Direction Preference', category="Preference Maps",
+                      doc='Measure preference for sine grating movement '
+                          'direction.',
+                      pre_plot_hooks=[measure_dr_pref.instance()])
+pg.add_plot('Direction Preference', [('Hue', 'DirectionPreference')])
+pg.add_plot('Direction Preference&Selectivity', [('Hue', 'DirectionPreference'),
+                                                 ('Confidence',
+                                                  'DirectionSelectivity')])
+pg.add_plot('Direction Selectivity', [('Strength', 'DirectionSelectivity')])
+pg.add_plot('Speed Preference', [('Strength', 'SpeedPreference')])
+pg.add_plot('Speed Selectivity', [('Strength', 'SpeedSelectivity')])
+pg.add_static_image('Color Key', 'command/dr_key_white_vert_small.png')
 
 
 class measure_hue_pref(SinusoidalMeasureResponseCommand):
     """Measure a hue preference map by collating the response to patterns."""
 
+    metafeature_fns = param.HookList(default=[contrast2scale,
+                                              hue2rgbscale])
+
     num_phase = param.Integer(default=12)
 
-    num_hue = param.Integer(default=8,bounds=(1,None),softbounds=(1,48),
+    num_hue = param.Integer(default=8, bounds=(1, None), softbounds=(1, 48),
                             doc="Number of hues to test.")
 
     subplot = param.String("Hue")
@@ -707,127 +721,153 @@ class measure_hue_pref(SinusoidalMeasureResponseCommand):
     # For backwards compatibility; not sure why it needs to differ from the default
     static_parameters = param.List(default=[])
 
-    def _feature_list(self,p):
-        return [Feature(name="frequency",values=p.frequencies),
-                Feature(name="orientation",range=(0,pi),step=pi/p.num_orientation,cyclic=True),
-                Feature(name="hue",range=(0.0,1.0),step=1.0/p.num_hue,cyclic=True),
-                Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True)]
+    def _feature_list(self, p):
+        return [Feature(name="frequency", values=p.frequencies),
+                Feature(name="orientation", range=(0, np.pi),
+                        step=np.pi / p.num_orientation, cyclic=True),
+                Feature(name="hue", range=(0.0, 1.0), step=1.0 / p.num_hue,
+                        cyclic=True),
+                Feature(name="phase", range=(0.0, 2 * np.pi),
+                        step=2 * np.pi / p.num_phase, cyclic=True)]
 
 
-pg= create_plotgroup(name='Hue Preference',category="Preference Maps",
-             doc='Measure preference for colors.',
-             pre_plot_hooks=[measure_hue_pref.instance()],normalize='Individually')
-pg.add_plot('Hue Preference',[('Hue','HuePreference')])
-pg.add_plot('Hue Preference&Selectivity',[('Hue','HuePreference'), ('Confidence','HueSelectivity')])
-pg.add_plot('Hue Selectivity',[('Strength','HueSelectivity')])
-
-
+pg = create_plotgroup(name='Hue Preference', category="Preference Maps",
+                      doc='Measure preference for colors.',
+                      pre_plot_hooks=[measure_hue_pref.instance()],
+                      normalize='Individually')
+pg.add_plot('Hue Preference', [('Hue', 'HuePreference')])
+pg.add_plot('Hue Preference&Selectivity',
+            [('Hue', 'HuePreference'), ('Confidence', 'HueSelectivity')])
+pg.add_plot('Hue Selectivity', [('Strength', 'HueSelectivity')])
 
 gaussian_corner = Composite(
-    operator = maximum, generators = [
-        Gaussian(size = 0.06,orientation=0,aspect_ratio=7,x=0.3),
-        Gaussian(size = 0.06,orientation=pi/2,aspect_ratio=7,y=0.3)])
+    operator=maximum, generators=[
+        Gaussian(size=0.06, orientation=0, aspect_ratio=7, x=0.3),
+        Gaussian(size=0.06, orientation=np.pi / 2, aspect_ratio=7, y=0.3)])
 
 
 class measure_second_or_pref(SinusoidalMeasureResponseCommand):
     """Measure the secondary  orientation preference maps."""
 
-    num_orientation	= param.Integer( default=16, bounds=(1,None), softbounds=(1,64),
+    num_orientation = param.Integer(default=16, bounds=(1, None),
+                                    softbounds=(1, 64),
                                     doc="Number of orientations to test.")
-    true_peak 	 	= param.Boolean( default=True, doc="""If set the second
-	    orientation response is computed on the true second mode of the
-	    orientation distribution, otherwise is just the second maximum response""" )
+
+    true_peak = param.Boolean(default=True, doc="""If set the second
+        orientation response is computed on the true second mode of the
+	    orientation distribution, otherwise is just the second maximum
+	    response""")
 
     subplot		= param.String("Second Orientation")
 
     def _feature_list(self, p):
-    	fs	= [ Feature(name="frequency", values=p.frequencies) ]
-    	if p.true_peak:
-	    fs.append(
-		Feature(name="orientation", range=(0.0, pi), step=pi/p.num_orientation,
-                    cyclic=True, preference_fn=DSF_BimodalPeaks() ) )
-	else:
-	    fs.append(
-		Feature(name="orientation", range=(0.0, pi), step=pi/p.num_orientation,
-                    cyclic=True, preference_fn=DSF_BimodalPeaks() ) )
-	fs.append( Feature(name="phase", range=(0.0, 2*pi), step=2*pi/p.num_phase, cyclic=True) )
+        fs = [Feature(name="frequency", values=p.frequencies)]
+        if p.true_peak:
+            fs.append(Feature(name="orientation", range=(0.0, np.pi),
+                              step=np.pi/p.num_orientation, cyclic=True,
+                              preference_fn=DSF_BimodalPeaks()))
+        else:
+            fs.append(Feature(name="orientation", range=(0.0, np.pi),
+                              step=np.pi/p.num_orientation, cyclic=True,
+                              preference_fn=DSF_BimodalPeaks()))
+            fs.append(Feature(name="phase", range=(0.0, 2*np.pi),
+                              step=2*np.pi/p.num_phase, cyclic=True))
 
-	return fs
+        return fs
 
 
-pg= create_plotgroup(name='Second Orientation Preference', category="Preference Maps",
-             doc='Measure the second preference for sine grating orientation.',
-             pre_plot_hooks=[measure_second_or_pref.instance( true_peak=False )])
-pg.add_plot('Second Orientation Preference', [('Hue','OrientationMode2Preference')])
+pg = create_plotgroup(name='Second Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure the second preference for sine grating '
+                          'orientation.',
+                      pre_plot_hooks=[
+                          measure_second_or_pref.instance(true_peak=False)])
+pg.add_plot('Second Orientation Preference',
+            [('Hue', 'OrientationMode2Preference')])
 pg.add_plot('Second Orientation Preference&Selectivity',
-            [('Hue','OrientationMode2Preference'), ('Confidence','OrientationMode2Selectivity')])
-pg.add_plot('Second Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
+            [('Hue', 'OrientationMode2Preference'),
+             ('Confidence', 'OrientationMode2Selectivity')])
+pg.add_plot('Second Orientation Selectivity',
+            [('Strength', 'OrientationMode2Selectivity')])
 pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
 
-
-pg= create_plotgroup(name='Second Peak Orientation Preference',category="Preference Maps",
-             doc='Measure the second peak preference for sine grating orientation.',
-             pre_plot_hooks=[measure_second_or_pref.instance( true_peak=True )])
-pg.add_plot('Second Peak Orientation Preference', [('Hue','OrientationMode2Preference')])
+pg = create_plotgroup(name='Second Peak Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure the second peak preference for sine '
+                          'grating orientation.',
+                      pre_plot_hooks=[
+                          measure_second_or_pref.instance(true_peak=True)])
+pg.add_plot('Second Peak Orientation Preference',
+            [('Hue', 'OrientationMode2Preference')])
 pg.add_plot('Second Peak Orientation Preference&Selectivity',
-            [('Hue','OrientationMode2Preference'), ('Confidence','OrientationMode2Selectivity')])
-pg.add_plot('Second Peak Orientation Selectivity', [('Strength','OrientationMode2Selectivity')])
-pg.add_static_image('Color Key','command/or_key_white_vert_small.png')
+            [('Hue', 'OrientationMode2Preference'),
+             ('Confidence', 'OrientationMode2Selectivity')])
+pg.add_plot('Second Peak Orientation Selectivity',
+            [('Strength', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
 
-
-pg = create_plotgroup(name='Two Peaks Orientation Preferences',category='Preference Maps',
-    doc="""Display the two most preferred orientations for all units with a
-    multimodal orientation preference distribution.""",
-    pre_plot_hooks=[
-    		measure_second_or_pref.instance(num_orientation=16, true_peak=True)
-])
-pg.add_plot( 'Two Peaks Orientation Preferences', [
-		( 'Or1',	'OrientationPreference' ),
-		( 'Sel1',	'OrientationSelectivity' ),
-		( 'Or2',	'OrientationMode2Preference' ),
-		( 'Sel2',	'OrientationMode2Selectivity' )
-])
-pg.add_static_image('Color Key','command/two_or_key_vert.png')
+pg = create_plotgroup(name='Two Peaks Orientation Preferences',
+                      category='Preference Maps',
+                      doc="""Display the two most preferred orientations for
+                      all units with a multimodal orientation preference
+                      distribution.""",
+                      pre_plot_hooks=[
+                          measure_second_or_pref.instance(num_orientation=16,
+                                                          true_peak=True)])
+pg.add_plot('Two Peaks Orientation Preferences',
+            [('Or1', 'OrientationPreference'),
+             ('Sel1', 'OrientationSelectivity'),
+             ('Or2', 'OrientationMode2Preference'),
+             ('Sel2', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/two_or_key_vert.png')
 
 class measure_corner_or_pref(PositionMeasurementCommand):
     """Measure a corner preference map by collating the response to patterns."""
 
     scale = param.Number(default=1.0)
 
-    divisions=param.Integer(default=10)
+    divisions = param.Integer(default=10)
 
-    pattern_coordinator = param.Callable(CoordinatedPatternGenerator(pattern_generator=gaussian_corner))
+    pattern_generator = param.Callable(default=gaussian_corner)
 
-    x_range=param.NumericTuple((-1.2,1.2))
+    x_range = param.NumericTuple((-1.2, 1.2))
 
-    y_range=param.NumericTuple((-1.2,1.2))
+    y_range = param.NumericTuple((-1.2, 1.2))
 
-    num_orientation = param.Integer(default=4,bounds=(1,None),softbounds=(1,24),
+    num_orientation = param.Integer(default=4, bounds=(1, None),
+                                    softbounds=(1, 24),
                                     doc="Number of orientations to test.")
 
     # JABALERT: Presumably this should be omitted, so that size is included?
-    static_parameters = param.List(default=["scale","offset"])
+    static_parameters = param.List(default=["scale", "offset"])
 
-    def _feature_list(self,p):
-        width =1.0*p.x_range[1]-p.x_range[0]
-        height=1.0*p.y_range[1]-p.y_range[0]
+    def _feature_list(self, p):
+        width = 1.0 * p.x_range[1] - p.x_range[0]
+        height = 1.0 * p.y_range[1] - p.y_range[0]
         return [
-            Feature(name="x",range=p.x_range,step=width/p.divisions,preference_fn=self.preference_fn),
-            Feature(name="y",range=p.y_range,step=height/p.divisions,preference_fn=self.preference_fn),
-            Feature(name="orientation",range=(0,2*pi),step=2*pi/p.num_orientation,cyclic=True,
-                preference_fn=DSF_WeightedAverage()
+            Feature(name="x", range=p.x_range, step=width / p.divisions,
+                    preference_fn=self.preference_fn),
+            Feature(name="y", range=p.y_range, step=height / p.divisions,
+                    preference_fn=self.preference_fn),
+            Feature(name="orientation", range=(0, 2 * np.pi),
+                    step=2 * np.pi / p.num_orientation, cyclic=True,
+                    preference_fn=DSF_WeightedAverage()
             )]
 
 
-pg= create_plotgroup(name='Corner OR Preference',category="Preference Maps",
-             doc='Measure orientation preference for corner shape (or other complex stimuli that cannot be represented as fullfield patterns).',
-             pre_plot_hooks=[measure_corner_or_pref.instance(
-                 preference_fn=DSF_WeightedAverage())],
-             normalize='Individually')
-pg.add_plot('Corner Orientation Preference',[('Hue','OrientationPreference')])
-pg.add_plot('Corner Orientation Preference&Selectivity',[('Hue','OrientationPreference'),
-                                                   ('Confidence','OrientationSelectivity')])
-pg.add_plot('Corner Orientation Selectivity',[('Strength','OrientationSelectivity')])
+pg = create_plotgroup(name='Corner OR Preference', category="Preference Maps",
+                      doc='Measure orientation preference for corner shape ('
+                          'or other complex stimuli that cannot be '
+                          'represented as fullfield patterns).',
+                      pre_plot_hooks=[measure_corner_or_pref.instance(
+                          preference_fn=DSF_WeightedAverage())],
+                      normalize='Individually')
+pg.add_plot('Corner Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Corner Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Corner Orientation Selectivity',
+            [('Strength', 'OrientationSelectivity')])
 
 
 class measure_corner_angle_pref(PositionMeasurementCommand):
@@ -843,103 +883,108 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
 
     y_range = param.NumericTuple((-1.0, 1.0))
 
-    num_or = param.Integer(default=4,bounds=(1,None),softbounds=(1,24),doc=
-        "Number of orientations to test.")
+    num_or = param.Integer(default=4, bounds=(1, None), softbounds=(1, 24), doc="""
+        Number of orientations to test.""")
 
-    angle_0 = param.Number(default=0.25*pi,bounds=(0.0,pi),softbounds=(0.0,0.5*pi),doc=
-        "First angle to test.")
+    angle_0 = param.Number(default=0.25 * np.pi, bounds=(0.0, np.pi),
+                           softbounds=(0.0, 0.5 * np.pi), doc="""
+                           First angle to test.""")
 
-    angle_1 = param.Number(default=0.75*pi,bounds=(0.0,pi),softbounds=(0.5*pi,pi),doc=
-        "Last angle to test.")
+    angle_1 = param.Number(default=0.75 * np.pi, bounds=(0.0, np.pi),
+                           softbounds=(0.5 * np.pi, np.pi), doc="""
+                           Last angle to test.""")
 
-    num_angle=param.Integer(default=4,bounds=(1,None),softbounds=(1,12),doc=
-        "Number of angles to test.")
+    num_angle = param.Integer(default=4, bounds=(1, None), softbounds=(1, 12),
+                              doc="Number of angles to test.")
 
-    key_img_fname=param.Filename(default='command/key_angles.png',doc=
-        "Name of the file with the image used to code angles with hues.")
+    key_img_fname = param.Filename(default='command/key_angles.png', doc="""
+        Name of the file with the image used to code angles with hues.""")
 
-    pattern_coordinator=CoordinatedPatternGenerator(pattern_generator=GaussiansCorner(aspect_ratio=4.0,cross=0.85))
+    pattern_generator = param.Callable(
+        default=GaussiansCorner(aspect_ratio=4.0, cross=0.85))
 
-    static_parameters = param.List( default=[ "size", "scale", "offset" ] )
+    static_parameters = param.List(default=["size", "scale", "offset"])
 
 
 
     def _feature_list( self, p ):
-    	"""Return the list of features to vary, generate hue code static image"""
+        """Return the list of features to vary, generate hue code static image"""
         x_step	= ( p.x_range[1]-p.x_range[0] ) / float( p.positions - 1 )
         y_step	= ( p.y_range[1]-p.y_range[0] ) / float( p.positions - 1 )
-	o_step	= 2.0*pi / p.num_or
-	if p.angle_0 < p.angle_1:
+        o_step	= 2.0*np.pi / p.num_or
+        if p.angle_0 < p.angle_1:
             angle_0 = p.angle_0
             angle_1 = p.angle_1
-	else:
+        else:
             angle_0 = p.angle_1
             angle_1 = p.angle_0
-	a_range	= ( angle_0, angle_1 )
-	a_step	= ( angle_1 - angle_0 ) / float( p.num_angle - 1 )
-	self._make_key_image( p )
-        return [
-            Feature( name="x",           range=p.x_range, step=x_step ),
-            Feature( name="y",           range=p.y_range, step=y_step ),
-            Feature( name="orientation", range=(0, 2*pi), step=o_step, cyclic=True ),
-            Feature( name="angle",       range=a_range,   step=a_step,
-                    preference_fn=DSF_WeightedAverage() )
-	]
+        a_range	= ( angle_0, angle_1 )
+        a_step	= ( angle_1 - angle_0 ) / float( p.num_angle - 1 )
+        self._make_key_image( p )
+        return [Feature(name="x", range=p.x_range, step=x_step),
+                Feature(name="y", range=p.y_range, step=y_step),
+                Feature(name="orientation", range=(0, 2 * np.pi), step=o_step,
+                        cyclic=True),
+                Feature(name="angle", range=a_range, step=a_step,
+                        preference_fn=DSF_WeightedAverage())]
 
 
     def _make_key_image( self, p ):
-    	"""Generate the image with keys to hues used to code angles
-	   the image is saved on-the-fly, in order to fit the current
-	   choice of angle range
-	"""
-	width	= 60
-	height	= 300
-	border	= 6
-	n_a	= 7
-	angle_0	= p.angle_0
-	angle_1	= p.angle_1
-	a_step	= 0.5 * ( angle_1 - angle_0 ) / float( n_a )
-	x_0	= border
-	x_1	= ( width - border ) / 2
-	x_a	= x_1 + 2 * border
-	y_use	= height - 2 * border
-	y_step	= y_use / float( n_a )
-	y_d	= int( float( 0.5 * y_step ) )
-	y_0	= border + y_d
-	l	= 15
+        """
+        Generate the image with keys to hues used to code angles the image is
+        saved on-the-fly, in order to fit the current choice of angle range
+        """
+        width = 60
+        height = 300
+        border = 6
+        n_a = 7
+        angle_0 = p.angle_0
+        angle_1 = p.angle_1
+        a_step = 0.5 * ( angle_1 - angle_0 ) / float(n_a)
+        x_0 = border
+        x_1 = ( width - border ) / 2
+        x_a = x_1 + 2 * border
+        y_use = height - 2 * border
+        y_step = y_use / float(n_a)
+        y_d = int(float(0.5 * y_step))
+        y_0 = border + y_d
+        l = 15
 
-	hues	= [ "hsl(%2d,100%%,50%%)" % h		for h in range( 0, 360, 360 / n_a ) ]
-	angles	= [ 0.5*angle_0 + a_step * a		for a in range( n_a ) ]
-	y_pos	= [ int( round( y_0 + y * y_step ) )	for y in range( n_a ) ]
-	deltas	= [ ( int( round( l * cos( a ) ) ), int( round( l * sin( a ) ) ) )
-							for a in angles ]
-	lb_img	= Image.new( "RGB", ( width, height ), "white" )
-	dr_img	= ImageDraw.Draw( lb_img )
+        hues = ["hsl(%2d,100%%,50%%)" % h for h in range(0, 360, 360/n_a)]
+        angles = [0.5*angle_0 + a_step*a for a in range(n_a)]
+        y_pos = [int(np.round(y_0 + y*y_step)) for y in range(n_a)]
+        deltas = [(int(np.round(l * np.cos(a))),
+                   int(np.round(l * np.sin(a)))) for a in angles]
+        lb_img = Image.new("RGB", (width, height), "white")
+        dr_img = ImageDraw.Draw(lb_img)
 
-	for h, y, d	in zip( hues, y_pos, deltas ):
-		dr_img.rectangle( [ ( x_0, y - y_d ), ( x_1, y + y_d ) ], fill = h )
-		dr_img.line( [ ( x_a, y ), ( x_a + d[ 0 ], y + d[ 1 ] ) ], fill = "black" )
-		dr_img.line( [ ( x_a, y ), ( x_a + d[ 0 ], y - d[ 1 ] ) ], fill = "black" )
-	
-	lb_img.save( p.key_img_fname )
+        for h, y, d	in zip( hues, y_pos, deltas ):
+            dr_img.rectangle([(x_0, y - y_d), (x_1, y + y_d)], fill=h)
+            dr_img.line([(x_a, y), (x_a + d[0], y + d[1])], fill="black")
+            dr_img.line([(x_a, y), (x_a + d[0], y - d[1])], fill="black")
 
-	#return( p.key_img_fname.default )
-		
+        lb_img.save( p.key_img_fname )
 
-pg= create_plotgroup(name='Corner Angle Preference',category="Preference Maps",
-             doc='Measure preference for angles in corner shapes',
-             normalize='Individually')
-pg.pre_plot_hooks=[ measure_corner_angle_pref.instance() ]
-pg.add_plot('Corner Angle Preference',[('Hue','AnglePreference')])
-pg.add_plot('Corner Angle Preference&Selectivity',[('Hue','AnglePreference'),
-                                                   ('Confidence','AngleSelectivity')])
-pg.add_plot('Corner Angle Selectivity',[('Strength','AngleSelectivity')])
-pg.add_plot('Corner Orientation Preference',[('Hue','OrientationPreference')])
-pg.add_plot('Corner Orientation Preference&Selectivity',[('Hue','OrientationPreference'),
-                                                   ('Confidence','OrientationSelectivity')])
-pg.add_plot('Corner Orientation Selectivity',[('Strength','OrientationSelectivity')])
-pg.add_static_image( 'Hue Code', measure_corner_angle_pref.instance().key_img_fname )
+        return( p.key_img_fname.default )
 
+
+pg = create_plotgroup(name='Corner Angle Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for angles in corner shapes',
+                      normalize='Individually')
+pg.pre_plot_hooks = [measure_corner_angle_pref.instance()]
+pg.add_plot('Corner Angle Preference', [('Hue', 'AnglePreference')])
+pg.add_plot('Corner Angle Preference&Selectivity',
+            [('Hue', 'AnglePreference'), ('Confidence', 'AngleSelectivity')])
+pg.add_plot('Corner Angle Selectivity', [('Strength', 'AngleSelectivity')])
+pg.add_plot('Corner Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Corner Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Corner Orientation Selectivity',
+            [('Strength', 'OrientationSelectivity')])
+pg.add_static_image('Hue Code',
+                    measure_corner_angle_pref.instance().key_img_fname)
 
 
 class PatternPresenter2(param.Parameterized):
@@ -1030,7 +1075,7 @@ class frequency_mapper(PatternGenerator):
 
     def __init__(self, **params):
         super(frequency_mapper, self).__init__(**params)
-        self.frequency_spacing = round(self.frequency_spacing)
+        self.frequency_spacing = np.round(self.frequency_spacing)
 
 
     def getFrequency(self):
@@ -1043,7 +1088,7 @@ class frequency_mapper(PatternGenerator):
 
 
     def setFrequency(self, new_frequency):
-        index = nonzero(self.frequency_spacing >= new_frequency)[0][0]
+        index = np.nonzero(self.frequency_spacing >= new_frequency)[0][0]
 
         sheet_range = self.bounds.lbrt()
         y_range = sheet_range[3] - sheet_range[1]
@@ -1054,7 +1099,8 @@ class frequency_mapper(PatternGenerator):
         setattr(self, 'y', y)
 
 
-    frequency = property(getFrequency, setFrequency, "The frequency at which to present.")
+    frequency = property(getFrequency, setFrequency,
+                         "The frequency at which to present.")
 
 
     def function(self, p):
@@ -1087,18 +1133,27 @@ class measure_frequency_preference(MeasureResponseCommand):
         except AttributeError:
             min_frequency = 1
             max_frequency = int(divisions) + 1
-            frequency_spacing = linspace(min_frequency, max_frequency, num=divisions+1, endpoint=True)
-            self.warning("Input generator is missing min_frequency, max_frequency, or frequency_spacing - will present linearly from", str(min_frequency), "to", str(max_frequency), "instead.")
+            frequency_spacing = np.linspace(min_frequency, max_frequency,
+                                         num=divisions+1, endpoint=True)
+            self.warning("Input generator is missing min_frequency, "
+                         "max_frequency, or frequency_spacing - will present "
+                         "linearly from {min} to {max} instead.".format(
+                min=min_frequency, max=max_frequency))
 
-        generator = frequency_mapper(size=1.0/divisions, frequency_spacing=frequency_spacing)
+        generator = frequency_mapper(size=1.0 / divisions,
+                                     frequency_spacing=frequency_spacing)
         self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
 
-        return [Feature(name="frequency", range=(min_frequency,max_frequency), step=1)]
+        return [Feature(name="frequency", range=(min_frequency, max_frequency),
+                        step=1)]
 
 
-pg= create_plotgroup(name='Frequency Preference and Selectivity', category="Auditory",
-    pre_plot_hooks=[measure_frequency_preference.instance()], normalize='Individually',
-    doc='Measure a best frequency preference and selectivity map for auditory neurons.')
+pg = create_plotgroup(name='Frequency Preference and Selectivity',
+                      category="Auditory",
+                      pre_plot_hooks=[measure_frequency_preference.instance()],
+                      normalize='Individually',
+                      doc='Measure a best frequency preference and selectivity'
+                          ' map for auditory neurons.')
 
 pg.add_plot('[Frequency Preference]', [('Strength','FrequencyPreference')])
 pg.add_plot('[Frequency Selectivity]', [('Strength','FrequencySelectivity')])
@@ -1123,7 +1178,7 @@ class log_frequency_mapper(PatternGenerator):
 
     def __init__(self, **params):
         super(log_frequency_mapper, self).__init__(**params)
-        self.frequency_spacing = round(self.frequency_spacing)
+        self.frequency_spacing = np.round(self.frequency_spacing)
 
 
     def getFrequency(self):
@@ -1171,13 +1226,14 @@ class measure_log_frequency_preference(MeasureResponseCommand):
         except AttributeError:
             min_frequency = 1
             max_frequency = int(divisions) + 1
-            frequency_spacing = linspace(min_frequency, max_frequency, num=divisions+1, endpoint=True)
+            frequency_spacing = np.linspace(min_frequency, max_frequency,
+                                            num=divisions+1, endpoint=True)
             self.warning("Input generator is missing min_frequency, max_frequency, or frequency_spacing - will present linearly from", str(min_frequency), "to", str(max_frequency), "instead.")
 
         generator = log_frequency_mapper(size=1.0/divisions, frequency_spacing=frequency_spacing)
         self.pattern_presenter = PatternPresenter2(pattern_generator=generator)
 
-        return [Feature(name="frequency", range=(0,divisions), step=1)]
+        return [Feature(name="frequency", range=(0, divisions), step=1)]
 
 
 pg= create_plotgroup(name='Log Frequency Band Preference and Selectivity', category="Auditory",
@@ -1268,9 +1324,12 @@ class measure_latency_preference(MeasureResponseCommand):
         return [Feature(name="latency", range=(min_latency,max_latency), step=1)]
 
 
-pg= create_plotgroup(name='Latency Preference and Selectivity', category="Auditory",
-    pre_plot_hooks=[measure_latency_preference.instance()], normalize='Individually',
-    doc='Measure a best onset latency preference and selectivity map for auditory neurons.')
+pg = create_plotgroup(name='Latency Preference and Selectivity',
+                      category="Auditory",
+                      pre_plot_hooks=[measure_latency_preference.instance()],
+                      normalize='Individually',
+                      doc='Measure a best onset latency preference and'
+                          ' selectivity map for auditory neurons.')
 
 pg.add_plot('[Latency Preference]', [('Strength','LatencyPreference')])
 pg.add_plot('[Latency Selectivity]', [('Strength','LatencySelectivity')])

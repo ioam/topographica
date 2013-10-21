@@ -28,18 +28,10 @@ from simulation import EventProcessor
 from sheetcoords import SheetCoordinateSystem
 from boundingregion import BoundingBox, BoundingRegionParameter
 from functionfamily import TransferFn
-
+from topo.misc.attrdict import AttrDict
 
 activity_type = float64
 
-class AttrDict(dict):
-    """
-    A dictionary type object that supports attribute access (e.g. for
-    IPython tab completion).
-    """
-    def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
 
 # (disable W0223 because input_event is deliberately still not implemented)
 class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
@@ -114,7 +106,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Initialize this object as an EventProcessor, then also as
         a SheetCoordinateSystem with equal xdensity and ydensity.
 
-        sheet_views is a dictionary that stores SheetViews,
+        views is an AttrDict, which stores associated measurements,
         i.e. representations of the sheet for use by analysis or plotting
         code.
         """
@@ -136,8 +128,10 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         # For non-plastic inputs
         self.__saved_activity = []
         self._plasticity_setting_stack = []
-        self.sheet_views =  AttrDict()
-        self.views = self.sheet_views
+
+        self.views = AttrDict()
+        self.views['maps'] = AttrDict()
+        self.views['curves'] = AttrDict()
 
 
     ### JABALERT: This should be deleted now that sheet_views is public
@@ -150,8 +144,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Delete the dictionary entry with key entry 'view_name' to save
         memory.
         """
-        if self.sheet_views.has_key(view_name):
-            del self.sheet_views[view_name]
+        if view_name in self.views.maps:
+            del self.views.maps[view_name]
 
 
     # CB: what to call this? sheetcoords()? sheetcoords_of_grid()? idxsheetcoords()?

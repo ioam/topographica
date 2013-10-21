@@ -61,6 +61,7 @@ sys.path = [os.path.join(basepath, '../', 'external', 'imagen')] + sys.path
 sys.path = [os.path.join(basepath, '../', 'external', 'lancet')] + sys.path
 
 import param
+import imagen
 
 # Patch for versions of param prior to 10 May 2013
 param.main=param.Parameterized(name="main")
@@ -378,9 +379,9 @@ except:
     pass
 
 
-from topo.analysis.featureresponses import FeatureResponses, MeasureResponseCommand,FeatureCurveCommand, pattern_response, io_shapes, store_measurement, get_feature_preference
+from topo.analysis.featureresponses import FeatureResponses, MeasureResponseCommand,FeatureCurveCommand, pattern_response, topo_metadata_fn, store_measurement, get_feature_preference
 
-FeatureResponses.io_dimensions_hook = io_shapes
+FeatureResponses.metadata_fns = [topo_metadata_fn]
 FeatureResponses.measurement_storage_hook = store_measurement
 
 MeasureResponseCommand.preference_lookup_fn = get_feature_preference

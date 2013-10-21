@@ -11,6 +11,7 @@ originating source object.
 
 import param
 
+
 class SheetView(param.Parameterized):
     """
     Class provided for backward compatibility with earlier SheetView
@@ -42,18 +43,20 @@ class SheetView(param.Parameterized):
         SheetView model. It is now easier to access the data and
         bounds attributes directly.
         """
+        self.warning('Viewing with old SheetView class')
         if hasattr(self, 'data'):
             return (self.data, self.bounds)
         else: # Necessary for backward compatibility with older snapshots.
             return self._view_list[0]
 
     def __init__(self, (data, bounds), src_name=None, precedence=0.0,
-                 timestamp=-1, row_precedence=0.5):
+                 timestamp=-1, row_precedence=0.5,**params):
+        self.warning('Initializing old SheetView class')
         super(SheetView,self).__init__(bounds=bounds,
                                        src_name = src_name,
                                        precedence = precedence,
                                        timestamp = timestamp,
-                                       row_precedence = row_precedence)
+                                       row_precedence = row_precedence, **params)
         self._view_list = []
         self.data = data
 

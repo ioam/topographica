@@ -22,10 +22,11 @@ from Tkinter import Frame
 import param
 import paramtk as tk
 
+from imagen.dataview import FeatureRangeMap, SheetView
+
 import topo
 
 from topo.base.functionfamily import PatternDrivenAnalysis
-from topo.base.sheetview import SheetView
 from topo.base.patterngenerator import PatternGenerator, Constant
 from topo.misc.generatorsheet import GeneratorSheet
 from topo.plotting.plot import make_template_plot
@@ -49,13 +50,21 @@ class TestPatternPlotGroup(SheetPlotGroup):
         dynamic_plots = []
         for kw in [dict(sheet=sheet) for sheet in self.sheets()]:
             sheet = kw['sheet']
-            new_view = SheetView((sheet.input_generator(),sheet.bounds),
-                                  sheet.name,sheet.precedence,topo.sim.time())
-            sheet.sheet_views['Activity']=new_view
+            views = topo.sim.views[sheet.name].maps
+
+            new_view = SheetView(sheet.input_generator(), bounds=sheet.bounds)
+
+            if 'Activity' not in views:
+                views['Activity'] = FeatureRangeMap(new_view, src_name=sheet.name,
+                                                    precedence=sheet.precedence,
+                                                    row_precedence=sheet.row_precedence,
+                                                    timestamp=topo.sim.time())
+            else:
+                views['Activity'].add_item(topo.sim.time(), new_view)
             channels = {'Strength':'Activity','Hue':None,'Confidence':None}
 
             ### JCALERT! it is not good to have to pass '' here... maybe a test in plot would be better
-            dynamic_plots.append(make_template_plot(channels,sheet.sheet_views,
+            dynamic_plots.append(make_template_plot(channels,topo.sim.views[sheet.name].maps,
                                                     sheet.xdensity,sheet.bounds,self.normalize,
                                                     name=''))
 
@@ -178,6 +187,6 @@ class TestPattern(SheetPanel):
                            for sheet in self.plotgroup.sheets()])
         pattern_present(inputs=input_dict,duration=self.duration,
                         plastic=self.plastic,overwrite_previous=False,
-                        force_sheetview=True,restore_state=True)
+                        install_sheetview=True,restore_state=True)
         topo.guimain.auto_refresh(update=False)
 

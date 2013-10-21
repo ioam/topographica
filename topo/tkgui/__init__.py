@@ -199,10 +199,10 @@ def start(mainloop=False,banner=True):
 
 
 
-
+from topo.command import pylabplot
 #######################
 
 if __name__ == '__main__':
     start(mainloop=True)
-
+    pylabplot.PylabPlotCommand.display_window = True
 
