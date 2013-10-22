@@ -230,7 +230,7 @@ class TemplatePlot(Plot):
         """
         sheet_view_key = self.channels.get(key,None)
         sv = self.view_dict.get(sheet_view_key, None)
-        if sv == None:
+        if sv == None or sv.top == None:
             matrix = None
         else:
             matrix = sv.top.data.copy()

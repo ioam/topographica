@@ -8,7 +8,7 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from imagen.dataview import SheetView, ProjectionGrid, FeatureRangeMap
+from imagen.dataview import SheetView, FeatureRangeMap
 from topo.misc.attrdict import AttrDict
 
 from topo.misc.keyedlist import KeyedList # CEBALERT: not in base

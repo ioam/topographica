@@ -621,7 +621,7 @@ class CFProjection(Projection):
 
         if 'cfs' not in self.dest.views:
             self.dest.views['cfs'] = AttrDict()
-        self.dest.views.cfs[self.name] = ProjectionGrid(bounds=self.src.bounds,
+        self.dest.views.cfs[self.name] = ProjectionGrid(bounds=self.dest.bounds,
                                                         shape=self.activity.shape,
                                                         proj_name=self.name,
                                                         proj_src_name=self.src.name,
