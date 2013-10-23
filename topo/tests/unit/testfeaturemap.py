@@ -216,7 +216,8 @@ class TestFeatureMaps(unittest.TestCase):
         self.feature_param = [Feature(name="phase",range=(0.0,1.0),values=[0.2,0.4,0.6],cyclic=False),
                               Feature(name="orientation",range=(0.0,1.0),step=0.5,cyclic=True)]
 
-        self.x = FeatureMaps(self.feature_param,pattern_presenting_cmd=pattern_response.instance(),
+        self.x = FeatureMaps(self.feature_param,
+                             pattern_response_fn=pattern_response.instance(),
                              pattern_generator=SineGrating())
         #print self.V1.activity
         #### test has to be written!!!

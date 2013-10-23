@@ -16,7 +16,7 @@ import param
 from param import normalize_path
 from topo.misc.distribution import DSF_WeightedAverage
 
-from imagen.dataview import SheetView, FeatureRangeMap
+from imagen.dataview import SheetView, NDDict
 
 try:
     import matplotlib
@@ -108,32 +108,32 @@ def complexity(full_matrix):
 
             if x==43 and y==43:
                 pylab.figure()
-		ax = pylab.subplot(111)
-		z = complex_matrix[x,y][:]
-		z.append(z[0])
-                pylab.plot(z,linewidth=4)
-		pylab.axis(xmin=0.0,xmax=numpy.pi)
-		ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
-		pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
-		pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[43,43].png'))
+        ax = pylab.subplot(111)
+        z = complex_matrix[x,y][:]
+        z.append(z[0])
+        pylab.plot(z,linewidth=4)
+        pylab.axis(xmin=0.0,xmax=numpy.pi)
+        ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
+        pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
+        pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[43,43].png'))
 
-            if x==45 and y==45:
-                pylab.figure()
-		ax = pylab.subplot(111)
-		z = complex_matrix[x,y][:]
-		z.append(z[0])
-                pylab.plot(z,linewidth=4)
-		pylab.axis(xmin=0.0,xmax=numpy.pi)
-		ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
-		pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
-		pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[45,45].png'))
-		
-            fft = numpy.fft.fft(complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y],2048)
-            first_har = 2048/len(complex_matrix[0,0])
-            if abs(fft[0]) != 0:
-                fftmeasure[x,y] = 2 *abs(fft[first_har]) /abs(fft[0])
-            else:
-                fftmeasure[x,y] = 0
+        if x==45 and y==45:
+            pylab.figure()
+        ax = pylab.subplot(111)
+        z = complex_matrix[x,y][:]
+        z.append(z[0])
+        pylab.plot(z,linewidth=4)
+        pylab.axis(xmin=0.0,xmax=numpy.pi)
+        ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
+        pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
+        pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[45,45].png'))
+
+        fft = numpy.fft.fft(complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y],2048)
+        first_har = 2048/len(complex_matrix[0,0])
+        if abs(fft[0]) != 0:
+            fftmeasure[x,y] = 2 *abs(fft[first_har]) /abs(fft[0])
+        else:
+            fftmeasure[x,y] = 0
     return fftmeasure
 
 
@@ -155,7 +155,7 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
     metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
                     src_name=sheet.name, timestamp=topo.sim.time())
     if "orientationACDC" not in sheet.curves:
-        sheet.views.curves["orientationACDC"] = FeatureRangeMap(**metadata)
+        sheet.views.curves["orientationACDC"] = NDDict(**metadata)
     curve_storage = sheet.views.curves["orientationACDC"]
 
     rows,cols = full_matrix.matrix_shape
@@ -176,9 +176,9 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
                 first_har = 2048/len(or_response)
                 s_w[x][y] = numpy.maximum(2*abs(fft[first_har]), abs(fft[0]))
         sv = SheetView(s_w, sheet.bounds)
-        new_item = FeatureRangeMap({full_matrix.features[orientation_index].values[o]:sv},
-                                   **metadata)
-        curve_storage.add_item(curve_label, new_item)
+        new_item = NDDict((full_matrix.features[orientation_index].values[o],sv),
+                          **metadata)
+        curve_storage[curve_label] = new_item
 
 
 
@@ -270,16 +270,18 @@ def analyze_complexity(full_matrix,simple_sheet_name,complex_sheet_name,filename
         complx = array(complexity(full_matrix[sheet]))/2.0
         # Should this be renamed to ModulationRatio?
         metadata=dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
-                      src_name=sheet.name, timestamp=topo.sim.time())
+                      src_name=sheet.name)
         sv = SheetView(complx, sheet.bounds)
         if 'ComplexSelectivity' not in sheet.views.maps:
-            sheet.views.maps['ComplexSelectivity'] = FeatureRangeMap(sv,
-                                                                     **metadata)
+            sheet.views.maps['ComplexSelectivity'] = NDDict((topo.sim.time(),sv),
+                                                            **metadata)
         else:
-            sheet.views.maps['ComplexSelectivity'].add_item(topo.sim.time(),
-                                                            sv)
+            sheet.views.maps['ComplexSelectivity'][topo.sim.time()] = sv
     import topo.command.pylabplot
-    topo.command.pylabplot.plot_modulation_ratio(full_matrix,simple_sheet_name=simple_sheet_name,complex_sheet_name=complex_sheet_name,filename=filename)
+    topo.command.pylabplot.plot_modulation_ratio(full_matrix,
+                                                 simple_sheet_name=simple_sheet_name,
+                                                 complex_sheet_name=complex_sheet_name,
+                                                 filename=filename)
 
     # Avoid error if no simple sheet exists
     try:

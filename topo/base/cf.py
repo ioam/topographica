@@ -23,7 +23,7 @@ from copy import copy
 import numpy as np
 import param
 
-from imagen.dataview import FeatureRangeMap, SheetView, ProjectionGrid
+from imagen.dataview import NDDict, SheetView, ProjectionGrid
 
 from topo.misc.attrdict import AttrDict
 
@@ -657,10 +657,10 @@ class CFProjection(Projection):
                 mask_template = self.mask_template
             else:
                 mask_template = _create_mask(self.cf_shape,self.bounds_template,
-                                            self.src,self.autosize_mask,
-                                            self.mask_threshold)
+                                             self.src,self.autosize_mask,
+                                             self.mask_threshold)
 
-            CF = self.cf_type(self.src,x=x,y=y,
+            CF = self.cf_type(self.src, x=x, y=y,
                               template=self._slice_template,
                               weights_generator=self.weights_generator,
                               mask=mask_template,
@@ -710,11 +710,10 @@ class CFProjection(Projection):
 
         sv = SheetView(matrix_data, self.src.bounds, roi=(r1, r2, c1, c2))
 
-        return FeatureRangeMap(sv, coords=(sheet_x, sheet_y),
-                               timestamp=timestamp, dest_name=self.dest.name,
-                               precedence=self.src.precedence,
-                               proj_name=self.name, src_name=self.src.name,
-                               row_precedence=self.src.row_precedence)
+        return NDDict((timestamp, sv), coords=(sheet_x, sheet_y),
+                      dest_name=self.dest.name, precedence=self.src.precedence,
+                      proj_name=self.name, src_name=self.src.name,
+                      row_precedence=self.src.row_precedence)
 
 
     def activate(self,input_activity):
@@ -934,7 +933,7 @@ class CFSheet(ProjectionSheet):
             elif proj_name == '' or p.name==proj_name:
                 v = p.get_view(x, y, self.simulation.time())
                 cfs = self.simulation.views[v.metadata.dest_name].cfs[v.metadata.proj_name]
-                cfs.add_item((x, y), v)
+                cfs[x, y] = v
 
 
 
@@ -988,7 +987,7 @@ class ResizableCFProjection(CFProjection):
 
         # it's ok so we can store the bounds and resize the weights
         mask_template = _create_mask(self.cf_shape,bounds_template,self.src,
-                                    self.autosize_mask,self.mask_threshold)
+                                     self.autosize_mask,self.mask_threshold)
 
         self.mask_template = mask_template
         self.n_units = self._calc_n_units()

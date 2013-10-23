@@ -16,7 +16,7 @@ import param
 from param.parameterized import ParameterizedFunction, ParamOverrides, \
     bothmethod
 
-from imagen.dataview import SheetView, ProjectionGrid, FeatureRangeMap
+from imagen.dataview import SheetView, ProjectionGrid, NDDict
 from imagen.sheetcoords import SheetCoordinateSystem
 
 import topo
@@ -428,6 +428,7 @@ class FeatureMaps(FeatureResponses):
 
     def _collate_results(self, p):
         results = {'fullmatrix': self._fullmatrix if self.store_fullmatrix else None}
+        timestamp = self.metadata.timestamp
 
         for out_label, output_metadata in self.metadata.outputs.items():
             results[out_label] = {}
@@ -447,10 +448,10 @@ class FeatureMaps(FeatureResponses):
                     for map_name, map_view in maps.items():
                         sv = SheetView(map_view, output_metadata['bounds'])
                         cr = None if map_name == 'selectivity' else cyclic_range
-                        metadata = dict(timestamp=self.metadata.timestamp,
-                                        cyclic_range=cr, **output_metadata)
+                        metadata = dict(cyclic_range=cr, **output_metadata)
                         name = base_name + k + map_name.capitalize()
-                        results[out_label][name] = FeatureRangeMap(sv, **metadata)
+                        results[out_label][name] = NDDict((timestamp, sv),
+                                                          **metadata)
 
         return results
 
@@ -513,7 +514,7 @@ class FeatureCurves(FeatureResponses):
                             dimension_labels=[p.x_axis.capitalize()],
                             label=p.label, prefix=p.measurement_prefix,
                             curve_params=p.curve_params, **output_metadata)
-            view = FeatureRangeMap(**metadata)
+            view = NDDict(**metadata)
             rows, cols = output_metadata['shape']
             curve_responses = self._featureresponses[out_label][p.x_axis].distribution_matrix
             for x in curve_responses[0, 0]._data.iterkeys():
@@ -522,7 +523,7 @@ class FeatureCurves(FeatureResponses):
                     for j in range(cols):
                         y_axis_values[i, j] = curve_responses[i, j].get_value(x)
                 sv = SheetView(y_axis_values, output_metadata['bounds'])
-                view.add_item(x, sv)
+                view[x] = sv
             results[out_label] = view
 
         return results
@@ -612,12 +613,12 @@ class ReverseCorrelation(FeatureResponses):
             results[in_label] = {}
             for out_label, output_metadata in self.metadata.outputs.items():
                 rows, cols = output_metadata['shape']
+                timestamp = self.metadata['timestamp']
                 view = ProjectionGrid(label=p.measurement_prefix + 'RFs',
-                                      timestamp=self.metadata['timestamp'],
+                                      timestamp=timestamp,
                                       bounds=output_metadata['bounds'],
                                       shape=output_metadata['shape'])
-                metadata = dict(timestamp=self.metadata['timestamp'],
-                                measurement_src=output_metadata['src_name'],
+                metadata = dict(measurement_src=output_metadata['src_name'],
                                 **input_metadata)
                 rc_response = self._featureresponses[in_label][out_label]
                 for ii in range(rows):
@@ -626,8 +627,8 @@ class ReverseCorrelation(FeatureResponses):
                         sv = SheetView(rc_response[ii, jj],
                                        input_metadata['bounds'])
                         rf_metadata = dict(coord=coord, **metadata)
-                        frm = FeatureRangeMap(sv, **rf_metadata)
-                        view.add_item(coord, frm)
+                        unit_dict = NDDict((timestamp, sv), **rf_metadata)
+                        view[coord] = unit_dict
                 results[in_label][out_label] = view
         return results
 
@@ -1399,18 +1400,16 @@ def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
     sheet = topo.sim.objects(Sheet)[sheet_name]
     view = sheet.views.maps.get(name, False)
     if not view:
-        metadata = dict(bounds=sheet.bounds, timestamp=topo.sim.time(),
-                        src_name=sheet.name, precedence=sheet.precedence,
-                        row_precedence=sheet.row_precedence, depth=1,
+        metadata = dict(bounds=sheet.bounds, depth=1, precedence=sheet.precedence,
+                        row_precedence=sheet.row_precedence, src_name=sheet.name,
                         shape=sheet.activity.shape)
         sv = SheetView(np.array(sheet.activity), sheet.bounds)
-        view = FeatureRangeMap(sv, **metadata)
+        view = NDDict((topo.sim.time(), sv), **metadata)
         sheet.views.maps[name] = view
     else:
         if force or topo.sim.time() > view.timestamp:
             sv = SheetView(np.array(sheet.activity), sheet.bounds)
-            view.add_item(topo.sim.time(), sv)
-
+            view[topo.sim.time()] = sv
     return view
 
 
@@ -1700,7 +1699,7 @@ def store_measurement(measurement_dict):
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
-        if isinstance(sheet_data, FeatureRangeMap):
+        if isinstance(sheet_data, NDDict):
             label = sheet_data.metadata.prefix + sheet_data.dimension_labels[0]
             indexed_features, feature_vals = zip(*sheet_data.metadata.curve_params.items())
             metadata = dict(bounds=sheet_data.metadata.bounds,
@@ -1708,17 +1707,17 @@ def store_measurement(measurement_dict):
                             dimension_labels=list(indexed_features))
             curve_storage = sheet.views.curves
             if label not in curve_storage:
-                curve_storage[label] = FeatureRangeMap(**metadata)
+                curve_storage[label] = NDDict(**metadata)
             else:
                 new_timestamp = sheet_data.timestamp > curve_storage[label].timestamp
                 new_measurement = any([True for c in curve_storage[label][...].values()
                                        if sheet_data.metadata.label == c.metadata.label])
                 if new_timestamp or new_measurement:
-                    curve_storage[label] = FeatureRangeMap(**metadata)
-            curve_storage[label].add_item(feature_vals, sheet_data)
+                    curve_storage[label] = NDDict(**metadata)
+            curve_storage[label][feature_vals] = sheet_data
         else:
             for data_name, data in sheet_data.items():
-                if isinstance(data, FeatureRangeMap):
+                if isinstance(data, NDDict):
                     if data_name not in sheet.views.maps:
                         sheet.views.maps[data_name] = data
                     else:

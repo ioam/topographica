@@ -31,18 +31,16 @@ class TestSheetView(unittest.TestCase):
 
     def test_init(self):
 
-        sv1 = SheetView((self.s.activity,self.s.bounds),
-                          src_name=self.s.name)
+        sv1 = SheetView(self.s.activity,self.s.bounds)
         # s.sheet_view() returns a SheetView
         self.s.views.maps['sv1']=sv1
-        sv2 = SheetView((self.s.activity,self.s.bounds),
-                        src_name=self.s.name)
+        sv2 = SheetView(self.s.activity,self.s.bounds)
         # s.sheet_view() returns a SheetView
         self.s.views.maps['sv2']=sv2
 
         # Define a type 1 SheetView, with matrix and bounding box.
-        sv3 = SheetView((self.s.activity, self.s.bounds))
-        sv4 = SheetView((self.s2.activity,self.s2.bounds))
+        sv3 = SheetView(self.s.activity, self.s.bounds)
+        sv4 = SheetView(self.s2.activity,self.s2.bounds)
 
 
 # CEBALERT: replace with test using FileImage

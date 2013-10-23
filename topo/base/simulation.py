@@ -1168,7 +1168,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
             ep.simulation = self
             self.eps_to_start.append(ep)
 
-            self.views[ep_name] = ep.views
+            if hasattr(ep,'views'):
+                self.views[ep_name] = ep.views
 
 
     def __delitem__(self,ep_name):

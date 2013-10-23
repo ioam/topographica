@@ -22,7 +22,7 @@ from Tkinter import Frame
 import param
 import paramtk as tk
 
-from imagen.dataview import FeatureRangeMap, SheetView
+from imagen.dataview import SheetView, NDDict
 
 import topo
 
@@ -52,15 +52,15 @@ class TestPatternPlotGroup(SheetPlotGroup):
             sheet = kw['sheet']
             views = topo.sim.views[sheet.name].maps
 
-            new_view = SheetView(sheet.input_generator(), bounds=sheet.bounds)
+            sv = SheetView(sheet.input_generator(), bounds=sheet.bounds)
 
             if 'Activity' not in views:
-                views['Activity'] = FeatureRangeMap(new_view, src_name=sheet.name,
-                                                    precedence=sheet.precedence,
-                                                    row_precedence=sheet.row_precedence,
-                                                    timestamp=topo.sim.time())
+                views['Activity'] = NDDict((topo.sim.time(), sv),
+                                           precedence=sheet.precedence,
+                                           row_precedence=sheet.row_precedence,
+                                           src_name=sheet.name,)
             else:
-                views['Activity'].add_item(topo.sim.time(), new_view)
+                views['Activity'][topo.sim.time()] = sv
             channels = {'Strength':'Activity','Hue':None,'Confidence':None}
 
             ### JCALERT! it is not good to have to pass '' here... maybe a test in plot would be better

@@ -65,7 +65,7 @@ class TestPlotGroupSaver(TestPlotGroupSaverBase):
 
     def test_cf_saving(self):
         save_plotgroup("Connection Fields",sheet=self.sim['B'])
-        self.exists("testplotfilesaver_000000.00_Afferent_(from_A).png")
+        self.exists("testplotfilesaver_000000.00_Afferent.png")
 
 @istest
 class TestCFProjectionPlotGroupSaver(TestPlotGroupSaverBase):

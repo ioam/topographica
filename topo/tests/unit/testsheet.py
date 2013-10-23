@@ -7,7 +7,7 @@ from numpy import array
 
 from imagen.dataview import SheetView
 
-from topo.base.sheetcoords import SheetCoordinateSystem,Slice
+from topo.base.sheetcoords import SheetCoordinateSystem, Slice
 from topo.base.sheet import *
 from topo.base.boundingregion import BoundingBox
 

@@ -965,7 +965,7 @@ class measure_corner_angle_pref(PositionMeasurementCommand):
 
         lb_img.save( p.key_img_fname )
 
-        return( p.key_img_fname.default )
+        return( self.key_img_fname )
 
 
 pg = create_plotgroup(name='Corner Angle Preference',

@@ -21,7 +21,7 @@ except ImportError:
     plt = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
 import param
-from imagen.dataview import SheetView
+from imagen.dataview import SheetView, NDDict
 import numpy as np
 from numpy.fft.fftpack import fft2
 from numpy.fft.helper import fftshift
@@ -473,8 +473,8 @@ class topographic_grid(xy_grid):
         for sheet in topo.sim.objects(Sheet).values():
             if ((p.xsheet_view_name in sheet.views.maps) and
                     (p.ysheet_view_name in sheet.views.maps)):
-                x = sheet.views.maps[p.xsheet_view_name].view()[0]
-                y = sheet.views.maps[p.ysheet_view_name].view()[0]
+                x = sheet.views.maps[p.xsheet_view_name].top.data
+                y = sheet.views.maps[p.ysheet_view_name].top.data
 
                 filename_suffix = "_" + sheet.name
                 title = 'Topographic mapping to ' + sheet.name + ' at time ' \
@@ -1030,16 +1030,17 @@ class measure_cog(ParameterizedFunction):
                 xpref[r][c]= xcentroid
                 ypref[r][c]= ycentroid
 
-        metadata = dict(precedence=sheet.precedence,
-                        row_precedence=sheet.row_precedence,
-                        src_name=sheet.name, timestamp=topo.sim.time())
+        metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
+                        src_name=sheet.name)
+
+        timestamp=topo.sim.time()
 
         xpref_sv = SheetView(xpref, sheet.bounds)
-        ypref_sv = SheetView(xpref, sheet.bounds)
+        ypref_sv = SheetView(ypref, sheet.bounds)
 
-        sheet.views.maps['XCoG'] = FeatureRangeMap(sv, **metadata)
+        sheet.views.maps['XCoG'] = NDDict((timestamp, xpref_sv), **metadata)
 
-        sheet.views.maps['YCoG'] = FeatureRangeMap(sv, **metadata)
+        sheet.views.maps['YCoG'] = NDDict((timestamp, ypref_sv), **metadata)
 
 
 pg= create_plotgroup(name='Center of Gravity',category="Preference Maps",
