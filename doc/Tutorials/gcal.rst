@@ -2,17 +2,20 @@
 GCAL Orientation Map
 ********************
 
-This tutorial shows how to use the `Topographica`_ software package
-to explore a simple orientation map simulation using test patterns
-and weight plots.
+This tutorial shows how to use the `Topographica`_ software package to
+explore an orientation map simulation using test patterns and weight
+plots.
 
 We will use the GCAL model `(Stevens et al., J. Neuroscience 2013)
-<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_.  a relatively
-simple and easy-to-understand cortical model.  Much more complex and
-realistic simulations can be built using the same underlying
-components in Topographica, e.g. by including multiple cell classes
-and laminae in each simulated region, or simulating finer time steps,
-but this model is already capable of surprisingly complex behavior.
+<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_,  a relatively
+simple and easy-to-understand cortical model.  As described in 
+`Bednar (J. Physiology-Paris, 106:194-211 2013)
+<http://dx.doi.org/10.1016/j.jphysparis.2011.12.001>`_, much more
+complex and realistic simulations can be built using the same
+underlying components in Topographica, e.g. by including multiple cell
+classes and laminae in each simulated region, or simulating finer time
+steps, but this model is already capable of surprisingly complex
+behavior. 
 
 This tutorial assumes that you have already followed the
 instructions for `obtaining and installing`_ Topographica. Also, you

@@ -66,6 +66,7 @@ import imagen
 # Patch for versions of param prior to 10 May 2013
 param.main=param.Parameterized(name="main")
 
+
 def version_int(v):
     """
     Convert a version four-tuple to a format that can be used to compare
@@ -73,11 +74,15 @@ def version_int(v):
     """
     return int("%02d%02d%02d%05d" % v)
 
+
+
 def version_str(v):
 	"""
 	Convert a version four-tuple to a string format x.y.z
 	"""
 	return "%d.%d.%d" % (v[0], v[1], v[2])
+
+
 
 def _find_version():
     """
@@ -86,44 +91,51 @@ def _find_version():
     information avaliable).
     """
 
-    pickle_allowed = True
-    git_output = "v0.0.0-0-"
-
-    (basepath,_) = os.path.split(os.path.abspath(__file__))
-
-    try:
-        git_process = Popen(["git", "describe"], stdout=PIPE, stderr=PIPE, cwd=basepath)
-        git_output = git_process.communicate()[0].strip()
-        if git_process.poll():
-            raise OSError
-    except OSError, CalledProcessError: #pyflakes:ignore (has to do with Python versions for CalledProcessError)
-        try:
-            release_file = open(basepath + "/.release")
-            git_output = release_file.read()
-            release_file.close()
-        except IOError:
-            param.main.warning("""\
+    version_warning = """\
 Unable to determine the version information for this copy of Topographica.
 
 For an official release, the version information is stored in a file
 named topo/.release.  For a development copy checked out from Git, the
 version is requested using "git describe".  Neither of these options
-was successful, perhaps because Git is not available on this machine.
-To work around this problem, either install Git on this machine, or
-temporarily use a machine that does have Git and run "topographica
-make-release-file", making sure you have write permissions on
-Topographica's root directory.
+was successful (output: "%s"), 
+perhaps because Git is not available on this machine.  To work around
+this problem, either install Git on this machine, or temporarily use a
+machine that does have Git and run "topographica make-release-file",
+making sure you have write permissions on Topographica's root
+directory.
 
 In the meantime, reading and saving snapshots will be disabled,
 because version information is necessary for determining how to
-interpret saved files.\n\n""")
-            pickle_allowed = False
-            git_output = "v0.0.0-0-"
+interpret saved files.\n\n""" 
 
-    (_version, count, _commit) = git_output[1:].split("-")
-    _version = _version.split(".")
-    _version = (int(_version[0]), int(_version[1]), int(_version[2]), int(count))
-    _release = version_int(_version)
+    version_string = None
+
+    (basepath,_) = os.path.split(os.path.abspath(__file__))
+
+    try:
+        git_process = Popen(["git","describe","--long","--match","v*.*.*"], stdout=PIPE, stderr=PIPE, cwd=basepath)
+        version_string = git_process.communicate()[0].strip()
+        if git_process.poll():
+            raise OSError
+
+    except OSError, CalledProcessError: #pyflakes:ignore (has to do with Python versions for CalledProcessError)
+        try:
+            release_file = open(basepath + "/.release")
+            version_string = release_file.read()
+            release_file.close()
+        except IOError:
+            pass
+
+    try:
+        (_version, count, _commit) = version_string[1:].split("-")
+        _version = _version.split(".")
+        _version = (int(_version[0]), int(_version[1]), int(_version[2]), int(count))
+        _release = version_int(_version)
+        pickle_allowed = True
+
+    except:
+        param.main.warning(version_warning % version_string)
+        (_version, _release, _commit, pickle_allowed) = ((0,0,0,0),0,0,False)
 
     return (_version, _release, _commit, pickle_allowed)
 
@@ -132,76 +144,16 @@ interpret saved files.\n\n""")
 
 
 
-import errno
-import platform
-
-
-def _win_documents_path():
-    """
-    Return the Windows "My Documents" folder path, if available.
-    """
-    # Accesses the Windows API via ctypes
-    import ctypes
-    import ctypes.wintypes
-
-    CSIDL_PERSONAL = 0x0005
-    dll = ctypes.windll.shell32
-    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH + 1)
-    if dll.SHGetSpecialFolderPathW(None, buf, CSIDL_PERSONAL, False):
-        return buf.value.encode()
-    else:
-        raise ValueError
-
-
-def _xdg_documents_path():
-    """
-    Return the Linux/UNIX XDG "Documents" folder path, if available.
-    """
-    # Runs the xdg-user-dir command from xdg-utils
-    # (which comes with most Linux systems)
-
-    import subprocess
-    p = subprocess.Popen(["xdg-user-dir", "DOCUMENTS"], stdout=subprocess.PIPE)
-    path = p.communicate()[0].strip()
-    if path:
-        return path
-    else:
-        raise ValueError
-
-
-# Determine the appropriate location in which to create files
-# on this operating system
-_default_output_path = os.path.join(os.path.expanduser('~'),
-                                    'Documents', 'Topographica')
-try:
-    documents = _xdg_documents_path()
-    _default_output_path = os.path.join(documents, 'Topographica')
-except: pass
-
-if platform.system() == 'Windows':
-    try:
-        documents = _win_documents_path()
-        _default_output_path = os.path.join(documents, 'Topographica')
-    except: pass
-
-
-# Make sure the default output path exists
-if not os.path.exists(_default_output_path):
-    print "Creating %s"%_default_output_path
-    try:
-        os.makedirs(_default_output_path)
-    except OSError, e:
-        if e.errno != errno.EEXIST:
-            raise
-
-
-# Location of topo/ package. This kind of thing won't work with py2exe
-# etc. Need to see if we can get rid of it.
-_package_path = os.path.split(__file__)[0]
-
-param.normalize_path.prefix = _default_output_path
-# CEBALERT: _default_output_path shouldn't be in there, right?
-param.resolve_path.search_paths+=([_default_output_path] + [_package_path])
+# Determine which paths to search for input files
+#
+# By default, searches in:
+# - the current working directory (the default value of param.resolve_path.search_paths),
+# - the parent of topo (to get images/, examples/, etc.)
+# - topo (for backwards compatibility, e.g. for finding color keys)
+#
+_package_path = os.path.split(__file__)[0] # location of topo
+_root_path = os.path.abspath(os.path.join(_package_path,'..')) # parent of topo
+param.resolve_path.search_paths+=[_root_path,_package_path]
 
 
 
