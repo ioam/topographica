@@ -127,7 +127,7 @@ TK_SUPPORTS_DOCK = True
 
 # gets set to the TopoConsole instance created by start.
 console = None
-def start(mainloop=False,banner=True):
+def start(mainloop=False,banner=True,exit_on_quit=True):
     """
     Start Tk and read in an options_database file (if present), then
     open a TopoConsole.
@@ -173,7 +173,7 @@ def start(mainloop=False,banner=True):
     except Tkinter.TclError:
         pass
 
-    console = TopoConsole(paramtk.root)
+    console = TopoConsole(paramtk.root,exit_on_quit)
 
     # Provide a way for other code to access the GUI when necessary
     topo.guimain=console
