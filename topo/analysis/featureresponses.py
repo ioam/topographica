@@ -1088,12 +1088,16 @@ class MeasureResponseCommand(PatternPresentingCommand):
         if p.subplot != "":
             Subplotting.set_subplots(p.subplot, force=True)
 
-        return FeatureMaps(self._feature_list(p), duration=p.duration,
-                           inputs=p.inputs, metafeature_fns=p.metafeature_fns,
-                           measurement_prefix=p.measurement_prefix,
-                           outputs=p.outputs, param_dict=static_params,
-                           pattern_generator=p.pattern_generator,
-                           pattern_response_fn=p.pattern_response_fn)
+        results = FeatureMaps(self._feature_list(p), duration=p.duration,
+                              inputs=p.inputs, metafeature_fns=p.metafeature_fns,
+                              measurement_prefix=p.measurement_prefix,
+                              outputs=p.outputs, param_dict=static_params,
+                              pattern_generator=p.pattern_generator,
+                              pattern_response_fn=p.pattern_response_fn)
+
+        self._restore_presenter_defaults()
+
+        return results
 
 
     def _feature_list(self, p):
@@ -1106,11 +1110,24 @@ class MeasureResponseCommand(PatternPresentingCommand):
         """
         Overrides parameters of the pattern_response_fn and
         pattern_coordinator, using extra_keywords passed into the
-        MeasurementResponseCommand.
+        MeasurementResponseCommand and saves the default parameters to restore
+        after measurement is complete.
         """
+        self._pr_fn_params = p.pattern_response_fn.get_param_values()
         for override, value in p.extra_keywords().items():
             if override in p.pattern_response_fn.params():
                 p.pattern_response_fn.set_param(override, value)
+
+
+    def _restore_presenter_defaults(self):
+        """
+        Restores the default pattern_response_fn parameters after the
+        measurement.
+        """
+        params = self.pattern_response_fn.params()
+        for key, value in self._pr_fn_params:
+            if not params[key].constant:
+                self.pattern_response_fn.set_param(key, value)
 
 
 
@@ -1227,7 +1244,9 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
         in each sheet."""
         p = ParamOverrides(self, params, allow_extra_keywords=True)
         self._set_presenter_overrides(p)
-        return self._compute_curves(p)
+        results = self._compute_curves(p)
+        self._restore_presenter_defaults()
+        return results
 
 
     def _compute_curves(self, p, val_format='%s'):

@@ -1108,10 +1108,13 @@ class measure_or_tuning(UnitCurveCommand):
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
+        results = {}
         for coord in p.coords:
             p.x = p.preference_lookup_fn('x',p.outputs[0],coord,default=coord[0])
             p.y = p.preference_lookup_fn('y',p.outputs[0],coord,default=coord[1])
-            self._compute_curves(p)
+            results[coord] = self._compute_curves(p)
+        self._restore_presenter_defaults()
+        return results
 
 
 create_plotgroup(template_plot_type="curve",name='Orientation Tuning',category="Tuning Curves",doc="""
@@ -1159,13 +1162,16 @@ class measure_size_response(UnitCurveCommand):
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
+        results = {}
         for coord in p.coords:
             # Orientations are stored as a normalized value beween 0
             # and 1, so we scale them by pi to get the true orientations.
             p.orientation = p.preference_lookup_fn('orientation',p.outputs[0],coord)
             p.x = p.preference_lookup_fn('x',p.outputs[0],coord,default=coord[0])
             p.y = p.preference_lookup_fn('y',p.outputs[0],coord,default=coord[1])
-            self._compute_curves(p)
+            results[coord] = self._compute_curves(p)
+        self._restore_presenter_defaults()
+        return results
 
 
     # Why not vary frequency too?  Usually it's just one number, but it could be otherwise.
@@ -1216,6 +1222,7 @@ class measure_contrast_response(UnitCurveCommand):
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
+        results = {}
         for coord in p.coords:
             orientation=p.preference_lookup_fn('orientation',p.outputs[0],coord)
             self.curve_parameters=[{"orientation":orientation+ro} for ro in p.relative_orientations]
@@ -1223,7 +1230,9 @@ class measure_contrast_response(UnitCurveCommand):
             p.x = p.preference_lookup_fn('x',p.outputs[0],coord,default=coord[0])
             p.y = p.preference_lookup_fn('y',p.outputs[0],coord,default=coord[1])
 
-            self._compute_curves(p,val_format="%.4f")
+            results[coord] = self._compute_curves(p,val_format="%.4f")
+        self._restore_presenter_defaults()
+        return results
 
     def _feature_list(self,p):
         return [Feature(name="phase",range=(0.0,2*np.pi),step=2*np.pi/p.num_phase,cyclic=True),
@@ -1270,7 +1279,7 @@ class measure_frequency_response(UnitCurveCommand):
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
-
+        results = {}
         for coord in p.coords:
             # Orientations are stored as a normalized value beween 0
             # and 1, so we scale them by pi to get the true orientations.
@@ -1278,7 +1287,10 @@ class measure_frequency_response(UnitCurveCommand):
             p.x = p.preference_lookup_fn('x',p.outputs[0],coord,default=coord[0])
             p.y = p.preference_lookup_fn('y',p.outputs[0],coord,default=coord[1])
 
-            self._compute_curves(p)
+            results[coord] = self._compute_curves(p)
+        self._restore_presenter_defaults()
+        return results
+
 
     def _feature_list(self,p):
         return [Feature(name="orientation",values=[p.orientation],cyclic=True),
@@ -1344,6 +1356,7 @@ class measure_orientation_contrast(UnitCurveCommand):
     def __call__(self,**params):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
+        results = {}
         for coord in p.coords:
             self.or_surrounds=[]
             orientation=p.preference_lookup_fn('orientation',p.outputs[0],coord,default=p.orientation_center)
@@ -1356,7 +1369,9 @@ class measure_orientation_contrast(UnitCurveCommand):
             p.x = p.preference_lookup_fn('x',p.outputs[0],coord,default=coord[0])
             p.y = p.preference_lookup_fn('y',p.outputs[0],coord,default=coord[1])
 
-            self._compute_curves(p)
+            results[coord] = self._compute_curves(p)
+        self._restore_presenter_defaults()
+        return results
 
     def _feature_list(self,p):
         return [Feature(name="phase",range=(0.0,2*np.pi),step=2*np.pi/p.num_phase,cyclic=True),

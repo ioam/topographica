@@ -342,4 +342,3 @@ ReverseCorrelation.measurement_storage_hook = store_rfs
 
 MeasureResponseCommand.preference_lookup_fn = get_feature_preference
 MeasureResponseCommand.pattern_response_fn = pattern_response.instance()
-FeatureCurveCommand.pattern_response_fn = pattern_response.instance()

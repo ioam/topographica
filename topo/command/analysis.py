@@ -339,11 +339,15 @@ class measure_rfs(SingleInputResponseCommand):
         p=ParamOverrides(self,params,allow_extra_keywords=True)
         self._set_presenter_overrides(p)
         static_params = dict([(s,p[s]) for s in p.static_parameters])
-        ReverseCorrelation(self._feature_list(p), param_dict=static_params,
-                           inputs=p.inputs, outputs=p.outputs,
-                           duration=p.duration,
-                           pattern_response_fn=p.pattern_response_fn,
-                           pattern_generator=p.pattern_generator)
+        results = ReverseCorrelation(self._feature_list(p),
+                                     param_dict=static_params,
+                                     inputs=p.inputs, outputs=p.outputs,
+                                     duration=p.duration,
+                                     pattern_response_fn=p.pattern_response_fn,
+                                     pattern_generator=p.pattern_generator)
+        self._restore_presenter_defaults()
+
+        return results
 
 
     def _feature_list(self, p):
