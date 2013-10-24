@@ -15,7 +15,7 @@ import param
 from param.parameterized import ParameterizedFunction, ParamOverrides, \
     bothmethod
 
-from imagen.dataview import SheetView, ProjectionGrid, NDDict
+from imagen.views import SheetView, ProjectionGrid, NdMapping
 
 import topo
 import topo.base.sheetcoords
@@ -435,7 +435,7 @@ class FeatureMaps(FeatureResponses):
                         cr = None if map_name == 'selectivity' else cyclic_range
                         metadata = dict(cyclic_range=cr, **output_metadata)
                         name = base_name + k + map_name.capitalize()
-                        results[out_label][name] = NDDict((timestamp, sv),
+                        results[out_label][name] = NdMapping((timestamp, sv),
                                                           **metadata)
 
         return results
@@ -498,7 +498,7 @@ class FeatureCurves(FeatureResponses):
                             dimension_labels=[p.x_axis.capitalize()],
                             label=p.label, prefix=p.measurement_prefix,
                             curve_params=p.curve_params, **output_metadata)
-            view = NDDict(**metadata)
+            view = NdMapping(**metadata)
             rows, cols = output_metadata['shape']
             curve_responses = self._featureresponses[out_label][p.x_axis].distribution_matrix
             for x in curve_responses[0, 0]._data.iterkeys():
@@ -609,7 +609,7 @@ class ReverseCorrelation(FeatureResponses):
                         sv = SheetView(rc_response[ii, jj],
                                        input_metadata['bounds'])
                         rf_metadata = dict(coord=coord, **metadata)
-                        unit_dict = NDDict((timestamp, sv), **rf_metadata)
+                        unit_dict = NdMapping((timestamp, sv), **rf_metadata)
                         view[coord] = unit_dict
                 results[in_label][out_label] = view
         return results
@@ -1009,20 +1009,25 @@ class Subplotting(param.Parameterized):
         if args != ():
             Subplotting.set_subplots(*(Subplotting._last_args))
 
-
-class MeasureResponseCommand(ParameterizedFunction):
-    """Parameterized command for presenting input patterns and measuring
-    responses."""
+class PatternPresentingCommand(ParameterizedFunction):
+    """Parameterized command for presenting input patterns"""
 
     duration = param.Number(default=None, doc="""
         If non-None, pattern_response_fn.duration will be set to this value.""")
 
-    inputs = param.List(default=[], doc="""Name of input supplied to the
-        metadata_fns to filter out desired input.""")
-
     measurement_prefix = param.String(default='', doc="""
         Optional prefix to add to the name under which results are stored as
         part of a measurement response.""")
+
+    __abstract = True
+
+
+class MeasureResponseCommand(PatternPresentingCommand):
+    """Parameterized command for presenting input patterns and measuring
+    responses."""
+
+    inputs = param.List(default=[], doc="""Name of input supplied to the
+        metadata_fns to filter out desired input.""")
 
     metafeature_fns = param.HookList(default=[contrast2scale], doc="""
         Metafeature_fns is a hooklist, which accepts any function, which applies
@@ -1372,7 +1377,7 @@ def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
                         row_precedence=sheet.row_precedence, src_name=sheet.name,
                         shape=sheet.activity.shape)
         sv = SheetView(np.array(sheet.activity), sheet.bounds)
-        view = NDDict((topo.sim.time(), sv), **metadata)
+        view = NdMapping((topo.sim.time(), sv), **metadata)
         sheet.views.maps[name] = view
     else:
         if force or topo.sim.time() > view.timestamp:
@@ -1395,7 +1400,7 @@ def update_activity(sheet_views_prefix='', force=False):
         update_sheet_activity(sheet_name, sheet_views_prefix, force)
 
 
-class pattern_present(ParameterizedFunction):
+class pattern_present(PatternPresentingCommand):
     """
     Presents a pattern on the input sheet(s) and returns the
     response. Does not affect the state but can overwrite the previous
@@ -1680,13 +1685,13 @@ def store_curves(measurement_dict):
         metadata = dict(bounds=data.metadata.bounds, timestamp=data.timestamp,
                         dimension_labels=list(feature_names))
         if label not in storage:
-            storage[label] = NDDict(**metadata)
+            storage[label] = NdMapping(**metadata)
         else:
             new_timestamp = data.timestamp > storage[label].timestamp
             new_measurement = any([True for c in storage[label][...].values()
                                    if data.metadata.label == c.metadata.label])
             if new_timestamp or new_measurement:
-                storage[label] = NDDict(**metadata)
+                storage[label] = NdMapping(**metadata)
         storage[label][feature_vals] = data
 
 

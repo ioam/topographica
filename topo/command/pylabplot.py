@@ -21,7 +21,7 @@ except ImportError:
     plt = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
 import param
-from imagen.dataview import SheetView, NDDict
+from imagen.views import SheetView, NdMapping
 import numpy as np
 from numpy.fft.fftpack import fft2
 from numpy.fft.helper import fftshift
@@ -1038,9 +1038,9 @@ class measure_cog(ParameterizedFunction):
         xpref_sv = SheetView(xpref, sheet.bounds)
         ypref_sv = SheetView(ypref, sheet.bounds)
 
-        sheet.views.maps['XCoG'] = NDDict((timestamp, xpref_sv), **metadata)
+        sheet.views.maps['XCoG'] = NdMapping((timestamp, xpref_sv), **metadata)
 
-        sheet.views.maps['YCoG'] = NDDict((timestamp, ypref_sv), **metadata)
+        sheet.views.maps['YCoG'] = NdMapping((timestamp, ypref_sv), **metadata)
 
 
 pg= create_plotgroup(name='Center of Gravity',category="Preference Maps",

@@ -1272,6 +1272,8 @@ class ConnectionFieldsPlotGroup(UnitPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        if kw['proj'].name not in kw['proj'].dest.views.cfs:
+            kw['proj']._make_cf_grid()
         return make_template_plot(self._channels(plot_template,**kw),
                                   kw['proj'].dest.views.cfs[kw['proj'].name],
                                   kw['proj'].src.xdensity,

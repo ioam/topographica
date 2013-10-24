@@ -8,7 +8,7 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from imagen.dataview import SheetView, NDDict
+from imagen.views import SheetView, NdMapping
 from topo.misc.attrdict import AttrDict
 
 from topo.misc.keyedlist import KeyedList # CEBALERT: not in base
@@ -294,10 +294,10 @@ class Projection(EPConnection):
     def get_projection_view(self, timestamp):
         """Returns the activity in a single projection"""
         sv = SheetView(self.activity.copy(), self.dest.bounds)
-        return NDDict((timestamp,sv), proj_src_name=self.src.name,
-                      precedence=self.src.precedence, proj_name=self.name,
-                      row_precedence=self.src.row_precedence,
-                      src_name=self.dest.name, timestamp=timestamp)
+        return NdMapping((timestamp, sv), proj_src_name=self.src.name,
+                         precedence=self.src.precedence, proj_name=self.name,
+                         row_precedence=self.src.row_precedence,
+                         src_name=self.dest.name, timestamp=timestamp)
 
 
     def n_bytes(self):

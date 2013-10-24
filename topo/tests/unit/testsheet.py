@@ -3,15 +3,16 @@ Unit tests for sheet and sheetcoords.
 """
 
 import unittest
-from numpy import array
 
-from imagen.dataview import SheetView
+from imagen.views import SheetView
 
-from topo.base.sheetcoords import SheetCoordinateSystem, Slice
+from topo.base.sheetcoords import Slice
 from topo.base.sheet import *
 from topo.base.boundingregion import BoundingBox
 
 from nose.tools import istest, nottest
+
+import numpy as np
 
 
 # CEBALERT:
@@ -724,7 +725,7 @@ class ExtraSheetTests(unittest.TestCase):
 
     def test_sheetview_release(self):
         s = Sheet()
-        s.activity = array([[1,2],[3,4]])
+        s.activity = np.array([[1,2],[3,4]])
         # Call s.sheet_view(..) with a parameter
         sv2 = SheetView(s.activity,bounds=s.bounds,
                         metadata=dict(src_name=s.name))

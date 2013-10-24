@@ -191,8 +191,8 @@ topo.sim.connect(
 ### Whisker-specific plots
 
 from topo.plotting.plotgroup import create_plotgroup
-from topo.analysis.featureresponses import Feature,FeatureMaps,Subplotting
-from imagen.dataview import SheetView, NDDict
+from topo.analysis.featureresponses import Feature, FeatureMaps, Subplotting
+from imagen.views import SheetView, NdMapping
 
 def measure_deflection_pref(num_deflection=8,scale=0.3,offset=0.0,display=False,
                             weighted_average=False, pattern_generator=Whiskers()):
@@ -232,7 +232,7 @@ pg.add_static_image('Color Key','topo/command/dfl_key_white_vert.png')
 # Color Layer 4 input units by their directional tuning
 sheet=topo.sim['Layer_4']
 sv=SheetView(MEDs/(2.0*pi),sheet.bounds)
-new_view = NDDict((None, sv), src_name=sheet.name, precedence=sheet.precedence)
+new_view = NdMapping((None, sv), src_name=sheet.name, precedence=sheet.precedence)
 sheet.views.maps['OrientationPreference']=new_view
 
 

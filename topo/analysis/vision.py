@@ -16,7 +16,7 @@ import param
 from param import normalize_path
 from topo.misc.distribution import DSF_WeightedAverage
 
-from imagen.dataview import SheetView, NDDict
+from imagen.views import SheetView, NdMapping
 
 try:
     import matplotlib
@@ -155,7 +155,7 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
     metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
                     src_name=sheet.name, timestamp=topo.sim.time())
     if "orientationACDC" not in sheet.curves:
-        sheet.views.curves["orientationACDC"] = NDDict(**metadata)
+        sheet.views.curves["orientationACDC"] = NdMapping(**metadata)
     curve_storage = sheet.views.curves["orientationACDC"]
 
     rows,cols = full_matrix.matrix_shape
@@ -175,11 +175,10 @@ def compute_ACDC_orientation_tuning_curves(full_matrix,curve_label,sheet):
                 fft = numpy.fft.fft(or_response+or_response+or_response+or_response,2048)
                 first_har = 2048/len(or_response)
                 s_w[x][y] = numpy.maximum(2*abs(fft[first_har]), abs(fft[0]))
+        fvs = full_matrix.features[orientation_index].values[o]
         sv = SheetView(s_w, sheet.bounds)
-        new_item = NDDict((full_matrix.features[orientation_index].values[o],sv),
-                          **metadata)
+        new_item = NdMapping((fvs, sv), **metadata)
         curve_storage[curve_label] = new_item
-
 
 
 def phase_preference_scatter_plot(sheet_name,diameter=0.39):
@@ -264,7 +263,7 @@ def analyze_complexity(full_matrix,simple_sheet_name,complex_sheet_name,filename
     import topo
     measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
                        if hasattr(s,'measure_maps') and s.measure_maps]
-
+    time = topo.sim.time()
     for sheet in measured_sheets:
         # Divide by two to get into 0-1 scale - that means simple/complex boundry is now at 0.5
         complx = array(complexity(full_matrix[sheet]))/2.0
@@ -273,8 +272,7 @@ def analyze_complexity(full_matrix,simple_sheet_name,complex_sheet_name,filename
                       src_name=sheet.name)
         sv = SheetView(complx, sheet.bounds)
         if 'ComplexSelectivity' not in sheet.views.maps:
-            sheet.views.maps['ComplexSelectivity'] = NDDict((topo.sim.time(),sv),
-                                                            **metadata)
+            sheet.views.maps['ComplexSelectivity'] = NdMapping((time, sv), **metadata)
         else:
             sheet.views.maps['ComplexSelectivity'][topo.sim.time()] = sv
     import topo.command.pylabplot

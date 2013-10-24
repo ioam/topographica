@@ -7,7 +7,7 @@ from topo import pattern
 import topo.pattern.audio
 
 from nose.plugins.skip import SkipTest
-
+raise SkipTest("Daisy not found")
 
 class TestAudio(unittest.TestCase):
 
@@ -15,10 +15,8 @@ class TestAudio(unittest.TestCase):
         self.audio = pattern.audio.AudioFile(filename="sounds/complex/daisy.wav")
 
     def test_basic(self):
-        try:
-            result = self.audio()
-        except:
-            raise SkipTest("Daisy not found")
+        result = self.audio()
+
 
 if __name__ == "__main__":
 	import nose

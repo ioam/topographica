@@ -13,18 +13,14 @@ from topo.plotting.bitmap import RGBBitmap, HSVBitmap
 SHOW_PLOTS = False
 
 ### JC: My new imports
-from topo.plotting.plot import TemplatePlot, make_template_plot
-import numpy.oldnumeric as Numeric
+from topo.plotting.plot import make_template_plot
 from numpy.oldnumeric import zeros, divide, Float, ones,reshape,array
 from topo.base.boundingregion import BoundingBox
-import numpy.oldnumeric.mlab as MLab
 import numpy.oldnumeric.random_array as RandomArray
 
 import param
 
-from imagen.dataview import SheetView, NDDict
-
-from random import random
+from imagen.views import SheetView, NdMapping
 
 
 ### This function is defined here, where it might be useful for testing
@@ -80,9 +76,9 @@ class TestPlot(unittest.TestCase):
         self.matrix1 = zeros((10,10),Float) + RandomArray.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix1, self.bounds1)
-        self.sheet_view1 = NDDict((None, sv), src_name='TestInputParam',
-                                  precedence=0.1, row_precedence=0.1,
-                                  cyclic_range=None)
+        self.sheet_view1 = NdMapping((None, sv), src_name='TestInputParam',
+                                     precedence=0.1, row_precedence=0.1,
+                                     cyclic_range=None)
         self.key1 = 'sv1'
         self.view_dict[self.key1] = self.sheet_view1
 
@@ -91,9 +87,9 @@ class TestPlot(unittest.TestCase):
         self.matrix2 = zeros((10,10),Float) + 0.3
         self.bounds2 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix2, self.bounds2)
-        self.sheet_view2 = NDDict((None, sv), src_name='TestInputParam',
-                                  precedence=0.2, row_precedence=0.2,
-                                  cyclic_range=None)
+        self.sheet_view2 = NdMapping((None, sv), src_name='TestInputParam',
+                                     precedence=0.2, row_precedence=0.2,
+                                     cyclic_range=None)
         self.key2 = ('sv2',0,10)
         self.view_dict[self.key2] = self.sheet_view2
 
@@ -102,9 +98,9 @@ class TestPlot(unittest.TestCase):
         self.matrix3 = zeros((10,10),Float) + RandomArray.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix3, self.bounds3)
-        self.sheet_view3 = NDDict((None, sv), src_name='TestInputParam',
-                                  precedence=0.3, row_precedence=0.3,
-                                  cyclic_range=None)
+        self.sheet_view3 = NdMapping((None, sv), src_name='TestInputParam',
+                                     precedence=0.3, row_precedence=0.3,
+                                     cyclic_range=None)
         self.key3 = ('sv3',0,'hello',(10,0))
         self.view_dict[self.key3] = self.sheet_view3
 
@@ -113,9 +109,9 @@ class TestPlot(unittest.TestCase):
         self.matrix4 = zeros((10,10),Float) + 1.6
         self.bounds4 = BoundingBox(points=((-0.7,-0.7),(0.7,0.7)))
         sv = SheetView(self.matrix4, self.bounds4)
-        self.sheet_view4 = NDDict((None, sv), src_name='TestInputParam',
-                                  precedence=0.4, row_precedence=0.4,
-                                  cyclic_range=None)
+        self.sheet_view4 = NdMapping((None, sv), src_name='TestInputParam',
+                                     precedence=0.4, row_precedence=0.4,
+                                     cyclic_range=None)
         self.key4 = 'sv4'
         self.view_dict[self.key4] = self.sheet_view4
 

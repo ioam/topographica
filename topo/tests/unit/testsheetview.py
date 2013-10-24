@@ -6,7 +6,7 @@ import unittest
 
 import numpy.oldnumeric as Numeric
 
-from imagen.dataview import SheetView
+from imagen.views import SheetView
 
 from topo.base.sheet import Sheet
 from topo.base.boundingregion import BoundingBox

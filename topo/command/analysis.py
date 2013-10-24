@@ -32,7 +32,7 @@ import param
 from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
 
-from imagen.dataview import SheetView
+from imagen.views import SheetView
 
 import topo
 from topo.base.cf import Projection

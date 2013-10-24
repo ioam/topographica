@@ -22,6 +22,8 @@ class PicklableClassAttributes(object):
     # classes that aren't parameterized any more
     do_not_restore = []
 
+    deleted_params = {}
+
 
     # Support for changing parameter names
     # CEBALERT: doesn't support things like changing output_fn to output_fns,
@@ -115,6 +117,7 @@ class PicklableClassAttributes(object):
         for class_path in to_restore:
             module_path = class_path[0:class_path.rindex('.')]
             class_name = class_path[class_path.rindex('.')+1::]
+            deleted_params = self.deleted_params.get(class_name, {})
 
             try:
                 module = __import__(module_path,fromlist=[module_path])
@@ -129,18 +132,19 @@ class PicklableClassAttributes(object):
                 break
 
             for p_name,p_obj in to_restore[class_path].items():
-
-                if p_name not in class_.params():
-                    # CEBALERT: GlobalParams's source code never has
-                    # parameters. If we move Parameter saving and
-                    # restoring to Parameterized, could allow
-                    # individual classes to customize Parameter
-                    # restoration.
-                    if class_.__name__!='GlobalParams':
-                        Parameterized(name='load_snapshot').warning("%s.%s found in snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. If you are using this class, please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
-                else:
-                    setattr(class_,p_name,p_obj)
-
+                try:
+                    if p_name not in class_.params():
+                        # CEBALERT: GlobalParams's source code never has
+                        # parameters. If we move Parameter saving and
+                        # restoring to Parameterized, could allow
+                        # individual classes to customize Parameter
+                        # restoration.
+                        if class_.__name__!='GlobalParams':
+                            Parameterized(name='load_snapshot').warning("%s.%s found in snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. If you are using this class, please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
+                    elif p_name not in deleted_params:
+                        setattr(class_,p_name,p_obj)
+                except:
+                    Parameterized(name='load_snapshot').warning("%s.%s found in snapshot, but '%s' but could not be restored to the current version of %s. If you are using this class, please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
 
     # CB: I guess this could be simplified
     def get_PO_class_attributes(self,module,class_attributes,processed_modules,exclude=()):

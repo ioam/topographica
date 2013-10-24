@@ -154,6 +154,22 @@ def preprocess_state(class_,state_mod_fn):
         old_setstate(instance,state)
     class_.__setstate__ = new_setstate
 
+def postprocess_state(class_,state_mod_fn):
+    """
+    Allow processing of instance and state after state has been applied.
+
+    state_mod_fn must accept two arguments: instance and state.
+    """
+    if not hasattr(class_,'__setstate__'):
+        # e.g. class_ used to be Parameterized, but now isn't
+        class_.__setstate__ = _setstate
+
+    old_setstate = class_.__setstate__
+    def new_setstate(instance,state):
+        old_setstate(instance,state)
+        state_mod_fn(instance,state)
+    class_.__setstate__ = new_setstate
+
 # CEBNOTE: eventually, might have to support multiple redirections for
 # one module (see version in r11323).
 def module_redirect(name,parent,actual_module):
@@ -428,29 +444,41 @@ def featuremapper_legacy():
 
     # Replace PatternPresenter objects with stub
     import topo.analysis.featureresponses
+    import param
     class PatternPresenter(param.Parameterized):
         def __init__(self):
             pass
     topo.analysis.featureresponses.PatternPresenter = PatternPresenter
 
-    # Do not restore class attributes for old classes
-    PicklableClassAttributes.do_not_restore += ['PatternPresentingCommand',
-                                                'PatternPresenter',
-                                                'topo.analysis.featureresponses.'
-                                                'SingleInputResponseCommand']
-
+    # Do not restore class attributes for old classes and delete old parameters
+    no_restore = ['topo.analysis.featureresponses.PatternPresenter',
+                  'topo.analysis.featureresponses.SingleInputResponseCommand',
+                  'topo.base.sheetview.UnitView']
+    param_no_restore = {'MeasureResponseCommand':('display'),
+                        'SingleInputResponseCommand':('pattern_presenter')}
+    PicklableClassAttributes.do_not_restore += no_restore
+    PicklableClassAttributes.deleted_params.update(param_no_restore)
 
     # Convert old sheet_views and curve_dict
     from topo.misc.attrdict import AttrDict
     from topo.base.sheet import Sheet
-    from imagen.dataview import SheetView, NDDict
+    from imagen.views import SheetView, NdMapping
     def _set_sheet_views(instance, state):
+        if state['simulation'] is None:
+            return None
         name = state['_name_param_value']
-        state['simulation'].views[name] = AttrDict()
-        views = state['simulation'].views[name]
+        if not hasattr(state['simulation'], 'views'):
+            state['simulation'].views = AttrDict()
+        if name not in state['simulation'].views:
+            if hasattr(instance, 'views'):
+                state['views'] = instance.views
+            else:
+                state['views'] = AttrDict()
+            state['simulation'].views[name] = state['views']
+        views = state['views']
         views['maps'] = AttrDict()
+        views['cfs'] = AttrDict()
         views['curves'] = AttrDict()
-        state['views'] = views
         if 'sheet_views' in state:
             svs = state['sheet_views']
             for key, sv in svs.items():
@@ -462,7 +490,7 @@ def featuremapper_legacy():
                 for param in metadata_names:
                     if hasattr(sv, param):
                         metadata[param] = getattr(sv, param)
-                state['views'].maps[key] = NDDict((sv.timestamp, new_sv),
+                state['views'].maps[key] = NdMapping((sv.timestamp, new_sv),
                                                   **metadata)
         if 'curve_dict' in state:
             old_curves = state['curve_dict']
@@ -474,10 +502,10 @@ def featuremapper_legacy():
                     label_name = labels[0].split(' ')[0]
                     l_val = labels[-1]
                     if key not in views['curves']:
-                        curves[key] = NDDict(dimension_labels=[label_name])
+                        curves[key] = NdMapping(dimension_labels=[label_name])
                     for f_val, old_sv in item.items():
                         if l_val not in curves[key].keys():
-                            curves[key][l_val] = NDDict(dimension_labels=[key],
+                            curves[key][l_val] = NdMapping(dimension_labels=[key],
                                                         label=label,
                                                         timestamp=old_sv.timestamp)
                         data, bounds = old_sv.view()
@@ -487,6 +515,11 @@ def featuremapper_legacy():
         state.pop('sheet_views', None)
 
     preprocess_state(Sheet, _set_sheet_views)
+
+    param.Parameterized().warning('Legacy code does not guarantee all'
+        'measurement parameters have been restored. Make sure measurements are '
+        'still set up correctly.')
+
 
 support[90800300] = featuremapper_legacy
 

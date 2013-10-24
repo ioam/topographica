@@ -16,11 +16,10 @@ from Tkinter import Frame
 import param
 import paramtk as tk
 
-from imagen.dataview import SheetView, NDDict
+from imagen.views import SheetView, NdMapping
 
 import topo
 
-from topo.base.functionfamily import PatternDrivenAnalysis
 from topo.base.patterngenerator import PatternGenerator, Constant
 from topo.misc.generatorsheet import GeneratorSheet
 from topo.plotting.plot import make_template_plot
@@ -49,10 +48,10 @@ class TestPatternPlotGroup(SheetPlotGroup):
             sv = SheetView(sheet.input_generator(), bounds=sheet.bounds)
 
             if 'Activity' not in views:
-                views['Activity'] = NDDict((topo.sim.time(), sv),
-                                           precedence=sheet.precedence,
-                                           row_precedence=sheet.row_precedence,
-                                           src_name=sheet.name,)
+                views['Activity'] = NdMapping((topo.sim.time(), sv),
+                                              precedence=sheet.precedence,
+                                              row_precedence=sheet.row_precedence,
+                                              src_name=sheet.name,)
             else:
                 views['Activity'][topo.sim.time()] = sv
             channels = {'Strength':'Activity','Hue':None,'Confidence':None}
