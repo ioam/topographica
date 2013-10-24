@@ -1632,7 +1632,12 @@ class pattern_response(pattern_present):
 
         p = ParamOverrides(self, dict(params_to_override, inputs=inputs))
 
-        return super(pattern_response, self).__call__(outputs=outputs, **p)
+        responses = super(pattern_response, self).__call__(outputs=outputs, **p)
+
+        if hasattr(topo, 'guimain') and current == total:
+            topo.guimain.refresh_activity_windows()
+
+        return responses
 
 
 def topo_metadata_fn(input_names=[], output_names=[]):

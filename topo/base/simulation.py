@@ -776,10 +776,6 @@ class SomeTimer(param.Parameterized):
                              duration=total_presentations,
                              remaining=estimate)
 
-        import topo
-        if hasattr(topo, 'guimain'):
-            topo.guimain.refresh_activity_windows()
-
 
 
 # CEBALERT: This singleton-producing mechanism is pretty complicated,
