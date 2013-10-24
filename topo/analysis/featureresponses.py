@@ -7,7 +7,6 @@ on measuring responses while varying features of an input pattern.
 
 import copy
 
-from math import pi
 from colorsys import hsv_to_rgb
 
 import numpy as np
@@ -17,7 +16,6 @@ from param.parameterized import ParameterizedFunction, ParamOverrides, \
     bothmethod
 
 from imagen.dataview import SheetView, ProjectionGrid, NDDict
-from imagen.sheetcoords import SheetCoordinateSystem
 
 import topo
 import topo.base.sheetcoords
@@ -157,28 +155,25 @@ class FeatureResponses(PatternDrivenAnalysis):
     """
 
     cmd_overrides = param.Dict(default={}, doc="""
-        Dictionary used to overwrite default values of the
-        pattern_response_fn.""")
+        Dictionary used to overwrite parameters on the pattern_response_fn.""")
 
     inputs = param.String(default=[], doc="""Names of the input supplied to
         the metadata_fns to filter out desired inputs.""")
 
     metadata_fns = param.HookList(default=[], instantiate=False, doc="""
-        Interface functions for metadata. Should return a dictionary
-        that at a minimum must contain the name and dimensions of the
-        inputs and outputs for pattern presentation and response
-        measurement.""")
+        Interface functions for metadata. Should return a dictionary that at a
+        minimum must contain the name and dimensions of the inputs and outputs
+        for pattern presentation and response measurement.""")
 
     metafeature_fns = param.HookList(default=[], doc="""
-        Metafeature functions can be used to coordinate lower level
-        features across input devices or depending on a metafeature
-        set on the function itself.""")
+        Metafeature functions can be used to coordinate lower level features
+        across input devices or depending on a metafeature set on the function
+        itself.""")
 
     measurement_prefix = param.String(default="", doc="""
         Prefix to add to the name under which results are stored.""")
 
-    measurement_storage_hook = param.Callable(default=None, instantiate=True,
-                                              doc="""
+    measurement_storage_hook = param.Callable(default=None, instantiate=True, doc="""
         Interface to store measurements after they have been completed.""")
 
     outputs = param.String(default=[], doc="""
@@ -186,28 +181,25 @@ class FeatureResponses(PatternDrivenAnalysis):
         desired outputs.""")
 
     param_dict = param.Dict(default={}, doc="""
-        Dictionary containing name value pairs of a feature, which is to
-        be varied across measurements.""")
+        Dictionary containing name value pairs of a feature, which is to be
+        varied across measurements.""")
 
     pattern_generator = param.Callable(instantiate=True, default=None, doc="""
         Defines the input pattern to be presented.""")
 
     pattern_response_fn = param.Callable(default=None, instantiate=True, doc="""
-        Presenter command responsible for presenting the input
-        patterns provided to it, returning measurement labels and
-        collecting and storing the measurement results in the
-        appropriate place.""")
+        Presenter command responsible for presenting the input patterns provided
+        to it and returning the response for the requested measurement sources.""")
 
     repetitions = param.Integer(default=1, bounds=(1, None), doc="""
         How many times each stimulus will be presented.
 
-        Each stimulus is specified by a particular feature
-        combination, and need only be presented once if the network
-        has no other source of variability.  If results differ for
-        each presentation of an identical stimulus (e.g. due to
-        intrinsic noise), then this parameter can be increased
-        so that results will be an average over the specified
-        number of repetitions.""")
+        Each stimulus is specified by a particular feature combination, and
+        need only be presented once if the network has no other source of
+        variability.  If results differ for each presentation of an identical
+        stimulus (e.g. due to intrinsic noise), then this parameter can be
+        increased so that results will be an average over the specified number
+        of repetitions.""")
 
     store_fullmatrix = param.Boolean(default=False, doc="""
         Determines whether or not store the full matrix of feature
@@ -245,6 +237,7 @@ class FeatureResponses(PatternDrivenAnalysis):
                                                          self.features)
 
 
+
     def _measure_responses(self, p):
         """
         Generate feature permutations and present each in sequence.
@@ -267,11 +260,8 @@ class FeatureResponses(PatternDrivenAnalysis):
             try:
                 self._present_permutation(p, permutation, permutation_num)
             except MeasurementInterrupt as MI:
-                self.warning(
-                    "Measurement was stopped after {current} out of {total} "
-                    "presentations."
-                    " Results may be incomplete.".format(current=MI.current,
-                                                         total=MI.total))
+                self.warning("Measurement was stopped after {0} out of {1} presentations. "
+                             "Results may be incomplete.".format(MI.current, MI.total))
                 break
 
         # Run hooks after the analysis session
@@ -281,7 +271,8 @@ class FeatureResponses(PatternDrivenAnalysis):
 
     def _present_permutation(self, p, permutation, permutation_num):
         """Present a pattern with the specified set of feature values."""
-        for out_label in self.metadata.outputs:
+        output_names = self.metadata['outputs'].keys()
+        for out_label in output_names:
             self._activities[out_label] *= 0
 
         # Calculate complete set of settings
@@ -291,14 +282,13 @@ class FeatureResponses(PatternDrivenAnalysis):
                              for f in self.features_to_compute]
 
         for i in xrange(0, p.repetitions):
-            for f in p.pre_presentation_hooks:
-                f()
 
+            for f in p.pre_presentation_hooks: f()
+
+            presentation_num = p.repetitions * permutation_num+i
             inputs = self._coordinate_inputs(p, dict(permuted_settings))
-            responses = p.pattern_response_fn(inputs,
-                                              self.metadata['outputs'].keys(),
-                                              p.repetitions * permutation_num+i,
-                                              self.total_steps)
+            responses = p.pattern_response_fn(inputs, output_names,
+                                              presentation_num, self.total_steps)
 
             for f in p.post_presentation_hooks:
                 f()
@@ -314,13 +304,11 @@ class FeatureResponses(PatternDrivenAnalysis):
 
     def _coordinate_inputs(self, p, feature_values):
         """
-        Generates pattern generators for all the requested inputs,
-        applies the correct feature values and iterates through
-        metafeature_fns, coordinating complex features.
+        Generates pattern generators for all the requested inputs, applies the
+        correct feature values and iterates through the metafeature_fns,
+        coordinating complex features.
         """
-
         input_names = self.metadata.inputs.keys()
-
         feature_values = dict(feature_values, **p.param_dict)
 
         for feature, value in feature_values.iteritems():
@@ -347,12 +335,20 @@ class FeatureResponses(PatternDrivenAnalysis):
         populate the full matrix, if enabled.
         """
         for out_label in self.metadata.outputs:
+            act = self._activities[out_label]
             for feature, value in current_values:
-                self._featureresponses[out_label][feature].update(
-                    self._activities[out_label], value)
+                self._featureresponses[out_label][feature].update(act, value)
             if p.store_fullmatrix:
-                self._fullmatrix[out_label].update(
-                    self._activities[out_label], current_values)
+                self._fullmatrix[out_label].update(act, current_values)
+
+
+    @bothmethod
+    def set_cmd_overrides(self_or_cls, **kwargs):
+        """
+        Allows setting of cmd_overrides at the class and instance level.
+        cmd_overrides are applied to the pattern_response_fn.
+        """
+        self_or_cls.cmd_overrides = dict(self_or_cls.cmd_overrides, **kwargs)
 
 
     def _apply_cmd_overrides(self, p):
@@ -360,21 +356,10 @@ class FeatureResponses(PatternDrivenAnalysis):
         Applies the cmd_overrides to the pattern_response_fn and
         the pattern_coordinator before launching a measurement.
         """
-
         for override, value in p.cmd_overrides.items():
             if override in p.pattern_response_fn.params():
                 p.pattern_response_fn.set_param(override, value)
 
-
-    @bothmethod
-    def set_cmd_overrides(self_or_cls, **overrides):
-        """
-        Allows setting of cmd_overrides at the class and instance
-        level. Important for setting overrides on the
-        pattern_response_fn.
-        """
-        self_or_cls.cmd_overrides = dict(self_or_cls.cmd_overrides,
-                                         **overrides)
 
 
 class FeatureMaps(FeatureResponses):
@@ -434,14 +419,14 @@ class FeatureMaps(FeatureResponses):
             results[out_label] = {}
             for feature in self._featureresponses[out_label]:
                 fp = filter(lambda f: f.name == feature, self.features)[0]
-                ar = self._featureresponses[out_label][feature].distribution_matrix[0, 0].axis_range
+                fr = self._featureresponses[out_label][feature]
+                ar = fr.distribution_matrix[0, 0].axis_range
                 cyclic_range = ar if fp.cyclic else 1.0
                 pref_fn = fp.preference_fn if fp.preference_fn is not None\
                     else self.preference_fn
                 if p.selectivity_multiplier is not None:
                     pref_fn.selectivity_scale = (pref_fn.selectivity_scale[0],
                                                  self.selectivity_multiplier)
-                fr = self._featureresponses[out_label][feature]
                 response = fr.apply_DSF(pref_fn)
                 base_name = self.measurement_prefix + feature.capitalize()
                 for k, maps in response.items():
@@ -458,25 +443,24 @@ class FeatureMaps(FeatureResponses):
 
 class FeatureCurves(FeatureResponses):
     """
-    Measures and collects the responses to a set of features, for
-    calculating tuning and similar curves.
+    Measures and collects the responses to a set of features, for calculating
+    tuning and similar curves.
 
-    These curves represent the response of a measurement source to
-    patterns that are controlled by a set of features.  This class can
-    collect data for multiple curves, each with the same x axis.  The
-    x axis represents the main feature value that is being varied,
-    such as orientation.  Other feature values can also be varied,
-    such as contrast, which will result in multiple curves (one per
-    unique combination of other feature values).
+    These curves represent the response of a measurement source to patterns
+    that are controlled by a set of features.  This class can collect data for
+    multiple curves, each with the same x axis. The x axis represents the main
+    feature value that is being varied, such as orientation.  Other feature
+    values can also be varied, such as contrast, which will result in multiple
+    curves (one per unique combination of other feature values).
 
-    The measured responses used to construct the curves will be passed
-    to the pattern_presenting_fn to be stored.  A particular set of
-    patterns is then constructed using a user-specified
-    PatternPresenter by adding the parameters determining the curve
+    A particular set of patterns is constructed using a user-specified
+    pattern_generator by adding the parameters determining the curve
     (curve_param_dict) to a static list of parameters (param_dict),
-    and then varying the specified set of features.  The results can
-    be accessed in the curve_dict passed to the presenter_cmd, indexed
-    by the curve_label and feature value.
+    and then varying the specified set of features. The input patterns will then
+    be passed to the pattern_response_fn, which should return the measured
+    responses for each of the requested sheets. Once the responses to all
+    feature permutations has been accumulated, the measured curves are passed to
+    the storage_fn and are finally returned.
     """
 
     x_axis = param.String(default=None, doc="""
@@ -554,8 +538,9 @@ class ReverseCorrelation(FeatureResponses):
 
     def _initialize_featureresponses(self, p):
         self._apply_cmd_overrides(p)
+        self.metadata = p.metadata
         for fn in p.metadata_fns:
-            self.metadata = AttrDict(p.metadata, **fn(p.inputs, p.outputs))
+            self.metadata = AttrDict(self.metadata, **fn(p.inputs, p.outputs))
 
         self._activities = {}
         self._featureresponses = {}
@@ -577,16 +562,14 @@ class ReverseCorrelation(FeatureResponses):
 
 
         # Run hooks before and after pattern presentation.
-        for f in p.pre_presentation_hooks:
-            f()
+        for f in p.pre_presentation_hooks: f()
 
         inputs = self._coordinate_inputs(p, dict(permuted_settings))
         measurement_sources = self.metadata.outputs.keys() + self.metadata.inputs.keys()
         responses = p.pattern_response_fn(inputs, measurement_sources,
                                           permutation_num, self.total_steps)
 
-        for f in p.post_presentation_hooks:
-            f()
+        for f in p.post_presentation_hooks: f()
 
         self._update(p, responses)
 
@@ -603,7 +586,6 @@ class ReverseCorrelation(FeatureResponses):
                     for jj in range(cols):
                         delta_rf = responses[out_label][ii, jj] * responses[in_label]
                         feature_responses[ii, jj] += delta_rf
-
 
 
     def _collate_results(self, p):
@@ -723,8 +705,8 @@ class contrast2centersurroundscale(param.ParameterizedFunction):
 
     contrast_parameter = param.String(default='weber_contrast')
 
-    def __call__(self, inputs, feature_values):
-        if "contrastcenter" in feature_values:
+    def __call__(self, inputs, features):
+        if "contrastcenter" in features:
             if self.contrast_parameter == 'michelson_contrast':
                 for g in inputs.itervalues():
                     g.offsetcenter = 0.5
@@ -745,12 +727,11 @@ class contrast2centersurroundscale(param.ParameterizedFunction):
                     g.offsetcenter = 0.0
                     g.scalecenter = g.contrastcenter
 
-        if "contrastsurround" in feature_values:
+        if "contrastsurround" in features:
             if self.contrast_parameter == 'michelson_contrast':
                 for g in inputs.itervalues():
                     g.offsetsurround = 0.5
-                    g.scalesurround = 2 * g.offsetsurround * g\
-                        .contrastsurround / 100.0
+                    g.scalesurround = 2*g.offsetsurround * g.contrastsurround/100.0
 
             elif self.contrast_parameter == 'weber_contrast':
                 # Weber_contrast is currently only well defined for
@@ -760,8 +741,7 @@ class contrast2centersurroundscale(param.ParameterizedFunction):
                 for g in inputs.itervalues():
                     g.offsetsurround = 0.5   #In this case this is the offset
                     # of both the background and the sine grating
-                    g.scalesurround = 2 * g.offsetsurround * g\
-                        .contrastsurround / 100.0
+                    g.scalesurround = 2*g.offsetsurround * g.contrastsurround/100.0
 
             elif self.contrast_parameter == 'scale':
                 for g in inputs.itervalues():
@@ -779,13 +759,13 @@ class contrast2scale(param.ParameterizedFunction):
 
     contrast_parameter = param.String(default='michelson_contrast')
 
-    def __call__(self, inputs, feature_values):
+    def __call__(self, inputs, features):
 
-        if "contrast" in feature_values:
+        if "contrast" in features:
             if self.contrast_parameter == 'michelson_contrast':
                 for g in inputs.itervalues():
                     g.offset = 0.5
-                    g.scale = 2 * g.offset * g.contrast / 100.0
+                    g.scale = 2*g.offset * g.contrast/100.0
 
             elif self.contrast_parameter == 'weber_contrast':
                 # Weber_contrast is currently only well defined for
@@ -795,7 +775,7 @@ class contrast2scale(param.ParameterizedFunction):
                 for g in inputs.itervalues():
                     g.offset = 0.5   #In this case this is the offset of both
                     # the background and the sine grating
-                    g.scale = 2 * g.offset * g.contrast / 100.0
+                    g.scale = 2*g.offset * g.contrast/100.0
 
             elif self.contrast_parameter == 'scale':
                 for g in inputs.itervalues():
@@ -810,8 +790,8 @@ class direction2translation(param.ParameterizedFunction):
     supports an old and new motion model.
     """
 
-    def __call__(self, inputs, feature_values):
-        if 'direction' in feature_values:
+    def __call__(self, inputs, features):
+        if 'direction' in features:
             import __main__ as main
 
             if '_new_motion_model' in main.__dict__ and main.__dict__[
@@ -821,17 +801,16 @@ class direction2translation(param.ParameterizedFunction):
 
                 for name in inputs:
                     inputs[name] = Translator(generator=inputs[name],
-                                              direction=feature_values[
-                                                  'direction'],
-                                              speed=feature_values['speed'],
+                                              direction=features['direction'],
+                                              speed=features['speed'],
                                               reset_period=self.duration)
             else:
             #### old motion model ####
-                orientation = feature_values['direction'] + pi / 2
+                orientation = features['direction'] + np.pi/2
                 from topo.pattern import Sweeper
 
                 for name in inputs.keys():
-                    speed = feature_values['speed']
+                    speed = features['speed']
                     try:
                         step = int(name[-1])
                     except:
@@ -841,9 +820,9 @@ class direction2translation(param.ParameterizedFunction):
                                          ' input sheet name.')
                             self.direction_warned = True
                         step = 0
-                    speed = feature_values['speed']
-                    inputs[name] = Sweeper(generator=inputs[name],
-                                           step=step, speed=speed)
+                    speed = features['speed']
+                    inputs[name] = Sweeper(generator=inputs[name], step=step,
+                                           speed=speed)
                     setattr(inputs[name], 'orientation', orientation)
 
 
@@ -854,23 +833,21 @@ class phasedisparity2leftrightphase(param.ParameterizedFunction):
     the keywords Left and Right in the input names.
     """
 
-    def __call__(self, inputs, feature_values):
-        if "contrast" in feature_values:
-            temp_phase1 = feature_values['phase'] - feature_values[
-                'phasedisparity'] / 2.0
-            temp_phase2 = feature_values['phase'] + feature_values[
-                'phasedisparity'] / 2.0
+    def __call__(self, inputs, features):
+        if "contrast" in features:
+            temp_phase1 = features['phase'] - features['phasedisparity']/2.0
+            temp_phase2 = features['phase'] + features['phasedisparity']/2.0
             for name in inputs.keys():
                 if (name.count('Right')):
-                    inputs[name].phase = wrap(0, 2 * pi, temp_phase1)
+                    inputs[name].phase = wrap(0, 2*np.pi, temp_phase1)
                 elif (name.count('Left')):
-                    inputs[name].phase = wrap(0, 2 * pi, temp_phase2)
+                    inputs[name].phase = wrap(0, 2*np.pi, temp_phase2)
                 else:
                     if not hasattr(self, 'disparity_warned'):
-                        self.warning('Unable to measure disparity preference,'
-                                     ' because disparity is defined only when'
-                                     ' there are inputs for Right and Left'
-                                     ' retinas.')
+                        self.warning('Unable to measure disparity preference, '
+                                     'because disparity is defined only when '
+                                     'there are inputs for Right and Left '
+                                     'retinas.')
                         self.disparity_warned = True
 
 
@@ -880,8 +857,8 @@ class hue2rgbscale(param.ParameterizedFunction):
     name.
     """
 
-    def __call__(self, inputs, feature_values):
-        if 'hue' in feature_values:
+    def __call__(self, inputs, features):
+        if 'hue' in features:
 
             # could be three retinas (R, G, and B) or a single RGB
             # retina for the color dimension; if every retina has
@@ -895,7 +872,7 @@ class hue2rgbscale(param.ParameterizedFunction):
 
             if not rgb_retina:
                 for name in inputs.keys():
-                    r, g, b = hsv_to_rgb(feature_values['hue'], 1.0, 1.0)
+                    r, g, b = hsv_to_rgb(features['hue'], 1.0, 1.0)
                     if (name.count('Red')):
                         inputs[name].scale = r
                     elif (name.count('Green')):
@@ -911,13 +888,12 @@ class hue2rgbscale(param.ParameterizedFunction):
                                          ' substrings.')
                             self.hue_warned = True
             else:
-                from contrib import rgbimages
+                from contrib.rgbimages import ExtendToRGB
 
-                r, g, b = hsv_to_rgb(feature_values['hue'], 1.0, 1.0)
+                r, g, b = hsv_to_rgb(features['hue'], 1.0, 1.0)
                 for name in inputs.keys():
-                    inputs[name] = rgbimages.ExtendToRGB(generator=inputs[name],
-                                                         relative_channel_strengths=[
-                                                             r, g, b])
+                    inputs[name] = ExtendToRGB(generator=inputs[name],
+                                               relative_channel_strengths=[r, g, b])
                     # CEBALERT: should warn as above if not a color network
 
 
@@ -928,17 +904,16 @@ class ocular2leftrightscale(param.ParameterizedFunction):
     keywords Left and Right in the input names.
     """
 
-    def __call__(self, inputs, feature_values):
-        if "ocular" in feature_values:
+    def __call__(self, inputs, features):
+        if "ocular" in features:
             for name in inputs.keys():
                 if (name.count('Right')):
-                    inputs[name].scale = 2 * feature_values['ocular']
+                    inputs[name].scale = 2 * features['ocular']
                 elif (name.count('Left')):
-                    inputs[name].scale = 2.0 - 2 * feature_values['ocular']
+                    inputs[name].scale = 2.0 - 2*features['ocular']
                 else:
-                    self.warning('Skipping input region %s; Ocularity is'
-                                 ' defined only for Left and Right retinas.' %
-                                 name)
+                    self.warning('Skipping input region %s; Ocularity is defined '
+                                 'only for Left and Right retinas.' % name)
 
 
 
@@ -1040,17 +1015,20 @@ class MeasureResponseCommand(ParameterizedFunction):
     responses."""
 
     duration = param.Number(default=None, doc="""
-        If non-None, pattern_response_fn.duration will be
-        set to this value.""")
+        If non-None, pattern_response_fn.duration will be set to this value.""")
 
-    inputs = param.List(default=[], doc="""Name of input supplied to
-        the metadata_fns to filter out desired input.""")
+    inputs = param.List(default=[], doc="""Name of input supplied to the
+        metadata_fns to filter out desired input.""")
 
-    measurement_prefix = param.String(default="", doc="""
-        Optional prefix to add to the name under which results are
-        stored as part of a measurement response.""")
+    measurement_prefix = param.String(default='', doc="""
+        Optional prefix to add to the name under which results are stored as
+        part of a measurement response.""")
 
-    metafeature_fns = param.HookList(default=[contrast2scale])
+    metafeature_fns = param.HookList(default=[contrast2scale], doc="""
+        Metafeature_fns is a hooklist, which accepts any function, which applies
+        coordinated changes to a set of inputs based on some parameter or feature
+        value. Can be used to present different patterns to different inputs or
+        to control complex features like contrast.""")
 
     offset = param.Number(default=0.0, softbounds=(-1.0, 1.0), doc="""
         Additive offset to input pattern.""")
@@ -1062,8 +1040,7 @@ class MeasureResponseCommand(ParameterizedFunction):
         Callable object that will generate input patterns coordinated
         using a list of meta parameters.""")
 
-    pattern_response_fn = param.Callable(default=None, instantiate=False,
-                                         doc="""
+    pattern_response_fn = param.Callable(default=None, instantiate=False, doc="""
         Callable object that will present a parameter-controlled pattern to a
         set of Sheets.  Needs to be supplied by a subclass or in the call.
         The attributes duration and apply_output_fns (if non-None) will
@@ -1074,18 +1051,17 @@ class MeasureResponseCommand(ParameterizedFunction):
         Function that will be used to analyze the distributions of unit
         responses.""")
 
-    preference_lookup_fn = param.Callable(default=None, instantiate=True,
-                                          doc="""
-        Callable object that will look up a preferred feature values.""")
+    preference_lookup_fn = param.Callable(default=None, doc="""
+        Callable object that will look up a preferred feature values.""",
+                                          instantiate=True)
 
     scale = param.Number(default=1.0, softbounds=(0.0, 2.0), doc="""
         Multiplicative strength of input pattern.""")
 
-    static_parameters = param.List(class_=str, default=["scale", "offset"],
-                                   doc="""
+    static_parameters = param.List(default=["scale", "offset"], doc="""
         List of names of parameters of this class to pass to the
-        pattern_presenter as static parameters, i.e. values that
-        will be fixed to a single value during measurement.""")
+        pattern_presenter as static parameters, i.e. values that will be fixed
+        to a single value during measurement.""", class_=str)
 
     subplot = param.String(default='', doc="""
         Name of map to register as a subplot, if any.""")
@@ -1108,8 +1084,7 @@ class MeasureResponseCommand(ParameterizedFunction):
             Subplotting.set_subplots(p.subplot, force=True)
 
         return FeatureMaps(self._feature_list(p), duration=p.duration,
-                           inputs=p.inputs,
-                           metafeature_fns=p.metafeature_fns,
+                           inputs=p.inputs, metafeature_fns=p.metafeature_fns,
                            measurement_prefix=p.measurement_prefix,
                            outputs=p.outputs, param_dict=static_params,
                            pattern_generator=p.pattern_generator,
@@ -1133,20 +1108,15 @@ class MeasureResponseCommand(ParameterizedFunction):
                 p.pattern_response_fn.set_param(override, value)
 
 
+
 class SinusoidalMeasureResponseCommand(MeasureResponseCommand):
     """
     Parameterized command for presenting sine gratings and measuring
     responses.
     """
 
-    pattern_generator = param.Callable(instantiate=True, default=SineGrating(),
-        doc="""
-        Callable object that will present a parameter-controlled pattern to a
-        set of Sheets.  By default, uses a SineGrating presented for a short
-        duration. By convention, most Topographica example files are designed
-        to have a suitable activity pattern computed by that time, but the
-        duration will need to be changed for other models that do not follow
-        that convention.""")
+    pattern_generator = param.Callable(default=SineGrating(), doc="""
+        Pattern to be presented on the inputs.""", instantiate=True)
 
     frequencies = param.List(class_=float, default=[2.4], doc="""
         Sine grating frequencies to test.""")
@@ -1211,7 +1181,6 @@ class SingleInputResponseCommand(MeasureResponseCommand):
 
     offset = param.Number(default=0.5)
 
-    # JABALERT: Presumably the size is overridden in the call, right?
     pattern_generator = param.Callable(default=RawRectangle(size=0.1,
                                                             aspect_ratio=1.0))
 
@@ -1262,28 +1231,27 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
         specified val_format to print a label for each value of a
         curve_parameter.
         """
-        curve_measurements = {}
+        measurements = {}
         for curve in p.curve_parameters:
             static_params = dict([(s, p[s]) for s in p.static_parameters])
             static_params.update(curve)
-            curve_label = "; ".join(
-                [('%s = ' + val_format + '%s') % (n.capitalize(), v, p.units)
+            curve_label = "; ".join([
+                ('%s = ' + val_format + '%s') % (n.capitalize(), v, p.units)
                  for n, v in curve.items()])
-            curve_measurements[curve_label] = FeatureCurves(
-                self._feature_list(p), curve_params=curve, duration=p.duration,
+            measurements[curve_label] = FeatureCurves(self._feature_list(p),
+                curve_params=curve, duration=p.duration, inputs=p.inputs,
+                label=curve_label, measurement_prefix=p.measurement_prefix,
+                metafeature_fns=p.metafeature_fns, outputs=p.outputs,
                 param_dict=static_params, pattern_generator=p.pattern_generator,
-                label=curve_label, pattern_response_fn=p.pattern_response_fn,
-                x_axis=p.x_axis, measurement_prefix=p.measurement_prefix,
-                metafeature_fns=p.metafeature_fns, inputs=p.inputs,
-                outputs=p.outputs)
-        return curve_measurements
+                pattern_response_fn = p.pattern_response_fn, x_axis = p.x_axis)
+        return measurements
 
 
     def _feature_list(self, p):
-        return [Feature(name="phase", range=(0.0, 2 * pi),
-                        step=2 * pi / p.num_phase, cyclic=True),
-                Feature(name="orientation", range=(0, pi),
-                        step=pi / p.num_orientation, cyclic=True),
+        return [Feature(name="phase", range=(0.0, 2*np.pi),
+                        step=2*np.pi / p.num_phase, cyclic=True),
+                Feature(name="orientation", range=(0, np.pi),
+                        step=np.pi/p.num_orientation, cyclic=True),
                 Feature(name="frequency", values=p.frequencies)]
 
 
@@ -1400,7 +1368,7 @@ def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
     sheet = topo.sim.objects(Sheet)[sheet_name]
     view = sheet.views.maps.get(name, False)
     if not view:
-        metadata = dict(bounds=sheet.bounds, depth=1, precedence=sheet.precedence,
+        metadata = dict(bounds=sheet.bounds, precedence=sheet.precedence,
                         row_precedence=sheet.row_precedence, src_name=sheet.name,
                         shape=sheet.activity.shape)
         sv = SheetView(np.array(sheet.activity), sheet.bounds)
@@ -1435,10 +1403,9 @@ class pattern_present(ParameterizedFunction):
 
     May also be used to measure the response to a pattern by calling
     it with restore_events disabled and restore_state and
-    force_sheetview enabled, which will push and pop the simulation
-    state and install the response in the sheet_view dictionary. The
-    measure_activity command in topo.command implements this
-    functionality.
+    install_sheetview enabled, which will push and pop the simulation
+    state and install the response in the sheets views dictionary. The
+    update_activity command implements this functionality.
 
     Given a set of input patterns, installs them into the specified
     GeneratorSheets, runs the simulation for the specified length of
@@ -1456,8 +1423,9 @@ class pattern_present(ParameterizedFunction):
     may still be installed on the retina.
 
     In order to to see the sequence of values presented, you may use
-    the back arrow history mechanism in the GUI. Note that the GUI's
-    Activity window must be open.
+    the back arrow history mechanism in the GUI. Note that the GUI's Activity
+    window must be open. Alternatively or access the activities through the
+    Activity entry in the views.maps dictionary on the specified sheets.
     """
 
     apply_output_fns = param.Boolean(default=True, doc="""
@@ -1655,6 +1623,8 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     sheets = {}
     sheets['inputs'] = [getattr(topo.sim, input_name, input_name)
                         for input_name in input_names]
+    sheets['outputs'] = [getattr(topo.sim, output_name, output_name) for
+                         output_name in output_names]
 
     for input_name in input_names:
         if input_name in sheets['inputs']:
@@ -1667,8 +1637,6 @@ def topo_metadata_fn(input_names=[], output_names=[]):
                 "generator sheets instead.")
         sheets['inputs'] = topo.sim.objects(GeneratorSheet).values()
 
-    sheets['outputs'] = [getattr(topo.sim, output_name, output_name) for
-                         output_name in output_names]
     for output_name in output_names:
         if output_name in sheets['outputs']:
             topo.sim.warning('Output sheet {0} not found.'.format(output_name))
@@ -1691,59 +1659,60 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     return metadata
 
 
-def store_measurement(measurement_dict):
-    """
-    Interface function to install measurement results the appropriate
-    sheet_views, curves or rfs dictionary.
-    """
+def store_rfs(measurement_dict):
+    measurement_dict.pop('fullmatrix')
+    for sheet_name, sheet_data in measurement_dict.items():
+        for data_name, data in sheet_data.items():
+            data_sheet = topo.sim[data_name]
+            if sheet_name not in data_sheet.views.rfs:
+                data_sheet.views.rfs[sheet_name] = data
+            else:
+                data_sheet.views.rfs[sheet_name].update(data)
+
+
+def store_curves(measurement_dict):
+    measurement_dict.pop('fullmatrix')
+    for sheet_name, data in measurement_dict.items():
+        sheet = topo.sim[sheet_name]
+        storage = sheet.views.curves
+        label = data.metadata.prefix + data.dimension_labels[0]
+        feature_names, feature_vals = zip(*data.metadata.curve_params.items())
+        metadata = dict(bounds=data.metadata.bounds, timestamp=data.timestamp,
+                        dimension_labels=list(feature_names))
+        if label not in storage:
+            storage[label] = NDDict(**metadata)
+        else:
+            new_timestamp = data.timestamp > storage[label].timestamp
+            new_measurement = any([True for c in storage[label][...].values()
+                                   if data.metadata.label == c.metadata.label])
+            if new_timestamp or new_measurement:
+                storage[label] = NDDict(**metadata)
+        storage[label][feature_vals] = data
+
+
+def store_maps(measurement_dict):
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
-        if isinstance(sheet_data, NDDict):
-            label = sheet_data.metadata.prefix + sheet_data.dimension_labels[0]
-            indexed_features, feature_vals = zip(*sheet_data.metadata.curve_params.items())
-            metadata = dict(bounds=sheet_data.metadata.bounds,
-                            timestamp=sheet_data.timestamp,
-                            dimension_labels=list(indexed_features))
-            curve_storage = sheet.views.curves
-            if label not in curve_storage:
-                curve_storage[label] = NDDict(**metadata)
+        for data_name, data in sheet_data.items():
+            if data_name not in sheet.views.maps:
+                sheet.views.maps[data_name] = data
             else:
-                new_timestamp = sheet_data.timestamp > curve_storage[label].timestamp
-                new_measurement = any([True for c in curve_storage[label][...].values()
-                                       if sheet_data.metadata.label == c.metadata.label])
-                if new_timestamp or new_measurement:
-                    curve_storage[label] = NDDict(**metadata)
-            curve_storage[label][feature_vals] = sheet_data
-        else:
-            for data_name, data in sheet_data.items():
-                if isinstance(data, NDDict):
-                    if data_name not in sheet.views.maps:
-                        sheet.views.maps[data_name] = data
-                    else:
-                        sheet.views.maps[data_name].update(data)
-                if isinstance(data, ProjectionGrid):
-                    data_sheet = topo.sim[data_name]
-                    label = "{sheet}_{key}".format(sheet=sheet_name,
-                                                   key=data.metadata.label)
-                    if label not in data_sheet.views.rfs:
-                        data_sheet.views.rfs[label] = data
-                    else:
-                        data_sheet.views.rfs[label].update(data)
+                sheet.views.maps[data_name].update(data)
 
 
 def get_feature_preference(feature, sheet_name, coords, default=0.0):
     """Return the feature preference for a particular unit."""
     try:
         sheet = topo.sim[sheet_name]
-        matrix_coords = sheet.sheet2matrixidx(*coords)
         map_name = feature.capitalize() + "Preference"
-        return sheet.views.maps[map_name].top[matrix_coords]
+        x, y = coords
+        return sheet.views.maps[map_name].top[x, y]
     except:
         topo.sim.warning(
-            ("%s should be measured before plotting this tuning curve -- " +
+            ("%s should be measured before plotting this tuning curve -- "
              "using default value of %s for %s unit (%d,%d).") %
-            (map_name, default, sheet.name, coords[0], coords[1]))
+            (map_name, default, sheet.name, x, y))
         return default
 
 
@@ -1755,7 +1724,6 @@ __all__ = [
     "FeatureMaps",
     "FeatureCurves",
     "Feature",
-    "CoordinatedPatternGenerator",
     "Subplotting",
     "MeasureResponseCommand",
     "SinusoidalMeasureResponseCommand",

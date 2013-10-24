@@ -875,7 +875,7 @@ class SheetPanel(PlotGroupPanel):
             # just matrixplot for whatever generators have the views
             for g in topo.sim.objects(GeneratorSheet).values():
                 try:
-                    view = sheet.views.rfs[g.name+'_RFs'][center_x, center_y]
+                    view = sheet.views.rfs[g.name][center_x, center_y]
                     matrixplot(view.top.data,title=("Receptive Field of %s unit (%d,%d) at coord (%3.0f, %3.0f) at time %s" %
                                                     (sheet.name,r,c,center_x,center_y,topo.sim.timestr(view.timestamp))))
                 except:

@@ -8,12 +8,6 @@ The Test Pattern window allows input patterns to be previewed.
 # * values like pi are written over
 # * need to sort the list of Pattern generators
 
-## Needs to be upgraded to behave how we want:
-### JABHACKALERT: Should use PatternPresenter (from
-### topo.command.analysis), which will allow flexible support for
-### making objects with different parameters in the different eyes,
-### e.g. to test ocular dominance or disparity.
-
 # CBENHANCEMENT: add 'use for learning' to install current pattern
 # (saving previous ones)?
 

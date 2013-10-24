@@ -619,8 +619,7 @@ class CFProjection(Projection):
         self.input_buffer = None
         self.activity = np.array(self.dest.activity)
 
-        if 'cfs' not in self.dest.views:
-            self.dest.views['cfs'] = AttrDict()
+        self.dest.views['cfs'] = AttrDict()
         self.dest.views.cfs[self.name] = ProjectionGrid(bounds=self.dest.bounds,
                                                         shape=self.activity.shape,
                                                         proj_name=self.name,

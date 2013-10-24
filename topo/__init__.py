@@ -330,11 +330,15 @@ try:
 except:
     pass
 
-
-from topo.analysis.featureresponses import FeatureResponses, MeasureResponseCommand,FeatureCurveCommand, pattern_response, topo_metadata_fn, store_measurement, get_feature_preference
+from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
+    FeatureMaps, ReverseCorrelation, MeasureResponseCommand, FeatureCurveCommand,\
+    pattern_response, topo_metadata_fn, store_rfs, store_maps, store_curves,\
+    get_feature_preference
 
 FeatureResponses.metadata_fns = [topo_metadata_fn]
-FeatureResponses.measurement_storage_hook = store_measurement
+FeatureMaps.measurement_storage_hook = store_maps
+FeatureCurves.measurement_storage_hook = store_curves
+ReverseCorrelation.measurement_storage_hook = store_rfs
 
 MeasureResponseCommand.preference_lookup_fn = get_feature_preference
 MeasureResponseCommand.pattern_response_fn = pattern_response.instance()

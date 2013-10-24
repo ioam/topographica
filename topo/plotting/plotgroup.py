@@ -1021,18 +1021,17 @@ class RFProjectionPlotGroup(GridPlotGroup):
         super(RFProjectionPlotGroup,self)._exec_pre_plot_hooks(inputs=[self.input_sheet.name],**kw)
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        proj_view = "{input}_{keyname}".format(input=self.input_sheet.name,
-                                               keyname=self.keyname)
+        input=self.input_sheet.name
 
         return make_template_plot(self._channels(plot_template, **kw),
-                                  getattr(self.sheet.views.rfs, proj_view, {}),
+                                  getattr(self.sheet.views.rfs, input, {}),
                                   self.input_sheet.xdensity,
                                   self.input_sheet.bounds,
                                   self.normalize,
                                   range_=kw['range_'])
 
     def _key(self,**kw):
-        return kw['x'],kw['y']
+        return kw['x'], kw['y']
 
 
 

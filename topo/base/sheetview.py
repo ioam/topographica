@@ -43,7 +43,6 @@ class SheetView(param.Parameterized):
         SheetView model. It is now easier to access the data and
         bounds attributes directly.
         """
-        self.warning('Viewing with old SheetView class')
         if hasattr(self, 'data'):
             return (self.data, self.bounds)
         else: # Necessary for backward compatibility with older snapshots.

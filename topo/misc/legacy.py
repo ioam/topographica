@@ -12,6 +12,7 @@ import param
 from snapshots import PicklableClassAttributes
 
 from topo import version_int
+from topo.misc.util import unit_value
 
 # CEBALERT: remove the extraneous "import param"s
 
@@ -420,6 +421,74 @@ def removed_JointScaling():
     topo.sheet.lissom.JointScaling = JointScaling
 
 support[90800129] = removed_JointScaling
+
+
+def featuremapper_legacy():
+    # For snapshots saved before 90800300
+
+    # Replace PatternPresenter objects with stub
+    import topo.analysis.featureresponses
+    class PatternPresenter(param.Parameterized):
+        def __init__(self):
+            pass
+    topo.analysis.featureresponses.PatternPresenter = PatternPresenter
+
+    # Do not restore class attributes for old classes
+    PicklableClassAttributes.do_not_restore += ['PatternPresentingCommand',
+                                                'PatternPresenter',
+                                                'topo.analysis.featureresponses.'
+                                                'SingleInputResponseCommand']
+
+
+    # Convert old sheet_views and curve_dict
+    from topo.misc.attrdict import AttrDict
+    from topo.base.sheet import Sheet
+    from imagen.dataview import SheetView, NDDict
+    def _set_sheet_views(instance, state):
+        name = state['_name_param_value']
+        state['simulation'].views[name] = AttrDict()
+        views = state['simulation'].views[name]
+        views['maps'] = AttrDict()
+        views['curves'] = AttrDict()
+        state['views'] = views
+        if 'sheet_views' in state:
+            svs = state['sheet_views']
+            for key, sv in svs.items():
+                data, bounds = sv.view()
+                new_sv = SheetView(data, bounds)
+                metadata = dict(dimension_labels=['Time'])
+                metadata_names = ['cyclic_range', 'precedence',
+                                  'row_precedence', 'src_name']
+                for param in metadata_names:
+                    if hasattr(sv, param):
+                        metadata[param] = getattr(sv, param)
+                state['views'].maps[key] = NDDict((sv.timestamp, new_sv),
+                                                  **metadata)
+        if 'curve_dict' in state:
+            old_curves = state['curve_dict']
+            curves = views['curves']
+            for key, value in old_curves.items():
+                key = key.capitalize()
+                for label, item in value.items():
+                    labels = unit_value(label)
+                    label_name = labels[0].split(' ')[0]
+                    l_val = labels[-1]
+                    if key not in views['curves']:
+                        curves[key] = NDDict(dimension_labels=[label_name])
+                    for f_val, old_sv in item.items():
+                        if l_val not in curves[key].keys():
+                            curves[key][l_val] = NDDict(dimension_labels=[key],
+                                                        label=label,
+                                                        timestamp=old_sv.timestamp)
+                        data, bounds = old_sv.view()
+                        sv = SheetView(data, bounds)
+                        curves[key][l_val][f_val] = sv
+        state.pop('curve_dict', None)
+        state.pop('sheet_views', None)
+
+    preprocess_state(Sheet, _set_sheet_views)
+
+support[90800300] = featuremapper_legacy
 
 
 ######################################################################

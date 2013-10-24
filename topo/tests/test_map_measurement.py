@@ -23,25 +23,17 @@ import pickle
 from numpy.testing import assert_array_almost_equal
 
 import numpy
-import topo
 
 from param import resolve_path, normalize_path
 from topo.command.analysis import *
 from topo.command.pylabplot import *
 from topo.plotting.plotgroup import plotgroups
 from topo.misc.attrdict import AttrDict
+from topo.misc.util import unit_value
 
 from nose.tools import nottest
 
-import re
 
-def unit_value(str):
-    m = re.match(r'([^\d]*)(\d*\.?\d+)([^\d]*)', str)
-    if m:
-        g = m.groups()
-        return ' '.join((g[0], g[2])).strip(), float(g[1])
-    else:
-        return int(str)
 
 # CEBALERT: change to be the all-in-one model eventually, and
 # uncomment all ocular/disparity/direction groups below.

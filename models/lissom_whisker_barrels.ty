@@ -191,14 +191,11 @@ topo.sim.connect(
 ### Whisker-specific plots
 
 from topo.plotting.plotgroup import create_plotgroup
-from topo.analysis.featureresponses import Feature,FeatureMaps,PatternPresenter,Subplotting
-from topo.base.sheetview import SheetView
+from topo.analysis.featureresponses import Feature,FeatureMaps,Subplotting
+from imagen.dataview import SheetView, NDDict
 
 def measure_deflection_pref(num_deflection=8,scale=0.3,offset=0.0,display=False,
-                            weighted_average=False,
-                            pattern_presenter=PatternPresenter(
-                                pattern_generator=Whiskers(),
-                                apply_output_fns=False,duration=0.175)):
+                            weighted_average=False, pattern_generator=Whiskers()):
     """
     Measure deflection maps by collating the responses to a set of
     whisker deflections in different directions.
@@ -214,8 +211,8 @@ def measure_deflection_pref(num_deflection=8,scale=0.3,offset=0.0,display=False,
 		    Feature(name="orientation",range=(0.0,2*pi),step=step_deflection,cyclic=True)]
 
     param_dict={"scale":scale,"offset":offset}
-    x=FeatureMaps(feature_values)
-    x.collect_feature_responses(pattern_presenter,param_dict,display,weighted_average)
+    FeatureMaps(feature_values,pattern_generator=pattern_generator,
+                param_dict=param_dict, weighted_average=weighted_average)
 
     Subplotting.set_subplots("Orientation",force=False)
 
@@ -234,8 +231,9 @@ pg.add_static_image('Color Key','topo/command/dfl_key_white_vert.png')
 
 # Color Layer 4 input units by their directional tuning
 sheet=topo.sim['Layer_4']
-new_view=SheetView((MEDs/(2.0*pi),sheet.bounds), sheet.name,sheet.precedence)
-sheet.sheet_views['OrientationPreference']=new_view
+sv=SheetView(MEDs/(2.0*pi),sheet.bounds)
+new_view = NDDict((None, sv), src_name=sheet.name, precedence=sheet.precedence)
+sheet.views.maps['OrientationPreference']=new_view
 
 
 # Use commands like the following to run the model and plot a map

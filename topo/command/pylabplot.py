@@ -1253,9 +1253,8 @@ class measure_frequency_response(UnitCurveCommand):
     would usually specify weber_contrast as the contrast_parameter. If
     there is no explicit LGN, then scale (offset=0.0) can be used to
     define the contrast.  Other relevant contrast definitions (or
-    other parameters) can also be used, provided they are defined in
-    PatternPresenter and the units parameter is changed as
-    appropriate.
+    other parameters) can also be used, provided they are defined in one of the
+    appropriate metaparameter_fns.
     """
 
     x_axis = param.String(default="frequency",constant=True)
