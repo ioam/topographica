@@ -618,7 +618,7 @@ if 'od' in p.dims: measure_sine_pref.num_ocularity=2
 # Measure feature maps based on unthresholded initial response for
 # speed and reliability
 from topo.analysis.featureresponses import MeasureResponseCommand
-MeasureResponseCommand.pattern_response_fn.duration=0.175
+MeasureResponseCommand.durations=[0.175]
 MeasureResponseCommand.pattern_response_fn.apply_output_fns=False
 
 

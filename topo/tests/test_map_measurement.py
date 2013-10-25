@@ -172,7 +172,7 @@ def test(plotgroup_names):
                 failing_tests += checkclose(sheet.name + " " + view_name,topo_version,
                                             sheet.views.maps[view_name].top.data,
                                             previous_sheet_views[view_name].view()[0])
-        import numpy as np
+
         if 'curve_dict' in previous_views[sheet.name]:
             previous_curve_dicts = previous_views[sheet.name]['curve_dict']
             # CB: need to cleanup var names e.g. val
@@ -180,7 +180,8 @@ def test(plotgroup_names):
                 for other_param in previous_curve_dicts[curve_name]:
                     other_param_val = unit_value(other_param)[-1]
                     for val in previous_curve_dicts[curve_name][other_param]:
-                        new = sheet.views.curves[curve_name.capitalize()][other_param_val-0.01:other_param_val+0.01,val].values()[0].data
+                        new_curves = sheet.views.curves[curve_name.capitalize()].top
+                        new = new_curves[other_param_val-0.01:other_param_val+0.01,val].values()[0].data
                         old = previous_curve_dicts[curve_name][other_param][val].view()[0]
                         failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),
                                                     topo_version, new, old)

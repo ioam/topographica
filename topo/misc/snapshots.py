@@ -88,7 +88,12 @@ class PicklableClassAttributes(object):
                 if p_name in self.param_moves.get(class_path,{}):
                     assert p_name not in self.param_name_changes.get(class_path,{})
 
-                    new_class_path,new_p_name = self.param_moves[class_path][p_name]
+                    if len(self.param_moves[class_path][p_name]) == 2:
+                        new_class_path,new_p_name = self.param_moves[class_path][p_name]
+                    if len(self.param_moves[class_path][p_name]) == 3:
+                        new_class_path,new_p_name,fn = self.param_moves[class_path][p_name]
+                        p_obj = fn(p_obj)
+
 
                     if new_class_path not in to_restore:
                         to_restore[new_class_path] = {}
@@ -99,7 +104,11 @@ class PicklableClassAttributes(object):
 
 
                 elif p_name in self.param_name_changes.get(class_path,{}):
-                    new_p_name = self.param_name_changes[class_path][p_name]
+                    if isinstance(self.param_name_changes[class_path][p_name],tuple):
+                        new_p_name, fn = self.param_name_changes[class_path][p_name]
+                        p_obj = fn(p_obj)
+                    else:
+                        new_p_name= self.param_name_changes[class_path][p_name]
 
                     if class_path not in to_restore:
                         to_restore[class_path] = {}
@@ -133,7 +142,9 @@ class PicklableClassAttributes(object):
 
             for p_name,p_obj in to_restore[class_path].items():
                 try:
-                    if p_name not in class_.params():
+                    if p_name in deleted_params:
+                        pass
+                    elif p_name not in class_.params():
                         # CEBALERT: GlobalParams's source code never has
                         # parameters. If we move Parameter saving and
                         # restoring to Parameterized, could allow
@@ -141,7 +152,7 @@ class PicklableClassAttributes(object):
                         # restoration.
                         if class_.__name__!='GlobalParams':
                             Parameterized(name='load_snapshot').warning("%s.%s found in snapshot, but '%s' is no longer defined as a Parameter by the current version of %s. If you are using this class, please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))
-                    elif p_name not in deleted_params:
+                    else:
                         setattr(class_,p_name,p_obj)
                 except:
                     Parameterized(name='load_snapshot').warning("%s.%s found in snapshot, but '%s' but could not be restored to the current version of %s. If you are using this class, please file a support request via topographica.org." % (class_.__name__, p_name,p_name,class_.__name__))

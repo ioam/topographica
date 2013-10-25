@@ -9,6 +9,8 @@ import copy
 
 from colorsys import hsv_to_rgb
 
+from collections import defaultdict
+
 import numpy as np
 
 import param
@@ -157,6 +159,9 @@ class FeatureResponses(PatternDrivenAnalysis):
     cmd_overrides = param.Dict(default={}, doc="""
         Dictionary used to overwrite parameters on the pattern_response_fn.""")
 
+    durations = param.List(default=[1.0], doc="""Times after presentation,
+        when a measurement is taken.""")
+
     inputs = param.String(default=[], doc="""Names of the input supplied to
         the metadata_fns to filter out desired inputs.""")
 
@@ -221,20 +226,24 @@ class FeatureResponses(PatternDrivenAnalysis):
         for fn in p.metadata_fns:
             self.metadata = AttrDict(p.metadata, **fn(p.inputs, p.outputs))
 
-        self._featureresponses = {}
-        self._activities = {}
+        self._featureresponses = defaultdict(lambda: defaultdict(dict))
+        self._activities = defaultdict(dict)
 
-        for out_label, output_metadata in self.metadata.outputs.items():
-            self._featureresponses[out_label] = {}
-            self._activities[out_label] = np.zeros(output_metadata['shape'])
+        self.measurement_labels = cross_product([self.metadata.outputs.keys(),
+                                                 p.durations])
+
+        for label in self.measurement_labels:
+            out_label, d = label
+            output_metadata = self.metadata.outputs[out_label]
+            self._activities[out_label][d] = np.zeros(output_metadata['shape'])
             for f in self.features:
-                self._featureresponses[out_label][f.name] = \
+                self._featureresponses[out_label][d][f.name] = \
                     DistributionMatrix(output_metadata['shape'],
                                        axis_range=f.range,
                                        cyclic=f.cyclic)
             if p.store_fullmatrix:
-                self._fullmatrix[out_label] = FullMatrix(output_metadata['shape'],
-                                                         self.features)
+                self._fullmatrix[out_label][d] = FullMatrix(output_metadata['shape'],
+                                                            self.features)
 
 
 
@@ -272,8 +281,9 @@ class FeatureResponses(PatternDrivenAnalysis):
     def _present_permutation(self, p, permutation, permutation_num):
         """Present a pattern with the specified set of feature values."""
         output_names = self.metadata['outputs'].keys()
-        for out_label in output_names:
-            self._activities[out_label] *= 0
+        for label in self.measurement_labels:
+            out_label, d = label
+            self._activities[out_label][d] *= 0
 
         # Calculate complete set of settings
         permuted_settings = zip(self.feature_names, permutation)
@@ -286,18 +296,23 @@ class FeatureResponses(PatternDrivenAnalysis):
             for f in p.pre_presentation_hooks: f()
 
             presentation_num = p.repetitions * permutation_num+i
+
             inputs = self._coordinate_inputs(p, dict(permuted_settings))
+
             responses = p.pattern_response_fn(inputs, output_names,
-                                              presentation_num, self.total_steps)
+                                              presentation_num, self.total_steps,
+                                              durations=p.durations)
 
             for f in p.post_presentation_hooks:
                 f()
 
-            for label, response in responses.items():
-                self._activities[label] += response
+            for response_labels, response in responses.items():
+                name, duration = response_labels
+                self._activities[name][duration] += response
 
-        for label in responses:
-            self._activities[label] = self._activities[label] / p.repetitions
+        for response_labels in responses.keys():
+            name, duration = response_labels
+            self._activities[name][duration] /= p.repetitions
 
         self._update(p, complete_settings)
 
@@ -334,12 +349,13 @@ class FeatureResponses(PatternDrivenAnalysis):
         Update each DistributionMatrix with (activity,bin) and
         populate the full matrix, if enabled.
         """
-        for out_label in self.metadata.outputs:
-            act = self._activities[out_label]
+        for label in self.measurement_labels:
+            name, d = label
+            act = self._activities[name][d]
             for feature, value in current_values:
-                self._featureresponses[out_label][feature].update(act, value)
+                self._featureresponses[name][d][feature].update(act,value)
             if p.store_fullmatrix:
-                self._fullmatrix[out_label].update(act, current_values)
+                self._fullmatrix[name][d].update(act, current_values)
 
 
     @bothmethod
@@ -412,14 +428,17 @@ class FeatureMaps(FeatureResponses):
 
 
     def _collate_results(self, p):
-        results = {'fullmatrix': self._fullmatrix if self.store_fullmatrix else None}
+        results = defaultdict(dict)
+        results['fullmatrix'] = self._fullmatrix if self.store_fullmatrix else None
         timestamp = self.metadata.timestamp
 
-        for out_label, output_metadata in self.metadata.outputs.items():
-            results[out_label] = {}
-            for feature in self._featureresponses[out_label]:
+        for label in self.measurement_labels:
+            name, duration = label
+            output_metadata = self.metadata.outputs[name]
+            feature_responses = self._featureresponses[name][duration]
+            for feature in feature_responses:
                 fp = filter(lambda f: f.name == feature, self.features)[0]
-                fr = self._featureresponses[out_label][feature]
+                fr = feature_responses[feature]
                 ar = fr.distribution_matrix[0, 0].axis_range
                 cyclic_range = ar if fp.cyclic else 1.0
                 pref_fn = fp.preference_fn if fp.preference_fn is not None\
@@ -433,10 +452,14 @@ class FeatureMaps(FeatureResponses):
                     for map_name, map_view in maps.items():
                         sv = SheetView(map_view, output_metadata['bounds'])
                         cr = None if map_name == 'selectivity' else cyclic_range
-                        metadata = dict(cyclic_range=cr, **output_metadata)
-                        name = base_name + k + map_name.capitalize()
-                        results[out_label][name] = NdMapping((timestamp, sv),
-                                                          **metadata)
+                        metadata = dict(cyclic_range=cr, dimension_labels=['Time','Duration'],
+                                        **output_metadata)
+                        map_name = base_name + k + map_name.capitalize()
+                        if map_name not in results[name]:
+                            results[name][map_name] = NdMapping(((timestamp, duration), sv),
+                                                            **metadata)
+                        else:
+                            results[name][map_name][timestamp, duration] = sv
 
         return results
 
@@ -490,25 +513,36 @@ class FeatureCurves(FeatureResponses):
 
 
     def _collate_results(self, p):
-        results = {'fullmatrix': self._fullmatrix if self.store_fullmatrix else None}
+        results = {}
+        results['fullmatrix'] = self._fullmatrix if self.store_fullmatrix else None
 
-        for out_label, output_metadata in self.metadata.outputs.items():
-            results[out_label] = {}
-            metadata = dict(timestamp=self.metadata.timestamp,
-                            dimension_labels=[p.x_axis.capitalize()],
+        time = self.metadata.timestamp
+        curve_label = p.measurement_prefix + p.x_axis.capitalize()
+
+        for label in self.measurement_labels:
+            name, duration = label
+            output_metadata = self.metadata.outputs[name]
+            rows, cols = output_metadata['shape']
+            f_names, f_vals = zip(*p.curve_params.items())
+            if name not in results:
+                results[name] = NdMapping(dimension_labels=['Time', 'Duration'],
+                                          curve_label=curve_label)
+            results[name][time, duration] = NdMapping(dimension_labels=list(f_names))
+            metadata = dict(dimension_labels=[p.x_axis.capitalize()],
                             label=p.label, prefix=p.measurement_prefix,
                             curve_params=p.curve_params, **output_metadata)
-            view = NdMapping(**metadata)
-            rows, cols = output_metadata['shape']
-            curve_responses = self._featureresponses[out_label][p.x_axis].distribution_matrix
+            results[name][time, duration][f_vals] = NdMapping(**metadata)
+
+            curve_responses = self._featureresponses[name][duration][p.x_axis].distribution_matrix
+            r = results[name][time, duration][f_vals]
+
             for x in curve_responses[0, 0]._data.iterkeys():
                 y_axis_values = np.zeros(output_metadata['shape'], activity_type)
                 for i in range(rows):
                     for j in range(cols):
                         y_axis_values[i, j] = curve_responses[i, j].get_value(x)
                 sv = SheetView(y_axis_values, output_metadata['bounds'])
-                view[x] = sv
-            results[out_label] = view
+                r[x] = sv
 
         return results
 
@@ -542,16 +576,20 @@ class ReverseCorrelation(FeatureResponses):
         for fn in p.metadata_fns:
             self.metadata = AttrDict(self.metadata, **fn(p.inputs, p.outputs))
 
-        self._activities = {}
-        self._featureresponses = {}
+        self.measurement_labels = cross_product([self.metadata.inputs.keys(),
+                                                 self.metadata.outputs.keys(),
+                                                 p.durations])
 
-        for in_label, input_metadata in self.metadata.inputs.items():
-            self._featureresponses[in_label] = {}
-            for out_label, output_metadata in self.metadata.outputs.items():
-                rows, cols = output_metadata['shape']
-                rc_array = np.array([[np.zeros(input_metadata['shape'], activity_dtype)
-                                      for r in range(rows)] for c in range(cols)])
-                self._featureresponses[in_label][out_label] = rc_array
+        self._featureresponses = defaultdict(lambda: defaultdict(dict))
+
+        for labels in self.measurement_labels:
+            in_label, out_label, duration = labels
+            input_metadata = self.metadata.inputs[in_label]
+            output_metadata = self.metadata.outputs[out_label]
+            rows, cols = output_metadata['shape']
+            rc_array = np.array([[np.zeros(input_metadata['shape'], activity_dtype)
+                                  for r in range(rows)] for c in range(cols)])
+            self._featureresponses[in_label][out_label][duration] = rc_array
 
 
     def _present_permutation(self, p, permutation, permutation_num):
@@ -567,7 +605,8 @@ class ReverseCorrelation(FeatureResponses):
         inputs = self._coordinate_inputs(p, dict(permuted_settings))
         measurement_sources = self.metadata.outputs.keys() + self.metadata.inputs.keys()
         responses = p.pattern_response_fn(inputs, measurement_sources,
-                                          permutation_num, self.total_steps)
+                                          permutation_num, self.total_steps,
+                                          durations=p.durations)
 
         for f in p.post_presentation_hooks: f()
 
@@ -580,38 +619,42 @@ class ReverseCorrelation(FeatureResponses):
         """
         for in_label in self.metadata.inputs:
             for out_label, output_metadata in self.metadata.outputs.items():
-                rows, cols = output_metadata['shape']
-                feature_responses = self._featureresponses[in_label][out_label]
-                for ii in range(rows):
-                    for jj in range(cols):
-                        delta_rf = responses[out_label][ii, jj] * responses[in_label]
-                        feature_responses[ii, jj] += delta_rf
+                for d in p.durations:
+                    rows, cols = output_metadata['shape']
+                    in_response = responses[(in_label, d)]
+                    out_response = responses[(out_label, d)]
+                    feature_responses = self._featureresponses[in_label][out_label][d]
+                    for ii in range(rows):
+                        for jj in range(cols):
+                            delta_rf = out_response[ii, jj] * in_response
+                            feature_responses[ii, jj] += delta_rf
 
 
     def _collate_results(self, p):
-        results = {'fullmatrix': self._fullmatrix if self.store_fullmatrix else None}
-
-        for in_label, input_metadata in self.metadata.inputs.items():
-            results[in_label] = {}
-            for out_label, output_metadata in self.metadata.outputs.items():
-                rows, cols = output_metadata['shape']
-                timestamp = self.metadata['timestamp']
-                view = ProjectionGrid(label=p.measurement_prefix + 'RFs',
-                                      timestamp=timestamp,
-                                      bounds=output_metadata['bounds'],
-                                      shape=output_metadata['shape'])
-                metadata = dict(measurement_src=output_metadata['src_name'],
-                                **input_metadata)
-                rc_response = self._featureresponses[in_label][out_label]
-                for ii in range(rows):
-                    for jj in range(cols):
-                        coord = view.matrixidx2coord(ii, jj)
-                        sv = SheetView(rc_response[ii, jj],
-                                       input_metadata['bounds'])
-                        rf_metadata = dict(coord=coord, **metadata)
-                        unit_dict = NdMapping((timestamp, sv), **rf_metadata)
-                        view[coord] = unit_dict
-                results[in_label][out_label] = view
+        dim_labels = ['Time','Duration']
+        results = defaultdict(dict)
+        results['fullmatrix'] = self._fullmatrix if self.store_fullmatrix else None
+        for labels in self.measurement_labels:
+            in_label, out_label, duration = labels
+            input_metadata = self.metadata.inputs[in_label]
+            output_metadata = self.metadata.outputs[out_label]
+            rows, cols = output_metadata['shape']
+            timestamp = self.metadata['timestamp']
+            view = ProjectionGrid(label=p.measurement_prefix + 'RFs',
+                                  timestamp=timestamp,
+                                  bounds=output_metadata['bounds'],
+                                  shape=output_metadata['shape'])
+            metadata = dict(measurement_src=output_metadata['src_name'],
+                            **input_metadata)
+            rc_response = self._featureresponses[in_label][out_label][duration]
+            for ii in range(rows):
+                for jj in range(cols):
+                    coord = view.matrixidx2coord(ii, jj)
+                    sv = SheetView(rc_response[ii, jj],input_metadata['bounds'])
+                    rf_metadata = dict(coord=coord, dimension_labels=dim_labels,
+                                       **metadata)
+                    view[coord] = NdMapping(((timestamp, duration), sv), **rf_metadata)
+            results[out_label][in_label] = view
         return results
 
 
@@ -803,7 +846,7 @@ class direction2translation(param.ParameterizedFunction):
                     inputs[name] = Translator(generator=inputs[name],
                                               direction=features['direction'],
                                               speed=features['speed'],
-                                              reset_period=self.duration)
+                                              reset_period=features['duration'])
             else:
             #### old motion model ####
                 orientation = features['direction'] + np.pi/2
@@ -888,7 +931,13 @@ class hue2rgbscale(param.ParameterizedFunction):
                                          ' substrings.')
                             self.hue_warned = True
             else:
-                from contrib.rgbimages import ExtendToRGB
+                try:
+                    from contrib.rgbimages import ExtendToRGB
+                except ImportError:
+                    ImportError('This hue conversion is currently not available.'
+                                'Obtain the contrib folder from '
+                                'https://github.com/ioam/svn-history and place'
+                                'it in the topographica directory.')
 
                 r, g, b = hsv_to_rgb(features['hue'], 1.0, 1.0)
                 for name in inputs.keys():
@@ -1009,11 +1058,12 @@ class Subplotting(param.Parameterized):
         if args != ():
             Subplotting.set_subplots(*(Subplotting._last_args))
 
+
 class PatternPresentingCommand(ParameterizedFunction):
     """Parameterized command for presenting input patterns"""
 
-    duration = param.Number(default=None, doc="""
-        If non-None, pattern_response_fn.duration will be set to this value.""")
+    durations = param.Parameter(default=[1.0], doc="""Times after presentation
+        begins at which to record a measurement.""")
 
     measurement_prefix = param.String(default='', doc="""
         Optional prefix to add to the name under which results are stored as
@@ -1088,7 +1138,7 @@ class MeasureResponseCommand(PatternPresentingCommand):
         if p.subplot != "":
             Subplotting.set_subplots(p.subplot, force=True)
 
-        results = FeatureMaps(self._feature_list(p), duration=p.duration,
+        results = FeatureMaps(self._feature_list(p), durations=p.durations,
                               inputs=p.inputs, metafeature_fns=p.metafeature_fns,
                               measurement_prefix=p.measurement_prefix,
                               outputs=p.outputs, param_dict=static_params,
@@ -1263,7 +1313,7 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
                 ('%s = ' + val_format + '%s') % (n.capitalize(), v, p.units)
                  for n, v in curve.items()])
             measurements[curve_label] = FeatureCurves(self._feature_list(p),
-                curve_params=curve, duration=p.duration, inputs=p.inputs,
+                curve_params=curve, durations=p.durations, inputs=p.inputs,
                 label=curve_label, measurement_prefix=p.measurement_prefix,
                 metafeature_fns=p.metafeature_fns, outputs=p.outputs,
                 param_dict=static_params, pattern_generator=p.pattern_generator,
@@ -1421,9 +1471,11 @@ def update_activity(sheet_views_prefix='', force=False):
 
 class pattern_present(PatternPresentingCommand):
     """
-    Presents a pattern on the input sheet(s) and returns the
-    response. Does not affect the state but can overwrite the previous
-    pattern if overwrite_previous is set to True.
+    Given a set of input patterns, installs them into the specified
+    GeneratorSheets, runs the simulation for the specified length of
+    time, then restores the original patterns and the original
+    simulation time.  Thus this input is not considered part of the
+    regular simulation, and is usually for testing purposes.
 
     May also be used to measure the response to a pattern by calling
     it with restore_events disabled and restore_state and
@@ -1431,17 +1483,17 @@ class pattern_present(PatternPresentingCommand):
     state and install the response in the sheets views dictionary. The
     update_activity command implements this functionality.
 
-    Given a set of input patterns, installs them into the specified
-    GeneratorSheets, runs the simulation for the specified length of
-    time, then restores the original patterns and the original
-    simulation time.  Thus this input is not considered part of the
-    regular simulation, and is usually for testing purposes.
-
     As a special case, if 'inputs' is just a single pattern, and not
     a dictionary, it is presented to all GeneratorSheets.
 
-    If a simulation is not provided, the active simulation, if one
-    exists, is requested.
+    If this process is interrupted by the user, the temporary patterns
+    may still be installed on the retina.
+
+    If overwrite_previous is true, the given inputs overwrite those
+    previously defined.
+
+    If plastic is False, overwrites the existing values of Sheet.plastic
+    to disable plasticity, then reenables plasticity.
 
     If this process is interrupted by the user, the temporary patterns
     may still be installed on the retina.
@@ -1456,18 +1508,12 @@ class pattern_present(PatternPresentingCommand):
         Determines whether sheet output functions will be applied.
         """)
 
-    duration = param.Number(default=None, doc="""
-        If non-None, pattern_presenter.duration will be
-        set to this value.  Provides a simple way to set
-        this commonly changed option of CoordinatedPatternGenerator.""")
-
     inputs = param.Dict(default={}, doc="""
         A dictionary of GeneratorSheetName:PatternGenerator pairs to be
         installed into the specified GeneratorSheets""")
 
     install_sheetview = param.Boolean(default=False, doc="""Determines
-        whether to install a sheet view in the appropriate sheet_views
-        dict even when there is an existing sheetview.""")
+        whether to install a sheet view in the global storage dictionary.""")
 
     plastic = param.Boolean(default=False, doc="""
         If plastic is False, overwrites the existing values of
@@ -1537,8 +1583,19 @@ class pattern_present(PatternPresentingCommand):
         if p.restore_events:
             topo.sim.event_push()
 
-        duration = p.duration if (p.duration is not None) else 1.0
-        topo.sim.run(duration)
+        durations = np.diff([0] + p.durations)
+        outputs = outputs if len(outputs) > 0 else topo.sim.objects(Sheet).keys()
+
+        responses = defaultdict(dict)
+        for i, d in enumerate(durations):
+            topo.sim.run(d)
+            time = p.durations[i]
+            if p.return_responses:
+                update_activity(p.sheet_views_prefix, p.install_sheetview)
+                if hasattr(topo, 'guimain'):
+                    topo.guimain.refresh_activity_windows()
+                for output in outputs:
+                    responses[(output, time)] = topo.sim[output].activity.copy()
 
         if p.restore_events:
             topo.sim.event_pop()
@@ -1555,17 +1612,6 @@ class pattern_present(PatternPresentingCommand):
 
         if not p.overwrite_previous:
             restore_input_generators()
-
-        update_activity(p.sheet_views_prefix, p.install_sheetview)
-
-        responses = {}
-        outputs = outputs if len(outputs) > 0 else topo.sim.objects(Sheet).keys()
-        if p.return_responses:
-                for output in outputs:
-                    responses[output] = topo.sim[output].activity.copy()
-
-        if hasattr(topo, 'guimain'):
-            topo.guimain.refresh_activity_windows()
 
         if p.restore_state:
             topo.sim.state_pop()
@@ -1608,8 +1654,7 @@ class pattern_response(pattern_present):
     return_responses = param.Boolean(default=True, doc="""
         If True, return a dictionary of the measured sheet activities.""")
 
-    def __call__(self, inputs={}, outputs=[], current=0, total=1,
-                 **params_to_override):
+    def __call__(self, inputs={}, outputs=[], current=0, total=1, **params):
         all_input_names = topo.sim.objects(GeneratorSheet).keys()
 
         if 'default' in inputs:
@@ -1630,9 +1675,9 @@ class pattern_response(pattern_present):
             raise MeasurementInterrupt(current, total)
         self.timer.update_timer('Measurement Timer', current, total)
 
-        p = ParamOverrides(self, dict(params_to_override, inputs=inputs))
-
-        responses = super(pattern_response, self).__call__(outputs=outputs, **p)
+        responses = super(pattern_response, self).__call__(inputs=inputs,
+                                                           outputs=outputs,
+                                                           **params)
 
         if hasattr(topo, 'guimain') and current == total:
             topo.guimain.refresh_activity_windows()
@@ -1691,12 +1736,12 @@ def topo_metadata_fn(input_names=[], output_names=[]):
 def store_rfs(measurement_dict):
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
+        sheet = topo.sim[sheet_name]
         for data_name, data in sheet_data.items():
-            data_sheet = topo.sim[data_name]
-            if sheet_name not in data_sheet.views.rfs:
-                data_sheet.views.rfs[sheet_name] = data
+            if sheet_name not in sheet.views.rfs:
+                sheet.views.rfs[data_name] = data
             else:
-                data_sheet.views.rfs[sheet_name].update(data)
+                sheet.views.rfs[data_name].update(data)
 
 
 def store_curves(measurement_dict):
@@ -1704,30 +1749,34 @@ def store_curves(measurement_dict):
     for sheet_name, data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
         storage = sheet.views.curves
-        label = data.metadata.prefix + data.dimension_labels[0]
-        feature_names, feature_vals = zip(*data.metadata.curve_params.items())
-        metadata = dict(bounds=data.metadata.bounds, timestamp=data.timestamp,
-                        dimension_labels=list(feature_names))
-        if label not in storage:
-            storage[label] = NdMapping(**metadata)
+        label = data.metadata.curve_label
+        if label in storage:
+            storage[label].update(data)
         else:
-            new_timestamp = data.timestamp > storage[label].timestamp
-            new_measurement = any([True for c in storage[label][...].values()
-                                   if data.metadata.label == c.metadata.label])
-            if new_timestamp or new_measurement:
-                storage[label] = NdMapping(**metadata)
-        storage[label][feature_vals] = data
+            storage[label] = data
+        #feature_names, feature_vals = zip(*data.metadata.curve_params.items())
+        #metadata = dict(bounds=data.metadata.bounds, timestamp=data.timestamp,
+        #                dimension_labels=list(feature_names))
+        #if label not in storage:
+        #    storage[label] = NdMapping(**metadata)
+        #else:
+        #    new_timestamp = data.timestamp > storage[label].timestamp
+        #    new_measurement = any([True for c in storage[label][...].values()
+        #                           if data.metadata.label == c.metadata.label])
+        #    if new_timestamp or new_measurement:
+        #        storage[label] = NdMapping(**metadata)
+        #storage[label][feature_vals] = data
 
 
 def store_maps(measurement_dict):
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
-        for data_name, data in sheet_data.items():
-            if data_name not in sheet.views.maps:
-                sheet.views.maps[data_name] = data
+        for map_name, data in sheet_data.items():
+            if map_name not in sheet.views.maps:
+                sheet.views.maps[map_name] = data
             else:
-                sheet.views.maps[data_name].update(data)
+                sheet.views.maps[map_name].update(data)
 
 
 def get_feature_preference(feature, sheet_name, coords, default=0.0):

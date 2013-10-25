@@ -450,13 +450,83 @@ def featuremapper_legacy():
             pass
     topo.analysis.featureresponses.PatternPresenter = PatternPresenter
 
-    # Do not restore class attributes for old classes and delete old parameters
-    no_restore = ['topo.analysis.featureresponses.PatternPresenter',
-                  'topo.analysis.featureresponses.SingleInputResponseCommand',
-                  'topo.base.sheetview.UnitView']
-    param_no_restore = {'MeasureResponseCommand':('display'),
-                        'SingleInputResponseCommand':('pattern_presenter')}
-    PicklableClassAttributes.do_not_restore += no_restore
+    # Move parameters and change them if necessary
+    duration_lambda = lambda x: param.List(default=[x.default], doc="""
+        If non-None, pattern_response_fn.duration will be set to this value.""")
+    apply_output_fns_lambda = lambda x: {'apply_output_fns': x.default}
+
+    name_changes = PicklableClassAttributes.param_name_changes
+
+    mrc_name_changes = name_changes.get(
+        'topo.analysis.featureresponses.MeasureResponseCommand',{})
+    mrc_name_changes.update(
+        {'duration': ('durations', duration_lambda)})
+    name_changes['topo.analysis.featureresponses.MeasureResponseCommand']=mrc_name_changes
+
+    mrc_moves = PicklableClassAttributes.param_moves.get(
+        'topo.analysis.featureresponses.MeasureResponseCommand',{})
+    mrc_moves.update({'apply_output_fns':
+                          ('topo.analysis.featureresponses.FeatureResponses','cmd_overrides',apply_output_fns_lambda)})
+    PicklableClassAttributes.param_moves['topo.analysis.featureresponses.MeasureResponseCommand'] = mrc_moves
+
+    fcc_name_changes = name_changes.get(
+        'topo.analysis.featureresponses.FeatureCurveCommand',{})
+    fcc_name_changes.update(
+        {'duration': ('durations', duration_lambda)})
+    name_changes['topo.analysis.featureresponses.FeatureCurveCommand']=fcc_name_changes
+
+    fcc_moves = PicklableClassAttributes.param_moves.get(
+        'topo.analysis.featureresponses.FeatureCurveCommand',{})
+    fcc_moves.update({'apply_output_fns':
+                          ('topo.analysis.featureresponses.FeatureCurves','cmd_overrides',apply_output_fns_lambda)})
+    PicklableClassAttributes.param_moves['topo.analysis.featureresponses.FeatureCurveCommand'] = fcc_moves
+
+    ppc_name_changes = name_changes.get(
+        'topo.analysis.featureresponses.PatternPresentingCommand',{})
+    ppc_name_changes.update(
+        {'duration': ('durations', duration_lambda),
+         'sheet_views_prefix': 'measurement_prefix'})
+    name_changes['topo.analysis.featureresponses.PatternPresentingCommand']=ppc_name_changes
+
+    # Move enable_fullmatrix parameter
+    fr_name_changes = name_changes.get(
+        'topo.analysis.featureresponses.FeatureResponses',{})
+    fr_name_changes.update(
+        {'enable_fullmatrix':'store_fullmatrix'})
+    name_changes['topo.analysis.featureresponses.FeatureResponses']=fr_name_changes
+
+    # Measurement Prefix
+    fr_name_changes = name_changes.get(
+        'topo.analysis.featureresponses.FeatureResponses',{})
+    fr_name_changes.update(
+        {'enable_fullmatrix':'store_fullmatrix'})
+    name_changes['topo.analysis.featureresponses.FeatureResponses']=fr_name_changes
+
+
+    # Delete old parameters
+    old_cmd_params = ('display', 'pattern_presenter', 'generator_sheets',
+                      'input_sheet', 'sheet')
+    param_no_restore = {'MeasureResponseCommand': old_cmd_params,
+                        'FeatureCurveCommand': old_cmd_params,
+                        'ProjectionSheetMeasurementCommand' : old_cmd_params,
+                        'SingleInputResponseCommand': old_cmd_params,
+                        'measure_rfs': ('sampling_interval', 'sampling_area'),
+                        'unit_tuning_curve': ('x_axis', 'sheet'),
+                        'ReverseCorrelation': old_cmd_params,
+                        'FeatureCurves': ('post_collect_responses_hook'),
+                        'FeatureMaps': ('sheet_views_prefix'),
+                        'measure_latency_preference': old_cmd_params,
+                        'PositionMeasurementCommand': old_cmd_params,
+                        'measure_corner_or_pref': old_cmd_params,
+                        'measure_orientation_contrast': old_cmd_params,
+                        'PatternPresenter': ('contrast_parameter', 'divisions',
+                                             'generator_sheets', 'apply_output_fns',
+                                             'duration'),
+                        'measure_or_tuning_fullfield': old_cmd_params,
+                        'UnitCurveCommand': old_cmd_params,
+                        'measure_frequency_preference': old_cmd_params,
+                        'SinusoidalMeasureResponseCommand': old_cmd_params,
+                        'measure_log_frequency_preference': old_cmd_params}
     PicklableClassAttributes.deleted_params.update(param_no_restore)
 
     # Convert old sheet_views and curve_dict
@@ -502,21 +572,23 @@ def featuremapper_legacy():
                     label_name = labels[0].split(' ')[0]
                     l_val = labels[-1]
                     if key not in views['curves']:
-                        curves[key] = NdMapping(dimension_labels=[label_name])
+                        curves[key] = NdMapping(dimension_labels=['Time'])
                     for f_val, old_sv in item.items():
-                        if l_val not in curves[key].keys():
-                            curves[key][l_val] = NdMapping(dimension_labels=[key],
-                                                        label=label,
-                                                        timestamp=old_sv.timestamp)
+                        timestamp = old_sv.timestamp
+                        curves[key][timestamp] = NdMapping(dimension_labels=[label_name])
+                        if l_val not in curves[key][timestamp].keys():
+                            curves[key][timestamp] [l_val] = NdMapping(dimension_labels=[key],
+                                                                       label=label,
+                                                                       timestamp=old_sv.timestamp)
                         data, bounds = old_sv.view()
                         sv = SheetView(data, bounds)
-                        curves[key][l_val][f_val] = sv
+                        curves[key][timestamp][l_val][f_val] = sv
         state.pop('curve_dict', None)
         state.pop('sheet_views', None)
 
     preprocess_state(Sheet, _set_sheet_views)
 
-    param.Parameterized().warning('Legacy code does not guarantee all'
+    param.Parameterized().warning('Legacy code does not guarantee all '
         'measurement parameters have been restored. Make sure measurements are '
         'still set up correctly.')
 

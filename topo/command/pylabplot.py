@@ -40,7 +40,7 @@ from topo.base.cf import CFSheet
 
 from topo.analysis.featureresponses import Feature
 from topo.analysis.featureresponses import PositionMeasurementCommand, FeatureCurveCommand, UnitCurveCommand
-from topo.analysis.featureresponses import contrast2scale, contrast2centersurroundscale
+from topo.analysis.featureresponses import contrast2centersurroundscale
 
 from topo.command import Command
 
@@ -699,7 +699,7 @@ class tuning_curve(unit_tuning_curve):
     def __call__(self, **params):
         p = ParamOverrides(self, params, allow_extra_keywords=True)
 
-        curves = p.sheet.views.curves[p.x_axis.capitalize()]
+        curves = p.sheet.views.curves[p.x_axis.capitalize()].top
         for coordinate in p.coords:
             super(tuning_curve, self).__call__(curves,
                                                sheet_name=p.sheet.name,
@@ -838,14 +838,14 @@ class cyclic_tuning_curve(cyclic_unit_tuning_curve):
     def __call__(self,**params):
         p=ParamOverrides(self,params)
         x_axis = p.x_axis.capitalize()
-        curves = p.sheet.views.curves[x_axis]
+        curves = p.sheet.views.curves[x_axis].top
         for coordinate in p.coords:
             super(cyclic_tuning_curve, self).__call__(curves, coord=coordinate,
                                                       sheet_name=p.sheet.name,
                                                       plot_type=p.plot_type,
                                                       unit=p.unit,
                                                       legend=p.legend,
-                                                      cyclic_range = p.cyclic_range)
+                                                      cyclic_range=p.cyclic_range)
 
 
 def plot_cfproj_mapping(dest,proj='Afferent',style='b-'):

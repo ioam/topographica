@@ -875,48 +875,6 @@ def print_sizes():
 PatternDrivenAnalysis.pre_presentation_hooks.append(wipe_out_activity)
 PatternDrivenAnalysis.pre_presentation_hooks.append(clear_event_queue)
 
-#from topo.analysis.featureresponses import pattern_present
-
-# def pattern_present(inputs={}, duration=1.0, plastic=False,
-#                     overwrite_previous=False, apply_output_fns=True, **kwargs):
-#     """
-#     Given a set of input patterns (dictionary of
-#     GeneratorSheetName:PatternGenerator pairs), installs them into the
-#     specified GeneratorSheets, runs the simulation for the specified
-#     length of time, then restores the original patterns and the
-#     original simulation time.  Thus this input is not considered part
-#     of the regular simulation, and is usually for testing purposes.
-
-#     As a special case, if 'inputs' is just a single pattern, and not
-#     a dictionary, it is presented to all GeneratorSheets.
-
-#     If a simulation is not provided, the active simulation, if one
-#     exists, is requested.
-
-#     If this process is interrupted by the user, the temporary patterns
-#     may still be installed on the retina.
-
-#     If overwrite_previous is true, the given inputs overwrite those
-#     previously defined.
-
-#     If plastic is False, overwrites the existing values of Sheet.plastic
-#     to disable plasticity, then reenables plasticity.
-
-#     In order to to see the sequence of values presented, you may use
-#     the back arrow history mechanism in the GUI. Note that the GUI's
-#     Activity window must be open and the display parameter set to true
-#     (display=True).
-
-#     Alternatively, the activity response of the sheets may be obtained
-#     from the sheet_views dictionary of the respective sheets.
-
-#     This function is a backward compatibility wrapper of the
-#     pattern_response class.
-#     """
-#     from analysis import pattern_response
-#     pattern_response(inputs=inputs, duration=duration, plastic=plastic,
-#                      overwrite_previous=overwrite_previous,
-#                      apply_output_fns=apply_output_fns, **kwargs)
 
 # maybe an explicit list would be better?
 import types

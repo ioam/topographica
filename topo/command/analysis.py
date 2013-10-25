@@ -42,7 +42,7 @@ from topo.misc.distribution import Distribution, DistributionStatisticFn
 from topo.misc.distribution import DSF_MaxValue, DSF_BimodalPeaks
 from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit,\
     DSF_BimodalVonMisesFit
-from topo.pattern import GaussiansCorner, Gaussian, RawRectangle, Composite, Constant
+from topo.pattern import GaussiansCorner, Gaussian, Composite, Constant
 from topo.pattern.random import UniformRandom
 from topo.analysis.featureresponses import ReverseCorrelation
 from topo.plotting.plotgroup import create_plotgroup, plotgroups
@@ -53,7 +53,7 @@ from topo.analysis.featureresponses import Feature, MeasureResponseCommand
 from topo.analysis.featureresponses import SinusoidalMeasureResponseCommand, \
     PositionMeasurementCommand, SingleInputResponseCommand
 from topo.analysis.featureresponses import update_activity, pattern_present
-from topo.analysis.featureresponses import update_sheet_activity # pyflakes:ignore (API import)
+from topo.analysis.featureresponses import pattern_response, update_sheet_activity # pyflakes:ignore (API import)
 from topo.analysis.featureresponses import contrast2scale,\
     direction2translation, hue2rgbscale, ocular2leftrightscale,\
     phasedisparity2leftrightphase
@@ -308,6 +308,11 @@ pg = create_plotgroup(name='Projection Activity', category="Basic",
 pg.add_plot('Projection Activity', [('Strength', 'ProjectionActivity')])
 
 
+#class measure_activity(MeasureResponseCommand):
+#
+#    def __call__():
+
+
 class measure_rfs(SingleInputResponseCommand):
     """
     Map receptive fields by reverse correlation.
@@ -340,9 +345,8 @@ class measure_rfs(SingleInputResponseCommand):
         self._set_presenter_overrides(p)
         static_params = dict([(s,p[s]) for s in p.static_parameters])
         results = ReverseCorrelation(self._feature_list(p),
-                                     param_dict=static_params,
-                                     inputs=p.inputs, outputs=p.outputs,
-                                     duration=p.duration,
+                                     durations=p.durations, inputs=p.inputs,
+                                     outputs=p.outputs, param_dict=static_params,
                                      pattern_response_fn=p.pattern_response_fn,
                                      pattern_generator=p.pattern_generator)
         self._restore_presenter_defaults()
@@ -684,15 +688,15 @@ class measure_dr_pref(SinusoidalMeasureResponseCommand):
                         cyclic=False) if p.num_speeds is 0 else
                 Feature(name="speed", range=(0.0, p.max_speed),
                         step=float(p.max_speed) / p.num_speeds, cyclic=False),
+                Feature(name="duration", values=np.max(p.durations)),
                 Feature(name="frequency", values=p.frequencies),
                 Feature(name="direction", range=(0.0, 2 * np.pi),
-                        step=2 * np.pi / p.num_direction, cyclic=True,
+                        step=2*np.pi / p.num_direction, cyclic=True,
                         preference_fn=self.preference_fn),
                 Feature(name="phase", range=(0.0, 2 * np.pi),
                         step=2 * np.pi / p.num_phase, cyclic=True),
                 Feature(name="orientation", range=(0.0, np.pi), values=or_values,
-                        cyclic=True,
-                        compute_fn=compute_orientation_from_direction)]
+                        cyclic=True, compute_fn=compute_orientation_from_direction)]
 
 
 pg = create_plotgroup(name='Direction Preference', category="Preference Maps",
