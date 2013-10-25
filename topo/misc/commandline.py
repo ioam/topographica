@@ -440,14 +440,14 @@ topo_parser.add_option("-o","--outputpath",action="callback",callback=o_action,t
 		       help="set the default output path")
 
 
-def gui(start=True):
+def gui(start=True,exit_on_quit=True):
     """Start the GUI as if -g were supplied in the command used to launch Topographica."""
     if matplotlib_imported:
         rcParams['backend']='TkAgg'
     auto_import_commands()
     if start:
         import topo.tkgui
-        topo.tkgui.start()
+        topo.tkgui.start(exit_on_quit=exit_on_quit)
 
 
 # Topographica stays open if an error occurs after -g
