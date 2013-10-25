@@ -336,6 +336,7 @@ from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
     get_feature_preference
 
 FeatureResponses.metadata_fns = [topo_metadata_fn]
+FeatureResponses.pattern_response_fn = pattern_response.instance()
 FeatureMaps.measurement_storage_hook = store_maps
 FeatureCurves.measurement_storage_hook = store_curves
 ReverseCorrelation.measurement_storage_hook = store_rfs

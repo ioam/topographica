@@ -201,7 +201,7 @@ class matrixplot(PylabPlotCommand):
 
         plt.imshow(mat, interpolation='nearest', aspect=aspect, extent=extent)
         if colorbar and (mat.min() != mat.max()): plt.colorbar()
-        self._generate_figure(p)
+        fig = self._generate_figure(p)
         return fig
 
 

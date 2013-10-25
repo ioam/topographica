@@ -32,12 +32,13 @@ import param
 from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
 
-from imagen.views import SheetView
+from imagen.views import SheetView, NdMapping
 
 import topo
 from topo.base.cf import Projection
 from topo.base.sheet import Sheet
 from topo.sheet import GeneratorSheet
+from topo.misc.attrdict import AttrDict
 from topo.misc.distribution import Distribution, DistributionStatisticFn
 from topo.misc.distribution import DSF_MaxValue, DSF_BimodalPeaks
 from topo.misc.distribution import DSF_WeightedAverage, DSF_VonMisesFit,\
@@ -308,9 +309,51 @@ pg = create_plotgroup(name='Projection Activity', category="Basic",
 pg.add_plot('Projection Activity', [('Strength', 'ProjectionActivity')])
 
 
-#class measure_activity(MeasureResponseCommand):
-#
-#    def __call__():
+
+class measure_activity(topo.analysis.featureresponses.FeatureResponses):
+
+    pattern_generator = param.Callable(default=Gaussian(), instantiate=True, doc="""
+        Callable object that will generate input patterns coordinated
+        using a list of meta parameters.""")
+
+    def __call__(self, **params):
+        p = ParamOverrides(self, params, allow_extra_keywords=True)
+        self._apply_cmd_overrides(p)
+        for fn in p.metadata_fns:
+            self.metadata = AttrDict(p.metadata, **fn(p.inputs, p.outputs))
+
+        output_names = self.metadata['outputs'].keys()
+        input_names = self.metadata.inputs.keys()
+        inputs = dict.fromkeys(input_names)
+        for k in inputs.keys():
+            inputs[k] = copy.deepcopy(p.pattern_generator)
+
+        responses = p.pattern_response_fn(inputs, output_names,
+                                          durations=p.durations)
+
+        results = self._collate_results(responses)
+
+        return results
+
+
+    def _collate_results(self, responses):
+        results = {}
+        for label, response in responses.items():
+            name, duration = label
+            metadata = self.metadata['outputs'][name]
+            if name not in results:
+                results[name] = NdMapping(dimension_labels=['Duration'])
+            sv = SheetView(response, metadata['bounds'])
+            results[name][duration] = sv
+        return results
+
+
+    def _apply_cmd_overrides(self, p):
+        super(measure_activity,self)._apply_cmd_overrides(p)
+        for override, value in p.extra_keywords():
+            if override in p.pattern_response_fn.params():
+                p.pattern_response_fn.set_param(override, value)
+
 
 
 class measure_rfs(SingleInputResponseCommand):
