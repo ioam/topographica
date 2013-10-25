@@ -293,7 +293,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         """Allow dictionary-style access to the menu bar."""
         return self.menubar[menu_name]
 
-    def __init__(self,root,**params):
+    def __init__(self, root,exit_on_quit=True, **params):
         tk.AppWindow.__init__(self,root,status=True)
         tk.TkParameterized.__init__(self,root,**params)
 
@@ -302,6 +302,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         # CEBALERT: on destroy(), ought to revert this
         Tkinter.Misc._report_exception=_tkinter_report_exception
 
+        self.exit_on_quit = exit_on_quit
         self.auto_refresh_panels = []
         self._init_widgets()
         self.title(topo.sim.name) # If -g passed *before* scripts on commandline, this is useless.
@@ -538,7 +539,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             except:
                 pass
 
-            print "Quit selected; exiting"
+            self.message("Quit selected%s" % ("; exiting" if  self.exit_on_quit else ""))
 
             # Workaround for obscure problem on some UNIX systems
             # as of 4/2007, probably including Fedora Core 5.
@@ -559,7 +560,8 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             # happens) run "stty saved_settings"?
 
             # CEBALERT: there was no call to self.master.destroy()
-            sys.exit(exit_status)
+            if  self.exit_on_quit:
+                sys.exit(exit_status)
 
 
     def run_script(self):
