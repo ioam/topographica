@@ -16,6 +16,7 @@ try:
     import matplotlib.ticker
     from matplotlib import pylab as plt
 except ImportError:
+    import param
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
     from topo.command import ImportErrorRaisingFakeModule
     plt = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
@@ -158,6 +159,7 @@ class vectorplot(PylabPlotCommand):
     def __call__(self,vec,xvalues=None,style='-',label=None,**params):
         p=ParamOverrides(self,params)
 
+        fig = pylab.figure()
         if xvalues is not None:
             plt.plot(xvalues, vec, style, label=label)
         else:
@@ -189,7 +191,7 @@ class matrixplot(PylabPlotCommand):
     def __call__(self, mat, aspect=None, colorbar=True, **params):
         p = ParamOverrides(self, params)
 
-        plt.figure(figsize=(5, 5))
+        fig = plt.figure(figsize=(5, 5))
         p.plot_type()
 
         # Swap lbrt to lrbt to match pylab
@@ -201,7 +203,7 @@ class matrixplot(PylabPlotCommand):
 
         plt.imshow(mat, interpolation='nearest', aspect=aspect, extent=extent)
         if colorbar and (mat.min() != mat.max()): plt.colorbar()
-        fig = self._generate_figure(p)
+        self._generate_figure(p)
         return fig
 
 
@@ -537,15 +539,17 @@ class overlaid_plot(PylabPlotCommand):
 
                if (t=='arrows'):
                    s = plt.flipud(p.sheet.views.maps[sel].view()[0])
-                   scale=int(np.ceil(np.log10(len(v))))
-                   X=np.array([x for x in xrange(len(v)/scale)])
-                   v_sc=np.zeros((len(v)/scale,len(v)/scale))
-                   s_sc=np.zeros((len(v)/scale,len(v)/scale))
+                   scale = int(np.ceil(np.log10(len(v))))
+                   X = np.array([x for x in xrange(len(v)/scale)])
+                   v_sc = np.zeros((len(v)/scale,len(v)/scale))
+                   s_sc = np.zeros((len(v)/scale,len(v)/scale))
                    for i in X:
                        for j in X:
-                           v_sc[i][j]=v[scale*i][scale*j]
-                           s_sc[i][j]=s[scale*i][scale*j]
-                   plt.quiver(scale*X,scale*X,-cos(2*pi*v_sc)*s_sc,-sin(2*pi*v_sc)*s_sc,color=c,edgecolors=c,minshaft=3,linewidths=1)
+                           v_sc[i][j] = v[scale*i][scale*j]
+                           s_sc[i][j] = s[scale*i][scale*j]
+                   plt.quiver(scale*X, scale*X, -np.cos(2*np.pi*v_sc)*s_sc,
+                              -np.sin(2*np.pi*v_sc)*s_sc, color=c,
+                              edgecolors=c, minshaft=3, linewidths=1)
 
            p.title='%s overlaid with %s at time %s' %(plot.name,pref,topo.sim.timestr())
            if isint: plt.ion()
