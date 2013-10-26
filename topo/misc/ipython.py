@@ -1,9 +1,12 @@
 """
-Topographica IPython extension for notebook support. Load with:
+Topographica IPython extension for notebook support. Automatically
+loaded when importing the topo module but may also be explicitly
+loaded using:
 
 %load_ext topo.misc.ipython
 """
 import topo
+import imagen
 import param
 import os, time, difflib, uuid, sys
 from matplotlib import pyplot as plt
@@ -17,8 +20,9 @@ except:
     raise SkipTest("IPython extension requires IPython >= 0.12")
 
 
-
-import imagen.ipython
+from imagen.views import SheetView
+from topo.base.sheet import Sheet
+from topo.base.projection import Projection
 from topo.command import pylabplot, analysis
 
 # Pylabplots should return a matplotlib figure when working in Notebook
@@ -52,7 +56,6 @@ class RunProgress(ProgressBar):
     """
     Progress bar for running Topographica models in IPython notebook.
     """
-
     interval = param.Number(default=20,
         doc="How often to update the progress bar in topo.sim.time units")
 
@@ -128,34 +131,49 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
         deltas =difflib.unified_diff(old_contents.splitlines(), new_contents.splitlines(), lineterm='')
         print '\n'.join(list(deltas))
 
+#===============#
+# Display hooks #
+#===============#
 
-
-def sheetview_display(sheetview):
-    f = pylabplot.activityplot(sheetview, sheetview.view()[0])
-    prefix = 'data:image/png;base64,'
-    b64 = prefix+ print_figure(f, 'png').encode("base64")
-    html = '<img src="%s" />' % b64
-    plt.close(f)
-    return html
-
-def sheet_activity_display(sheet):
+def sheet_activity_display(sheet, size=256, format='svg'):
+    if not isinstance(sheet, Sheet): return None
     analysis.update_sheet_activity(sheet.name, force=True)
-    return sheetview_display(sheet.views['Activity'])
+    return sheetview_display(sheet.views.maps.Activity.top,
+                             size=size, format=format)
 
-def projection_activity_display(projection):
-    analysis.update_projectionactivity(sheet=projection.dest)
-    view = projection.dest.views[('ProjectionActivity', projection.dest.name, projection.name)]
-    #arr = view.view()[0]
-    #arr *= 10
-    return sheetview_display(view)
 
+def projection_activity_display(projection, size=256, format='svg'):
+    if not isinstance(projection, Projection): return None
+    analysis.update_projectionactivity(outputs=[projection.dest.name])
+    view = projection.dest.views.maps[projection.name+'ProjectionActivity'].top
+    return sheetview_display(view, size=size, format=format)
+
+
+def pattern_display(pattern, size=256, format='svg'):
+    if not isinstance(pattern, imagen.PatternGenerator): return None
+    view = SheetView(pattern(xdensity=size, ydensity=size), pattern.bounds)
+    return sheetview_display(view, size=size, format=format)
+
+def sheetview_display(sheetview, size=256, format='svg'):
+    if not isinstance(sheetview, SheetView): return None
+    cyclic = sheetview.cyclic_range is not None
+    plot_type = plt.hsv if cyclic else plt.gray
+    mat = sheetview.data/sheetview.cyclic_range if cyclic else sheetview.data
+    extent = sheetview.bounds.aarect().lbrt()
+    fig = pylabplot.matrixplot(mat,
+                             extent=extent,
+                             plot_type=plot_type)
+    inches = size / float(fig.dpi)
+    fig.set_size_inches(inches, inches)
+    prefix = 'data:image/png;base64,'
+    b64 = prefix + print_figure(fig, 'png').encode("base64")
+    html = "<img height='%d' width='%d' src='%s' />" % (size, size, b64)
+    plt.close(fig)
+    return html
 
 _loaded = False
 def load_ipython_extension(ip):
     from topo.command import runscript
-    # Load Imagen's IPython extension
-    imagen.ipython.load_ipython_extension(ip)
-
     runscript.ns = ip.user_ns
     runscript.push = ip.push
 
@@ -164,6 +182,7 @@ def load_ipython_extension(ip):
         _loaded = True
 
         html_formatter = ip.display_formatter.formatters['text/html']
-        html_formatter.for_type_by_name('topo.base.projection', 'Projection', projection_activity_display)
-        html_formatter.for_type_by_name('topo.base.sheet', 'Sheet', sheet_activity_display)
-        html_formatter.for_type_by_name('topo.base.sheetview', 'SheetView', sheetview_display)
+        html_formatter.for_type(Projection, projection_activity_display)
+        html_formatter.for_type(Sheet, sheet_activity_display)
+        html_formatter.for_type(SheetView, sheetview_display)
+        html_formatter.for_type(imagen.PatternGenerator, pattern_display)
