@@ -440,7 +440,7 @@ class FeatureMaps(FeatureResponses):
                 fp = filter(lambda f: f.name == feature, self.features)[0]
                 fr = feature_responses[feature]
                 ar = fr.distribution_matrix[0, 0].axis_range
-                cyclic_range = ar if fp.cyclic else 1.0
+                cyclic_range = ar if fp.cyclic else None
                 pref_fn = fp.preference_fn if fp.preference_fn is not None\
                     else self.preference_fn
                 if p.selectivity_multiplier is not None:
@@ -450,14 +450,15 @@ class FeatureMaps(FeatureResponses):
                 base_name = self.measurement_prefix + feature.capitalize()
                 for k, maps in response.items():
                     for map_name, map_view in maps.items():
-                        sv = SheetView(map_view, output_metadata['bounds'])
                         cr = None if map_name == 'selectivity' else cyclic_range
-                        metadata = dict(cyclic_range=cr, dimension_labels=['Time','Duration'],
+                        sv = SheetView(map_view, output_metadata['bounds'],
+                                       cyclic_range=cr)
+                        data = ((timestamp, duration), sv)
+                        metadata = dict(dimension_labels=['Time','Duration'],
                                         **output_metadata)
                         map_name = base_name + k + map_name.capitalize()
                         if map_name not in results[name]:
-                            results[name][map_name] = NdMapping(((timestamp, duration), sv),
-                                                            **metadata)
+                            results[name][map_name] = NdMapping(data, **metadata)
                         else:
                             results[name][map_name][timestamp, duration] = sv
 
@@ -521,21 +522,27 @@ class FeatureCurves(FeatureResponses):
 
         for label in self.measurement_labels:
             name, duration = label
+            f_names, f_vals = zip(*p.curve_params.items())
+
             output_metadata = self.metadata.outputs[name]
             rows, cols = output_metadata['shape']
-            f_names, f_vals = zip(*p.curve_params.items())
-            if name not in results:
-                results[name] = NdMapping(dimension_labels=['Time', 'Duration'],
-                                          curve_label=curve_label)
-            results[name][time, duration] = NdMapping(dimension_labels=list(f_names))
             metadata = dict(dimension_labels=[p.x_axis.capitalize()],
                             label=p.label, prefix=p.measurement_prefix,
                             curve_params=p.curve_params, **output_metadata)
+
+            # Create top level NdMapping indexing over time and duration
+            if name not in results:
+                results[name] = NdMapping(dimension_labels=['Time', 'Duration'],
+                                          curve_label=curve_label)
+
+            # Create NdMapping for each feature name and populate it with an
+            # entry of for the specified features
+            results[name][time, duration] = NdMapping(dimension_labels=list(f_names))
             results[name][time, duration][f_vals] = NdMapping(**metadata)
 
             curve_responses = self._featureresponses[name][duration][p.x_axis].distribution_matrix
             r = results[name][time, duration][f_vals]
-
+            # Populate the deepest NdMapping with measurements for each x value
             for x in curve_responses[0, 0]._data.iterkeys():
                 y_axis_values = np.zeros(output_metadata['shape'], activity_type)
                 for i in range(rows):
@@ -576,19 +583,21 @@ class ReverseCorrelation(FeatureResponses):
         for fn in p.metadata_fns:
             self.metadata = AttrDict(self.metadata, **fn(p.inputs, p.outputs))
 
+        # Create cross product of all sources and durations
         self.measurement_labels = cross_product([self.metadata.inputs.keys(),
                                                  self.metadata.outputs.keys(),
                                                  p.durations])
 
+        # Set up the featureresponses measurement dict
         self._featureresponses = defaultdict(lambda: defaultdict(dict))
-
         for labels in self.measurement_labels:
             in_label, out_label, duration = labels
             input_metadata = self.metadata.inputs[in_label]
-            output_metadata = self.metadata.outputs[out_label]
-            rows, cols = output_metadata['shape']
+
+            rows, cols = self.metadata.outputs[out_label]['shape']
             rc_array = np.array([[np.zeros(input_metadata['shape'], activity_dtype)
                                   for r in range(rows)] for c in range(cols)])
+
             self._featureresponses[in_label][out_label][duration] = rc_array
 
 
@@ -597,7 +606,6 @@ class ReverseCorrelation(FeatureResponses):
 
         # Calculate complete set of settings
         permuted_settings = zip(self.feature_names, permutation)
-
 
         # Run hooks before and after pattern presentation.
         for f in p.pre_presentation_hooks: f()
@@ -631,7 +639,11 @@ class ReverseCorrelation(FeatureResponses):
 
 
     def _collate_results(self, p):
-        dim_labels = ['Time','Duration']
+        """
+        Collate responses into the results dictionary containing a
+        ProjectionGrid for each measurement source.
+        """
+        dim_labels = ['Time', 'Duration']
         results = defaultdict(dict)
         results['fullmatrix'] = self._fullmatrix if self.store_fullmatrix else None
         for labels in self.measurement_labels:
@@ -650,9 +662,8 @@ class ReverseCorrelation(FeatureResponses):
             for ii in range(rows):
                 for jj in range(cols):
                     coord = view.matrixidx2coord(ii, jj)
-                    sv = SheetView(rc_response[ii, jj],input_metadata['bounds'])
-                    rf_metadata = dict(coord=coord, dimension_labels=dim_labels,
-                                       **metadata)
+                    sv = SheetView(rc_response[ii, jj], input_metadata['bounds'])
+                    rf_metadata = dict(coord=coord, dimension_labels=dim_labels,**metadata)
                     view[coord] = NdMapping(((timestamp, duration), sv), **rf_metadata)
             results[out_label][in_label] = view
         return results
@@ -1493,7 +1504,7 @@ class pattern_present(PatternPresentingCommand):
     previously defined.
 
     If plastic is False, overwrites the existing values of Sheet.plastic
-    to disable plasticity, then reenables plasticity.
+    to disable plasticity, then re-enables plasticity.
 
     If this process is interrupted by the user, the temporary patterns
     may still be installed on the retina.
@@ -1734,6 +1745,9 @@ def topo_metadata_fn(input_names=[], output_names=[]):
 
 
 def store_rfs(measurement_dict):
+    """
+    Store RFs in the global sheet views dictionary.
+    """
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
@@ -1745,6 +1759,9 @@ def store_rfs(measurement_dict):
 
 
 def store_curves(measurement_dict):
+    """
+    Store curves in the global sheet views dictionary.
+    """
     measurement_dict.pop('fullmatrix')
     for sheet_name, data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
@@ -1754,21 +1771,12 @@ def store_curves(measurement_dict):
             storage[label].update(data)
         else:
             storage[label] = data
-        #feature_names, feature_vals = zip(*data.metadata.curve_params.items())
-        #metadata = dict(bounds=data.metadata.bounds, timestamp=data.timestamp,
-        #                dimension_labels=list(feature_names))
-        #if label not in storage:
-        #    storage[label] = NdMapping(**metadata)
-        #else:
-        #    new_timestamp = data.timestamp > storage[label].timestamp
-        #    new_measurement = any([True for c in storage[label][...].values()
-        #                           if data.metadata.label == c.metadata.label])
-        #    if new_timestamp or new_measurement:
-        #        storage[label] = NdMapping(**metadata)
-        #storage[label][feature_vals] = data
 
 
 def store_maps(measurement_dict):
+    """
+    Store maps in the global sheet view dictionary.
+    """
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
