@@ -4,7 +4,8 @@
 >>> from numpy.testing import assert_array_equal
 >>> from topo.tests.utils import assert_array_not_equal, new_simulation
 >>> from topo import numbergen
->>> from topo.command import pattern_present,save_input_generators,restore_input_generators
+>>> from topo.command import save_input_generators,restore_input_generators
+>>> from topo.command.analysis import pattern_present
 >>> import topo
 
 
@@ -18,7 +19,7 @@ True
 
 # check for bug:
 # pattern_present() before any run() messes up events
->>> pattern_present(inputs={'GS':Constant(scale=1)}) # comment out this line & test passes
+>>> _ = pattern_present(inputs={'GS':Constant(scale=1)}) # comment out this line & test passes
 >>> a_t1 = copy.deepcopy(R.activity)
 
 >>> topo.sim.run(1)
@@ -41,7 +42,7 @@ False
 
 
 ### Test pattern_present
->>> pattern_present(inputs={'GS':Constant(scale=1)})
+>>> _ = pattern_present(inputs={'GS':Constant(scale=1)})
 
 # check activity pattern
 >>> assert_array_equal(array([[1.,1.],[1.,1.]]),R.activity)
