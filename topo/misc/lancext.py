@@ -7,8 +7,8 @@ more sophisticated measurements and analysis to be executed during a
 simulation run.
 """
 
-import os, sys, re, types, pickle, imp, importlib, time, inspect, json
-from collections import defaultdict, namedtuple
+import os, sys, types, pickle, importlib, inspect
+from collections import namedtuple
 import topo
 import param
 from lancet import PrettyPrinted
