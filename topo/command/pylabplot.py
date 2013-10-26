@@ -754,7 +754,7 @@ class cyclic_unit_tuning_curve(unit_tuning_curve):
                     max_y = np.max(y_values)
                     self.peak_argmax = np.argmax(y_values)
 
-        super(cyclic_unit_tuning_curve,self).__call__(curves, **p)
+        return super(cyclic_unit_tuning_curve,self).__call__(curves, **p)
 
 
     def _reduce_ticks(self,ticks):
