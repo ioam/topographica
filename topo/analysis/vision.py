@@ -108,32 +108,32 @@ def complexity(full_matrix):
 
             if x==43 and y==43:
                 pylab.figure()
-        ax = pylab.subplot(111)
-        z = complex_matrix[x,y][:]
-        z.append(z[0])
-        pylab.plot(z,linewidth=4)
-        pylab.axis(xmin=0.0,xmax=numpy.pi)
-        ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
-        pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
-        pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[43,43].png'))
+            ax = pylab.subplot(111)
+            z = complex_matrix[x,y][:]
+            z.append(z[0])
+            pylab.plot(z,linewidth=4)
+            pylab.axis(xmin=0.0,xmax=numpy.pi)
+            ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
+            pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
+            pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[43,43].png'))
 
-        if x==45 and y==45:
-            pylab.figure()
-        ax = pylab.subplot(111)
-        z = complex_matrix[x,y][:]
-        z.append(z[0])
-        pylab.plot(z,linewidth=4)
-        pylab.axis(xmin=0.0,xmax=numpy.pi)
-        ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
-        pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
-        pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[45,45].png'))
+            if x==45 and y==45:
+                pylab.figure()
+            ax = pylab.subplot(111)
+            z = complex_matrix[x,y][:]
+            z.append(z[0])
+            pylab.plot(z,linewidth=4)
+            pylab.axis(xmin=0.0,xmax=numpy.pi)
+            ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
+            pylab.xticks([0,len(z)/2,len(z)-1], ['0','pi/2','pi'])
+            pylab.savefig(normalize_path(str(topo.sim.time()) + str(complex_matrix[x,y][0])+ 'modulation_response[45,45].png'))
 
-        fft = numpy.fft.fft(complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y],2048)
-        first_har = 2048/len(complex_matrix[0,0])
-        if abs(fft[0]) != 0:
-            fftmeasure[x,y] = 2 *abs(fft[first_har]) /abs(fft[0])
-        else:
-            fftmeasure[x,y] = 0
+            fft = numpy.fft.fft(complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y]+complex_matrix[x,y],2048)
+            first_har = 2048/len(complex_matrix[0,0])
+            if abs(fft[0]) != 0:
+                fftmeasure[x,y] = 2 *abs(fft[first_har]) /abs(fft[0])
+            else:
+                fftmeasure[x,y] = 0
     return fftmeasure
 
 
