@@ -171,6 +171,16 @@ def sheetview_display(sheetview, size=256, format='svg'):
     plt.close(fig)
     return html
 
+try:
+    from lancet import ViewFrame
+    ViewFrame.display_fns.append(sheetview_display)
+    ViewFrame.display_fns.append(sheet_activity_display)
+    ViewFrame.display_fns.append(projection_activity_display)
+    ViewFrame.display_fns.append(pattern_display)
+except:
+    pass
+
+
 _loaded = False
 def load_ipython_extension(ip):
     from topo.command import runscript
