@@ -12,6 +12,7 @@
 *.lock
 bin
 lib
+!models/stevens.jn13/jn13_figures/lib/
 local/*
 external/*
 emacslog
