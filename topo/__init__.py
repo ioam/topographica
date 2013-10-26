@@ -331,9 +331,8 @@ except:
     pass
 
 from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
-    FeatureMaps, ReverseCorrelation, MeasureResponseCommand, FeatureCurveCommand,\
-    pattern_response, topo_metadata_fn, store_rfs, store_maps, store_curves,\
-    get_feature_preference
+    FeatureMaps, ReverseCorrelation, MeasureResponseCommand, pattern_response,\
+    topo_metadata_fn, store_rfs, store_maps, store_curves, get_feature_preference
 
 FeatureResponses.metadata_fns = [topo_metadata_fn]
 FeatureResponses.pattern_response_fn = pattern_response.instance()
