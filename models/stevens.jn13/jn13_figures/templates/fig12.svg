@@ -27,9 +27,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.62638413"
-     inkscape:cx="587.51885"
-     inkscape:cy="163.92456"
+     inkscape:zoom="0.88584093"
+     inkscape:cx="374.47186"
+     inkscape:cy="31.779645"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
      showgrid="false"
@@ -2832,7 +2832,7 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Xlabels"
-     style="stroke-linecap:square;stroke-linejoin:round;display:none"
+     style="stroke-linecap:square;stroke-linejoin:round;display:inline"
      transform="translate(155.90552,40.475835)">
     <text
        id="text8228-9-0"

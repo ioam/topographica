@@ -54,7 +54,7 @@ def scale_bar_overlay(normalized_width, aspect=0.05, color='w'):
    ax.get_yaxis().set_visible(False)
    [spine.set_visible(False) for spine in ax.spines.values()]
    if (0.5>normalized_width>0):
-       ax.add_patch(plt.Rectangle((0,0), width=normalized_width, 
+       ax.add_patch(plt.Rectangle((0,0), width=normalized_width,
                                   height=1.0, facecolor=color))
    return fig
 
@@ -108,9 +108,9 @@ def FFT_histogram_overlay(amplitudes, fit, fit_function = KaschubeFit,
       kmax = fit['a1']
 
    if (kmax is not None) and (kmax >=1.5):
-       plt.arrow(kmax, max(fit_curve)+ 0.38, 0.0, -0.3, 
+       plt.arrow(kmax, max(fit_curve)+ 0.38, 0.0, -0.3,
                  fc=arrow_color, ec=arrow_color,lw=6,
-                 length_includes_head=True, 
+                 length_includes_head=True,
                  head_width=4.0, head_length=0.1)
 
    plt.xlim((0.0,len(amplitudes)))
@@ -121,7 +121,7 @@ def FFT_histogram_overlay(amplitudes, fit, fit_function = KaschubeFit,
 # 'Stream' plots for contrast and development #
 #=============================================#
 
-def stream(xvals, samples, normalization=1.0, show_std=False, 
+def stream(xvals, samples, normalization=1.0, show_std=False,
            fillcolor=(1,0,0), linecolor=(1,0,0)):
    """
    Given a list of samples (also lists) which may be empty, computes
@@ -136,7 +136,7 @@ def stream(xvals, samples, normalization=1.0, show_std=False,
    sample counts. Retuns (xinds, mean, conf95, std)
    """
    # Cannot take mean or std of empty lists - filter first
-   xs,filtered =  zip(*[(x,grp) for (x,grp) 
+   xs,filtered =  zip(*[(x,grp) for (x,grp)
                         in zip(xvals,samples) if (grp != [])])
    # Normalize to given normalization constant
    normed = [[el/normalization for el in grp] for grp in filtered]
@@ -152,9 +152,9 @@ def stream(xvals, samples, normalization=1.0, show_std=False,
    # Plot the mean line
    plt.plot(xs,mean,color=linecolor)
    # Plot the fill area (95% confidence area)
-   plt.fill_between(xs, 
-                    mean+np.array(conf95), 
-                    mean-np.array(conf95), 
+   plt.fill_between(xs,
+                    mean+np.array(conf95),
+                    mean-np.array(conf95),
                     interpolate=True, color=fillcolor)
    # If show_std, plot the standard deviation as a dashed line.
    if show_std:
@@ -204,7 +204,7 @@ def map_development_streams(stabilities, selectivities, selectivity_norm,
 
    assert len(selectivities) == len(stabilities)
    xvals = range(len(stabilities))
-   
+
    fig = plt.figure(frameon=frame, figsize=figsize)
    fig.patch.set_alpha(0.0)
    ax = fig.add_subplot(111)
@@ -298,10 +298,10 @@ def model_scatterplot(iterables, colors=['r','b'],
    fig = plt.figure(figsize=(8,6))
    ax = plt.subplot(111)
    plt.axhline(y=math.pi, linestyle='dotted')
-   
+
    for iterable, color in zip(iterables, colors):
       units_per_hc, pw_densities = zip(*iterable)
-      units_per_hc2 = np.array(units_per_hc)**2 
+      units_per_hc2 = np.array(units_per_hc)**2
 
       # Center both clusters on the given mean hypercolumn size for ferret.
       HCmm2 = units_per_hc2 * (mean_mm2_ferret / units_per_hc2.mean())
@@ -337,7 +337,7 @@ def tanaka_histogram(data, bins=7, aspect=0.78):
     replot_data = {'biased':[3, 5.5, 11, 57,  14, 6, 3.5],
                    'unbiased':[12, 15.5, 19, 17, 13, 11.5, 12]}
     replot = isinstance(data, str)
-    
+
     if replot:
        counts = replot_data[data]
        data = np.linspace(0.0,1.0,100)
@@ -346,7 +346,7 @@ def tanaka_histogram(data, bins=7, aspect=0.78):
        interval_30deg = 1.0 / 6.0
        lower_bound = (interval_30deg / 2.0)
        upper_bound = 1.0 - (interval_30deg / 2.0)
-       data_counts, _ = np.histogram(data, bins=5, 
+       data_counts, _ = np.histogram(data, bins=5,
                                      range=(lower_bound, upper_bound),
                                      density=False)
        # The style of histogram in tanaka et al includes a repeated bar
@@ -361,11 +361,11 @@ def tanaka_histogram(data, bins=7, aspect=0.78):
     # Using matplotlib's bar plot to build the histogram.
     fig = plt.figure()
     ax = plt.subplot(111, frameon=True)
-    bars = plt.bar(bin_edges[:-1], counts if replot else data_counts, 
+    bars = plt.bar(bin_edges[:-1], counts if replot else data_counts,
                    width=0.8/bins, color='k')
 
     # Show the hline for equi-orientation distribution
-    if replot: plt.axhline(100 / 7.0, lw=2)          
+    if replot: plt.axhline(100 / 7.0, lw=2)
     else:      plt.axhline(sum_counts/6.0, lw=2)
 
     # Set the xlim and ylim (ylim=100 if replotting data)
@@ -429,7 +429,9 @@ class TuningCurvePlot(object):
 
 
 def tuning_curve_plot(tuning_curves, coord, legend=False, normalize=False):
-   return cyclic_unit_tuning_curve(tuning_curves, coord=coord, legend=legend, 
+   return cyclic_unit_tuning_curve(tuning_curves, coord=coord,
+                                   legend=legend,
+                                   center=False,
                                    plot_type = TuningCurvePlot(normalize=normalize))
 
 
@@ -438,4 +440,3 @@ def close(figs):
    Closes a list of figure handles.
    """
    for f in figs: plt.close(f)
-
