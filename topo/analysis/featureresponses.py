@@ -1333,10 +1333,10 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
 
 
     def _feature_list(self, p):
-        return [Feature(name="phase", range=(0.0, 2*np.pi),
-                        step=2*np.pi / p.num_phase, cyclic=True),
-                Feature(name="orientation", range=(0, np.pi),
+        return [Feature(name="orientation", range=(0, np.pi),
                         step=np.pi/p.num_orientation, cyclic=True),
+                Feature(name="phase", range=(0.0, 2*np.pi),
+                        step=2*np.pi / p.num_phase, cyclic=True),
                 Feature(name="frequency", values=p.frequencies)]
 
 

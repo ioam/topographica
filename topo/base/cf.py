@@ -22,8 +22,8 @@ from copy import copy
 
 import numpy as np
 import param
-
-from imagen.views import AttrDict, SheetView, NdMapping, ProjectionGrid
+from imagen.ndmapping import AttrDict, NdMapping
+from imagen.views import SheetView, ProjectionGrid
 
 import patterngenerator
 from patterngenerator import PatternGenerator
