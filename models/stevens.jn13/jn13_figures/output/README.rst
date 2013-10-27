@@ -15,7 +15,7 @@ al. (2010)
 ``experimental_data.json``. Note that a notebook showing how the
 experimental data was processed may be included in the future.
 
-Note that the contents of this directory will continously grows
+Note that the contents of this directory will continuously grow
 in size as jobs are launched from
 ``stevens_jn13.ipynb``. Approximately 5.3GB is needed to hold the
 simulation data if all the figures are to be reproduced.
