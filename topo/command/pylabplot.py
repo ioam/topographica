@@ -743,6 +743,7 @@ class cyclic_unit_tuning_curve(unit_tuning_curve):
 
     def __call__(self,curves,**params):
         p=ParamOverrides(self,params)
+        self.center = p.center
         if p.center:
             self.peak_argmax = 0
             max_y = 0.0
