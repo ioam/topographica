@@ -159,7 +159,7 @@ class vectorplot(PylabPlotCommand):
     def __call__(self,vec,xvalues=None,style='-',label=None,**params):
         p=ParamOverrides(self,params)
 
-        fig = pylab.figure()
+        fig = plt.figure()
         if xvalues is not None:
             plt.plot(xvalues, vec, style, label=label)
         else:
