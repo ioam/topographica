@@ -735,7 +735,7 @@ class cyclic_unit_tuning_curve(unit_tuning_curve):
     unit = param.String(default="degrees",doc="""
         String to use in labels to specify the units in which curves are plotted.""")
 
-    recenter = param.Boolean(default=True,doc="""
+    center = param.Boolean(default=True,doc="""
         Centers the tuning curve around the maximally responding feature.""")
 
     relative_labels = param.Boolean(default=False,doc="""
@@ -743,7 +743,7 @@ class cyclic_unit_tuning_curve(unit_tuning_curve):
 
     def __call__(self,curves,**params):
         p=ParamOverrides(self,params)
-        if p.recenter:
+        if p.center:
             self.peak_argmax = 0
             max_y = 0.0
             x, y = p.coord
@@ -798,7 +798,7 @@ class cyclic_unit_tuning_curve(unit_tuning_curve):
         if self.first_curve:
             x_values = curve.keys()
             y_values = [curve[k, x, y] for k in x_values]
-            if self.recenter:
+            if self.center:
                 rotate_n = self.peak_argmax+len(x_values)/2
                 y_values = self._rotate(y_values, n=rotate_n)
                 self.ticks=self._rotate(x_values, n=rotate_n)
@@ -1385,7 +1385,7 @@ class measure_orientation_contrast(UnitCurveCommand):
 create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category="Tuning Curves",
                  doc='Measure the response of one unit to a center and surround sine grating disk.',
                  pre_plot_hooks=[measure_orientation_contrast.instance()],
-                 plot_hooks=[cyclic_tuning_curve.instance(x_axis="orientationsurround",recenter=False,relative_labels=True)],
+                 plot_hooks=[cyclic_tuning_curve.instance(x_axis="orientationsurround",center=False,relative_labels=True)],
                  prerequisites=['OrientationPreference','XPreference'])
 
 
