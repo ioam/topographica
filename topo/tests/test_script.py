@@ -35,7 +35,6 @@ FIXEDDATADIR = resolve_path("topo/tests/data_traintests",path_to_file=False)
 def ensure_path_exists(path):
     """Force the specified path to exist if it doesn't yet."""
     if not os.path.exists(path):
-        print "CRREEEating %s" % path
         os.makedirs(path)
 
 def _support_old_args(args):
