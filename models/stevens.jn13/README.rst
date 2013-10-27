@@ -8,7 +8,7 @@ al. (2013) <http://www.jneurosci.org/content/33/40/15747.full>`_.
 
 | @article{Stevens2013,
 |   author = {Stevens, Jean-Luc R. and Law, Judith S. and
-|   Antol\'{i}k, J\'{a}n and Bednar, James A.},
+|   Antol\\'{i}k, J\\'{a}n and Bednar, James A.},
 |   title = {Mechanisms for Stable, Robust, and Adaptive
 |   Development of Orientation Maps in the Primary Visual Cortex},
 |   journal = {The Journal of Neuroscience},
