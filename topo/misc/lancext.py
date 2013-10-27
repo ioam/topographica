@@ -1,16 +1,18 @@
 """
 The Topographica Lancet extension allows Topographica simulations to
-be easily integrated into a Lancet workflow. The TopoCommand
-CommandTemplate is appropriate for simple runs using the default
-analysis function whereas the Analysis and RunBatchCommand allow for
-more sophisticated measurements and analysis to be executed during a
-simulation run.
+be easily integrated into a Lancet workflow (see
+github.com/ioam/lancet). The TopoCommand CommandTemplate is
+appropriate for simple runs using the default analysis function,
+whereas the Analysis and RunBatchCommand allow for more sophisticated
+measurements and analysis to be executed during a simulation run.
 """
 
 import os, sys, types, pickle, importlib, inspect
 from collections import namedtuple
+
 import topo
 import param
+
 from lancet import PrettyPrinted
 from lancet import CommandTemplate
 from lancet import Launcher, review_and_launch
@@ -20,6 +22,7 @@ from lancet import NumpyFile
 from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
 Launcher.output_directory = default_output_path()
+
 
 class param_formatter(param.ParameterizedFunction):
    """
@@ -69,6 +72,7 @@ class param_formatter(param.ParameterizedFunction):
 
    separator = param.String(default=',', doc="""
           The separator to use between <key>=<value> pairs.""")
+
 
    def __call__(self, constant_keys, varying_keys, spec):
 
@@ -140,6 +144,7 @@ class TopoCommand(CommandTemplate):
 
    save_global_params = param.Boolean(default=True, doc="Matches run_batch parameter of same name.")
 
+
    def __init__(self, tyfile, executable=None, **kwargs):
 
       auto_executable =  os.path.realpath(
@@ -159,6 +164,7 @@ class TopoCommand(CommandTemplate):
           and (type(self) == TopoCommand)
           and ('-c' not in self.topo_flag_options)):
          raise Exception, 'Please use -c option to introduce the appropriate analysis into the namespace.'
+
 
    def _topo_args(self, switch_override=[]):
       """
@@ -193,6 +199,7 @@ class TopoCommand(CommandTemplate):
       switches =  [s for s in switch_override
                    if (s not in self.topo_switches)] + self.topo_switches
       return sorted(switches) + flattened_options
+
 
    def _run_batch_kwargs(self, spec, tid, info):
       """
@@ -233,6 +240,7 @@ class TopoCommand(CommandTemplate):
 
       return dict(options.items() + derived_options.items())
 
+
    def __call__(self, spec, tid=None, info={}):
       """
       Returns a Popen argument list to invoke Topographica and execute
@@ -256,7 +264,7 @@ class TopoCommand(CommandTemplate):
 
 class AnalysisFn(PrettyPrinted, object):
    """
-   An AnalysiFn records information about a function so that run_batch
+   An AnalysisFn records information about a function so that run_batch
    can invoke it via an Analysis object. It also allows checks on the
    function's signature using Python's introspection mechanisms.
 
@@ -272,6 +280,7 @@ class AnalysisFn(PrettyPrinted, object):
       self.signature = signature
 
       # Would be good to check if module is available
+
 
    def _register(self, fn):
       """
@@ -297,22 +306,21 @@ class AnalysisFn(PrettyPrinted, object):
                    if k not in ['name', 'self']]
       return name, argspec, (args, kwargs, alist, kwdict)
 
+
    def get_module(self):
-      """
-      Return a module object that contains the analysis function.
-      """
+      """Return a module object that contains the analysis function."""
       return importlib.import_module(self.module)
 
+
    def __repr__(self):
-      """
-      Used for pretty printing declaratively.
-      """
+      """Used for pretty printing declaratively."""
       return "AnalysisFn(%s.%s)" % (self.module, self.name)
+
 
 
 class Analysis(PrettyPrinted, param.Parameterized):
    """
-   Analysis is a callable that behaves like a generall analysis_fn for
+   Analysis is a callable that behaves like a general analysis_fn for
    run_batch. You can add multiple analysis functions, the return
    values of which will be collated and saved as a numpy file
    containing topo.sim.time metadata as well as any extra metadata
@@ -334,6 +342,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
        Keys to include as metadata in the output numpy file along with
        'time' (Topographica simulation time).""")
 
+
    @classmethod
    def pickle_path(cls, batch_info):
       """
@@ -344,6 +353,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
       pkl_name = '%s.analysis' % batch_info['batch_name']
       return os.path.join(batch_info['root_directory'], pkl_name)
 
+
    @classmethod
    def load(cls, tid, batch_info, specs):
       """
@@ -351,6 +361,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
       Topographica run_batch context. Loads the pickle file based on
       the batch_name and root directory in batch_info.
       """
+
       pkl_path = cls.pickle_path(batch_info)
       with open(pkl_path,'rb') as pkl: analysis =  pickle.load(pkl)
 
@@ -363,6 +374,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
       analysis._runtime_info = runtime_info(tid, batch_info, specs)
       return analysis
 
+
    def __init__(self, **kwargs):
       self._pprint_args = ([],[],None,{})
       super(Analysis, self).__init__(**kwargs)
@@ -374,6 +386,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
       # The data and metadata accumulators
       self._data = {}
       self._metadata = {}
+
 
    def add_analysis_fn(self, fn):
       """
@@ -390,16 +403,17 @@ class Analysis(PrettyPrinted, param.Parameterized):
       self.analysis_fns.append(AnalysisFn(fn))
       sys.path = sys_paths
 
+
    def __call__(self):
       """
       Calls the necessary analysis functions specified by the user in
       the run_batch context. Invoked as a single analysis function on
       the commandline by RunBatchCommand.
       """
+
       info = self._runtime_info
       batch_tag = info.batch_info['batch_tag']
       batch_name = info.batch_info['batch_name']
-
 
       topo_time = topo.sim.time()
       metadata_items = [(key, info.specs[key]) for key in self.metadata]
@@ -427,6 +441,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
                                                 **self._data)
       self._data = {}; self._metadata = {}
 
+
    def verify(self, specs, model_params):
       """
       The final check of argument specification before launch. Used to
@@ -434,6 +449,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
       arguments and warns about unused keys. If set to strict_verify,
       keywords are not allowed to be left unspecified.
       """
+
       (argset, kwargset) = self._argument_sets()
 
       known = ( argset | kwargset                # Analysisfn params...
@@ -463,20 +479,22 @@ class Analysis(PrettyPrinted, param.Parameterized):
          raise Exception("The following keys must be provided: %s"
                          % ", ".join('%r' % el for el in missing))
 
+
    def summary(self):
-      """
-      Summary of the analysis and the analysis functions used.
-      """
+      """Summary of the analysis and the analysis functions used."""
+
       (args, kwargs) = self._argument_sets()
       print("Analysis functions:\n")
       for (ind, el) in enumerate(self.analysis_fns):
          print "   %d. %s%s" % (ind, el.name, inspect.formatargspec(*el.argspec))
+
 
    def _accumulate_results(self, fn_name, retval):
        """
        Accumulates the results of the analysis functions into the
        self._data and self._metadata attributes.
        """
+
        metadict = {}
        if isinstance(retval, dict):
            metadict = retval.pop('metadata', {})
@@ -494,10 +512,10 @@ class Analysis(PrettyPrinted, param.Parameterized):
        self._overwrite_warning(fn_name, self._metadata, metadict, 'metadata')
        self._metadata.update(metadict)
 
+
    def _overwrite_warning(self, fn_name, current, additions, label):
-      """
-      Warn when overwriting previously returned or defined data.
-      """
+      """Warn when overwriting previously returned or defined data."""
+
       intersection = set(current) & set(additions)
       overwrite_msg = "Analysis function %s overwriting existing %s keys: %s"
       if intersection:
@@ -515,11 +533,11 @@ class Analysis(PrettyPrinted, param.Parameterized):
       kwargset = set(kw for kws in kwarglists for kw in kws)
       return (argset, kwargset)
 
+
    def _pprint(self, cycle=False, flat=False, annotate=False,
                onlychanged=True, level=1, tab = '   '):
-      """
-      Pretty print the Analysis in a declarative style.
-      """
+      """Pretty print the Analysis in a declarative style."""
+
       path_str = '%spaths=%r\n' % ((level*tab), self.paths)
       path_str = '' if (onlychanged and not self.paths) else path_str
       fn_level = level + 1
@@ -557,20 +575,21 @@ class RunBatchCommand(TopoCommand):
       self.pprint_args(['executable', 'tyfile', 'analysis'],
                        ['topo_switches', 'snapshot'])
 
+
    def get_model_params(self):
-      """
-      Obtains all the script parameters used in the model file.
-      """
+      """Obtains all the script parameters used in the model file."""
       # FIXME: This functionality cannot be properly integrated with
-      # Topographica until models are dedined as classes, allowing
+      # Topographica until models are defined as classes, allowing
       # parameters to be listed without needing to load the model.
       return self._model_params
+
 
    def __call__(self, spec=None, tid=None, info={}):
       """
       Generates the appropriate Topographica run_batch command to make
       use of the pickled RunBatchCommand object.
       """
+
       formatted_spec = dict((k, repr(v) if isinstance(v,str) else str(v))
                             for (k,v) in spec.items())
       kwarg_opts = self._run_batch_kwargs(formatted_spec, tid, info)
@@ -591,6 +610,7 @@ class RunBatchCommand(TopoCommand):
       topo_args = self._topo_args(['-a'])
       return  [self.executable] + topo_args + ['-c',  '; '.join(run_batch_list)]
 
+
    def verify(self, args):
       """
       Check that the supplied arguments make sense given the specified
@@ -601,13 +621,13 @@ class RunBatchCommand(TopoCommand):
       if hasattr(self, '_model_params'):
          return self.analysis.verify(args.specs, self.get_model_params())
 
+
    def finalize(self, info):
-      """
-      Pickle the analysis before launch.
-      """
+      """Pickle the analysis before launch."""
       pkl_path = self.analysis.pickle_path(info)
       with open(pkl_path,'wb') as pkl:
          pickle.dump(self.analysis, pkl)
+
 
    def summary(self):
       print("Command executable: %s" % self.executable)
