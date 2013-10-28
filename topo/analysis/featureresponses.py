@@ -1694,7 +1694,7 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     for input_name in input_names:
         if input_name in sheets['inputs']:
             topo.sim.warning('Input sheet {0} not found.'.format(input_name))
-            sheets['inputs'].pop(input_name)
+            sheets['inputs'].pop(sheets['inputs'].index(input_name))
     if not sheets['inputs']:
         if input_names:
             topo.sim.warning(
@@ -1705,7 +1705,7 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     for output_name in output_names:
         if output_name in sheets['outputs']:
             topo.sim.warning('Output sheet {0} not found.'.format(output_name))
-            sheets['outputs'].pop(output_name)
+            sheets['outputs'].pop(sheets['outputs'].index(output_name))
     if not sheets['outputs']:
         if output_names:
             topo.sim.warning(
