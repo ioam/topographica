@@ -914,47 +914,27 @@ class hue2rgbscale(param.ParameterizedFunction):
     def __call__(self, inputs, features):
         if 'hue' in features:
 
-            # could be three retinas (R, G, and B) or a single RGB
-            # retina for the color dimension; if every retina has
-            # 'Red' or 'Green' or 'Blue' in its name, then three
-            # retinas for color are assumed
-
-            rgb_retina = False
-            for name in inputs:
-                if not ('Red' in name or 'Green' in name or 'Blue' in name):
-                    rgb_retina = True
-
-            if not rgb_retina:
-                for name in inputs.keys():
-                    r, g, b = hsv_to_rgb(features['hue'], 1.0, 1.0)
-                    if (name.count('Red')):
-                        inputs[name].scale = r
-                    elif (name.count('Green')):
-                        inputs[name].scale = g
-                    elif (name.count('Blue')):
-                        inputs[name].scale = b
-                    else:
-                        if not hasattr(self, 'hue_warned'):
-                            self.warning('Unable to measure hue preference,'
-                                         ' because hue is defined only when'
-                                         ' there are different input sheets'
-                                         ' with names with Red, Green or Blue'
-                                         ' substrings.')
-                            self.hue_warned = True
-            else:
-                try:
-                    from contrib.rgbimages import ExtendToRGB
-                except ImportError:
-                    ImportError('This hue conversion is currently not available.'
-                                'Obtain the contrib folder from '
-                                'https://github.com/ioam/svn-history and place'
-                                'it in the topographica directory.')
-
+            for name in inputs.keys():
                 r, g, b = hsv_to_rgb(features['hue'], 1.0, 1.0)
-                for name in inputs.keys():
-                    inputs[name] = ExtendToRGB(generator=inputs[name],
-                                               relative_channel_strengths=[r, g, b])
-                    # CEBALERT: should warn as above if not a color network
+                if (name.count('Red')):
+                    inputs[name].scale = r
+                elif (name.count('Green')):
+                    inputs[name].scale = g
+                elif (name.count('Blue')):
+                    inputs[name].scale = b
+                else:
+                    # Note: this warning will be skipped if any retina
+                    # has 'Red', 'Green', or 'Blue' in its
+                    # name. E.g. if there is only a 'RedRetina', the
+                    # warning will be skipped and a hue map will be
+                    # measured without error.
+                    if not hasattr(self, 'hue_warned'):
+                        self.warning('Unable to measure hue preference,'
+                                     ' because hue is defined only when'
+                                     ' there are different input sheets'
+                                     ' with names with Red, Green or Blue'
+                                     ' substrings.')
+                        self.hue_warned = True
 
 
 
