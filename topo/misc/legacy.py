@@ -292,8 +292,8 @@ support[11871] = pattern_basic_removed
 
 def param_external_removed():
     # CB: From param/external.py, only odict should be relevant to snapshots.
-    import imagen.odict.OrderedDict
-    allow_import(imagen.odict.OrderedDict,'param.external')
+    import imagen.odict
+    allow_import(imagen.odict,'param.external')
 
 support[12024] = param_external_removed
 
@@ -592,9 +592,14 @@ def featuremapper_legacy():
         'measurement parameters have been restored. Make sure measurements are '
         'still set up correctly.')
 
-
 support[90800300] = featuremapper_legacy
 
+
+def topo_misc_odict_removed():
+    import imagen.odict
+    allow_import(imagen.odict, 'topo.misc.odict')
+
+support[90800361] = topo_misc_odict_removed()
 
 ######################################################################
 ######################################################################
