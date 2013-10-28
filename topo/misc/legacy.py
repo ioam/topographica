@@ -292,8 +292,8 @@ support[11871] = pattern_basic_removed
 
 def param_external_removed():
     # CB: From param/external.py, only odict should be relevant to snapshots.
-    import topo.misc.odict
-    allow_import(topo.misc.odict,'param.external')
+    import imagen.odict.OrderedDict
+    allow_import(imagen.odict.OrderedDict,'param.external')
 
 support[12024] = param_external_removed
 

@@ -26,6 +26,11 @@ import param
 from param.parameterized import ParameterizedFunction, ParamOverrides
 from param import normalize_path
 
+try:
+    from collections import OrderedDict
+except:
+    from imagen.odict import OrderedDict
+
 import topo
 from topo.base.sheet import Sheet
 from topo.base.projection import ProjectionSheet
@@ -36,10 +41,6 @@ from topo.misc.snapshots import PicklableClassAttributes
 from topo.misc.genexamples import generate as _generate
 from topo.base.functionfamily import PatternDrivenAnalysis
 
-
-# CEBALERT: Could say min Python 2.6 and use Python's own. Or is it
-# 2.7?
-from topo.misc.odict import OrderedDict
 
 
 def generate_example(target):
