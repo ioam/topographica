@@ -599,7 +599,7 @@ def topo_misc_odict_removed():
     import imagen.odict
     allow_import(imagen.odict, 'topo.misc.odict')
 
-support[90800361] = topo_misc_odict_removed()
+support[90800361] = topo_misc_odict_removed
 
 ######################################################################
 ######################################################################
