@@ -12,8 +12,11 @@ import os, sys, types, pickle, inspect
 try:  # The correct thing to do in Python 2.7+
    from importlib import import_module
 except:
-   def import_module(module):
-      return __import__(module)
+
+   def import_module(name):
+      "Fallback equivalent to the function in importlib"
+      __import__(name)
+      return sys.modules[name]
 
 from collections import namedtuple
 
