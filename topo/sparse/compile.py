@@ -4,7 +4,12 @@ import numpy
 (basepath, _) = os.path.split(os.path.abspath(__file__))
 (rootpath, _) = os.path.split(os.path.split(basepath)[0])
 
-from Cython.Distutils import build_ext
+try:
+    from Cython.Distutils import build_ext
+except:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest('Cython could not be imported, '
+                   'cannot compile sparse components.')
 from distutils.core import setup
 from distutils.extension import Extension
 
