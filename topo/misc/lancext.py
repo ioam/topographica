@@ -7,7 +7,14 @@ whereas the Analysis and RunBatchCommand allow for more sophisticated
 measurements and analysis to be executed during a simulation run.
 """
 
-import os, sys, types, pickle, importlib, inspect
+import os, sys, types, pickle, inspect
+
+try:  # The correct thing to do in Python 2.7+
+   from importlib import import_module
+except:
+   def import_module(module):
+      return __import__(module)
+
 from collections import namedtuple
 
 import topo
@@ -309,7 +316,7 @@ class AnalysisFn(PrettyPrinted, object):
 
    def get_module(self):
       """Return a module object that contains the analysis function."""
-      return importlib.import_module(self.module)
+      return import_module(self.module)
 
 
    def __repr__(self):
