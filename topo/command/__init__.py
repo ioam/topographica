@@ -29,7 +29,7 @@ from param import normalize_path
 try:
     from collections import OrderedDict
 except:
-    from imagen.odict import OrderedDict
+    from imagen.odict import OrderedDict # pyflakes:ignore (try/except import)
 
 import topo
 from topo.base.sheet import Sheet
