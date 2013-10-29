@@ -415,8 +415,8 @@ def fig11(template_dir, build_dir, input_seed=102, size_factor=1.0, show_raster=
 
     for (index,row) in selection.iterrows():
         fname = os.path.join(output_dir, 'OR_%d.png' % int(row['time']))
-        pref = get_pref(row, roi=True, normalize=True)
-        sel = get_sel(row, roi=True)
+        pref = get_pref(row)
+        sel = get_sel(row)
 
         # Rotate the colour key to match the convention in Tanaka et el.
         tanaka_pref = pref + (2.0 / 3.0) % 1
