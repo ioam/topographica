@@ -1432,17 +1432,18 @@ def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
     name = sheet_views_prefix + 'Activity'
     sheet = topo.sim.objects(Sheet)[sheet_name]
     view = sheet.views.maps.get(name, False)
+    time = float(topo.sim.time())
     if not view:
         metadata = dict(bounds=sheet.bounds, precedence=sheet.precedence,
                         row_precedence=sheet.row_precedence, src_name=sheet.name,
                         shape=sheet.activity.shape)
         sv = SheetView(np.array(sheet.activity), sheet.bounds)
-        view = NdMapping((topo.sim.time(), sv), **metadata)
+        view = NdMapping((time, sv), **metadata)
         sheet.views.maps[name] = view
     else:
-        if force or topo.sim.time() > view.timestamp:
+        if force or time > view.timestamp:
             sv = SheetView(np.array(sheet.activity), sheet.bounds)
-            view[topo.sim.time()] = sv
+            view[time] = sv
     return view
 
 
@@ -1683,7 +1684,7 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     the simulation.
     """
     metadata = AttrDict()
-    metadata['timestamp'] = topo.sim.time()
+    metadata['timestamp'] = float(topo.sim.time())
 
     sheets = {}
     sheets['inputs'] = [getattr(topo.sim, input_name, input_name)
