@@ -8,16 +8,6 @@ measurements and analysis to be executed during a simulation run.
 """
 
 import os, sys, types, pickle, inspect
-
-try:  # The correct thing to do in Python 2.7+
-   from importlib import import_module
-except:
-
-   def import_module(name):
-      "Fallback equivalent to the function in importlib"
-      __import__(name)
-      return sys.modules[name]
-
 from collections import namedtuple
 
 import topo
@@ -319,8 +309,9 @@ class AnalysisFn(PrettyPrinted, object):
 
    def get_module(self):
       """Return a module object that contains the analysis function."""
-      return import_module(self.module)
-
+      # In Python 2.7+, importlib.import_module should be used instead
+      __import__(self.module)
+      return sys.modules[self.module]
 
    def __repr__(self):
       """Used for pretty printing declaratively."""
