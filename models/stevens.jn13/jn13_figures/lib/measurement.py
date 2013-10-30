@@ -19,38 +19,12 @@ import analysis
 # Set up appropriate defaults for analysis
 import topo.analysis.featureresponses
 
-class measure_response(object):
-
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-        self.measure_params = dict([(k,getattr(MeasureResponseCommand,k))
-                                    for k in MeasureResponseCommand.params().keys()])
-        self.apply_output_fns = MeasureResponseCommand.pattern_response_fn.apply_output_fns
-        self.plastic = MeasureResponseCommand.pattern_response_fn.plastic
-
-    def __enter__(self):
-
-        for key in self.kwargs:
-            if key in ['plastic', 'apply_output_fns']:
-                setattr(MeasureResponseCommand.pattern_response_fn,
-                        key, self.kwargs[key])    
-            else:
-                setattr(MeasureResponseCommand, key, self.kwargs[key])
-
-    def __exit__(self, *kwargs):
-
-        for key in self.measure_params:
-            setattr(MeasureResponseCommand, key, self.measure_params[key])
-
-        MeasureResponseCommand.pattern_response_fn.apply_output_fns = self.apply_output_fns
-        MeasureResponseCommand.pattern_response_fn.plastic = self.plastic
-
 # Figures 5-9, afferent response only
 
-def OR_measurement(selectivity_multiplier):
+def OR_measurement(selectivity_multiplier, settings={}):
     """ Default scale is 0.3, not 1.0 (100% contrast)"""
     topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier = selectivity_multiplier
-    measurement = topo.command.analysis.measure_sine_pref.instance(scale=1.0)()
+    measurement = topo.command.analysis.measure_sine_pref.instance(scale=1.0, **settings)()
     sel = topo.sim.V1.views.maps.OrientationSelectivity.top
     pref = topo.sim.V1.views.maps.OrientationPreference.top
     return {'OrientationSelectivity':sel, 'OrientationPreference': pref,
@@ -77,7 +51,7 @@ def stability_analysis(figure, times):
     roi = ROI(disable=(True if figure=='Fig10_12' else False))
     simulation_time = topo.sim.time()
     preference = topo.sim.V1.views.maps.OrientationPreference.top.data
-    if simulation_time == times[0]:  
+    if simulation_time == times[0]:
         topo.stability_maps = [preference[roi,roi]]
     if simulation_time == times[-1]:
         topo.stability_maps.append(preference[roi,roi])
@@ -110,10 +84,11 @@ def measure_FF():
     disable homeostatic adaptation (i.e. output functions).
     """
     ff_map_multiplier = 2.0
-    with measure_response(durations=[0.225] , apply_output_fns=False):
-        measurement = OR_measurement(selectivity_multiplier=ff_map_multiplier)
-        measurement['metadata'].update(roi=ROI())
-        return measurement
+    measurement = OR_measurement(selectivity_multiplier=ff_map_multiplier,
+                                 settings = dict(durations=[0.225],
+                                                 apply_output_fns=False))
+    measurement['metadata'].update(roi=ROI())
+    return measurement
 
 def measure_GR():
     full_map_multiplier = 0.2
