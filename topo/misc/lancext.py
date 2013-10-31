@@ -7,7 +7,8 @@ whereas the Analysis and RunBatchCommand allow for more sophisticated
 measurements and analysis to be executed during a simulation run.
 """
 
-import os, sys, types, pickle, inspect
+import os, sys, types, pickle, inspect, subprocess, platform
+from numpy.version import full_version as numpy_full_version
 from collections import namedtuple
 
 import topo
@@ -22,6 +23,39 @@ from lancet import NumpyFile
 from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
 Launcher.output_directory = default_output_path()
+
+
+#===============================================#
+# Metadata information for full reproducibility #
+#===============================================#
+
+def metadata_git(paths):
+    """
+    Takes as argument a path or list of paths for which to obtain GIT
+    commit information which is returned as a dictionary.
+    """
+    # str(foo.decode()) ensures code is Python 3 compatible.
+    commit = ["git", "log", "--oneline", "-n", "1"]
+    diff = ["git", "diff"]
+    if isinstance(paths, str): paths = [paths]
+    def _desc(path, cmd):
+        if os.path.exists(os.path.join(path, ".git")):
+            git_log = subprocess.Popen(cmd,
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=path)
+            return str(git_log.communicate()[0].decode()).strip()
+    return { 'git_commit' : dict((os.path.abspath(path), _desc(path, commit)) for path in paths),
+             'git_diff':    dict((os.path.abspath(path), _desc(path, diff)) for path in paths)}
+
+def metadata_platform():
+    """
+    Capture basic information about the environment on the current
+    platform and return as a dictionary.
+    """
+    platform_dict = {}
+    platform_dict['hostname'] = platform.node()
+    platform_dict['python']   = sys.version
+    platform_dict['numpy']    = numpy_full_version
+    return { 'platform' : platform_dict }
 
 
 class param_formatter(param.ParameterizedFunction):
