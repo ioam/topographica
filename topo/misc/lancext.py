@@ -573,7 +573,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
                onlychanged=True, level=1, tab = '   '):
       """Pretty print the Analysis in a declarative style."""
 
-      path_str = '%spaths=%r\n' % ((level*tab), self.paths)
+      path_str = '%spaths=%r,\n' % ((level*tab), self.paths)
       path_str = '' if (onlychanged and not self.paths) else path_str
       fn_level = level + 1
       if len(self.analysis_fns) == 0:
@@ -607,8 +607,7 @@ class RunBatchCommand(TopoCommand):
                                             analysis = analysis,
                                             do_format=False,
                                             **kwargs)
-      self.pprint_args(['executable', 'tyfile', 'analysis'],
-                       ['topo_switches', 'snapshot'])
+      self.pprint_args(['executable', 'tyfile', 'analysis'], [])
 
 
    def get_model_params(self):
