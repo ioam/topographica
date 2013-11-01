@@ -7,8 +7,7 @@ whereas the Analysis and RunBatchCommand allow for more sophisticated
 measurements and analysis to be executed during a simulation run.
 """
 
-import os, sys, types, pickle, inspect, subprocess, platform
-from numpy.version import full_version as numpy_full_version
+import os, sys, types, pickle, inspect
 from collections import namedtuple
 
 import topo
