@@ -2,8 +2,22 @@
 News
 ****
 
+
+**4 Nov 2013:** Reproducible paper with Lancet and IPython Notebook
+===================================================================
+
+The IPython Notebook reproducing the results of the recently published
+paper `(Stevens et al.,J. Neuroscience 2013)
+<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ is now available
+as an `example in the Tutorials section`_. This notebook is designed
+to show how to write a reproducible paper using Topographica, `IPython
+Notebook <http://ipython.org/notebook.html>`_ and `Lancet
+<https://github.com/ioam/lancet>`_.
+
+
 **2 Oct 2013:** New paper using Topographica
 ============================================
+
 
 `Stevens et al. (J. Neuroscience 2013) <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_
 shows results from the GCAL model included with Topographica 
@@ -350,6 +364,7 @@ model editor.
 ======================================================================
 Includes a new `LISSOM tutorial`_. (`Linux screenshot`_).
 
+.. _example in the Tutorials section: Tutorials/index.html
 .. _shared-memory multiple-core support (via OpenMP): ../User_Manual/multicore.html
 .. _Sigmoid: ../Reference_Manual/imagen.Sigmoid-class.html
 .. _LogGaussian: ../Reference_Manual/imagen.LogGaussian-class.html
