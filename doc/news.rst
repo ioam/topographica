@@ -1,6 +1,6 @@
 **4 Nov 2013:** An IPython Notebook reproducing the results of 
-`Stevens et al. (J. Neuroscience
-2013)<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ is now
+`Stevens et al. (J. Neuroscience 2013)
+<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ is now
 available as an `example in the Tutorials section`_.  This notebook is
 designed to show how to write a `reproducible paper`_ using Topographica,
 `IPython Notebook <http://ipython.org/notebook.html>`_ and `Lancet
