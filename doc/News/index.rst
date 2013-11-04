@@ -12,7 +12,7 @@ An IPython Notebook reproducing the results of
 is now available as an `example in the Tutorials section`_.  This
 notebook is designed to show how to write a reproducible paper
 using Topographica, `IPython Notebook
-<http://ipython.org/notebook.html>`_ and `Lancet
+<http://ipython.org/notebook.html>`_, and `Lancet
 <https://github.com/ioam/lancet>`_.
 
 

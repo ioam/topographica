@@ -3,7 +3,7 @@
 <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ is now
 available as an `example in the Tutorials section`_.  This notebook is
 designed to show how to write a reproducible paper using Topographica,
-`IPython Notebook <http://ipython.org/notebook.html>`_ and `Lancet
+`IPython Notebook <http://ipython.org/notebook.html>`_, and `Lancet
 <https://github.com/ioam/lancet>`_.
 
 **2 Oct 2013:** Topographica GCAL V1 modelling paper `(Stevens et al.,
