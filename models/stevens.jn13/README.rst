@@ -56,7 +56,7 @@ notebooks, you may view the following two HTML versions:
 Topographica Installation
 -------------------------
 
-To run the model without using `IPython Notebook <http://ipython.org/>`_ you will need the Topographica simulator. To install from GitHub, you may follow `these instructions <https://github.com/ioam/topographica>`_. In brief:
+To run the model, you will need the Topographica simulator. To install from GitHub, you may follow `these instructions <https://github.com/ioam/topographica>`_. In brief:
 
 ::
 
@@ -97,7 +97,7 @@ the required dependencies may be installed with pip as follows:
 
 You can then follow the instructions above for 
 `running the notebooks
-<https://github.com/ioam/topographica/tree/master/models/stevens.jn13#running-the-notebooks>`.
+<https://github.com/ioam/topographica/tree/master/models/stevens.jn13#running-the-notebooks>`_.
 
 Directory organization
 ----------------------

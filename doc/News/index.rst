@@ -6,10 +6,11 @@ News
 **4 Nov 2013:** Reproducible paper with Lancet and IPython Notebook
 ===================================================================
 
-An IPython Notebook reproducing the results of `Stevens et
-al. (J. Neuroscience 2013)<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ 
+An IPython Notebook reproducing the results of
+`Stevens et al. (J. Neuroscience 2013) 
+<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ 
 is now available as an `example in the Tutorials section`_.  This
-notebook is designed to show how to write a `reproducible paper`_
+notebook is designed to show how to write a reproducible paper
 using Topographica, `IPython Notebook
 <http://ipython.org/notebook.html>`_ and `Lancet
 <https://github.com/ioam/lancet>`_.

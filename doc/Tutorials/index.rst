@@ -54,7 +54,7 @@ every figure from `Stevens et al. (J. Neuroscience 2013)
 <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_. This notebook
 is the final result of an agile workflow for doing reproducible
 research based on IPython Notebook and
-`Lancet<https://github.com/ioam/lancet>`_, as described in 
+`Lancet <https://github.com/ioam/lancet>`_, as described in 
 `this newly submitted paper
 <http://homepages.inf.ed.ac.uk/jbednar/papers/stevens.fin13_submitted.pdf>`_
 The link above takes you to a static copy of the notebook output; to
