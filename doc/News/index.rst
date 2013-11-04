@@ -22,7 +22,7 @@ using Topographica, `IPython Notebook
 `Stevens et al. (J. Neuroscience 2013) <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_
 shows results from the GCAL model included with Topographica 
 (`examples/gcal.ty <https://github.com/ioam/topographica/blob/master/examples/gcal.ty>`_).  
-The `GCAL tutorial<../Tutorials/gcal.html>`_ shows how to explore a
+The `GCAL tutorial <../Tutorials/gcal.html>`_ shows how to explore a
 running GCAL model, and the `GCAL demo
 <http://homepages.inf.ed.ac.uk/jbednar/gcal_stab.html>`_ 
 shows how the model develops over time.
@@ -362,7 +362,7 @@ model editor.
 ======================================================================
 Includes a new `LISSOM tutorial`_. (`Linux screenshot`_).
 
-.. _example in the Tutorials section: Tutorials/index.html
+.. _example in the Tutorials section: ../Tutorials/index.html
 .. _shared-memory multiple-core support (via OpenMP): ../User_Manual/multicore.html
 .. _Sigmoid: ../Reference_Manual/imagen.Sigmoid-class.html
 .. _LogGaussian: ../Reference_Manual/imagen.LogGaussian-class.html

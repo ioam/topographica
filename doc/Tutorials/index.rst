@@ -56,7 +56,7 @@ is the final result of an agile workflow for doing reproducible
 research based on IPython Notebook and
 `Lancet <https://github.com/ioam/lancet>`_, as described in 
 `this newly submitted paper
-<http://homepages.inf.ed.ac.uk/jbednar/papers/stevens.fin13_submitted.pdf>`_
+<http://homepages.inf.ed.ac.uk/jbednar/papers/stevens.fin13_submitted.pdf>`_.
 The link above takes you to a static copy of the notebook output; to
 replicate it for yourself just follow 
 `these instructions
