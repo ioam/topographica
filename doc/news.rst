@@ -1,16 +1,14 @@
-**4 Nov 2013:** The IPython Notebook reproducing the results of the
-recently published paper `(Stevens et al.,J. Neuroscience 2013)
-<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ is now available
-as an `example in the Tutorials section`_.  This notebook is designed
-to show how to write a `reproducible paper`_ using Topographica,
+**4 Nov 2013:** An IPython Notebook reproducing the results of 
+`Stevens et al. (J. Neuroscience
+2013)<http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ is now
+available as an `example in the Tutorials section`_.  This notebook is
+designed to show how to write a `reproducible paper`_ using Topographica,
 `IPython Notebook <http://ipython.org/notebook.html>`_ and `Lancet
 <https://github.com/ioam/lancet>`_.
 
-**2 Oct 2013:** Topographica V1 modelling paper `(Stevens et al.,
+**2 Oct 2013:** Topographica GCAL V1 modelling paper `(Stevens et al.,
 J. Neuroscience 2013) <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ 
-published.  A complete example of replicating the paper will be posted
-here soon, showing how to launch the simulations, collate the results,
-and generate the final figures.  Meanwhile, the `GCAL tutorial
+published.  The `GCAL tutorial
 <../Tutorials/gcal.html>`_ shows how to explore a running GCAL model,
 and the `GCAL demo <http://homepages.inf.ed.ac.uk/jbednar/gcal_stab.html>`_
 shows how the model develops over time.

@@ -1,6 +1,6 @@
-=======================================================
-Mechanisms for Stable, Robust, and Adaptive Development
-=======================================================
+==================================================
+Replicating Stevens et al. (J. Neuroscience, 2013)
+==================================================
 
 This directory includes all the code necessary to re-run all the
 simulations and regenerate all the figures detailed in `Stevens et
@@ -19,6 +19,10 @@ al. (2013) <http://www.jneurosci.org/content/33/40/15747.full>`_.
 |   doi = {10.1523/JNEUROSCI.1037-13.2013},
 |   url = {http://www.jneurosci.org/content/33/40/15747.full}
 | }
+
+
+Running the Notebooks
+---------------------
 
 If all the necessary software dependencies are satisfied, including
 IPython notebook, you can start exploring the model by running the
@@ -48,6 +52,7 @@ notebooks, you may view the following two HTML versions:
   full set of simulations is computationally expensive, you select a
   small subset before launching the jobs.
 
+
 Topographica Installation
 -------------------------
 
@@ -66,17 +71,22 @@ Topographica itself depends on numpy, PIL and scipy which may be installed with 
    pip install numpy PIL scipy
 
 
-With Topographica installed you can now explore the model from this directory as follows:
+With Topographica installed you can now explore the model from this
+directory using the Topographica GUI:
 
 ::
 
    ../../topographica -g gcal.ty
 
+The rest of the instructions show how to go further, using IPython
+notebook to explore how the model is put together and how to put
+results together into figures.
+
 
 Installing IPython Notebook
 ---------------------------
 
-To to run the contents of '``stevens_jn13.ipynb``' and
+To run the contents of '``stevens_jn13.ipynb``' and
 '``gcal.ipynb``' and reproduce all the figures in the paper, you will
 need IPython (>=1.0) and the ability to run the IPython notebook. All
 the required dependencies may be installed with pip as follows:
@@ -85,8 +95,9 @@ the required dependencies may be installed with pip as follows:
 
    pip install ipython jinja tornado pyzmq
 
-Now run ipython notebook in the current directory as follows:  ``ipython notebook``
-
+You can then follow the instructions above for 
+`running the notebooks
+<https://github.com/ioam/topographica/tree/master/models/stevens.jn13#running-the-notebooks>`.
 
 Directory organization
 ----------------------

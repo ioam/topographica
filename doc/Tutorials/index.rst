@@ -30,35 +30,48 @@ particular biological system.
 
 |gcal_ipynb|_
 
-This is an `IPython Notebook <http://ipython.org/notebook.html>`_ that
-steps through the definition of the GCAL model used in the tutorial
-above. This demonstrates how a Topographica model can be interactively
-explored in the Notebook environment. Installation instructions, the
-notebooks themselves and all the supporting code `may be found here
-<https://github.com/ioam/topographica/tree/master/models/stevens.jn13>`_.
+In addition to the GUI-based way of interacting with Topographica
+illustrated in the tutorials above, you can also use `IPython Notebook
+<http://ipython.org/notebook.html>`_, which provides a command-line
+prompt that allows you to weave together Python code, textual output,
+and graphical output.  This approach makes it easier to modify a
+model, look at parts of it not currently exposed in the GUI, and to 
+develop new types of analyses not yet offered in the GUI.
+
+The link above takes you to a static HTML snapshot of a notebook that
+illustrates how to define, explore, and analyze the GCAL model (see
+above) from within IPython Notebook.  In practice, you'll want to try
+out the actual notebook for yourself, which you can do by 
+downloading the latest git version of Topographica using
+`these instructions
+<https://github.com/ioam/topographica/tree/master/models/stevens.jn13#topographica-installation>`_.
 
 |stevens_jn13|_
 
-This second `IPython Notebook <http://ipython.org/notebook.html>`_
-uses the GCAL model definition notebook described above to reproduce
-the figures shown in `Stevens et al. (J. Neuroscience 2013)
+Building on the GCAL IPython Notebook described above, this second
+notebook shows how to reproduce
+every figure from `Stevens et al. (J. Neuroscience 2013)
 <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_. This notebook
-demonstrates an agile, reproducible workflow using IPython Notebook
-and Lancet as described in `this newly submitted paper
+is the final result of an agile workflow for doing reproducible
+research based on IPython Notebook and
+`Lancet<https://github.com/ioam/lancet>`_, as described in 
+`this newly submitted paper
 <http://homepages.inf.ed.ac.uk/jbednar/papers/stevens.fin13_submitted.pdf>`_
-with installation instructions and supporting material `available here
-<https://github.com/ioam/topographica/tree/master/models/stevens.jn13>`_.
+The link above takes you to a static copy of the notebook output; to
+replicate it for yourself just follow 
+`these instructions
+<https://github.com/ioam/topographica/tree/master/models/stevens.jn13#topographica-installation>`_.
 
-
-These should be good starting points for seeing how Topographica
-works and how to use a Topographica model. If you develop any other
-tutorials for your own models, we would love to add them here!
+Each of these tutorials should be a good starting point for seeing how
+Topographica works and how to use a Topographica model in practice. If
+you develop any other tutorials for your own models, we would love to
+add them here!
 
 .. Trick to get matching italic style for the links
 .. _gcal_ipynb: ../_static/gcal_notebook.html
 .. |gcal_ipynb| replace:: *GCAL Model definition*
 
 .. _stevens_jn13: ../_static/stevens_jn13_notebook.html
-.. |stevens_jn13| replace:: *Reproducing the GCAL paper*
+.. |stevens_jn13| replace:: *Replicating Stevens et al. (J. Neuroscience 2013)*
 
 .. _older tutorial: ./lissom_oo_or.html
