@@ -23,9 +23,20 @@ The clone command above is read-only.  To push changes set up your `SSH key <htt
    cd topographica
    git submodule update --init
 
-If dependencies are missing, you can install them using pip.  Pip is available on most systems already, but if it is missing or if the installed version is old, you
-can install it using ``easy_install pip`` or the equivalent for your package manager, or install virtualenv instead.  The only required dependencies are numpy and PIL, which can be installed using
-``pip install numpy PIL``, but other highly recommended packages include scipy, ipython, and matplotlib, which can each be installed in the same way.
+If dependencies are missing, you can install them using pip.  Pip is
+available on most systems already, but if it is missing or if the
+installed version is old, you can install it using ``easy_install
+pip`` or the equivalent for your package manager, or install
+virtualenv instead.  The only required dependencies are numpy and PIL,
+which can be installed using::
+
+   pip install numpy PIL
+
+but other highly recommended packages include scipy, ipython, and
+matplotlib, which can each be installed in the same way::
+
+   pip install scipy ipython matplotlib
+
 
 MAKING DOCUMENTATION (OPTIONAL)
 -------------------------------
