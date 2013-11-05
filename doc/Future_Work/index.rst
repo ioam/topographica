@@ -85,8 +85,3 @@ very welcome!
 .. _Issues: https://github.com/ioam/topographica/issues
 .. _subproject: https://github.com/ioam
 .. _tackle one of the existing problems listed: ../Developer_Manual/index.html#joining
-
-.. toctree::
-   :maxdepth: 1
-
-   current

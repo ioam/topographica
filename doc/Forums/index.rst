@@ -44,6 +44,3 @@ available:
 .. _Open Discussion: http://sourceforge.net/forum/forum.php?forum_id=178311
 .. _Issues: https://github.com/ioam/topographica/issues?state=open
 .. _Reporting specific problems with Topographica: problems.html
-
-.. toctree::
-   problems
