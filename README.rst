@@ -39,7 +39,7 @@ matplotlib, which can each be installed in the same way::
 
 If you wish to use `IPython Notebook <http://ipython.org/notebook>`_
 (optional) with Topographica, you can install the remaining
-dependencies as follows:
+dependencies as follows::
 
    pip install ipython tornado pyzmq jinja2
 
