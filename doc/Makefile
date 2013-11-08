@@ -155,3 +155,9 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+notebooks:
+	PYTHONIOENCODING=utf-8 ipython nbconvert --template full --stdout ../models/stevens.jn13/stevens_jn13.ipynb > ./_static/stevens_jn13_notebook.html
+	PYTHONIOENCODING=utf-8 ipython nbconvert --template full --stdout ../models/stevens.jn13/gcal.ipynb > ./_static/gcal_notebook.html
+	@echo "Converted notebooks  'stevens_jn13.ipynb' and 'gcal.ipynb'" \
+	      "to static HTML pages in ./_static."
