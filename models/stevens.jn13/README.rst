@@ -21,83 +21,53 @@ al. (2013) <http://www.jneurosci.org/content/33/40/15747.full>`_.
 | }
 
 
-Running the Notebooks
----------------------
+Getting Started
+---------------
 
-If all the necessary software dependencies are satisfied, including
-IPython notebook, you can start exploring the model by running the
+To run the model, you will need the Topographica simulator. To install
+from GitHub, you may follow `these instructions
+<https://github.com/ioam/topographica>`_ which includes the
+instructions for installing `IPython Notebook
+<http://ipython.org/notebook>`_.
+
+With Topographica installed you can now explore the model from this
+directory using the Topographica GUI without requiring IPython
+Notebook:
+
+::
+
+   ../../topographica -g gcal.ty
+
+To go further, using IPython notebook to explore how the model is put
+together and how to put results together into figures, you can run the
 following command in this directory:
 
 ::
 
    ipython notebook
 
-Now you should be able to select the '``stevens_jn13``' or '``gcal``' notebooks.
+Now you should be able to select the '``stevens_jn13``' or '``gcal``'
+notebooks. Note that IPython >=1.0 is required.
 
 Running the live notebooks allows you to explore the model
 iteratively. If you simply wish to view the static contents of these
 notebooks, you may view the following two HTML versions:
 
 - `Model definition
-  <http://nbviewer.ipython.org/urls/raw.github.com/ioam/topographica/master/models/stevens.jn13/gcal.ipynb>`_:
-  An interactive notebook that simultaneously defines the model and
-  explores it. Running this notebook generates the Topographica model
-  file '``gcal.ty``'.
+  <http://topographica.org/_static/gcal_notebook.html>`_: A notebook
+  that simultaneously defines the model and explores it. Running the
+  live version of this notebook generates the Topographica model file
+  '``gcal.ty``'.
 
 - `Simulation and Figures
-  <http://nbviewer.ipython.org/urls/raw.github.com/ioam/topographica/master/models/stevens.jn13/stevens_jn13.ipynb>`_:
+  <http://topographica.org/_static/stevens_jn13_notebook.html>`_:
   Defines all 842 model simulations needed to reproduce all the
   figures, allows you to launch them and automatically builds the
   corresponding SVG figures used in publication. Although running the
-  full set of simulations is computationally expensive, you select a
-  small subset before launching the jobs.
+  full set of simulations is computationally expensive, the live
+  notebook allows you to select a small subset before launching the
+  jobs.
 
-
-Topographica Installation
--------------------------
-
-To run the model, you will need the Topographica simulator. To install from GitHub, you may follow `these instructions <https://github.com/ioam/topographica>`_. In brief:
-
-::
-
-   git clone git://github.com/ioam/topographica.git
-   cd topographica
-   git submodule update --init
-
-Topographica itself depends on numpy, PIL and scipy which may be installed with pip:
-
-::
-
-   pip install numpy PIL scipy
-
-
-With Topographica installed you can now explore the model from this
-directory using the Topographica GUI:
-
-::
-
-   ../../topographica -g gcal.ty
-
-The rest of the instructions show how to go further, using IPython
-notebook to explore how the model is put together and how to put
-results together into figures.
-
-
-Installing IPython Notebook
----------------------------
-
-To run the contents of '``stevens_jn13.ipynb``' and
-'``gcal.ipynb``' and reproduce all the figures in the paper, you will
-need IPython (>=1.0) and the ability to run the IPython notebook. All
-the required dependencies may be installed with pip as follows:
-
-::
-
-   pip install ipython jinja tornado pyzmq
-
-You can then follow the instructions above for 
-`running the notebooks
-<https://github.com/ioam/topographica/tree/master/models/stevens.jn13#running-the-notebooks>`_.
 
 Directory organization
 ----------------------

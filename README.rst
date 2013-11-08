@@ -35,7 +35,13 @@ which can be installed using::
 but other highly recommended packages include scipy, ipython, and
 matplotlib, which can each be installed in the same way::
 
-   pip install scipy ipython matplotlib
+   pip install gmpy scipy ipython matplotlib
+
+If you wish to use `IPython Notebook <http://ipython.org/notebook>`_
+(optional) with Topographica, you can install the remaining
+dependencies as follows:
+
+   pip install ipython tornado pyzmq jinja2
 
 
 MAKING DOCUMENTATION (OPTIONAL)
