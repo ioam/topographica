@@ -206,6 +206,7 @@ class TestPatternGenerator(unittest.TestCase):
 
         p=PatternGenerator(x=numbergen.UniformRandom(lbound=-1,ubound=1,seed=1))
 
+        topo.sim.time = p.params('x').time_fn
         x0 = p.x
         topo.sim.run(1)
         x1 = p.x

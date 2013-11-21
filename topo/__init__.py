@@ -245,17 +245,19 @@ from topo.base.simulation import Simulation
 
 # Set the default value of Simulation.time_type to gmpy.mpq. If gmpy
 # is unavailable, use the slower fixedpoint.FixedPoint.
+
+def fixedpoint_time_type(x, precision=4):
+    "A fixedpoint time type of given precision"
+    return fixedpoint.FixedPoint(x, precision)
+
 try:
     import gmpy
-    Simulation.time_type = gmpy.mpq
-    Simulation.time_type_args = ()
+    _time_type = gmpy.mpq
     _mpq_pickle_support()
 except ImportError:
     import topo.misc.fixedpoint as fixedpoint
     param.main.warning('gmpy.mpq not available; using slower fixedpoint.FixedPoint for simulation time.')
-    Simulation.time_type = fixedpoint.FixedPoint
-    Simulation.time_type_args = (4,)  # gives precision=4
-
+    _time_type = fixedpoint_time_type
     # Provide a fake gmpy.mpq (to allow e.g. pickled test data to be
     # loaded).
     # CEBALERT: can we move this into whatever test needs it? I guess
@@ -266,19 +268,15 @@ except ImportError:
     sys.meta_path.append(gmpyImporter())
 
 
-
+param.Dynamic.time_fn(val=0.0, time_type=_time_type)
+param.Dynamic.time_fn.autostep = False
 sim = Simulation()
-
 
 # numbergen used to be part of topo; import it there for backwards compatibility
 # and set the time function to be topo.sim.time()
 import sys,numbergen
 sys.modules['topo.numbergen']=numbergen
 sys.modules['topo.numbergen.basic']=numbergen
-try:
-    numbergen.TimeDependentValue.time_fn = sim.time
-except AttributeError: # For versions of numbergen before April 2013
-    numbergen.ExponentialDecay.time_fn = sim.time
 
 # imagen used to be part of topo; import its files at their former locations
 # for backwards compatibility and set the time function to be topo.sim.time()
