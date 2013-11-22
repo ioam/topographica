@@ -261,6 +261,14 @@ def pattern_basic_rectangular_removed():
 
 support[11558] = pattern_basic_rectangular_removed
 
+
+def pattern_Null_removed():
+    import imagen
+    from imagen import Constant
+    imagen.Null=Constant
+
+support[90800407] = pattern_Null_removed
+
 # CEBALERT: should be renamed (it's not only about pattern.basic). And
 # did all these happen in one commit?  I added topo.ep recently; did
 # that happen in the same commit as the others or not?
@@ -344,8 +352,6 @@ support[12089] = moved_picklableclassattributes
 
 
 def LISSOM_moved_to_SettlingCFSheet():
-    # For snapshots saved before 90800126
-    
     import topo.sheet.lissom
     import topo.sheet.optimized
     def _LISSOM_move_private_params_to_SettlingCFSheet(instance,state):
@@ -357,6 +363,23 @@ def LISSOM_moved_to_SettlingCFSheet():
     preprocess_state(topo.sheet.optimized.LISSOM_Opt,_LISSOM_move_private_params_to_SettlingCFSheet)
 
 support[90800126] = LISSOM_moved_to_SettlingCFSheet
+
+
+def sim_time_moved_to_Dynamic_time_fn():
+    def _sim_time_moved_to_Dynamic_time_fn(instance,state):
+        print "in patch",state.keys()
+        if '_time' in state and '_time_type_param_value' in state:
+            param.Dynamic.time_fn(state['_time'],time_type=state['_time_type_param_value'])
+            del state['_time']
+            del state['_time_type_param_value']
+            del state['_time_type_args_param_value']
+        else:
+            print "skipped"
+
+    import topo.base.simulation
+    preprocess_state(topo.base.simulation.Simulation,_sim_time_moved_to_Dynamic_time_fn)
+
+support[90800408] = sim_time_moved_to_Dynamic_time_fn
 
 
 def removed_JointScaling():
