@@ -1497,7 +1497,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # CEBALERT: hack to support importing the time type since the
         # scheduled actions will have times printed using the
         # time_type.
-        imports.append("from %s import %s"%(self.time_type.__module__,self.time_type.__name__))
+        imports.append("from %s import %s"%(self.time.time_type.__module__,self.time.time_type.__name__))
 
         imps  = sorted(set(imports))
 
