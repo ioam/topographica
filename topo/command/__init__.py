@@ -348,6 +348,12 @@ Loading error:
         p = param.Parameterized(name="load_snapshot")
         p.message("Unable to restore Subplotting settings")
 
+    # Temporary -- broadcast topo.sim.time to all subpackages
+    import imagen,numbergen
+    param.Dynamic.time_fn = topo.sim.time
+    numbergen.TimeDependentValue.time_fn = topo.sim.time
+    imagen.Translator.time_fn = topo.sim.time
+
 
 
 
