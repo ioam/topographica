@@ -367,7 +367,6 @@ support[90800126] = LISSOM_moved_to_SettlingCFSheet
 
 def sim_time_moved_to_Dynamic_time_fn():
     def _sim_time_moved_to_Dynamic_time_fn(instance,state):
-        print "in patch",state.keys()
         if '_time' in state and '_time_type_param_value' in state:
             param.Dynamic.time_fn(state['_time'],time_type=state['_time_type_param_value'])
             del state['_time']
