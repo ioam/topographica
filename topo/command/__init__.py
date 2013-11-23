@@ -26,6 +26,7 @@ import param
 from param.parameterized import ParameterizedFunction, ParamOverrides
 from param import normalize_path
 
+import imagen, numbergen
 try:
     from collections import OrderedDict
 except:
@@ -239,7 +240,6 @@ class UnpickleEnvironmentCreator(object):
         L.SnapshotSupport.install(self.release,self.version)
 
 
-
 def save_snapshot(snapshot_name=None):
     """
     Save a snapshot of the network's current state.
@@ -265,6 +265,11 @@ def save_snapshot(snapshot_name=None):
     topoPOclassattrs = PicklableClassAttributes(topo,exclusions=('plotting','tests','tkgui'),
                                                 startup_commands=topo.sim.startup_commands)
 
+    paramPOclassattrs = PicklableClassAttributes(param)
+    imagenPOclassattrs = PicklableClassAttributes(imagen)
+    numbergenPOclassattrs = PicklableClassAttributes(numbergen)
+
+
     from topo.misc.commandline import global_params
 
     topo.sim.RELEASE=topo.release
@@ -274,6 +279,9 @@ def save_snapshot(snapshot_name=None):
                PickleMain(),
                global_params,
                topoPOclassattrs,
+               paramPOclassattrs,
+               imagenPOclassattrs,
+               numbergenPOclassattrs,
                topo.sim)
 
     try:
@@ -349,7 +357,6 @@ Loading error:
         p.message("Unable to restore Subplotting settings")
 
     # Temporary -- broadcast topo.sim.time to all subpackages
-    import imagen,numbergen
     param.Dynamic.time_fn = topo.sim.time
     numbergen.TimeDependentValue.time_fn = topo.sim.time
     imagen.Translator.time_fn = topo.sim.time
