@@ -525,11 +525,10 @@ return_code=0
 def t_action(option,opt_str,value,parser):
     """Callback function for the -t option for invoking tests."""
 
-    extra_target_descriptions = {"list":"List of all the available tests.",
-                                 "unit":"Unit tests using nosetests and doctests.",
-                                 "all":"All the tests, including tests that are slow to run.",
+    extra_target_descriptions = {"unit":"Quick unit tests using nosetests and doctest.",
+                                 "all":"Nearly all the tests, even those quite slow to run.",
                                  "speed":"Test for changes in execution speed.",
-                                 "default":"Default test suite.",
+                                 "default":"Default test suite (traintests,snapshots,gui,maptests).",
                                  "flakes":"Run pyflakes static code checker."}
 
     global return_code
@@ -539,7 +538,7 @@ def t_action(option,opt_str,value,parser):
         max_len = max(len(k) for k,_ in available_items)
         print ("---------------\nAvailable tests\n---------------\n%s"
                % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
-                           for k,v in available_items if k != 'list'))
+                           for k,v in available_items))
 
     elif value == "unit":
         import subprocess

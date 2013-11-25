@@ -265,12 +265,12 @@ def run_tests():
     return errors
 
 
-target_description = {'traintests':"Test for consistent results after training a network.",
-                      'unopttraintests':"Test for consistent results after training a network (unoptimized components).",
+target_description = {'traintests':"Test for consistent results from training models.",
+                      'unopttraintests':"Same as traintests, but without optimized components.",
                       'snapshots':"Test saving and restoring models from snapshots.",
                       'pickle':"Test whether components can be pickled and unpickled.",
-                      'scriptrepr':"Tests whether the model can be saved as a script repr.",
-                      'gui':"Test whether GUI components can be displayed successfully.",
+                      'scriptrepr':"Test whether a model can be saved as a script_repr.",
+                      'gui':"Test GUI components (requires a real or virtual display).",
                       'batch':"Test operation in batch mode with run_batch.",
                       'maptests':"Test map measurement results."}
 
