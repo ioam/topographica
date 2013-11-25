@@ -895,7 +895,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
     name = param.Parameter(constant=False)
 
-    forever = param.Forever()
+    forever = param.Infinity()
 
     ### Simulation(register=True) is a singleton
     #
