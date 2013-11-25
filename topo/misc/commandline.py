@@ -527,6 +527,8 @@ def t_action(option,opt_str,value,parser):
 
     extra_targets = ["list","unit","all","speed","default"]
 
+    global return_code
+
     # Would be nice to include one line of documentation of each test as well
     if value == "list":
         from topo.tests.runtests import target
@@ -537,13 +539,21 @@ def t_action(option,opt_str,value,parser):
         import subprocess
         ret = subprocess.call(["nosetests", "-v", "--with-doctest", 
                                "--doctest-extension=txt"])
-        global return_code
+        return_code += abs(ret)
+
+    elif value == "flakes":
+        import subprocess
+        targets = ["topo", "external/param", "external/paramtk", "external/imagen", "external/lancet"]
+        ret = subprocess.call(["python","topo/tests/buildbot/pyflakes-ignore.py","--ignore", "topo/tests","--total"] + targets)
         return_code += abs(ret)
 
     else:
         valuestr="" if value == "default" else "'%s'" % value
         global_params.exec_in_context("targets=[" + valuestr + "]")
-        execfile('./topo/tests/runtests.py',__main__.__dict__)
+        # Call runtests.run_tests() as if it were a proper module
+        ns={}
+        execfile('./topo/tests/runtests.py',ns,ns)
+        return_code += len(ns["run_tests"]())
 
     global something_executed
     something_executed=True
@@ -551,7 +561,7 @@ def t_action(option,opt_str,value,parser):
 
 topo_parser.add_option("-t","--test",action = "callback",callback=t_action,type="string",
 		       default=[],dest="tests",metavar="<testname>",
-		       help="name of test to run (use '-t list' to show tests available).  At present, exits after the first test run (with an appropriate status code), but should be extended to allow multiple -t options.")
+		       help="name of test to run (use '-t list' to show tests available).")
 
 
 
