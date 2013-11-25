@@ -491,7 +491,7 @@ def p_action(option,opt_str,value,parser):
     something_executed=True
 
 topo_parser.add_option("-p","--set-parameter",action = "callback",callback=p_action,type="string",
-		       default=[],dest="commands",metavar="\"<command>\"",
+		       default=[],dest="commands",metavar="<param>=<value>",
 		       help="command specifying value(s) of script-level (global) Parameter(s).")
 
 
@@ -517,7 +517,6 @@ def a_action(option,opt_str,value,parser):
 topo_parser.add_option("-a","--auto-import-commands",action="callback",callback=a_action,help="""\
 import everything from commands/*.py into the main namespace, for convenience; \
 equivalent to -c 'from topo.misc.commandline import auto_import_commands ; auto_import_commands()'.""")
-
 
 
 def exec_startup_files():
@@ -580,7 +579,7 @@ def process_argv(argv):
         import os,multiprocessing
         total_cores = multiprocessing.cpu_count()
         num_threads = int(os.environ.get('OMP_NUM_THREADS',total_cores))
-        openmp_main.message("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
+        openmp_main.verbose("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
     except:
         pass
 
