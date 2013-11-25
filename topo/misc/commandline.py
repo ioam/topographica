@@ -533,7 +533,7 @@ def t_action(option,opt_str,value,parser):
     if value == "list":
         from topo.tests.runtests import target
         available_tests = sorted((target.keys()+extra_targets))
-        print "Available tests: %s" % " ".join(available_tests)
+        print "---------------\nAvailable tests\n---------------\n%s" % "\n".join('%s'% el for el in available_tests if el != 'list')
 
     elif value == "unit":
         import subprocess
