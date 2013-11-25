@@ -519,6 +519,44 @@ import everything from commands/*.py into the main namespace, for convenience; \
 equivalent to -c 'from topo.misc.commandline import auto_import_commands ; auto_import_commands()'.""")
 
 
+global return_code
+return_code=0
+
+def t_action(option,opt_str,value,parser):
+    """Callback function for the -t option for invoking tests."""
+
+    extra_targets = ["list","unit","all","speed","default"]
+
+    # Would be nice to include one line of documentation of each test as well
+    if value == "list":
+        from topo.tests.runtests import target
+        available_tests = sorted((target.keys()+extra_targets))
+        print "Available tests: %s" % " ".join(available_tests)
+
+    elif value == "unit":
+        import subprocess
+        ret = subprocess.call(["nosetests", "-v", "--with-doctest", 
+                               "--doctest-extension=txt"])
+        global return_code
+        return_code += abs(ret)
+
+    else:
+        valuestr="" if value == "default" else "'%s'" % value
+        global_params.exec_in_context("targets=[" + valuestr + "]")
+        execfile('./topo/tests/runtests.py',__main__.__dict__)
+
+    global something_executed
+    something_executed=True
+    
+
+topo_parser.add_option("-t","--test",action = "callback",callback=t_action,type="string",
+		       default=[],dest="tests",metavar="<testname>",
+		       help="name of test to run (use '-t list' to show tests available).  At present, exits after the first test run (with an appropriate status code), but should be extended to allow multiple -t options.")
+
+
+
+
+
 def exec_startup_files():
     """
     Execute startup files.
@@ -663,4 +701,7 @@ def process_argv(argv):
             # Load Topographica IPython extension in embedded shell
             ipshell.extension_manager.load_extension('topo.misc.ipython')
             ipshell()
-            sys.exit()
+
+    global return_code
+    if return_code != 0: print "Exiting with return code %d" % return_code
+    sys.exit(return_code)
