@@ -339,9 +339,9 @@ def default_output_path():
         try:
             documents = _win_documents_path()
         except: pass
-    
+
     return os.path.join(documents, 'Topographica')
-    
+
 
 
 def set_output_path(path):
@@ -360,7 +360,7 @@ def set_output_path(path):
                 cmdline_main.warning("Unable to set output path %s"%path)
 
     param.normalize_path.prefix=path
-    
+
     if not path in param.resolve_path.search_paths:
         param.resolve_path.search_paths+=[path]
 
@@ -398,7 +398,7 @@ topo_parser.add_option("-i","--interactive",action="callback",callback=i_action,
 def v_action(option,opt_str,value,parser):
     """Callback function for the -v option."""
     cmdline_main.message("Enabling verbose message output.")
-    if hasattr(parameterized,'get_logger'): 
+    if hasattr(parameterized,'get_logger'):
         parameterized.get_logger().setLevel(parameterized.VERBOSE)
     else: # For versions of the param package before 9 May 2013
         parameterized.min_print_level=parameterized.VERBOSE
@@ -410,7 +410,7 @@ enable verbose messaging output""")
 def d_action(option,opt_str,value,parser):
     """Callback function for the -d option."""
     cmdline_main.message("Enabling debugging message output.")
-    if hasattr(parameterized,'get_logger'): 
+    if hasattr(parameterized,'get_logger'):
         parameterized.get_logger().setLevel(parameterized.DEBUG)
     else: # For versions of the param package before 9 May 2013
         parameterized.min_print_level=parameterized.DEBUG
@@ -479,8 +479,8 @@ def c_action(option,opt_str,value,parser):
     something_executed=True
 
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
-		       default=[],dest="commands",metavar="\"<command>\"",
-		       help="string of arbitrary Python code to be executed in the main namespace")
+                       default=[],dest="commands",metavar="\"<command>\"",
+                       help="string of arbitrary Python code to be executed in the main namespace")
 
 
 
@@ -491,8 +491,8 @@ def p_action(option,opt_str,value,parser):
     something_executed=True
 
 topo_parser.add_option("-p","--set-parameter",action = "callback",callback=p_action,type="string",
-		       default=[],dest="commands",metavar="<param>=<value>",
-		       help="command specifying value(s) of script-level (global) Parameter(s).")
+                       default=[],dest="commands",metavar="<param>=<value>",
+                       help="command specifying value(s) of script-level (global) Parameter(s).")
 
 
 def auto_import_commands():
@@ -525,19 +525,25 @@ return_code=0
 def t_action(option,opt_str,value,parser):
     """Callback function for the -t option for invoking tests."""
 
-    extra_targets = ["list","unit","all","speed","default"]
+    extra_target_descriptions = {"list":"List of all the available tests.",
+                                 "unit":"Unit tests using nosetests and doctests.",
+                                 "all":"All the tests, including tests that are slow to run.",
+                                 "speed":"Test for changes in execution speed.",
+                                 "default":"Default test suite.",
+                                 "flakes":"Run pyflakes static code checker."}
 
     global return_code
-
-    # Would be nice to include one line of documentation of each test as well
     if value == "list":
-        from topo.tests.runtests import target
-        available_tests = sorted((target.keys()+extra_targets))
-        print "---------------\nAvailable tests\n---------------\n%s" % "\n".join('%s'% el for el in available_tests if el != 'list')
+        from topo.tests.runtests import target_description
+        available_items = sorted((target_description.items() + extra_target_descriptions.items()))
+        max_len = max(len(k) for k,_ in available_items)
+        print ("---------------\nAvailable tests\n---------------\n%s"
+               % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
+                           for k,v in available_items if k != 'list'))
 
     elif value == "unit":
         import subprocess
-        ret = subprocess.call(["nosetests", "-v", "--with-doctest", 
+        ret = subprocess.call(["nosetests", "-v", "--with-doctest",
                                "--doctest-extension=txt"])
         return_code += abs(ret)
 
@@ -557,11 +563,11 @@ def t_action(option,opt_str,value,parser):
 
     global something_executed
     something_executed=True
-    
+
 
 topo_parser.add_option("-t","--test",action = "callback",callback=t_action,type="string",
-		       default=[],dest="tests",metavar="<testname>",
-		       help="name of test to run (use '-t list' to show tests available).")
+                       default=[],dest="tests",metavar="<testname>",
+                       help="name of test to run (use '-t list' to show tests available).")
 
 
 

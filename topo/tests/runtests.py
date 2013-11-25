@@ -265,6 +265,22 @@ def run_tests():
     return errors
 
 
+target_description = {'traintests':"Test for consistent results after training a network.",
+                      'unopttraintests':"Test for consistent results after training a network (unoptimized components).",
+                      'snapshots':"Test saving and restoring models from snapshots.",
+                      'pickle':"Test whether components can be pickled and unpickled.",
+                      'scriptrepr':"Tests whether the model can be saved as a script repr.",
+                      'gui':"Test whether GUI components can be displayed successfully.",
+                      'batch':"Test operation in batch mode with run_batch.",
+                      'maptests':"Test map measurement results."}
+
+description_keys = set(target_description.keys())
+target_keys = set(target.keys())
+if description_keys != target_keys:
+    raise Exception("Following mismatches between target defined and descriptions given: %s"
+                    % ", ".join(el for el in target_keys ^ description_keys))
+
+assert set(target_description.keys()) == set(target.keys())
 
 def start():
     errors = run_tests()
