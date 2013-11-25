@@ -239,11 +239,8 @@ script = os.path.join(scripts_dir,"models/lissom_oo_or.ty")
 target['maptests'].append(topographica_script + ' -c "cortex_density=8" %s -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)"'%script)
 
 
-def start():
+def run_tests():
     errors = []
-
-    print "Running: %s"%p.targets
-    print
 
     # CEBALERT: rename one of target or targets!
 
@@ -254,6 +251,9 @@ def start():
     else:
         targets = p.targets
 
+    print "Running: %s" % targets
+    print
+
     target.update(speedtarget)
 
     for name in targets:
@@ -262,6 +262,12 @@ def start():
             if _runc(cmd) > 0:
                 if name not in errors:
                     errors.append(name)
+    return errors
+
+
+
+def start():
+    errors = run_tests()
 
     print
     print "="*60
