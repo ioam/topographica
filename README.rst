@@ -79,13 +79,13 @@ up to date::
   git pull
   git submodule update
 
-Changes any file outside of external/ can be made in the usual git fashion::
+Changes to any file outside of external/ can be made in the usual git fashion::
 
   edit topo/dir/somefile.py
   git commit -m "Important change" topo/dir/somefile.py
   git push
 
-If you need to make changes to one of the submodules, there are several
+If you need to make changes to one of the submodules in external/, there are several
 points to remember, assuming you're starting in the topographica
 directory and you're modifying the param submodule (otherwise simply exchange param
 with the submodule you want to modify)::
