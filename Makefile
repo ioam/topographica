@@ -49,8 +49,9 @@ DIST_ZIP                   = ${DIST_DIRNAME}.zip
 
 
 
-# Default does not include doc, in case user lacks PHP
-default: ext-packages topographica
+# By default, do nothing
+default: 
+	echo "The Makefile is primarily for package maintainers; see the Developers Manual for more info. It is not needed for building or using Topogrpahica."
 
 all: default reference-manual doc tests
 
@@ -130,21 +131,6 @@ generate-map-tests-data:
 release-file:
 	echo ${GIT_DESCRIBE} > topo/.release
 
-#############################################################################
-##### tests
-#
-# Convenience targets for platforms with Make; each of these should
-# just call a Python command, and should not be the advertised way to
-# do whatever the target does. (Also, note that buildbot no longer uses
-# any of these.) I think they could be deleted, but some developers
-# are probably used to typing "make slow-tests" or "make tests". Should
-# we make it easier to run these targets via python?
-
-all-speed-tests:
-	./topographica -p timing=True -p 'targets=["speed"]' topo/tests/runtests.py
-
-slow-tests: # all tests except speed tests
-	./topographica -p 'targets=["all"]' topo/tests/runtests.py
 
 
 #############################################################################
