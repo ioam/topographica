@@ -527,9 +527,12 @@ def t_action(option,opt_str,value,parser):
 
     extra_target_descriptions = {"unit":"Quick unit tests using nosetests and doctest.",
                                  "exhaustive":"Nearly all the tests, even those quite slow to run.",
+                                 "coverage":"Same as unit but measuring test coverage.",
                                  "speed":"Test for changes in execution speed.",
                                  "quick":"All tests whose runtimes are in seconds.",
                                  "flakes":"Run pyflakes static code checker."}
+
+    local_targets = ["list","unit","flakes","coverage"]
 
     global return_code
 
@@ -547,13 +550,20 @@ def t_action(option,opt_str,value,parser):
                                "--doctest-extension=txt"])
         return_code += abs(ret)
 
+    if value == "coverage":
+        import subprocess
+        ret = subprocess.call(["nosetests", "-v", "--with-doctest",
+                               "--doctest-extension=txt", 
+                               "--with-cov", "--cov-report", "html"])
+        return_code += abs(ret)
+
     if value == "flakes" or value == "quick":
         import subprocess
         targets = ["topo", "external/param", "external/paramtk", "external/imagen", "external/lancet"]
         ret = subprocess.call(["python","topo/tests/buildbot/pyflakes-ignore.py","--ignore", "topo/tests","--total"] + targets)
         return_code += abs(ret)
 
-    if value not in ["list","unit","flakes"]:
+    if value not in local_targets:
         global_params.exec_in_context("targets=['%s']" % value)
         # Call runtests.run_tests() as if it were a proper module
         ns={}
