@@ -526,12 +526,13 @@ def t_action(option,opt_str,value,parser):
     """Callback function for the -t option for invoking tests."""
 
     extra_target_descriptions = {"unit":"Quick unit tests using nosetests and doctest.",
-                                 "all":"Nearly all the tests, even those quite slow to run.",
+                                 "exhaustive":"Nearly all the tests, even those quite slow to run.",
                                  "speed":"Test for changes in execution speed.",
-                                 "default":"Default test suite (traintests,snapshots,gui,maptests).",
+                                 "quick":"All tests whose runtimes are in seconds.",
                                  "flakes":"Run pyflakes static code checker."}
 
     global return_code
+
     if value == "list":
         from topo.tests.runtests import target_description
         available_items = sorted((target_description.items() + extra_target_descriptions.items()))
@@ -540,21 +541,20 @@ def t_action(option,opt_str,value,parser):
                % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
                            for k,v in available_items))
 
-    elif value == "unit":
+    if value == "unit" or value == "quick":
         import subprocess
         ret = subprocess.call(["nosetests", "-v", "--with-doctest",
                                "--doctest-extension=txt"])
         return_code += abs(ret)
 
-    elif value == "flakes":
+    if value == "flakes" or value == "quick":
         import subprocess
         targets = ["topo", "external/param", "external/paramtk", "external/imagen", "external/lancet"]
         ret = subprocess.call(["python","topo/tests/buildbot/pyflakes-ignore.py","--ignore", "topo/tests","--total"] + targets)
         return_code += abs(ret)
 
-    else:
-        valuestr="" if value == "default" else "'%s'" % value
-        global_params.exec_in_context("targets=[" + valuestr + "]")
+    if value not in ["list","unit","flakes"]:
+        global_params.exec_in_context("targets=['%s']" % value)
         # Call runtests.run_tests() as if it were a proper module
         ns={}
         execfile('./topo/tests/runtests.py',ns,ns)
