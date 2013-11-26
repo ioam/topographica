@@ -9,7 +9,7 @@ This directory contains the test suite for Topographica. The tests are categoris
 
 Here is a basic explanation of what the individual types of functional tests (referred to as "targets") do:
 
-- the ``traintests`` run a number of scripts through a simulation and compare their output against previous results stored in data files.
+- the ``training`` tests run a number of scripts through a simulation and compare their output against previous results stored in data files.
   They fail if the results differ beyond the accuracy margin; the required decimal point precision is passed on to the test before running.
   The current list of trainscripts is the following:
   
@@ -25,21 +25,21 @@ Here is a basic explanation of what the individual types of functional tests (re
   absolutely required to have them in the repository; if they are not found, the test scripts will generate new data files. However,
   having them readily available is more convenient since generating new files takes a long time.
 
-- ``unopttraintests`` do the same as ``traintests`` but without using the `Weave package <http://www.scipy.org/Weave>`_ for optimisation.
+- ``unopt`` do the same as ``training`` but without using the `Weave package <http://www.scipy.org/Weave>`_ for optimisation.
   
 - ``speedtests`` and ``startupspeedtests`` compare the time it takes to run certain test scripts against previously stored results. Since runtime
   is machine-dependent, timing results are not checked in with the repository but rather generated the first time speedtests are run on a given
   machine. The data files are named ``scriptname._SPEEDDATA`` and ``scriptname._STARTUPSPEEDDATA``, and are stored in
   ``~/Topographica/tests/hostname/``, wherever HOME is on the respective machine.
   
-  Speedtests use (almost) the same script list as traintests; see comments in ``runtests.py`` as to why certain scripts are excluded.
+  Speed tests use (almost) the same script list as training tests; see comments in ``runtests.py`` as to why certain scripts are excluded.
   Startupspeedtests use ``models/lissom.ty`` and ``examples/gcal.ty``.
   
   Unless there is some error, these tests will always "pass"; they do not perform any assertions but rather simply report current timings and compare
   them against previous results. To make this set of tests truly useful, they should probably be included in performance tracking and plotting
   in buildbot once that is restored.
 
-- ``maptests`` check the results from map measurements obtained by running a simulation with the ``models/lissom_oo_or.ty`` script, and compare
+- ``maps`` check the results from map measurements obtained by running a simulation with the ``models/lissom_oo_or.ty`` script, and compare
   the results against previous data stored in the data_maptests directory.
 
 - ``snapshots`` and ``pickle`` which deal with saving and restoring legacy code to and from bytecode, using ``instances-r11275.pickle``
@@ -53,9 +53,9 @@ For detailed explanation of what any of these test targets does, consult someone
 DIRECTORY STRUCTURE
 -------------------
 
-- As mentioned above, ``topo/tests/data_maptests`` and ``topo/tests/data_traintests`` contain control data for maptests and traintests, respectively.
-  Speed data is written in ``~/Topographica/tests/hostname/`` since it varies for each machine and should not be checked in. If desired, traintest
-  and maptest data can also be written in ``~``.
+- As mentioned above, ``topo/tests/data_maptests`` and ``topo/tests/data_traintests`` contain control data for maps and training tests, respectively.
+  Speed data is written in ``~/Topographica/tests/hostname/`` since it varies for each machine and should not be checked in. If desired, training
+  and maps test data can also be written in ``~``.
 
 - ``topo/tests/data_disabled`` contains various data files which have been excluded from the tests for one reason or another. Carefully inspect
   comments in the test scripts to see what happened exactly; usually such omissions have an accompanying ALERT with them.
@@ -65,7 +65,7 @@ DIRECTORY STRUCTURE
 - ``runtests.py`` is the "crude Makefile replacement" which contains a list of commands and runner code to choose which set of commands to run. Start
   here when trying to find out how each command works.
 
-- ``test_script.py`` is a mammoth script containing a huge number of methods for running traintests, speedtests, and snapshottests. This should be
+- ``test_script.py`` is a mammoth script containing a huge number of methods for running training, speedtests, and snapshottests. This should be
   broken down and separated into different scripts by someone who knows how Topographica and the tests work, i.e. has a vision as to how to best
   optimise and improve the tests.
 
@@ -80,11 +80,11 @@ RUNNING
 -------
 
 To run any of the above targets, use ``./topographica -p "targets=['targets']" topo/tests/runtests.py`` where 'targets' would mean any subset of
-the tests, e.g. ``"targets=['traintests']"`` or ``"targets=['traintests','unopttraintests','snapshots']"``. ``"targets=['all']"`` is a shortcut for
+the tests, e.g. ``"targets=['training']"`` or ``"targets=['training,'unopt,'snapshots']"``. ``"targets=['all']"`` is a shortcut for
 running the entire set of functional tests except speedtests. ``"targets=['speed']"`` is a convenience shortcut for ``speedtests`` and
 ``startupspeedtests``.
 
-Each target basically runs a set of commands, e.g. ``traintests`` would run a series of commands such as
+Each target basically runs a set of commands, e.g. ``training`` would run a series of commands such as
 ``./topographica -c "from topo.tests.test_script import test_script; test_script(script='scriptpath',decimal=6)"``
 
 NB: on Linux, single and double quotes mean the same but on Windows, always use double quotes on the outside since single quotes are not treated
@@ -105,16 +105,6 @@ To troubleshoot an error with any particular test, the following would be a good
 
 5. Once the specific error has been reproduced, go on from there.
 
-Additional ways to run the tests are present in the Makefile::
-
-   all-speed-tests:
-      ./topographica -p timing=True -p 'targets=["speed"]' topo/tests/runtests.py
-	  
-   slow-tests: # all tests except speed tests
-      ./topographica -p 'targets=["all"]' topo/tests/runtests.py
-	  
-These should be eventually removed because of a) the need to separate the test targets away from the current runner (see below) and b) the general
-move towards replacing Makefile commands with pure Python.
 
 PROBLEMS AND FURTHER WORK
 -------------------------
