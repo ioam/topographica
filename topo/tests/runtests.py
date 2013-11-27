@@ -236,6 +236,10 @@ script = os.path.join(scripts_dir,"models/lissom_oo_or.ty")
 target['maps'].append(topographica_script + ' -c "cortex_density=8" %s -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)"'%script)
 
 
+def list_tests(tests):
+    return "["+",".join(tests)+"]" if len(tests)>0 else ""
+
+
 def run_tests():
     errors = []
 
@@ -250,7 +254,7 @@ def run_tests():
     else:
         targets = p.targets
 
-    print "Running: %s" % targets
+    print "Running: %s" % list_tests(targets)
     print
 
     target.update(speedtarget)
@@ -261,6 +265,11 @@ def run_tests():
             if _runc(cmd) > 0:
                 if name not in errors:
                     errors.append(name)
+    print
+    print "="*60
+    print
+    print "runtests: targets with errors: %s %s" % (len(errors),list_tests(errors))
+
     return errors
 
 
@@ -284,10 +293,6 @@ assert set(target_description.keys()) == set(target.keys())
 def start():
     errors = run_tests()
 
-    print
-    print "="*60
-    print
-    print "runtests.start(): targets with errors: %s"%len(errors)
     if len(errors)>0:
         print errors
         sys.exit(1)
