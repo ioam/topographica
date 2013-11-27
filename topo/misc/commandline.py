@@ -544,6 +544,10 @@ def t_action(option,opt_str,value,parser):
                % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
                            for k,v in available_items))
 
+    # JABALERT: Unlike the tests in runtests.py, will not use xvfb-run
+    # to hide GUI windows being tested.  Once runtests.py is made into
+    # a module, the code it contains for conditionally using xvfb-run
+    # can be applied here as well.
     if value == "unit" or value == "quick":
         import subprocess
         ret = subprocess.call(["nosetests", "-v", "--with-doctest",
@@ -728,5 +732,7 @@ def process_argv(argv):
             ipshell()
 
     global return_code
-    if return_code != 0: print "Exiting with return code %d" % return_code
+    if return_code != 0:
+        cmdline_main.warning("Errors encountered; exiting with return code %d" % return_code)
+
     sys.exit(return_code)
