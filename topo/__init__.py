@@ -62,6 +62,7 @@ sys.path = [os.path.join(basepath, '../', 'external', 'lancet')] + sys.path
 
 import param
 import imagen
+from imagen import views
 
 # Patch for versions of param prior to 10 May 2013
 param.main=param.Parameterized(name="main")
@@ -267,10 +268,10 @@ except ImportError:
     import sys
     sys.meta_path.append(gmpyImporter())
 
-
 param.Dynamic.time_fn(val=0.0, time_type=_time_type)
-param.Dynamic.time_fn.autostep = False
+param.Dynamic.time_dependent = True
 sim = Simulation()
+timeline = views.Timeline()
 
 # numbergen used to be part of topo; import it there for backwards compatibility
 # and set the time function to be topo.sim.time()
