@@ -1,3 +1,8 @@
+# ALERT: Most of this file is outdated, and should be removed, 
+# mainly leaving targets useful for making releases.  Most of 
+# them should be called from the parent directory to this one,
+# using "make -f platform/Makefile <target>".
+
 PREFIX =  ${CURDIR}/
 PYLINT = bin/pylint --rcfile=topo/tests/buildbot/pylintrc
 
