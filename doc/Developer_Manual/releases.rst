@@ -2,9 +2,12 @@
 Making Releases
 ***************
 
-The latest version of Topographica is always available by Git, but
-we also make more stable versions available periodically. To make
-such a release, the steps we generally follow are:
+The latest version of Topographica is always available by Git, but we
+also make more stable versions available periodically. To make such a
+release, the steps we have followed in the past are listed below.
+However, please note that as of version 0.9.8 several steps in these
+instructions are out of date, and will need to be updated as part of
+the next release.
 
 #. Ensure that no one besides yourself has any modified files
    checked out in Git; if they do, make sure all of it gets checked
