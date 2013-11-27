@@ -86,15 +86,6 @@ topographicagui:
 	chmod a+x ${PREFIX}topographicagui
 
 
-## Currently useful lint checks
-pyflakes: # Everything except topo/tests (where we do lots of importing but not using...)
-	${PYFLAKES} topo external/param --ignore topo/tests --total
-
-lint-base: # topo.base and param 
-	${PYLINT} topo.base external/param | cat
-#CEBALERT: how to get pylint's "ignore" options to work? Upgrade pylint (http://www.logilab.org/ticket/70493)?
-
-
 # CEBALERT: need to update pychecker and work on its configuration if
 # we're going to use it.
 check:
