@@ -9,8 +9,6 @@ GITVERSION = $(shell echo ${GIT_DESCRIBE} |  cut -d- -f2)
 
 PYTHON = ${PREFIX}/bin/python
 
-PYFLAKES = ${PYTHON} topo/tests/buildbot/pyflakes-ignore.py
-
 # if 0, skips building tk and related external packages
 GUI = 1
 
@@ -53,7 +51,7 @@ DIST_ZIP                   = ${DIST_DIRNAME}.zip
 default: 
 	echo "The Makefile is primarily for package maintainers; see the Developers Manual for more info. It is not needed for building or using Topogrpahica."
 
-all: default reference-manual doc tests
+all: default reference-manual doc
 
 # CEBALERT: should be able to remove topo/tests/testsnapshot.typ,
 # topo/tests/testplotfilesaver*.png
