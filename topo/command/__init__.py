@@ -358,7 +358,7 @@ Loading error:
 
     # Temporary -- broadcast topo.sim.time to all subpackages
     param.Dynamic.time_fn = topo.sim.time
-    numbergen.TimeDependentValue.time_fn = topo.sim.time
+    numbergen.TimeDependent.time_fn = topo.sim.time
     imagen.Translator.time_fn = topo.sim.time
 
 
