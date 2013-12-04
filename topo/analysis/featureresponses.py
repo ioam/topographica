@@ -17,7 +17,7 @@ import param
 from param.parameterized import ParameterizedFunction, ParamOverrides, \
     bothmethod
 
-from imagen.views import SheetView, ProjectionGrid, NdMapping
+from imagen.views import SheetView, SheetStack, ProjectionGrid, NdMapping
 
 import topo
 import topo.base.sheetcoords
@@ -453,14 +453,15 @@ class FeatureMaps(FeatureResponses):
                         cr = None if map_name == 'selectivity' else cyclic_range
                         sv = SheetView(map_view, output_metadata['bounds'],
                                        cyclic_range=cr)
-                        data = ((timestamp, duration), sv)
-                        metadata = dict(dimension_labels=['Time','Duration'],
+                        data = (duration, sv)
+                        metadata = dict(dimension_labels=['Duration'],
+                                        timestamp=timestamp,
                                         **output_metadata)
                         map_name = base_name + k + map_name.capitalize()
                         if map_name not in results[name]:
-                            results[name][map_name] = NdMapping(data, **metadata)
+                            results[name][map_name] = SheetStack(data, **metadata)
                         else:
-                            results[name][map_name][timestamp, duration] = sv
+                            results[name][map_name][duration] = sv
 
         return results
 
@@ -532,16 +533,17 @@ class FeatureCurves(FeatureResponses):
 
             # Create top level NdMapping indexing over time and duration
             if name not in results:
-                results[name] = NdMapping(dimension_labels=['Time', 'Duration'],
+                results[name] = NdMapping(dimension_labels=['Duration'],
+                                          timestamp=time,
                                           curve_label=curve_label)
 
             # Create NdMapping for each feature name and populate it with an
             # entry of for the specified features
-            results[name][time, duration] = NdMapping(dimension_labels=list(f_names))
-            results[name][time, duration][f_vals] = NdMapping(**metadata)
+            results[name][duration] = NdMapping(dimension_labels=list(f_names))
+            results[name][duration][f_vals] = SheetStack(**metadata)
 
             curve_responses = self._featureresponses[name][duration][p.x_axis].distribution_matrix
-            r = results[name][time, duration][f_vals]
+            r = results[name][duration][f_vals]
             # Populate the deepest NdMapping with measurements for each x value
             for x in curve_responses[0, 0]._data.iterkeys():
                 y_axis_values = np.zeros(output_metadata['shape'], activity_type)
@@ -643,7 +645,6 @@ class ReverseCorrelation(FeatureResponses):
         Collate responses into the results dictionary containing a
         ProjectionGrid for each measurement source.
         """
-        dim_labels = ['Time', 'Duration']
         results = defaultdict(dict)
         results['fullmatrix'] = self._fullmatrix if self.store_fullmatrix else None
         for labels in self.measurement_labels:
@@ -657,14 +658,14 @@ class ReverseCorrelation(FeatureResponses):
                                   bounds=output_metadata['bounds'],
                                   shape=output_metadata['shape'])
             metadata = dict(measurement_src=output_metadata['src_name'],
-                            **input_metadata)
+                            dimension_labels=['Duration'], **input_metadata)
             rc_response = self._featureresponses[in_label][out_label][duration]
             for ii in range(rows):
                 for jj in range(cols):
                     coord = view.matrixidx2coord(ii, jj)
                     sv = SheetView(rc_response[ii, jj], input_metadata['bounds'])
-                    rf_metadata = dict(coord=coord, dimension_labels=dim_labels,**metadata)
-                    view[coord] = NdMapping(((timestamp, duration), sv), **rf_metadata)
+                    rf_metadata = dict(coord=coord, **metadata)
+                    view[coord] = SheetStack((duration, sv), **rf_metadata)
             results[out_label][in_label] = view
         return results
 
@@ -1303,12 +1304,17 @@ class FeatureCurveCommand(SinusoidalMeasureResponseCommand):
             curve_label = "; ".join([
                 ('%s = ' + val_format + '%s') % (n.capitalize(), v, p.units)
                  for n, v in curve.items()])
-            measurements[curve_label] = FeatureCurves(self._feature_list(p),
+            results = FeatureCurves(self._feature_list(p),
                 curve_params=curve, durations=p.durations, inputs=p.inputs,
                 label=curve_label, measurement_prefix=p.measurement_prefix,
                 metafeature_fns=p.metafeature_fns, outputs=p.outputs,
                 param_dict=static_params, pattern_generator=p.pattern_generator,
-                pattern_response_fn = p.pattern_response_fn, x_axis = p.x_axis)
+                pattern_response_fn=p.pattern_response_fn, x_axis=p.x_axis)
+            for src, data in results.items():
+                if src not in measurements:
+                    measurements[src] = data
+                else:
+                    measurements[src].update(data)
         return measurements
 
 
@@ -1422,23 +1428,23 @@ class UnitCurveCommand(FeatureCurveCommand):
 ### PJFRALERT: Functions and classes below will stay in Topographica
 
 
-def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
+def update_sheet_activity(sheet_name, force=False):
     """
-    Update the 'Activity' SheetView for a given sheet by name.
+    Update the '_activity_buffer' SheetStack for a given sheet by name.
 
     If force is False and the existing Activity SheetView isn't stale,
     the existing view is returned.
     """
-    name = sheet_views_prefix + 'Activity'
+    name = '_activity_buffer'
     sheet = topo.sim.objects(Sheet)[sheet_name]
     view = sheet.views.maps.get(name, False)
     time = float(topo.sim.time())
     if not view:
-        metadata = dict(bounds=sheet.bounds, precedence=sheet.precedence,
-                        row_precedence=sheet.row_precedence, src_name=sheet.name,
-                        shape=sheet.activity.shape)
+        metadata = dict(bounds=sheet.bounds, dimension_labels=['Time'],
+                        precedence=sheet.precedence, row_precedence=sheet.row_precedence,
+                        src_name=sheet.name, shape=sheet.activity.shape)
         sv = SheetView(np.array(sheet.activity), sheet.bounds)
-        view = NdMapping((time, sv), **metadata)
+        view = SheetStack((time, sv), **metadata)
         sheet.views.maps[name] = view
     else:
         if force or time > view.timestamp:
@@ -1447,7 +1453,7 @@ def update_sheet_activity(sheet_name, sheet_views_prefix='', force=False):
     return view
 
 
-def update_activity(sheet_views_prefix='', force=False):
+def update_activity(force=False):
     """
     Make a map of neural activity available for each sheet, for use in
     template-based plots.
@@ -1458,7 +1464,7 @@ def update_activity(sheet_views_prefix='', force=False):
     they need to average over recent spiking activity.
     """
     for sheet_name in topo.sim.objects(Sheet).keys():
-        update_sheet_activity(sheet_name, sheet_views_prefix, force)
+        update_sheet_activity(sheet_name, force)
 
 
 class pattern_present(PatternPresentingCommand):
@@ -1528,11 +1534,6 @@ class pattern_present(PatternPresentingCommand):
     return_responses = param.Boolean(default=False, doc="""
         If True, return a dictionary of the responses.""")
 
-    sheet_views_prefix = param.String(default="", doc="""
-        Optional prefix to add to the name under which results are
-        stored in sheet_views. Can be used e.g. to distinguish maps as
-        originating from a particular GeneratorSheet.""")
-
     __abstract = True
 
     def __call__(self, inputs={}, outputs=[], **params_to_override):
@@ -1583,7 +1584,7 @@ class pattern_present(PatternPresentingCommand):
             topo.sim.run(d)
             time = p.durations[i]
             if p.return_responses:
-                update_activity(p.sheet_views_prefix, p.install_sheetview)
+                update_activity(p.install_sheetview)
                 if hasattr(topo, 'guimain'):
                     topo.guimain.refresh_activity_windows()
                 for output in outputs:
@@ -1733,10 +1734,13 @@ def store_rfs(measurement_dict):
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
         for data_name, data in sheet_data.items():
-            if sheet_name not in sheet.views.rfs:
-                sheet.views.rfs[data_name] = data
+            new_data = data.empty()
+            for k, v in data.items():
+                new_data[k] = v.add_dimension('Time', 0, data.metadata.timestamp)
+            if data_name not in sheet.views.rfs:
+                sheet.views.rfs[data_name] = new_data
             else:
-                sheet.views.rfs[data_name].update(data)
+                sheet.views.rfs[data_name].update(new_data)
 
 
 def store_curves(measurement_dict):
@@ -1748,6 +1752,7 @@ def store_curves(measurement_dict):
         sheet = topo.sim[sheet_name]
         storage = sheet.views.curves
         label = data.metadata.curve_label
+        data = data.add_dimension('Time', 0, data.metadata.timestamp)
         if label in storage:
             storage[label].update(data)
         else:
@@ -1762,6 +1767,7 @@ def store_maps(measurement_dict):
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
         for map_name, data in sheet_data.items():
+            data = data.add_dimension('Time', 0, data.metadata.timestamp)
             if map_name not in sheet.views.maps:
                 sheet.views.maps[map_name] = data
             else:
