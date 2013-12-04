@@ -445,7 +445,7 @@ class FeatureMaps(FeatureResponses):
                     else self.preference_fn
                 if p.selectivity_multiplier is not None:
                     pref_fn.selectivity_scale = (pref_fn.selectivity_scale[0],
-                                                 self.selectivity_multiplier)
+                                                 p.selectivity_multiplier)
                 response = fr.apply_DSF(pref_fn)
                 base_name = self.measurement_prefix + feature.capitalize()
                 for k, maps in response.items():
