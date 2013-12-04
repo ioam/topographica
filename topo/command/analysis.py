@@ -32,7 +32,7 @@ import param
 from param.parameterized import ParameterizedFunction
 from param.parameterized import ParamOverrides
 
-from imagen.views import SheetView, NdMapping
+from imagen.views import SheetView, SheetStack
 
 import topo
 from topo.base.cf import Projection
@@ -224,7 +224,7 @@ pg = create_plotgroup(name='Activity', category='Basic',
                       doc='Plot the activity for all Sheets.',
                       auto_refresh=True, pre_plot_hooks=[update_activity],
                       plot_immediately=True)
-pg.add_plot('Activity', [('Strength', 'Activity')])
+pg.add_plot('Activity', [('Strength', '_activity_buffer')])
 
 
 def update_rgb_activities():
@@ -309,6 +309,16 @@ pg = create_plotgroup(name='Projection Activity', category="Basic",
 pg.add_plot('Projection Activity', [('Strength', 'ProjectionActivity')])
 
 
+def store_activity(measurement_dict):
+    for sheet_name, sheet_data in measurement_dict.items():
+        sheet = topo.sim[sheet_name]
+        for data_name, data in sheet_data.items():
+
+            if data_name not in sheet.views.maps:
+                sheet.views.maps[data_name] = data
+            else:
+                sheet.views.maps[data_name].update(data)
+
 
 class measure_activity(topo.analysis.featureresponses.FeatureResponses):
 
@@ -333,6 +343,9 @@ class measure_activity(topo.analysis.featureresponses.FeatureResponses):
 
         results = self._collate_results(responses)
 
+        if p.measurement_storage_hook:
+            p.measurement_storage_hook(results)
+
         return results
 
 
@@ -342,7 +355,8 @@ class measure_activity(topo.analysis.featureresponses.FeatureResponses):
             name, duration = label
             metadata = self.metadata['outputs'][name]
             if name not in results:
-                results[name] = NdMapping(dimension_labels=['Duration'])
+                results[name] = SheetStack(dimension_labels=['Duration'],
+                                           timestamp=self.metadata.timestamp)
             sv = SheetView(response, metadata['bounds'])
             results[name][duration] = sv
         return results
