@@ -1583,10 +1583,10 @@ class pattern_present(PatternPresentingCommand):
         for i, d in enumerate(durations):
             topo.sim.run(d)
             time = p.durations[i]
-            if p.return_responses:
+            if hasattr(topo, 'guimain'):
                 update_activity(p.install_sheetview)
-                if hasattr(topo, 'guimain'):
-                    topo.guimain.refresh_activity_windows()
+                topo.guimain.refresh_activity_windows()
+            if p.return_responses:
                 for output in outputs:
                     responses[(output, time)] = topo.sim[output].activity.copy()
 
