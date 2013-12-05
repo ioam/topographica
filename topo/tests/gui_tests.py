@@ -140,7 +140,7 @@ def test_orientation_tuning():
     """Check that orientation tuning plot works."""
 
     p = topo.guimain['Plots']['Tuning Curves']['Orientation Tuning']()
-    from topo.command.pylabplot import measure_or_tuning
+    from topo.command.analysis import measure_or_tuning
     p.pre_plot_hooks = [measure_or_tuning.instance(num_phase=1,num_orientation=1,curve_parameters=[{'contrast':30}])]
     p.Refresh()
 

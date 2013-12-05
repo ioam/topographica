@@ -623,6 +623,14 @@ def topo_misc_odict_removed():
 
 support[90800361] = topo_misc_odict_removed
 
+
+def moved_Subplotting():
+    import topo.analysis.featureresponses
+    from topo.plotting.plotgroup import Subplotting
+    topo.analysis.featureresponses.Subplotting = Subplotting
+
+support[90800454] = moved_Subplotting
+
 ######################################################################
 ######################################################################
 

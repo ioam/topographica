@@ -190,8 +190,8 @@ topo.sim.connect(
 
 ### Whisker-specific plots
 
-from topo.plotting.plotgroup import create_plotgroup
-from topo.analysis.featureresponses import Feature, FeatureMaps, Subplotting
+from topo.plotting.plotgroup import create_plotgroup, Subplotting
+from topo.analysis.featureresponses import Feature, FeatureMaps
 from imagen.views import SheetView, NdMapping
 
 def measure_deflection_pref(num_deflection=8,scale=0.3,offset=0.0,display=False,
