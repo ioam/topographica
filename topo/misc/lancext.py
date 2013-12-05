@@ -1,10 +1,10 @@
 """
 The Topographica Lancet extension allows Topographica simulations to
 be easily integrated into a Lancet workflow (see
-github.com/ioam/lancet). The TopoCommand CommandTemplate is
-appropriate for simple runs using the default analysis function,
-whereas the Analysis and RunBatchCommand allow for more sophisticated
-measurements and analysis to be executed during a simulation run.
+github.com/ioam/lancet). The TopoCommand is appropriate for simple
+runs using the default analysis function, whereas the Analysis and
+RunBatchCommand allow for more sophisticated measurements and analysis
+to be executed during a simulation run.
 """
 
 import os, sys, types, pickle, inspect
@@ -14,7 +14,7 @@ import topo
 import param
 
 from lancet import PrettyPrinted
-from lancet import CommandTemplate
+from lancet import Command
 from lancet import Launcher, review_and_launch
 from lancet import NumpyFile
 
@@ -83,7 +83,7 @@ class param_formatter(param.ParameterizedFunction):
 
 
 
-class TopoCommand(CommandTemplate):
+class TopoCommand(Command):
    """
    TopoCommand is designed to to format Lancet Args objects into
    run_batch commands in a general way. Note that Topographica is
