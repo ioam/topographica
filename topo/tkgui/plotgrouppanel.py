@@ -26,8 +26,6 @@ from topo.misc.generatorsheet import GeneratorSheet
 
 import topo
 
-from topo.plotting.plotgroup import Subplotting
-
 def with_busy_cursor(fn):
     """
     Decorator to show busy cursor for duration of fn call.

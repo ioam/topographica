@@ -886,9 +886,9 @@ class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
     ########## overridden
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        view_dict = {'Strength': kw['sheet'].views.maps,
-                     'Hue': kw['sheet'].views.maps,
-                     'Confidence': kw['sheet'].views.maps}
+        view_dict = {'Strength': kw['proj'].dest.views.maps,
+                     'Hue': kw['proj'].dest.views.maps,
+                     'Confidence': kw['proj'].dest.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
                                   view_dict,
                                   kw['proj'].dest.xdensity,
