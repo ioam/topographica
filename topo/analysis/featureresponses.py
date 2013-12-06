@@ -43,7 +43,7 @@ def update_sheet_activity(sheet_name, force=False):
     name = '_activity_buffer'
     sheet = topo.sim.objects(Sheet)[sheet_name]
     view = sheet.views.maps.get(name, False)
-    time = float(topo.sim.time())
+    time = topo.sim.time()
     if not view:
         metadata = dict(bounds=sheet.bounds, dimension_labels=['Time'],
                         precedence=sheet.precedence, row_precedence=sheet.row_precedence,
@@ -52,7 +52,7 @@ def update_sheet_activity(sheet_name, force=False):
         view = SheetStack((time, sv), **metadata)
         sheet.views.maps[name] = view
     else:
-        if force or time > view.timestamp:
+        if force or view.timestamp < time:
             sv = SheetView(np.array(sheet.activity), sheet.bounds)
             view[time] = sv
     return view
@@ -280,7 +280,7 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     the simulation.
     """
     metadata = AttrDict()
-    metadata['timestamp'] = float(topo.sim.time())
+    metadata['timestamp'] = topo.sim.time()
 
     sheets = {}
     sheets['inputs'] = [getattr(topo.sim, input_name, input_name)
