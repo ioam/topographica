@@ -551,6 +551,10 @@ class TemplatePlotGroup(SheetPlotGroup):
         plots are guaranteed to be on a known scale, but only values
         between 0.0 and 1.0 will be visibly distinguishable.""")
 
+    color_channel = param.ObjectSelector(default='None', objects=['None'], doc="""
+        Defines the color channel to be displayed in the GUI, can usually be set
+        to a measured OrientationMap""")
+
 
 
     # Overrides:
@@ -642,8 +646,11 @@ class TemplatePlotGroup(SheetPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['sheet'].views.maps,
+                     'Hue': kw['sheet'].views.maps,
+                     'Confidence': kw['sheet'].views.maps}
         return make_template_plot(plot_template,
-                                  kw['sheet'].views.maps,
+                                  view_dict,
                                   kw['sheet'].xdensity,
                                   kw['sheet'].bounds,
                                   self.normalize,
@@ -788,8 +795,11 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):#sheet,proj
+        view_dict = {'Strength': kw['sheet'].views.maps,
+                     'Hue': kw['sheet'].views.maps,
+                     'Confidence': kw['sheet'].views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].src.views.maps,
+                                  view_dict,
                                   kw['proj'].src.xdensity,
                                   None,
                                   self.normalize,
@@ -876,8 +886,11 @@ class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
     ########## overridden
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['sheet'].views.maps,
+                     'Hue': kw['sheet'].views.maps,
+                     'Confidence': kw['sheet'].views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].dest.views.maps,
+                                  view_dict,
                                   kw['proj'].dest.xdensity,
                                   kw['proj'].dest.bounds,
                                   self.normalize,
@@ -935,8 +948,11 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': self.sheet.views.maps,
+                     'Hue': self.sheet.views.maps,
+                     'Confidence': self.sheet.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  self.sheet.views.maps,
+                                  view_dict,
                                   self.input_sheet.xdensity,
                                   self.input_sheet.bounds,
                                   self.normalize,
@@ -1016,9 +1032,10 @@ class RFProjectionPlotGroup(GridPlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         input=self.input_sheet.name
-
+        rf_view = getattr(self.sheet.views.rfs, input, {})
+        view_dict = {'Hue': rf_view, 'Strength': rf_view, 'Confidence': rf_view}
         return make_template_plot(self._channels(plot_template, **kw),
-                                  getattr(self.sheet.views.rfs, input, {}),
+                                  view_dict,
                                   self.input_sheet.xdensity,
                                   self.input_sheet.bounds,
                                   self.normalize,
@@ -1041,8 +1058,11 @@ class TwoOrientationsPlotGroup( TemplatePlotGroup ):
     # _make_template_plot	- use density argument slot to parse unit_size
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['sheet'].views.maps,
+                     'Hue': kw['sheet'].views.maps,
+                     'Confidence': kw['sheet'].views.maps}
         return make_template_plot(plot_template,
-                                  kw['sheet'].views.maps,
+                                  view_dict,
                                   self.unit_size,
                                   kw['sheet'].bounds,
                                   self.normalize,
@@ -1145,8 +1165,11 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
     ########## overridden
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['proj'].dest.views.cfs[kw['proj'].name],
+                     'Hue': kw['proj'].src.views.maps,
+                     'Confidence': kw['proj'].src.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].dest.views.cfs[kw['proj'].name],
+                                  view_dict,
                                   kw['proj'].src.xdensity,
                                   kw['bounds'],
                                   self.normalize,
@@ -1247,8 +1270,11 @@ class ConnectionFieldsPlotGroup(UnitPlotGroup):
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         if kw['proj'].name not in kw['proj'].dest.views.cfs:
             kw['proj']._make_cf_grid()
+        view_dict = {'Strength': kw['proj'].dest.views.cfs[kw['proj'].name],
+                     'Hue': kw['proj'].src.views.maps,
+                     'Confidence': kw['proj'].src.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].dest.views.cfs[kw['proj'].name],
+                                  view_dict,
                                   kw['proj'].src.xdensity,
                                   kw['bounds'],
                                   self.normalize,
