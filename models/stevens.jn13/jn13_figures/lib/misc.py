@@ -8,9 +8,8 @@ and for displaying data in IPython Notebook.
 import topo
 import numpy as np
 import os, copy, glob, math, json
-import imagen
+import imagen, lancet
 import pandas
-import lancet
 import Image
 
 from topo.misc.commandline import gui
@@ -30,23 +29,33 @@ def convolve(filename, kernel_pattern, trim=True):
     im = im.convert(mode='RGB')
     arr_RGB = np.array(im)
     arr = arr_RGB[...,0]
-    
+
     fft1 = np.fft.fft2(arr / 255.0)
     fft2 = np.fft.fft2(kernel, s=arr.shape)
     convolved_raw = np.fft.ifft2( fft1 * fft2).real
     k_rows, k_cols = kernel.shape
     rolled = np.roll(np.roll(convolved_raw, -(k_cols//2), axis=-1), -(k_rows//2), axis=-2)
-    convolved = rolled / float(kernel.sum()) 
+    convolved = rolled / float(kernel.sum())
     if trim:
         padding = (arr.shape[0] - kernel.shape[0]) / 2
         width = arr.shape[0] - 2 * padding
         convolved = convolved[padding-1:padding+width, padding-1:padding+width]
     return Image.fromarray(np.uint8(convolved * 255.0))
 
-def generate_GR(images_dir, kernel_pattern, name='V_GR', trim=True):
+
+def generate_GR(images_dir, kernel_pattern=None, name='V_GR', trim=True):
     """
-    Generates a convolved dataset using the anisotropy given by the aspect_ratio
+    Generates a convolved dataset using the given kernel.
+
+    If no kernel is supplied, uses the default kernel of vertical
+    anisotropic blur to simulate the vertical goggle rearing
+    condition.
     """
+
+    if kernel_pattern is None:
+        kernel_pattern = imagen.Gaussian(aspect_ratio=10.0, xdensity=128, ydensity=128,
+                                         size=0.05, orientation=math.pi/2.0)
+
     for filename in glob.glob(os.path.join(images_dir, 'shouval','combined*.png')):
         basepath, ext = os.path.splitext(filename)
         savename = '%s_%s%s' % (os.path.basename(basepath), name, ext)
@@ -64,7 +73,7 @@ def view_weights(projections, coords=(0,0), transpose=True):
     dframe = pandas.DataFrame({'weights':views})
     labelled = dframe.set_index([names])
     lancet.ViewFrame(labelled.T if transpose else labelled)
-    
+
 def view_activities(sheets, coords=(0,0), transpose=True):
     """
     View the neural activities weights for a given sheet as a pandas DataFrame.
@@ -73,7 +82,7 @@ def view_activities(sheets, coords=(0,0), transpose=True):
     dframe = pandas.DataFrame({'activities':sheets})
     labelled = dframe.set_index([names])
     lancet.ViewFrame(labelled.T if transpose else labelled)
-    
+
 def view_patterns(pattern, num=3, transpose=True, radius=1.0):
     """
     View num instances of the given Pattern Generator object as a
@@ -96,7 +105,7 @@ def view_patterns(pattern, num=3, transpose=True, radius=1.0):
 
 
 def cleanup_notebook(input_notebook, output_notebook):
-    
+
     content = json.load(open(input_notebook, 'r'))
 
     for worksheet in content['worksheets']:
@@ -112,10 +121,10 @@ def cleanup_notebook(input_notebook, output_notebook):
                         outputs.append(output)
                         continue
                     val = output.get('output_type',None)
-                    if ((val is not None) and (val == 'display_data') 
+                    if ((val is not None) and (val == 'display_data')
                         and output.get("javascript", [""])[0].startswith("$('div#")): pass
                     else:
                         outputs.append(output)
-                cell['outputs'] = outputs  
-                
+                cell['outputs'] = outputs
+
     json.dump(content, open(output_notebook, 'w'))
