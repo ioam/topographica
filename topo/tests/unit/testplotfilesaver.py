@@ -14,11 +14,7 @@ from topo.base.simulation import Simulation
 from topo.base.cf import CFSheet, CFProjection
 from topo.sheet import GeneratorSheet
 
-from topo.plotting.plotfilesaver import PlotGroupSaver
-
-from topo.plotting.plotgroup import PlotGroup
-
-from topo.command.analysis import save_plotgroup
+from topo.plotting.plotgroup import save_plotgroup
 
 
 import __main__

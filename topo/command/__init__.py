@@ -40,7 +40,8 @@ from topo.misc.util import MultiFile
 from topo.misc.picklemain import PickleMain
 from topo.misc.snapshots import PicklableClassAttributes
 from topo.misc.genexamples import generate as _generate
-from topo.base.functionfamily import PatternDrivenAnalysis
+
+from fmapper.core import PatternDrivenAnalysis
 
 
 
@@ -350,7 +351,7 @@ Loading error:
     # Restore subplotting prefs without worrying if there is a
     # problem (e.g. if topo/analysis/ is not present)
     try:
-        from topo.analysis.featureresponses import Subplotting
+        from topo.plotting.plotgroup import Subplotting
         Subplotting.restore_subplots()
     except:
         p = param.Parameterized(name="load_snapshot")
@@ -520,7 +521,7 @@ def default_analysis_function():
     """
     # CEBALERT: why are these imports here rather than at the top?
     import topo
-    from topo.command.analysis import save_plotgroup
+    from topo.plotting.plotgroup import save_plotgroup
 
     # Save all plotgroups listed in default_analysis_plotgroups
     for pg in default_analysis_plotgroups:

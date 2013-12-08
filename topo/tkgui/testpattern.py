@@ -54,10 +54,12 @@ class TestPatternPlotGroup(SheetPlotGroup):
                                               src_name=sheet.name,)
             else:
                 views['Activity'][topo.sim.time()] = sv
-            channels = {'Strength':'Activity','Hue':None,'Confidence':None}
+            channels = {'Strength': 'Activity','Hue':None,'Confidence':None}
 
+            view = topo.sim.views[sheet.name].maps
+            view_dict = {'Strength':view,'Hue':view,'Confidence':view}
             ### JCALERT! it is not good to have to pass '' here... maybe a test in plot would be better
-            dynamic_plots.append(make_template_plot(channels,topo.sim.views[sheet.name].maps,
+            dynamic_plots.append(make_template_plot(channels, view_dict,
                                                     sheet.xdensity,sheet.bounds,self.normalize,
                                                     name=''))
 

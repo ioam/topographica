@@ -20,11 +20,9 @@ test functions are expected to be useful.
 
 import pickle
 
-from numpy.testing import assert_array_almost_equal
-
 import numpy
 
-from param import resolve_path, normalize_path
+from param import resolve_path
 from topo.command.analysis import *
 from topo.command.pylabplot import *
 from topo.plotting.plotgroup import plotgroups
@@ -123,7 +121,6 @@ def checkclose(label,version,x,y):
 @nottest
 def test(plotgroup_names):
     import topo
-    import param
     assert topo.sim.name==sim_name
     assert topo.sim['V1'].nominal_density==8
     assert topo.sim.time()==100

@@ -10,11 +10,15 @@ import copy
 import Image
 
 import param
-from param.parameterized import ParamOverrides
+from param.parameterized import ParamOverrides, ParameterizedFunction
 from param import resolve_path
 
-import topo
+from imagen.random import UniformRandom
+from fmapper import distribution
 
+import topo
+from topo.command import pylabplot
+from topo.command import analysis
 from topo.base.cf import CFSheet,CFProjection
 from topo.base.projection import ProjectionSheet
 from topo.sheet import GeneratorSheet,Sheet
@@ -547,6 +551,10 @@ class TemplatePlotGroup(SheetPlotGroup):
         plots are guaranteed to be on a known scale, but only values
         between 0.0 and 1.0 will be visibly distinguishable.""")
 
+    color_channel = param.ObjectSelector(default='None', objects=['None'], doc="""
+        Defines the color channel to be displayed in the GUI, can usually be set
+        to a measured OrientationMap""")
+
 
 
     # Overrides:
@@ -638,8 +646,11 @@ class TemplatePlotGroup(SheetPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['sheet'].views.maps,
+                     'Hue': kw['sheet'].views.maps,
+                     'Confidence': kw['sheet'].views.maps}
         return make_template_plot(plot_template,
-                                  kw['sheet'].views.maps,
+                                  view_dict,
                                   kw['sheet'].xdensity,
                                   kw['sheet'].bounds,
                                   self.normalize,
@@ -784,8 +795,11 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):#sheet,proj
+        view_dict = {'Strength': kw['sheet'].views.maps,
+                     'Hue': kw['sheet'].views.maps,
+                     'Confidence': kw['sheet'].views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].src.views.maps,
+                                  view_dict,
                                   kw['proj'].src.xdensity,
                                   None,
                                   self.normalize,
@@ -863,16 +877,6 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
 
 
-class ProjectionSheetMeasurementCommand(param.ParameterizedFunction):
-    """A callable Parameterized command for measuring or plotting a specified Sheet."""
-
-    outputs = param.List(default=[],doc="""
-        List of sheets to use in measurements.""")
-
-    __abstract = True
-
-
-
 class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
     """Visualize the activity of all Projections into a ProjectionSheet."""
 
@@ -882,8 +886,11 @@ class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
     ########## overridden
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['proj'].dest.views.maps,
+                     'Hue': kw['proj'].dest.views.maps,
+                     'Confidence': kw['proj'].dest.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].dest.views.maps,
+                                  view_dict,
                                   kw['proj'].dest.xdensity,
                                   kw['proj'].dest.bounds,
                                   self.normalize,
@@ -941,8 +948,11 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': self.sheet.views.maps,
+                     'Hue': self.sheet.views.maps,
+                     'Confidence': self.sheet.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  self.sheet.views.maps,
+                                  view_dict,
                                   self.input_sheet.xdensity,
                                   self.input_sheet.bounds,
                                   self.normalize,
@@ -1022,9 +1032,10 @@ class RFProjectionPlotGroup(GridPlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         input=self.input_sheet.name
-
+        rf_view = getattr(self.sheet.views.rfs, input, {})
+        view_dict = {'Hue': rf_view, 'Strength': rf_view, 'Confidence': rf_view}
         return make_template_plot(self._channels(plot_template, **kw),
-                                  getattr(self.sheet.views.rfs, input, {}),
+                                  view_dict,
                                   self.input_sheet.xdensity,
                                   self.input_sheet.bounds,
                                   self.normalize,
@@ -1047,8 +1058,11 @@ class TwoOrientationsPlotGroup( TemplatePlotGroup ):
     # _make_template_plot	- use density argument slot to parse unit_size
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['sheet'].views.maps,
+                     'Hue': kw['sheet'].views.maps,
+                     'Confidence': kw['sheet'].views.maps}
         return make_template_plot(plot_template,
-                                  kw['sheet'].views.maps,
+                                  view_dict,
                                   self.unit_size,
                                   kw['sheet'].bounds,
                                   self.normalize,
@@ -1128,27 +1142,6 @@ class ProjectionPlotGroup(GridPlotGroup):
 
 
 
-class UnitMeasurementCommand(ProjectionSheetMeasurementCommand):
-    """A callable Parameterized command for measuring or plotting specified units from a Sheet."""
-
-    coords = param.List(default=[(0,0)],doc="""
-        List of coordinates of unit(s) to measure.""")
-
-    projection = param.ObjectSelector(default=None,doc="""
-        Name of the projection to measure; None means all projections.""")
-
-    __abstract = True
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        for output in p.outputs:
-            s = getattr(topo.sim,output,None)
-            if s is not None:
-                for x,y in p.coords:
-                    s.update_unit_view(x,y,'' if p.projection is None else p.projection.name)
-
-
-
 class CFProjectionPlotGroup(ProjectionPlotGroup):
     """Visualize one CFProjection."""
 
@@ -1172,8 +1165,11 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
     ########## overridden
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
+        view_dict = {'Strength': kw['proj'].dest.views.cfs[kw['proj'].name],
+                     'Hue': kw['proj'].src.views.maps,
+                     'Confidence': kw['proj'].src.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].dest.views.cfs[kw['proj'].name],
+                                  view_dict,
                                   kw['proj'].src.xdensity,
                                   kw['bounds'],
                                   self.normalize,
@@ -1274,8 +1270,11 @@ class ConnectionFieldsPlotGroup(UnitPlotGroup):
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         if kw['proj'].name not in kw['proj'].dest.views.cfs:
             kw['proj']._make_cf_grid()
+        view_dict = {'Strength': kw['proj'].dest.views.cfs[kw['proj'].name],
+                     'Hue': kw['proj'].src.views.maps,
+                     'Confidence': kw['proj'].src.views.maps}
         return make_template_plot(self._channels(plot_template,**kw),
-                                  kw['proj'].dest.views.cfs[kw['proj'].name],
+                                  view_dict,
                                   kw['proj'].src.xdensity,
                                   kw['bounds'],
                                   self.normalize,
@@ -1290,9 +1289,6 @@ class ConnectionFieldsPlotGroup(UnitPlotGroup):
             (r,c) = proj.dest.sheet2matrixidx(self.x,self.y)
             bounds = proj.cf_bounds(r,c)
         return [dict(proj=proj,bounds=bounds)]
-
-
-
 
 
 
@@ -1357,3 +1353,519 @@ def create_plotgroup(template_plot_type='bitmap',**params):
     pg = pg_type(**params)
     plotgroups[pg.name]=pg
     return pg
+
+
+# Helper function for save_plotgroup
+def _equivalent_for_plotgroup_update(p1,p2):
+    """
+    Helper function for save_plotgroup.
+
+    Comparison operator for deciding whether make_plots(update==False) is
+    safe for one plotgroup if the other has already been updated.
+
+    Treats plotgroups as the same if the specified list of attributes
+    (if present) match in both plotgroups.
+    """
+
+    attrs_to_check = ['pre_plot_hooks','keyname','sheet','x','y','projection','input_sheet','density','coords']
+
+    for a in attrs_to_check:
+        if hasattr(p1,a) or hasattr(p2,a):
+            if not (hasattr(p1,a) and hasattr(p2,a) and getattr(p1,a)== getattr(p2,a)):
+                return False
+
+    return True
+
+
+
+class save_plotgroup(ParameterizedFunction):
+    """
+    Convenience command for saving a set of plots to disk.  Examples:
+
+      save_plotgroup("Activity")
+      save_plotgroup("Orientation Preference")
+      save_plotgroup("Projection",projection=topo.sim['V1'].projections('Afferent'))
+
+    Some plotgroups accept optional parameters, which can be passed
+    like projection above.
+    """
+
+    equivalence_fn = param.Callable(default=_equivalent_for_plotgroup_update,doc="""
+        Function to call on plotgroups p1,p2 to determine if calling pre_plot_hooks
+        on one of them is sufficient to update both plots.  Should return False
+        unless the commands are exact equivalents, including all relevant parameters.""")
+
+    use_cached_results = param.Boolean(default=False,doc="""
+        If True, will use the equivalence_fn to determine cases where
+        the pre_plot_hooks for a plotgroup can safely be skipped, to
+        avoid lengthy redundant computation.  Should usually be
+        False for safety, but can be enabled for e.g. batch mode
+        runs using a related batch of plots.""")
+
+    saver_params = param.Dict(default={},doc="""
+        Optional parameters to pass to the underlying PlotFileSaver object.""")
+
+
+    # Class variables to cache values from previous invocations
+    previous_time=[-1]
+    previous_plotgroups=[]
+
+    def __call__(self,name,**params):
+        p=ParamOverrides(self,params,allow_extra_keywords=True)
+
+        plotgroup = copy.deepcopy(plotgroups[name])
+
+        # JABALERT: Why does a Projection plot need a Sheet parameter?
+        # CB: It shouldn't, of course, since we know the sheet when we have
+        # the projection object - it's just leftover from when we passed the
+        # names instead. There should be an ALERT already about this somewhere
+        # in projectionpanel.py or plotgroup.py (both need to be changed).
+        if 'projection' in params:
+            setattr(plotgroup,'sheet',params['projection'].dest)
+
+        plotgroup._set_name(name)
+
+        # Specified parameters that aren't parameters of
+        # save_plotgroup() are set on the plotgroup
+        for n,v in p.extra_keywords().items():
+            plotgroup.set_param(n,v)
+
+        # Reset plot cache when time changes
+        if (topo.sim.time() != self.previous_time[0]):
+            del self.previous_time[:]
+            del self.previous_plotgroups[:]
+            self.previous_time.append(topo.sim.time())
+
+        # Skip update step if equivalent to prior command at this sim time
+        update=True
+        if p.use_cached_results:
+            for g in self.previous_plotgroups:
+                if p.equivalence_fn(g,plotgroup):
+                    update=False
+                    break
+
+        keywords=" ".join(["%s" % (v.name if isinstance(v,param.Parameterized) else str(v)) for n,v in p.extra_keywords().items()])
+        plot_description="%s%s%s" % (plotgroup.name," " if keywords else "",keywords)
+        if update:
+            self.previous_plotgroups.append(plotgroup)
+            self.debug("%s: Running pre_plot_hooks" % plot_description)
+        else:
+            self.message("%s: Using cached results from pre_plot_hooks" % plot_description)
+
+        plotgroup.make_plots(update=update)
+        plotgroup.filesaver.save_to_disk(**(p.saver_params))
+
+
+
+class Subplotting(param.Parameterized):
+    """
+    Convenience functions for handling subplots (such as colorized
+    Activity plots).  Only needed for avoiding typing, as plots can be
+    declared with their own specific subplots without using these
+    functions.
+    """
+
+    plotgroups_to_subplot = param.List(default=
+                                       ["Activity", "Connection Fields",
+                                        "Projection", "Projection Activity"],
+                                       doc="List of plotgroups for which to "
+                                           "set subplots.")
+
+    subplotting_declared = param.Boolean(default=False,
+                                         doc="Whether set_subplots has "
+                                             "previously been called")
+
+    _last_args = param.Parameter(default=())
+
+    @staticmethod
+    def set_subplots(prefix=None, hue="", confidence="", force=True):
+        """
+        Define Hue and Confidence subplots for each of the
+        plotgroups_to_subplot.
+        Typically used to make activity or weight plots show a
+        preference value as the hue, and a selectivity as the
+        confidence.
+
+        The specified hue, if any, should be the name of a SheetView,
+        such as OrientationPreference.  The specified confidence, if
+        any, should be the name of a (usually) different SheetView,
+        such as OrientationSelectivity.
+
+        The prefix option is a shortcut making the usual case easier
+        to type; it sets hue to prefix+"Preference" and confidence to
+        prefix+"Selectivity".
+
+        If force=False, subplots are changed only if no subplot is
+        currently defined.  Force=False is useful for setting up
+        subplots automatically when maps are measured, without
+        overwriting any subplots set up specifically by the user.
+
+        Currently works only for plotgroups that have a plot
+        with the same name as the plotgroup, though this could
+        be changed easily.
+
+        Examples::
+
+           Subplotting.set_subplots("Orientation")
+             - Set the default subplots to OrientationPreference and
+             OrientationSelectivity
+
+           Subplotting.set_subplots(hue="OrientationPreference")
+             - Set the default hue subplot to OrientationPreference with no
+             selectivity
+
+           Subplotting.set_subplots()
+             - Remove subplots from all the plotgroups_to_subplot.
+        """
+
+        Subplotting._last_args = (prefix, hue, confidence, force)
+
+        if Subplotting.subplotting_declared and not force:
+            return
+
+        if prefix:
+            hue = prefix + "Preference"
+            confidence = prefix + "Selectivity"
+
+        for name in Subplotting.plotgroups_to_subplot:
+            if name in plotgroups.keys():
+                pg = plotgroups[name]
+                if name in pg.plot_templates.keys():
+                    pt = pg.plot_templates[name]
+                    pt["Hue"] = hue
+                    pt["Confidence"] = confidence
+                else:
+                    Subplotting().warning("No template %s defined for plotgroup"
+                                          " %s" % (name, name))
+            else:
+                Subplotting().warning("No plotgroup %s defined" % name)
+
+        Subplotting.subplotting_declared = True
+
+
+    @staticmethod
+    def restore_subplots():
+        args = Subplotting._last_args
+        if args != ():
+            Subplotting.set_subplots(*(Subplotting._last_args))
+
+
+pg = create_plotgroup(name='Activity', category='Basic',
+                      doc='Plot the activity for all Sheets.',
+                      auto_refresh=True, pre_plot_hooks=[analysis.update_activity],
+                      plot_immediately=True)
+pg.add_plot('Activity', [('Strength', '_activity_buffer')])
+
+
+pg = create_plotgroup(name='Connection Fields', category="Basic",
+                     doc='Plot the weight strength in each ConnectionField of a specific unit of a Sheet.',
+                     pre_plot_hooks=[analysis.update_connectionfields],
+                     plot_immediately=True, normalize='Individually', situate=True)
+pg.add_plot('Connection Fields', [('Strength', 'Weights')])
+
+
+pg = create_plotgroup(name='Projection', category="Basic",
+           doc='Plot the weights of an array of ConnectionFields in a Projection.',
+           pre_plot_hooks=[analysis.update_projection],
+           plot_immediately=False, normalize='Individually', sheet_coords=True)
+pg.add_plot('Projection', [('Strength', 'Weights')])
+
+
+pg = create_plotgroup(name='RGB', category='Other',
+             doc='Combine and plot the red, green, and blue activity for all appropriate Sheets.',
+             auto_refresh=True, pre_plot_hooks=[analysis.update_rgb_activities],
+             plot_immediately=True)
+pg.add_plot('RGB', [('Red', 'RedActivity'), ('Green', 'GreenActivity'),
+                    ('Blue', 'BlueActivity')])
+
+
+pg = create_plotgroup(name='Projection Activity', category="Basic",
+                      doc='Plot the activity in each Projection that connects '
+                          'to a Sheet.',
+                      pre_plot_hooks=[analysis.update_projectionactivity.instance()],
+                      plot_immediately=True, normalize='Individually',
+                      auto_refresh=True)
+pg.add_plot('Projection Activity', [('Strength', 'ProjectionActivity')])
+
+
+pg= create_plotgroup(name='Center of Gravity',category="Preference Maps",
+             doc='Measure the center of gravity of each ConnectionField in a Projection.',
+             pre_plot_hooks=[analysis.measure_cog.instance()],
+             plot_hooks=[pylabplot.topographic_grid.instance(xsheet_view_name="XCoG",ysheet_view_name="YCoG")],
+             normalize='Individually')
+pg.add_plot('X CoG',[('Strength','XCoG')])
+pg.add_plot('Y CoG',[('Strength','YCoG')])
+pg.add_plot('CoG',[('Red','XCoG'),('Green','YCoG')])
+
+
+pg = create_plotgroup(name='RF Projection', category='Other',
+                      doc='Measure white noise receptive fields.',
+                      pre_plot_hooks=[analysis.measure_rfs.instance(
+                          pattern_generator=UniformRandom())],
+                      normalize='Individually')
+
+pg.add_plot('RFs', [('Strength', 'RFs')])
+
+
+pg = create_plotgroup(name='Orientation Preference', category="Preference Maps",
+                      doc='Measure preference for sine grating orientation.',
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance(
+                          preference_fn=distribution.DSF_WeightedAverage())])
+pg.add_plot('Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
+pg.add_plot('Phase Preference', [('Hue', 'PhasePreference')])
+pg.add_plot('Phase Selectivity', [('Strength', 'PhaseSelectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+
+
+pg = create_plotgroup(name='vonMises Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for sine grating orientation '
+                          'using von Mises fit.',
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance(
+                          preference_fn=distribution.DSF_VonMisesFit(),
+                          num_orientation=16)])
+pg.add_plot('Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
+pg.add_plot('Phase Preference', [('Hue', 'PhasePreference')])
+pg.add_plot('Phase Selectivity', [('Strength', 'PhaseSelectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+
+
+pg = create_plotgroup(name='Bimodal Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for sine grating orientation '
+                          'using bimodal von Mises fit.',
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance(
+                          preference_fn=distribution.DSF_BimodalVonMisesFit(),
+                          num_orientation=16)])
+pg.add_plot('Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
+pg.add_plot('Second Orientation Preference',
+            [('Hue', 'OrientationMode2Preference')])
+pg.add_plot('Second Orientation Preference&Selectivity',
+            [('Hue', 'OrientationMode2Preference'),
+             ('Confidence', 'OrientationMode2Selectivity')])
+pg.add_plot('Second Orientation Selectivity',
+            [('Strength', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+
+
+pg = create_plotgroup(name='Two Orientation Preferences',
+                      category='Preference Maps',
+                      doc='Display the two most preferred orientations for '
+                          'each units, using bimodal von Mises fit.',
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance(
+                          preference_fn=distribution.DSF_BimodalVonMisesFit(),
+                          num_orientation=16)])
+pg.add_plot('Two Orientation Preferences', [('Or1', 'OrientationPreference'),
+                                            ('Sel1', 'OrientationSelectivity'),
+                                            ('Or2', 'OrientationMode2Preference'),
+                                            ('Sel2', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/two_or_key_vert.png')
+
+
+pg = create_plotgroup(name='Spatial Frequency Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for sine grating orientation '
+                          'and frequency.',
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance(
+                          preference_fn=distribution.DSF_WeightedAverage())])
+pg.add_plot('Spatial Frequency Preference',
+            [('Strength', 'FrequencyPreference')])
+pg.add_plot('Spatial Frequency Selectivity',
+            [('Strength', 'FrequencySelectivity')])
+# Just calls measure_sine_pref to plot different maps.
+
+
+pg = create_plotgroup(name='Ocular Preference', category="Preference Maps",
+                      doc='Measure preference for sine gratings between two '
+                          'eyes.',
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance()])
+pg.add_plot('Ocular Preference', [('Strength', 'OcularPreference')])
+pg.add_plot('Ocular Selectivity', [('Strength', 'OcularSelectivity')])
+
+
+pg= create_plotgroup(name='PhaseDisparity Preference',category="Preference Maps",doc="""
+    Measure preference for sine gratings at a specific orentation differing in phase
+    between two input sheets.""",
+             pre_plot_hooks=[analysis.measure_phasedisparity.instance()],normalize='Individually')
+pg.add_plot('PhaseDisparity Preference', [('Hue', 'PhasedisparityPreference')])
+pg.add_plot('PhaseDisparity Preference&Selectivity',
+            [('Hue', 'PhasedisparityPreference'),
+             ('Confidence', 'PhasedisparitySelectivity')])
+pg.add_plot('PhaseDisparity Selectivity',
+            [('Strength', 'PhasedisparitySelectivity')])
+pg.add_static_image('Color Key', 'command/disp_key_white_vert_small.png')
+
+
+pg = create_plotgroup(name='Direction Preference', category="Preference Maps",
+                      doc='Measure preference for sine grating movement '
+                          'direction.',
+                      pre_plot_hooks=[analysis.measure_dr_pref.instance()])
+pg.add_plot('Direction Preference', [('Hue', 'DirectionPreference')])
+pg.add_plot('Direction Preference&Selectivity', [('Hue', 'DirectionPreference'),
+                                                 ('Confidence',
+                                                  'DirectionSelectivity')])
+pg.add_plot('Direction Selectivity', [('Strength', 'DirectionSelectivity')])
+pg.add_plot('Speed Preference', [('Strength', 'SpeedPreference')])
+pg.add_plot('Speed Selectivity', [('Strength', 'SpeedSelectivity')])
+pg.add_static_image('Color Key', 'command/dr_key_white_vert_small.png')
+
+
+pg = create_plotgroup(name='Hue Preference', category="Preference Maps",
+                      doc='Measure preference for colors.',
+                      pre_plot_hooks=[analysis.measure_hue_pref.instance()],
+                      normalize='Individually')
+pg.add_plot('Hue Preference', [('Hue', 'HuePreference')])
+pg.add_plot('Hue Preference&Selectivity',
+            [('Hue', 'HuePreference'), ('Confidence', 'HueSelectivity')])
+pg.add_plot('Hue Selectivity', [('Strength', 'HueSelectivity')])
+
+
+pg = create_plotgroup(name='Second Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure the second preference for sine grating '
+                          'orientation.',
+                      pre_plot_hooks=[
+                          analysis.measure_second_or_pref.instance(true_peak=False)])
+pg.add_plot('Second Orientation Preference',
+            [('Hue', 'OrientationMode2Preference')])
+pg.add_plot('Second Orientation Preference&Selectivity',
+            [('Hue', 'OrientationMode2Preference'),
+             ('Confidence', 'OrientationMode2Selectivity')])
+pg.add_plot('Second Orientation Selectivity',
+            [('Strength', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+
+
+pg = create_plotgroup(name='Second Peak Orientation Preference',
+                      category="Preference Maps",
+                      doc='Measure the second peak preference for sine '
+                          'grating orientation.',
+                      pre_plot_hooks=[
+                          analysis.measure_second_or_pref.instance(true_peak=True)])
+pg.add_plot('Second Peak Orientation Preference',
+            [('Hue', 'OrientationMode2Preference')])
+pg.add_plot('Second Peak Orientation Preference&Selectivity',
+            [('Hue', 'OrientationMode2Preference'),
+             ('Confidence', 'OrientationMode2Selectivity')])
+pg.add_plot('Second Peak Orientation Selectivity',
+            [('Strength', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+
+
+pg = create_plotgroup(name='Two Peaks Orientation Preferences',
+                      category='Preference Maps',
+                      doc="""Display the two most preferred orientations for
+                      all units with a multimodal orientation preference
+                      distribution.""",
+                      pre_plot_hooks=[
+                          analysis.measure_second_or_pref.instance(num_orientation=16,
+                                                          true_peak=True)])
+pg.add_plot('Two Peaks Orientation Preferences',
+            [('Or1', 'OrientationPreference'),
+             ('Sel1', 'OrientationSelectivity'),
+             ('Or2', 'OrientationMode2Preference'),
+             ('Sel2', 'OrientationMode2Selectivity')])
+pg.add_static_image('Color Key', 'command/two_or_key_vert.png')
+
+
+pg = create_plotgroup(name='Corner OR Preference', category="Preference Maps",
+                      doc='Measure orientation preference for corner shape ('
+                          'or other complex stimuli that cannot be '
+                          'represented as fullfield patterns).',
+                      pre_plot_hooks=[analysis.measure_corner_or_pref.instance(
+                          preference_fn=distribution.DSF_WeightedAverage())],
+                      normalize='Individually')
+pg.add_plot('Corner Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Corner Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Corner Orientation Selectivity',
+            [('Strength', 'OrientationSelectivity')])
+
+
+pg = create_plotgroup(name='Corner Angle Preference',
+                      category="Preference Maps",
+                      doc='Measure preference for angles in corner shapes',
+                      normalize='Individually')
+pg.pre_plot_hooks = [analysis.measure_corner_angle_pref.instance()]
+pg.add_plot('Corner Angle Preference', [('Hue', 'AnglePreference')])
+pg.add_plot('Corner Angle Preference&Selectivity',
+            [('Hue', 'AnglePreference'), ('Confidence', 'AngleSelectivity')])
+pg.add_plot('Corner Angle Selectivity', [('Strength', 'AngleSelectivity')])
+pg.add_plot('Corner Orientation Preference', [('Hue', 'OrientationPreference')])
+pg.add_plot('Corner Orientation Preference&Selectivity',
+            [('Hue', 'OrientationPreference'),
+             ('Confidence', 'OrientationSelectivity')])
+pg.add_plot('Corner Orientation Selectivity',
+            [('Strength', 'OrientationSelectivity')])
+pg.add_static_image('Hue Code', analysis.measure_corner_angle_pref.instance().key_img_fname)
+
+
+pg= create_plotgroup(name='Position Preference',category="Preference Maps",
+           doc='Measure preference for the X and Y position of a Gaussian.',
+           pre_plot_hooks=[analysis.measure_position_pref.instance(
+            preference_fn=distribution.DSF_WeightedAverage( selectivity_scale=(0.,17.) ))],
+           plot_hooks=[pylabplot.topographic_grid.instance()],
+           normalize='Individually')
+
+pg.add_plot('X Preference',[('Strength','XPreference')])
+pg.add_plot('Y Preference',[('Strength','YPreference')])
+pg.add_plot('Position Preference',[('Red','XPreference'),
+                                   ('Green','YPreference')])
+
+
+create_plotgroup(template_plot_type="curve",name='Orientation Tuning Fullfield',category="Tuning Curves",doc="""
+            Plot orientation tuning curves for a specific unit, measured using full-field sine gratings.
+            Although the data takes a long time to collect, once it is ready the plots
+            are available immediately for any unit.""",
+        pre_plot_hooks=[analysis.measure_or_tuning_fullfield.instance()],
+        plot_hooks=[pylabplot.cyclic_tuning_curve.instance(x_axis='orientation',unit='degrees')])
+
+
+create_plotgroup(template_plot_type="curve",name='Orientation Tuning',category="Tuning Curves",doc="""
+            Measure orientation tuning for a specific unit at different contrasts,
+            using a pattern chosen to match the preferences of that unit.""",
+        pre_plot_hooks=[analysis.measure_or_tuning.instance()],
+        plot_hooks=[pylabplot.cyclic_tuning_curve.instance(x_axis="orientation")],
+        prerequisites=['XPreference'])
+
+
+create_plotgroup(template_plot_type="curve",name='Size Tuning',category="Tuning Curves",
+        doc='Measure the size preference for a specific unit.',
+        pre_plot_hooks=[analysis.measure_size_response.instance()],
+        plot_hooks=[pylabplot.tuning_curve.instance(x_axis='size',unit="Diameter of stimulus")],
+        prerequisites=['OrientationPreference','XPreference'])
+
+
+create_plotgroup(template_plot_type="curve",name='Contrast Response',category="Tuning Curves",
+        doc='Measure the contrast response function for a specific unit.',
+        pre_plot_hooks=[analysis.measure_contrast_response.instance()],
+        plot_hooks=[pylabplot.tuning_curve.instance(x_axis="contrast",unit="%")],
+        prerequisites=['OrientationPreference','XPreference'])
+
+
+create_plotgroup(template_plot_type="curve",name='Frequency Tuning',category="Tuning Curves",
+        doc='Measure the spatial frequency preference for a specific unit.',
+        pre_plot_hooks=[analysis.measure_frequency_response.instance()],
+                 plot_hooks=[pylabplot.tuning_curve.instance(x_axis="frequency",unit="cycles per unit distance")],
+        prerequisites=['OrientationPreference','XPreference'])
+
+
+create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category="Tuning Curves",
+                 doc='Measure the response of one unit to a center and surround sine grating disk.',
+                 pre_plot_hooks=[analysis.measure_orientation_contrast.instance()],
+                 plot_hooks=[pylabplot.cyclic_tuning_curve.instance(x_axis="orientationsurround",center=False,relative_labels=True)],
+                 prerequisites=['OrientationPreference','XPreference'])
+
