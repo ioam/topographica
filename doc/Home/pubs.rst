@@ -5,6 +5,9 @@ Papers using or about Topographica
 Journal Articles
 ----------------
 
+-  Jan Antolik and Andrew Davison.
+   `Integrated workflows for spiking neuronal network simulations`_.
+   *Frontiers in Neuroinformatics*, 2009, in press. (Uses `Param`_.)
 -  Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar. 
    `Mechanisms for stable, robust, and adaptive development of orientation
    maps in the primary visual cortex`_. *Journal of Neuroscience*, 
@@ -137,6 +140,7 @@ to `Jim Bednar`_ so that they can be included here.
 .. _Development of maps of simple and complex cells in the primary visual cortex: http://dx.doi.org/10.3389/fncom.2011.00017
 .. _Modeling the emergence of whisker direction maps in rat barrel cortex: http://dx.doi.org/10.1371/journal.pone.0008778
 .. _`Topographica: Building and analyzing map-level simulations from Python, C/C++, MATLAB, NEST, or NEURON components`: http://dx.doi.org/10.3389/neuro.11.008.2009
+.. _`Integrated workflows for spiking neuronal network simulations`: http://www.frontiersin.org/Journal/10.3389/fninf.2013.00034/
 .. _Understanding neural maps with Topographica: http://www.brains-minds-media.org/archive/1402
 .. _Modeling cortical maps with Topographica: http://nn.cs.utexas.edu/keyword?bednar:neurocomputing04-sw
 .. _Scaling self-organizing maps to model large cortical networks: http://nn.cs.utexas.edu/keyword?bednar:neuroinformatics04
@@ -153,3 +157,4 @@ to `Jim Bednar`_ so that they can be included here.
 .. _Self-organizing visual cortex model using a homeostatic plasticity mechanism: http://www.inf.ed.ac.uk/publications/thesis/online/IM060401.pdf
 .. _A self-organizing model of disparity maps in the primary visual cortex: http://www.inf.ed.ac.uk/publications/thesis/online/IM060400.pdf
 .. _Jim Bednar: mailto:jbednar@inf.ed.ac.uk
+.. _Param: http://ioam.github.io/param
