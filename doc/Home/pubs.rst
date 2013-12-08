@@ -7,7 +7,8 @@ Journal Articles
 
 -  Jan Antolik and Andrew Davison.
    `Integrated workflows for spiking neuronal network simulations`_.
-   *Frontiers in Neuroinformatics*, 2009, in press. (Uses `Param`_.)
+   *Frontiers in Neuroinformatics*, 2009, in press. (Uses `Param`_ and
+   `ImaGen`_.)
 -  Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar. 
    `Mechanisms for stable, robust, and adaptive development of orientation
    maps in the primary visual cortex`_. *Journal of Neuroscience*, 
@@ -158,3 +159,4 @@ to `Jim Bednar`_ so that they can be included here.
 .. _A self-organizing model of disparity maps in the primary visual cortex: http://www.inf.ed.ac.uk/publications/thesis/online/IM060400.pdf
 .. _Jim Bednar: mailto:jbednar@inf.ed.ac.uk
 .. _Param: http://ioam.github.io/param
+.. _ImaGen: http://ioam.github.io/imagen
