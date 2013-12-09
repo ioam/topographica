@@ -525,20 +525,35 @@ return_code=0
 def t_action(option,opt_str,value,parser):
     """Callback function for the -t option for invoking tests."""
 
-    extra_target_descriptions = {"unit":"Quick unit tests using nosetests and doctest.",
-                                 "exhaustive":"Nearly all the tests, even those quite slow to run.",
+    local_target_descriptions = {"unit":"Quick unit tests using nosetests and doctest.",
+                                 "all":"All correctness tests (i.e. all tests but speed, coverage).",
                                  "coverage":"Same as unit but measuring test coverage.",
+                                 "exhaustive":"Slow system tests.",
                                  "speed":"Test for changes in execution speed.",
                                  "quick":"All tests whose runtimes are in seconds.",
                                  "flakes":"Run pyflakes static code checker."}
 
-    local_targets = ["list","unit","flakes","coverage"]
+    local_targets = []
+    
+    # Targets handled in this file
+    if value in  ["list","unit","flakes","coverage"]:
+        local_targets += [value]
+        value = None
+    
+    # Other targets require runtests.py
+    if value == "quick":
+        local_targets += ["unit","flakes"]
 
+    if value == "all":
+        local_targets += ["unit","flakes"]
+        value = "exhaustive"
+
+    import subprocess
     global return_code
 
-    if value == "list":
+    if "list" in local_targets:
         from topo.tests.runtests import target_description
-        available_items = sorted((target_description.items() + extra_target_descriptions.items()))
+        available_items = sorted((target_description.items() + local_target_descriptions.items()))
         max_len = max(len(k) for k,_ in available_items)
         print ("---------------\nAvailable tests\n---------------\n%s"
                % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
@@ -548,26 +563,23 @@ def t_action(option,opt_str,value,parser):
     # to hide GUI windows being tested.  Once runtests.py is made into
     # a module, the code it contains for conditionally using xvfb-run
     # can be applied here as well.
-    if value == "unit" or value == "quick":
-        import subprocess
+    if "flakes" in local_targets:
+        targets = ["topo", "external/param", "external/paramtk", "external/imagen", "external/lancet"]
+        ret = subprocess.call(["python","topo/tests/buildbot/pyflakes-ignore.py","--ignore", "topo/tests","--total"] + targets)
+        return_code += abs(ret)
+
+    if "unit" in local_targets:
         ret = subprocess.call(["nosetests", "-v", "--with-doctest",
                                "--doctest-extension=txt"])
         return_code += abs(ret)
 
-    if value == "coverage":
-        import subprocess
+    if "coverage" in local_targets:
         ret = subprocess.call(["nosetests", "-v", "--with-doctest",
                                "--doctest-extension=txt", 
                                "--with-cov", "--cov-report", "html"])
         return_code += abs(ret)
 
-    if value == "flakes" or value == "quick":
-        import subprocess
-        targets = ["topo", "external/param", "external/paramtk", "external/imagen", "external/lancet"]
-        ret = subprocess.call(["python","topo/tests/buildbot/pyflakes-ignore.py","--ignore", "topo/tests","--total"] + targets)
-        return_code += abs(ret)
-
-    if value not in local_targets:
+    if value is not None:
         global_params.exec_in_context("targets=['%s']" % value)
         # Call runtests.run_tests() as if it were a proper module
         ns={}
