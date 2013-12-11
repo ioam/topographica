@@ -9,9 +9,9 @@ import param
 from param.parameterized import overridable_property
 
 from imagen.views import SheetView, NdMapping
-from topo.misc.attrdict import AttrDict
+from imagen.odict import OrderedDict
 
-from topo.misc.keyedlist import KeyedList # CEBALERT: not in base
+from topo.misc.attrdict import AttrDict
 
 from sheet import Sheet
 from simulation import EPConnection
@@ -437,7 +437,7 @@ class ProjectionSheet(Sheet):
         jointly normalised together, call
         __grouped_in_projection('JointNormalize').
         """
-        in_proj = KeyedList()
+        in_proj = OrderedDict()
         in_proj[None]=[] # Independent (ungrouped) connections
 
         for c in self.in_connections:

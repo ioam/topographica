@@ -24,10 +24,10 @@ import param
 from param import normalize_path,resolve_path
 import paramtk as tk
 
+from imagen.odict import OrderedDict
 
 import topo
 from topo.plotting.plotgroup import plotgroups, FeatureCurvePlotGroup
-from topo.misc.keyedlist import KeyedList
 from topo.misc.commandline import sim_name_from_filename
 import topo.misc.genexamples
 import topo.command
@@ -461,7 +461,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         plots_menu.delete(0,'end')
 
         # create menu entries, and get list of categories
-        entries=KeyedList() # keep the order of plotgroup_templates (which is also KL)
+        entries=OrderedDict() # keep the order of plotgroup_templates (which is also KL)
         categories = []
         for label,plotgroup in plotgroups.items():
             entries[label] = PlotsMenuEntry(plotgroup)
@@ -471,7 +471,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
 
         # The Basic category items appear on the menu itself.
         assert 'Basic' in categories, "'Basic' is the category for the standard Plots menu entries."
-        for label,entry in entries:
+        for label,entry in entries.items():
             if entry.plotgroup.category=='Basic':
                     plots_menu.add_command(label=label,command=entry.__call__)
 
@@ -486,7 +486,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             plots_menu.add_cascade(label=category,menu=category_menu)
 
             # could probably search more efficiently than this
-            for label,entry in sorted(entries):
+            for label,entry in entries.items():
                 if entry.plotgroup.category==category:
                     category_menu.add_command(label=label,command=entry.__call__)
 

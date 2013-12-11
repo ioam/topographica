@@ -14,6 +14,8 @@ from param.parameterized import ParamOverrides, ParameterizedFunction
 from param import resolve_path
 
 from imagen.random import UniformRandom
+from imagen.odict import OrderedDict
+
 from fmapper import distribution
 
 import topo
@@ -22,7 +24,6 @@ from topo.command import analysis
 from topo.base.cf import CFSheet,CFProjection
 from topo.base.projection import ProjectionSheet
 from topo.sheet import GeneratorSheet,Sheet
-from topo.misc.keyedlist import KeyedList
 
 from plot import make_template_plot, Plot
 from plotfilesaver import PlotGroupSaver,CFProjectionPlotGroupSaver
@@ -583,7 +584,7 @@ class TemplatePlotGroup(SheetPlotGroup):
 
     def __init__(self,plot_templates=None,static_images=None,**params):
         super(TemplatePlotGroup,self).__init__(**params)
-        self.plot_templates = KeyedList(plot_templates or [])
+        self.plot_templates = OrderedDict(plot_templates or [])
         # Add plots for the static images, if any
         for image_name,file_path in static_images or []:
             self.add_static_image(image_name,file_path)
@@ -605,7 +606,7 @@ class TemplatePlotGroup(SheetPlotGroup):
         dict_={}
         for key,value in specification_tuple_list:
             dict_[key]=value
-        self.plot_templates.append((name,dict_))
+        self.plot_templates[name] = dict_
 
     add_plot = add_template # CEBALERT: should be removed when callers updated
 
@@ -627,7 +628,7 @@ class TemplatePlotGroup(SheetPlotGroup):
         # calls make_template_plot for all plot_templates for all kw returned
         # by _kw_for_make_template_plot!!
         template_plots = []
-        for plot_template_name,plot_template in self.plot_templates:
+        for plot_template_name,plot_template in self.plot_templates.items():
             for kw in self._kw_for_make_template_plot(range_):
                 template_plots.append(self._make_template_plot(plot_template_name,plot_template,**kw))
         return template_plots
@@ -1318,7 +1319,7 @@ class FeatureCurvePlotGroup(UnitPlotGroup):
 
 
 
-plotgroups = KeyedList()
+plotgroups = OrderedDict()
 """
 Global repository of PlotGroups, to which users can add their own as
 needed.
