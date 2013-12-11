@@ -273,27 +273,28 @@ support[90800407] = pattern_Null_removed
 # did all these happen in one commit?  I added topo.ep recently; did
 # that happen in the same commit as the others or not?
 def pattern_basic_removed():
-   import topo.pattern
-   import topo.command
-   import topo.coordmapper
-   import topo.ep
-   import topo.learningfn
-   import topo.numbergen
-   import topo.pattern
-   import topo.projection
-   import topo.responsefn
-   import topo.sheet
-   import topo.transferfn
-   module_redirect('basic',topo.command,topo.command)
-   module_redirect('basic',topo.coordmapper,topo.coordmapper)
-   module_redirect('basic',topo.ep,topo.ep)
-   module_redirect('basic',topo.learningfn,topo.learningfn)
-   module_redirect('basic',topo.numbergen,topo.numbergen)
-   module_redirect('basic',topo.pattern,topo.pattern)
-   module_redirect('basic',topo.projection,topo.projection)
-   module_redirect('basic',topo.responsefn,topo.responsefn)
-   module_redirect('basic',topo.sheet,topo.sheet)
-   module_redirect('basic',topo.transferfn,topo.transferfn)
+    import topo
+    import topo.pattern
+    import topo.command
+    import topo.base.ep
+    import topo.coordmapper
+    import topo.learningfn
+    import topo.numbergen
+    import topo.pattern
+    import topo.projection
+    import topo.responsefn
+    import topo.sheet
+    import topo.transferfn
+    module_redirect('basic',topo.command,topo.command)
+    module_redirect('basic',topo.coordmapper,topo.coordmapper)
+    module_redirect('basic',topo.learningfn,topo.learningfn)
+    module_redirect('basic',topo.numbergen,topo.numbergen)
+    module_redirect('basic',topo.pattern,topo.pattern)
+    module_redirect('basic',topo.projection,topo.projection)
+    module_redirect('basic',topo.responsefn,topo.responsefn)
+    module_redirect('basic',topo.sheet,topo.sheet)
+    module_redirect('basic',topo.transferfn,topo.transferfn)
+    sys.modules['topo.ep.basic']=topo.base.ep
 
 support[11871] = pattern_basic_removed
 
@@ -633,25 +634,22 @@ support[90800454] = moved_Subplotting
 
 
 def moved_distribution():
-    import topo.misc
     from fmapper import distribution
-    topo.misc.distribution = distribution
+    allow_import(distribution, 'topo.misc.distribution')
 
 support[90800481] = moved_distribution
 
 
 def moved_ep():
-    import topo
     from topo.base import ep
-    topo.ep = ep
+    sys.modules['topo.ep']=ep
 
 support[90800486] = moved_ep
 
 
 def moved_generatorsheet():
-    import topo.misc
     from topo.base import generatorsheet
-    topo.misc.generatorsheet = topo.base.generatorsheet
+    allow_import(generatorsheet, 'topo.misc.generatorsheet')
 
 support[90800490] = moved_generatorsheet
 
