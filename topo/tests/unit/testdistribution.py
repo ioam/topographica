@@ -7,7 +7,7 @@ Tests of distribution.py
 # finished in distribution.
 
 import unittest
-from topo.misc.distribution import Distribution, DSF_WeightedAverage
+from fmapper.distribution import Distribution, DSF_WeightedAverage
 import copy
 
 # for testing the statistics

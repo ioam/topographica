@@ -20,12 +20,11 @@ from topo.sheet import GeneratorSheet
 from topo.base.cf import CFProjection, CFSheet
 from topo.base.simulation import Simulation
 from topo.learningfn.optimized import CFPLF_Hebbian
-
-from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps, pattern_response
-from topo.misc.distribution import DSF_WeightedAverage
+from topo.analysis.featureresponses import pattern_response
 
 from imagen import SineGrating
-from fmapper import Feature
+from fmapper import Feature, DistributionMatrix, FeatureMaps
+from fmapper.distribution import DSF_WeightedAverage
 
 # globals to use weighted_average, selectivity, vector_sum, which are not methods
 # of DistributionMatrix any more

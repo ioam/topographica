@@ -631,6 +631,14 @@ def moved_Subplotting():
 
 support[90800454] = moved_Subplotting
 
+
+def moved_distribution():
+    import topo.misc
+    from fmapper import distribution
+    topo.misc.distribution = distribution
+
+support[90800481] = moved_Subplotting
+
 ######################################################################
 ######################################################################
 
