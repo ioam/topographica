@@ -857,7 +857,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
     # _kw_for_make_template_plot(), to allow calculation of range for
     # joint normalization. A mess.
     def _hack(self,range_):
-        for key,projlist in self.sheet._grouped_in_projections('JointNormalize'):
+        for key,projlist in self.sheet._grouped_in_projections('JointNormalize').items():
             if key==self._group_key:
                 args = []
                 for proj in projlist or self.projections():
@@ -871,7 +871,7 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
     def __keyed_projections(self):
         # helper method to return a list of (key,proj) pairs from self.sheet
         keys_and_projns = []
-        for key,projlist in self.sheet._grouped_in_projections('JointNormalize'):
+        for key,projlist in self.sheet._grouped_in_projections('JointNormalize').items():
             for proj in projlist:
                 keys_and_projns.append((key,proj))
         return keys_and_projns

@@ -150,7 +150,7 @@ class JointNormalizingCFSheet(CFSheet):
         If active_units_mask is True, only active units will have
         their weights normalized.
         """
-        for key,projlist in self._grouped_in_projections('JointNormalize'):
+        for key,projlist in self._grouped_in_projections('JointNormalize').items():
             if key == None:
                 normtype='Individually'
             else:

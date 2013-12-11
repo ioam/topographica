@@ -417,7 +417,7 @@ def removed_JointScaling():
     
         def do_joint_scaling(self):
             joint_total = zeros(self.shape, activity_type)
-            for key,projlist in self._grouped_in_projections('JointNormalize'):
+            for key,projlist in self._grouped_in_projections('JointNormalize').items():
                 if key is not None:
                     if key =='Afferent':
                         for proj in projlist:
@@ -651,7 +651,7 @@ support[90800486] = moved_ep
 def moved_generatorsheet():
     import topo.misc
     from topo.base import generatorsheet
-    topo.misc.generatorsheet = generatorsheet
+    topo.misc.generatorsheet = topo.base.generatorsheet
 
 support[90800490] = moved_generatorsheet
 
