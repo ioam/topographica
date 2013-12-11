@@ -94,12 +94,8 @@ class SumUnit(EventProcessor):
             self.send_output(data=self.value)
             self.value = 0.0
 
-import re,os
 __all__ = list(set(k for k,v in locals().items()
                     if isinstance(v, type)
                     and issubclass(v, EventProcessor)
                     and v is not EventProcessor
                     and not v.__name__.startswith('_')))
-# Automatically discover all .py files in this directory.
-__all__ += [re.sub('\.py$','',f) for f in os.listdir(__path__[0])
-           if re.match('^[^_].*\.py$',f)]
