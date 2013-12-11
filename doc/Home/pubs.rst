@@ -37,6 +37,9 @@ Journal Articles
 Book Chapters
 -------------
 
+-  James A. Bednar and Christopher E. Ball. Topographica. In
+   Eugene M. Izhikevich, editor, *The Encyclopedia of Computational
+   Neuroscience*. *Scholarpedia*, 2014. In preparation.
 -  James A. Bednar. Topographica. In Dieter Jaeger and Ranu Jung,
    editors, *The Encyclopedia of Computational Neuroscience*.
    Springer, 2013. In press.
@@ -44,10 +47,7 @@ Book Chapters
    unsupervised Hebbian self-organization. In *Growing Adaptive
    Machines: Combining Development and Learning in Artificial Neural
    Networks*, Studies in Computational Intelligence. Springer,
-   Berlin, 2012. In press.
--  James A. Bednar and Christopher E. Ball. Topographica. In
-   Eugene M. Izhikevich, editor, *The Encyclopedia of Computational
-   Neuroscience*. *Scholarpedia*, 2013. In preparation.
+   Berlin, 2013. In press.
 
 Conference Papers
 -----------------

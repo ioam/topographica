@@ -25,12 +25,11 @@ from math import pi
 # be reworked to either import the package directly, or handle the import error
 # differently. For more information on how nose works, see topo/tests/README.
 
-from nose.plugins.skip import SkipTest
-
 try:
-	import playerc
+    import playerc
 except ImportError:
-	raise SkipTest("Module requires the Player/Stage package to be run")
+    from nose.plugins.skip import SkipTest
+    raise SkipTest("Module requires the Player/Stage package to be run")
 
 # JPALERT: Because of the global interpreter lock in Python, using
 # Python threads (via the 'thread' or 'threading' modules does not

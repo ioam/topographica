@@ -222,7 +222,8 @@ class HomeostaticResponse(TransferFnWithState):
         self.t=None     # To allow state_push at init
         self.y_avg=None # To allow state_push at init
 
-        self._next_update_timestamp = topo.sim.time_type(topo.sim.time()+self.period)
+        next_timestamp = topo.sim.time() + self.period
+        self._next_update_timestamp = topo.sim.convert_to_time_type(next_timestamp)
         self._y_avg_prev = None
         self._x_prev = None
 

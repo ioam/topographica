@@ -28,9 +28,14 @@ from simulation import EventProcessor
 from sheetcoords import SheetCoordinateSystem
 from boundingregion import BoundingBox, BoundingRegionParameter
 from functionfamily import TransferFn
-from topo.misc.attrdict import AttrDict
 
 activity_type = float64
+
+class AttrDict(dict):
+    """Provides convenient attribute access."""
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 
 # (disable W0223 because input_event is deliberately still not implemented)
@@ -78,14 +83,14 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
             incoming events.
             """)
 
-    precedence = param.Number(default = 0.1, softbounds=(0.0,1.0),doc="""
+    precedence = param.Number(default=0.1, softbounds=(0.0,1.0),doc="""
             Allows a sorting order for Sheets, e.g. in the GUI.""")
 
-    row_precedence = param.Number(default = 0.5, softbounds=(0.0,1.0),doc="""
+    row_precedence = param.Number(default=0.5, softbounds=(0.0,1.0),doc="""
             Allows grouping of Sheets before sorting precedence is
             applied, e.g. for two-dimensional plots in the GUI.""")
 
-    layout_location = param.NumericTuple(default = (-1,-1),precedence=-1,doc="""
+    layout_location = param.NumericTuple(default=(-1,-1),precedence=-1,doc="""
             Location for this Sheet in an arbitrary pixel-based space
             in which Sheets can be laid out for visualization.""")
 
@@ -99,7 +104,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
     def _get_density(self):
         return self.xdensity
 
-    density = property(_get_density,doc="""The sheet's true density (i.e. the xdensity, which is equal to the ydensity for a Sheet.)""")
+    density = property(_get_density,doc="""The sheet's true density (i.e. the
+        xdensity, which is equal to the ydensity for a Sheet.)""")
 
     def __init__(self,**params):
         """

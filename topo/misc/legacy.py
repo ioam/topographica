@@ -261,6 +261,14 @@ def pattern_basic_rectangular_removed():
 
 support[11558] = pattern_basic_rectangular_removed
 
+
+def pattern_Null_removed():
+    import imagen
+    from imagen import Constant
+    imagen.Null=Constant
+
+support[90800407] = pattern_Null_removed
+
 # CEBALERT: should be renamed (it's not only about pattern.basic). And
 # did all these happen in one commit?  I added topo.ep recently; did
 # that happen in the same commit as the others or not?
@@ -292,8 +300,8 @@ support[11871] = pattern_basic_removed
 
 def param_external_removed():
     # CB: From param/external.py, only odict should be relevant to snapshots.
-    import topo.misc.odict
-    allow_import(topo.misc.odict,'param.external')
+    import imagen.odict
+    allow_import(imagen.odict,'param.external')
 
 support[12024] = param_external_removed
 
@@ -344,8 +352,6 @@ support[12089] = moved_picklableclassattributes
 
 
 def LISSOM_moved_to_SettlingCFSheet():
-    # For snapshots saved before 90800126
-    
     import topo.sheet.lissom
     import topo.sheet.optimized
     def _LISSOM_move_private_params_to_SettlingCFSheet(instance,state):
@@ -357,6 +363,22 @@ def LISSOM_moved_to_SettlingCFSheet():
     preprocess_state(topo.sheet.optimized.LISSOM_Opt,_LISSOM_move_private_params_to_SettlingCFSheet)
 
 support[90800126] = LISSOM_moved_to_SettlingCFSheet
+
+
+def sim_time_moved_to_Dynamic_time_fn():
+    def _sim_time_moved_to_Dynamic_time_fn(instance,state):
+        if '_time' in state and '_time_type_param_value' in state:
+            param.Dynamic.time_fn(state['_time'],time_type=state['_time_type_param_value'])
+            del state['_time']
+            del state['_time_type_param_value']
+            del state['_time_type_args_param_value']
+        else:
+            print "skipped"
+
+    import topo.base.simulation
+    preprocess_state(topo.base.simulation.Simulation,_sim_time_moved_to_Dynamic_time_fn)
+
+support[90800408] = sim_time_moved_to_Dynamic_time_fn
 
 
 def removed_JointScaling():
@@ -592,9 +614,22 @@ def featuremapper_legacy():
         'measurement parameters have been restored. Make sure measurements are '
         'still set up correctly.')
 
-
 support[90800300] = featuremapper_legacy
 
+
+def topo_misc_odict_removed():
+    import imagen.odict
+    allow_import(imagen.odict, 'topo.misc.odict')
+
+support[90800361] = topo_misc_odict_removed
+
+
+def moved_Subplotting():
+    import topo.analysis.featureresponses
+    from topo.plotting.plotgroup import Subplotting
+    topo.analysis.featureresponses.Subplotting = Subplotting
+
+support[90800454] = moved_Subplotting
 
 ######################################################################
 ######################################################################

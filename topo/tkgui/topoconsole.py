@@ -36,7 +36,7 @@ import topo.tkgui
 
 from templateplotgrouppanel import TemplatePlotGroupPanel
 from featurecurvepanel import FeatureCurvePanel
-from projectionpanel import CFProjectionPanel,ProjectionActivityPanel,ConnectionFieldsPanel,RFProjectionPanel
+from projectionpanel import SheetPanel,CFProjectionPanel,ProjectionActivityPanel,ConnectionFieldsPanel,RFProjectionPanel
 from testpattern import TestPattern
 from editor import ModelEditor
 
@@ -814,6 +814,7 @@ class ControllableMenu(tk.Menu):
 
 
 if __name__ != '__main__':
+    plotpanel_classes['Activity'] = SheetPanel
     plotpanel_classes['Connection Fields'] = ConnectionFieldsPanel
     plotpanel_classes['RF Projection'] = RFProjectionPanel
     plotpanel_classes['Projection'] = CFProjectionPanel

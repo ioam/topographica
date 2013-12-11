@@ -2,9 +2,12 @@
 Making Releases
 ***************
 
-The latest version of Topographica is always available by Git, but
-we also make more stable versions available periodically. To make
-such a release, the steps we generally follow are:
+The latest version of Topographica is always available by Git, but we
+also make more stable versions available periodically. To make such a
+release, the steps we have followed in the past are listed below.
+However, please note that as of version 0.9.8 several steps in these
+instructions are out of date, and will need to be updated as part of
+the next release.
 
 #. Ensure that no one besides yourself has any modified files
    checked out in Git; if they do, make sure all of it gets checked
@@ -21,7 +24,7 @@ such a release, the steps we generally follow are:
    current version of the code. In particular,
    doc/Reference\_Manual/index\_text.php needs to match the current
    version of the reference manual (don't forget to
-   ``make reference-manual`` and check the dot graphs).
+   ``make -C doc reference-manual`` and check the dot graphs).
 #. Update the tutorials to match changes to the GUI, if necessary. A
    simple way to get updated versions of each image is to:
 
@@ -50,27 +53,27 @@ such a release, the steps we generally follow are:
 #. Check any modified files into Git.
 #. Are all the buildbot tests still passing? You might need to
    trigger new builds to check all platforms are ok.
-#. Save all open files from within any editor, and do a "make dist"
-   to create a candidate distribution archive. (To ensure that all
-   files are saved in Emacs, you can do "M-x compile RET make
-   dist".) Note that this step is best done on a local disk rather
-   than on a network drive. (Additionally, using a scratch copy of
-   Topographica on which you have run 'make -C external clean' will
-   speed things up, but this is not necessary.)
+#. Save all open files from within any editor, and do a "make -f
+   -f platform/Makefile dist" to create a candidate distribution archive. (To
+   ensure that all files are saved in Emacs, you can do "M-x compile
+   RET make -f platform/Makefile dist".) Note that this step is best done on a
+   local disk rather than on a network drive. (Additionally, using a
+   scratch copy of Topographica on which you have run 'make -C
+   external clean' will speed things up, but this is not necessary.)
 #. Unpack the distribution archive and examine it:
 
    #. Use "ls -lFRA" or "find ." to ensure that no stray files were
-      included; if they were, edit "distclean:" in ./Makefile to
+      included; if they were, edit "distclean:" in ./platform/Makefile to
       delete them from the generated distribution.
    #. Double-check the generated documentation to ensure that it is
       complete and was generated properly.
    #. Try out the source on various platforms, ensuring that there
       are no errors. Also perform a self-test on the various
-      platforms ("make tests; make slow-tests").
+      platforms ("./topographica -t quick -t exhaustive").
 
 #. If you find problems, go back to step 6 and start over.
 #. Now generate the tar.gz
-   (``make dist-pysource dist-pysource-sdist``) and check its
+   (``make -f platform/Makefile dist-pysource dist-pysource-sdist``) and check its
    contents in the same way as above.
 #. At this point, it is a good idea to test the packages. Buildbot
    does not yet check that the packages it generates work on all
@@ -81,9 +84,8 @@ such a release, the steps we generally follow are:
    other developers that they may once again commit new code to the
    Git repository.
 #. Create tar.gz and upload them to pypi:
-   ``make dist-pysource-sdist; make dist-pypi-upload``.
-#. update the public web site. Change to the copy of Topographica
-   you created for distribution so that no stray files from doc/ are
-   included and do "make sf-web-site".
+   ``make -f platform/Makefile dist-pysource-sdist; make -f platform/Makefile dist-pypi-upload``.
+#. check the public web site (should be updated automatically
+anyway). 
 #. Send an announcement to topographica-announce at lists.sf.net.
 

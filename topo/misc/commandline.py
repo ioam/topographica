@@ -339,9 +339,9 @@ def default_output_path():
         try:
             documents = _win_documents_path()
         except: pass
-    
+
     return os.path.join(documents, 'Topographica')
-    
+
 
 
 def set_output_path(path):
@@ -360,7 +360,7 @@ def set_output_path(path):
                 cmdline_main.warning("Unable to set output path %s"%path)
 
     param.normalize_path.prefix=path
-    
+
     if not path in param.resolve_path.search_paths:
         param.resolve_path.search_paths+=[path]
 
@@ -398,7 +398,7 @@ topo_parser.add_option("-i","--interactive",action="callback",callback=i_action,
 def v_action(option,opt_str,value,parser):
     """Callback function for the -v option."""
     cmdline_main.message("Enabling verbose message output.")
-    if hasattr(parameterized,'get_logger'): 
+    if hasattr(parameterized,'get_logger'):
         parameterized.get_logger().setLevel(parameterized.VERBOSE)
     else: # For versions of the param package before 9 May 2013
         parameterized.min_print_level=parameterized.VERBOSE
@@ -410,7 +410,7 @@ enable verbose messaging output""")
 def d_action(option,opt_str,value,parser):
     """Callback function for the -d option."""
     cmdline_main.message("Enabling debugging message output.")
-    if hasattr(parameterized,'get_logger'): 
+    if hasattr(parameterized,'get_logger'):
         parameterized.get_logger().setLevel(parameterized.DEBUG)
     else: # For versions of the param package before 9 May 2013
         parameterized.min_print_level=parameterized.DEBUG
@@ -479,8 +479,8 @@ def c_action(option,opt_str,value,parser):
     something_executed=True
 
 topo_parser.add_option("-c","--command",action = "callback",callback=c_action,type="string",
-		       default=[],dest="commands",metavar="\"<command>\"",
-		       help="string of arbitrary Python code to be executed in the main namespace")
+                       default=[],dest="commands",metavar="\"<command>\"",
+                       help="string of arbitrary Python code to be executed in the main namespace")
 
 
 
@@ -491,8 +491,8 @@ def p_action(option,opt_str,value,parser):
     something_executed=True
 
 topo_parser.add_option("-p","--set-parameter",action = "callback",callback=p_action,type="string",
-		       default=[],dest="commands",metavar="\"<command>\"",
-		       help="command specifying value(s) of script-level (global) Parameter(s).")
+                       default=[],dest="commands",metavar="<param>=<value>",
+                       help="command specifying value(s) of script-level (global) Parameter(s).")
 
 
 def auto_import_commands():
@@ -517,6 +517,72 @@ def a_action(option,opt_str,value,parser):
 topo_parser.add_option("-a","--auto-import-commands",action="callback",callback=a_action,help="""\
 import everything from commands/*.py into the main namespace, for convenience; \
 equivalent to -c 'from topo.misc.commandline import auto_import_commands ; auto_import_commands()'.""")
+
+
+global return_code
+return_code=0
+
+def t_action(option,opt_str,value,parser):
+    """Callback function for the -t option for invoking tests."""
+
+    extra_target_descriptions = {"unit":"Quick unit tests using nosetests and doctest.",
+                                 "exhaustive":"Nearly all the tests, even those quite slow to run.",
+                                 "coverage":"Same as unit but measuring test coverage.",
+                                 "speed":"Test for changes in execution speed.",
+                                 "quick":"All tests whose runtimes are in seconds.",
+                                 "flakes":"Run pyflakes static code checker."}
+
+    local_targets = ["list","unit","flakes","coverage"]
+
+    global return_code
+
+    if value == "list":
+        from topo.tests.runtests import target_description
+        available_items = sorted((target_description.items() + extra_target_descriptions.items()))
+        max_len = max(len(k) for k,_ in available_items)
+        print ("---------------\nAvailable tests\n---------------\n%s"
+               % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
+                           for k,v in available_items))
+
+    # JABALERT: Unlike the tests in runtests.py, will not use xvfb-run
+    # to hide GUI windows being tested.  Once runtests.py is made into
+    # a module, the code it contains for conditionally using xvfb-run
+    # can be applied here as well.
+    if value == "unit" or value == "quick":
+        import subprocess
+        ret = subprocess.call(["nosetests", "-v", "--with-doctest",
+                               "--doctest-extension=txt"])
+        return_code += abs(ret)
+
+    if value == "coverage":
+        import subprocess
+        ret = subprocess.call(["nosetests", "-v", "--with-doctest",
+                               "--doctest-extension=txt", 
+                               "--with-cov", "--cov-report", "html"])
+        return_code += abs(ret)
+
+    if value == "flakes" or value == "quick":
+        import subprocess
+        targets = ["topo", "external/param", "external/paramtk", "external/imagen", "external/lancet"]
+        ret = subprocess.call(["python","topo/tests/buildbot/pyflakes-ignore.py","--ignore", "topo/tests","--total"] + targets)
+        return_code += abs(ret)
+
+    if value not in local_targets:
+        global_params.exec_in_context("targets=['%s']" % value)
+        # Call runtests.run_tests() as if it were a proper module
+        ns={}
+        execfile('./topo/tests/runtests.py',ns,ns)
+        return_code += len(ns["run_tests"]())
+
+    global something_executed
+    something_executed=True
+
+
+topo_parser.add_option("-t","--test",action = "callback",callback=t_action,type="string",
+                       default=[],dest="tests",metavar="<testname>",
+                       help="name of test to run (use '-t list' to show tests available).")
+
+
 
 
 
@@ -580,7 +646,7 @@ def process_argv(argv):
         import os,multiprocessing
         total_cores = multiprocessing.cpu_count()
         num_threads = int(os.environ.get('OMP_NUM_THREADS',total_cores))
-        openmp_main.message("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
+        openmp_main.verbose("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
     except:
         pass
 
@@ -664,4 +730,9 @@ def process_argv(argv):
             # Load Topographica IPython extension in embedded shell
             ipshell.extension_manager.load_extension('topo.misc.ipython')
             ipshell()
-            sys.exit()
+
+    global return_code
+    if return_code != 0:
+        cmdline_main.warning("Errors encountered; exiting with return code %d" % return_code)
+
+    sys.exit(return_code)

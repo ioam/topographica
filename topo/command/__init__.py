@@ -26,6 +26,12 @@ import param
 from param.parameterized import ParameterizedFunction, ParamOverrides
 from param import normalize_path
 
+import imagen, numbergen
+try:
+    from collections import OrderedDict
+except:
+    from imagen.odict import OrderedDict # pyflakes:ignore (try/except import)
+
 import topo
 from topo.base.sheet import Sheet
 from topo.base.projection import ProjectionSheet
@@ -34,12 +40,9 @@ from topo.misc.util import MultiFile
 from topo.misc.picklemain import PickleMain
 from topo.misc.snapshots import PicklableClassAttributes
 from topo.misc.genexamples import generate as _generate
-from topo.base.functionfamily import PatternDrivenAnalysis
 
+from fmapper.core import PatternDrivenAnalysis
 
-# CEBALERT: Could say min Python 2.6 and use Python's own. Or is it
-# 2.7?
-from topo.misc.odict import OrderedDict
 
 
 def generate_example(target):
@@ -238,7 +241,6 @@ class UnpickleEnvironmentCreator(object):
         L.SnapshotSupport.install(self.release,self.version)
 
 
-
 def save_snapshot(snapshot_name=None):
     """
     Save a snapshot of the network's current state.
@@ -264,6 +266,11 @@ def save_snapshot(snapshot_name=None):
     topoPOclassattrs = PicklableClassAttributes(topo,exclusions=('plotting','tests','tkgui'),
                                                 startup_commands=topo.sim.startup_commands)
 
+    paramPOclassattrs = PicklableClassAttributes(param)
+    imagenPOclassattrs = PicklableClassAttributes(imagen)
+    numbergenPOclassattrs = PicklableClassAttributes(numbergen)
+
+
     from topo.misc.commandline import global_params
 
     topo.sim.RELEASE=topo.release
@@ -273,6 +280,9 @@ def save_snapshot(snapshot_name=None):
                PickleMain(),
                global_params,
                topoPOclassattrs,
+               paramPOclassattrs,
+               imagenPOclassattrs,
+               numbergenPOclassattrs,
                topo.sim)
 
     try:
@@ -341,11 +351,16 @@ Loading error:
     # Restore subplotting prefs without worrying if there is a
     # problem (e.g. if topo/analysis/ is not present)
     try:
-        from topo.analysis.featureresponses import Subplotting
+        from topo.plotting.plotgroup import Subplotting
         Subplotting.restore_subplots()
     except:
         p = param.Parameterized(name="load_snapshot")
         p.message("Unable to restore Subplotting settings")
+
+    # Temporary -- broadcast topo.sim.time to all subpackages
+    param.Dynamic.time_fn = topo.sim.time
+    numbergen.TimeDependent.time_fn = topo.sim.time
+    imagen.Translator.time_fn = topo.sim.time
 
 
 
@@ -506,7 +521,7 @@ def default_analysis_function():
     """
     # CEBALERT: why are these imports here rather than at the top?
     import topo
-    from topo.command.analysis import save_plotgroup
+    from topo.plotting.plotgroup import save_plotgroup
 
     # Save all plotgroups listed in default_analysis_plotgroups
     for pg in default_analysis_plotgroups:

@@ -229,13 +229,13 @@ class TemplatePlot(Plot):
         will be used as Hue, the matrix is normalized in range 0..1
         """
         sheet_view_key = self.channels.get(key,None)
-        sv = self.view_dict.get(sheet_view_key, None)
+        sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
         if sv == None or sv.top == None:
             matrix = None
         else:
             matrix = sv.top.data.copy()
-            if key=='Hue' and sv.metadata.cyclic_range is not None:
-                matrix /= sv.metadata.cyclic_range
+            if key=='Hue' and sv.top.cyclic_range is not None:
+                matrix /= sv.top.cyclic_range
 
             # Calculate timestamp for this plot
             timestamp = sv.timestamp
@@ -254,7 +254,7 @@ class TemplatePlot(Plot):
         """ Set the Plot plot_src_name. Called when Plot is created"""
         for key in self.channels:
             sheet_view_key = self.channels.get(key,None)
-            sv = self.view_dict.get(sheet_view_key, None)
+            sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
             if sv != None:
                  self.plot_src_name = sv.metadata.src_name
                  self.precedence = sv.metadata.precedence
@@ -269,8 +269,8 @@ class TemplatePlot(Plot):
         Sub-function used by plot: get the matrix shape and the bounding box
         of the SheetViews that constitute the TemplatePlot.
         """
-        for name in self.channels.values():
-            sv = self.view_dict.get(name, None)
+        for channel, name in self.channels.items():
+            sv = self.view_dict.get(channel,{}).get(name, None)
             if sv != None:
                 shape = sv.top.data.shape
                 box = sv.top.bounds

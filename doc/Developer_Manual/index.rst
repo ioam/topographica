@@ -79,20 +79,3 @@ it as a public pull request`_ only once it's done.
 .. _GitHub.com: http://github.com/
 .. _Jim: mailto:jbednar@inf.ed.ac.uk?subject=Request%20to%20be%20a%20Topographica%20developer
 .. _submitting it as a public pull request: git.html#pullrequest
-
-.. toctree::
-   :maxdepth: 1
-   
-   installation
-   revisioncontrol
-   coding
-   ood
-   imports
-   alerts
-   gui
-   optimization
-   memuse
-   refactoring
-   testing
-   releases
-   git

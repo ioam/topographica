@@ -23,9 +23,26 @@ The clone command above is read-only.  To push changes set up your `SSH key <htt
    cd topographica
    git submodule update --init
 
-If dependencies are missing, you can install them using pip.  Pip is available on most systems already, but if it is missing or if the installed version is old, you
-can install it using ``easy_install pip`` or the equivalent for your package manager, or install virtualenv instead.  The only required dependencies are numpy and PIL, which can be installed using
-``pip install numpy PIL``, but other highly recommended packages include scipy, ipython, and matplotlib, which can each be installed in the same way.
+If dependencies are missing, you can install them using pip.  Pip is
+available on most systems already, but if it is missing or if the
+installed version is old, you can install it using ``easy_install
+pip`` or the equivalent for your package manager, or install
+virtualenv instead.  The only required dependencies are numpy and PIL,
+which can be installed using::
+
+   pip install numpy PIL
+
+but other highly recommended packages include scipy, ipython, and
+matplotlib, which can each be installed in the same way::
+
+   pip install gmpy scipy ipython matplotlib
+
+If you wish to use `IPython Notebook <http://ipython.org/notebook>`_
+(optional) with Topographica, you can install the remaining
+dependencies as follows::
+
+   pip install ipython tornado pyzmq jinja2
+
 
 MAKING DOCUMENTATION (OPTIONAL)
 -------------------------------
@@ -62,13 +79,13 @@ up to date::
   git pull
   git submodule update
 
-Changes any file outside of external/ can be made in the usual git fashion::
+Changes to any file outside of external/ can be made in the usual git fashion::
 
   edit topo/dir/somefile.py
   git commit -m "Important change" topo/dir/somefile.py
   git push
 
-If you need to make changes to one of the submodules, there are several
+If you need to make changes to one of the submodules in external/, there are several
 points to remember, assuming you're starting in the topographica
 directory and you're modifying the param submodule (otherwise simply exchange param
 with the submodule you want to modify)::

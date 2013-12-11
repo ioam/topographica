@@ -19,3 +19,8 @@ include
 info
 man
 share
+.ipynb_checkpoints/
+!models/stevens.jn13/jn13_figures/lib/
+models/stevens.jn13/jn13_figures/output/Fig*
+models/stevens.jn13/jn13_figures/output/build_dir
+

@@ -59,9 +59,11 @@ sys.path = [os.path.join(basepath, '../', 'external', 'param')] + sys.path
 sys.path = [os.path.join(basepath, '../', 'external', 'paramtk')] + sys.path
 sys.path = [os.path.join(basepath, '../', 'external', 'imagen')] + sys.path
 sys.path = [os.path.join(basepath, '../', 'external', 'lancet')] + sys.path
+sys.path = [os.path.join(basepath, '../', 'external', 'featuremapper')] + sys.path
 
 import param
 import imagen
+from imagen import views
 
 # Patch for versions of param prior to 10 May 2013
 param.main=param.Parameterized(name="main")
@@ -245,17 +247,19 @@ from topo.base.simulation import Simulation
 
 # Set the default value of Simulation.time_type to gmpy.mpq. If gmpy
 # is unavailable, use the slower fixedpoint.FixedPoint.
+
+def fixedpoint_time_type(x, precision=4):
+    "A fixedpoint time type of given precision"
+    return fixedpoint.FixedPoint(x, precision)
+
 try:
     import gmpy
-    Simulation.time_type = gmpy.mpq
-    Simulation.time_type_args = ()
+    _time_type = gmpy.mpq
     _mpq_pickle_support()
 except ImportError:
     import topo.misc.fixedpoint as fixedpoint
     param.main.warning('gmpy.mpq not available; using slower fixedpoint.FixedPoint for simulation time.')
-    Simulation.time_type = fixedpoint.FixedPoint
-    Simulation.time_type_args = (4,)  # gives precision=4
-
+    _time_type = fixedpoint_time_type
     # Provide a fake gmpy.mpq (to allow e.g. pickled test data to be
     # loaded).
     # CEBALERT: can we move this into whatever test needs it? I guess
@@ -265,20 +269,16 @@ except ImportError:
     import sys
     sys.meta_path.append(gmpyImporter())
 
-
-
+param.Dynamic.time_fn(val=0.0, time_type=_time_type)
+param.Dynamic.time_dependent = True
 sim = Simulation()
-
+timeline = views.Timeline()
 
 # numbergen used to be part of topo; import it there for backwards compatibility
 # and set the time function to be topo.sim.time()
 import sys,numbergen
 sys.modules['topo.numbergen']=numbergen
 sys.modules['topo.numbergen.basic']=numbergen
-try:
-    numbergen.TimeDependentValue.time_fn = sim.time
-except AttributeError: # For versions of numbergen before April 2013
-    numbergen.ExponentialDecay.time_fn = sim.time
 
 # imagen used to be part of topo; import its files at their former locations
 # for backwards compatibility and set the time function to be topo.sim.time()
@@ -331,14 +331,17 @@ except:
     pass
 
 from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
-    FeatureMaps, ReverseCorrelation, MeasureResponseCommand, FeatureCurveCommand,\
-    pattern_response, topo_metadata_fn, store_rfs, store_maps, store_curves,\
+    FeatureMaps, ReverseCorrelation, MeasureResponseCommand, pattern_response,\
+    topo_metadata_fn, store_rfs, store_maps, store_curves, store_activity, \
     get_feature_preference
+from fmapper.command import measure_activity
 
 FeatureResponses.metadata_fns = [topo_metadata_fn]
+FeatureResponses.pattern_response_fn = pattern_response.instance()
 FeatureMaps.measurement_storage_hook = store_maps
 FeatureCurves.measurement_storage_hook = store_curves
 ReverseCorrelation.measurement_storage_hook = store_rfs
+measure_activity.measurement_storage_hook = store_activity
 
 MeasureResponseCommand.preference_lookup_fn = get_feature_preference
 MeasureResponseCommand.pattern_response_fn = pattern_response.instance()

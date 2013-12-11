@@ -69,7 +69,7 @@ class TestPlot(unittest.TestCase):
 
         ### Simple case: we only pass a dictionnary to Plot()
         ### that does not belong to a Sheet:
-        self.view_dict = {}
+        views = {}
 
         ### SheetView1:
         ### Find a way to assign randomly the matrix.
@@ -80,7 +80,7 @@ class TestPlot(unittest.TestCase):
                                      precedence=0.1, row_precedence=0.1,
                                      cyclic_range=None)
         self.key1 = 'sv1'
-        self.view_dict[self.key1] = self.sheet_view1
+        views[self.key1] = self.sheet_view1
 
         ### SheetView2:
         ### Find a way to assign randomly the matrix.
@@ -91,7 +91,7 @@ class TestPlot(unittest.TestCase):
                                      precedence=0.2, row_precedence=0.2,
                                      cyclic_range=None)
         self.key2 = ('sv2',0,10)
-        self.view_dict[self.key2] = self.sheet_view2
+        views[self.key2] = self.sheet_view2
 
         ### SheetView3:
         ### Find a way to assign randomly the matrix.
@@ -102,7 +102,7 @@ class TestPlot(unittest.TestCase):
                                      precedence=0.3, row_precedence=0.3,
                                      cyclic_range=None)
         self.key3 = ('sv3',0,'hello',(10,0))
-        self.view_dict[self.key3] = self.sheet_view3
+        views[self.key3] = self.sheet_view3
 
         ### SheetView4: for testing clipping + different bounding box
         ### Find a way to assign randomly the matrix.
@@ -113,7 +113,9 @@ class TestPlot(unittest.TestCase):
                                      precedence=0.4, row_precedence=0.4,
                                      cyclic_range=None)
         self.key4 = 'sv4'
-        self.view_dict[self.key4] = self.sheet_view4
+        views[self.key4] = self.sheet_view4
+
+        self.view_dict = {'Strength': views, 'Hue': views, 'Confidence': views}
 
         ### JCALERT! for the moment we can only pass a triple when creating plot
         ### adding more sheetView to test when plot will be fixed for accepting

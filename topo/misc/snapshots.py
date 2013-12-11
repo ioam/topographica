@@ -22,7 +22,7 @@ class PicklableClassAttributes(object):
     # classes that aren't parameterized any more
     do_not_restore = []
 
-    deleted_params = {}
+    deleted_params = {"Simulation": ["time_type","time_type_args"]}
 
 
     # Support for changing parameter names
@@ -126,7 +126,7 @@ class PicklableClassAttributes(object):
         for class_path in to_restore:
             module_path = class_path[0:class_path.rindex('.')]
             class_name = class_path[class_path.rindex('.')+1::]
-            deleted_params = self.deleted_params.get(class_name, {})
+            deleted_params = self.deleted_params.get(class_name, [])
 
             try:
                 module = __import__(module_path,fromlist=[module_path])
