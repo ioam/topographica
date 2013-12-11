@@ -25,7 +25,7 @@ from topo.analysis.featureresponses import DistributionMatrix, FeatureMaps, patt
 from topo.misc.distribution import DSF_WeightedAverage
 
 from imagen import SineGrating
-from fmapper.core import Feature
+from fmapper import Feature
 
 # globals to use weighted_average, selectivity, vector_sum, which are not methods
 # of DistributionMatrix any more

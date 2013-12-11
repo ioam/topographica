@@ -41,7 +41,7 @@ from topo.misc.picklemain import PickleMain
 from topo.misc.snapshots import PicklableClassAttributes
 from topo.misc.genexamples import generate as _generate
 
-from fmapper.core import PatternDrivenAnalysis
+from fmapper import PatternDrivenAnalysis
 
 
 

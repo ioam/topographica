@@ -27,7 +27,7 @@ from topo.sheet import GeneratorSheet
 from fmapper.command import PatternPresentingCommand, MeasureResponseCommand,\
     SingleInputResponseCommand, SinusoidalMeasureResponseCommand, PositionMeasurementCommand,\
     FeatureCurveCommand, UnitCurveCommand
-from fmapper.core import MeasurementInterrupt, DistributionMatrix, FullMatrix, FeatureResponses,\
+from fmapper import MeasurementInterrupt, DistributionMatrix, FullMatrix, FeatureResponses,\
     ReverseCorrelation, FeatureMaps, FeatureCurves, Feature
 
 activity_dtype = np.float64
