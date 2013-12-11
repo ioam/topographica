@@ -32,10 +32,10 @@ def power_spectrum(pref, peak_val=1.0):
 
 def polar_preference(pref):
    """
-   Turns hue representation to polar representation.
-   Hue representation uses values expected in the range 0-1.0
+   Converts the preference to polar representation.  Preference values
+   supplied should be in the range 0-pi.
    """
-   polarfn = lambda x: cmath.rect(1.0, x*2*math.pi)
+   polarfn = lambda x: cmath.rect(1.0, 2*x)
    polar_vecfn = np.vectorize(polarfn)
    return polar_vecfn(pref)
 
