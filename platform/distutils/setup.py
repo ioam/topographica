@@ -153,7 +153,6 @@ of `SciPy`_) for optimum performance.
               'topo.base',
               'topo.command',
               'topo.coordmapper',
-              'topo.ep',
               'topo.learningfn',
               'topo.misc',
               'topo.plotting',

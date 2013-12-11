@@ -58,7 +58,7 @@ from topoconsole import TopoConsole,ControllableMenu
 # derived from the one specified in each widget, and imported before
 # the relevant GUI window starts.
 from topo.coordmapper import *  # pyflakes:ignore (see comment above)
-from topo.ep import *  # pyflakes:ignore (see comment above)
+from topo.base.ep import *  # pyflakes:ignore (see comment above)
 from topo.learningfn import *  # pyflakes:ignore (see comment above)
 from topo.transferfn import *  # pyflakes:ignore (see comment above)
 from topo.pattern import *  # pyflakes:ignore (see comment above)

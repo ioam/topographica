@@ -12,7 +12,7 @@ become available for any model.
 
 import param
 
-from topo.base.simulation import EventProcessor,EPConnectionEvent
+from simulation import EventProcessor,EPConnectionEvent
 
 
 class PulseGenerator(EventProcessor):

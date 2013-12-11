@@ -637,7 +637,15 @@ def moved_distribution():
     from fmapper import distribution
     topo.misc.distribution = distribution
 
-support[90800481] = moved_Subplotting
+support[90800481] = moved_distribution
+
+
+def moved_ep():
+    import topo
+    from topo.base import ep
+    topo.ep = ep
+
+support[90800486] = moved_ep
 
 ######################################################################
 ######################################################################
