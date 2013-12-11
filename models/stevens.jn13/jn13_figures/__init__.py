@@ -29,14 +29,17 @@ class Display(object):
 
 def get_pref(row, roi=True, normalize=True):
     sheetview = row['OrientationPreference']
-    if roi: data = sheetview.data[row['roi'], row['roi']]
-    else:  data =  sheetview.data
+    if roi is True:     roi = row['roi']
+    elif roi is False:  roi = slice(None,None)
+    data = sheetview.data[roi, roi]
     return data / sheetview.cyclic_range if normalize else data
 
 def get_sel(row, roi=True):
     sheetview = row['OrientationSelectivity']
-    if roi: return sheetview.data[row['roi'], row['roi']]
-    else:   return sheetview.data
+    if roi is True:     roi = row['roi']
+    elif roi is False:  roi = slice(None,None)
+    return sheetview.data[roi, roi]
+
 
 def setup(name, template_dir, build_dir, subdir=None):
     """
@@ -268,7 +271,7 @@ def fig06_09(template_dir, build_dir, fig, contrasts=(10,25,100),
             df = info.load(dframe[contrast_slice & seed_slice])
             # Ensuring the data is sorted by simulation time
             sorted_rows = [df[df['time'] == time].iloc[0] for time in sorted(df['time'])]
-            prefs = [get_pref(row) for row in sorted_rows] 
+            prefs = [get_pref(row) for row in sorted_rows]
             # Each selectivity is a whole map, these selectivities are averages across the map
             mean_sels = [get_sel(row).mean() for row in sorted_rows]
             selectivities.append(mean_sels)
@@ -294,7 +297,7 @@ def fig06_09(template_dir, build_dir, fig, contrasts=(10,25,100),
         if set(df['contrast']) != set(all_contrasts):
             print "Warning: Contrast values are missing for seed %d" % seed
         # Each selectivity is a whole map, these selectivities are averages across the map
-        mean_sels = [get_sel(row).mean() for row in sorted_rows] 
+        mean_sels = [get_sel(row).mean() for row in sorted_rows]
         # Computing map quality based on the pinwheel density
         pinwheel_counts = [row['pinwheels'].shape[0] for row in sorted_rows]
         # Pinwheel density is pinwheel count / (kmax**2)
@@ -307,7 +310,7 @@ def fig06_09(template_dir, build_dir, fig, contrasts=(10,25,100),
         contrast_stabilities = []
         for contrast in sorted(all_contrasts):
             rows = [df[(df['time']==time) & (df['contrast']==contrast)].iloc[0] for time in sorted(all_times)]
-            prefs = [get_pref(row) for row in rows] 
+            prefs = [get_pref(row) for row in rows]
             mean_stability = np.mean(analysis.stability_index(prefs))
             contrast_stabilities.append(mean_stability)
         stabilities.append(contrast_stabilities)
@@ -351,13 +354,14 @@ def fig10(template_dir, build_dir, bound_radius=0.6,  selectivity_norm=0.07138,
     for (index, row) in selection.iterrows():
         time =row['time']
         fname = os.path.join(output_dir, '%%s_%.1f.png' % int(time))
-        # Not applying ROI as new bounds will be used
-        pref = get_pref(row, roi=False)
-        sel = get_sel(row, roi=False)
-        (cfs, coords) = row['afferent_CFs']
-
         bounds = imagen.boundingregion.BoundingBox(radius=0.75)
         sheetcoords = imagen.SheetCoordinateSystem(bounds, xdensity=98)
+        roi = slice(*sheetcoords.sheet2matrixidx(bound_radius, bound_radius))
+        # Not applying ROI as new bounds will be used
+        pref = get_pref(row, roi=roi)
+        sel = get_sel(row, roi=roi)
+        (cfs, coords) = row['afferent_CFs']
+
         roi = slice(*sheetcoords.sheet2matrixidx(bound_radius, bound_radius))
         # Create the combined preference/selectivity map
         or_map = rasterplots.OR_map(pref,sel)
@@ -473,7 +477,7 @@ def fig12(template_dir, build_dir, input_seed=102, time=20000, legend=False,
     for i,coord, norm in [(i,c,norm) for (i,c) in enumerate(coords) for norm in [True, False]]:
         fname = 'ORtuning_%d%s_%d.svg' % (i+1, '_norm' if norm else '', time)
 
-        tcfig = vectorplots.tuning_curve_plot(tuning_curves, coord, 
+        tcfig = vectorplots.tuning_curve_plot(tuning_curves, coord,
                                               legend=legend, normalize=norm)
         tcfig.savefig(os.path.join(output_dir, fname), **savefig_opts)
 
