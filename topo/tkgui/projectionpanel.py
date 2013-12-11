@@ -318,14 +318,6 @@ class ProjectionPanel(PlotMatrixPanel):
 ##                                             'new_default':True})
 ##         #################
 
-    # def populate_color_channel_param(self):
-    #     channels = ['None']
-    #
-    #     channels += [k.replace('Preference','') for k in self.sheet.views.maps.keys()
-    #                  if 'Preference' in k]
-    #     self.plotgroup.params()['color_channel'].objects = channels
-    #     self.plotgroup.color_channel = 'None'
-
 
 
 class CFProjectionPanel(ProjectionPanel):
