@@ -12,16 +12,14 @@ playerstage.sourceforge.net), and the playerrobot module for
 high-level communications with Player robots.
 """
 
-
-import Image,ImageOps
+import Image
+import ImageOps
 from math import pi,cos,sin
 
 import param
-
 from topo.base.simulation import EventProcessor
 from topo.pattern.image import GenericImage
-
-from playerrobot import CameraDevice,PTZDevice
+from topo.hardware.playerrobot import CameraDevice,PTZDevice
 
 
 class CameraImage(GenericImage):
