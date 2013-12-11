@@ -647,6 +647,14 @@ def moved_ep():
 
 support[90800486] = moved_ep
 
+
+def moved_generatorsheet():
+    import topo.misc
+    from topo.base import generatorsheet
+    topo.misc.generatorsheet = generatorsheet
+
+support[90800490] = moved_generatorsheet
+
 ######################################################################
 ######################################################################
 

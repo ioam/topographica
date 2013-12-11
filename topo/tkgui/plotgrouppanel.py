@@ -22,7 +22,7 @@ from topo.base.cf import CFSheet
 
 from topo.command.pylabplot import matrixplot
 
-from topo.misc.generatorsheet import GeneratorSheet
+from topo.base.generatorsheet import GeneratorSheet
 
 import topo
 

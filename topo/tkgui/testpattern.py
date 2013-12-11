@@ -21,7 +21,7 @@ from imagen.views import SheetView, NdMapping
 import topo
 
 from topo.base.patterngenerator import PatternGenerator, Constant
-from topo.misc.generatorsheet import GeneratorSheet
+from topo.base.generatorsheet import GeneratorSheet
 from topo.plotting.plot import make_template_plot
 from topo.plotting.plotgroup import SheetPlotGroup
 from topo.analysis.featureresponses import pattern_present
