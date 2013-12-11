@@ -1619,7 +1619,7 @@ pg.add_plot('Orientation Preference&Selectivity',
 pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
 pg.add_plot('Phase Preference', [('Hue', 'PhasePreference')])
 pg.add_plot('Phase Selectivity', [('Strength', 'PhaseSelectivity')])
-pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+pg.add_static_image('Color Key', 'static/or_key_white_vert_small.png')
 
 
 pg = create_plotgroup(name='vonMises Orientation Preference',
@@ -1636,7 +1636,7 @@ pg.add_plot('Orientation Preference&Selectivity',
 pg.add_plot('Orientation Selectivity', [('Strength', 'OrientationSelectivity')])
 pg.add_plot('Phase Preference', [('Hue', 'PhasePreference')])
 pg.add_plot('Phase Selectivity', [('Strength', 'PhaseSelectivity')])
-pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+pg.add_static_image('Color Key', 'static/or_key_white_vert_small.png')
 
 
 pg = create_plotgroup(name='Bimodal Orientation Preference',
@@ -1658,7 +1658,7 @@ pg.add_plot('Second Orientation Preference&Selectivity',
              ('Confidence', 'OrientationMode2Selectivity')])
 pg.add_plot('Second Orientation Selectivity',
             [('Strength', 'OrientationMode2Selectivity')])
-pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+pg.add_static_image('Color Key', 'static/or_key_white_vert_small.png')
 
 
 pg = create_plotgroup(name='Two Orientation Preferences',
@@ -1672,7 +1672,7 @@ pg.add_plot('Two Orientation Preferences', [('Or1', 'OrientationPreference'),
                                             ('Sel1', 'OrientationSelectivity'),
                                             ('Or2', 'OrientationMode2Preference'),
                                             ('Sel2', 'OrientationMode2Selectivity')])
-pg.add_static_image('Color Key', 'command/two_or_key_vert.png')
+pg.add_static_image('Color Key', 'static/two_or_key_vert.png')
 
 
 pg = create_plotgroup(name='Spatial Frequency Preference',
@@ -1706,7 +1706,7 @@ pg.add_plot('PhaseDisparity Preference&Selectivity',
              ('Confidence', 'PhasedisparitySelectivity')])
 pg.add_plot('PhaseDisparity Selectivity',
             [('Strength', 'PhasedisparitySelectivity')])
-pg.add_static_image('Color Key', 'command/disp_key_white_vert_small.png')
+pg.add_static_image('Color Key', 'static/disp_key_white_vert_small.png')
 
 
 pg = create_plotgroup(name='Direction Preference', category="Preference Maps",
@@ -1720,7 +1720,7 @@ pg.add_plot('Direction Preference&Selectivity', [('Hue', 'DirectionPreference'),
 pg.add_plot('Direction Selectivity', [('Strength', 'DirectionSelectivity')])
 pg.add_plot('Speed Preference', [('Strength', 'SpeedPreference')])
 pg.add_plot('Speed Selectivity', [('Strength', 'SpeedSelectivity')])
-pg.add_static_image('Color Key', 'command/dr_key_white_vert_small.png')
+pg.add_static_image('Color Key', 'static/dr_key_white_vert_small.png')
 
 
 pg = create_plotgroup(name='Hue Preference', category="Preference Maps",
@@ -1746,7 +1746,7 @@ pg.add_plot('Second Orientation Preference&Selectivity',
              ('Confidence', 'OrientationMode2Selectivity')])
 pg.add_plot('Second Orientation Selectivity',
             [('Strength', 'OrientationMode2Selectivity')])
-pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+pg.add_static_image('Color Key', 'static/or_key_white_vert_small.png')
 
 
 pg = create_plotgroup(name='Second Peak Orientation Preference',
@@ -1762,7 +1762,7 @@ pg.add_plot('Second Peak Orientation Preference&Selectivity',
              ('Confidence', 'OrientationMode2Selectivity')])
 pg.add_plot('Second Peak Orientation Selectivity',
             [('Strength', 'OrientationMode2Selectivity')])
-pg.add_static_image('Color Key', 'command/or_key_white_vert_small.png')
+pg.add_static_image('Color Key', 'static/or_key_white_vert_small.png')
 
 
 pg = create_plotgroup(name='Two Peaks Orientation Preferences',
@@ -1778,7 +1778,7 @@ pg.add_plot('Two Peaks Orientation Preferences',
              ('Sel1', 'OrientationSelectivity'),
              ('Or2', 'OrientationMode2Preference'),
              ('Sel2', 'OrientationMode2Selectivity')])
-pg.add_static_image('Color Key', 'command/two_or_key_vert.png')
+pg.add_static_image('Color Key', 'static/two_or_key_vert.png')
 
 
 pg = create_plotgroup(name='Corner OR Preference', category="Preference Maps",
@@ -1811,7 +1811,7 @@ pg.add_plot('Corner Orientation Preference&Selectivity',
              ('Confidence', 'OrientationSelectivity')])
 pg.add_plot('Corner Orientation Selectivity',
             [('Strength', 'OrientationSelectivity')])
-pg.add_static_image('Hue Code', analysis.measure_corner_angle_pref.instance().key_img_fname)
+pg.add_static_image('Hue Code', 'static/key_angles.png')
 
 
 pg= create_plotgroup(name='Position Preference',category="Preference Maps",
