@@ -360,7 +360,7 @@ def fig10(template_dir, build_dir, bound_radius=0.6,  selectivity_norm=0.07138,
         sheetcoords = imagen.SheetCoordinateSystem(bounds, xdensity=98)
         roi = slice(*sheetcoords.sheet2matrixidx(bound_radius, bound_radius))
         # Create the combined preference/selectivity map
-        or_map = rasterplots.OR_map(sel,pref)
+        or_map = rasterplots.OR_map(pref,sel)
         or_black = rasterplots.black_selectivity(or_map)
         (dim1,dim2) = pref.shape
         or_black_resized = rasterplots.resize(or_black, (dim1*4,dim2*4))
