@@ -6,7 +6,7 @@ in Inkscape. SVG templates allow publication quality SVGs to be built
 that dynamically reflect the available simulation data.
 """
 
-import os, shutil, re
+import os, shutil, re, string
 import xml.etree.ElementTree as etree
 etree12 = etree.VERSION[0:3] == '1.2'
 
