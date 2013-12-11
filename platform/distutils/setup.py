@@ -179,13 +179,13 @@ of `SciPy`_) for optimum performance.
 
 # Help text for dependencies not PIP
 def help_dependency(package):
-	print "The required package %s is not installed on your system." % package
+    print "The required package %s is not installed on your system." % package
 
-if __name__=="__main__":
-	try:
-		import numpy
-	except ImportError:
-		help_dependency(package)
-		sys.exit(1)
+if __name__ == "__main__":
+    try:
+        import numpy
+    except ImportError:
+        help_dependency(package)
+        sys.exit(1)
 
     setup(**setup_args)
