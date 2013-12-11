@@ -411,7 +411,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
       the commandline by RunBatchCommand.
       """
       topo_time = topo.sim.time()
-      metadata_items = [(key, info.specs[key]) for key in self.metadata]
+      metadata_items = [(key, self._info.specs[key]) for key in self.metadata]
       self._metadata = dict(metadata_items + [('time',topo_time)])
 
       filename = '%s%s_%s' % (self._info.batch_name,
@@ -422,9 +422,9 @@ class Analysis(PrettyPrinted, param.Parameterized):
       for afn in self.analysis_fns:
          (args, kws,_,_) = afn.signature
          fn = self._callables[afn.name]
-         args = dict((key, info.specs[key]) for key in args)
-         fn_kws = dict((key, info.specs[key]) for key in kws
-                       if (key in info.specs))
+         args = dict((key, self._info.specs[key]) for key in args)
+         fn_kws = dict((key, self._info.specs[key]) for key in kws
+                       if (key in self._info.specs))
          retval = fn(**dict(args, **fn_kws))
          self._accumulate_results(afn.name, retval)
          # If the analysis function fails let run_batch catch the Exception
