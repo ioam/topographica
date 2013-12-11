@@ -345,25 +345,24 @@ class Analysis(PrettyPrinted, param.Parameterized):
 
 
    @classmethod
-   def pickle_path(cls, batch_info):
+   def pickle_path(cls, root_directory, batch_name):
       """
       Locates the pickle file based on the given launch info
       dictionary. Used by load as a classmethod and by save as an
       instance method.
       """
-      pkl_name = '%s.analysis' % batch_info['batch_name']
-      return os.path.join(batch_info['root_directory'], pkl_name)
+      return os.path.join(root_directory, '%s.analysis' % batch_name)
 
 
    @classmethod
-   def load(cls, tid, batch_info, specs):
+   def load(cls, tid, specs, root_directory, batch_name, batch_tag):
       """
       Classmethod used to load the RunBatchCommand callable into a
       Topographica run_batch context. Loads the pickle file based on
       the batch_name and root directory in batch_info.
       """
 
-      pkl_path = cls.pickle_path(batch_info)
+      pkl_path = cls.pickle_path(root_directory, batch_name)
       with open(pkl_path,'rb') as pkl: analysis =  pickle.load(pkl)
 
       sys.path += analysis.paths
@@ -371,8 +370,8 @@ class Analysis(PrettyPrinted, param.Parameterized):
                          for afn in analysis.analysis_fns]
       analysis._callables = dict((name, getattr(module, name))
                                  for (name, module) in callable_specs)
-      runtime_info = namedtuple('runtime_info','tid batch_info specs')
-      analysis._runtime_info = runtime_info(tid, batch_info, specs)
+      info = namedtuple('info',['tid', 'specs', 'batch_name', 'batch_tag'])
+      analysis._info = info(tid, specs, batch_name, batch_tag)
       return analysis
 
 
@@ -381,7 +380,7 @@ class Analysis(PrettyPrinted, param.Parameterized):
       super(Analysis, self).__init__(**kwargs)
       #self.pprint_args(['analysis_fns','paths'],['strict_verify'])
       # Information about the batch.
-      self._runtime_info = ()
+      self._info = ()
       # The callables specified by analysis_fns
       self._callables = {}
       # The data and metadata accumulators
@@ -411,17 +410,14 @@ class Analysis(PrettyPrinted, param.Parameterized):
       the run_batch context. Invoked as a single analysis function on
       the commandline by RunBatchCommand.
       """
-
-      info = self._runtime_info
-      batch_tag = info.batch_info['batch_tag']
-      batch_name = info.batch_info['batch_name']
-
       topo_time = topo.sim.time()
       metadata_items = [(key, info.specs[key]) for key in self.metadata]
       self._metadata = dict(metadata_items + [('time',topo_time)])
 
-      if not batch_tag: filename = '%s_%s' % (batch_name, topo_time)
-      else: filename = '%s[%s]_%s' % (batch_name, batch_tag, topo_time)
+      filename = '%s%s_%s' % (self._info.batch_name,
+                              ('[%s]' % self._info.batch_tag
+                               if self._info.batch_tag else ''),
+                              topo_time)
 
       for afn in self.analysis_fns:
          (args, kws,_,_) = afn.signature
@@ -598,8 +594,9 @@ class RunBatchCommand(TopoCommand):
 
       # Load and configure the Analysis object.
       prelude = ['from topo.misc.lancext import Analysis']
-      config = (tid, info, spec)
-      prelude += ["analysis_fn=Analysis.load(%r, %r, %r)" % config ]
+      prelude += ["analysis_fn=Analysis.load(%r, %r, %r, %r, %r)"
+                  % (tid, spec, info['root_directory'],
+                     info['batch_name'], info['batch_tag']) ]
 
       # Create the keyword representation to pass into run_batch
       keywords = ', '.join(['%s=%s' % (k,allopts[k]) for k in
@@ -624,7 +621,8 @@ class RunBatchCommand(TopoCommand):
 
    def finalize(self, info):
       """Pickle the analysis before launch."""
-      pkl_path = self.analysis.pickle_path(info)
+      pkl_path = self.analysis.pickle_path(info['root_directory'],
+                                           info['batch_name'])
       with open(pkl_path,'wb') as pkl:
          pickle.dump(self.analysis, pkl)
 
