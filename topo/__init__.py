@@ -18,7 +18,6 @@ that can be used with the above functions and classes::
   sheet          - Sheet classes: 2D arrays of processing units
   projection     - Projection classes: connections between Sheets
   pattern        - PatternGenerator classes: 2D input or weight patterns
-  ep             - EventProcessor classes: other simulation objects
   transferfn     - Transfer functions, for e.g. normalization or squashing
   responsefn     - Calculate the response of a Projection
   learningfn     - Adjust weights for a Projection
@@ -36,7 +35,6 @@ __all__ = ['analysis',
            'base',
            'command',
            'coordmapper',
-           'ep',
            'learningfn',
            'misc',
            'numbergen',
