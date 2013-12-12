@@ -630,9 +630,9 @@ def ndmapping_ndim_remove():
     def remove_ndmapping(instance,state):
         if 'ndim' in state:
             del state['ndim']
-    preprocess_state(imagen.ndmapping.NdMapping,remove_ndmapping)
+    preprocess_state(imagen.ndmapping.NdMapping, remove_ndmapping)
 
-support[908004010] = ndmapping_ndim_remove
+support[90800401] = ndmapping_ndim_remove
 
 
 def moved_Subplotting():
