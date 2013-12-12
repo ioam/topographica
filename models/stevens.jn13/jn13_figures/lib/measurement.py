@@ -24,7 +24,7 @@ import topo.analysis.featureresponses
 def OR_measurement(selectivity_multiplier, settings={}):
     """ Default scale is 0.3, not 1.0 (100% contrast)"""
     topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier = selectivity_multiplier
-    measurement = topo.command.analysis.measure_sine_pref(scale=1.0, **settings)()
+    measurement = topo.command.analysis.measure_sine_pref(scale=1.0, **settings)
     sel = topo.sim.V1.views.maps.OrientationSelectivity.top
     pref = topo.sim.V1.views.maps.OrientationPreference.top
     return {'OrientationSelectivity':sel, 'OrientationPreference': pref,
