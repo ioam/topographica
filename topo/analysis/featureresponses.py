@@ -29,6 +29,7 @@ from fmapper.command import PatternPresentingCommand, MeasureResponseCommand,\
     FeatureCurveCommand, UnitCurveCommand
 from fmapper import MeasurementInterrupt, DistributionMatrix, FullMatrix, FeatureResponses,\
     ReverseCorrelation, FeatureMaps, FeatureCurves, Feature
+from fmapper.metaparams import *
 
 activity_dtype = np.float64
 
