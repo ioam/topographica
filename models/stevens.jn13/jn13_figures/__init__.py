@@ -294,8 +294,10 @@ def fig06_09(template_dir, build_dir, fig, contrasts=(10,25,100),
         # Ensuring contrasts are sorted
         sorted_rows = [df[df['contrast'] == contrast].iloc[0] for contrast in sorted(df['contrast'])]
 
-        if set(df['contrast']) != set(all_contrasts):
-            print "Warning: Contrast values are missing for seed %d" % seed
+        missing_contrasts = set(df['contrast']) ^set(all_contrasts)
+        if missing_contrasts != set():
+            missing = ', '.join(str(el) for el in missing_contrasts)
+            print "Warning: Contrast values %s are missing for seed %d" % (missing, seed)
         # Each selectivity is a whole map, these selectivities are averages across the map
         mean_sels = [get_sel(row).mean() for row in sorted_rows]
         # Computing map quality based on the pinwheel density
