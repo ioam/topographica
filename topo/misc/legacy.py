@@ -625,11 +625,24 @@ def topo_misc_odict_removed():
 support[90800361] = topo_misc_odict_removed
 
 
+def ndmapping_ndim_remove():
+    import imagen
+    def remove_ndmapping(instance,state):
+        if 'ndim' in state:
+            del state['ndim']
+    preprocess_state(imagen.ndmapping.NdMapping,remove_ndmapping)
+
+support[908004010] = ndmapping_ndim_remove
+
+
 def moved_Subplotting():
     import topo.analysis.featureresponses
-    from topo.plotting.plotgroup import Subplotting
+    import topo.command.analysis
+    from topo.plotting.plotgroup import Subplotting, _equivalent_for_plotgroup_update, save_plotgroup
     topo.analysis.featureresponses.Subplotting = Subplotting
-
+    topo.command.analysis._equivalent_for_plotgroup_update = _equivalent_for_plotgroup_update
+    topo.command.analysis.save_plotgroup = save_plotgroup
+    
 support[90800454] = moved_Subplotting
 
 
