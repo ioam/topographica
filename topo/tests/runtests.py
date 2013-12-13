@@ -92,9 +92,9 @@ def _runc(cmd):
     return os.system(cmd)
 
 
-import topo.misc.keyedlist
-target = topo.misc.keyedlist.KeyedList()
-speedtarget = topo.misc.keyedlist.KeyedList()
+from imagen.odict import OrderedDict
+target = OrderedDict()
+speedtarget = OrderedDict()
 
 
 # CEBALERT: need to pick which scripts to include for training and
