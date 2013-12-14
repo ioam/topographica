@@ -656,6 +656,7 @@ support[90800481] = moved_distribution
 def moved_ep():
     from topo.base import ep
     sys.modules['topo.ep']=ep
+    setattr(sys.modules['topo'],'ep',ep)
 
 support[90800486] = moved_ep
 
@@ -665,6 +666,35 @@ def moved_generatorsheet():
     allow_import(generatorsheet, 'topo.misc.generatorsheet')
 
 support[90800490] = moved_generatorsheet
+
+
+def replace_keyedlist():
+    from imagen import odict
+    class KeyedList(list):
+        def __getitem__(self, key):
+            for value in [v for k,v in self if k == key]: return value
+            if isinstance(key,int):
+                for v in [v for i,k,v in enumerate(self) if i==key]: return v
+            raise KeyError(key)
+        def get(self, key, default=None):
+            if key in self.keys(): return self[key]
+            return default
+        def set(self, key, value):
+            if key in self.keys(): self[self.index((key,self[key]))] = (key,value)
+            else: self.append((key,value))
+            return True
+        def has_key(self, key): return key in self.keys()
+        def __setitem__(self,k,v): return self.set(k,v)
+        def append(self, (key, value)): super(KeyedList,self).append(tuple((key,value)))
+        def items(self): return list(self)
+        def keys(self): return [k for (k, v) in self.items()]
+        def values(self): return [v for (k, v) in self.items()]
+        def update(self,b): [self.set(k, v) for (k, v) in b.items()]
+    odict.KeyedList = KeyedList
+    sys.modules['topo.misc.keyedlist'] = odict
+    setattr(sys.modules['topo.misc'], 'keyedlist', odict)
+
+support[90800491] = replace_keyedlist
 
 ######################################################################
 ######################################################################
