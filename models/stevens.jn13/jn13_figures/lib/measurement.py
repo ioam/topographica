@@ -51,6 +51,7 @@ def stability_analysis(figure, times):
     roi = ROI(disable=(True if figure=='Fig10_12' else False))
     simulation_time = topo.sim.time()
     preference = topo.sim.V1.views.maps.OrientationPreference.top.data
+    preference = preference / topo.sim.V1.views.maps.OrientationPreference.top.cyclic_range
     if simulation_time == times[0]:
         topo.stability_maps = [preference[roi,roi]]
     if simulation_time == times[-1]:
@@ -67,6 +68,7 @@ def pinwheel_analysis():
     """
     roi = ROI() # Central ROI (1.0 x 1.0 in sheet coordinates)
     preference = topo.sim.V1.views.maps.OrientationPreference.top.data
+    preference = preference / topo.sim.V1.views.maps.OrientationPreference.top.cyclic_range
     polar_map = analysis.polar_preference(preference[roi,roi])
     contour_info = analysis.polarmap_contours(polar_map)
     (re_contours, im_contours, _ ) = contour_info
