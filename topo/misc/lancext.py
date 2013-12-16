@@ -10,10 +10,11 @@ to be executed during a simulation run.
 import os, sys, types, pickle, inspect
 from collections import namedtuple
 
+import numpy.version as np_version
 import topo
 import param
 
-from lancet import PrettyPrinted
+from lancet import PrettyPrinted, vcs_metadata
 from lancet import Command
 from lancet import Launcher, review_and_launch
 from lancet import NumpyFile
@@ -22,6 +23,109 @@ from lancet import NumpyFile
 from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
 Launcher.output_directory = default_output_path()
+
+
+class topo_metadata(param.Parameterized):
+   """
+   Topographica specific helper function that expands on Lancet's
+   vcs_metadata function to generate suitable metadata information for
+   logging with Lancet. Records Topographica version control
+   information as well as information about all relevant submodules
+   and the current numpy version.
+
+   No arguments should be necessary when either contructing or calling
+   this object as the default behaviour is designed to be useful. The
+   summary method prints out the key information collected to assist
+   with reproducibility. For instance, this may be called to print all
+   the relevant git revisions in an IPython Notebook before launching
+   jobs.
+   """
+
+   max_log_length = param.Integer(default=90, doc="""
+      Maximum number of characters that will be shown per message in
+      the printed summary.""")
+
+   paths = param.List(default=[
+         os.path.split(param.resolve_path('topographica'))[0],
+         param.resolve_path('external/param',  path_to_file=False),
+         param.resolve_path('external/paramtk',path_to_file=False),
+         param.resolve_path('external/imagen', path_to_file=False),
+         param.resolve_path('external/lancet', path_to_file=False)
+         ], doc="""
+   List of git repositories including Topographica and relevant
+   submodules. Version control information from these repositories
+   will be returned as a dictionary when called. The most important
+   information is pretty printed when the summary method is called.""")
+
+   commands = param.Dict(default={'.git':(['git', 'rev-parse', 'HEAD'],
+                                          ['git', 'log', '--oneline', '-n', '1'],
+                                          ['git', 'diff'])},
+      doc="""The git commands to pass to subprocess to extract the
+      necessary version control information. Uses the same
+      specification format as the lancet.vsc_metdata helper function.""")
+
+   def __init__(self, **kwargs):
+      super(topo_metadata,self).__init__(**kwargs)
+      self._repos = ['Topographica', 'Param', 'Param Tk', 'Imagen', 'Lancet']
+      self._summarized = ['Topographica', 'Param', 'Imagen', 'Lancet']
+      self._paths = dict(zip(self._repos, self.paths))
+      self._info = {}
+
+
+   def __call__(self, **params_to_override):
+      p = param.ParamOverrides(self, params_to_override)
+      self._info = vcs_metadata(paths=p.paths,
+                                commands=p.commands)
+
+      self._info['numpy_version'] = np_version.full_version
+      self._info['numpy_git_revision'] = np_version.git_revision
+      return self._info
+
+   def _modified_files(self, diff):
+      "Returns the set of files mentioned in a given git diff string."
+      modified_files = []
+      diff_marker = 'diff --git '
+      diff_lines = [line for line in diff.splitlines()
+                    if line.startswith(diff_marker)]
+
+      for diff_line in diff_lines:
+         bfilepath = diff_line[len(diff_marker):].rsplit(' b/')[1]
+         bfile = bfilepath.rsplit('/')[-1]
+         modified_files.append(bfile)
+      return set(modified_files)
+
+
+   def summary(self):
+      "Printed summary of the versioning information captured via git."
+      np_name = 'Numpy'
+      info = self._info if self._info else self()
+
+      messages = [info['vcs_messages'][self._paths[repo]] for repo in self._summarized]
+      diffs = [info['vcs_diffs'][self._paths[repo]] for repo in self._summarized]
+
+      diff_message = "   %s  [%d files have uncommited changes as captured by git diff]"
+      longest_name = max(len(name) for name in self._summarized + [np_name])
+
+      print "Topographica version control summary:\n"
+      for repo_name, message, diff in zip(self._summarized, messages, diffs):
+         truncate_len = (self.max_log_length - 3)
+         if len(message) > truncate_len:
+            message = message[:truncate_len]+'...'
+
+         sha_len = len(message.split()[0])
+         modified_files = self._modified_files(diff)
+         print '   %s: %s%s' % (repo_name,
+                                ' ' * (longest_name - len(repo_name)),
+                                message)
+         if len(modified_files) != 0:
+            print diff_message % (' ' * (sha_len+longest_name+1),
+                                  len(modified_files))
+
+      numpy_sha = self._info['numpy_git_revision'][:7]
+      np_info = (np_name,   ' ' * (longest_name-len(np_name)),
+                 numpy_sha, self._info['numpy_version'],
+                 '' if np_version.release else 'Non-')
+      print '   %s: %s%s Version %s (%srelease)' % np_info
 
 
 class param_formatter(param.ParameterizedFunction):
