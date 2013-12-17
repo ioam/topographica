@@ -143,9 +143,9 @@ if p.dataset in ["Nature", "VGR"]:
     if p.dataset=="Nature":
         image_filenames= [param.resolve_path("images/shouval/combined%02d.png"%(i+1)) for i in xrange(25)]
     else:
-        # Actual ordering used in the paper for historical reasons, makes little difference
-        #ordering = [1,25,8,24,22,23,4,15,17,13,5,20,18,14,3,6,12,10,21,7,9,2,16,11,19]
-        ordering = range(1,26)
+        # Actual ordering used in the paper for historical reasons,
+        # makes little difference if ordering=range(1,26) is used instead.
+        ordering = [1,25,8,24,22,23,4,15,17,13,5,20,18,14,3,6,12,10,21,7,9,2,16,11,19]
         image_filenames  = [param.resolve_path("images/VGR/combined%02d_VGR.png" % i) for i in ordering]
 
     inputs=[pattern.image.FileImage(filename=f,
@@ -295,6 +295,5 @@ topo.sim.grid_layout([[None,    'V1',     None],
 
 import topo.analysis.featureresponses
 topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier=2.0
-topo.analysis.featureresponses.FeatureCurveCommand.apply_output_fns=True
 contrasts =  [{'contrast':c} for c in [100, 80, 60, 40, 20, 10]]
 topo.analysis.featureresponses.FeatureCurveCommand.curve_parameters= contrasts
