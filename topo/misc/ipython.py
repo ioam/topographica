@@ -135,10 +135,12 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
 # Display hooks #
 #===============#
 
+from topo.analysis.featureresponses import update_sheet_activity
+
 def sheet_activity_display(sheet, size=256, format='svg'):
     if not isinstance(sheet, Sheet): return None
-    analysis.update_sheet_activity(sheet.name, force=True)
-    return sheetview_display(sheet.views.maps.Activity.top,
+    update_sheet_activity(sheet.name, force=True)
+    return sheetview_display(sheet.views.maps._activity_buffer.top,
                              size=size, format=format)
 
 
