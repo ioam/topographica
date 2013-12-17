@@ -43,7 +43,11 @@ def convolve(filename, kernel_pattern, trim=True):
     return Image.fromarray(np.uint8(convolved * 255.0))
 
 
-def generate_GR(images_dir, kernel_pattern=None, name='V_GR', trim=True):
+anisotropic_kernel = kernel_pattern = imagen.Gaussian(aspect_ratio=10.0, size=0.05,
+                                                      xdensity=128, ydensity=128,
+                                                      orientation=math.pi/2.0)
+
+def generate_GR(images_dir, kernel_pattern=anisotropic_kernel, name='V_GR', trim=True):
     """
     Generates a convolved dataset using the given kernel.
 
@@ -51,11 +55,6 @@ def generate_GR(images_dir, kernel_pattern=None, name='V_GR', trim=True):
     anisotropic blur to simulate the vertical goggle rearing
     condition.
     """
-
-    if kernel_pattern is None:
-        kernel_pattern = imagen.Gaussian(aspect_ratio=10.0, xdensity=128, ydensity=128,
-                                         size=0.05, orientation=math.pi/2.0)
-
     for filename in glob.glob(os.path.join(images_dir, 'shouval','combined*.png')):
         basepath, ext = os.path.splitext(filename)
         savename = '%s_%s%s' % (os.path.basename(basepath), name, ext)
