@@ -115,10 +115,9 @@ def measure_shouval(times, num_orientation, num_phase):
     measurement['metadata'].update(roi=ROI(disable=True))
     topo.sim.V1.output_fns.pop()
     if topo.sim.time() == times[-1]:
-        topo.command.pylabplot.measure_or_tuning_fullfield.instance(sheet=topo.sim.V1,
-                                                                    num_orientation=num_orientation,
-                                                                    num_phase=num_phase,
-                                                                    curve_parameters=contrasts)()
+        topo.command.analysis.measure_or_tuning_fullfield(num_orientation=num_orientation,
+                                                          num_phase=num_phase,
+                                                          curve_parameters=contrasts)
         measurement.update({'tuning_curves':topo.sim.V1.views.curves.Orientation.top})
     return measurement
 
