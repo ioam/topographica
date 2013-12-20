@@ -54,13 +54,13 @@ iteratively. If you simply wish to view the static contents of these
 notebooks, you may view the following two HTML versions:
 
 - `Model definition
-  <http://topographica.org/_static/gcal_notebook.html>`_: A notebook
+  <http://topographica.org/_static/gcal.html>`_: A notebook
   that simultaneously defines the model and explores it. Running the
   live version of this notebook generates the Topographica model file
   '``gcal.ty``'.
 
 - `Simulation and Figures
-  <http://topographica.org/_static/stevens_jn13_notebook.html>`_:
+  <http://topographica.org/_static/stevens_jn13.html>`_:
   Defines all 842 model simulations needed to reproduce all the
   figures, allows you to launch them and automatically builds the
   corresponding SVG figures used in publication. Although running the
