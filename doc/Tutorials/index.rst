@@ -68,10 +68,10 @@ you develop any other tutorials for your own models, we would love to
 add them here!
 
 .. Trick to get matching italic style for the links
-.. _gcal_ipynb: ../_static/gcal_notebook.html
+.. _gcal_ipynb: ../_static/gcal.html
 .. |gcal_ipynb| replace:: *GCAL Model definition*
 
-.. _stevens_jn13: ../_static/stevens_jn13_notebook.html
+.. _stevens_jn13: ../_static/stevens_jn13.html
 .. |stevens_jn13| replace:: *Replicating Stevens et al. (J. Neuroscience 2013)*
 
 .. _older tutorial: ./lissom_oo_or.html
