@@ -269,7 +269,7 @@ class SheetPanel(TemplatePlotGroupPanel):
             else:
                 pt["Hue"] = prefix + "Preference"
                 pt["Confidence"] = prefix + "Selectivity"
-        self.refresh_plots()
+        self.refresh_plots(update=False)
 
 
     def populate_color_channel_param(self):
