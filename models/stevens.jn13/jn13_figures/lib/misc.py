@@ -68,7 +68,7 @@ def view_weights(projections, coords=(0,0), transpose=True):
     View the weights for the given projection as a pandas DataFrame.
     """
     names = ['%s (%s to %s)' % (proj.name, proj.src.name, proj.dest.name) for proj in projections]
-    views = [proj.get_view(*coords).top for proj in projections]
+    views = [proj.view(*coords).top for proj in projections]
     dframe = pandas.DataFrame({'weights':views})
     labelled = dframe.set_index([names])
     lancet.ViewFrame(labelled.T if transpose else labelled)

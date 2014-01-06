@@ -22,8 +22,8 @@ from copy import copy
 
 import numpy as np
 import param
-from imagen.ndmapping import AttrDict, NdMapping
-from imagen.views import SheetView, ProjectionGrid
+from imagen.ndmapping import AttrDict
+from imagen.views import SheetView, SheetStack, ProjectionGrid
 
 import patterngenerator
 from patterngenerator import PatternGenerator
@@ -697,7 +697,7 @@ class CFProjection(Projection):
         return self.cfs[r,c].get_bounds(self.src)
 
 
-    def get_view(self, sheet_x, sheet_y, timestamp=None):
+    def view(self, sheet_x, sheet_y, timestamp=None):
         """
         Return a single connection field SheetView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
@@ -711,10 +711,16 @@ class CFProjection(Projection):
 
         sv = SheetView(matrix_data, self.src.bounds, roi=(r1, r2, c1, c2))
 
-        return NdMapping((timestamp, sv), coords=(sheet_x, sheet_y),
-                      dest_name=self.dest.name, precedence=self.src.precedence,
-                      proj_name=self.name, src_name=self.src.name,
-                      row_precedence=self.src.row_precedence)
+        return SheetStack((timestamp, sv), coords=(sheet_x, sheet_y),
+                          dimension_labels=['Time'], dest_name=self.dest.name,
+                          precedence=self.src.precedence,
+                          proj_name=self.name, src_name=self.src.name,
+                          row_precedence=self.src.row_precedence)
+
+
+    def get_view(self, sheet_x, sheet_y, timestamp=None):
+        self.warning("Deprecated, call 'view' method instead.")
+        return self.view(sheet_x, sheet_y, timestamp)
 
 
     def activate(self,input_activity):
@@ -932,7 +938,7 @@ class CFSheet(ProjectionSheet):
             if not isinstance(p,CFProjection):
                 self.debug("Skipping non-CFProjection "+p.name)
             elif proj_name == '' or p.name==proj_name:
-                v = p.get_view(x, y, self.simulation.time())
+                v = p.view(x, y, self.simulation.time())
                 cfs = self.views.cfs
                 if p.name not in cfs:
                     p._make_cf_grid()

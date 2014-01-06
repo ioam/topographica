@@ -8,7 +8,7 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from imagen.views import SheetView, NdMapping
+from imagen.views import SheetView, SheetStack
 from imagen.odict import OrderedDict
 
 from topo.misc.attrdict import AttrDict
@@ -291,13 +291,19 @@ class Projection(EPConnection):
                 of.restore_plasticity_state()
 
 
-    def get_projection_view(self, timestamp):
+    def projection_view(self, timestamp):
         """Returns the activity in a single projection"""
         sv = SheetView(self.activity.copy(), self.dest.bounds)
-        return NdMapping((timestamp, sv), proj_src_name=self.src.name,
-                         precedence=self.src.precedence, proj_name=self.name,
-                         row_precedence=self.src.row_precedence,
-                         src_name=self.dest.name, timestamp=timestamp)
+        return SheetStack((timestamp, sv), dimension_labels=['Time'],
+                          proj_src_name=self.src.name,
+                          precedence=self.src.precedence, proj_name=self.name,
+                          row_precedence=self.src.row_precedence,
+                          src_name=self.dest.name, timestamp=timestamp)
+
+
+    def get_projection_view(self, timestamp):
+        self.warning("Deprecated, call 'projection_view' method instead.")
+        return self.projection_view(timestamp)
 
 
     def n_bytes(self):

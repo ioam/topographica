@@ -110,7 +110,7 @@ class update_projectionactivity(ProjectionSheetMeasurementCommand):
                     if not isinstance(conn,Projection):
                         topo.sim.debug("Skipping non-Projection "+conn.name)
                     else:
-                        v = conn.get_projection_view(topo.sim.time())
+                        v = conn.projection_view(topo.sim.time())
                         key = v.metadata.proj_name + 'ProjectionActivity'
                         topo.sim[v.metadata.src_name].views.maps[key] = v
 
