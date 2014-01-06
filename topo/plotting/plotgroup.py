@@ -1033,7 +1033,7 @@ class RFProjectionPlotGroup(GridPlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         input=self.input_sheet.name
-        rf_view = getattr(self.sheet.views.rfs, input, {})
+        rf_view = self.sheet.views.rfs.get(input, {})
         view_dict = {'Hue': rf_view, 'Strength': rf_view, 'Confidence': rf_view}
         return make_template_plot(self._channels(plot_template, **kw),
                                   view_dict,
