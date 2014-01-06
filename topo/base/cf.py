@@ -616,18 +616,18 @@ class CFProjection(Projection):
         ### happening
         self.input_buffer = None
         self.activity = np.array(self.dest.activity)
-        self._make_cf_grid()
-
-
-    def _make_cf_grid(self):
         if 'cfs' not in self.dest.views:
             self.dest.views.cfs = AttrDict()
-        self.dest.views.cfs[self.name] = ProjectionGrid(bounds=self.dest.bounds,
-                                                        shape=self.activity.shape,
-                                                        proj_name=self.name,
-                                                        proj_src_name=self.src.name,
-                                                        proj_dest_name=self.dest.name,
-                                                        timestamp=self.src.simulation.time())
+        self.dest.views.cfs[self.name] = self._cf_grid()
+
+
+    def _cf_grid(self, shape=None):
+        "Create ProjectionGrid with the correct metadata."
+        shape = self.dest.shape if shape is None else shape
+        return ProjectionGrid(bounds=self.dest.bounds, shape=shape,
+                              proj_name=self.name, proj_src_name=self.src.name,
+                              proj_dest_name=self.dest.name,
+                              timestamp=self.src.simulation.time())
 
 
     def _generate_coords(self):
@@ -695,6 +695,19 @@ class CFProjection(Projection):
     def cf_bounds(self,r,c):
         """Return the bounds of the specified ConnectionField."""
         return self.cfs[r,c].get_bounds(self.src)
+    
+    
+    def grid(self, rows=10, cols=10):
+        dim1, dim2 = self.dest.shape
+        l, t = self.dest.matrixidx2sheet(0, 0)
+        r, b = self.dest.matrixidx2sheet(dim1-1, dim2-1)
+        x, y = np.meshgrid(np.linspace(l, r, cols),
+                           np.linspace(b, t, rows))
+        coords = zip(x.flat, y.flat)
+        grid = self._cf_grid(shape=(cols, rows))
+        for x, y in coords:
+            grid[x, y] = self.view(x, y)
+        return grid
 
 
     def view(self, sheet_x, sheet_y, timestamp=None):
@@ -941,7 +954,7 @@ class CFSheet(ProjectionSheet):
                 v = p.view(x, y, self.simulation.time())
                 cfs = self.views.cfs
                 if p.name not in cfs:
-                    p._make_cf_grid()
+                    cfs[p.name] = p._cf_grid()
                 cfs[p.name][x, y] = v
 
 

@@ -95,6 +95,20 @@ class update_projection(UnitMeasurementCommand):
 
 
 
+class measure_projection(param.ParameterizedFunction):
+
+    rows = param.Number(default=10, doc="Number of CF rows.")
+
+    cols = param.Number(default=10, doc="Number of CF columns.")
+
+    projection = param.ObjectSelector(default=None, constant=True)
+
+    def __call__(self, **params):
+        p = ParamOverrides(self, params)
+        return p.projection.grid(p.rows, p.cols)
+
+
+
 class update_projectionactivity(ProjectionSheetMeasurementCommand):
     """
     Add SheetViews for all of the Projections of the ProjectionSheet
