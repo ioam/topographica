@@ -2,20 +2,20 @@
 """
 GCAL
 
-Simple but robust single-population V1 model orientation map from: 
+Simple but robust single-population V1 model orientation map from:
 
-   Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar. 
+   Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar.
    Mechanisms for stable, robust, and adaptive development of orientation
    maps in the primary visual cortex.
 
 @article{Stevens02102013,
-   author = {Stevens, Jean-Luc R. and Law, Judith S. and Antolik, Jan and Bednar, James A.}, 
+   author = {Stevens, Jean-Luc R. and Law, Judith S. and Antolik, Jan and Bednar, James A.},
    title = {Mechanisms for Stable, Robust, and Adaptive Development of Orientation Maps in the Primary Visual Cortex},
-   journal = {The Journal of Neuroscience} 
-   volume = {33}, 
-   number = {40}, 
-   pages = {15747-15766}, 
-   year = {2013}, 
+   journal = {The Journal of Neuroscience}
+   volume = {33},
+   number = {40},
+   pages = {15747-15766},
+   year = {2013},
    doi = {10.1523/JNEUROSCI.1037-13.2013},
    url = {http://www.jneurosci.org/content/33/40/15747.full}
 }
@@ -43,9 +43,9 @@ from topo.base.arrayutil import DivideWithConstant
 from topo.transferfn.misc import HomeostaticResponse
 from topo.misc.commandline import global_params as p
 
-p.add( 
+p.add(
 
-    input_seed = param.Integer(default=42, doc="""
+    input_seed = param.Integer(default=102, doc="""
          The random seed to set the input patterns"""),
 
     dataset=param.ObjectSelector(default='Gaussian',objects=
@@ -53,13 +53,13 @@ p.add(
         Set of input patterns to use::
           :'Gaussian': Two-dimensional Gaussians
           :'Nature':   Shouval's 1999 monochrome 256x256 images.
-          :'VGR':       Simulated vertical goggle rearing 
+          :'VGR':       Simulated vertical goggle rearing
                        (anisotropically blurred Shouval)"""),
 
     num_inputs=param.Integer(default=2,bounds=(1,None),doc="""
         How many input patterns to present per unit area at each
         iteration, when using discrete patterns (e.g. Gaussians)."""),
-        
+
     aff_strength=param.Number(default=1.5,bounds=(0.0,None),doc="""
         Overall strength of the afferent projection to V1."""),
 
@@ -77,7 +77,7 @@ p.add(
 
     inh_lr=param.Number(default=0.3,bounds=(0.0,None),doc="""
         Learning rate for the lateral inhibitory projection to V1."""),
-        
+
     area=param.Number(default=1.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
         Linear size of cortical area to simulate.
@@ -94,9 +94,9 @@ p.add(
     cortex_density=param.Number(default=49.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
         The nominal_density to use for V1."""),
-    
+
     # Noisy disk parameters
-    
+
     retinal_waves=param.Integer(default=0,bounds=(0,None),doc="""
         How many retinal wave (noisy disk) presentations before the
         chosen dataset is displayed. Zero for no noisy disk
@@ -108,7 +108,7 @@ p.add(
     contrast=param.Number(default=20, bounds=(0,100),
         inclusive_bounds=(True,True),doc="""
         Brightness of the input patterns as a contrast (percent)."""),
-    
+
     # Toggle between the L, GCL, AL and GCAL models
 
     gain_control = param.Boolean(default=True, doc="""
@@ -154,7 +154,7 @@ if p.dataset in ["Nature", "VGR"]:
                 x=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=p.input_seed+12),
                 y=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=p.input_seed+36),
                 orientation=patch_orientation)  for f in image_filenames]
-    
+
     combined_inputs = pattern.Selector(generators=inputs)
 
 noise_ratio = (p.percent_noise / 100.0)
@@ -168,11 +168,11 @@ disks_inputs=[topo.pattern.Composite(operator=numpy.add,
                         y=numbergen.UniformRandom(lbound=-2.125,ubound=2.125, seed=p.input_seed+36),
                                                  size=2.0, aspect_ratio=1.0, scale = disk_scale,
                                                  bounds=sheet.BoundingBox(radius=1.125),smoothing=0.1),
-                               
+
                              topo.pattern.random.UniformRandom(scale=rand_scale)])]
 
 retina_inputs = topo.pattern.Selector(generators=disks_inputs)
-    
+
 if p.retinal_waves == 0:
     retina_inputs = combined_inputs
 else:
@@ -195,15 +195,15 @@ lgn_surroundg = pattern.Gaussian(size=0.25,aspect_ratio=1.0, output_fns=[transfe
 for s in ['LGNOn','LGNOff']:
 
     extra_kwargs = dict(tsettle=2,strict_tsettle=1) if p.gain_control else dict(tsettle=0,strict_tsettle=0)
-    
+
     topo.sim[s]=sheet.optimized.LISSOM_Opt(
                     nominal_density=p.lgn_density,
                     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25+0.5),
-                    output_fns=[transferfn.misc.HalfRectify()], 
+                    output_fns=[transferfn.misc.HalfRectify()],
                     measure_maps=False, **extra_kwargs)
-    
-    if p.gain_control:                                           
-        
+
+    if p.gain_control:
+
         topo.sim.connect(s,s,delay=0.05, name='LateralGC',
                     dest_port=("Activity"),activity_group=(0.6, DivideWithConstant(c=0.11)),
                     connection_type=projection.SharedWeightCFProjection,
