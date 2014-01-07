@@ -291,8 +291,10 @@ class Projection(EPConnection):
                 of.restore_plasticity_state()
 
 
-    def projection_view(self, timestamp):
+    def projection_view(self, timestamp=None):
         """Returns the activity in a single projection"""
+        if timestamp is None:
+            timestamp = self.src.simulation.time()
         sv = SheetView(self.activity.copy(), self.dest.bounds)
         return SheetStack((timestamp, sv), dimension_labels=['Time'],
                           proj_src_name=self.src.name,
