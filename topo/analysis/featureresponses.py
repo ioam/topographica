@@ -24,12 +24,12 @@ from topo.misc.attrdict import AttrDict
 from topo import pattern
 from topo.sheet import GeneratorSheet
 
-from fmapper.command import PatternPresentingCommand, MeasureResponseCommand,\
+from featuremapper.command import PatternPresentingCommand, MeasureResponseCommand,\
     SingleInputResponseCommand, SinusoidalMeasureResponseCommand, PositionMeasurementCommand,\
     FeatureCurveCommand, UnitCurveCommand
-from fmapper import MeasurementInterrupt, DistributionMatrix, FullMatrix, FeatureResponses,\
+from featuremapper import MeasurementInterrupt, DistributionMatrix, FullMatrix, FeatureResponses,\
     ReverseCorrelation, FeatureMaps, FeatureCurves, Feature
-from fmapper.metaparams import *  # pyflakes:ignore (API import)
+from featuremapper.metaparams import *  # pyflakes:ignore (API import)
 
 activity_dtype = np.float64
 

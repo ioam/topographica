@@ -16,7 +16,7 @@ from param import resolve_path
 from imagen.random import UniformRandom
 from imagen.odict import OrderedDict
 
-from fmapper import distribution
+from featuremapper import distribution
 
 import topo
 from topo.command import pylabplot

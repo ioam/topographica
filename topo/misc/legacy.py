@@ -647,7 +647,7 @@ support[90800454] = moved_Subplotting
 
 
 def moved_distribution():
-    from fmapper import distribution
+    from featuremapper import distribution
     allow_import(distribution, 'topo.misc.distribution')
 
 support[90800481] = moved_distribution

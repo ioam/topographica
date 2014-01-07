@@ -7,7 +7,7 @@ Tests of distribution.py
 # finished in distribution.
 
 import unittest
-from fmapper.distribution import Distribution, DSF_WeightedAverage
+from featuremapper.distribution import Distribution, DSF_WeightedAverage
 import copy
 
 # for testing the statistics

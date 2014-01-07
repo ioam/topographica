@@ -23,8 +23,8 @@ from topo.learningfn.optimized import CFPLF_Hebbian
 from topo.analysis.featureresponses import pattern_response
 
 from imagen import SineGrating
-from fmapper import Feature, DistributionMatrix, FeatureMaps
-from fmapper.distribution import DSF_WeightedAverage
+from featuremapper import Feature, DistributionMatrix, FeatureMaps
+from featuremapper.distribution import DSF_WeightedAverage
 
 # globals to use weighted_average, selectivity, vector_sum, which are not methods
 # of DistributionMatrix any more

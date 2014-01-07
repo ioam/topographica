@@ -21,7 +21,7 @@ import numpy as np
 
 from imagen.views import SheetView, SheetStack
 
-from fmapper.command import * # pyflakes:ignore (API import)
+from featuremapper.command import * # pyflakes:ignore (API import)
 
 import param
 from param import ParameterizedFunction, ParamOverrides

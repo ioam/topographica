@@ -46,7 +46,7 @@ def snapshot(filename):
 def or_analysis():
     """Return a command for orientation analysis."""
     return """\
-from fmapper.command import measure_or_pref ; \
+from featuremapper.command import measure_or_pref ; \
 from topo.command.analysis import measure_cog ; \
 measure_or_pref(); \
 measure_cog()"""
@@ -54,7 +54,7 @@ measure_cog()"""
 def retinotopy_analysis():
     """Return a command for retinotopy analysis."""
     return """\
-from fmapper.command import measure_position_pref ; \
+from featuremapper.command import measure_position_pref ; \
 from topo.command.analysis import measure_cog ; \
 measure_position_pref(); \
 measure_cog()"""

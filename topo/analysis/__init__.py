@@ -6,7 +6,7 @@ from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
     FeatureMaps, ReverseCorrelation, MeasureResponseCommand, pattern_response,\
     topo_metadata_fn, store_rfs, store_maps, store_curves, store_activity, \
     get_feature_preference
-from fmapper.command import measure_activity
+from featuremapper.command import measure_activity
 
 FeatureResponses.metadata_fns = [topo_metadata_fn]
 FeatureResponses.pattern_response_fn = pattern_response.instance()
