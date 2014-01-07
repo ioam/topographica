@@ -624,9 +624,8 @@ class CFProjection(Projection):
     def _cf_grid(self, shape=None):
         "Create ProjectionGrid with the correct metadata."
         shape = self.dest.shape if shape is None else shape
-        return ProjectionGrid(bounds=self.dest.bounds, shape=shape,
-                              proj_name=self.name, proj_src_name=self.src.name,
-                              proj_dest_name=self.dest.name,
+        return ProjectionGrid(self.dest.bounds, shape, proj_name=self.name,
+                              proj_src_name=self.src.name, proj_dest_name=self.dest.name,
                               timestamp=self.src.simulation.time())
 
 
@@ -719,10 +718,11 @@ class CFProjection(Projection):
             timestamp = self.src.simulation.time()
         matrix_data = np.zeros(self.src.activity.shape, dtype=np.float64)
         (r, c) = self.dest.sheet2matrixidx(sheet_x, sheet_y)
-        r1, r2, c1, c2 = self.cfs[r, c].input_sheet_slice
-        matrix_data[r1:r2, c1:c2] = self.cfs[r, c].weights
+        cf = self.cfs[r, c]
+        r1, r2, c1, c2 = cf.input_sheet_slice
+        matrix_data[r1:r2, c1:c2] = cf.weights
 
-        sv = SheetView(matrix_data, self.src.bounds, roi=(r1, r2, c1, c2))
+        sv = SheetView(matrix_data, self.src.bounds, roi_bounds=cf.get_bounds(self.src))
 
         return SheetStack((timestamp, sv), coords=(sheet_x, sheet_y),
                           dimension_labels=['Time'], dest_name=self.dest.name,
