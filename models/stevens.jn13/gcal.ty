@@ -105,7 +105,7 @@ p.add(
     percent_noise = param.Number(default=50, doc="""
        The percentage of the noise strength to the disk strength for noisy disks"""),
 
-    contrast=param.Number(default=20, bounds=(0,100),
+    contrast=param.Number(default=25, bounds=(0,100),
         inclusive_bounds=(True,True),doc="""
         Brightness of the input patterns as a contrast (percent)."""),
 
