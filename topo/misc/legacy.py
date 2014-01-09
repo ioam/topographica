@@ -571,6 +571,7 @@ def featuremapper_legacy():
         views = state['views']
         views['maps'] = AttrDict()
         views['cfs'] = AttrDict()
+        views['rfs'] = AttrDict()
         views['curves'] = AttrDict()
         if 'sheet_views' in state:
             svs = state['sheet_views']
@@ -695,6 +696,42 @@ def replace_keyedlist():
     setattr(sys.modules['topo.misc'], 'keyedlist', odict)
 
 support[90800491] = replace_keyedlist
+
+def fmapper_rename():
+    import featuremapper
+    allow_import(featuremapper, 'fmapper')
+
+    param_no_restore = {'SheetView': ('bounds',),
+                        'ProjectionGrid': ('bounds',)}
+    PicklableClassAttributes.deleted_params.update(param_no_restore)
+
+    import imagen
+    def remove_shape(instance,state):
+        if 'shape' in state:
+            x, y = state.pop('shape')
+        elif '_shape_param_value' in state:
+            x, y = state.pop('_shape_param_value')
+        if '_bounds_param_value' in state:
+            bounds = state.pop('_bounds_param_value')
+        elif 'scs' in state:
+            bounds = state.pop('scs').bounds
+        l, b, r, t = bounds.lbrt()
+
+        cl_name = 'SheetCoordinateSystem'
+        xdensity = x/(r-l)
+        ydensity = y/(t-b)
+        state['_{cl}__xdensity'.format(cl=cl_name)] = xdensity
+        state['_{cl}__xstep'.format(cl=cl_name)] = 1.0/xdensity
+        state['_{cl}__ydensity'.format(cl=cl_name)] = ydensity
+        state['_{cl}__ystep'.format(cl=cl_name)] = 1.0/ydensity
+        state['_{cl}__shape'.format(cl=cl_name)] = (x, y)
+        state['lbrt'] = (l, b, r, t)
+        state['bounds'] = bounds
+
+    preprocess_state(imagen.views.SheetView, remove_shape)
+    preprocess_state(imagen.views.ProjectionGrid, remove_shape)
+
+support[90800536] = fmapper_rename
 
 ######################################################################
 ######################################################################

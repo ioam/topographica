@@ -624,7 +624,7 @@ class CFProjection(Projection):
     def _cf_grid(self, shape=None):
         "Create ProjectionGrid with the correct metadata."
         shape = self.dest.shape if shape is None else shape
-        return ProjectionGrid(self.dest.bounds, shape, proj_name=self.name,
+        return ProjectionGrid(bounds=self.dest.bounds, shape=shape, proj_name=self.name,
                               proj_src_name=self.src.name, proj_dest_name=self.dest.name,
                               timestamp=self.src.simulation.time())
 
