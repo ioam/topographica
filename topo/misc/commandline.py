@@ -483,6 +483,19 @@ topo_parser.add_option("-c","--command",action = "callback",callback=c_action,ty
                        help="string of arbitrary Python code to be executed in the main namespace")
 
 
+def n_action(option,opt_str,value,parser):
+    from IPython.html.notebookapp import NotebookApp
+    sys.argv = ['notebook']
+    NotebookApp.open_browser = False
+    NotebookApp.port = int(os.environ.get('PORT',8888))
+    NotebookApp().launch_instance()
+    global something_executed
+    something_executed=True
+
+topo_parser.add_option("-n","--notebook",action = "callback",callback=n_action,
+                       default=False,dest="notebook",
+                       help="launch the IPython Notebook interface")
+
 
 def p_action(option,opt_str,value,parser):
     """Callback function for the -p option."""
