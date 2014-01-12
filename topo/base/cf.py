@@ -621,12 +621,12 @@ class CFProjection(Projection):
         self.dest.views.cfs[self.name] = self._cf_grid()
 
 
-    def _cf_grid(self, shape=None):
+    def _cf_grid(self, shape=None, **kwargs):
         "Create ProjectionGrid with the correct metadata."
         shape = self.dest.shape if shape is None else shape
-        return ProjectionGrid(bounds=self.dest.bounds, shape=shape, proj_name=self.name,
+        return ProjectionGrid(self.dest.bounds, shape, info=self.name,
                               proj_src_name=self.src.name, proj_dest_name=self.dest.name,
-                              timestamp=self.src.simulation.time())
+                              timestamp=self.src.simulation.time(), **kwargs)
 
 
     def _generate_coords(self):
@@ -696,20 +696,20 @@ class CFProjection(Projection):
         return self.cfs[r,c].get_bounds(self.src)
     
     
-    def grid(self, rows=10, cols=10):
+    def grid(self, rows=10, cols=10, **kwargs):
         dim1, dim2 = self.dest.shape
         l, t = self.dest.matrixidx2sheet(0, 0)
         r, b = self.dest.matrixidx2sheet(dim1-1, dim2-1)
         x, y = np.meshgrid(np.linspace(l, r, cols),
                            np.linspace(b, t, rows))
         coords = zip(x.flat, y.flat)
-        grid = self._cf_grid(shape=(cols, rows))
+        grid = self._cf_grid(shape=(cols, rows), **kwargs)
         for x, y in coords:
-            grid[x, y] = self.view(x, y)
+            grid[x, y] = self.view(x, y, **kwargs)
         return grid
 
 
-    def view(self, sheet_x, sheet_y, timestamp=None):
+    def view(self, sheet_x, sheet_y, timestamp=None, **kwargs):
         """
         Return a single connection field SheetView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
@@ -728,7 +728,7 @@ class CFProjection(Projection):
                           dimension_labels=['Time'], dest_name=self.dest.name,
                           precedence=self.src.precedence,
                           proj_name=self.name, src_name=self.src.name,
-                          row_precedence=self.src.row_precedence)
+                          row_precedence=self.src.row_precedence, **kwargs)
 
 
     def get_view(self, sheet_x, sheet_y, timestamp=None):
