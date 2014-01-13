@@ -19,7 +19,7 @@ PlotGroupTemplate for more information.
 
 import numpy as np
 
-from imagen.views import SheetView, SheetStack
+from imagen.views import SheetView, SheetStack, SheetContours
 
 from featuremapper.command import * # pyflakes:ignore (API import)
 
@@ -152,8 +152,11 @@ class measure_cog(ParameterizedFunction):
         Name of the projection to measure; the empty string means 'the first
         non-self connection available'.""")
 
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
+    stride = param.Integer(default=1, doc="Stride by which to skip grid lines"
+                                          "in the CoG Wireframe.")
+
+    def __call__(self, **params):
+        p = ParamOverrides(self, params)
 
         measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
                            if hasattr(s,'measure_maps') and s.measure_maps]
@@ -172,18 +175,18 @@ class measure_cog(ParameterizedFunction):
             for proj in sheet.in_connections:
                 if (proj.name == requested_proj) or \
                    (requested_proj == '' and (proj.src != sheet)):
-                   results[sheet.name][proj.name] = self._update_proj_cog(proj)
+                   results[sheet.name][proj.name] = self._update_proj_cog(p, proj)
 
         return results
 
 
-    def _update_proj_cog(self,proj):
+    def _update_proj_cog(self, p, proj):
         """Measure the CoG of the specified projection and register corresponding SheetViews."""
 
-        sheet=proj.dest
+        sheet = proj.dest
         rows, cols = sheet.activity.shape
-        xpref = np.zeros((rows, cols), np.float64)
-        ypref = np.zeros((rows, cols), np.float64)
+        xcog = np.zeros((rows, cols), np.float64)
+        ycog = np.zeros((rows, cols), np.float64)
 
         for r in xrange(rows):
             for c in xrange(cols):
@@ -194,27 +197,43 @@ class measure_cog(ParameterizedFunction):
                     r1 + row_centroid + 0.5,
                     c1 + col_centroid + 0.5)
 
-                xpref[r][c]= xcentroid
-                ypref[r][c]= ycentroid
+                xcog[r][c] = xcentroid
+                ycog[r][c] = ycentroid
 
         metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
                         src_name=sheet.name, dimension_labels=['Time'])
 
         timestamp = topo.sim.time()
-        xpref_stack = SheetStack((timestamp, SheetView(xpref, sheet.bounds)), **metadata)
-        ypref_stack = SheetStack((timestamp, SheetView(ypref, sheet.bounds)), **metadata)
+        xsv = SheetView(xcog, sheet.bounds)
+        ysv = SheetView(ycog, sheet.bounds)
+
+        lines = []
+        hlines, vlines = xsv.data.shape
+        for hind in range(hlines)[::p.stride]:
+            lines.append(np.vstack([xsv.data[hind,:].T, ysv.data[hind,:]]).T)
+        for vind in range(vlines)[::p.stride]:
+            lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
+
+        xcog_stack = SheetStack((timestamp, xsv), **metadata)
+        ycog_stack = SheetStack((timestamp, ysv), **metadata)
+        contour_stack = SheetStack((timestamp, SheetContours(lines, sheet.bounds)), **metadata)
 
         if 'XCoG' in sheet.views.maps:
-            sheet.views.maps['XCoG'].update(xpref_stack)
+            sheet.views.maps['XCoG'].update(xcog_stack)
         else:
-            sheet.views.maps['XCoG'] = xpref_stack
+            sheet.views.maps['XCoG'] = xcog_stack
 
         if 'YCoG' in sheet.views.maps:
-            sheet.views.maps['YCoG'].update(ypref_stack)
+            sheet.views.maps['YCoG'].update(ycog_stack)
         else:
-            sheet.views.maps['YCoG'] = ypref_stack
+            sheet.views.maps['YCoG'] = ycog_stack
 
-        return {'XCoG': xpref_stack, 'YCoG': ypref_stack}
+        if 'CoG' in sheet.views.maps:
+            sheet.views.maps['CoG'].update(contour_stack)
+        else:
+            sheet.views.maps['CoG'] = contour_stack
+
+        return {'XCoG': xcog_stack, 'YCoG': ycog_stack, 'CoG': contour_stack}
 
 
 import types
