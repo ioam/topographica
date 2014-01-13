@@ -158,6 +158,8 @@ class measure_cog(ParameterizedFunction):
         measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
                            if hasattr(s,'measure_maps') and s.measure_maps]
 
+        results = {}
+
         # Could easily be extended to measure CoG of all projections
         # and e.g. register them using different names (e.g. "Afferent
         # XCoG"), but then it's not clear how the PlotGroup would be
@@ -165,14 +167,14 @@ class measure_cog(ParameterizedFunction):
         # only a fixed-named plot).
         requested_proj=p.proj_name
         for sheet in measured_sheets:
+            if sheet not in results:
+                results[sheet.name] = {}
             for proj in sheet.in_connections:
                 if (proj.name == requested_proj) or \
                    (requested_proj == '' and (proj.src != sheet)):
-                    self._update_proj_cog(proj)
-                    if requested_proj=='':
-                        print "measure_cog: Measured %s projection %s from %s" % \
-                              (proj.dest.name,proj.name,proj.src.name)
-                        break
+                   results[sheet.name][proj.name] = self._update_proj_cog(proj)
+
+        return results
 
 
     def _update_proj_cog(self,proj):
@@ -196,16 +198,23 @@ class measure_cog(ParameterizedFunction):
                 ypref[r][c]= ycentroid
 
         metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
-                        src_name=sheet.name)
+                        src_name=sheet.name, dimension_labels=['Time'])
 
-        timestamp=topo.sim.time()
+        timestamp = topo.sim.time()
+        xpref_stack = SheetStack((timestamp, SheetView(xpref, sheet.bounds)), **metadata)
+        ypref_stack = SheetStack((timestamp, SheetView(ypref, sheet.bounds)), **metadata)
 
-        xpref_sv = SheetView(xpref, sheet.bounds)
-        ypref_sv = SheetView(ypref, sheet.bounds)
+        if 'XCoG' in sheet.views.maps:
+            sheet.views.maps['XCoG'].update(xpref_stack)
+        else:
+            sheet.views.maps['XCoG'] = xpref_stack
 
-        sheet.views.maps['XCoG'] = SheetStack((timestamp, xpref_sv), **metadata)
+        if 'YCoG' in sheet.views.maps:
+            sheet.views.maps['YCoG'].update(ypref_stack)
+        else:
+            sheet.views.maps['YCoG'] = ypref_stack
 
-        sheet.views.maps['YCoG'] = SheetStack((timestamp, ypref_sv), **metadata)
+        return {'XCoG': xpref_stack, 'YCoG': ypref_stack}
 
 
 import types
