@@ -330,9 +330,9 @@ def store_rfs(measurement_dict):
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
         for data_name, data in sheet_data.items():
-            new_data = data.empty()
-            for k, v in data.items():
-                new_data[k] = v.add_dimension('Time', 0, data.metadata.timestamp)
+            reindexed_items = [(k, v.add_dimension('Time', 0, data.metadata.timestamp))
+                               for k, v in data.items()]
+            new_data = data.clone(reindexed_items)
             if data_name not in sheet.views.rfs:
                 sheet.views.rfs[data_name] = new_data
             else:
