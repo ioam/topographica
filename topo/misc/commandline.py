@@ -486,11 +486,11 @@ topo_parser.add_option("-c","--command",action = "callback",callback=c_action,ty
 def n_action(option,opt_str,value,parser):
     from IPython.html.notebookapp import NotebookApp
     sys.argv = ['notebook']
-    NotebookApp.open_browser = False
-    NotebookApp.port = int(os.environ.get('PORT',8888))
+    NotebookApp.ipython_dir = param.resolve_path('platform/ipython', path_to_file=False)
+    NotebookApp.profile = 'topo'
     NotebookApp().launch_instance()
     global something_executed
-    something_executed=True
+    something_executed = True
 
 topo_parser.add_option("-n","--notebook",action = "callback",callback=n_action,
                        default=False,dest="notebook",

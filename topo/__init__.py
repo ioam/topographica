@@ -50,14 +50,8 @@ __all__ = ['analysis',
 # First, try Git; if that fails, try to read the release file.
 
 from subprocess import Popen, CalledProcessError, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
-import os, sys
 
-(basepath, _) = os.path.split(os.path.abspath(__file__))
-sys.path = [os.path.join(basepath, '../', 'external', 'param')] + sys.path
-sys.path = [os.path.join(basepath, '../', 'external', 'paramtk')] + sys.path
-sys.path = [os.path.join(basepath, '../', 'external', 'imagen')] + sys.path
-sys.path = [os.path.join(basepath, '../', 'external', 'lancet')] + sys.path
-sys.path = [os.path.join(basepath, '../', 'external', 'featuremapper')] + sys.path
+import os
 
 import param
 import imagen

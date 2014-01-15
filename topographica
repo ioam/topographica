@@ -30,6 +30,15 @@ if len(argv) > 1 and argv[1] == 'make-release-file':
     print "Release file %s created." % release_filename
     sys.exit(0)
 
+import os, sys
+
+(basepath, _) = os.path.split(os.path.abspath(__file__))
+sys.path = [os.path.join(basepath, 'external', 'param')] + sys.path
+sys.path = [os.path.join(basepath, 'external', 'paramtk')] + sys.path
+sys.path = [os.path.join(basepath, 'external', 'imagen')] + sys.path
+sys.path = [os.path.join(basepath, 'external', 'lancet')] + sys.path
+sys.path = [os.path.join(basepath, 'external', 'featuremapper')] + sys.path
+
 import topo
 
 # Process the command-line arguments
