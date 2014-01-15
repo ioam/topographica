@@ -582,9 +582,15 @@ def t_action(option,opt_str,value,parser):
         return_code += abs(ret)
 
     if "unit" in local_targets:
-        ret = subprocess.call(["nosetests", "-v", "--with-doctest",
-                               "--doctest-extension=txt"])
-        return_code += abs(ret)
+        env = os.environ.copy()
+        pypath = env.get('PYTHONPATH','')
+        external = param.resolve_path('external', path_to_file=False)
+        submodules = ['param', 'paramtk', 'imagen', 'featuremapper', 'lancet']
+        env['PYTHONPATH'] = pypath + ':'.join(os.path.join(external, m ) for m in submodules)
+        proc = subprocess.Popen(["nosetests", "-v", "--with-doctest",
+                                 "--doctest-extension=txt"], env=env)
+        proc.wait()
+        return_code += abs(proc.returncode)
 
     if "coverage" in local_targets:
         ret = subprocess.call(["nosetests", "-v", "--with-doctest",
