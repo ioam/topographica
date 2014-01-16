@@ -19,7 +19,7 @@ PlotGroupTemplate for more information.
 
 import numpy as np
 
-from imagen.views import SheetView, SheetStack, SheetContours
+from imagen.views import SheetView, SheetStack, SheetLines
 
 from featuremapper.command import * # pyflakes:ignore (API import)
 
@@ -216,7 +216,7 @@ class measure_cog(ParameterizedFunction):
 
         xcog_stack = SheetStack((timestamp, xsv), **metadata)
         ycog_stack = SheetStack((timestamp, ysv), **metadata)
-        contour_stack = SheetStack((timestamp, SheetContours(lines, sheet.bounds)), **metadata)
+        contour_stack = SheetStack((timestamp, SheetLines(lines, sheet.bounds)), **metadata)
 
         if 'XCoG' in sheet.views.maps:
             sheet.views.maps['XCoG'].update(xcog_stack)
