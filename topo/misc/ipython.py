@@ -6,28 +6,19 @@ loaded using:
 %load_ext topo.misc.ipython
 """
 import topo
-import imagen
 import param
 import os, time, difflib, uuid, sys
-from matplotlib import pyplot as plt
-
 
 try:
-    from IPython.core.pylabtools import print_figure
     from IPython.display import HTML, Javascript, display
 except:
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
 
-
-from imagen.views import SheetView
-from topo.base.sheet import Sheet
-from topo.base.projection import Projection
-from topo.command import pylabplot, analysis
-
 # Pylabplots should return a matplotlib figure when working in Notebook
 # otherwise open display windows for the Topographica Tk GUI
 if not isinstance(sys.stdout, file):
+    from topo.command import pylabplot
     pylabplot.PylabPlotCommand.display_window = False
 
 class ProgressBar(param.Parameterized):
@@ -135,66 +126,24 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
 # Display hooks #
 #===============#
 
-from topo.analysis.featureresponses import update_sheet_activity
-
-def sheet_activity_display(sheet, size=256, format='svg'):
-    if not isinstance(sheet, Sheet): return None
-    update_sheet_activity(sheet.name, force=True)
-    return sheetview_display(sheet.views.maps._activity_buffer.top,
-                             size=size, format=format)
-
-
-def projection_activity_display(projection, size=256, format='svg'):
-    if not isinstance(projection, Projection): return None
-    analysis.update_projectionactivity(outputs=[projection.dest.name])
-    view = projection.dest.views.maps[projection.name+'ProjectionActivity'].top
-    return sheetview_display(view, size=size, format=format)
-
-
-def pattern_display(pattern, size=256, format='svg'):
-    if not isinstance(pattern, imagen.PatternGenerator): return None
-    view = SheetView(pattern(xdensity=size, ydensity=size), pattern.bounds)
-    return sheetview_display(view, size=size, format=format)
-
-def sheetview_display(sheetview, size=256, format='svg'):
-    if not isinstance(sheetview, SheetView): return None
-    cyclic = sheetview.cyclic_range is not None
-    plot_type = plt.hsv if cyclic else plt.gray
-    mat = sheetview.data/sheetview.cyclic_range if cyclic else sheetview.data
-    extent = sheetview.bounds.aarect().lbrt()
-    fig = pylabplot.matrixplot(mat,
-                             extent=extent,
-                             plot_type=plot_type)
-    inches = size / float(fig.dpi)
-    fig.set_size_inches(inches, inches)
-    prefix = 'data:image/png;base64,'
-    b64 = prefix + print_figure(fig, 'png').encode("base64")
-    html = "<img height='%d' width='%d' src='%s' />" % (size, size, b64)
-    plt.close(fig)
-    return html
+from imagen.ipython import load_ipython_extension as load_imagen_extension
+from imagen.ipython import sheetstack_display, sheetlayer_display
 
 try:
     from lancet import ViewFrame
-    ViewFrame.display_fns.append(sheetview_display)
-    ViewFrame.display_fns.append(sheet_activity_display)
-    ViewFrame.display_fns.append(projection_activity_display)
-    ViewFrame.display_fns.append(pattern_display)
+    ViewFrame.display_fns.append(sheetstack_display)
+    ViewFrame.display_fns.append(sheetlayer_display)
 except:
     pass
 
 
 _loaded = False
 def load_ipython_extension(ip):
-    from topo.command import runscript
-    runscript.ns = ip.user_ns
-    runscript.push = ip.push
+    load_imagen_extension(ip)
 
     global _loaded
     if not _loaded:
         _loaded = True
-
-        html_formatter = ip.display_formatter.formatters['text/html']
-        html_formatter.for_type(Projection, projection_activity_display)
-        html_formatter.for_type(Sheet, sheet_activity_display)
-        html_formatter.for_type(SheetView, sheetview_display)
-        html_formatter.for_type(imagen.PatternGenerator, pattern_display)
+        from topo.command import runscript
+        runscript.ns = ip.user_ns
+        runscript.push = ip.push
