@@ -29,6 +29,8 @@ from sheetcoords import SheetCoordinateSystem
 from boundingregion import BoundingBox, BoundingRegionParameter
 from functionfamily import TransferFn
 
+from imagen.views import SheetView
+
 activity_type = float64
 
 class AttrDict(dict):
@@ -299,4 +301,13 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         significant amount of data other than in the activity array.
         """
         return self.activity.nbytes
+
+
+    def __getitem__(self, coords):
+        metadata = dict(info=self.name,
+                        precedence=self.precedence,
+                        row_precedence = self.row_precedence,
+                        timestamp = self.simulation.time())
+        return SheetView(self.activity, self.bounds, metadata=metadata)[coords]
+
 
