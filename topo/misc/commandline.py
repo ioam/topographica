@@ -11,6 +11,12 @@ from optparse import OptionParser
 import sys, __main__, math, os, re
 
 import topo
+
+try:
+    from external import sys_paths
+except:
+    pass
+
 import param
 
 from param import parameterized
@@ -547,7 +553,11 @@ def t_action(option,opt_str,value,parser):
                                  "flakes":"Run pyflakes static code checker."}
 
     local_targets = []
-    
+
+    env = os.environ.copy()
+    pypath = env.get('PYTHONPATH','')
+    env['PYTHONPATH'] = pypath + ':'.join(p for p in sys_paths())
+
     # Targets handled in this file
     if value in  ["list","unit","flakes","coverage"]:
         local_targets += [value]
@@ -582,21 +592,18 @@ def t_action(option,opt_str,value,parser):
         return_code += abs(ret)
 
     if "unit" in local_targets:
-        env = os.environ.copy()
-        pypath = env.get('PYTHONPATH','')
-        external = param.resolve_path('external', path_to_file=False)
-        submodules = ['param', 'paramtk', 'imagen', 'featuremapper', 'lancet']
-        env['PYTHONPATH'] = pypath + ':'.join(os.path.join(external, m ) for m in submodules)
         proc = subprocess.Popen(["nosetests", "-v", "--with-doctest",
                                  "--doctest-extension=txt"], env=env)
         proc.wait()
         return_code += abs(proc.returncode)
 
     if "coverage" in local_targets:
-        ret = subprocess.call(["nosetests", "-v", "--with-doctest",
-                               "--doctest-extension=txt", 
-                               "--with-cov", "--cov-report", "html"])
-        return_code += abs(ret)
+        proc = subprocess.Popen(["nosetests", "-v", "--with-doctest",
+                                 "--doctest-extension=txt",
+                                 "--with-cov", "--cov-report", "html"], env=env)
+        proc.wait()
+        return_code += abs(proc.returncode)
+
 
     if value is not None:
         global_params.exec_in_context("targets=['%s']" % value)
