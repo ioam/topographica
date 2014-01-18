@@ -139,7 +139,7 @@ except:
 
 _loaded = False
 def load_ipython_extension(ip):
-    load_imagen_extension(ip)
+    load_imagen_extension(ip, verbose=False)
 
     global _loaded
     if not _loaded:
