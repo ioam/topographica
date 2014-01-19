@@ -19,6 +19,11 @@ from lancet import Command
 from lancet import Launcher, review_and_launch
 from lancet import NumpyFile
 
+try:
+   from external import sys_paths
+   submodules = sys_paths()
+except:
+   submodules = []
 
 from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
@@ -45,13 +50,7 @@ class topo_metadata(param.Parameterized):
       Maximum number of characters that will be shown per message in
       the printed summary.""")
 
-   paths = param.List(default=[
-         os.path.split(param.resolve_path('topographica'))[0],
-         param.resolve_path('external/param',  path_to_file=False),
-         param.resolve_path('external/paramtk',path_to_file=False),
-         param.resolve_path('external/imagen', path_to_file=False),
-         param.resolve_path('external/lancet', path_to_file=False)
-         ], doc="""
+   paths = param.List(default = submodules, doc="""
    List of git repositories including Topographica and relevant
    submodules. Version control information from these repositories
    will be returned as a dictionary when called. The most important
