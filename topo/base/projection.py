@@ -8,7 +8,7 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from imagen.views import SheetView, SheetStack
+from imagen.views import SheetView
 from imagen.odict import OrderedDict
 
 from topo.misc.attrdict import AttrDict
@@ -295,12 +295,13 @@ class Projection(EPConnection):
         """Returns the activity in a single projection"""
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        sv = SheetView(self.activity.copy(), self.dest.bounds)
-        return SheetStack((timestamp, sv), dimension_labels=['Time'],
-                          proj_src_name=self.src.name,
-                          precedence=self.src.precedence, proj_name=self.name,
-                          row_precedence=self.src.row_precedence,
-                          src_name=self.dest.name, timestamp=timestamp)
+        return SheetView(self.activity.copy(), self.dest.bounds,
+                         metadata=dict(proj_src_name=self.src.name,
+                                       precedence=self.src.precedence,
+                                       proj_name=self.name,
+                                       row_precedence=self.src.row_precedence,
+                                       src_name=self.dest.name,
+                                       timestamp=timestamp))
 
 
     def get_projection_view(self, timestamp):

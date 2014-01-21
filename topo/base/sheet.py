@@ -29,7 +29,7 @@ from sheetcoords import SheetCoordinateSystem
 from boundingregion import BoundingBox, BoundingRegionParameter
 from functionfamily import TransferFn
 
-from imagen.views import SheetView, SheetStack
+from imagen.views import SheetView
 
 activity_type = float64
 
@@ -307,8 +307,6 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         metadata = dict(precedence=self.precedence,
                         row_precedence = self.row_precedence,
                         timestamp = self.simulation.time())
-        sv = SheetView(self.activity.copy(), self.bounds, title=self.name, metadata=metadata)[coords]
-        return SheetStack(title=self.name, bounds=self.bounds,
-                          initial_items=[(self.simulation.time(),sv)])
+        return SheetView(self.activity.copy(), self.bounds, title=self.name, metadata=metadata)[coords]
 
 
