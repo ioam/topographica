@@ -326,7 +326,6 @@ def store_rfs(measurement_dict):
     """
     Store RFs in the global sheet views dictionary.
     """
-    time_type = type(param.Dynamic.time_fn.time_type(0))
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
@@ -334,7 +333,8 @@ def store_rfs(measurement_dict):
             dim_len = len(data.dimension_labels)
             add_title = ', {label%s} = {value%s}' % (dim_len, dim_len)
             reindexed_items = [(k, v.add_dimension('Time', 0, data.metadata.timestamp,
-                                                   time_type, title=v.title+add_title))
+                                                   param.Dynamic.time_fn.time_type,
+                                                   title=v.title+add_title))
                                for k, v in data.items()]
             new_data = data.clone(reindexed_items)
             if data_name not in sheet.views.rfs:
@@ -348,12 +348,12 @@ def store_curves(measurement_dict):
     Store curves in the global sheet views dictionary.
     """
     measurement_dict.pop('fullmatrix')
-    time_type = type(param.Dynamic.time_fn.time_type(0))
     for sheet_name, data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
         storage = sheet.views.curves
         label = data.metadata.curve_label
-        data = data.add_dimension('Time', 0, data.metadata.timestamp, time_type)
+        data = data.add_dimension('Time', 0, data.metadata.timestamp,
+                                  param.Dynamic.time_fn.time_type)
         if label in storage:
             storage[label].update(data)
         else:
@@ -364,7 +364,6 @@ def store_maps(measurement_dict):
     """
     Store maps in the global sheet view dictionary.
     """
-    time_type = type(param.Dynamic.time_fn.time_type(0))
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
@@ -372,7 +371,7 @@ def store_maps(measurement_dict):
             dim_len = len(data.dimension_labels)
             title = data.title + ', {label%s} = {value%s}' % (dim_len, dim_len)
             data = data.add_dimension('Time', 0, data.metadata.timestamp,
-                                      time_type, title=title)
+                                      param.Dynamic.time_fn.time_type, title=title)
             if map_name not in sheet.views.maps:
                 sheet.views.maps[map_name] = data
             else:
