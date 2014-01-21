@@ -1356,6 +1356,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         to save its own state.  This operation is useful for testing
         something while being able to roll back to the original state.
         """
+        if self.eps_to_start != []:
+            self.run(0.0)
         self.event_push()
         for ep in self._event_processors.values():
             ep.state_push()
