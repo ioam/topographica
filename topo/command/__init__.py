@@ -887,9 +887,10 @@ def print_sizes():
     (n_conns(),max(n_bytes()/1024.0/1024.0,1.0))
 
 # added these two function to the PatternDrivenAnalysis hooks
+PatternDrivenAnalysis.pre_presentation_hooks.append(topo.sim.state_push)
 PatternDrivenAnalysis.pre_presentation_hooks.append(wipe_out_activity)
 PatternDrivenAnalysis.pre_presentation_hooks.append(clear_event_queue)
-
+PatternDrivenAnalysis.post_presentation_hooks.append(topo.sim.state_pop)
 
 # maybe an explicit list would be better?
 import types
