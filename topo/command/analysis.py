@@ -19,7 +19,7 @@ PlotGroupTemplate for more information.
 
 import numpy as np
 
-from imagen.views import SheetView, SheetStack, SheetLines
+from imagen.views import SheetView, SheetStack, SheetLines, ProjectionGrid
 
 from featuremapper.command import * # pyflakes:ignore (API import)
 
@@ -32,6 +32,240 @@ from topo.base.sheet import Sheet
 from topo.base.arrayutil import centroid
 
 from topo.analysis.featureresponses import pattern_present, pattern_response, update_activity # pyflakes:ignore (API import)
+
+
+
+import copy, time
+
+import sys
+from topo.base.cf import CFProjection
+
+class Collector(param.Parameterized):
+    """
+    A Collector collects the results of measurements over time,
+    allowing any measurement to be easily saved as an animation. The
+    output of any measurement can be recorded as well as sheet
+    activities, projection CFs or projection activities:
+
+    c = Collector()
+    with r(100, steps=10):
+       c.collect(topo.sim.V1)      # c.V1.Activity
+       c.collect(measure_or_pref)  # c.V1.OrientationPreference etc.
+       c.collect(measure_cog)      # c.V1.Afferent.CoG
+       c.collect(topo.sim.V1.Afferent)  # c.V1.Afferent.CFGrid
+       c.collect(topo.sim.V1.Afferent,  # c.V1.Afferent.Activity
+                            activity=True)
+
+   Once completed, the data may be easy obtained via attribute access
+   as shown in the comments above. You may also pass keywords to the
+   measurement via the record method or the sampling density (rows,
+   cols) when recording CFs from projections.
+    """
+
+
+    measurements = param.List(default=[], doc="""
+        A list of tuples of form (obj, kwargs) where obj may be a
+        measurement class, a sheet or a projection.""")
+
+    class group(object):
+        """
+        Container class for convenient attribute access.
+        """
+        def __repr__(self):
+            return "Keys:\n   %s" % "\n   ".join(self.__dict__.keys())
+
+    def __init__(self, **kwargs):
+        super(Collector,self).__init__(**kwargs)
+
+    def _projection_CFs(self, projection, **kwargs):
+        """
+        Record the CFs of a projection as a ProjectionGrid.
+        """
+        data = measure_projection.instance(projection=projection, **kwargs)()
+        sheet = data.metadata['proj_dest_name']
+        projection = data.metadata['info']
+        projection_CFs = {}
+        projection_CFs[sheet] = {}
+        projection_CFs[sheet][projection] = {}
+        projection_CFs[sheet][projection]['CFGrid'] = data
+        return projection_CFs
+
+    def _projection_activity(self, projection, **kwargs):
+        """
+        Record the projection activity of a projection.
+        """
+        sview = topo.sim.V1.Afferent.projection_view()
+        sheet = sview.metadata['src_name']
+        projection = sview.metadata['proj_name']
+        stack = SheetStack(title=sview.name, bounds=sview.bounds,
+                          initial_items=[(topo.sim.time(),sview)],
+                           dimension_labels=['Time'],
+                           time_type=[topo.sim.time.time_type])
+        projection_activity = {}
+        projection_activity[sheet] = {}
+        projection_activity[sheet][projection] = {}
+        projection_activity[sheet][projection]['Activity'] = stack
+        return projection_activity
+
+    def _projection_measurement(self, projection, activity=False, **kwargs):
+        """
+        Record the CFs of a projection as a ProjectionGrid or record
+        the projection activity SheetView.
+        """
+        if activity:
+            return self._projection_activity(projection, **kwargs)
+        else:
+            return self._projection_CFs(projection, **kwargs)
+
+    def _sheet_activity(self, sheet):
+        """
+        Given a sheet, return the data as a measurement in the
+        appropriate dictionary format.
+        """
+        sview = sheet[:]
+        stack = SheetStack(title=sview.name, bounds=sview.bounds,
+                          initial_items=[(1.0,sview)], key_type=[float]) # topo.sim.time()
+        activity_data = {}
+        activity_data[sheet.name] = {}
+        activity_data[sheet.name]['Activity'] =  stack
+        return activity_data
+
+    def _get_measurement(self, item):
+        """
+        Method to declare the measurements to collect views
+        from. Accepts measurement classes or instances, sheet
+        objects(to measure sheet activity) and projection objects (to
+        measure CFs or projection activities).
+        """
+        if isinstance(item, tuple):
+            obj, kwargs = item
+        else:
+            obj, kwargs = item, {}
+
+        if isinstance(obj, CFProjection):
+            return lambda :self._projection_measurement(obj, **kwargs)
+        elif isinstance(obj, Sheet):
+            return lambda: self._sheet_activity(obj)
+        else:
+            return obj.instance(**kwargs)
+
+    def collect(self, obj, **kwargs):
+
+        items = [self._formatter(el) for el in self.measurements]
+        if kwargs:
+            fmt = self._formatter((obj, kwargs))
+            if fmt in items:
+                raise Exception("%r already being recorded." % fmt)
+            self.measurements.append((obj, kwargs))
+        else:
+            fmt = self._formatter(obj)
+            if fmt in items:
+                raise Exception("%r already being recorded." % fmt)
+            self.measurements.append(obj)
+
+    def save_entry(self, sheet_name, feature_name, data, projection=None):
+        """
+        Create or update entries, dynamically creating attributes for
+        convenient access as necessary.
+        """
+        if not hasattr(self, sheet_name):
+            setattr(self, sheet_name, self.group())
+        group = getattr(self, sheet_name)
+
+        if projection is not None:
+            if not hasattr(group, projection):
+                setattr(group, projection, self.group())
+            group = getattr(group, projection)
+
+        time_type = param.Dynamic.time_fn
+
+        if 'Time' not in data.dimension_labels and not isinstance(data, ProjectionGrid):
+            timestamped_data = data.add_dimension('Time', 0,
+                                                  topo.sim.time(),
+                                                  time_type)
+        else:
+            timestamped_data = data
+
+        if not hasattr(group, feature_name):
+            setattr(group, feature_name, timestamped_data)
+        else:
+            getattr(group, feature_name).update(timestamped_data)
+
+    def _record_data(self, measurement_data):
+        """
+        Given measurement data in the standard dictionary format
+        record the elements. The dictionary may be indexed by sheet
+        name then by feature name (e.g. sheet measurements) or by
+        sheet name, then projection name before the feature name
+        (projection measurements).
+        """
+        for sheet_name in measurement_data:
+            for name in measurement_data[sheet_name]:
+                data = measurement_data[sheet_name][name]
+                # Data may be a feature, or dictionary of projection labels
+                if not isinstance(data, dict):
+                    # Indexed by sheet name and feature name
+                    self.save_entry(sheet_name, name, data, None)
+                else:
+                    # Indexed by sheet and projection name before the feature.
+                    for feature_name in data:
+                        self.save_entry(sheet_name, feature_name,
+                                         data[feature_name], name)
+
+    def run(self, durations, cycles=1):
+        try:
+            self.durations = list(durations) * cycles
+        except:
+            self.durations = [durations] * cycles
+        return self
+
+
+    def __enter__(self):
+        self._old_measurements = self.measurements
+        self.measurements = []
+        return self
+
+    def __exit__(self, exc, *args):
+        self.advance(self.durations)
+        self.measurements = self._old_measurements
+
+
+    def advance(self, durations):
+        measurements = [self._get_measurement(item) for item in self.measurements]
+        for i,duration in enumerate(durations):
+            try:
+                # clear_output is needed to avoid displaying garbage
+                # in static HTML notebooks.
+                from IPython.core.display import clear_output
+                clear_output()
+            except:
+                pass
+            for measurement in measurements:
+                measurement_data = measurement()
+                self._record_data(copy.deepcopy(measurement_data))
+            info = (i+1, len(durations), topo.sim.time())
+            msg = "%d/%d measurement cycles complete. Simulation Time=%s" % info
+            print '\r', msg
+            sys.stdout.flush()
+            time.sleep(0.0001)
+            topo.sim.run(duration)
+        print "Completed collection. Simulation Time=%s" % topo.sim.time()
+
+    def _formatter(self, item):
+        if isinstance(item, tuple):
+            (obj, kwargs) = item
+            return '(%s, %s)' % (obj.name, kwargs)
+        else:
+            return item.name
+
+    def __repr__(self):
+
+        if self.measurements == []:
+            return 'Collector()'
+        items = [self._formatter(el) for el in self.measurements]
+        return 'Collector([%s])' % ', '.join(items)
+
+
 
 
 class ProjectionSheetMeasurementCommand(param.ParameterizedFunction):
@@ -201,7 +435,7 @@ class measure_cog(ParameterizedFunction):
                 ycog[r][c] = ycentroid
 
         metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
-                        src_name=sheet.name, dimension_labels=['Time'])
+                        src_name=sheet.name, dimension_labels=['Time'], key_type=[topo.sim.time.time_type])
 
         timestamp = topo.sim.time()
         xsv = SheetView(xcog, sheet.bounds)
