@@ -94,17 +94,17 @@ class Collector(param.Parameterized):
         """
         Record the projection activity of a projection.
         """
-        sview = topo.sim.V1.Afferent.projection_view()
+        sview = projection.projection_view()
         sheet = sview.metadata['src_name']
-        projection = sview.metadata['proj_name']
-        stack = SheetStack(title=sview.name, bounds=sview.bounds,
-                          initial_items=[(topo.sim.time(),sview)],
+        stack = SheetStack(title=projection.name, bounds=sview.bounds,
+                           initial_items=[(topo.sim.time(), sview)],
                            dimension_labels=['Time'],
                            time_type=[topo.sim.time.time_type])
+        proj_name = sview.metadata['proj_name']
         projection_activity = {}
         projection_activity[sheet] = {}
-        projection_activity[sheet][projection] = {}
-        projection_activity[sheet][projection]['Activity'] = stack
+        projection_activity[sheet][proj_name] = {}
+        projection_activity[sheet][proj_name]['Activity'] = stack
         return projection_activity
 
     def _projection_measurement(self, projection, activity=False, **kwargs):
