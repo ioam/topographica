@@ -20,13 +20,16 @@ to develop a new simulation using different input patterns.
 This tutorial supersedes an `older tutorial`_ using the LISSOM model
 from  `Miikkulainen et al. (2005) <http://computationalmaps.org>`_.
 
-:doc:`som_retinotopy`
+|som_ipynb|_
 
-How to run a model in the Topographica Tk GUI that develops
-selectivity for position, mapping the input space to the cortical
-space. The model uses the abstract SOM algorithm, focusing on the
-basic principles of self-organization rather than modeling any
-particular biological system.
+
+How to run a model that develops selectivity for position,
+mapping the input space to the cortical space. The model uses the
+abstract SOM algorithm, focusing on the basic principles of
+self-organization rather than modeling any particular biological
+system. This notebook supersedes an older tutorial exploring the
+`SOM in the Tk GUI`_.
+
 
 |gcal_ipynb|_
 
@@ -35,13 +38,13 @@ illustrated in the tutorials above, you can also use `IPython Notebook
 <http://ipython.org/notebook.html>`_, which provides a command-line
 prompt that allows you to weave together Python code, textual output,
 and graphical output.  This approach makes it easier to modify a
-model, look at parts of it not currently exposed in the GUI, and to 
+model, look at parts of it not currently exposed in the GUI, and to
 develop new types of analyses not yet offered in the GUI.
 
 The link above takes you to a static HTML snapshot of a notebook that
 illustrates how to define, explore, and analyze the GCAL model (see
 above) from within IPython Notebook.  In practice, you'll want to try
-out the actual notebook for yourself, which you can do by 
+out the actual notebook for yourself, which you can do by
 downloading the latest git version of Topographica using
 `these instructions
 <https://github.com/ioam/topographica/tree/master/models/stevens.jn13#topographica-installation>`_.
@@ -54,11 +57,11 @@ every figure from `Stevens et al. (J. Neuroscience 2013)
 <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_. This notebook
 is the final result of an agile workflow for doing reproducible
 research based on IPython Notebook and
-`Lancet <https://github.com/ioam/lancet>`_, as described in 
+`Lancet <https://github.com/ioam/lancet>`_, as described in
 `this newly submitted paper
 <http://homepages.inf.ed.ac.uk/jbednar/papers/stevens.fin13_submitted.pdf>`_.
 The link above takes you to a static copy of the notebook output; to
-replicate it for yourself just follow 
+replicate it for yourself just follow
 `these instructions
 <https://github.com/ioam/topographica/tree/master/models/stevens.jn13#topographica-installation>`_.
 
@@ -75,3 +78,7 @@ add them here!
 .. |stevens_jn13| replace:: *Replicating Stevens et al. (J. Neuroscience 2013)*
 
 .. _older tutorial: ./lissom_oo_or.html
+.. _SOM in the Tk GUI: ./som_retinotopy.html
+
+.. _som_ipynb: ../_static/som_retinotopy_notebook.html
+.. |som_ipynb| replace:: *SOM Retinotopic Map*
