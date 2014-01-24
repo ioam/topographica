@@ -325,8 +325,6 @@ def topo_metadata_fn(input_names=[], output_names=[]):
         else:
             topo.sim.warning('Output sheet {0} not found.'.format(o))
 
-    print metadata
-
     return metadata
 
 
