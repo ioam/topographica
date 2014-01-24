@@ -183,7 +183,8 @@ class pattern_present(PatternPresentingCommand):
             topo.sim.event_push()
 
         durations = np.diff([0] + p.durations)
-        outputs = outputs if len(outputs) > 0 else topo.sim.objects(Sheet).keys()
+        projection_dict = dict((conn.name, conn) for conn in topo.sim.connections())
+        outputs = outputs if len(outputs) > 0 else topo.sim.objects(Sheet).keys() + projection_dict.keys()
 
         responses = defaultdict(dict)
         for i, d in enumerate(durations):
@@ -193,8 +194,12 @@ class pattern_present(PatternPresentingCommand):
                 update_activity(p.install_sheetview)
                 topo.guimain.refresh_activity_windows()
             if p.return_responses:
+
                 for output in outputs:
-                    responses[(output, time)] = topo.sim[output].activity.copy()
+                    if output in topo.sim.objects(Sheet).keys():
+                        responses[(output, time)] = topo.sim[output].activity.copy()
+                    elif output in projection_dict:
+                        responses[(output, time)] = projection_dict[output].activity.copy()
 
         if p.restore_events:
             topo.sim.event_pop()
@@ -283,41 +288,44 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     metadata = AttrDict()
     metadata['timestamp'] = topo.sim.time()
 
-    sheets = {}
-    sheets['inputs'] = [getattr(topo.sim, input_name, input_name)
-                        for input_name in input_names]
-    sheets['outputs'] = [getattr(topo.sim, output_name, output_name) for
-                         output_name in output_names]
+    generator_sheets = topo.sim.objects(GeneratorSheet)
+    measurement_sheets = dict((n, s) for n, s in topo.sim.objects(Sheet).items()
+                              if hasattr(s, 'measure_maps') and s.measure_maps)
+    projections = dict((conn.name, conn) for conn in topo.sim.connections())
 
-    for input_name in input_names:
-        if input_name in sheets['inputs']:
-            topo.sim.warning('Input sheet {0} not found.'.format(input_name))
-            sheets['inputs'].pop(sheets['inputs'].index(input_name))
-    if not sheets['inputs']:
-        if input_names:
-            topo.sim.warning(
-                "Warning specified input sheets do not exist, using all "
-                "generator sheets instead.")
-        sheets['inputs'] = topo.sim.objects(GeneratorSheet).values()
+    if input_names == []:
+        input_names = generator_sheets.keys()
 
-    for output_name in output_names:
-        if output_name in sheets['outputs']:
-            topo.sim.warning('Output sheet {0} not found.'.format(output_name))
-            sheets['outputs'].pop(sheets['outputs'].index(output_name))
-    if not sheets['outputs']:
-        if output_names:
-            topo.sim.warning(
-                "Warning specified output sheets do not exist, using all "
-                "sheets with measure_maps enabled.")
-        sheets['outputs'] = [s for s in topo.sim.objects(Sheet).values() if
-                             hasattr(s, 'measure_maps') and s.measure_maps]
+    metadata['inputs'] = {}
+    for i in input_names:
+        if i in generator_sheets:
+            gs = generator_sheets[i]
+            metadata['inputs'][i] = {'bounds': gs.bounds, 'precedence': gs.precedence,
+                                     'row_precedence': gs.row_precedence,
+                                     'shape': gs.shape, 'src_name': gs.name}
+        else:
+            topo.sim.warning('Input sheet {0} not found.'.format(i))
 
-    for sheet_type, sheet_list in sheets.items():
-        metadata[sheet_type] = dict(
-            [(s.name, {'bounds': s.bounds, 'precedence': s.precedence,
-                       'row_precedence': s.row_precedence,
-                       'shape': s.shape, 'src_name': s.name})
-             for s in sheet_list])
+    if output_names == []:
+        output_names = measurement_sheets.keys()
+
+    metadata['outputs'] = {}
+    for o in output_names:
+        if o in measurement_sheets:
+            s = measurement_sheets[o]
+            metadata['outputs'][o] = {'bounds': s.bounds, 'precedence': s.precedence,
+                                      'row_precedence': s.row_precedence,
+                                      'shape': s.shape, 'src_name': s.name}
+        elif o in projections:
+            p = projections[o]
+            metadata['outputs'][o] = {'bounds': p.dest.bounds, 'precedence': p.dest.precedence,
+                                      'row_precedence': p.dest.row_precedence,
+                                      'shape': p.dest.shape, 'dest_name': p.dest.name,
+                                      'src_name': p.src.name}
+        else:
+            topo.sim.warning('Output sheet {0} not found.'.format(o))
+
+    print metadata
 
     return metadata
 
@@ -366,16 +374,17 @@ def store_maps(measurement_dict):
     """
     measurement_dict.pop('fullmatrix')
     for sheet_name, sheet_data in measurement_dict.items():
-        sheet = topo.sim[sheet_name]
-        for map_name, data in sheet_data.items():
-            dim_len = len(data.dimension_labels)
-            title = data.title + ', {label%s} = {value%s}' % (dim_len, dim_len)
-            data = data.add_dimension('Time', 0, data.metadata.timestamp,
-                                      param.Dynamic.time_fn.time_type, title=title)
-            if map_name not in sheet.views.maps:
-                sheet.views.maps[map_name] = data
-            else:
-                sheet.views.maps[map_name].update(data)
+        if sheet_name in topo.sim.objects(Sheet).keys():
+            sheet = topo.sim[sheet_name]
+            for map_name, data in sheet_data.items():
+                dim_len = len(data.dimension_labels)
+                title = data.title + ', {label%s} = {value%s}' % (dim_len, dim_len)
+                data = data.add_dimension('Time', 0, data.metadata.timestamp,
+                                          param.Dynamic.time_fn.time_type, title=title)
+                if map_name not in sheet.views.maps:
+                    sheet.views.maps[map_name] = data
+                else:
+                    sheet.views.maps[map_name].update(data)
 
 
 def store_activity(measurement_dict):
