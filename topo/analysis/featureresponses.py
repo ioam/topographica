@@ -336,17 +336,10 @@ def store_rfs(measurement_dict):
     for sheet_name, sheet_data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
         for data_name, data in sheet_data.items():
-            dim_len = len(data.dimension_labels)
-            add_title = ', {label%s} = {value%s}' % (dim_len, dim_len)
-            reindexed_items = [(k, v.add_dimension('Time', 0, data.metadata.timestamp,
-                                                   param.Dynamic.time_fn.time_type,
-                                                   title=v.title+add_title))
-                               for k, v in data.items()]
-            new_data = data.clone(reindexed_items)
             if data_name not in sheet.views.rfs:
-                sheet.views.rfs[data_name] = new_data
+                sheet.views.rfs[data_name] = data
             else:
-                sheet.views.rfs[data_name].update(new_data)
+                sheet.views.rfs[data_name].update(data)
 
 
 def store_curves(measurement_dict):
@@ -358,8 +351,6 @@ def store_curves(measurement_dict):
         sheet = topo.sim[sheet_name]
         storage = sheet.views.curves
         label = data.metadata.curve_label
-        data = data.add_dimension('Time', 0, data.metadata.timestamp,
-                                  param.Dynamic.time_fn.time_type)
         if label in storage:
             storage[label].update(data)
         else:
@@ -375,10 +366,6 @@ def store_maps(measurement_dict):
         if sheet_name in topo.sim.objects(Sheet).keys():
             sheet = topo.sim[sheet_name]
             for map_name, data in sheet_data.items():
-                dim_len = len(data.dimension_labels)
-                title = data.title + ', {label%s} = {value%s}' % (dim_len, dim_len)
-                data = data.add_dimension('Time', 0, data.metadata.timestamp,
-                                          param.Dynamic.time_fn.time_type, title=title)
                 if map_name not in sheet.views.maps:
                     sheet.views.maps[map_name] = data
                 else:
@@ -387,12 +374,12 @@ def store_maps(measurement_dict):
 
 def store_activity(measurement_dict):
     for sheet_name, sheet_data in measurement_dict.items():
-        sheet = topo.sim[sheet_name]
-        for data_name, data in sheet_data.items():
-            if data_name not in sheet.views.maps:
-                sheet.views.maps[data_name] = data
+        if sheet_name in topo.sim.objects(Sheet).keys():
+            sheet = topo.sim[sheet_name]
+            if 'Activity' not in sheet.views.maps:
+                sheet.views.maps['Activity'] = sheet_data
             else:
-                sheet.views.maps[data_name].update(data)
+                sheet.views.maps['Activity'].update(sheet_data)
 
 
 def get_feature_preference(feature, sheet_name, coords, default=0.0):
