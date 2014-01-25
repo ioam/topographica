@@ -80,5 +80,5 @@ add them here!
 .. _older tutorial: ./lissom_oo_or.html
 .. _SOM in the Tk GUI: ./som_retinotopy.html
 
-.. _som_ipynb: ../_static/som_retinotopy_notebook.html
+.. _som_ipynb: http://ioam.github.io/media/som_retinotopy.html
 .. |som_ipynb| replace:: *SOM Retinotopic Map*
