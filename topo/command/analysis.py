@@ -30,7 +30,7 @@ import topo
 from topo.base.cf import CFSheet, Projection
 from topo.base.sheet import Sheet
 from topo.base.arrayutil import centroid
-
+from topo.misc.attrdict import AttrDict
 from topo.analysis.featureresponses import pattern_present, pattern_response, update_activity # pyflakes:ignore (API import)
 
 
@@ -303,15 +303,14 @@ def update_rgb_activities():
     Make available Red, Green, and Blue activity matrices for all appropriate sheets.
     """
     for sheet in topo.sim.objects(Sheet).values():
-        metadata = dict(bounds=sheet.bounds,src_name=sheet.name,
-                        precedence=sheet.precedence,
-                        row_precedence=sheet.row_precedence,
-                        timestamp=topo.sim.time())
+        metadata = AttrDict(src_name=sheet.name, precedence=sheet.precedence,
+                            row_precedence=sheet.row_precedence,
+                            timestamp=topo.sim.time())
         for c in ['Red','Green','Blue']:
             # should this ensure all of r,g,b are present?
             if hasattr(sheet,'activity_%s'%c.lower()):
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
-                new_view = SheetView(activity_copy,**metadata)
+                new_view = SheetView(activity_copy, bounds=sheet.bounds, metadata=metadata)
                 sheet.views.maps['%sActivity'%c]=new_view
 
 

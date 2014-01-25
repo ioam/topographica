@@ -297,11 +297,11 @@ class Projection(EPConnection):
             timestamp = self.src.simulation.time()
         return SheetView(self.activity.copy(), self.dest.bounds,
                          metadata=AttrDict(proj_src_name=self.src.name,
-                                       precedence=self.src.precedence,
-                                       proj_name=self.name,
-                                       row_precedence=self.src.row_precedence,
-                                       src_name=self.dest.name,
-                                       timestamp=timestamp))
+                                           precedence=self.src.precedence,
+                                           proj_name=self.name,
+                                           row_precedence=self.src.row_precedence,
+                                           src_name=self.dest.name,
+                                           timestamp=timestamp))
 
 
     def get_projection_view(self, timestamp):

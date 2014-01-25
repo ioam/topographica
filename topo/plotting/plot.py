@@ -11,6 +11,8 @@ from math import sin, cos
 
 import param
 
+from imagen.ndmapping import NdMapping
+
 from topo.base.sheetcoords import SheetCoordinateSystem,Slice
 
 from bitmap import HSVBitmap, RGBBitmap, Bitmap, DrawBitmap
@@ -228,17 +230,21 @@ class TemplatePlot(Plot):
         If the sheet_view derives from a cyclic distribution, and it
         will be used as Hue, the matrix is normalized in range 0..1
         """
-        sheet_view_key = self.channels.get(key,None)
+
+        sheet_view_key = self.channels.get(key, None)
         sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
-        if sv == None or sv.top == None:
+        if isinstance(sv, NdMapping):
+            sv = sv.top
+
+        if sv == None:
             matrix = None
         else:
-            matrix = sv.top.data.copy()
-            if key=='Hue' and sv.top.cyclic_range is not None:
-                matrix /= sv.top.cyclic_range
+            matrix = sv.data.copy()
+            if key=='Hue' and sv.cyclic_range is not None:
+                matrix /= sv.cyclic_range
 
             # Calculate timestamp for this plot
-            timestamp = sv.timestamp
+            timestamp = sv.metadata.timestamp
             if timestamp >=0:
                 if self.timestamp < 0:
                     self.timestamp = timestamp
@@ -271,9 +277,10 @@ class TemplatePlot(Plot):
         """
         for channel, name in self.channels.items():
             sv = self.view_dict.get(channel,{}).get(name, None)
+            if isinstance(sv, NdMapping): sv = sv.top
             if sv != None:
-                shape = sv.top.data.shape
-                box = sv.top.bounds
+                shape = sv.data.shape
+                box = sv.bounds
 
         return shape, box
 

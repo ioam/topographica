@@ -722,13 +722,15 @@ class CFProjection(Projection):
         r1, r2, c1, c2 = cf.input_sheet_slice
         matrix_data[r1:r2, c1:c2] = cf.weights
 
-        sv = SheetView(matrix_data, self.src.bounds, roi_bounds=cf.get_bounds(self.src))
+        sv = SheetView(matrix_data, self.src.bounds, roi_bounds=cf.get_bounds(self.src),
+                       metadata=AttrDict(timestamp=timestamp))
 
         return SheetStack((timestamp, sv), coords=(sheet_x, sheet_y),
                           dimension_labels=['Time'], dest_name=self.dest.name,
                           precedence=self.src.precedence,
                           proj_name=self.name, src_name=self.src.name,
-                          row_precedence=self.src.row_precedence, **kwargs)
+                          row_precedence=self.src.row_precedence,
+                          timestamp=timestamp, **kwargs)
 
 
     def get_view(self, sheet_x, sheet_y, timestamp=None):

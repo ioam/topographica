@@ -45,16 +45,18 @@ def update_sheet_activity(sheet_name, force=False):
     sheet = topo.sim.objects(Sheet)[sheet_name]
     view = sheet.views.maps.get(name, False)
     time = topo.sim.time()
+    metadata = AttrDict(bounds=sheet.bounds, precedence=sheet.precedence,
+                        row_precedence=sheet.row_precedence,
+                        src_name=sheet.name, shape=sheet.activity.shape,
+                        timestamp=time)
     if not view:
-        metadata = dict(bounds=sheet.bounds, dimension_labels=['Time'],
-                        precedence=sheet.precedence, row_precedence=sheet.row_precedence,
-                        src_name=sheet.name, shape=sheet.activity.shape)
-        sv = SheetView(np.array(sheet.activity), sheet.bounds)
-        view = SheetStack((time, sv), **metadata)
+        sv = SheetView(np.array(sheet.activity), sheet.bounds, metadata=metadata)
+        view = SheetStack((time, sv), dimension_labels=['Time'], **metadata)
         sheet.views.maps[name] = view
     else:
         if force or view.timestamp < time:
-            sv = SheetView(np.array(sheet.activity), sheet.bounds)
+            sv = SheetView(np.array(sheet.activity), sheet.bounds,
+                           metadata=metadata)
             view[time] = sv
     return view
 
