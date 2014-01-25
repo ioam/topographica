@@ -22,6 +22,7 @@ import topo
 
 from topo.base.patterngenerator import PatternGenerator, Constant
 from topo.base.generatorsheet import GeneratorSheet
+from topo.misc.attrdict import AttrDict
 from topo.plotting.plot import make_template_plot
 from topo.plotting.plotgroup import SheetPlotGroup
 from topo.analysis.featureresponses import pattern_present
@@ -45,13 +46,15 @@ class TestPatternPlotGroup(SheetPlotGroup):
             sheet = kw['sheet']
             views = topo.sim.views[sheet.name].maps
 
-            sv = SheetView(sheet.input_generator(), bounds=sheet.bounds)
+            sv = SheetView(sheet.input_generator(), bounds=sheet.bounds,
+                           metadata=AttrDict(timestamp=topo.sim.time()))
 
             if 'Activity' not in views:
                 views['Activity'] = NdMapping((topo.sim.time(), sv),
                                               precedence=sheet.precedence,
                                               row_precedence=sheet.row_precedence,
-                                              src_name=sheet.name,)
+                                              src_name=sheet.name,
+                                              timestamp=topo.sim.time())
             else:
                 views['Activity'][topo.sim.time()] = sv
             channels = {'Strength': 'Activity','Hue':None,'Confidence':None}
