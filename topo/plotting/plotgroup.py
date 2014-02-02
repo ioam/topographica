@@ -1691,7 +1691,7 @@ pg.add_plot('Spatial Frequency Selectivity',
 pg = create_plotgroup(name='Ocular Preference', category="Preference Maps",
                       doc='Measure preference for sine gratings between two '
                           'eyes.',
-                      pre_plot_hooks=[analysis.measure_sine_pref.instance()])
+                      pre_plot_hooks=[analysis.measure_od_pref.instance()])
 pg.add_plot('Ocular Preference', [('Strength', 'OcularPreference')])
 pg.add_plot('Ocular Selectivity', [('Strength', 'OcularSelectivity')])
 
