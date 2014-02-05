@@ -264,7 +264,6 @@ except ImportError:
 param.Dynamic.time_fn(val=0.0, time_type=_time_type)
 param.Dynamic.time_dependent = True
 sim = Simulation()
-timeline = views.Timeline()
 
 # numbergen used to be part of topo; import it there for backwards compatibility
 # and set the time function to be topo.sim.time()
