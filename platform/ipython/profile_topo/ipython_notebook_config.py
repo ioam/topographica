@@ -63,6 +63,9 @@ c.NotebookApp.open_browser = False
 # List of files to run at IPython startup.
 # c.IPKernelApp.exec_files = []
 
+# dotted module name of an IPython extension to load.
+c.IPKernelApp.extra_extension = 'topo.misc.ipython'
+
 #------------------------------------------------------------------------------
 # InlineBackend configuration
 #------------------------------------------------------------------------------
