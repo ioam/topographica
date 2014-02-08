@@ -16,7 +16,7 @@ from Tkinter import Frame
 import param
 import paramtk as tk
 
-from imagen.views import SheetView, NdMapping
+from dataviews import SheetView, NdMapping
 
 import topo
 

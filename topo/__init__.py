@@ -49,13 +49,12 @@ __all__ = ['analysis',
 # Find out Topographica's version.
 # First, try Git; if that fails, try to read the release file.
 
-from subprocess import Popen, CalledProcessError, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
+from subprocess import Popen, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
 
 import os
 
 import param
 import imagen
-from imagen import views
 
 # Patch for versions of param prior to 10 May 2013
 param.main=param.Parameterized(name="main")

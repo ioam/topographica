@@ -19,11 +19,13 @@ CFProjection.
 
 
 from copy import copy
-
 import numpy as np
+
 import param
-from imagen.ndmapping import AttrDict
-from imagen.views import SheetView, SheetStack, ProjectionGrid
+from dataviews.ndmapping import AttrDict
+from dataviews import SheetView, SheetStack, CoordinateGrid
+from dataviews.sheetcoords import Slice
+from dataviews.boundingregion import BoundingBox, BoundingRegionParameter
 
 import patterngenerator
 from patterngenerator import PatternGenerator
@@ -32,8 +34,6 @@ from functionfamily import LearningFn,Hebbian,IdentityLF
 from functionfamily import ResponseFn,DotProduct
 from functionfamily import CoordinateMapperFn,IdentityMF
 from projection import Projection,ProjectionSheet
-from sheetcoords import Slice
-from boundingregion import BoundingBox,BoundingRegionParameter
 
 
 def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
@@ -624,7 +624,7 @@ class CFProjection(Projection):
     def _cf_grid(self, shape=None, **kwargs):
         "Create ProjectionGrid with the correct metadata."
         shape = self.dest.shape if shape is None else shape
-        return ProjectionGrid(self.dest.bounds, shape, info=self.name,
+        return CoordinateGrid(self.dest.bounds, shape, info=self.name,
                               proj_src_name=self.src.name, proj_dest_name=self.dest.name,
                               timestamp=self.src.simulation.time(), **kwargs)
 

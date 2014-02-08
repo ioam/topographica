@@ -14,7 +14,7 @@ from param.parameterized import ParamOverrides, ParameterizedFunction
 from param import resolve_path
 
 from imagen.random import UniformRandom
-from imagen.odict import OrderedDict
+from dataviews.odict import OrderedDict
 
 from featuremapper import distribution
 

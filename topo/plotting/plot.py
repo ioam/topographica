@@ -2,20 +2,17 @@
 Plot class.
 """
 
-
 import copy
-import numpy
-
-from numpy.oldnumeric import zeros, ones, Float, divide
 from math import sin, cos
 
+import numpy
+from numpy.oldnumeric import zeros, ones, Float, divide
+
 import param
-
-from imagen.ndmapping import NdMapping
-
+from dataviews.ndmapping import NdMapping
 from topo.base.sheetcoords import SheetCoordinateSystem,Slice
-
 from bitmap import HSVBitmap, RGBBitmap, Bitmap, DrawBitmap
+
 
 
 ### JCALERT!

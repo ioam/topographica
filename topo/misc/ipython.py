@@ -5,9 +5,15 @@ loaded using:
 
 %load_ext topo.misc.ipython
 """
+import os
+import time
+import difflib
+import uuid
+import sys
+
 import topo
 import param
-import os, time, difflib, uuid, sys
+
 
 try:
     from IPython.display import HTML, Javascript, display
@@ -126,13 +132,13 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
 # Display hooks #
 #===============#
 
-from imagen.ipython import load_ipython_extension as load_imagen_extension
-from imagen.ipython import sheetstack_display, sheetlayer_display
+from dataviews.ipython import load_ipython_extension as load_imagen_extension
+from dataviews.ipython import stack_display, view_display
 
 try:
     from lancet import ViewFrame
-    ViewFrame.display_fns.append(sheetstack_display)
-    ViewFrame.display_fns.append(sheetlayer_display)
+    ViewFrame.display_fns.append(stack_display)
+    ViewFrame.display_fns.append(view_display)
 except:
     pass
 

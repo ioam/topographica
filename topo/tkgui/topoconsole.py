@@ -11,29 +11,24 @@ import os
 import copy
 import sys
 import re
-import __main__
 import webbrowser
 import string
-
 from Tkinter import Frame, Button, \
      LEFT, YES, Label, DISABLED, \
      NORMAL, DoubleVar
 from tkFileDialog import asksaveasfilename,askopenfilename
 
+import __main__
 import param
 from param import normalize_path,resolve_path
 import paramtk as tk
-
-from imagen.odict import OrderedDict
-
+from dataviews.odict import OrderedDict
 import topo
 from topo.plotting.plotgroup import plotgroups, FeatureCurvePlotGroup
 from topo.misc.commandline import sim_name_from_filename
 import topo.misc.genexamples
 import topo.command
-
 import topo.tkgui
-
 from templateplotgrouppanel import TemplatePlotGroupPanel
 from featurecurvepanel import FeatureCurvePanel
 from projectionpanel import SheetPanel,CFProjectionPanel,ProjectionActivityPanel,ConnectionFieldsPanel,RFProjectionPanel

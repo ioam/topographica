@@ -4,15 +4,12 @@ Unit tests for sheet and sheetcoords.
 
 import unittest
 
-from imagen.views import SheetView
+from nose.tools import istest, nottest
+import numpy as np
 
 from topo.base.sheetcoords import Slice
 from topo.base.sheet import *
 from topo.base.boundingregion import BoundingBox
-
-from nose.tools import istest, nottest
-
-import numpy as np
 
 
 # CEBALERT:
