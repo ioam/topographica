@@ -44,23 +44,25 @@ following command in this directory:
 
 ::
 
-   ipython notebook
+   ../../topographica -n
 
-Now you should be able to select the '``stevens_jn13``' or '``gcal``'
-notebooks. Note that IPython >=1.0 is required.
+Now if you visit localhost:8888 in your browser you should be able to
+select the '``stevens_jn13``' or '``gcal``' notebooks. Note that if a
+port number other than 8888 be required, the appropriate port number
+will be shown in the terminal. IPython >=1.0 is required.
 
 Running the live notebooks allows you to explore the model
 iteratively. If you simply wish to view the static contents of these
 notebooks, you may view the following two HTML versions:
 
-- `Model definition
-  <http://topographica.org/_static/gcal.html>`_: A notebook
-  that simultaneously defines the model and explores it. Running the
-  live version of this notebook generates the Topographica model file
-  '``gcal.ty``'.
+- `Model definition <http://ioam.github.io/media/gcal.html>`_: A
+  notebook that simultaneously defines the model and explores
+  it. Running the live version of this notebook generates the
+  Topographica model file '``gcal.ty``' and will regenerate the
+  contents shown in the HTML version.
 
 - `Simulation and Figures
-  <http://topographica.org/_static/stevens_jn13.html>`_:
+  <http://ioam.github.io/media/stevens_jn13.html>`_:
   Defines all 842 model simulations needed to reproduce all the
   figures, allows you to launch them and automatically builds the
   corresponding SVG figures used in publication. Although running the
