@@ -122,6 +122,10 @@ p.add(
         The initial V1 threshold value. This value is static in the L and GCL models
         and adaptive in the AL and GCAL models.""")
 )
+
+# The retinal bounds are used for displaying patterns and for configuring the retinal sheet.
+retinal_bounds = sheet.BoundingBox(radius=p.area/2.0+0.25+0.375+0.5)
+
 ### Input patterns
 
 # Scale of 1.0 is equivalent to 100% contrast.
@@ -135,7 +139,8 @@ if p.dataset=="Gaussian":
                        orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=p.input_seed+21+i),
                        size=0.088388, aspect_ratio=4.66667, scale=contrast_scale)
             for i in xrange(total_num_inputs)]
-    combined_inputs = pattern.SeparatedComposite(min_separation=0,generators=inputs)
+    combined_inputs = pattern.SeparatedComposite(min_separation=0,generators=inputs,
+                                                 bounds = retinal_bounds)
 if p.dataset in ["Nature", "VGR"]:
     # Do not randomly rotate GR patches (otherwise horizontal bias is meaningless)
     patch_orientation = 0.0 if p.dataset=="VGR" else numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=p.input_seed+65)
@@ -168,7 +173,6 @@ disks_inputs=[topo.pattern.Composite(operator=numpy.add,
                         y=numbergen.UniformRandom(lbound=-2.125,ubound=2.125, seed=p.input_seed+36),
                                                  size=2.0, aspect_ratio=1.0, scale = disk_scale,
                                                  bounds=sheet.BoundingBox(radius=1.125),smoothing=0.1),
-
                              topo.pattern.random.UniformRandom(scale=rand_scale)])]
 
 retina_inputs = topo.pattern.Selector(generators=disks_inputs)
@@ -295,5 +299,4 @@ topo.sim.grid_layout([[None,    'V1',     None],
 
 import topo.analysis.featureresponses
 topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier=2.0
-contrasts =  [{'contrast':c} for c in [100, 80, 60, 40, 20, 10]]
-topo.analysis.featureresponses.FeatureCurveCommand.curve_parameters= contrasts
+topo.analysis.featureresponses.FeatureCurveCommand.contrasts= [100, 80, 60, 40, 20, 10]
