@@ -9,7 +9,6 @@ import os
 import math
 import time
 import difflib
-import uuid
 import sys
 
 import topo
@@ -17,7 +16,6 @@ import param
 
 
 try:
-    from IPython.display import HTML, Javascript, display
     from IPython.core.display import clear_output
 except:
     clear_output = None
@@ -81,6 +79,33 @@ class RunProgress(ProgressBar):
         if remaining != 0:
             topo.sim.run(remaining)
             self.update(100)
+
+
+def prompt(message, default, options, skip=False):
+    """
+    Helper function to repeatedly prompt the user with a list of
+    options. If no input is given, the default value is returned. If
+    wither the skip flag is True or the prompt is in a batch mode
+    environment (e.g. for automated testing), the default value is
+    immediately returned.
+    """
+    options = list(set(opt.lower() for opt in options))
+    show_options = options[:]
+    assert default.lower() in options, "Default value must be in options list."
+    if skip or ('SKIP_IPYTHON_PROMPTS' in os.environ):
+        return default
+    default_index = show_options.index(default.lower())
+    show_options[default_index] = show_options[default_index].capitalize()
+    choices ="/".join(show_options)
+    prompt_msg = "%s (%s): " % (message, choices)
+    response = raw_input(prompt_msg)
+    if response =="":
+        return default.lower()
+    while response.lower() not in options:
+        msg = ("Response '%s' not in available options (%s). Please try again: "
+               % (response, choices))
+        response = raw_input(msg)
+    return response.lower()
 
 
 def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_',
