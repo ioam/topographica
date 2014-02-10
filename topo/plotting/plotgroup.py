@@ -1817,7 +1817,7 @@ pg.add_static_image('Hue Code', 'static/key_angles.png')
 pg= create_plotgroup(name='Position Preference',category="Preference Maps",
            doc='Measure preference for the X and Y position of a Gaussian.',
            pre_plot_hooks=[analysis.measure_position_pref.instance(
-            preference_fn=distribution.DSF_WeightedAverage( selectivity_scale=(0.,17.) ))],
+            preference_fn=distribution.DSF_WeightedAverage(selectivity_scale=(0.,17.) ))],
            plot_hooks=[pylabplot.topographic_grid.instance()],
            normalize='Individually')
 
@@ -1832,7 +1832,7 @@ create_plotgroup(template_plot_type="curve",name='Orientation Tuning Fullfield',
             Although the data takes a long time to collect, once it is ready the plots
             are available immediately for any unit.""",
         pre_plot_hooks=[analysis.measure_or_tuning_fullfield.instance()],
-        plot_hooks=[pylabplot.cyclic_tuning_curve.instance(x_axis='orientation',unit='degrees')])
+        plot_hooks=[pylabplot.cyclic_tuning_curve.instance(x_axis='orientation')])
 
 
 create_plotgroup(template_plot_type="curve",name='Orientation Tuning',category="Tuning Curves",doc="""
@@ -1846,27 +1846,28 @@ create_plotgroup(template_plot_type="curve",name='Orientation Tuning',category="
 create_plotgroup(template_plot_type="curve",name='Size Tuning',category="Tuning Curves",
         doc='Measure the size preference for a specific unit.',
         pre_plot_hooks=[analysis.measure_size_response.instance()],
-        plot_hooks=[pylabplot.tuning_curve.instance(x_axis='size',unit="Diameter of stimulus")],
+        plot_hooks=[pylabplot.tuning_curve.instance(x_axis='size')],
         prerequisites=['OrientationPreference','XPreference'])
 
 
 create_plotgroup(template_plot_type="curve",name='Contrast Response',category="Tuning Curves",
         doc='Measure the contrast response function for a specific unit.',
         pre_plot_hooks=[analysis.measure_contrast_response.instance()],
-        plot_hooks=[pylabplot.tuning_curve.instance(x_axis="contrast",unit="%")],
+        plot_hooks=[pylabplot.tuning_curve.instance(x_axis="contrast")],
         prerequisites=['OrientationPreference','XPreference'])
 
 
 create_plotgroup(template_plot_type="curve",name='Frequency Tuning',category="Tuning Curves",
         doc='Measure the spatial frequency preference for a specific unit.',
         pre_plot_hooks=[analysis.measure_frequency_response.instance()],
-                 plot_hooks=[pylabplot.tuning_curve.instance(x_axis="frequency",unit="cycles per unit distance")],
+                 plot_hooks=[pylabplot.tuning_curve.instance(x_axis="frequency")],
         prerequisites=['OrientationPreference','XPreference'])
 
 
 create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category="Tuning Curves",
                  doc='Measure the response of one unit to a center and surround sine grating disk.',
                  pre_plot_hooks=[analysis.measure_orientation_contrast.instance()],
-                 plot_hooks=[pylabplot.cyclic_tuning_curve.instance(x_axis="orientationsurround",center=False,relative_labels=True)],
+                 plot_hooks=[pylabplot.cyclic_tuning_curve.instance(x_axis="orientationsurround", center=False,
+                                                                    relative_labels=True)],
                  prerequisites=['OrientationPreference','XPreference'])
 
