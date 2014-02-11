@@ -17,28 +17,27 @@ SheetViews should be plotted in which combination.  See the help for
 PlotGroupTemplate for more information.
 """
 
+import copy
+import time
+import sys
+
 import numpy as np
-
-from imagen.views import SheetView, SheetStack, SheetLines, ProjectionGrid
-
-from featuremapper.command import * # pyflakes:ignore (API import)
 
 import param
 from param import ParameterizedFunction, ParamOverrides
+
+from dataviews import SheetView, SheetStack, SheetLines, CoordinateGrid
+
+from featuremapper.command import * # pyflakes:ignore (API import)
 
 import topo
 from topo.base.cf import CFSheet, Projection
 from topo.base.sheet import Sheet
 from topo.base.arrayutil import centroid
 from topo.misc.attrdict import AttrDict
-from topo.analysis.featureresponses import pattern_present, pattern_response, update_activity # pyflakes:ignore (API import)
-
-
-
-import copy, time
-
-import sys
 from topo.base.cf import CFProjection
+from topo.analysis.featureresponses import pattern_present, pattern_response, update_activity  # pyflakes:ignore (API import)
+
 
 class Collector(param.Parameterized):
     """
@@ -179,7 +178,7 @@ class Collector(param.Parameterized):
 
         time_type = param.Dynamic.time_fn
 
-        if 'Time' not in data.dimension_labels and not isinstance(data, ProjectionGrid):
+        if 'Time' not in data.dimension_labels and not isinstance(data, CoordinateGrid):
             timestamped_data = data.add_dimension('Time', 0,
                                                   topo.sim.time(),
                                                   time_type)

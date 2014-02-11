@@ -5,13 +5,20 @@ loaded using:
 
 %load_ext topo.misc.ipython
 """
+import os
+import math
+import time
+import difflib
+import sys
+
 import topo
 import param
-import os, time, difflib, uuid, sys
+
 
 try:
-    from IPython.display import HTML, Javascript, display
+    from IPython.core.display import clear_output
 except:
+    clear_output = None
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
 
@@ -23,35 +30,41 @@ if not isinstance(sys.stdout, file):
 
 class ProgressBar(param.Parameterized):
     """
-    A simple progress bar for IPython notebook inspired by the example
-    notebook "Progress Bars" available in IPython GitHub repository.
+    A simple text progress bar suitable for the IPython notebook.
     """
 
-    name = param.String(doc="The name given to the progress bar.")
+    width = param.Integer(default=70, doc="""
+        The width of the progress bar in multiples of 'char'.""")
 
-    def __init__(self, name, **kwargs):
-        super(ProgressBar,self).__init__(name = name, **kwargs)
-        self._divname = "%s-%s" % (name, uuid.uuid4())
-        html = ("""<b>%s progress</b><div style="border: 1px"""
-                """ solid black; width:500px">"""
-                """<div id="%s" style="background-color:grey;"""
-                """ width:0%%">&nbsp;</div></div>""")
-        display(HTML(html % (name, self._divname)))
+    fill_char = param.String(default='#', doc="""
+        The character used to fill the progress bar.""")
+
+    def __init__(self, **kwargs):
+        super(ProgressBar,self).__init__(**kwargs)
 
     def update(self, percentage):
         " Update the progress bar to the given percentage value "
-        display(Javascript("$('div#%s').width('%i%%')"
-                           % (self._divname, percentage)))
+        if clear_output: clear_output()
+        percent_per_char = 100.0 / self.width
+        char_count = int(math.floor(percentage/percent_per_char) if percentage<100.0 else self.width)
+        blank_count = self.width - char_count
+        print '\r', "[%s%s] %0.1f%%" % (self.fill_char * char_count,
+                              ' '*len(self.fill_char)*blank_count,
+                              percentage)
+        sys.stdout.flush()
+        time.sleep(0.0001)
+
 
 class RunProgress(ProgressBar):
     """
-    Progress bar for running Topographica models in IPython notebook.
+    Progress bar for running Topographica simulations in a Notebook.
     """
+
     interval = param.Number(default=20,
         doc="How often to update the progress bar in topo.sim.time units")
 
-    def __init__(self, interval=20, name="Training"):
-        super(RunProgress,self).__init__(name=name, interval=interval)
+    def __init__(self, **kwargs):
+        super(RunProgress,self).__init__(**kwargs)
 
     def run(self, duration):
         """
@@ -62,8 +75,37 @@ class RunProgress(ProgressBar):
             topo.sim.run(self.interval)
             completed += self.interval
             self.update(100*(completed / duration))
-        topo.sim.run(duration - completed)
-        self.update(100)
+        remaining = duration - completed
+        if remaining != 0:
+            topo.sim.run(remaining)
+            self.update(100)
+
+
+def prompt(message, default, options, skip=False):
+    """
+    Helper function to repeatedly prompt the user with a list of
+    options. If no input is given, the default value is returned. If
+    wither the skip flag is True or the prompt is in a batch mode
+    environment (e.g. for automated testing), the default value is
+    immediately returned.
+    """
+    options = list(set(opt.lower() for opt in options))
+    show_options = options[:]
+    assert default.lower() in options, "Default value must be in options list."
+    if skip or ('SKIP_IPYTHON_PROMPTS' in os.environ):
+        return default
+    default_index = show_options.index(default.lower())
+    show_options[default_index] = show_options[default_index].capitalize()
+    choices ="/".join(show_options)
+    prompt_msg = "%s (%s): " % (message, choices)
+    response = raw_input(prompt_msg)
+    if response =="":
+        return default.lower()
+    while response.lower() not in options:
+        msg = ("Response '%s' not in available options (%s). Please try again: "
+               % (response, choices))
+        response = raw_input(msg)
+    return response.lower()
 
 
 def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_',
@@ -126,13 +168,13 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
 # Display hooks #
 #===============#
 
-from imagen.ipython import load_ipython_extension as load_imagen_extension
-from imagen.ipython import sheetstack_display, sheetlayer_display
+from dataviews.ipython import load_ipython_extension as load_imagen_extension
+from dataviews.ipython import stack_display, view_display
 
 try:
     from lancet import ViewFrame
-    ViewFrame.display_fns.append(sheetstack_display)
-    ViewFrame.display_fns.append(sheetlayer_display)
+    ViewFrame.display_fns.append(stack_display)
+    ViewFrame.display_fns.append(view_display)
 except:
     pass
 

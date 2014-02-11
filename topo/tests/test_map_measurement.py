@@ -173,12 +173,13 @@ def test(plotgroup_names):
         if 'curve_dict' in previous_views[sheet.name]:
             previous_curve_dicts = previous_views[sheet.name]['curve_dict']
             # CB: need to cleanup var names e.g. val
+            time, duration = (topo.sim.time(), 1.0)
             for curve_name in previous_curve_dicts:
                 for other_param in previous_curve_dicts[curve_name]:
                     other_param_val = unit_value(other_param)[-1]
                     for val in previous_curve_dicts[curve_name][other_param]:
-                        new_curves = sheet.views.curves[curve_name.capitalize()].top
-                        new = new_curves[other_param_val-0.01:other_param_val+0.01,val].values()[0].data
+                        new_curves = sheet.views.curves[curve_name.capitalize()]
+                        new = new_curves[time, duration, other_param_val-0.01:other_param_val+0.01, val].values()[0].data
                         old = previous_curve_dicts[curve_name][other_param][val].view()[0]
                         failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),
                                                     topo_version, new, old)

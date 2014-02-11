@@ -14,13 +14,13 @@ import numpy as np
 import param
 from param.parameterized import ParamOverrides
 
-from imagen.views import SheetView, SheetStack
+from dataviews import SheetView, SheetStack
+from dataviews.ndmapping import AttrDict
 
 import topo
 import topo.base.sheetcoords
 from topo.base.sheet import Sheet
 from topo.command import restore_input_generators, save_input_generators
-from topo.misc.attrdict import AttrDict
 from topo import pattern
 from topo.sheet import GeneratorSheet
 
@@ -352,7 +352,7 @@ def store_curves(measurement_dict):
     for sheet_name, data in measurement_dict.items():
         sheet = topo.sim[sheet_name]
         storage = sheet.views.curves
-        label = data.metadata.curve_label
+        label = data.metadata.label
         if label in storage:
             storage[label].update(data)
         else:
@@ -413,4 +413,8 @@ __all__ = [
     "SingleInputResponseCommand",
     "FeatureCurveCommand",
     "UnitCurveCommand",
+    "pattern_present",
+    "pattern_response",
+    "update_activity",
+    "update_sheet_activity"
 ]

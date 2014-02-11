@@ -5,12 +5,10 @@ A small number of helper functions used for convolving image patches
 and for displaying data in IPython Notebook.
 """
 
-import topo
 import numpy as np
-import os, copy, glob, math, json
-import imagen, lancet
-import pandas
+import os, math, glob
 import Image
+import imagen
 
 from topo.misc.commandline import gui
 
@@ -42,88 +40,27 @@ def convolve(filename, kernel_pattern, trim=True):
         convolved = convolved[padding-1:padding+width, padding-1:padding+width]
     return Image.fromarray(np.uint8(convolved * 255.0))
 
+anisotropic_kernel = imagen.Gaussian(aspect_ratio=10.0, size=0.05, xdensity=128, ydensity=128,
+                                     orientation=math.pi/2.0)
 
-anisotropic_kernel = kernel_pattern = imagen.Gaussian(aspect_ratio=10.0, size=0.05,
-                                                      xdensity=128, ydensity=128,
-                                                      orientation=math.pi/2.0)
-
-def generate_GR(images_dir, kernel_pattern=anisotropic_kernel, name='V_GR', trim=True):
+def generate_GR(images_dir, kernel_pattern=anisotropic_kernel,
+                name='V_GR', trim=True):
     """
-    Generates a convolved dataset using the given kernel.
+    Generates a convolved dataset using the given kernel. Returns a
+    list of the convolved image filenames.
 
     If no kernel is supplied, uses the default kernel of vertical
     anisotropic blur to simulate the vertical goggle rearing
     condition.
     """
-    for filename in glob.glob(os.path.join(images_dir, 'shouval','combined*.png')):
+    convolved_files = []
+    shouval_files = glob.glob(os.path.join(images_dir, 'shouval','combined*.png'))
+    for filename in sorted(shouval_files):
         basepath, ext = os.path.splitext(filename)
         savename = '%s_%s%s' % (os.path.basename(basepath), name, ext)
         savedir = os.path.join(images_dir, name)
         if not os.path.isdir(savedir): os.makedirs(savedir)
-        convolve(filename, kernel_pattern,trim=trim).save(os.path.join(savedir, savename), format='png')
-
-# For viewing the model
-def view_weights(projections, coords=(0,0), transpose=True):
-    """
-    View the weights for the given projection as a pandas DataFrame.
-    """
-    names = ['%s (%s to %s)' % (proj.name, proj.src.name, proj.dest.name) for proj in projections]
-    views = [proj.view(*coords).top for proj in projections]
-    dframe = pandas.DataFrame({'weights':views})
-    labelled = dframe.set_index([names])
-    lancet.ViewFrame(labelled.T if transpose else labelled)
-
-def view_activities(sheets, coords=(0,0), transpose=True):
-    """
-    View the neural activities weights for a given sheet as a pandas DataFrame.
-    """
-    names = [sheet.name for sheet in sheets]
-    dframe = pandas.DataFrame({'activities':sheets})
-    labelled = dframe.set_index([names])
-    lancet.ViewFrame(labelled.T if transpose else labelled)
-
-def view_patterns(pattern, num=3, transpose=True, radius=1.0):
-    """
-    View num instances of the given Pattern Generator object as a
-    pandas DataFrame.
-    """
-    bounds = imagen.boundingregion.BoundingBox(radius=radius)
-    views = []
-    pat = copy.deepcopy(pattern)
-    topo.sim.state_push()
-    for i in range(num):
-        arr = pat(xdensity=256,  ydensity=256, bounds=bounds)
-        views.append(imagen.views.SheetView(arr, bounds))
-        # views.append(topo.base.sheetview.SheetView((..., bounds)))
-        topo.sim.run(1)
-    topo.sim.state_pop()
-    dframe = pandas.DataFrame({'patterns':views})
-    lancet.ViewFrame(dframe.T if transpose else dframe)
-
-
-
-
-def cleanup_notebook(input_notebook, output_notebook):
-
-    content = json.load(open(input_notebook, 'r'))
-
-    for worksheet in content['worksheets']:
-        for cell in worksheet['cells']:
-            if cell['cell_type'] == 'code':
-                outputs = []
-                for output in cell['outputs']:
-                    html = output.get('html',None)
-                    if html and html[0].endswith("width:0%\">&nbsp;</div></div>"):
-                        new_html = html[0].replace("width:0%", "width:100%")
-                        #new_output = output.copy()
-                        output['html'] = [new_html]
-                        outputs.append(output)
-                        continue
-                    val = output.get('output_type',None)
-                    if ((val is not None) and (val == 'display_data')
-                        and output.get("javascript", [""])[0].startswith("$('div#")): pass
-                    else:
-                        outputs.append(output)
-                cell['outputs'] = outputs
-
-    json.dump(content, open(output_notebook, 'w'))
+        save_path = os.path.join(savedir, savename)
+        convolve(filename, kernel_pattern,trim=trim).save(save_path, format='png')
+        convolved_files.append(save_path)
+    return convolved_files

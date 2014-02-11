@@ -302,18 +302,24 @@ class ElasticNet(Sheet):
         self.zarray=[[self.net[i][r].z for i in range(CS)] for r in range(CS)]
 
 
+from dataviews.ndmapping import AttrDict
+from dataviews import SheetView
+
 
 def update_elastic_net_maps():
     for sheet in topo.sim.objects(ElasticNet).values():
+        metadata = AttrDict(src_name=sheet.name,
+                            precedence=sheet.precedence,
+                            timestamp=topo.sim.time())
         sheet.sheet_view_dict['XCoG']= \
-           SheetView((array(sheet.xarray),sheet.bounds),
-                     sheet.name,sheet.precedence,topo.sim.time())
+           SheetView((array(sheet.xarray), sheet.bounds),
+                     metadata=metadata)
         sheet.sheet_view_dict['YCoG']= \
-           SheetView((array(sheet.yarray),sheet.bounds),
-                     sheet.name,sheet.precedence,topo.sim.time())
+           SheetView((array(sheet.yarray), sheet.bounds),
+                     metadata=metadata)
         sheet.sheet_view_dict['OcularPreference']= \
-           SheetView((array(sheet.zarray),sheet.bounds),
-                     sheet.name,sheet.precedence,topo.sim.time())
+           SheetView((array(sheet.zarray), sheet.bounds),
+                     metadata=metadata)
 
 from topo.plotting.plotgroup import plotgroups
 import topo.command.analysis

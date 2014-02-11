@@ -6,11 +6,9 @@ import unittest
 
 import numpy.oldnumeric as Numeric
 
-from imagen.views import SheetView
+from dataviews import SheetView
 
 from topo.base.sheet import Sheet
-from topo.base.boundingregion import BoundingBox
-from topo.plotting.bitmap import PaletteBitmap
 
 # Turn False once development is complete and this module is to be
 # included as part of the system unit testing.

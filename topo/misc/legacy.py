@@ -2,6 +2,8 @@
 Code used to support old snapshots (those created from 0.9.7/r11275
 onwards).
 """
+from dataviews import odict
+
 __version__='$Revision: 8021 $'
 
 import sys
@@ -301,8 +303,8 @@ support[11871] = pattern_basic_removed
 
 def param_external_removed():
     # CB: From param/external.py, only odict should be relevant to snapshots.
-    import imagen.odict
-    allow_import(imagen.odict,'param.external')
+    import dataviews.odict
+    allow_import(dataviews.odict,'param.external')
 
 support[12024] = param_external_removed
 
@@ -555,7 +557,7 @@ def featuremapper_legacy():
     # Convert old sheet_views and curve_dict
     from topo.misc.attrdict import AttrDict
     from topo.base.sheet import Sheet
-    from imagen.views import SheetView, NdMapping
+    from dataviews import SheetView, NdMapping
     def _set_sheet_views(instance, state):
         if state['simulation'] is None:
             return None
@@ -620,18 +622,18 @@ support[90800300] = featuremapper_legacy
 
 
 def topo_misc_odict_removed():
-    import imagen.odict
-    allow_import(imagen.odict, 'topo.misc.odict')
+    import dataviews.odict
+    allow_import(dataviews.odict, 'topo.misc.odict')
 
 support[90800361] = topo_misc_odict_removed
 
 
 def ndmapping_ndim_remove():
-    import imagen
+    import dataviews
     def remove_ndmapping(instance,state):
         if 'ndim' in state:
             del state['ndim']
-    preprocess_state(imagen.ndmapping.NdMapping, remove_ndmapping)
+    preprocess_state(dataviews.NdMapping, remove_ndmapping)
 
 support[90800401] = ndmapping_ndim_remove
 
@@ -670,7 +672,6 @@ support[90800490] = moved_generatorsheet
 
 
 def replace_keyedlist():
-    from imagen import odict
     class KeyedList(list):
         def __getitem__(self, key):
             for value in [v for k,v in self if k == key]: return value
@@ -705,7 +706,7 @@ def fmapper_rename():
                         'ProjectionGrid': ('bounds',)}
     PicklableClassAttributes.deleted_params.update(param_no_restore)
 
-    import imagen
+    import dataviews
     def remove_shape(instance,state):
         if 'shape' in state:
             x, y = state.pop('shape')
@@ -728,8 +729,8 @@ def fmapper_rename():
         state['lbrt'] = (l, b, r, t)
         state['bounds'] = bounds
 
-    preprocess_state(imagen.views.SheetView, remove_shape)
-    preprocess_state(imagen.views.ProjectionGrid, remove_shape)
+    preprocess_state(dataviews.SheetView, remove_shape)
+    preprocess_state(dataviews.CoordinateGrid, remove_shape)
 
 support[90800536] = fmapper_rename
 

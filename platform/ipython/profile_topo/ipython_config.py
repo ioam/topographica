@@ -3,5 +3,8 @@
 c = get_config()
 
 import sys, os
-sys.path = [os.path.abspath('../../..')] + sys.path
+profile_dir = os.path.split(__file__)[0]
+project_dir = os.path.join(profile_dir, '..', '..', '..')
+sys.path = [os.path.abspath(project_dir)] + sys.path
+
 import external

@@ -49,13 +49,12 @@ __all__ = ['analysis',
 # Find out Topographica's version.
 # First, try Git; if that fails, try to read the release file.
 
-from subprocess import Popen, CalledProcessError, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
+from subprocess import Popen, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
 
 import os
 
 import param
 import imagen
-from imagen import views
 
 # Patch for versions of param prior to 10 May 2013
 param.main=param.Parameterized(name="main")
@@ -264,7 +263,6 @@ except ImportError:
 param.Dynamic.time_fn(val=0.0, time_type=_time_type)
 param.Dynamic.time_dependent = True
 sim = Simulation()
-timeline = views.Timeline()
 
 # numbergen used to be part of topo; import it there for backwards compatibility
 # and set the time function to be topo.sim.time()
@@ -313,11 +311,3 @@ license (http://www.opensource.org/licenses/bsd-license.php).
 # weights underflows are common and not a problem.
 from numpy import seterr
 old_seterr_settings=seterr(all="raise",under="ignore")
-
-
-# Load Topographica IPython extension if imported as module
-try:
-    ip = get_ipython() # pyflakes:ignore (try/except import)
-    ip.extension_manager.load_extension('topo.misc.ipython')
-except:
-    pass

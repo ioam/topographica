@@ -15,7 +15,7 @@ $ ./topographica examples/lissom_whisker_barrels.ty
 """
 
 
-from math import pi, sqrt
+from math import pi
 
 import numpy
 import param
@@ -192,7 +192,7 @@ topo.sim.connect(
 
 from topo.plotting.plotgroup import create_plotgroup, Subplotting
 from topo.analysis.featureresponses import Feature, FeatureMaps
-from imagen.views import SheetView, NdMapping
+from dataviews import SheetView, NdMapping
 
 def measure_deflection_pref(num_deflection=8,scale=0.3,offset=0.0,display=False,
                             weighted_average=False, pattern_generator=Whiskers()):

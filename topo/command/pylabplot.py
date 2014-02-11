@@ -34,6 +34,8 @@ from topo.plotting.plot import make_template_plot
 from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
+from dataviews.plots import DataPlot
+
 from topo.command import Command
 
 
@@ -573,100 +575,7 @@ class overlaid_plots(overlaid_plot):
 
 
 
-class unit_tuning_curve(PylabPlotCommand):
-    """
-    Plot a tuning curve for a feature, such as orientation, contrast, or size.
-
-    The curve datapoints are collected from the curve_dict for
-    the units at the specified coordinate in the specified sheet
-    (where the units and sheet may be set by a GUI, using
-    topo.analysis.featureresponses.UnitCurveCommand.sheet and
-    topo.analysis.featureresponses.UnitCurveCommand.coords,
-    or by hand).
-    """
-
-    sheet_name = param.String(default="")
-
-    # Can we list some alternatives here, if there are any
-    # useful ones?
-    plot_type = param.Callable(default=plt.plot,doc="""
-        Matplotlib command to generate the plot.""")
-
-    legend=param.Boolean(default=True, doc="""
-        Whether or not to include a legend in the plot.""")
-
-    coord = param.NumericTuple(default=(0,0), doc="""
-           The  sheet coordinate position to be plotted.""")
-
-    num_ticks=param.Number(default=5, doc="""
-        Number of tick marks on the X-axis.""")
-
-    unit = param.String(default="",doc="""
-        String to use in labels to specify the units in which curves are plotted.""")
-
-    __abstract = True
-
-
-    def _format_x_tick_label(self,x):
-        return "%g" % round(x,2)
-
-    def _rotate(self, seq, n=1):
-        n = n % len(seq) # n=hop interval
-        return seq[n:] + seq[:n]
-
-    def _curve_values(self, coord, curve):
-        """Return the x, y, and x ticks values for the specified curve from the curve_dict"""
-        x, y = coord
-        x_values = curve.keys()
-        y_values = [curve[k, x, y] for k in x_values]
-        self.x_values = x_values
-        return x_values, y_values, x_values
-
-    def _reduce_ticks(self, ticks):
-        values = []
-        values.append(self.x_values[0])
-        rangex = self.x_values[-1] - self.x_values[0]
-        for i in xrange(1, self.num_ticks+1):
-            values.append(values[-1]+rangex/(self.num_ticks))
-        labels = values
-        return (values, labels)
-
-    def __call__(self, curve_views, **params):
-        p=ParamOverrides(self,params,allow_extra_keywords=True)
-
-        fig = plt.figure(figsize=(7,7))
-        isint = plt.isinteractive()
-        plt.ioff()
-
-        x_axis = curve_views.top.dimension_labels[0]
-
-        plt.ylabel('Response', fontsize='large')
-        plt.xlabel('%s (%s)' % (x_axis, p.unit), fontsize='large')
-        plt.title('Sheet %s, coordinate(x,y)=(%0.3f,%0.3f) at time %s' %
-                  (p.sheet_name, p.coord[0], p.coord[1],
-                   topo.sim.timestr(curve_views.timestamp)))
-        p.title='%s: %s Tuning Curve' % (topo.sim.name, x_axis)
-
-        self.first_curve = True
-        for val, curve in curve_views[...].items():
-            x_values, y_values, ticks = self._curve_values(p.coord, curve)
-
-            x_tick_values, ticks = self._reduce_ticks(ticks)
-            labels = [self._format_x_tick_label(x) for x in ticks]
-            plt.xticks(x_tick_values, labels, fontsize='large')
-            plt.yticks(fontsize='large')
-
-            p.plot_type(x_values, y_values, label=curve.metadata.label, lw=3.0)
-            self.first_curve = False
-
-        if isint: plt.ion()
-        if p.legend: plt.legend(loc=2)
-        self._generate_figure(p)
-        return fig
-
-
-
-class tuning_curve(unit_tuning_curve):
+class tuning_curve(PylabPlotCommand):
     """
     Plot a tuning curve for a feature, such as orientation, contrast, or size.
 
@@ -678,12 +587,23 @@ class tuning_curve(unit_tuning_curve):
     or by hand).
     """
 
-    sheet = param.ObjectSelector(
-        default=None, doc="""
-        Name of the sheet to use in measurements.""")
+    center = param.Boolean(default=True, doc="""
+        Centers the tuning curve around the maximally responding feature.""")
 
     coords = param.List(default=[(0 , 0)], doc="""
         List of coordinates of units to measure.""")
+
+    group_by = param.List(default=['Contrast'], doc="""
+        Feature dimensions for which curves are overlaid.""")
+
+    legend = param.Boolean(default=True, doc="""
+        Whether or not to include a legend in the plot.""")
+
+    relative_labels = param.Boolean(default=False, doc="""
+        Relabel the x-axis with values relative to the preferred.""")
+
+    sheet = param.ObjectSelector(default=None, doc="""
+        Name of the sheet to use in measurements.""")
 
     x_axis = param.String(default='', doc="""
         Feature to plot on the x axis of the tuning curve""")
@@ -694,155 +614,45 @@ class tuning_curve(unit_tuning_curve):
     def __call__(self, **params):
         p = ParamOverrides(self, params, allow_extra_keywords=True)
 
-        curves = p.sheet.views.curves[p.x_axis.capitalize()].top
-        for coordinate in p.coords:
-            super(tuning_curve, self).__call__(curves,
-                                               sheet_name=p.sheet.name,
-                                               coord=coordinate,
-                                               plot_type=p.plot_type,
-                                               unit=p.unit,
-                                               legend=p.legend)
-
-
-
-class cyclic_unit_tuning_curve(unit_tuning_curve):
-    """
-    Same as tuning_curve, but rotates the curve so that minimum y
-    values are at the minimum x value to make the plots easier to
-    interpret.  Such rotation is valid only for periodic quantities
-    like orientation or direction, and only if the correct period
-    is set.
-
-    At present, the y_values and labels are rotated by an amount
-    determined by the minmum y_value for the first curve plotted
-    (usually the lowest contrast curve).
-    """
-
-    cyclic_range = param.Number(default=np.pi,bounds=(0,None),softbounds=(0,10),doc="""
-        Range of the cyclic quantity (e.g. pi for the orientation of
-        a symmetric stimulus, or 2*pi for motion direction or the
-        orientation of a non-symmetric stimulus).""")
-
-    unit = param.String(default="degrees",doc="""
-        String to use in labels to specify the units in which curves are plotted.""")
-
-    center = param.Boolean(default=True,doc="""
-        Centers the tuning curve around the maximally responding feature.""")
-
-    relative_labels = param.Boolean(default=False,doc="""
-        Relabel the x-axis with values relative to the preferred.""")
-
-    def __call__(self,curves,**params):
-        p=ParamOverrides(self,params)
-        self.center = p.center
-        if p.center:
-            self.peak_argmax = 0
-            max_y = 0.0
-            x, y = p.coord
-            for curve in curves[...].values():
-                x_values = curve.keys()
-                y_values = [curve[k, x, y] for k in x_values]
-                if np.max(y_values) > max_y:
-                    max_y = np.max(y_values)
-                    self.peak_argmax = np.argmax(y_values)
-
-        return super(cyclic_unit_tuning_curve,self).__call__(curves, **p)
-
-
-    def _reduce_ticks(self,ticks):
-        values = []
-        labels = []
-        step = np.pi/(self.num_ticks-1)
-        if self.relative_labels:
-            labels.append(-90)
-            label_step = 180 / (self.num_ticks-1)
-        else:
-            labels.append(ticks[0])
-            label_step = step
-        values.append(self.x_values[0])
-        for i in xrange(0,self.num_ticks-1):
-            labels.append(labels[-1]+label_step)
-            values.append(values[-1]+step)
-        return (values, labels)
-
-
-    # This implementation should work for quantities periodic with
-    # some multiple of pi that we want to express in degrees, but it
-    # will need to be reimplemented in a subclass to work with other
-    # cyclic quantities.
-    def _format_x_tick_label(self,x):
-        if self.relative_labels:
-            return str(x)
-        return str(int(np.round(180*x/np.pi)))
-
-
-    def _curve_values(self, coord, curve):
-        """
-        Return the x, y, and x ticks values for the specified curve from the curve_dict.
-
-        With the current implementation, there may be cases (i.e.,
-        when the lowest contrast curve gives a lot of zero y_values)
-        in which the maximum is not in the center.  This may
-        eventually be changed so that the preferred orientation is in
-        the center.
-        """
-        x, y = coord
-        if self.first_curve:
-            x_values = curve.keys()
-            y_values = [curve[k, x, y] for k in x_values]
-            if self.center:
-                rotate_n = self.peak_argmax+len(x_values)/2
-                y_values = self._rotate(y_values, n=rotate_n)
-                self.ticks=self._rotate(x_values, n=rotate_n)
-            else:
-                self.ticks = list(x_values)
-
-            self.ticks.append(self.ticks[0])
-            x_values.append(x_values[0]+self.cyclic_range)
-            y_values.append(y_values[0])
-
-            self.x_values = x_values
-        else:
-            y_values = [curve[k, x, y] for k in self.ticks]
-
-        return self.x_values, y_values, self.ticks
-
-
-
-class cyclic_tuning_curve(cyclic_unit_tuning_curve):
-    """
-    Same as tuning_curve, but rotates the curve so that minimum y
-    values are at the minimum x value to make the plots easier to
-    interpret.  Such rotation is valid only for periodic quantities
-    like orientation or direction, and only if the correct period
-    is set.
-
-    At present, the y_values and labels are rotated by an amount
-    determined by the minmum y_value for the first curve plotted
-    (usually the lowest contrast curve).
-    """
-
-    sheet = param.ObjectSelector(
-        default=None, doc="""
-        Name of the sheet to use in measurements.""")
-
-    x_axis = param.String(default="",doc="""
-        Feature to plot on the x axis of the tuning curve""")
-
-    coords = param.List(default=[(0, 0)], doc="""
-        List of coordinates of units to measure.""")
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
         x_axis = p.x_axis.capitalize()
-        curves = p.sheet.views.curves[x_axis].top
-        for coordinate in p.coords:
-            super(cyclic_tuning_curve, self).__call__(curves, coord=coordinate,
-                                                      sheet_name=p.sheet.name,
-                                                      plot_type=p.plot_type,
-                                                      unit=p.unit,
-                                                      legend=p.legend,
-                                                      cyclic_range=p.cyclic_range)
+        stack = p.sheet.views.curves[x_axis]
+        time = stack.dim_max('Time')
+        curves = stack[time, :, :, :].sample(coords=p.coords, x_axis=x_axis,
+                                             group_by=p.group_by)
+
+        figs = []
+        for coord, curve in curves:
+            fig = plt.figure()
+            ax = plt.subplot(111)
+            DataPlot(curve, center=p.center, relative_labels=p.relative_labels,
+                     show_legend=p.legend)(ax)
+            self._generate_figure(p, fig)
+            figs.append((coord, fig))
+
+        return figs
+
+        
+    def _generate_figure(self, p, fig):
+        """
+        Helper function to display a figure on screen or save to a file.
+
+        p should be a ParamOverrides instance containing the current
+        set of parameters.
+        """
+
+        plt.show._needmain=False
+        if p.filename is not None:
+            # JABALERT: need to reformat this as for other plots
+            fullname=p.filename+p.filename_suffix+str(topo.sim.time())+"."+p.file_format
+            fig.savefig(normalize_path(fullname), dpi=p.file_dpi)
+        elif p.display_window:
+            self._set_windowtitle(p.title)
+            fig.show()
+        else:
+            fig.close()
+
+        
+cyclic_tuning_curve = tuning_curve
 
 
 

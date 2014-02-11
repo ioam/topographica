@@ -25,11 +25,12 @@ from numpy import float64
 import param
 
 from simulation import EventProcessor
-from sheetcoords import SheetCoordinateSystem
-from boundingregion import BoundingBox, BoundingRegionParameter
+
 from functionfamily import TransferFn
 
-from imagen.views import SheetView
+from dataviews import SheetView
+from dataviews.sheetcoords import SheetCoordinateSystem
+from dataviews.boundingregion import BoundingBox, BoundingRegionParameter
 
 activity_type = float64
 

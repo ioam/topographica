@@ -11,8 +11,12 @@ no matter what the context from which they are called.
 """
 
 import cPickle as pickle
-
-import os,sys,re,string,time,platform
+import sys
+import os
+import re
+import string
+import time
+import platform
 
 import __main__
 
@@ -30,7 +34,7 @@ import imagen, numbergen
 try:
     from collections import OrderedDict
 except:
-    from imagen.odict import OrderedDict # pyflakes:ignore (try/except import)
+    from dataviews.odict import OrderedDict # pyflakes:ignore (try/except import)
 
 import topo
 from topo.base.sheet import Sheet

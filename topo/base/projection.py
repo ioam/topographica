@@ -8,8 +8,8 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from imagen.views import SheetView
-from imagen.odict import OrderedDict
+from dataviews import SheetView
+from dataviews.odict import OrderedDict
 
 from topo.misc.attrdict import AttrDict
 
