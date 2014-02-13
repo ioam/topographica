@@ -95,7 +95,7 @@ def prompt(message, default, options, skip=False):
     if skip or ('SKIP_IPYTHON_PROMPTS' in os.environ):
         return default
     default_index = show_options.index(default.lower())
-    show_options[default_index] = show_options[default_index].capitalize()
+    show_options[default_index] = show_options[default_index].upper()
     choices ="/".join(show_options)
     prompt_msg = "%s (%s): " % (message, choices)
     response = raw_input(prompt_msg)
