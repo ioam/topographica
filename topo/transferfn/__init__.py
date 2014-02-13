@@ -33,6 +33,8 @@ from imagen.transferfn import BinaryThreshold,DivisiveNormalizeL1  # pyflakes:ig
 from imagen.transferfn import DivisiveNormalizeL2,DivisiveNormalizeLinf # pyflakes:ignore (API import)
 from imagen.transferfn import DivisiveNormalizeLp # pyflakes:ignore (API import)
 
+from featuremapper import PatternDrivenAnalysis
+
 # CEBHACKALERT: these need to respect the mask - which will be passed in.
 
 
@@ -575,7 +577,6 @@ class ScalingTF(TransferFnWithState):
         x *= self.sf
 
 
-
 class Hysteresis(TransferFnWithState):
     """
     Smoothly interpolates a matrix between simulation time steps, with
@@ -590,7 +591,7 @@ class Hysteresis(TransferFnWithState):
         self.first_call = True
         self.__current_state_stack=[]
         self.old_a = 0
-        topo.base.functionfamily.PatternDrivenAnalysis.pre_presentation_hooks.append(self.reset)
+        PatternDrivenAnalysis.pre_presentation_hooks.append(self.reset)
 
     def __call__(self,x):
         if self.first_call is True:
