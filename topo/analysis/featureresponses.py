@@ -291,6 +291,7 @@ def topo_metadata_fn(input_names=[], output_names=[]):
     metadata['timestamp'] = topo.sim.time()
 
     generator_sheets = topo.sim.objects(GeneratorSheet)
+    all_sheets = dict((n, s) for n, s in topo.sim.objects(Sheet).items())
     measurement_sheets = dict((n, s) for n, s in topo.sim.objects(Sheet).items()
                               if hasattr(s, 'measure_maps') and s.measure_maps)
     projections = dict((conn.name, conn) for conn in topo.sim.connections())
@@ -313,8 +314,8 @@ def topo_metadata_fn(input_names=[], output_names=[]):
 
     metadata['outputs'] = {}
     for o in output_names:
-        if o in measurement_sheets:
-            s = measurement_sheets[o]
+        if o in all_sheets:
+            s = all_sheets[o]
             metadata['outputs'][o] = {'bounds': s.bounds, 'precedence': s.precedence,
                                       'row_precedence': s.row_precedence,
                                       'shape': s.shape, 'src_name': s.name}
