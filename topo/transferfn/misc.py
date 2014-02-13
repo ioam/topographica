@@ -168,10 +168,13 @@ class HalfRectify(TransferFn):
 class HomeostaticResponse(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
-    constant desired average activity. Details can be found in the report
-    'Mechanisms for Stable and Robust Development of Orientation Maps
-    and Receptive Fields', by Judith S. Law, Jan Antolik, and James A.
-    Bednar, 2011 (http://www.inf.ed.ac.uk/publications/report/1404.html).
+    constant desired average activity. Defined in:
+
+    Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar.
+    Mechanisms for stable, robust, and adaptive development of orientation
+    maps in the primary visual cortex.
+    Journal of Neuroscience 33:15747-15766, 2013.
+    http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013
     """
 
     t_init = param.Number(default=0.15,doc="""
