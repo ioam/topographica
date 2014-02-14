@@ -696,10 +696,13 @@ class CFProjection(Projection):
         return self.cfs[r,c].get_bounds(self.src)
     
     
-    def grid(self, rows=10, cols=10, **kwargs):
+    def grid(self, rows=10, cols=10, lbrt=None, **kwargs):
         dim1, dim2 = self.dest.shape
-        l, t = self.dest.matrixidx2sheet(0, 0)
-        r, b = self.dest.matrixidx2sheet(dim1-1, dim2-1)
+        if lbrt is None:
+            l, t = self.dest.matrixidx2sheet(0, 0)
+            r, b = self.dest.matrixidx2sheet(dim1-1, dim2-1)
+        else:
+            l, b, r, t = lbrt
         x, y = np.meshgrid(np.linspace(l, r, cols),
                            np.linspace(b, t, rows))
         coords = zip(x.flat, y.flat)
