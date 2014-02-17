@@ -212,3 +212,5 @@ topo.sim.grid_layout([vs,ls,es], xstep=70/len(eyes), ystep=200, item_scale=0.75/
 from topo.analysis.featureresponses import MeasureResponseCommand
 MeasureResponseCommand.durations=[0.175]
 MeasureResponseCommand.pattern_response_fn.apply_output_fns=False
+
+
