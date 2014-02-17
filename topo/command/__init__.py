@@ -215,7 +215,8 @@ class runscript(param.ParameterizedFunction):
         for (key, val) in kwargs.items():
             global_params.exec_in_context('%s=%s' % (key,val))
 
-        code = compile(open(source_file, 'r').read(), "<execution>", "exec")
+        source_path = param.resolve_path(source_file)
+        code = compile(open(source_path, 'r').read(), "<execution>", "exec")
         exec code in ns #globals and locals
 
         self.push(ns)
