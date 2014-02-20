@@ -743,7 +743,8 @@ class CFProjection(Projection):
             bounds = roi_bounds
 
         sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
-                    roi_bounds=roi_bounds, metadata=AttrDict(timestamp=timestamp))
+                    input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
+                    metadata=AttrDict(timestamp=timestamp))
 
         return CFStack((timestamp, sv), coords=(sheet_x, sheet_y),
                        dimension_labels=['Time'], dest_name=self.dest.name,

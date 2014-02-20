@@ -95,25 +95,27 @@ class CFView(ImagenSheetView):
         The situated bounds can be set to embed the SheetLayer in a larger
         bounded region.""")
 
+    input_sheet_slice = param.NumericTuple(default=(0, 0, 0, 0), doc="""
+        Slice indices of the embedded view into the situated matrix.""")
+
     @property
     def situated(self):
         if self.bounds.lbrt() == self.situated_bounds.lbrt():
             return self
-        xd, yd = self.xdensity, self.ydensity
+        l, b, r, t = self.bounds.lbrt()
+        xd = int(np.round(self.data.shape[1] / (r-l)))
+        yd = int(np.round(self.data.shape[0] / (t-b)))
 
         scs = SheetCoordinateSystem(self.situated_bounds, xd, yd)
 
         data = np.zeros(scs.shape, dtype=np.float64)
-        l, b, r, t = self.bounds.lbrt()
-
-        coord = scs.sheet2matrixidx((l+r)/2., (t+b)/2.)
-        r1, r2, c1, c2 = Slice.findinputslice(coord, self.shape, scs.shape)
-
+        r1, r2, c1, c2 = self.input_sheet_slice
         data[r1:r2, c1:c2] = self.data
-        return SheetView(data, self.situated_bounds, roi_bounds=self.roi_bounds,
-                         situated_bounds=self.situated_bounds,
-                         cyclic_range=self.cyclic_range,
-                         style=self.style, metadata=self.metadata)
+
+        return ImagenSheetView(data, self.situated_bounds, roi_bounds=self.roi_bounds,
+                               situated_bounds=self.situated_bounds,
+                               cyclic_range=self.cyclic_range,
+                               style=self.style, metadata=self.metadata)
 
 
 class CFStack(SheetStack):
