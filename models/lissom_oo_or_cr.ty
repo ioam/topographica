@@ -33,6 +33,7 @@ __version__='$Revision: 8562 $'
 
 
 from math import pi, sqrt
+
 import numpy
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
@@ -96,22 +97,27 @@ for e in eyes:
             topo.sim[e+cone+'Retina'+n]=sheet.GeneratorSheet(
                 nominal_density=default_retina_density,
                 input_generator=input_composite,
-                period=1.0, phase=0.05,
+                period=1.0, phase=0.05,row_precedence=0.1,
                 nominal_bounds=sheet.BoundingBox(radius=0.5+0.27083+0.375))
 
         for l in center_polarities:
             for opponent in opponent_types:
                 topo.sim[e+opponent+' LGN'+l+n]=sheet.CFSheet(
-                    nominal_density=24.0,
+                    nominal_density=24.0,row_precedence=0.2 if l=='On' else 0.3,
                     nominal_bounds=sheet.BoundingBox(radius=0.5+0.27083),
                     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.0,upper_bound=1.0)],
                     measure_maps=False)
 
 
+
+### Sheets
 topo.sim['V1'] = sheet.SettlingCFSheet(
     nominal_density=locals().get('default_density',48.0),tsettle=9,
     nominal_bounds=sheet.BoundingBox(radius=0.5),
     output_fns=[transferfn.PiecewiseLinear(lower_bound=0.076,upper_bound=0.626)])
+
+
+### Connections
 
 # DoG weights for the LGN
 centerg   = pattern.Gaussian(size=0.07385,aspect_ratio=1.0,output_fns=[transferfn.DivisiveNormalizeL1()])
