@@ -181,7 +181,7 @@ class Collector(param.Parameterized):
         if 'Time' not in data.dimension_labels and not isinstance(data, CoordinateGrid):
             timestamped_data = data.add_dimension('Time', 0,
                                                   topo.sim.time(),
-                                                  time_type)
+                                                  {'Time':{'type':time_type}})
         else:
             timestamped_data = data
 

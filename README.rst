@@ -43,6 +43,12 @@ dependencies as follows::
 
    pip install ipython tornado pyzmq jinja2
 
+The notebook server may then be launched using the following command:
+
+::
+
+   ../../topographica -n
+
 
 MAKING DOCUMENTATION (OPTIONAL)
 -------------------------------

@@ -23,7 +23,7 @@ import numpy as np
 
 import param
 from dataviews.ndmapping import AttrDict
-from dataviews import SheetView, SheetStack, CoordinateGrid
+from dataviews import CoordinateGrid
 from dataviews.sheetcoords import Slice
 from dataviews.boundingregion import BoundingBox, BoundingRegionParameter
 
@@ -34,6 +34,7 @@ from functionfamily import LearningFn,Hebbian,IdentityLF
 from functionfamily import ResponseFn,DotProduct
 from functionfamily import CoordinateMapperFn,IdentityMF
 from projection import Projection,ProjectionSheet
+from sheetview import CFView, CFStack
 
 
 def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
@@ -696,44 +697,61 @@ class CFProjection(Projection):
         return self.cfs[r,c].get_bounds(self.src)
     
     
-    def grid(self, rows=10, cols=10, lbrt=None, **kwargs):
-        dim1, dim2 = self.dest.shape
+    def grid(self, rows=10, cols=10, lbrt=None, situated=False, **kwargs):
         if lbrt is None:
-            l, t = self.dest.matrixidx2sheet(0, 0)
-            r, b = self.dest.matrixidx2sheet(dim1-1, dim2-1)
+            bounds = self.dest.bounds
+            l, b, r, t = bounds.lbrt()
         else:
             l, b, r, t = lbrt
-        x, y = np.meshgrid(np.linspace(l, r, cols),
-                           np.linspace(b, t, rows))
+            bounds = BoundingBox(points=((l, b), (r, t)))
+
+        xd, yd = self.dest.xdensity, self.dest.ydensity
+        half_x_unit, half_y_unit = 1.0/xd, 1.0/yd
+
+        x, y = np.meshgrid(np.linspace(l+half_x_unit, r-half_x_unit, cols),
+                           np.linspace(b+half_y_unit, t-half_y_unit, rows))
         coords = zip(x.flat, y.flat)
-        grid = self._cf_grid(shape=(cols, rows), **kwargs)
+
+        grid_items = {}
         for x, y in coords:
-            grid[x, y] = self.view(x, y, **kwargs)
-        return grid
+            grid_items[x, y] = self.view(x, y, situated=situated, **kwargs)
+
+        return CoordinateGrid(bounds, (cols, rows), info=self.name, initial_items=grid_items,
+                              proj_src_name=self.src.name, proj_dest_name=self.dest.name,
+                              timestamp=self.src.simulation.time(), **kwargs)
 
 
-    def view(self, sheet_x, sheet_y, timestamp=None, **kwargs):
+    def view(self, sheet_x, sheet_y, timestamp=None, situated=False, **kwargs):
         """
         Return a single connection field SheetView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        matrix_data = np.zeros(self.src.activity.shape, dtype=np.float64)
         (r, c) = self.dest.sheet2matrixidx(sheet_x, sheet_y)
         cf = self.cfs[r, c]
         r1, r2, c1, c2 = cf.input_sheet_slice
-        matrix_data[r1:r2, c1:c2] = cf.weights
+        situated_shape = self.src.activity.shape
+        situated_bounds = self.src.bounds
+        roi_bounds = cf.get_bounds(self.src)
+        if situated:
+            matrix_data = np.zeros(situated_shape, dtype=np.float64)
+            matrix_data[r1:r2, c1:c2] = cf.weights.copy()
+            bounds = situated_bounds
+        else:
+            matrix_data = cf.weights.copy()
+            bounds = roi_bounds
 
-        sv = SheetView(matrix_data, self.src.bounds, roi_bounds=cf.get_bounds(self.src),
-                       metadata=AttrDict(timestamp=timestamp))
+        sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
+                    input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
+                    metadata=AttrDict(timestamp=timestamp))
 
-        return SheetStack((timestamp, sv), coords=(sheet_x, sheet_y),
-                          dimension_labels=['Time'], dest_name=self.dest.name,
-                          precedence=self.src.precedence,
-                          proj_name=self.name, src_name=self.src.name,
-                          row_precedence=self.src.row_precedence,
-                          timestamp=timestamp, **kwargs)
+        return CFStack((timestamp, sv), coords=(sheet_x, sheet_y),
+                       dimension_labels=['Time'], dest_name=self.dest.name,
+                       precedence=self.src.precedence, proj_name=self.name,
+                       src_name=self.src.name,
+                       row_precedence=self.src.row_precedence,
+                       timestamp=timestamp, **kwargs)
 
 
     def get_view(self, sheet_x, sheet_y, timestamp=None):

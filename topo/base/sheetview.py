@@ -9,7 +9,14 @@ for a single sheet, and a view can be passed around independent of the
 originating source object.
 """
 
+import numpy as np
+
 import param
+
+from dataviews import SheetView as ImagenSheetView
+from dataviews import CoordinateGrid, SheetStack
+from dataviews.sheetcoords import Slice, SheetCoordinateSystem
+from dataviews.boundingregion import BoundingRegion
 
 
 class SheetView(param.Parameterized):
@@ -82,16 +89,37 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
     return unitview
 
 
-def ProjectionView((data, bounds), projection, timestamp,**params):
-    """
-    Function for backward compatibility with earlier ProjectionView
-    compoennt. Original docstring for ProjectionView:
+class CFView(ImagenSheetView):
 
-    ProjectionViews should be stored in Sheets via a tuple
-    ('Weights',Sheet,Projection).
-    """
-    projectionview = SheetView((data, bounds), projection.src.name,
-                               projection.src.precedence, timestamp,
-                               row_precedence = projection.src.row_precedence, **params)
-    projectionview.projection = projection
-    return projectionview
+    situated_bounds = param.ClassSelector(class_=BoundingRegion, default=None, doc="""
+        The situated bounds can be set to embed the SheetLayer in a larger
+        bounded region.""")
+
+    input_sheet_slice = param.NumericTuple(default=(0, 0, 0, 0), doc="""
+        Slice indices of the embedded view into the situated matrix.""")
+
+    @property
+    def situated(self):
+        if self.bounds.lbrt() == self.situated_bounds.lbrt():
+            return self
+        l, b, r, t = self.bounds.lbrt()
+        xd = int(np.round(self.data.shape[1] / (r-l)))
+        yd = int(np.round(self.data.shape[0] / (t-b)))
+
+        scs = SheetCoordinateSystem(self.situated_bounds, xd, yd)
+
+        data = np.zeros(scs.shape, dtype=np.float64)
+        r1, r2, c1, c2 = self.input_sheet_slice
+        data[r1:r2, c1:c2] = self.data
+
+        return ImagenSheetView(data, self.situated_bounds, roi_bounds=self.roi_bounds,
+                               situated_bounds=self.situated_bounds,
+                               cyclic_range=self.cyclic_range,
+                               style=self.style, metadata=self.metadata)
+
+
+class CFStack(SheetStack):
+
+    @property
+    def situated(self):
+        return self.map(lambda x, _: x.situated)
