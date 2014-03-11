@@ -22,8 +22,6 @@ import param
 import numpy, numpy.random
 from numpy import exp,zeros,ones,power
 
-import topo
-import topo.base.functionfamily
 from topo.base.sheet import activity_type
 from topo.base.arrayutil import clip_lower
 
