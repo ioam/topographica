@@ -212,11 +212,7 @@ optimization requires careful consideration of the details of how
 Python and Topographica allocate memory in specific cases.
 `asizeof`_ can be useful in this respect, but much more detailed
 information is available from an external program `Heapy`_, which
-can be installed using:
-
-::
-
-    $ make -C external guppy
+can be installed using e.g. ``apt-get install python-guppy``.
 
 Heapy will give you output similar to a performance profiler, but
 for memory usage. For example:
@@ -309,9 +305,33 @@ start examining Slice to determine how its memory usage can be
 reduced. This process is similar to that for `performance
 optimization`_, but focusing on memory rather than speed.
 
+If you are debugging memory usage during the running of a simulation,
+you may want to use ``setrelheap()`` after loading the simulation but
+before running. Similarly, you can subtract one ``heap()`` from
+another.
+
 Note that `documentation for Heapy`_ is sparse and difficult to
 follow; it may be easier to start with some `notes from another
 developer`_.
+
+
+Beyond Python
+-------------
+
+If the memory usage reported by heapy is vastly different from the
+memory usage reported by the operating system (e.g. via top), you may
+have encountered a bug outside Python code. Various tools exist to
+investigate such a situation (e.g. `gdb-heap`_, valgrind) but are
+beyond the scope of this guide. You might be able to narrow down the
+problem to a particular extension or operation by cutting out parts of
+your simulation bit by bit until you find the culprit (at which point
+you could search the web for known bugs in that extension).
+
+Another possible cause of discrepancy in memory usage is that Python
+does not always `return memory to the operating system`_, even after
+you free that memory in Python. If you do use a lot of memory in
+Python at any point, this could be your problem.
+
 
 .. _topo.misc.memuse: ../Reference_Manual/topo.misc.memuse-module.html
 .. _topsize: ../Reference_Manual/topo.misc.memuse-module.html#topsize
@@ -326,4 +346,6 @@ developer`_.
 .. _Heapy: http://guppy-pe.sourceforge.net/#Heapy
 .. _performance optimization: optimization.html
 .. _documentation for Heapy: http://guppy-pe.sourceforge.net/heapy_Use.html
-.. _notes from another developer: http://www.pkgcore.org/trac/pkgcore/doc/dev-notes/heapy.rst
+.. _notes from another developer: http://smira.ru/wp-content/uploads/2011/08/heapy.html
+.. _gdb-heap: https://github.com/rogerhu/gdb-heap
+.. _return memory to the operating system: http://effbot.org/pyfaq/why-doesnt-python-release-the-memory-when-i-delete-a-large-object.htm

@@ -14,8 +14,8 @@ import numpy as np
 import param
 
 from dataviews import SheetView as ImagenSheetView
-from dataviews import CoordinateGrid, SheetStack
-from dataviews.sheetcoords import Slice, SheetCoordinateSystem
+from dataviews import SheetStack
+from dataviews.sheetcoords import SheetCoordinateSystem
 from dataviews.boundingregion import BoundingRegion
 
 
