@@ -307,3 +307,6 @@ topo.command.default_analysis_plotgroups=pgs
 from topo.analysis.featureresponses import MeasureResponseCommand
 MeasureResponseCommand.durations=[1.0 if p.gain_control else 0.175]
 MeasureResponseCommand.pattern_response_fn.apply_output_fns=p.gain_control
+
+import topo.analysis.featureresponses
+topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier=2.0
