@@ -22,7 +22,7 @@ from copy import copy
 import numpy as np
 
 import param
-from dataviews.ndmapping import AttrDict
+from dataviews.ndmapping import AttrDict, Dimension
 from dataviews import CoordinateGrid
 from dataviews.sheetcoords import Slice
 from dataviews.boundingregion import BoundingBox, BoundingRegionParameter
@@ -728,6 +728,7 @@ class CFProjection(Projection):
         """
         if timestamp is None:
             timestamp = self.src.simulation.time()
+        time_dim = Dimension("time", type=param.Dynamic.time_fn.time_type)
         (r, c) = self.dest.sheet2matrixidx(sheet_x, sheet_y)
         cf = self.cfs[r, c]
         r1, r2, c1, c2 = cf.input_sheet_slice
@@ -747,7 +748,7 @@ class CFProjection(Projection):
                     metadata=AttrDict(timestamp=timestamp))
 
         return CFStack((timestamp, sv), coords=(sheet_x, sheet_y),
-                       dimension_labels=['Time'], dest_name=self.dest.name,
+                       dimensions=[time_dim], dest_name=self.dest.name,
                        precedence=self.src.precedence, proj_name=self.name,
                        src_name=self.src.name,
                        row_precedence=self.src.row_precedence,

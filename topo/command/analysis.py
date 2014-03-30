@@ -26,8 +26,9 @@ import numpy as np
 import param
 from param import ParameterizedFunction, ParamOverrides
 
-from dataviews import SheetView, SheetStack, SheetLines, CoordinateGrid
+from dataviews import SheetView, SheetStack, SheetLines, CoordinateGrid, Dimension
 
+from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
 
 import topo
@@ -97,8 +98,7 @@ class Collector(param.Parameterized):
         sheet = sview.metadata['src_name']
         stack = SheetStack(title=projection.name, bounds=sview.bounds,
                            initial_items=[(topo.sim.time(), sview)],
-                           dimension_labels=['Time'],
-                           time_type=[topo.sim.time.time_type])
+                           dimensions=[features.Time])
         proj_name = sview.metadata['proj_name']
         projection_activity = {}
         projection_activity[sheet] = {}
@@ -179,7 +179,7 @@ class Collector(param.Parameterized):
         time_type = param.Dynamic.time_fn
 
         if 'Time' not in data.dimension_labels and not isinstance(data, CoordinateGrid):
-            timestamped_data = data.add_dimension('Time', 0,
+            timestamped_data = data.add_dimension(features.Time, 0,
                                                   topo.sim.time(),
                                                   {'Time':{'type':time_type}})
         else:
@@ -433,7 +433,7 @@ class measure_cog(ParameterizedFunction):
                 ycog[r][c] = ycentroid
 
         metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
-                        src_name=sheet.name, dimension_labels=['Time'], key_type=[topo.sim.time.time_type])
+                        src_name=sheet.name, dimensions=[features.Time])
 
         timestamp = topo.sim.time()
         xsv = SheetView(xcog, sheet.bounds)

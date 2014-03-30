@@ -30,6 +30,7 @@ from featuremapper.command import PatternPresentingCommand, MeasureResponseComma
 from featuremapper import MeasurementInterrupt, DistributionMatrix, FullMatrix, FeatureResponses,\
     ReverseCorrelation, FeatureMaps, FeatureCurves, Feature
 from featuremapper.metaparams import *  # pyflakes:ignore (API import)
+from featuremapper.features import Time
 
 activity_dtype = np.float64
 
@@ -51,7 +52,7 @@ def update_sheet_activity(sheet_name, force=False):
                         timestamp=time)
     if not view:
         sv = SheetView(np.array(sheet.activity), sheet.bounds, metadata=metadata)
-        view = SheetStack((time, sv), dimension_labels=['Time'], **metadata)
+        view = SheetStack((time, sv), dimensions=[Time], **metadata)
         sheet.views.maps[name] = view
     else:
         if force or view.timestamp < time:
