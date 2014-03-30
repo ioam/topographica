@@ -26,7 +26,7 @@ import numpy as np
 import param
 from param import ParameterizedFunction, ParamOverrides
 
-from dataviews import SheetView, SheetStack, SheetLines, CoordinateGrid, Dimension
+from dataviews import SheetView, SheetStack, SheetLines, CoordinateGrid
 
 from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
