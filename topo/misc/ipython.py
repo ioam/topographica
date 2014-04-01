@@ -168,8 +168,13 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
 # Display hooks #
 #===============#
 
+from topo.base.sheetview import CFView
+
 from dataviews.ipython import load_ipython_extension as load_imagen_extension
 from dataviews.ipython import stack_display, view_display
+from dataviews.plots import SheetViewPlot, viewmap
+
+viewmap.update({CFView: SheetViewPlot})
 
 try:
     from lancet import ViewFrame
