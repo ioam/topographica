@@ -178,7 +178,7 @@ def test(plotgroup_names):
                 for other_param in previous_curve_dicts[curve_name]:
                     other_param_val = unit_value(other_param)[-1]
                     for val in previous_curve_dicts[curve_name][other_param]:
-                        new_curves = sheet.views.curves[curve_name.capitalize()]
+                        new_curves = sheet.views.curves[curve_name.capitalize()+"Tuning"]
                         new = new_curves[time, duration, other_param_val-0.01:other_param_val+0.01, val].values()[0].data
                         old = previous_curve_dicts[curve_name][other_param][val].view()[0]
                         failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),
