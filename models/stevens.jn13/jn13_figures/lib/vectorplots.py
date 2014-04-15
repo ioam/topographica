@@ -11,7 +11,6 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from analysis import KaschubeFit
-from topo.command.pylabplot import cyclic_unit_tuning_curve
 
 #==============================================#
 # Overlays for OR maps and FFTs (subplots D-F) #
@@ -429,10 +428,22 @@ class TuningCurvePlot(object):
 
 
 def tuning_curve_plot(tuning_curves, coord, legend=False, normalize=False):
-   return cyclic_unit_tuning_curve(tuning_curves, coord=coord,
-                                   legend=legend,
-                                   center=False,
-                                   plot_type = TuningCurvePlot(normalize=normalize))
+    """
+    To reproduce the tuning curve figure exactly, please checkout the following:
+
+    Topographica: 37a7113   measure_or_tuning can no longer be imported from
+                            command.pylabplot
+
+    Imagen:       fec785e   Updated ProjectionGrid methods
+
+    In later versions of Topographica, tuning curves may still be plotted using
+    the FeatureMapper and DataView packages, or using the backward compatibility
+    method command.pylabplot.tuning_curve.
+    """
+    from topo.command.pylabplot import cyclic_unit_tuning_curve
+    return cyclic_unit_tuning_curve(tuning_curves, coord=coord,
+                                    legend=legend, center=False,
+                                    plot_type=TuningCurvePlot(normalize=normalize))
 
 
 def close(figs):
