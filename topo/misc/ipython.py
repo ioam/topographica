@@ -22,11 +22,6 @@ except:
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
 
-# Pylabplots should return a matplotlib figure when working in Notebook
-# otherwise open display windows for the Topographica Tk GUI
-if not isinstance(sys.stdout, file):
-    from topo.command import pylabplot
-    pylabplot.PylabPlotCommand.display_window = False
 
 class ProgressBar(param.Parameterized):
     """
