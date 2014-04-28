@@ -615,9 +615,9 @@ class tuning_curve(PylabPlotCommand):
         p = ParamOverrides(self, params, allow_extra_keywords=True)
 
         x_axis = p.x_axis.capitalize()
-        stack = p.sheet.views.curves[x_axis]
-        time = stack.dim_max('Time')
-        curves = stack[time, :, :, :].sample(coords=p.coords, x_axis=x_axis,
+        stack = p.sheet.views.curves[x_axis+"Tuning"]
+        time = stack.dim_max('time')
+        curves = stack[time, :, :, :].sample(samples=p.coords, x_axis=p.x_axis,
                                              group_by=p.group_by)
 
         figs = []
@@ -653,6 +653,9 @@ class tuning_curve(PylabPlotCommand):
 
         
 cyclic_tuning_curve = tuning_curve
+
+def cyclic_unit_tuning_curve(coord=(0, 0), **kwargs):
+    return tuning_curve(coords=[coord], **kwargs)[0]
 
 
 
