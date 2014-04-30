@@ -26,7 +26,7 @@ import numpy as np
 import param
 from param import ParameterizedFunction, ParamOverrides
 
-from dataviews import SheetView, SheetStack, SheetLines, CoordinateGrid
+from dataviews import SheetView, SheetStack, Contours, CoordinateGrid
 
 from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
@@ -448,7 +448,7 @@ class measure_cog(ParameterizedFunction):
 
         xcog_stack = SheetStack((timestamp, xsv), **metadata)
         ycog_stack = SheetStack((timestamp, ysv), **metadata)
-        contour_stack = SheetStack((timestamp, SheetLines(lines, sheet.bounds)), **metadata)
+        contour_stack = SheetStack((timestamp, Contours(lines, sheet.bounds)), **metadata)
 
         if 'XCoG' in sheet.views.maps:
             sheet.views.maps['XCoG'].update(xcog_stack)
