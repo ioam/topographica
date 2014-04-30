@@ -17,6 +17,7 @@ from dataviews import SheetView as ImagenSheetView
 from dataviews import SheetStack
 from dataviews.sheetcoords import SheetCoordinateSystem
 from dataviews.boundingregion import BoundingRegion
+from dataviews.options import options, StyleOpts
 
 
 class SheetView(param.Parameterized):
@@ -123,3 +124,6 @@ class CFStack(SheetStack):
     @property
     def situated(self):
         return self.map(lambda x, _: x.situated)
+
+
+options.CFView = StyleOpts(interpolation='nearest')
