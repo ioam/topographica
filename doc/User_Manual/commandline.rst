@@ -4,11 +4,16 @@ Topographica Command Line
 
 The GUI interface of Topographica provides the most commonly used
 plots and displays, but it is often useful to be able to manipulate
-the underlying program objects interactively. The Topographica
-command prompt allows you to do this easily, using the same syntax
-as in Topographica scripts. This section will eventually include
-detailed information on how to do this, but hopefully the current
-information will help you get started.
+the underlying program objects interactively. The Topographica command
+prompt allows you to do this easily, using the same syntax as in
+Topographica scripts. This section describes the basic
+`IPython`_-based interactive prompt that is available whenever
+Topographica starts.  Topographica also supports the more
+full-featured `IPython Notebook` interface using a web browser, which
+supports all of the same commands and also provides interactive
+visualization facilities similar to those in the GUI (but more
+flexible).  See the `Tutorials` for examples of using the notebook 
+interface.
 
 The command prompt gives you direct access to `Python`_, and so any
 expression valid for Python can be entered. For instance, if your
@@ -141,10 +146,8 @@ information:
      |  
     ... 
 
-Topographica uses `IPython`_ for its interactive prompt, providing
-many convenient facilities for interactive work (such as tab
-completion). The `IPython Quick Tutorial`_ is a good place to learn
-about these.
+See the `IPython Quick Tutorial`_ for IPython-specific extensions useful 
+from the command prompt.
 
 Recreating results from interactive sessions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -248,7 +251,8 @@ and save the resulting bitmaps to disk, just do:
 
 ::
 
-    Topographica> from topo.command.analysis import save_plotgroup, measure_or_pref
+    Topographica> from topo.command.analysis import measure_or_pref
+    Topographica> from topo.plotting.plotgroup import save_plotgroup
     Topographica> measure_or_pref()
     Topographica> save_plotgroup("Orientation Preference")
 
@@ -315,7 +319,7 @@ Simplifying imports during interactive runs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When working interactively, typing common import lines (such as
-``from topo.command.analysis import save_plotgroup, measure_or_pref``,
+``from topo.command.analysis import measure_or_pref``,
 from the earlier example) can be tedious. Topographica therefore
 provides the "-a" command-line option, which automatically imports
 every command in topo/command/\*.py. The "-g" option also
@@ -516,8 +520,10 @@ This gives a ParametersFrame representing the Parameters of
 (This is the same editing window as is available through the `model
 editor`_.)
 
+.. _Tutorials: http://topographica.org/Tutorials
 .. _Python: http://python.org/doc/
-.. _IPython: http://ipython.scipy.org/
+.. _IPython: http://ipython.org/
+.. _IPython Notebook: http://ipython.org/notebook.html
 .. _IPython Quick Tutorial: http://ipython.scipy.org/doc/manual/html/interactive/tutorial.html
 .. _save\_script\_repr: ../Reference_Manual/topo.command-module.html#save_script_repr
 .. _save\_snapshot: ../Reference_Manual/topo.command-module.html#save_snapshot
