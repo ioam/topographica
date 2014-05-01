@@ -18,8 +18,7 @@ feature), please try the following:
 #. If the problem is still present in the current version, you can
    search the list of issues on our project pages at GitHub
    to see if we already know about the problem. Issues are stored
-   separately for each subproject (`Param <https://github.com/ioam/param/issues?state=open>`_, `ParamTk <https://github.com/ioam/paramtk/issues?state=open>`_, `ImaGen <https://github.com/ioam/imagen/issues?state=open>`_ (aliased to topo.pattern in Topographica), `FeatureMapper <https://github.com/ioam/featuremapper/issues?state=open>`_)
-   If you find your issue has already been reported, please feel free
+   separately for each subproject (`Param <https://github.com/ioam/param/issues?state=open>`_, `ParamTk <https://github.com/ioam/paramtk/issues?state=open>`_, `ImaGen <https://github.com/ioam/imagen/issues?state=open>`_ (aliased to topo.pattern in Topographica), or `FeatureMapper <https://github.com/ioam/featuremapper/issues?state=open>`_). If you find your issue has already been reported, please feel free
    to add additional comments to the report.  
 #. If you can locate where in the code there might be a problem
    (e.g. by going to the line numbers mentioned in a Python
