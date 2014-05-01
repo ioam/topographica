@@ -34,7 +34,7 @@ from topo.plotting.plot import make_template_plot
 from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
-from dataviews.plots import DataPlot
+from dataviews.plots import DataPlot, GridLayout
 
 from topo.command import Command
 
@@ -593,7 +593,7 @@ class tuning_curve(PylabPlotCommand):
     coords = param.List(default=[(0 , 0)], doc="""
         List of coordinates of units to measure.""")
 
-    group_by = param.List(default=['Contrast'], doc="""
+    group_by = param.List(default=['contrast'], doc="""
         Feature dimensions for which curves are overlaid.""")
 
     legend = param.Boolean(default=True, doc="""
@@ -617,11 +617,14 @@ class tuning_curve(PylabPlotCommand):
         x_axis = p.x_axis.capitalize()
         stack = p.sheet.views.curves[x_axis+"Tuning"]
         time = stack.dim_max('time')
+
         curves = stack[time, :, :, :].sample(samples=p.coords, x_axis=p.x_axis,
                                              group_by=p.group_by)
 
+        if not isinstance(curves, GridLayout): curves = [curves]
+
         figs = []
-        for coord, curve in curves:
+        for coord, curve in zip(p.coords,curves):
             fig = plt.figure()
             ax = plt.subplot(111)
             DataPlot(curve, center=p.center, relative_labels=p.relative_labels,
@@ -631,7 +634,7 @@ class tuning_curve(PylabPlotCommand):
 
         return figs
 
-        
+
     def _generate_figure(self, p, fig):
         """
         Helper function to display a figure on screen or save to a file.
@@ -651,7 +654,7 @@ class tuning_curve(PylabPlotCommand):
         else:
             fig.close()
 
-        
+
 cyclic_tuning_curve = tuning_curve
 
 def cyclic_unit_tuning_curve(coord=(0, 0), **kwargs):
