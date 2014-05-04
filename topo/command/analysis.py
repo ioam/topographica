@@ -436,8 +436,8 @@ class measure_cog(ParameterizedFunction):
                         src_name=sheet.name, dimensions=[features.Time])
 
         timestamp = topo.sim.time()
-        xsv = SheetView(xcog, sheet.bounds)
-        ysv = SheetView(ycog, sheet.bounds)
+        xsv = SheetView(xcog, sheet.bounds, label='X CoG')
+        ysv = SheetView(ycog, sheet.bounds, label='Y CoG')
 
         lines = []
         hlines, vlines = xsv.data.shape
@@ -445,10 +445,12 @@ class measure_cog(ParameterizedFunction):
             lines.append(np.vstack([xsv.data[hind,:].T, ysv.data[hind,:]]).T)
         for vind in range(vlines)[::p.stride]:
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
+        cogmesh = Contours(lines, sheet.bounds, label='Center of Gravity')
 
-        xcog_stack = SheetStack((timestamp, xsv), **metadata)
-        ycog_stack = SheetStack((timestamp, ysv), **metadata)
-        contour_stack = SheetStack((timestamp, Contours(lines, sheet.bounds)), **metadata)
+        title = ' '.join([sheet.name, SheetStack.title])
+        xcog_stack = SheetStack((timestamp, xsv), title=title, **metadata)
+        ycog_stack = SheetStack((timestamp, ysv), title=title,  **metadata)
+        contour_stack = SheetStack((timestamp, cogmesh), title=title, **metadata)
 
         if 'XCoG' in sheet.views.maps:
             sheet.views.maps['XCoG'].update(xcog_stack)
