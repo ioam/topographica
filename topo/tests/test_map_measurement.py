@@ -167,7 +167,7 @@ def test(plotgroup_names):
             previous_sheet_views = previous_views[sheet.name]['sheet_views']
             for view_name in previous_sheet_views:
                 failing_tests += checkclose(sheet.name + " " + view_name,topo_version,
-                                            sheet.views.maps[view_name].top.data,
+                                            sheet.views.maps[view_name].last.data,
                                             previous_sheet_views[view_name].view()[0])
 
         if 'curve_dict' in previous_views[sheet.name]:

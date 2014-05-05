@@ -468,8 +468,8 @@ class topographic_grid(xy_grid):
         for sheet in topo.sim.objects(Sheet).values():
             if ((p.xsheet_view_name in sheet.views.maps) and
                     (p.ysheet_view_name in sheet.views.maps)):
-                x = sheet.views.maps[p.xsheet_view_name].top.data
-                y = sheet.views.maps[p.ysheet_view_name].top.data
+                x = sheet.views.maps[p.xsheet_view_name].last.data
+                y = sheet.views.maps[p.ysheet_view_name].last.data
 
                 filename_suffix = "_" + sheet.name
                 title = 'Topographic mapping to ' + sheet.name + ' at time ' \
@@ -616,7 +616,7 @@ class tuning_curve(PylabPlotCommand):
 
         x_axis = p.x_axis.capitalize()
         stack = p.sheet.views.curves[x_axis+"Tuning"]
-        time = stack.dim_max('time')
+        time = stack.dim_range('time')[1]
 
         curves = stack[time, :, :, :].sample(samples=p.coords, x_axis=p.x_axis,
                                              group_by=p.group_by)

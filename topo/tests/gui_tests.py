@@ -78,7 +78,7 @@ def test_test_pattern():
     from topo.pattern import TwoRectangles
     assert isinstance(tp.pattern_generator,TwoRectangles), "Pattern generator did not change."
 
-    preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].top.data
+    preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].last.data
     two_rectangles = array([[0.,1],[1.,0.]])
     assert_array_equal(preview,two_rectangles,"Incorrect pattern in preview plot.")
 
@@ -86,19 +86,19 @@ def test_test_pattern():
     tp.Present()
     gs_view = _get_named_plot('GS',act.plotgroup.plots).view_dict.get('Strength',{})['Activity']
     assert gs_view.metadata.src_name=='GS'
-    gs_plot_array = gs_view.top.data
+    gs_plot_array = gs_view.last.data
     assert_array_equal(gs_plot_array,two_rectangles,"Incorrect pattern in activity plot after Present.")
 
 
     tp.params_frame.gui_set_param('scale',0.5)
-    preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].top.data
+    preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].last.data
     assert_array_equal(preview,0.5*two_rectangles,"Changing pattern parameters did not update preview.")
 
 
     ### Defaults button
 
     # first change several more parameters
-    initial_preview = tp.plotgroup.plots[0].view_dict.get('Strength',{})['Activity'].top.data
+    initial_preview = tp.plotgroup.plots[0].view_dict.get('Strength',{})['Activity'].last.data
 
     new_param_values = [#('output_fns','Sigmoid'),
                         ('scale','2')]
@@ -106,7 +106,7 @@ def test_test_pattern():
     for name,value in new_param_values:
         tp.params_frame.gui_set_param(name,value)
 
-    changed_preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].top.data
+    changed_preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].last.data
     # and check the preview did change
     try:
         assert_array_equal(changed_preview,initial_preview)
@@ -117,7 +117,7 @@ def test_test_pattern():
 
     # test that preview display is correct
     tp.params_frame.Defaults()
-    preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].top.data
+    preview = _get_named_plot('GS',tp.plotgroup.plots).view_dict.get('Strength',{})['Activity'].last.data
     assert_array_equal(preview,two_rectangles,"Defaults button failed to revert params to default values.")
 
     # CB: still need to test duration, learning, etc

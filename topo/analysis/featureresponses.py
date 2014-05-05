@@ -340,9 +340,15 @@ class StorageHook(param.ParameterizedFunction):
 
     def __call__(self, viewcontainer, **params):
         p = ParamOverrides(self, params)
-        for sheet_name, container in viewcontainer.containers.items():
-            sheet = topo.sim[sheet_name]
-            storage = sheet.views[p.sublabel] if p.sublabel else sheet.views
+        objects = dict(topo.sim.objects(), **dict([(proj.name, proj) for proj in topo.sim.connections()]))
+        for src_name, container in viewcontainer.containers.items():
+            source = objects[src_name]
+            if isinstance(source, Sheet):
+                storage = source.views[p.sublabel] if p.sublabel else source.views
+            else:
+                proj_store = source.dest.views[source.name] = {}
+                proj_store[p.sublabel] = {}
+                storage = proj_store[p.sublabel]
             for label, data in container.items.items():
                 if label not in storage:
                     storage[label] = data
@@ -356,7 +362,7 @@ def get_feature_preference(feature, sheet_name, coords, default=0.0):
         sheet = topo.sim[sheet_name]
         map_name = feature.capitalize() + "Preference"
         x, y = coords
-        return sheet.views.maps[map_name].top[x, y]
+        return sheet.views.maps[map_name].last[x, y]
     except:
         topo.sim.warning(
             ("%s should be measured before plotting this tuning curve -- "

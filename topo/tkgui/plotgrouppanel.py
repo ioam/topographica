@@ -876,7 +876,7 @@ class SheetPanel(PlotGroupPanel):
             for g in topo.sim.objects(GeneratorSheet).values():
                 try:
                     view = sheet.views.rfs[g.name][center_x, center_y]
-                    matrixplot(view.top.data,title=("Receptive Field of %s unit (%d,%d) at coord (%3.0f, %3.0f) at time %s" %
+                    matrixplot(view.last.data,title=("Receptive Field of %s unit (%d,%d) at coord (%3.0f, %3.0f) at time %s" %
                                                     (sheet.name,r,c,center_x,center_y,topo.sim.timestr(view.timestamp))))
                 except:
                     # maybe lose this warning

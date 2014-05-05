@@ -231,7 +231,7 @@ class TemplatePlot(Plot):
         sheet_view_key = self.channels.get(key, None)
         sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
         if isinstance(sv, NdMapping):
-            sv = sv.top
+            sv = sv.last
 
         if sv == None:
             matrix = None
@@ -274,7 +274,7 @@ class TemplatePlot(Plot):
         """
         for channel, name in self.channels.items():
             sv = self.view_dict.get(channel,{}).get(name, None)
-            if isinstance(sv, NdMapping): sv = sv.top
+            if isinstance(sv, NdMapping): sv = sv.last
             if sv != None:
                 shape = sv.data.shape
                 box = sv.bounds

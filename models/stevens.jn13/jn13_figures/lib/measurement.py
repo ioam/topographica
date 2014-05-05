@@ -25,8 +25,8 @@ def OR_measurement(selectivity_multiplier, settings={}):
     """ Default scale is 0.3, not 1.0 (100% contrast)"""
     topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier = selectivity_multiplier
     measurement = topo.command.analysis.measure_sine_pref(scale=1.0, **settings)
-    sel = topo.sim.V1.views.maps.OrientationSelectivity.top
-    pref = topo.sim.V1.views.maps.OrientationPreference.top
+    sel = topo.sim.V1.views.maps.OrientationSelectivity.last
+    pref = topo.sim.V1.views.maps.OrientationPreference.last
     return {'OrientationSelectivity':sel, 'OrientationPreference': pref,
             'metadata':{'mean_selectivity':sel.data.mean()}}
 
@@ -50,8 +50,8 @@ def stability_analysis(figure, times):
     """
     roi = ROI(disable=(True if figure=='Fig10_12' else False))
     simulation_time = topo.sim.time()
-    preference = topo.sim.V1.views.maps.OrientationPreference.top.data
-    preference = preference / topo.sim.V1.views.maps.OrientationPreference.top.cyclic_range
+    preference = topo.sim.V1.views.maps.OrientationPreference.last.data
+    preference = preference / topo.sim.V1.views.maps.OrientationPreference.last.cyclic_range
     if simulation_time == times[0]:
         topo.stability_maps = [preference[roi,roi]]
     if simulation_time == times[-1]:
@@ -67,8 +67,8 @@ def pinwheel_analysis():
     get the estimated value of kmax to compute the pinwheel density.
     """
     roi = ROI() # Central ROI (1.0 x 1.0 in sheet coordinates)
-    preference = topo.sim.V1.views.maps.OrientationPreference.top.data
-    preference = preference / topo.sim.V1.views.maps.OrientationPreference.top.cyclic_range
+    preference = topo.sim.V1.views.maps.OrientationPreference.last.data
+    preference = preference / topo.sim.V1.views.maps.OrientationPreference.last.cyclic_range
     polar_map = analysis.polar_preference(preference[roi,roi])
     contour_info = analysis.polarmap_contours(polar_map)
     (re_contours, im_contours, _ ) = contour_info
@@ -118,7 +118,7 @@ def measure_shouval(times, num_orientation, num_phase):
         topo.command.analysis.measure_or_tuning_fullfield(num_orientation=num_orientation,
                                                           num_phase=num_phase,
                                                           curve_parameters=contrasts)
-        measurement.update({'tuning_curves':topo.sim.V1.views.curves.Orientation.top})
+        measurement.update({'tuning_curves':topo.sim.V1.views.curves.Orientation.last})
     return measurement
 
 
