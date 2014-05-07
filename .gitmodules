@@ -16,3 +16,6 @@
 [submodule "external/featuremapper"]
 	path = external/featuremapper
 	url = https://github.com/ioam/featuremapper.git
+[submodule "external/dataviews"]
+	path = external/dataviews
+	url = https://github.com/ioam/dataviews.git
