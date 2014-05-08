@@ -57,6 +57,7 @@ and (x,y) location:
                      y=numbergen.UniformRandom(lbound=-0.5,ubound=0.5,seed=34),
                      orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=56))
     Topographica> matrixplot(input_pattern())
+    Topographica> topo.sim.run(1.0)
     Topographica> matrixplot(input_pattern())
 
 |image2|\ |image3|
