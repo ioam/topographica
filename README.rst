@@ -6,7 +6,7 @@ Topographica is a general-purpose neural simulator focusing on topographic maps.
 This program is free, open-source software available under the BSD license (see LICENSE.txt).
 
 
-This document describes how to get and edit the Topographica source code.  Most first-time users will instead want to use the pre-packaged distributions available for most platforms; see ioam/topographica `Downloads <http://github.com/ioam/topographica/downloads>`_  for links.
+This document describes how to get and edit the Topographica source code.  Most first-time users will instead want to use the pre-packaged distributions available for most platforms; see Topographica's `Downloads <http://ioam.github.io/topographica/Downloads/index.html>`_  for links.
 
 CLONING TOPOGRAPHICA
 --------------------
