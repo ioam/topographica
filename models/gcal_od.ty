@@ -175,9 +175,10 @@ for e in eyes:
                                     seed=input_seed+1+5*i)*(-1)**(e=='Left'),
             y=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=input_seed+2+5*i),
             orientation=numbergen.UniformRandom(lbound=-pi/8,ubound=pi/8,seed=input_seed+3+5*i),
-            scale= (2.0-numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+4+5*i)) if e=='Right' else \
-                   numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+4+5*i))
-        for f,i in zip(image_filenames,range(len(image_filenames)))]
+            scale= (1-p.dim_fraction) + p.dim_fraction * \
+                (2.0-numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+4+5*i)) if e=='Right' else \
+                numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+4+5*i))
+            for f,i in zip(image_filenames,range(len(image_filenames)))]
         combined_inputs=pattern.Selector(generators=inputs)
 
 
