@@ -188,4 +188,9 @@ if __name__ == "__main__":
         help_dependency(package)
         sys.exit(1)
 
+    # When creating a release, check the version is set correctly.
+    if 'bdist_wininst' in sys.argv or 'upload' in sys.argv:
+        import topo
+        topo.__version__.verify()
+
     setup(**setup_args)
