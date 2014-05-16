@@ -89,7 +89,7 @@ def _runc(cmd):
     return os.system(cmd)
 
 
-from dataviews.odict import OrderedDict
+from collections import OrderedDict
 target = OrderedDict()
 speedtarget = OrderedDict()
 

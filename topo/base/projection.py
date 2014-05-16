@@ -9,7 +9,7 @@ import param
 from param.parameterized import overridable_property
 
 from dataviews import SheetView
-from dataviews.odict import OrderedDict
+from collections import OrderedDict
 
 from topo.misc.attrdict import AttrDict
 

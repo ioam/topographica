@@ -31,10 +31,7 @@ from param.parameterized import ParameterizedFunction, ParamOverrides
 from param import normalize_path
 
 import imagen, numbergen
-try:
-    from collections import OrderedDict
-except:
-    from dataviews.odict import OrderedDict # pyflakes:ignore (try/except import)
+from collections import OrderedDict
 
 import topo
 from topo.base.sheet import Sheet

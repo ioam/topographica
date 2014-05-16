@@ -22,7 +22,7 @@ import __main__
 import param
 from param import normalize_path,resolve_path
 import paramtk as tk
-from dataviews.odict import OrderedDict
+from collections import OrderedDict
 import topo
 from topo.plotting.plotgroup import plotgroups, FeatureCurvePlotGroup
 from topo.misc.commandline import sim_name_from_filename
