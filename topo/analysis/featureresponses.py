@@ -341,7 +341,8 @@ class StorageHook(param.ParameterizedFunction):
     def __call__(self, viewcontainer, **params):
         p = ParamOverrides(self, params)
         objects = dict(topo.sim.objects(), **dict([(proj.name, proj) for proj in topo.sim.connections()]))
-        for src_name, container in viewcontainer.containers.items():
+        for path, container in viewcontainer.path_items.items():
+            label, src_name = path
             source = objects[src_name]
             if isinstance(source, Sheet):
                 storage = source.views[p.sublabel] if p.sublabel else source.views
@@ -349,11 +350,10 @@ class StorageHook(param.ParameterizedFunction):
                 proj_store = source.dest.views[source.name] = {}
                 proj_store[p.sublabel] = {}
                 storage = proj_store[p.sublabel]
-            for label, data in container.items.items():
-                if label not in storage:
-                    storage[label] = data
-                else:
-                    storage[label].update(data)
+            if label not in storage:
+                storage[label] = container
+            else:
+                storage[label].update(container)
 
 
 def get_feature_preference(feature, sheet_name, coords, default=0.0):
