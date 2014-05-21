@@ -296,6 +296,7 @@ class Projection(EPConnection):
         if timestamp is None:
             timestamp = self.src.simulation.time()
         return SheetView(self.activity.copy(), self.dest.bounds,
+                         label='Activity', title='%s {label}' % self.name,
                          metadata=AttrDict(proj_src_name=self.src.name,
                                            precedence=self.src.precedence,
                                            proj_name=self.name,
