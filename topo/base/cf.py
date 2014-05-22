@@ -24,8 +24,7 @@ import numpy as np
 import param
 from dataviews.ndmapping import AttrDict, Dimension
 from dataviews import CoordinateGrid
-from dataviews.sheetcoords import Slice
-from dataviews.boundingregion import BoundingBox, BoundingRegionParameter
+from dataviews.sheetviews import BoundingBox, BoundingRegionParameter, Slice
 
 import patterngenerator
 from patterngenerator import PatternGenerator

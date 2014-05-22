@@ -28,9 +28,8 @@ from simulation import EventProcessor
 
 from functionfamily import TransferFn
 
-from dataviews import SheetView
-from dataviews.sheetcoords import SheetCoordinateSystem
-from dataviews.boundingregion import BoundingBox, BoundingRegionParameter
+from dataviews.sheetviews import BoundingBox, BoundingRegionParameter,\
+    SheetCoordinateSystem, SheetView
 
 activity_type = float64
 
