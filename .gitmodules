@@ -19,3 +19,9 @@
 [submodule "external/dataviews"]
 	path = external/dataviews
 	url = https://github.com/ioam/dataviews.git
+[submodule "doc/builder"]
+	path = doc/builder
+	url = https://github.com/ioam/ioam-builder.git
+[submodule "doc/nbpublisher"]
+	path = doc/nbpublisher
+	url = https://github.com/ioam/ioam-builder.git

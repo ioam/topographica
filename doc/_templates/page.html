@@ -1,7 +1,9 @@
 {% extends "!page.html" %}
 {# add our custom css and js #}
-{% set css_files = css_files + ["_static/topo.css"] %}
-{% set script_files = script_files + ["_static/topo.js"] %}
+{% set project_name = 'Topographica' %}
+{% set ioam_project = 'topographica' %}
+{% set css_files = css_files + ["_static/custom.css"] %}
+{% set script_files = script_files + ["_static/custom.js"] %}
 
 {# the menu at the top #}
 {% block rootrellink %}
@@ -26,7 +28,7 @@
 {% block sidebarsourcelink %}
 <h3>{{ _('This Page') }}</h3>
 <ul class="this-page-menu">
-	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/{{ pagename }}.rst" rel="nofollow">Edit on GitHub</a></li>
+	<li><a	href="https://github.com/ioam/{{ github_project }}/edit/master/doc/{{ pagename }}.rst" rel="nofollow">Edit on GitHub</a></li>
 </ul>
 {% endblock %}
 
@@ -39,7 +41,7 @@
 <li><a href="{{ pathto('User_Manual/index') }}">User Manual</a></li>
 <li><a href="{{ pathto('Reference_Manual/index') }}">Reference Manual</a></li>
 <li><a href="{{ pathto('Developer_Manual/index') }}">Developer Manual</a></li>
-<li><a href="http://github.com/ioam/topographica">Github Source Code</a></li>
+<li><a href="http://github.com/ioam/{{ ioam_project }}">Github Source Code</a></li>
 <li><a href="{{ pathto('Forums/index') }}">Forums</a></li>
 <li><a href="{{ pathto('Team_Members/index') }}">Team Members</a></li>
 <li><a href="{{ pathto('Future_Work/index') }}">Future Work</a></li>

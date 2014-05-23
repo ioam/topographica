@@ -24,7 +24,7 @@ different input patterns.
 This tutorial supersedes an `older tutorial`_ using the LISSOM model
 from  `Miikkulainen et al. (2005) <http://computationalmaps.org>`_.
 
-:doc:`som_retinotopy`
+:doc:`som_retinotopy_static`
 
 How to run a model that develops selectivity for position,
 mapping the input space to the cortical space. The model uses the

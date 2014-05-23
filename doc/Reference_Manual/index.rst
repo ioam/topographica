@@ -34,16 +34,23 @@ Subprojects
  Support for generating streams of scalars, e.g. random
  distributions; currently available through the imagen module
  (below)
+`dataviews`_
+ Support for composable and declarative data structures to hold
+ and visualize data and metadata. 
 `imagen`_
  Support for generating 1D, and 2D patterns, and for defining
  mappings between continuous 2D space and finite matrices
+`featuremapper`_
+ Support for the coordinated presentation of input patterns, collating
+ and analyzing the responses to measure feature maps, tuning curves,
+ receptive fields, PSTHs, etc.
 
-The param, paramtk, numbergen, and imagen modules are each developed
-and maintained separately from Topographica, because they are
-general-purpose packages that can be useful for a wide variety of
-Python programs. However, they are documented together with
-Topographica because they were developed alongside Topographica and
-are used extensively within Topographica.
+The param, paramtk, numbergen, dataviews, imagen and featuremapper
+modules are each developed and maintained separately from
+Topographica, because they are general-purpose packages that can be
+useful for a wide variety of Python programs. However, they are
+documented together with Topographica because they were developed
+alongside Topographica and are used extensively within Topographica.
 
 Core Topographica packages
 --------------------------
@@ -134,22 +141,24 @@ separately.
 .. _User Manual: ../User_Manual/index.html
 .. _Tutorials: ../Tutorials/index.html
 .. _external dependencies: ../Downloads/dependencies.html
-.. _main reference manual page: hierarchy.html
-.. _param: param-module.html
-.. _paramtk: paramtk-module.html
-.. _numbergen: numbergen-module.html
-.. _imagen: imagen-module.html
-.. _base: topo.base-module.html
-.. _plotting: topo.plotting-module.html
-.. _analysis: topo.analysis-module.html
-.. _misc: topo.misc-module.html
-.. _tkgui: topo.tkgui-module.html
-.. _sheet: topo.sheet-module.html
-.. _projection: topo.projection-module.html
-.. _ep: topo.ep-module.html
-.. _transferfn: topo.transferfn-module.html
-.. _responsefn: topo.responsefn-module.html
-.. _learningfn: topo.learningfn-module.html
-.. _coordmapper: topo.coordmapper-module.html
-.. _command: topo.command-module.html
+.. _main reference manual page: topo.html
+.. _param: http://ioam.github.io/param/Reference_Manual/param.html
+.. _paramtk: http://ioam.github.io/param/Reference_Manual/paramtk.html
+.. _dataviews: http://ioam.github.io/dataviews/Reference_Manual/dataviews.html
+.. _imagen: http://ioam.github.io/imagen/Reference_Manual/imagen.html
+.. _numbergen: http://ioam.github.io/imagen/Reference_Manual/numbergen.html
+.. _featuremapper: http://ioam.github.io/featuremapper/Reference_Manual/featuremapper.html
+.. _base: topo.base.html
+.. _plotting: topo.plotting.html
+.. _analysis: topo.analysis.html
+.. _misc: topo.misc.html
+.. _tkgui: topo.tkgui.html
+.. _sheet: topo.sheet.html
+.. _projection: topo.projection.html
+.. _ep: topo.ep.html
+.. _transferfn: topo.transferfn.html
+.. _responsefn: topo.responsefn.html
+.. _learningfn: topo.learningfn.html
+.. _coordmapper: topo.coordmapper.html
+.. _command: topo.command.html
 .. _external libraries: ../Downloads/dependencies.html
