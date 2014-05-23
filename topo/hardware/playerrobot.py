@@ -27,9 +27,9 @@ from math import pi
 
 try:
     import playerc
+    SKIP = False
 except ImportError:
-    from nose.plugins.skip import SkipTest
-    raise SkipTest("Module requires the Player/Stage package to be run")
+    SKIP = True
 
 # JPALERT: Because of the global interpreter lock in Python, using
 # Python threads (via the 'thread' or 'threading' modules does not
@@ -67,7 +67,8 @@ def use_threading():
 
 # JPALERT This is a HACK for the CVS version of Player, this value
 # should be defined in the playerc module:
-playerc.PLAYERC_OPEN_MODE = 1
+if not SKIP:
+    playerc.PLAYERC_OPEN_MODE = 1
 
 
 class PlayerException(Exception):
@@ -200,7 +201,8 @@ class PlayerDevice(PlayerObject):
 
     @synched_method
     @player_fn()
-    def subscribe(self,mode=playerc.PLAYERC_OPEN_MODE):
+    def subscribe(self, mode=None):
+        mode = playerc.PLAYERC_OPEN_MODE if None else mode
         return self.proxy.subscribe(mode)
 
 
@@ -412,4 +414,3 @@ class PlayerRobot(object):
         getattr(self,devname)[devnum] = dev
         if self._running:
             dev.subscribe()
-
