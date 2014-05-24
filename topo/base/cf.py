@@ -717,7 +717,8 @@ class CFProjection(Projection):
 
         return CoordinateGrid(bounds, (cols, rows), info=self.name, initial_items=grid_items,
                               proj_src_name=self.src.name, proj_dest_name=self.dest.name,
-                              timestamp=self.src.simulation.time(), **kwargs)
+                              title=' '.join([self.dest.name, self.name, '{label}']),
+                              timestamp=self.src.simulation.time(), label='CFs', **kwargs)
 
 
     def view(self, sheet_x, sheet_y, timestamp=None, situated=False, **kwargs):
@@ -744,7 +745,8 @@ class CFProjection(Projection):
 
         sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
                     input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
-                    metadata=AttrDict(timestamp=timestamp), label="CF Weights")
+                    metadata=AttrDict(timestamp=timestamp), label="CF Weights",
+                    title=self.name+' {label}')
 
         return CFStack((timestamp, sv), coords=(sheet_x, sheet_y),
                        dimensions=[time_dim], dest_name=self.dest.name,
