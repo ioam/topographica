@@ -16,64 +16,10 @@ import param
 
 
 try:
-    from IPython.core.display import clear_output
+    import IPython
 except:
-    clear_output = None
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
-
-
-class ProgressBar(param.Parameterized):
-    """
-    A simple text progress bar suitable for the IPython notebook.
-    """
-
-    width = param.Integer(default=70, doc="""
-        The width of the progress bar in multiples of 'char'.""")
-
-    fill_char = param.String(default='#', doc="""
-        The character used to fill the progress bar.""")
-
-    def __init__(self, **kwargs):
-        super(ProgressBar,self).__init__(**kwargs)
-
-    def update(self, percentage):
-        " Update the progress bar to the given percentage value "
-        if clear_output: clear_output()
-        percent_per_char = 100.0 / self.width
-        char_count = int(math.floor(percentage/percent_per_char) if percentage<100.0 else self.width)
-        blank_count = self.width - char_count
-        print '\r', "[%s%s] %0.1f%%" % (self.fill_char * char_count,
-                              ' '*len(self.fill_char)*blank_count,
-                              percentage)
-        sys.stdout.flush()
-        time.sleep(0.0001)
-
-
-class RunProgress(ProgressBar):
-    """
-    Progress bar for running Topographica simulations in a Notebook.
-    """
-
-    interval = param.Number(default=20,
-        doc="How often to update the progress bar in topo.sim.time units")
-
-    def __init__(self, **kwargs):
-        super(RunProgress,self).__init__(**kwargs)
-
-    def run(self, duration):
-        """
-        Run topo.sim(duration), updating every interval duration.
-        """
-        completed = 0.0
-        while (duration - completed) >= self.interval:
-            topo.sim.run(self.interval)
-            completed += self.interval
-            self.update(100*(completed / duration))
-        remaining = duration - completed
-        if remaining != 0:
-            topo.sim.run(remaining)
-            self.update(100)
 
 
 def prompt(message, default, options, skip=False):
@@ -168,6 +114,9 @@ from topo.base.sheetview import CFView
 from dataviews.ipython import load_ipython_extension as load_imagen_extension
 from dataviews.ipython.display_hooks import stack_display, view_display
 from dataviews.plots import SheetViewPlot, viewmap
+
+from dataviews.ipython.widgets import RunProgress
+RunProgress.run_hook = topo.sim.run
 
 viewmap.update({CFView: SheetViewPlot})
 
