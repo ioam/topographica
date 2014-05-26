@@ -6,17 +6,14 @@ loaded using:
 %load_ext topo.misc.ipython
 """
 import os
-import math
 import time
 import difflib
-import sys
 
 import topo
-import param
 
 
 try:
-    import IPython
+    import IPython # pyflakes:ignore (Required import)
 except:
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
