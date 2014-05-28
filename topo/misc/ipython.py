@@ -125,6 +125,8 @@ except:
     pass
 
 
+
+
 _loaded = False
 def load_ipython_extension(ip):
     load_imagen_extension(ip, verbose=False)
@@ -132,6 +134,12 @@ def load_ipython_extension(ip):
     global _loaded
     if not _loaded:
         _loaded = True
+
+        try:
+            from lancet import load_ipython_extension as load_lancet_extension
+            load_lancet_extension(ip)
+        except:
+            pass
         from topo.command import runscript
         runscript.ns = ip.user_ns
         runscript.push = ip.push
