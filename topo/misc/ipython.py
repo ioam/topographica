@@ -110,12 +110,12 @@ from topo.base.sheetview import CFView
 
 from dataviews.ipython import load_ipython_extension as load_imagen_extension
 from dataviews.ipython.display_hooks import stack_display, view_display
-from dataviews.plots import SheetViewPlot, viewmap
+from dataviews.plots import SheetViewPlot, Plot
 
 from dataviews.ipython.widgets import RunProgress
 RunProgress.run_hook = topo.sim.run
 
-viewmap.update({CFView: SheetViewPlot})
+Plot.defaults.update({CFView: SheetViewPlot})
 
 try:
     from lancet import ViewFrame
