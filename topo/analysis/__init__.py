@@ -1,5 +1,8 @@
 """
 Analysis tools for Topographica, other than plotting tools.
+
+Configures the interface to the featuremapper and dataviews projects
+and sets the appropriate Topographica-specific hooks.
 """
 
 from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
@@ -7,6 +10,102 @@ from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
     topo_metadata_fn, StorageHook, get_feature_preference
 from featuremapper.command import measure_response
 
+
+from dataviews.collector import Reference
+from dataviews.options import channels, ChannelOpts
+from dataviews.operation import cmap2rgb, operator, chain
+
+from featuremapper.command import Collector
+from topo.base.sheet import Sheet
+from topo.base.projection import Projection
+
+import numpy as np
+import topo
+
+class SimRef(Reference):
+    """
+    A SimRef instance is installed on Collector to allow Topographica
+    model elements to be referenced for collection.
+
+    This is important to allow pickling and unpickling of Collectors
+    that work correctly with Topographica in different execution
+    environments (e.g. nodes of a cluster) and acrsos different models
+    without directly pickling the components (e.g. Sheets and
+    Projections) themselves.
+
+    More information about references can be found in the docstring of
+    the dataviews.collector.Reference.
+    """
+    @property
+    def resolved_type(self):
+        if self.array_ref:
+            return np.ndarray
+        elif isinstance(self.obj, tuple):
+            return Projection
+        else:
+            return Sheet
+
+    def __init__(self, obj=None, array_ref=None):
+        if [obj, array_ref] == [None,None]:
+            raise Exception("Please specify an object, a path string or an array_ref.")
+
+        self.array_ref = None
+        if obj is None:
+            self.obj = None
+            self.array_ref = array_ref
+        elif isinstance(obj, str):
+            self.obj = tuple(obj.split('.')) if '.' in obj else obj
+        elif isinstance(obj, Projection):
+            self.obj = (obj.dest.name, obj.name)
+        else:
+            self.obj = obj.name
+
+    def resolve(self):
+        from topo import sim
+        if isinstance(self.obj, tuple):
+            (sheet, proj) = self.obj
+            return sim[sheet].projections()[proj]
+        elif self.obj:
+            return sim[self.obj]
+        else:
+            return eval('topo.sim.'+self.array_ref)
+
+
+#==================#
+# Collection hooks #
+#==================#
+
+
+def sheet_hook(obj, *args, **kwargs):
+    """
+    Return a SheetView of the Sheet activity.
+    """
+    return obj[:]
+
+def projection_hook(obj, *args, **kwargs):
+    """
+    Return a SheetView of the projection activity, otherwise if
+    grid=True, return a CoordinateGrid of the CFs.
+    """
+    if kwargs.pop('grid', False):
+        return obj.grid(**kwargs)
+    else:
+        return obj.projection_view()
+
+
+# Configure Collector with appropriate hooks
+Collector.sim = SimRef
+Collector.for_type(Sheet, sheet_hook, referencer=SimRef)
+Collector.for_type(Projection, projection_hook, referencer=SimRef)
+
+
+# Setting default channel operation for ON-OFF visualization
+ON_sub_OFF = chain.instance(chain=lambda x: [cmap2rgb(operator(x, operator=np.subtract).N, cmap='jet')])
+ChannelOpts.operations['ON_sub_OFF'] = ON_sub_OFF
+channels['ON_sub_OFF'] = ChannelOpts('ON_sub_OFF', "CF Weights * CF Weights")
+
+
+# Featuremapper hooks
 FeatureResponses.metadata_fns = [topo_metadata_fn]
 FeatureResponses.pattern_response_fn = pattern_response.instance()
 FeatureMaps.measurement_storage_hook = StorageHook.instance(sublabel='maps')
