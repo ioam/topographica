@@ -17,7 +17,7 @@ import param
 from lancet import PrettyPrinted, vcs_metadata
 from lancet import Command
 from lancet import Launcher, review_and_launch
-from lancet import NumpyFile
+from lancet import ViewFile, NumpyFile
 
 try:
    from external import sys_paths
@@ -657,6 +657,101 @@ class Analysis(PrettyPrinted, param.Parameterized):
 
 
 class RunBatchCommand(TopoCommand):
+class BatchCollector(PrettyPrinted, param.Parameterized):
+   """
+   BatchCollector is a wrapper class used to execute a Collector in a
+   Topographica run_batch context, saving the dataviews to disk as
+   *.view files. It supports the same core interface as the deprecated
+   Analysis objects.
+   """
+
+   metadata = param.List(default=[], doc="""
+       Keys to include as metadata in the output file along with
+       'time' (Topographica simulation time).""")
+
+
+   @classmethod
+   def pickle_path(cls, root_directory, batch_name):
+      """
+      Locates the pickle file based on the given launch info
+      dictionary. Used by load as a classmethod and by save as an
+      instance method.
+      """
+      return os.path.join(root_directory, '%s.collector' % batch_name)
+
+
+   @classmethod
+   def load(cls, tid, specs, root_directory, batch_name, batch_tag):
+      """
+      Classmethod used to load the RunBatchCommand callable into a
+      Topographica run_batch context. Loads the pickle file based on
+      the batch_name and root directory in batch_info.
+      """
+      pkl_path = cls.pickle_path(root_directory, batch_name)
+      with open(pkl_path,'rb') as pkl:
+         collectorfn =  pickle.load(pkl)
+
+      info = namedtuple('info',['tid', 'specs', 'batch_name', 'batch_tag'])
+      collectorfn._info = info(tid, specs, batch_name, batch_tag)
+      return collectorfn
+
+
+   def __init__(self, collector, **kwargs):
+      from topo.analysis import Collector
+      self._pprint_args = ([],[],None,{})
+      super(BatchCollector, self).__init__(**kwargs)
+      if not isinstance(collector, Collector):
+         raise TypeError("Please supply a Collector to BatchCollector")
+      self.collector = collector
+      # The _info attribute holds information about the batch.
+      self._info = ()
+
+
+   def __call__(self):
+      """
+      Calls the collector specified by the user in the run_batch
+      context. Invoked as an analysis function by RunBatchCommand.
+      """
+      from dataviews.collector import AttrTree
+      self.collector.interval_hook = topo.sim.run
+
+      topo_time = topo.sim.time()
+      metadata_items = [(key, self._info.specs[key]) for key in self.metadata]
+      self._metadata = dict(metadata_items + [('time',topo_time)])
+
+      filename = '%s%s_%s' % (self._info.batch_name,
+                              ('[%s]' % self._info.batch_tag
+                               if self._info.batch_tag else ''),
+                              topo_time)
+
+      viewtree = AttrTree()
+      viewtree = self.collector(viewtree, times=[topo_time])
+
+      ViewFile(directory= param.normalize_path.prefix,
+               hash_suffix = False).save(filename,
+                                         viewtree,
+                                         metadata=self._metadata)
+
+   def verify(self, specs, model_params):
+      if hasattr(self, '_model_params'):
+         raise NotImplementedError("Implement once model parameters can be inspected easily.")
+
+   def summary(self):
+      print "Collector definition summary:\n\n%s" % self.collector
+
+   def _pprint(self, cycle=False, flat=False, annotate=False,
+               onlychanged=True, level=1, tab = '   '):
+      """Pretty print the collector in a declarative style."""
+      split = '\n%s' % (tab*(level+1))
+      spec_strs = []
+      for path, val in self.collector.path_items.items():
+         key = repr('.'.join(path)) if isinstance(path, tuple) else 'None'
+         spec_strs.append('(%s,%s%s%r),' % (key, split, tab, val))
+
+      return 'Collector([%s%s%s])' % (split, split.join(spec_strs)[:-1], split)
+
+
+
    """
    Runs a custom analysis function of type Analysis with
    run_batch. This command is far more flexible for regular usage than
