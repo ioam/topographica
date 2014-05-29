@@ -29,6 +29,7 @@ from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
 Launcher.output_directory = default_output_path()
 
+from topo.analysis import Collector
 
 class topo_metadata(param.Parameterized):
    """
@@ -656,7 +657,6 @@ class Analysis(PrettyPrinted, param.Parameterized):
 
 
 
-class RunBatchCommand(TopoCommand):
 class BatchCollector(PrettyPrinted, param.Parameterized):
    """
    BatchCollector is a wrapper class used to execute a Collector in a
@@ -752,14 +752,24 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
 
 
 
+class RunBatchCommand(TopoCommand):
    """
-   Runs a custom analysis function of type Analysis with
+   Runs a custom analysis function of type Analysis or Collector with
    run_batch. This command is far more flexible for regular usage than
    TopoCommand as it allows you to build a run_batch analysis
    incrementally.
    """
 
-   analysis = param.ClassSelector(class_=Analysis, allow_None=False)
+   metadata = param.List(default=[], doc="""
+       Keys to include as metadata in the output file along with
+       'time' (Topographica simulation time).""")
+
+   analysis = param.ClassSelector(default=None, class_=(Analysis, Collector, BatchCollector),
+                                  allow_None=True, doc="""
+      The object used to define the analysis executed in
+      RunBatch. This object may be an Analysis object a Topographica
+      Collector or BatchCollector (which wraps a Collector). Analysis
+      objects are now deprecated and only retained for legacy reasons.""" )
 
    def __init__(self, tyfile, analysis, **kwargs):
       super(RunBatchCommand, self).__init__(tyfile=tyfile,
@@ -768,6 +778,10 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
                                             do_format=False,
                                             **kwargs)
       self.pprint_args(['executable', 'tyfile', 'analysis'], [])
+      if isinstance(self.analysis, Collector):
+         self.analysis = BatchCollector(analysis, metadata=self.metadata)
+      elif isinstance(self.analysis, Analysis):
+         self.warning("Analysis objects are deprecated: Collectors should be used instead.")
 
 
    def get_model_params(self):
@@ -791,9 +805,10 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
                                                   # mistakenly included.
 
       # Load and configure the Analysis object.
-      prelude = ['from topo.misc.lancext import Analysis']
-      prelude += ["analysis_fn=Analysis.load(%r, %r, %r, %r, %r)"
-                  % (tid, spec, info['root_directory'],
+      class_type = 'Analysis' if isinstance(self.analysis, Analysis) else 'BatchCollector'
+      prelude = ['from topo.misc.lancext import %s' % class_type]
+      prelude += ["analysis_fn=%s.load(%r, %r, %r, %r, %r)"
+                  % (class_type, tid, spec, info['root_directory'],
                      info['batch_name'], info['batch_tag']) ]
 
       # Create the keyword representation to pass into run_batch
