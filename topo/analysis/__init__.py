@@ -20,6 +20,7 @@ from topo.base.sheet import Sheet
 from topo.base.projection import Projection
 
 import numpy as np
+import topo  # pyflakes:ignore (Needed to resolve reference with eval)
 
 class SimRef(Reference):
     """
