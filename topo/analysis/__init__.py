@@ -70,6 +70,23 @@ class SimRef(Reference):
         else:
             return eval('topo.sim.'+self.array_ref)
 
+    def __repr__(self):
+        if isinstance(self.obj, tuple):
+            return "SimRef(%r)" % '.'.join(el for el in self.obj)
+        elif self.obj is None:
+            return "SimRef(array_ref=%r)" % self.array_ref
+        else:
+            return "SimRef(%r)" % self.obj
+
+
+    def __str__(self):
+        if isinstance(self.obj, tuple):
+            return "topo.sim."+'.'.join(el for el in self.obj)
+        elif self.obj is None:
+            return "topo.sim." + self.array_ref
+        else:
+            return "topo.sim."+ self.obj
+
 
 #==================#
 # Collection hooks #
