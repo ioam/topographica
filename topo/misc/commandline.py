@@ -574,14 +574,6 @@ def t_action(option,opt_str,value,parser):
     import subprocess
     global return_code
 
-    if "list" in local_targets:
-        from topo.tests.runtests import target_description
-        available_items = sorted((target_description.items() + local_target_descriptions.items()))
-        max_len = max(len(k) for k,_ in available_items)
-        print ("---------------\nAvailable tests\n---------------\n%s"
-               % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
-                           for k,v in available_items))
-
     # JABALERT: Unlike the tests in runtests.py, will not use xvfb-run
     # to hide GUI windows being tested.  Once runtests.py is made into
     # a module, the code it contains for conditionally using xvfb-run
@@ -604,13 +596,27 @@ def t_action(option,opt_str,value,parser):
         proc.wait()
         return_code += abs(proc.returncode)
 
+    from topo.tests.runtests import target_description
 
     if value is not None:
-        global_params.exec_in_context("targets=['%s']" % value)
-        # Call runtests.run_tests() as if it were a proper module
-        ns={}
-        execfile('./topo/tests/runtests.py',ns,ns)
-        return_code += len(ns["run_tests"]())
+        if value not in target_description:
+            print "\nCould not find test target %r.\n" % value
+            local_targets =['list']
+        else:
+            global_params.exec_in_context("targets=['%s']" % value)
+            # Call runtests.run_tests() as if it were a proper module
+            ns={}
+            execfile('./topo/tests/runtests.py',ns,ns)
+            return_code += len(ns["run_tests"]())
+
+
+
+    if "list" in local_targets:
+        available_items = sorted((target_description.items() + local_target_descriptions.items()))
+        max_len = max(len(k) for k,_ in available_items)
+        print ("---------------\nAvailable tests\n---------------\n%s"
+               % "\n".join('%s%s : %s'% (k,' '*(max_len-len(k)),v)
+                           for k,v in available_items))
 
     global something_executed
     something_executed=True
