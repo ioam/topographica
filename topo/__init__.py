@@ -52,12 +52,8 @@ __all__ = ['analysis',
 from subprocess import Popen, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
 
 import os
-
 import param
 import imagen
-
-# Patch for versions of param prior to 10 May 2013
-param.main=param.Parameterized(name="main")
 
 
 def version_int(v):
@@ -67,73 +63,16 @@ def version_int(v):
     """
     return int("%02d%02d%02d%05d" % v)
 
+__version__ = param.Version(release=(0,9,8), fpath=__file__, commit="$Format:%h$")
+commit  = __version__.commit
+version = tuple(list(__version__.release) +[__version__.commit_count])
+release = int("%02d%02d%02d%05d" % version)
 
 
-def version_str(v):
-	"""
-	Convert a version four-tuple to a string format x.y.z
-	"""
-	return "%d.%d.%d" % (v[0], v[1], v[2])
+# Patch for versions of param prior to 10 May 2013
+param.main=param.Parameterized(name="main")
 
 
-
-def _find_version():
-    """
-    Return the version tuple, the release number, the git commit, and
-    whether reading pickle files is allowed (False if no version
-    information avaliable).
-    """
-
-    version_warning = """\
-Unable to determine the version information for this copy of Topographica.
-
-For an official release, the version information is stored in a file
-named topo/.release.  For a development copy checked out from Git, the
-version is requested using "git describe".  Neither of these options
-was successful (output: "%s"), 
-perhaps because Git is not available on this machine.  To work around
-this problem, either install Git on this machine, or temporarily use a
-machine that does have Git and run "topographica make-release-file",
-making sure you have write permissions on Topographica's root
-directory.
-
-In the meantime, reading and saving snapshots will be disabled,
-because version information is necessary for determining how to
-interpret saved files.\n\n""" 
-
-    version_string = None
-
-    (basepath,_) = os.path.split(os.path.abspath(__file__))
-
-    try:
-        git_process = Popen(["git","describe","--long","--match","v*.*.*"], stdout=PIPE, stderr=PIPE, cwd=basepath)
-        version_string = git_process.communicate()[0].strip()
-        if git_process.poll():
-            raise OSError
-
-    except OSError, CalledProcessError: #pyflakes:ignore (has to do with Python versions for CalledProcessError)
-        try:
-            release_file = open(basepath + "/.release")
-            version_string = release_file.read()
-            release_file.close()
-        except IOError:
-            pass
-
-    try:
-        (_version, count, _commit) = version_string[1:].split("-")
-        _version = _version.split(".")
-        _version = (int(_version[0]), int(_version[1]), int(_version[2]), int(count))
-        _release = version_int(_version)
-        pickle_allowed = True
-
-    except:
-        param.main.warning(version_warning % version_string)
-        (_version, _release, _commit, pickle_allowed) = ((0,0,0,0),0,0,False)
-
-    return (_version, _release, _commit, pickle_allowed)
-
-
-(version, release, commit, pickle_read_write_allowed) = _find_version()
 
 
 
