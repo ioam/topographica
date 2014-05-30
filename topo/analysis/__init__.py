@@ -20,7 +20,6 @@ from topo.base.sheet import Sheet
 from topo.base.projection import Projection
 
 import numpy as np
-import topo
 
 class SimRef(Reference):
     """
