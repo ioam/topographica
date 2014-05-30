@@ -5,8 +5,6 @@ In order to grab frames, you need to install Opencv, and python-opencv
 
 This class was tested with Opencv 2.0.0 and Ubuntu 10.04 LTS.
 """
-__version__ = "$Revision$"
-
 
 import ImageOps
 from imagen.image import GenericImage

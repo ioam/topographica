@@ -1,7 +1,6 @@
 """
 GeneratorSheet: a sheet with a pattern generator.
 """
-__version__='$Revision: 7629 $'
 
 
 import param

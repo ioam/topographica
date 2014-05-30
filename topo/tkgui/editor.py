@@ -7,7 +7,6 @@ Window:  window and canvas
 
 Originally written by Alan Lindsay.
 """
-__version__='$Revision: 8989 $'
 
 from inspect import getdoc
 import math
