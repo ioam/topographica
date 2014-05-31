@@ -145,6 +145,9 @@ class measure_cog(ParameterizedFunction):
     stride = param.Integer(default=1, doc="Stride by which to skip grid lines"
                                           "in the CoG Wireframe.")
 
+    measurement_storage_hook = param.Callable(default=None, instantiate=True, doc="""
+        Interface to store measurements after they have been completed.""")
+
     def __call__(self, **params):
         p = ParamOverrides(self, params)
 
@@ -167,6 +170,10 @@ class measure_cog(ParameterizedFunction):
                     cog_data = self._update_proj_cog(p, proj)
                     for key, data in cog_data.items():
                         results.set_path((key, name), data)
+
+
+        if p.measurement_storage_hook:
+            p.measurement_storage_hook(results)
 
         return results
 
@@ -209,21 +216,6 @@ class measure_cog(ParameterizedFunction):
         xcog_stack = SheetStack((timestamp, xsv), **metadata)
         ycog_stack = SheetStack((timestamp, ysv), **metadata)
         contour_stack = SheetStack((timestamp, cogmesh), **metadata)
-
-        if 'XCoG' in sheet.views.maps:
-            sheet.views.maps['XCoG'].update(xcog_stack)
-        else:
-            sheet.views.maps['XCoG'] = xcog_stack
-
-        if 'YCoG' in sheet.views.maps:
-            sheet.views.maps['YCoG'].update(ycog_stack)
-        else:
-            sheet.views.maps['YCoG'] = ycog_stack
-
-        if 'CoG' in sheet.views.maps:
-            sheet.views.maps['CoG'].update(contour_stack)
-        else:
-            sheet.views.maps['CoG'] = contour_stack
 
         return {'XCoG': xcog_stack, 'YCoG': ycog_stack, 'CoG': contour_stack}
 
