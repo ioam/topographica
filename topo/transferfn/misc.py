@@ -22,8 +22,6 @@ from topo.base.sheetcoords import SheetCoordinateSystem
 from topo.transferfn import TransferFn, TransferFnWithState
 from topo.pattern import Gaussian
 
-from topo.pattern.random import UniformRandomInt
-
 # Not suitable for basic.py due to its dependence on patterns.
 class PatternCombine(TransferFn):
     """
@@ -120,50 +118,6 @@ class KernelMax(TransferFn):
                                                     size=2*radius,x=wc+0.5,y=wy+0.5)
         x *= 0.0
         x[rmin:rmax,cmin:cmax] = kernel
-
-
-class TemporalScatter(TransferFnWithState):
-    """
-    Scatter values across time using a uniform random distribution
-    across history of length depth.
-    """
-
-    depth  = param.Integer(default=5, bounds=(1,None), doc="""Depth of the buffer.""")
-
-    def __init__(self,**params):
-        super(TemporalScatter,self).__init__(**params)
-        self.first_call =  True
-        self.buffer = None
-        self.depth_map = None
-        self.__current_state_stack=[]
-
-    def __call__(self,x):
-        (d1,d2) = x.shape
-        if self.first_call is True:
-            self.buffer = numpy.zeros((d1,d2,self.depth))
-            self.depth_map = UniformRandomInt(low=0, high=self.depth,
-                                               xdensity=d1,
-                                               ydensity=d2)()
-            self.first_call = False
-
-        # Roll the buffer and copy x to the top of the stack
-        self.buffer =numpy.roll(self.buffer,1,axis=2)
-        self.buffer[...,0] = x
-
-        x.fill(0.0)
-        x += self.buffer[numpy.arange(d1)[:, None],
-                         numpy.arange(d2),
-                         self.depth_map]
-        return x
-
-    def state_push(self):
-        self.__current_state_stack.append((copy.copy(self.buffer),
-                                           copy.copy(self.first_call)))
-        super(TemporalScatter,self).state_push()
-
-    def state_pop(self):
-        self.buffer,self.first_call =  self.__current_state_stack.pop()
-        super(TemporalScatter,self).state_pop()
 
 
 class HalfRectify(TransferFn):
