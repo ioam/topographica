@@ -250,3 +250,10 @@ license (http://www.opensource.org/licenses/bsd-license.php).
 # weights underflows are common and not a problem.
 from numpy import seterr
 old_seterr_settings=seterr(all="raise",under="ignore")
+
+
+from topo.analysis import Collector
+from topo.misc.ipython import RunProgress
+
+Collector.time_fn = sim.time
+Collector.interval_hook = RunProgress
