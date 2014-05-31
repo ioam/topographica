@@ -98,7 +98,7 @@ class CFView(ImagenSheetView):
         Slice indices of the embedded view into the situated matrix.""")
 
     @property
-    def stack_type():
+    def stack_type(self):
         return CFStack
 
     @property

@@ -745,8 +745,8 @@ class CFProjection(Projection):
 
         sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
                     input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
-                    metadata=AttrDict(timestamp=timestamp), label="CF Weights",
-                    title=self.name+' {label}')
+                    metadata=AttrDict(timestamp=timestamp),
+                    label=self.name+ " CF", title='{label} {value}', value='Weights')
 
         return CFStack((timestamp, sv), coords=(sheet_x, sheet_y),
                        dimensions=[time_dim], dest_name=self.dest.name,
