@@ -12,6 +12,7 @@ import param
 from param import ParameterizedFunction, ParamOverrides
 
 from dataviews import SheetView, SheetStack, Contours
+from dataviews.collector import AttrTree
 
 from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
@@ -150,7 +151,7 @@ class measure_cog(ParameterizedFunction):
         measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
                            if hasattr(s,'measure_maps') and s.measure_maps]
 
-        results = {}
+        results = AttrTree()
 
         # Could easily be extended to measure CoG of all projections
         # and e.g. register them using different names (e.g. "Afferent
@@ -159,12 +160,13 @@ class measure_cog(ParameterizedFunction):
         # only a fixed-named plot).
         requested_proj=p.proj_name
         for sheet in measured_sheets:
-            if sheet not in results:
-                results[sheet.name] = {}
             for proj in sheet.in_connections:
                 if (proj.name == requested_proj) or \
                    (requested_proj == '' and (proj.src != sheet)):
-                   results[sheet.name][proj.name] = self._update_proj_cog(p, proj)
+                    name = sheet.name.capitalize()+proj.name.capitalize()
+                    cog_data = self._update_proj_cog(p, proj)
+                    for key, data in cog_data.items():
+                        results.set_path((key, name), data)
 
         return results
 
