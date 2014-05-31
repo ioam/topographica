@@ -10,6 +10,9 @@ from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
     topo_metadata_fn, StorageHook, get_feature_preference
 from featuremapper.command import measure_response
 
+import numpy as np
+import topo  # pyflakes:ignore (Needed to resolve reference with eval)
+
 
 from dataviews.collector import Reference
 from dataviews.options import channels, ChannelOpts
@@ -19,8 +22,8 @@ from featuremapper.command import Collector
 from topo.base.sheet import Sheet
 from topo.base.projection import Projection
 
-import numpy as np
-import topo  # pyflakes:ignore (Needed to resolve reference with eval)
+from analysis import measure_cog
+
 
 class SimRef(Reference):
     """
@@ -109,6 +112,12 @@ def projection_hook(obj, *args, **kwargs):
     else:
         return obj.projection_view()
 
+def measurement_hook(obj, *args, **kwargs):
+    return obj(*args, **kwargs)
+
+Collector.for_type(measure_cog,  measurement_hook, mode='merge')
+
+
 
 # Configure Collector with appropriate hooks
 Collector.sim = SimRef
@@ -129,6 +138,8 @@ FeatureMaps.measurement_storage_hook = StorageHook.instance(sublabel='maps')
 FeatureCurves.measurement_storage_hook = StorageHook.instance(sublabel='curves')
 ReverseCorrelation.measurement_storage_hook = StorageHook.instance(sublabel='rfs')
 measure_response.measurement_storage_hook = StorageHook.instance(sublabel=None)
+measure_cog.measurement_storage_hook = StorageHook.instance(sublabel='CoG')
+
 
 MeasureResponseCommand.preference_lookup_fn = get_feature_preference
 MeasureResponseCommand.pattern_response_fn = pattern_response.instance()

@@ -166,10 +166,10 @@ class measure_cog(ParameterizedFunction):
             for proj in sheet.in_connections:
                 if (proj.name == requested_proj) or \
                    (requested_proj == '' and (proj.src != sheet)):
-                    name = sheet.name.capitalize()+proj.name.capitalize()
                     cog_data = self._update_proj_cog(p, proj)
                     for key, data in cog_data.items():
-                        results.set_path((key, name), data)
+                        results.set_path((key, proj.name.capitalize()),
+                                         data)
 
 
         if p.measurement_storage_hook:
