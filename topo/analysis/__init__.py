@@ -22,7 +22,7 @@ from featuremapper.command import Collector
 from topo.base.sheet import Sheet
 from topo.base.projection import Projection
 
-from analysis import measure_cog
+from command import measure_cog
 
 
 class SimRef(Reference):
@@ -115,14 +115,12 @@ def projection_hook(obj, *args, **kwargs):
 def measurement_hook(obj, *args, **kwargs):
     return obj(*args, **kwargs)
 
-Collector.for_type(measure_cog,  measurement_hook, mode='merge')
-
-
 
 # Configure Collector with appropriate hooks
 Collector.sim = SimRef
 Collector.for_type(Sheet, sheet_hook, referencer=SimRef)
 Collector.for_type(Projection, projection_hook, referencer=SimRef)
+Collector.for_type(measure_cog,  measurement_hook, mode='merge')
 
 
 # Setting default channel operation for ON-OFF visualization
