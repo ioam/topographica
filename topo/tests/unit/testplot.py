@@ -12,14 +12,13 @@ SHOW_PLOTS = False
 ### JC: My new imports
 from topo.plotting.plot import make_template_plot
 from numpy.oldnumeric import zeros, Float, array
-from topo.base.boundingregion import BoundingBox
 import numpy.oldnumeric.random_array as RandomArray
 
 import param
 
 from dataviews import SheetView, NdMapping
 from dataviews.ndmapping import AttrDict
-
+from dataviews.sheetviews import BoundingBox
 
 ### This function is defined here, where it might be useful for testing
 ### Plot
