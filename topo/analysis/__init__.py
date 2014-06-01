@@ -11,16 +11,16 @@ from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
 from featuremapper.command import measure_response
 
 import numpy as np
-import topo  # pyflakes:ignore (Needed to resolve reference with eval)
-
 
 from dataviews.collector import Reference
 from dataviews.options import channels, ChannelOpts
 from dataviews.operation import cmap2rgb, operator, chain
 
+import topo
 from featuremapper.command import Collector
 from topo.base.sheet import Sheet
 from topo.base.projection import Projection
+from topo.misc.ipython import RunProgress
 
 from command import measure_cog
 
@@ -92,6 +92,11 @@ class SimRef(Reference):
 
 
 ### Collection hooks
+
+
+Collector.time_fn = topo.sim.time
+Collector.interval_hook = RunProgress
+
 
 def sheet_hook(obj, *args, **kwargs):
     """
