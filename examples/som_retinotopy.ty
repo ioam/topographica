@@ -54,6 +54,11 @@ p.add(
         Starting value for the learning rate."""))
 
 
+# Using time dependent random streams.
+# Corresponding numbergen objects should be given suitable names.
+param.Dynamic.time_dependent=True
+numbergen.RandomDistribution.time_dependent = True
+
 # input pattern
 sheet.GeneratorSheet.period = 1.0
 sheet.GeneratorSheet.phase = 0.05
@@ -61,8 +66,8 @@ sheet.GeneratorSheet.nominal_density = p.retina_density
 
 input_pattern = pattern.Gaussian(scale=1.0,size=2*sqrt(2.0*0.1*24.0)/24.0,
     aspect_ratio=1.0,orientation=0,
-    x=numbergen.UniformRandom(name='xgen', lbound=-0.5,ubound=0.5,seed=p.input_seed+12, time_dependent=True),
-    y=numbergen.UniformRandom(name='ygen', lbound=-0.5,ubound=0.5,seed=p.input_seed+56, time_dependent=True))
+    x=numbergen.UniformRandom(name='xgen', lbound=-0.5,ubound=0.5,seed=p.input_seed+12),
+    y=numbergen.UniformRandom(name='ygen', lbound=-0.5,ubound=0.5,seed=p.input_seed+56))
 
 
 # Local variable to allow weights to be controlled easily
