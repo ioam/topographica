@@ -32,7 +32,7 @@ class SimRef(Reference):
 
     This is important to allow pickling and unpickling of Collectors
     that work correctly with Topographica in different execution
-    environments (e.g. nodes of a cluster) and acrsos different models
+    environments (e.g. nodes of a cluster) and across different models
     without directly pickling the components (e.g. Sheets and
     Projections) themselves.
 
@@ -91,10 +91,7 @@ class SimRef(Reference):
             return "topo.sim."+ self.obj
 
 
-#==================#
-# Collection hooks #
-#==================#
-
+### Collection hooks
 
 def sheet_hook(obj, *args, **kwargs):
     """
