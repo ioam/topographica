@@ -616,7 +616,7 @@ class tuning_curve(PylabPlotCommand):
 
         x_axis = p.x_axis.capitalize()
         stack = p.sheet.views.curves[x_axis+"Tuning"]
-        time = stack.dim_range('time')[1]
+        time = stack.dim_range('Time')[1]
 
         curves = stack[time, :, :, :].sample(samples=p.coords, x_axis=p.x_axis,
                                              group_by=p.group_by)

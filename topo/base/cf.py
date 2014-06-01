@@ -728,7 +728,7 @@ class CFProjection(Projection):
         """
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        time_dim = Dimension("time", type=param.Dynamic.time_fn.time_type)
+        time_dim = Dimension("Time", type=param.Dynamic.time_fn.time_type)
         (r, c) = self.dest.sheet2matrixidx(sheet_x, sheet_y)
         cf = self.cfs[r, c]
         r1, r2, c1, c2 = cf.input_sheet_slice
