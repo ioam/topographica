@@ -55,7 +55,7 @@ def update_sheet_activity(sheet_name, force=False):
         view = SheetStack((time, sv), dimensions=[Time], **metadata)
         sheet.views.maps[name] = view
     else:
-        if force or view.dim_range('Time')[1] < time:
+        if force or view.dim_range('time')[1] < time:
             sv = SheetView(np.array(sheet.activity), sheet.bounds,
                            metadata=metadata)
             view[time] = sv
