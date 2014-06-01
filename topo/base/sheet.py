@@ -307,8 +307,10 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         metadata = AttrDict(precedence=self.precedence,
                             row_precedence=self.row_precedence,
                             timestamp=self.simulation.time())
-        return SheetView(self.activity.copy(), self.bounds,
-                         label=self.name+' Activity', metadata=metadata,
-                         value='Activity')[coords]
+
+        sv = SheetView(self.activity.copy(), self.bounds,
+                       label=self.name+' Activity', value='Activity')[coords]
+        sv.metadata=metadata
+        return sv
 
 

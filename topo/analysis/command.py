@@ -67,7 +67,8 @@ def update_rgb_activities():
             # should this ensure all of r,g,b are present?
             if hasattr(sheet,'activity_%s'%c.lower()):
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
-                new_view = SheetView(activity_copy, bounds=sheet.bounds, metadata=metadata)
+                new_view = SheetView(activity_copy, bounds=sheet.bounds)
+                new_view.metadata=metadata
                 sheet.views.maps['%sActivity'%c]=new_view
 
 
@@ -198,8 +199,9 @@ class measure_cog(ParameterizedFunction):
                 xcog[r][c] = xcentroid
                 ycog[r][c] = ycentroid
 
-        metadata = dict(precedence=sheet.precedence, row_precedence=sheet.row_precedence,
-                        src_name=sheet.name, dimensions=[features.Time])
+        metadata = AttrDict(precedence=sheet.precedence,
+                            row_precedence=sheet.row_precedence,
+                            src_name=sheet.name)
 
         timestamp = topo.sim.time()
         xsv = SheetView(xcog, sheet.bounds, label='X CoG', title='%s {label}' %  sheet.name)
@@ -213,9 +215,13 @@ class measure_cog(ParameterizedFunction):
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
         cogmesh = Contours(lines, sheet.bounds, label='Center of Gravity')
 
-        xcog_stack = SheetStack((timestamp, xsv), **metadata)
-        ycog_stack = SheetStack((timestamp, ysv), **metadata)
-        contour_stack = SheetStack((timestamp, cogmesh), **metadata)
+        xcog_stack = SheetStack((timestamp, xsv), dimensions=[features.Time])
+        xcog_stack.metadata = metadata
+        ycog_stack = SheetStack((timestamp, ysv), dimensions=[features.Time])
+        ycog_stack.metadata = metadata
+
+        contour_stack = SheetStack((timestamp, cogmesh), dimensions=[features.Time])
+        contour_stack.metadata = metadata
 
         return {'XCoG': xcog_stack, 'YCoG': ycog_stack, 'CoG': contour_stack}
 

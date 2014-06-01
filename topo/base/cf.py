@@ -624,9 +624,13 @@ class CFProjection(Projection):
     def _cf_grid(self, shape=None, **kwargs):
         "Create ProjectionGrid with the correct metadata."
         shape = self.dest.shape if shape is None else shape
-        return CoordinateGrid(self.dest.bounds, shape, info=self.name,
-                              proj_src_name=self.src.name, proj_dest_name=self.dest.name,
-                              timestamp=self.src.simulation.time(), **kwargs)
+        grid = CoordinateGrid(self.dest.bounds, shape)
+        grid.metadata = AttrDict(timestamp=self.src.simulation.time(),
+                                 info=self.name,
+                                 proj_src_name=self.src.name,
+                                 proj_dest_name=self.dest.name,
+                                 **kwargs)
+        return grid
 
 
     def _generate_coords(self):
@@ -715,10 +719,15 @@ class CFProjection(Projection):
         for x, y in coords:
             grid_items[x, y] = self.view(x, y, situated=situated, **kwargs)
 
-        return CoordinateGrid(bounds, (cols, rows), info=self.name, initial_items=grid_items,
-                              proj_src_name=self.src.name, proj_dest_name=self.dest.name,
+        grid = CoordinateGrid(bounds, (cols, rows), initial_items=grid_items,
                               title=' '.join([self.dest.name, self.name, '{label}']),
-                              timestamp=self.src.simulation.time(), label='CFs', **kwargs)
+                              label='CFs')
+        grid.metadata = AttrDict(info=self.name,
+                                 proj_src_name=self.src.name,
+                                 proj_dest_name=self.dest.name,
+                                 timestamp=self.src.simulation.time(),
+                                 **kwargs)
+        return grid
 
 
     def view(self, sheet_x, sheet_y, timestamp=None, situated=False, **kwargs):
@@ -748,12 +757,14 @@ class CFProjection(Projection):
                     metadata=AttrDict(timestamp=timestamp),
                     label=self.name+ " CF", title='{label} {value}', value='Weights')
 
-        return CFStack((timestamp, sv), coords=(sheet_x, sheet_y),
-                       dimensions=[time_dim], dest_name=self.dest.name,
-                       precedence=self.src.precedence, proj_name=self.name,
-                       src_name=self.src.name,
-                       row_precedence=self.src.row_precedence,
-                       timestamp=timestamp, **kwargs)
+        cfstack = CFStack((timestamp, sv), dimensions=[time_dim])
+        cfstack.metadata = AttrDict(coords=(sheet_x, sheet_y),
+                                    dest_name=self.dest.name,
+                                    precedence=self.src.precedence, proj_name=self.name,
+                                    src_name=self.src.name,
+                                    row_precedence=self.src.row_precedence,
+                                    timestamp=timestamp, **kwargs)
+        return cfstack
 
 
     def get_view(self, sheet_x, sheet_y, timestamp=None):

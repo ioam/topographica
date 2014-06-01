@@ -46,15 +46,15 @@ class TestPatternPlotGroup(SheetPlotGroup):
             sheet = kw['sheet']
             views = topo.sim.views[sheet.name].maps
 
-            sv = SheetView(sheet.input_generator(), bounds=sheet.bounds,
-                           metadata=AttrDict(timestamp=topo.sim.time()))
+            sv = SheetView(sheet.input_generator(), bounds=sheet.bounds)
+            sv.metadata=AttrDict(timestamp=topo.sim.time())
 
             if 'Activity' not in views:
-                views['Activity'] = NdMapping((topo.sim.time(), sv),
-                                              precedence=sheet.precedence,
-                                              row_precedence=sheet.row_precedence,
-                                              src_name=sheet.name,
-                                              timestamp=topo.sim.time())
+                views['Activity'] = NdMapping((topo.sim.time(), sv))
+                views['Activity'].metadata = AttrDict(precedence=sheet.precedence,
+                                                      row_precedence=sheet.row_precedence,
+                                                      src_name=sheet.name,
+                                                      timestamp=topo.sim.time())
             else:
                 views['Activity'][topo.sim.time()] = sv
             channels = {'Strength': 'Activity','Hue':None,'Confidence':None}

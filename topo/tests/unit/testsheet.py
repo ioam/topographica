@@ -724,8 +724,8 @@ class ExtraSheetTests(unittest.TestCase):
         s = Sheet()
         s.activity = np.array([[1,2],[3,4]])
         # Call s.sheet_view(..) with a parameter
-        sv2 = SheetView(s.activity,bounds=s.bounds,
-                        metadata=dict(src_name=s.name))
+        sv2 = SheetView(s.activity,bounds=s.bounds)
+        sv2.metadata = dict(src_name=s.name)
         self.assertEqual(len(s.views.maps.keys()),0)
         s.views.maps['Activity']=sv2
         self.assertEqual(len(s.views.maps.keys()),1)

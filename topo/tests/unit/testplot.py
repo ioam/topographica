@@ -75,10 +75,12 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix1 = zeros((10,10),Float) + RandomArray.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = SheetView(self.matrix1, self.bounds1, metadata=metadata)
-        self.sheet_view1 = NdMapping((None, sv), src_name='TestInputParam',
-                                     precedence=0.1, row_precedence=0.1,
-                                     cyclic_range=None, timestamp=time)
+        sv = SheetView(self.matrix1, self.bounds1)
+        sv.metadata=metadata
+        self.sheet_view1 = NdMapping((None, sv))
+        self.sheet_view1.metadata = AttrDict(src_name='TestInputParam',
+                                            precedence=0.1, row_precedence=0.1,
+                                            cyclic_range=None, timestamp=time)
         self.key1 = 'sv1'
         views[self.key1] = self.sheet_view1
 
@@ -86,10 +88,12 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix2 = zeros((10,10),Float) + 0.3
         self.bounds2 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = SheetView(self.matrix2, self.bounds2, metadata=metadata)
-        self.sheet_view2 = NdMapping((None, sv), src_name='TestInputParam',
-                                     precedence=0.2, row_precedence=0.2,
-                                     cyclic_range=None, timestamp=time)
+        sv = SheetView(self.matrix2, self.bounds2)
+        sv.metadata=metadata
+        self.sheet_view2 = NdMapping((None, sv))
+        self.sheet_view2.metadata = AttrDict(src_name='TestInputParam',
+                                             precedence=0.2, row_precedence=0.2,
+                                             cyclic_range=None, timestamp=time)
         self.key2 = ('sv2',0,10)
         views[self.key2] = self.sheet_view2
 
@@ -97,10 +101,12 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix3 = zeros((10,10),Float) + RandomArray.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = SheetView(self.matrix3, self.bounds3, metadata=metadata)
-        self.sheet_view3 = NdMapping((None, sv), src_name='TestInputParam',
-                                     precedence=0.3, row_precedence=0.3,
-                                     cyclic_range=None, timestamp=time)
+        sv = SheetView(self.matrix3, self.bounds3)
+        sv.metadata=metadata
+        self.sheet_view3 = NdMapping((None, sv))
+        self.sheet_view3.metadata = AttrDict(src_name='TestInputParam',
+                                             precedence=0.3, row_precedence=0.3,
+                                             cyclic_range=None, timestamp=time)
         self.key3 = ('sv3',0,'hello',(10,0))
         views[self.key3] = self.sheet_view3
 
@@ -108,10 +114,12 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix4 = zeros((10,10),Float) + 1.6
         self.bounds4 = BoundingBox(points=((-0.7,-0.7),(0.7,0.7)))
-        sv = SheetView(self.matrix4, self.bounds4, metadata=metadata)
-        self.sheet_view4 = NdMapping((None, sv), src_name='TestInputParam',
-                                     precedence=0.4, row_precedence=0.4,
-                                     cyclic_range=None, timestamp=time)
+        sv = SheetView(self.matrix4, self.bounds4)
+        sv.metadata=metadata
+        self.sheet_view4 = NdMapping((None, sv))
+        self.sheet_view4.metadata = AttrDict(src_name='TestInputParam',
+                                             precedence=0.4, row_precedence=0.4,
+                                             cyclic_range=None, timestamp=time)
         self.key4 = 'sv4'
         views[self.key4] = self.sheet_view4
 

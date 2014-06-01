@@ -295,14 +295,15 @@ class Projection(EPConnection):
         """Returns the activity in a single projection"""
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        return SheetView(self.activity.copy(), self.dest.bounds,
-                         label='Activity', title='%s {label}' % self.name,
-                         metadata=AttrDict(proj_src_name=self.src.name,
-                                           precedence=self.src.precedence,
-                                           proj_name=self.name,
-                                           row_precedence=self.src.row_precedence,
-                                           src_name=self.dest.name,
-                                           timestamp=timestamp))
+        sv = SheetView(self.activity.copy(), self.dest.bounds,
+                         label='Activity', title='%s {label}' % self.name)
+        sv.metadata=AttrDict(proj_src_name=self.src.name,
+                             precedence=self.src.precedence,
+                             proj_name=self.name,
+                             row_precedence=self.src.row_precedence,
+                             src_name=self.dest.name,
+                             timestamp=timestamp)
+        return sv
 
 
     def get_projection_view(self, timestamp):
