@@ -169,8 +169,8 @@ class measure_cog(ParameterizedFunction):
                    (requested_proj == '' and (proj.src != sheet)):
                     cog_data = self._update_proj_cog(p, proj)
                     for key, data in cog_data.items():
-                        results.set_path((key, proj.name.capitalize()),
-                                         data)
+                        name = proj.name[0].upper() + proj.name[1:]
+                        results.set_path((key, name), data)
 
 
         if p.measurement_storage_hook:
