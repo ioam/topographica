@@ -118,6 +118,7 @@ def checkclose(label,version,x,y):
         print '...%s array is unchanged since data was generated (%s)' % (label,topo_version)
     return errors
 
+
 @nottest
 def test(plotgroup_names):
     import topo
@@ -142,6 +143,13 @@ def test(plotgroup_names):
             topo_version,previous_views = pickle.load(f)
         ########################################
         except AttributeError:
+            # PRALERT: Code to allow loading of old data files after
+            # boundingregion was moved to dataviews.
+            import sys
+            from dataviews.sheetviews import boundingregion
+            sys.modules['imagen.boundingregion'] = boundingregion
+
+
             # CEBALERT: code here just to support old data file. Should
             # generate a new one so it's no longer necessary.
 
