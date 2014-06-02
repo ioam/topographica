@@ -117,8 +117,7 @@ class CFView(ImagenSheetView):
 
         return ImagenSheetView(data, self.situated_bounds, roi_bounds=self.roi_bounds,
                                situated_bounds=self.situated_bounds,
-                               cyclic_range=self.cyclic_range,
-                               style=self.style, metadata=self.metadata)
+                               label=self.label, value=self.value)
 
 
 class CFStack(SheetStack):
