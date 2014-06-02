@@ -593,7 +593,7 @@ class tuning_curve(PylabPlotCommand):
     coords = param.List(default=[(0 , 0)], doc="""
         List of coordinates of units to measure.""")
 
-    group_by = param.List(default=['contrast'], doc="""
+    group_by = param.List(default=['Contrast'], doc="""
         Feature dimensions for which curves are overlaid.""")
 
     legend = param.Boolean(default=True, doc="""
@@ -615,13 +615,14 @@ class tuning_curve(PylabPlotCommand):
         p = ParamOverrides(self, params, allow_extra_keywords=True)
 
         x_axis = p.x_axis.capitalize()
-        stack = p.sheet.views.curves[x_axis+"Tuning"]
+        stack = p.sheet.views.curves[x_axis.capitalize()+"Tuning"]
         time = stack.dim_range('Time')[1]
 
-        curves = stack[time, :, :, :].sample(samples=p.coords, x_axis=p.x_axis,
-                                             group_by=p.group_by)
 
-        if not isinstance(curves, GridLayout): curves = [curves]
+        curves = stack[time, :, :, :].sample(coords=p.coords).collate(p.x_axis.capitalize())
+        overlaid_curves = curves.overlay_dimensions(p.group_by)
+
+        if not isinstance(curves, GridLayout): curves = [overlaid_curves]
 
         figs = []
         for coord, curve in zip(p.coords,curves):
