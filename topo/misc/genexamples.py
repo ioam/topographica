@@ -215,35 +215,40 @@ def _stuff(specified_targets):
                                                        "print 'printing a string'"]),
 
         "lissom_oo_or_10000.typ":run(examples,scripts["lissom_oo_or"],
-                                     commands=["topo.sim.run(10000)",
+                                     commands=["from topo.misc.ipython import RunProgress",
+                                               "RunProgress(label=None)(10000)",
                                                or_analysis(),
                                                snapshot("lissom_oo_or_10000.typ")]),
 
 
         "lissom_or_10000.typ":run(examples,scripts["lissom_or"],
-                                  commands=["topo.sim.run(10000)",
+                                  commands=["from topo.misc.ipython import RunProgress",
+                                            "RunProgress(label=None)(10000)",
                                             or_analysis(),
                                             snapshot("lissom_or_10000.typ")]),
 
         "lissom_fsa_10000.typ":run(examples,scripts["lissom_fsa"],
-                                   commands=["topo.sim.run(10000)",
+                                   commands=["from topo.misc.ipython import RunProgress",
+                                             "RunProgress(label=None)(10000)",
                                              snapshot("lissom_fsa_10000.typ")]),
 
         "obermayer_pnas90_40000.typ":run(examples,scripts["obermayer_pnas90"],
-                                         commands=["topo.sim.run(40000)",
+                                         commands=["from topo.misc.ipython import RunProgress",
+                                                   "RunProgress(label=None)(40000)",
                                                    or_analysis(),
                                                    snapshot("obermayer_pnas90_30000.typ")]),
 
         "som_retinotopy_40000.typ":run(examples,scripts["som_retinotopy"],
-                                       commands=["topo.sim.run(40000)",
+                                       commands=["from topo.misc.ipython import RunProgress",
+                                                 "RunProgress(label=None)(40000)",
                                                  retinotopy_analysis(),
                                                  snapshot("som_retinotopy_40000.typ")]),
 
         "gcal_10000.typ":run(examples,scripts["gcal"],
-                                   commands=["topo.sim.run(10000)",
-                                             or_analysis(),
-                                             snapshot("gcal_10000.typ")])
-
+                             commands=["from topo.misc.ipython import RunProgress",
+                                       "RunProgress(label=None)(10000)",
+                                       or_analysis(),
+                                       snapshot("gcal_10000.typ")])
         }
 
     return command_labels,available_targets
