@@ -94,7 +94,7 @@ from nbpublisher import nbbuild
 
 
 def setup(app):
-	app.connect('autodoc-process-docstring', param_formatter)
+    app.connect('autodoc-process-docstring', param_formatter)
     try:
         import runipy
         nbbuild.setup(app)
