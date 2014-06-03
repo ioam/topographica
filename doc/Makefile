@@ -8,4 +8,4 @@ include ./builder/Makefile
 export
 
 %:
-	@MAKE -f ./builder/Makefile
+	$(MAKE) -f ./builder/Makefile $(CFLAGS)
