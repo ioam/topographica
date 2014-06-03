@@ -101,5 +101,5 @@ add them here!
 
 .. _older tutorial: ./lissom_oo_or.html
 
-.. _som_ipynb: http://ioam.github.io/media/som_retinotopy.html
+.. _som_ipynb: http://ioam.github.io/media/topo/som_retinotopy.html
 .. |som_ipynb| replace:: *SOM Retinotopic Map*
