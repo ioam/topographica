@@ -27,4 +27,4 @@
 	url = https://github.com/ioam/ioam-builder.git
 [submodule "doc/reference_data"]
 	path = doc/reference_data
-	url = git@github.com:ioam/ioam.github.com.git
+	url = https://github.com/ioam/ioam.github.com.git
