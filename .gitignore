@@ -20,8 +20,13 @@ info
 man
 share
 .ipynb_checkpoints/
+.idea
 !models/stevens.jn13/jn13_figures/lib/
 models/stevens.jn13/jn13_figures/output/Fig*
 models/stevens.jn13/jn13_figures/output/build_dir
 models/stevens.jn13/
 platform/ipython
+doc/Tutorials/*.rst
+doc/Reference_Manual/*.rst
+/*.ipynb
+topo/optimized/optimized.c
