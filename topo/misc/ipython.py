@@ -14,6 +14,7 @@ import topo
 
 try:
     import IPython # pyflakes:ignore (Required import)
+    from IPython.core.magic import Magics, magics_class, line_magic
 except:
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
@@ -70,6 +71,7 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
                 save before a staleness warning is issued. Useful when
                 exporting from an active IPython notebook.
     """
+    print("Deprecation Warning: Please use the %define_exporter magic instead")
     lines = []
     if output_path is None:
         output_path = os.path.splitext(os.path.basename(notebook))[0] + ext
@@ -101,6 +103,38 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
     if diff and overwrite:
         deltas =difflib.unified_diff(old_contents.splitlines(), new_contents.splitlines(), lineterm='')
         print '\n'.join(list(deltas))
+
+
+@magics_class
+class ExportMagic(Magics):
+    """
+    Line magic that defines a cell magic to export the cell contents
+    to a specific file. For instance, running
+
+    %export_magic OUT ./output.txt
+
+    will define an %%OUT cell magic that writes to the file
+    output.txt. This cell magic takes a single, optional argument
+    'clear' which should be used for the first cell to be exported.
+    """
+    @line_magic
+    def export_magic(self, line):
+        split = line.split()
+        if len(split) != 2:
+            raise Exception("Please supply the export magic name and target filename")
+        [name, filename] = split
+        def exporter(line, cell):
+
+            mode = 'w' if line.strip() == 'clear' else 'a'
+            with open(os.path.abspath(filename), mode) as f:
+                    f.write(cell+'\n')
+            self.shell.run_cell(cell)
+
+        self.shell.register_magic_function(exporter, magic_kind='cell',
+                                           magic_name=name)
+        self.shell.set_hook('complete_command', lambda k,v: ['clear'],
+                            str_key = '%%{name}'.format(name=name))
+
 
 #===============#
 # Display hooks #
@@ -134,6 +168,8 @@ def load_ipython_extension(ip):
     global _loaded
     if not _loaded:
         _loaded = True
+        ip.register_magics(ExportMagic)
+
 
         try:
             from lancet import load_ipython_extension as load_lancet_extension
