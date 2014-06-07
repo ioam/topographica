@@ -28,5 +28,6 @@ models/stevens.jn13/
 platform/ipython
 doc/Tutorials/*.rst
 doc/Reference_Manual/*.rst
+/doc/test_data
 /*.ipynb
 topo/optimized/optimized.c
