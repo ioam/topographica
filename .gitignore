@@ -31,3 +31,4 @@ doc/Reference_Manual/*.rst
 /doc/test_data
 /*.ipynb
 topo/optimized/optimized.c
+notebooks/
