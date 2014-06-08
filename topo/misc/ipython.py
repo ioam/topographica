@@ -111,14 +111,14 @@ class ExportMagic(Magics):
     Line magic that defines a cell magic to export the cell contents
     to a specific file. For instance, running
 
-    %export_magic OUT ./output.txt
+    %define_exporter OUT ./output.txt
 
     will define an %%OUT cell magic that writes to the file
     output.txt. This cell magic takes a single, optional argument
     'clear' which should be used for the first cell to be exported.
     """
     @line_magic
-    def export_magic(self, line):
+    def define_exporter(self, line):
         split = line.split()
         if len(split) != 2:
             raise Exception("Please supply the export magic name and target filename")
