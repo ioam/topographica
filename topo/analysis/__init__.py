@@ -15,6 +15,7 @@ import numpy as np
 from dataviews.collector import Reference
 from dataviews.options import channels, ChannelOpts
 from dataviews.operation import cmap2rgb, operator, chain
+from dataviews.testing import IPTestCase
 
 import topo
 from featuremapper.command import Collector
@@ -23,6 +24,27 @@ from topo.base.projection import Projection
 from topo.misc.ipython import RunProgress
 
 from command import measure_cog
+
+from topo.base.sheetview import CFView, CFStack
+from imagen import Animation
+
+class TopoIPTestCase(IPTestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(TopoIPTestCase, self).__init__(*args, **kwargs)
+        self.addTypeEqualityFunc(CFView,   self.compare_cfviews)
+        self.addTypeEqualityFunc(CFStack,   self.compare_cfstack)
+        self.addTypeEqualityFunc(Animation,   self.compare_animation)
+
+    def compare_cfviews(self, view1, view2, msg):
+        self.compare_sheetviews(view1, view2, msg)
+
+    def compare_cfstack(self, view1, view2, msg):
+        self.compare_sheetstack(view1, view2, msg)
+
+    def compare_animation(self, view1, view2, msg):
+        self.compare_sheetstack(view1, view2, msg)
+
 
 
 class SimRef(Reference):
