@@ -59,19 +59,10 @@ Once the documentation has been built, load doc/index.html into your web browser
 
 As a last resort, for each <file>.html you can simply read the corresponding source file <file>_text.php in a text editor.
 
-BUILDING FROM SOURCE (OPTIONAL)
--------------------------------
-
-As long as all the dependencies have been installed as described above, no separate build step is needed -- all core Topographica files are pure Python, and any optimized C files will be compiled on the fly as needed by Topographica.
-
-Alternatively, the dependencies can all be built from source, by changing to the "external" directory and typing ``make default``.  All non-standard external libraries will be fetched automatically and for most platforms will be built from source.  This approach makes the initial compilation time vastly longer and the simulator directory vastly larger, but it provides a full set of dependencies with known versions, including packages needed by Topographica's maintainers.  For specific instructions, see the "Build all Topographica's dependencies" and "Building Topographica" sections in the `Developer Manual installation instructions <http://topographica.org/Developer_Manual/installation.html>`_.
-
-If you use this Makefile, you will need to append the absolute path of ``./topographica/bin/python`` to your ``PATH`` environment variable in order to make use of the packages you have built::
-
-   export PATH=<PATH TO ./topographica/bin/>:$PATH
-
 RUNNING TOPOGRAPHICA
 --------------------
+
+As long as all the dependencies have been installed as described above, no separate build step is needed -- all core Topographica files are pure Python, and any optimized C files will be compiled on the fly as needed by Topographica.
 
 Once installed as described above, Topographica can be launched by running the ``topographica`` script in the main directory; e.g. ``topographica -g`` for the GUI version.  See doc/Tutorials/index.html for examples of getting started with Topographica, and doc/index.html for all of the documentation.  You can also get online help from the Topographica command line using ``help()``, or from the shell command line using ``pydoc some-text``.
 
