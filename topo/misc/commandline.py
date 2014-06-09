@@ -488,18 +488,29 @@ topo_parser.add_option("-c","--command",action = "callback",callback=c_action,ty
                        default=[],dest="commands",metavar="\"<command>\"",
                        help="string of arbitrary Python code to be executed in the main namespace")
 
-
 def n_action(option,opt_str,value,parser):
+    args = [arg for arg in sys.argv[1:] if arg != opt_str]
+    options, args = parser.parse_args(args)
     from IPython.html.notebookapp import NotebookApp
     sys.argv = ['notebook']
     NotebookApp.ipython_dir = param.resolve_path('platform/ipython', path_to_file=False)
     NotebookApp.profile = 'topo'
+    if options.IP is not None:
+        NotebookApp.ip = options.IP
+    if options.Port is not None:
+        NotebookApp.port = options.Port
     NotebookApp().launch_instance()
     global something_executed
     something_executed = True
 
-topo_parser.add_option("-n","--notebook",action = "callback",callback=n_action,
-                       default=False,dest="notebook",
+topo_parser.add_option("--ip", action="store", default=None, dest="IP",
+                       help="Store the provided notebook IP.")
+
+topo_parser.add_option("--port", action="store", default=None, dest="Port",
+                       type=int, help="Store the provided notebook port.")
+
+topo_parser.add_option("-n", "--notebook", action="callback", callback=n_action,
+                       default=False, dest="notebook",
                        help="launch the IPython Notebook interface")
 
 
