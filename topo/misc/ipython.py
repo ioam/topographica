@@ -1,75 +1,50 @@
 """
-Topographica IPython extension for notebook support. Load with:
+Topographica IPython extension for notebook support. Automatically
+loaded when importing the topo module but may also be explicitly
+loaded using:
 
 %load_ext topo.misc.ipython
 """
+import os
+import time
+import difflib
+
 import topo
-import param
-import os, time, difflib, uuid, sys
-from matplotlib import pyplot as plt
 
 
 try:
-    from IPython.core.pylabtools import print_figure
-    from IPython.display import HTML, Javascript, display
+    import IPython # pyflakes:ignore (Required import)
+    from IPython.core.magic import Magics, magics_class, line_magic
 except:
     from nose.plugins.skip import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
 
 
-
-import imagen.ipython
-from topo.command import pylabplot, analysis
-
-# Pylabplots should return a matplotlib figure when working in Notebook
-# otherwise open display windows for the Topographica Tk GUI
-if not isinstance(sys.stdout, file):
-    pylabplot.PylabPlotCommand.display_window = False
-
-class ProgressBar(param.Parameterized):
+def prompt(message, default, options, skip=False):
     """
-    A simple progress bar for IPython notebook inspired by the example
-    notebook "Progress Bars" available in IPython GitHub repository.
+    Helper function to repeatedly prompt the user with a list of
+    options. If no input is given, the default value is returned. If
+    wither the skip flag is True or the prompt is in a batch mode
+    environment (e.g. for automated testing), the default value is
+    immediately returned.
     """
-
-    name = param.String(doc="The name given to the progress bar.")
-
-    def __init__(self, name, **kwargs):
-        super(ProgressBar,self).__init__(name = name, **kwargs)
-        self._divname = "%s-%s" % (name, uuid.uuid4())
-        html = ("""<b>%s progress</b><div style="border: 1px"""
-                """ solid black; width:500px">"""
-                """<div id="%s" style="background-color:grey;"""
-                """ width:0%%">&nbsp;</div></div>""")
-        display(HTML(html % (name, self._divname)))
-
-    def update(self, percentage):
-        " Update the progress bar to the given percentage value "
-        display(Javascript("$('div#%s').width('%i%%')"
-                           % (self._divname, percentage)))
-
-class RunProgress(ProgressBar):
-    """
-    Progress bar for running Topographica models in IPython notebook.
-    """
-
-    interval = param.Number(default=20,
-        doc="How often to update the progress bar in topo.sim.time units")
-
-    def __init__(self, interval=20, name="Training"):
-        super(RunProgress,self).__init__(name=name, interval=interval)
-
-    def run(self, duration):
-        """
-        Run topo.sim(duration), updating every interval duration.
-        """
-        completed = 0.0
-        while (duration - completed) >= self.interval:
-            topo.sim.run(self.interval)
-            completed += self.interval
-            self.update(100*(completed / duration))
-        topo.sim.run(duration - completed)
-        self.update(100)
+    options = list(set(opt.lower() for opt in options))
+    show_options = options[:]
+    assert default.lower() in options, "Default value must be in options list."
+    if skip or ('SKIP_IPYTHON_PROMPTS' in os.environ):
+        return default
+    default_index = show_options.index(default.lower())
+    show_options[default_index] = show_options[default_index].upper()
+    choices ="/".join(show_options)
+    prompt_msg = "%s (%s): " % (message, choices)
+    response = raw_input(prompt_msg)
+    if response =="":
+        return default.lower()
+    while response.lower() not in options:
+        msg = ("Response '%s' not in available options (%s). Please try again: "
+               % (response, choices))
+        response = raw_input(msg)
+    return response.lower()
 
 
 def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_',
@@ -96,6 +71,7 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
                 save before a staleness warning is issued. Useful when
                 exporting from an active IPython notebook.
     """
+    print("Deprecation Warning: Please use the %define_exporter magic instead")
     lines = []
     if output_path is None:
         output_path = os.path.splitext(os.path.basename(notebook))[0] + ext
@@ -129,41 +105,77 @@ def export_notebook(notebook, output_path=None, ext='.ty', identifier='_export_'
         print '\n'.join(list(deltas))
 
 
+@magics_class
+class ExportMagic(Magics):
+    """
+    Line magic that defines a cell magic to export the cell contents
+    to a specific file. For instance, running
 
-def sheetview_display(sheetview):
-    f = pylabplot.activityplot(sheetview, sheetview.view()[0])
-    prefix = 'data:image/png;base64,'
-    b64 = prefix+ print_figure(f, 'png').encode("base64")
-    html = '<img src="%s" />' % b64
-    plt.close(f)
-    return html
+    %define_exporter OUT ./output.txt
 
-def sheet_activity_display(sheet):
-    analysis.update_sheet_activity(sheet.name, force=True)
-    return sheetview_display(sheet.views['Activity'])
+    will define an %%OUT cell magic that writes to the file
+    output.txt. This cell magic takes a single, optional argument
+    'clear' which should be used for the first cell to be exported.
+    """
+    @line_magic
+    def define_exporter(self, line):
+        split = line.split()
+        if len(split) != 2:
+            raise Exception("Please supply the export magic name and target filename")
+        [name, filename] = split
+        def exporter(line, cell):
 
-def projection_activity_display(projection):
-    analysis.update_projectionactivity(sheet=projection.dest)
-    view = projection.dest.views[('ProjectionActivity', projection.dest.name, projection.name)]
-    #arr = view.view()[0]
-    #arr *= 10
-    return sheetview_display(view)
+            mode = 'w' if line.strip() == 'clear' else 'a'
+            with open(os.path.abspath(filename), mode) as f:
+                    f.write(cell+'\n')
+            self.shell.run_cell(cell)
+
+        self.shell.register_magic_function(exporter, magic_kind='cell',
+                                           magic_name=name)
+        self.shell.set_hook('complete_command', lambda k,v: ['clear'],
+                            str_key = '%%{name}'.format(name=name))
+
+
+#===============#
+# Display hooks #
+#===============#
+
+from topo.base.sheetview import CFView
+
+from dataviews.ipython import load_ipython_extension as load_imagen_extension
+from dataviews.ipython.display_hooks import stack_display, view_display
+from dataviews.plots import SheetViewPlot, Plot
+
+from dataviews.ipython.widgets import RunProgress
+RunProgress.run_hook = topo.sim.run
+
+Plot.defaults.update({CFView: SheetViewPlot})
+
+try:
+    from lancet import ViewFrame
+    ViewFrame.display_fns.append(stack_display)
+    ViewFrame.display_fns.append(view_display)
+except:
+    pass
+
+
 
 
 _loaded = False
 def load_ipython_extension(ip):
-    from topo.command import runscript
-    # Load Imagen's IPython extension
-    imagen.ipython.load_ipython_extension(ip)
-
-    runscript.ns = ip.user_ns
-    runscript.push = ip.push
+    load_imagen_extension(ip, verbose=False)
 
     global _loaded
     if not _loaded:
         _loaded = True
+        ip.register_magics(ExportMagic)
 
-        html_formatter = ip.display_formatter.formatters['text/html']
-        html_formatter.for_type_by_name('topo.base.projection', 'Projection', projection_activity_display)
-        html_formatter.for_type_by_name('topo.base.sheet', 'Sheet', sheet_activity_display)
-        html_formatter.for_type_by_name('topo.base.sheetview', 'SheetView', sheetview_display)
+
+        try:
+            from lancet import load_ipython_extension as load_lancet_extension
+            load_lancet_extension(ip)
+        except:
+            pass
+        from topo.command import runscript
+        runscript.ns = ip.user_ns
+        runscript.push = ip.push

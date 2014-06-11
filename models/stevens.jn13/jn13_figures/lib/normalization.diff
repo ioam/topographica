@@ -1,0 +1,78 @@
+diff --git a/topo/base/cf.py b/topo/base/cf.py
+index 8d80c5c..8d6ab50 100644
+--- a/topo/base/cf.py
++++ b/topo/base/cf.py
+@@ -120,7 +120,7 @@ class ConnectionField(object):
+             return self._norm_total[0]
+         else:
+             # CEBALERT: what was I playing with for this before?
+-            return np.sum(np.abs(self.weights),dtype=np.float64)
++            return np.sum(np.abs(self.weights), dtype=np.float32)
+ 
+     def __set_norm_total(self,new_norm_total):
+         """
+@@ -607,8 +607,6 @@ class CFProjection(Projection):
+         if initialize_cfs:
+             self._create_cfs()
+ 
+-        if self.apply_output_fns_init:
+-            self.apply_learn_output_fns(active_units_mask=False)
+ 
+         ### JCALERT! We might want to change the default value of the
+         ### input value to self.src.activity; but it fails, raising a
+@@ -654,6 +652,11 @@ class CFProjection(Projection):
+         # self.debug("Creating CF(%d,%d) from src (%.3f,%.3f) to  dest (%.3f,%.3f)"%(r,c,x_cf,y_cf,x,y))
+ 
+         try:
++            if self.apply_output_fns_init:
++                 ofs = [wof.single_cf_fn for wof in self.weights_output_fns]
++            else:
++                 ofs = []
++
+             if self.same_cf_shape_for_all_cfs:
+                 mask_template = self.mask_template
+             else:
+@@ -665,6 +668,7 @@ class CFProjection(Projection):
+                               template=self._slice_template,
+                               weights_generator=self.weights_generator,
+                               mask=mask_template,
++                              output_fns=ofs,
+                               min_matrix_radius=self.min_matrix_radius)
+         except NullCFError:
+             if self.allow_null_cfs:
+diff --git a/topo/sheet/optimized.py b/topo/sheet/optimized.py
+index 39c1ad2..4f69166 100644
+--- a/topo/sheet/optimized.py
++++ b/topo/sheet/optimized.py
+@@ -33,9 +33,6 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
+     code = c_header + """
+         DECLARE_SLOT_OFFSET(_norm_total,cf_type);
+         DECLARE_SLOT_OFFSET(_has_norm_total,cf_type);
+-        DECLARE_SLOT_OFFSET(weights,cf_type);
+-        DECLARE_SLOT_OFFSET(input_sheet_slice,cf_type);
+-        DECLARE_SLOT_OFFSET(mask,cf_type);
+ 
+         npfloat *x = active_units_mask;
+         npfloat *m = sheet_mask;
+@@ -49,18 +46,10 @@ def compute_joint_norm_totals_opt(projlist,active_units_mask):
+                     PyObject *proj = PyList_GetItem(projlist,p);
+                     PyObject *cfs = PyObject_GetAttrString(proj,"flatcfs");
+                     PyObject *cf = PyList_GetItem(cfs,r);
+-                    LOOKUP_FROM_SLOT_OFFSET(int,_has_norm_total,cf);
+-                    LOOKUP_FROM_SLOT_OFFSET(double,_norm_total,cf);
+-                    if (_has_norm_total[0] == 0) {
+-                        LOOKUP_FROM_SLOT_OFFSET(float,weights,cf);
+-                        LOOKUP_FROM_SLOT_OFFSET(int,input_sheet_slice,cf);
+-
+-                        UNPACK_FOUR_TUPLE(int,rr1,rr2,cc1,cc2,input_sheet_slice);
+-
+-                        SUM_NORM_TOTAL(cf,weights,_norm_total,rr1,rr2,cc1,cc2);
+-                    }
+-                    nt += _norm_total[0];
++                    PyObject *o = PyObject_GetAttrString(cf,"norm_total");
++                    nt += PyFloat_AsDouble(o);
+                     Py_DECREF(cfs);
++                    Py_DECREF(o);
+                 }
+ 
+                 for(int p=0; p<length; p++) {

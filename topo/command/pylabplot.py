@@ -12,48 +12,31 @@ matplotlib.rc file (if any).  There are many backends available for
 different GUI or non-GUI uses.
 """
 
-import param
-
 try:
-    import matplotlib.ticker
-    import pylab
+    from matplotlib import pylab as plt
 except ImportError:
+    import param
     param.Parameterized(name=__name__).warning("Could not import matplotlib; module will not be useable.")
     from topo.command import ImportErrorRaisingFakeModule
-    pylab = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
+    plt = ImportErrorRaisingFakeModule("matplotlib")  # pyflakes:ignore (try/except import)
 
+import param
 
-import numpy
-from math import pi
-# JABALERT: Import all of these from numpy instead?
-from numpy.oldnumeric import sqrt, array, transpose, argmin, cos, sin, log10, Float
-from numpy import outer,arange,ones,zeros
-
+import numpy as np
 from numpy.fft.fftpack import fft2
 from numpy.fft.helper import fftshift
-from numpy import abs
 
 import topo
-from topo.base.sheetview import SheetView
-from topo.base.arrayutil import centroid, wrap
 from topo.base.sheet import Sheet
-from topo.misc.util import frange
-import topo.analysis.vision
+from topo.base.arrayutil import wrap
+
 from topo.plotting.plot import make_template_plot
-import param
-from param import ParameterizedFunction,normalize_path
+from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
-from topo.pattern import SineGrating, OrientationContrast
-from topo.plotting.plotgroup import create_plotgroup
-from topo.base.cf import CFSheet
 
-from topo.analysis.featureresponses import Feature, PatternPresenter
-from topo.analysis.featureresponses import PositionMeasurementCommand, FeatureCurveCommand, UnitCurveCommand
-
+from dataviews.plots import DataPlot, GridLayout
 
 from topo.command import Command
-
-
 
 
 
@@ -91,8 +74,7 @@ class PylabPlotCommand(Command):
 
     display_window = param.Boolean(default=True, doc="""
         Whether to open a display window containing the plot when
-        Topographica is running in a non-batch mode."""
-)
+        Topographica is running in a non-batch mode.""")
 
     __abstract = True
 
@@ -111,7 +93,7 @@ class PylabPlotCommand(Command):
         # else there can be a switch based on the backend type.
         if title is not None:
             try:
-                manager = pylab.get_current_fig_manager()
+                manager = plt.get_current_fig_manager()
                 manager.window.title(title)
             except:
                 pass
@@ -125,16 +107,16 @@ class PylabPlotCommand(Command):
         set of parameters.
         """
 
-        pylab.show._needmain=False
+        plt.show._needmain=False
         if p.filename is not None:
             # JABALERT: need to reformat this as for other plots
             fullname=p.filename+p.filename_suffix+str(topo.sim.time())+"."+p.file_format
-            pylab.savefig(normalize_path(fullname), dpi=p.file_dpi)
+            plt.savefig(normalize_path(fullname), dpi=p.file_dpi)
         elif p.display_window:
             self._set_windowtitle(p.title)
-            pylab.show()
+            plt.show()
         else:
-            pylab.close(pylab.gcf())
+            plt.close(plt.gcf())
 
 
 
@@ -170,13 +152,13 @@ class vectorplot(PylabPlotCommand):
     def __call__(self,vec,xvalues=None,style='-',label=None,**params):
         p=ParamOverrides(self,params)
 
-        fig = pylab.figure()
+        fig = plt.figure()
         if xvalues is not None:
-            pylab.plot(xvalues, vec, style, label=label)
+            plt.plot(xvalues, vec, style, label=label)
         else:
-            pylab.plot(vec, style, label=label)
+            plt.plot(vec, style, label=label)
 
-        pylab.grid(True)
+        plt.grid(True)
         self._generate_figure(p)
         return fig
 
@@ -192,28 +174,28 @@ class matrixplot(PylabPlotCommand):
     or customized plots; this is just a simple example.
     """
 
-    plot_type = param.Callable(default=pylab.gray,doc="""
-        Matplotlib command to generate the plot, e.g. pylab.gray or pylab.hsv.""")
+    plot_type = param.Callable(default=plt.gray,doc="""
+        Matplotlib command to generate the plot, e.g. plt.gray or plt.hsv.""")
 
     extent = param.Parameter(default=None,doc="""
         Subregion of the matrix to plot, as a tuple (l,b,r,t).""")
 
     # JABALERT: All but the first two should probably be Parameters
-    def __call__(self,mat,aspect=None,colorbar=True,**params):
-        p=ParamOverrides(self,params)
+    def __call__(self, mat, aspect=None, colorbar=True, **params):
+        p = ParamOverrides(self, params)
 
-        fig = pylab.figure(figsize=(5,5))
+        fig = plt.figure(figsize=(5, 5))
         p.plot_type()
 
         # Swap lbrt to lrbt to match pylab
         if p.extent is None:
             extent = None
         else:
-            (l,b,r,t)=p.extent
-            extent=(l,r,b,t)
+            (l, b, r, t) = p.extent
+            extent = (l, r, b, t)
 
-        pylab.imshow(mat,interpolation='nearest',aspect=aspect,extent=extent)
-        if colorbar and (mat.min()!= mat.max()): pylab.colorbar()
+        plt.imshow(mat, interpolation='nearest', aspect=aspect, extent=extent)
+        if colorbar and (mat.min() != mat.max()): plt.colorbar()
         self._generate_figure(p)
         return fig
 
@@ -233,39 +215,39 @@ class matrixplot3d(PylabPlotCommand):
     get a contour plot, or "surface" to get a solid surface plot, but
     surface plots currently fail in many cases, e.g. for small
     matrices.
+
+    If you have trouble, you can try matrixplot3d_gnuplot instead.
     """
 
-    def __call__(self,mat,type="wireframe",**params):
-        p=ParamOverrides(self,params)
+    def __call__(self, mat, type="wireframe", **params):
+        p = ParamOverrides(self, params)
 
         from mpl_toolkits.mplot3d import axes3d
 
-        fig = pylab.figure()
+        fig = plt.figure()
         ax = axes3d.Axes3D(fig)
 
         # Construct matrices for r and c values
-        rn,cn = mat.shape
-        c = outer(ones(rn),arange(cn*1.0))
-        r = outer(arange(rn*1.0),ones(cn))
+        rn, cn = mat.shape
+        c = np.outer(np.ones(rn), np.arange(cn * 1.0))
+        r = np.outer(np.arange(rn * 1.0), np.ones(cn))
 
-        if type=="wireframe":
-            ax.plot_wireframe(r,c,mat)
-        elif type=="surface":
+        if type == "wireframe":
+            ax.plot_wireframe(r, c, mat)
+        elif type == "surface":
             # Sometimes fails for no obvious reason
-            ax.plot_surface(r,c,mat)
-        elif type=="contour":
+            ax.plot_surface(r, c, mat)
+        elif type == "contour":
             # Works but not usually very useful
-            ax.contour3D(r,c,mat)
+            ax.contour3D(r, c, mat)
         else:
-            raise ValueError("Unknown plot type "+str(type))
+            raise ValueError("Unknown plot type " + str(type))
 
         ax.set_xlabel('R')
         ax.set_ylabel('C')
         ax.set_zlabel('Value')
 
         self._generate_figure(p)
-        return fig
-
 
 
 class matrixplot3dx3(PylabPlotCommand):
@@ -277,21 +259,21 @@ class matrixplot3dx3(PylabPlotCommand):
     """
 
     def __call__(self,x,y,z,labels=["X","Y","Z"],type="wireframe",**params):
-        p=ParamOverrides(self,params)
+        p = ParamOverrides(self, params)
 
         from mpl_toolkits.mplot3d import axes3d
 
-        fig = pylab.figure()
+        fig = plt.figure()
         ax = axes3d.Axes3D(fig)
 
-        if type=="wireframe":
-            ax.plot_wireframe(x,y,z)
-        elif type=="surface":
-            ax.plot_surface(x,y,z)
-        elif type=="contour":
-            ax.contour3D(x,y,z)
+        if type == "wireframe":
+            ax.plot_wireframe(x, y, z)
+        elif type == "surface":
+            ax.plot_surface(x, y, z)
+        elif type == "contour":
+            ax.contour3D(x, y, z)
         else:
-            raise ValueError("Unknown plot type "+str(type))
+            raise ValueError("Unknown plot type " + str(type))
 
         ax.set_xlabel(labels[0])
         ax.set_ylabel(labels[1])
@@ -305,7 +287,7 @@ class histogramplot(PylabPlotCommand):
     """
     Compute and plot the histogram of the supplied data.
 
-    See help(pylab.hist) for help on the histogram function itself.
+    See help(plt.hist) for help on the histogram function itself.
 
     If given, colors is an iterable collection of matplotlib.colors
     (see help (matplotlib.colors) ) specifying the bar colors.
@@ -315,19 +297,18 @@ class histogramplot(PylabPlotCommand):
     """
 
     # JABALERT: All but the first two arguments should probably be Parameters
-    def __call__(self,data,colors=None,**params):
-        p=ParamOverrides(self,params,allow_extra_keywords=True)
+    def __call__(self, data, colors=None, **params):
+        p = ParamOverrides(self, params, allow_extra_keywords=True)
 
-        fig = pylab.figure(figsize=(4,2))
-        n,bins,bars = pylab.hist(data,**(p.extra_keywords()))
+        fig = plt.figure(figsize=(4, 2))
+        n, bins, bars = plt.hist(data, **(p.extra_keywords()))
 
         # if len(bars)!=len(colors), any extra bars won't have their
         # colors changed, or any extra colors will be ignored.
-        if colors: [bar.set_fc(color) for bar,color in zip(bars,colors)]
+        if colors: [bar.set_fc(color) for bar, color in zip(bars, colors)]
 
         self._generate_figure(p)
         return fig
-
 
 
 class gradientplot(matrixplot):
@@ -340,24 +321,24 @@ class gradientplot(matrixplot):
     """
 
     # JABALERT: All but the first two arguments should probably be Parameters
-    def __call__(self,data,cyclic=True,cyclic_range=1.0,**params):
-        p=ParamOverrides(self,params)
+    def __call__(self, data, cyclic_range=1.0, **params):
+        p = ParamOverrides(self, params)
 
-        r,c = data.shape
-        dx = numpy.diff(data,1,axis=1)[0:r-1,0:c-1]
-        dy = numpy.diff(data,1,axis=0)[0:r-1,0:c-1]
+        r, c = data.shape
+        dx = np.diff(data, 1, axis=1)[0:r - 1, 0:c - 1]
+        dy = np.diff(data, 1, axis=0)[0:r - 1, 0:c - 1]
 
-        if cyclic: # Wrap into the specified range
+        if cyclic_range is not None: # Wrap into the specified range
             # Convert negative differences to an equivalent positive value
-            dx = wrap(0,cyclic_range,dx)
-            dy = wrap(0,cyclic_range,dy)
+            dx = wrap(0, cyclic_range, dx)
+            dy = wrap(0, cyclic_range, dy)
             #
             # Make it increase as gradient reaches the halfway point,
             # and decrease from there
-            dx = 0.5*cyclic_range-abs(dx-0.5*cyclic_range)
-            dy = 0.5*cyclic_range-abs(dy-0.5*cyclic_range)
+            dx = 0.5 * cyclic_range - np.abs(dx - 0.5 * cyclic_range)
+            dy = 0.5 * cyclic_range - np.abs(dy - 0.5 * cyclic_range)
 
-        return super(gradientplot,self).__call__(sqrt(dx*dx+dy*dy),**p)
+        return super(gradientplot, self).__call__(np.sqrt(dx*dx + dy*dy), **p)
 
 
 
@@ -365,13 +346,13 @@ class fftplot(matrixplot):
     """
     Compute and show the 2D Fast Fourier Transform (FFT) of the supplied data.
 
-    Example:: fftplot(topo.sim["V1"].sheet_views["OrientationPreference"].view()[0],filename="out")
+    Example:: fftplot(topo.sim["V1"].views.maps["OrientationPreference"].data,filename="out")
     """
 
-    def __call__(self,data,**params):
-        p=ParamOverrides(self,params)
-        fft_plot=1-abs(fftshift(fft2(data-0.5, s=None, axes=(-2,-1))))
-        return super(fftplot,self).__call__(fft_plot,**p)
+    def __call__(self, data, **params):
+        p = ParamOverrides(self, params)
+        fft_plot = 1 - np.abs(fftshift(fft2(data - 0.5, s=None, axes=(-2, -1))))
+        return super(fftplot, self).__call__(fft_plot, **p)
 
 
 class autocorrelationplot(matrixplot):
@@ -379,16 +360,17 @@ class autocorrelationplot(matrixplot):
     Compute and show the 2D autocorrelation of the supplied data.
     Requires the external SciPy package.
 
-    Example:: autocorrelationplot(topo.sim["V1"].sheet_views["OrientationPreference"].view()[0],filename="out")
+    Example:: autocorrelationplot(topo.sim["V1"].views.maps["OrientationPreference"].data,filename="out")
     """
 
-    plot_type = param.Callable(default=pylab.autumn)
+    plot_type = param.Callable(default=plt.autumn)
 
-    def __call__(self,data,**params):
-        p=ParamOverrides(self,params)
+    def __call__(self, data, **params):
+        p = ParamOverrides(self, params)
         import scipy.signal
-        mat=scipy.signal.correlate2d(data,data)
-        return super(autocorrelationplot,self).__call__(mat,**p)
+
+        mat = scipy.signal.correlate2d(data, data)
+        return super(autocorrelationplot, self).__call__(mat, **p)
 
 
 class activityplot(matrixplot):
@@ -399,12 +381,12 @@ class activityplot(matrixplot):
     By default plots the Sheet's activity, but any other matrix of the
     same size may be supplied for plotting in these coordinates instead.
     """
-    def __call__(self,sheet,mat=None,**params):
-        p=ParamOverrides(self,params)
-        if p.extent is None: p.extent=sheet.bounds.aarect().lbrt()
-        if mat is None: mat = sheet.activity
-        return super(activityplot,self).__call__(mat,**p)
 
+    def __call__(self, sheet, mat=None, **params):
+        p = ParamOverrides(self, params)
+        if p.extent is None: p.extent = sheet.bounds.aarect().lbrt()
+        if mat is None: mat = sheet.activity
+        return super(activityplot, self).__call__(mat, **p)
 
 
 class xy_grid(PylabPlotCommand):
@@ -427,35 +409,36 @@ class xy_grid(PylabPlotCommand):
 
    def __call__(self, **params):
 
-       p=ParamOverrides(self,params)
-       fig = pylab.figure(figsize=(5,5))
+       p = ParamOverrides(self, params)
+       fig = plt.figure(figsize=(5, 5))
 
        # This one-liner works in Octave, but in matplotlib it
        # results in lines that are all connected across rows and columns,
        # so here we plot each line separately:
-       #   pylab.plot(x,y,"k-",transpose(x),transpose(y),"k-")
+       #   plt.plot(x,y,"k-",transpose(x),transpose(y),"k-")
        # Here, the "k-" means plot in black using solid lines;
        # see matplotlib for more info.
-       isint=pylab.isinteractive() # Temporarily make non-interactive for plotting
-       pylab.ioff()
-       for r,c in zip(p.y[::p.skip],p.x[::p.skip]):
-           pylab.plot(c,r,"k-")
-       for r,c in zip(transpose(p.y)[::p.skip],transpose(p.x)[::p.skip]):
-           pylab.plot(c,r,"k-")
+       isint = plt.isinteractive() # Temporarily make non-interactive for
+       # plotting
+       plt.ioff()
+       for r, c in zip(p.y[::p.skip], p.x[::p.skip]):
+           plt.plot(c, r, "k-")
+       for r, c in zip(np.transpose(p.y)[::p.skip],np.transpose(p.x)[::p.skip]):
+           plt.plot(c, r, "k-")
 
        # Force last line avoid leaving cells open
        if p.skip != 1:
-           pylab.plot(p.x[-1],p.y[-1],"k-")
-           pylab.plot(transpose(p.x)[-1],transpose(p.y)[-1],"k-")
+           plt.plot(p.x[-1], p.y[-1], "k-")
+           plt.plot(np.transpose(p.x)[-1], np.transpose(p.y)[-1], "k-")
 
-       pylab.xlabel('x')
-       pylab.ylabel('y')
+       plt.xlabel('x')
+       plt.ylabel('y')
        # Currently sets the input range arbitrarily; should presumably figure out
        # what the actual possible range is for this simulation (which would presumably
        # be the maximum size of any GeneratorSheet?).
-       pylab.axis(p.axis)
+       plt.axis(p.axis)
 
-       if isint: pylab.ion()
+       if isint: plt.ion()
        self._generate_figure(p)
        return fig
 
@@ -479,19 +462,20 @@ class topographic_grid(xy_grid):
     x = param.Array(constant=True, precedence=-1)
     y = param.Array(constant=True, precedence=-1)
 
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
+    def __call__(self, **params):
+        p = ParamOverrides(self, params)
 
         for sheet in topo.sim.objects(Sheet).values():
-            if ((p.xsheet_view_name in sheet.sheet_views) and
-                (p.ysheet_view_name in sheet.sheet_views)):
+            if ((p.xsheet_view_name in sheet.views.maps) and
+                    (p.ysheet_view_name in sheet.views.maps)):
+                x = sheet.views.maps[p.xsheet_view_name].last.data
+                y = sheet.views.maps[p.ysheet_view_name].last.data
 
-                x = sheet.sheet_views[p.xsheet_view_name].view()[0]
-                y = sheet.sheet_views[p.ysheet_view_name].view()[0]
-
-                filename_suffix="_" + sheet.name
-                title='Topographic mapping to '+sheet.name+' at time '+topo.sim.timestr()
-                super(topographic_grid, self).__call__(x=x,y=y, title=title, filename_suffix=filename_suffix)
+                filename_suffix = "_" + sheet.name
+                title = 'Topographic mapping to ' + sheet.name + ' at time ' \
+                        + topo.sim.timestr()
+                super(topographic_grid, self).__call__(x=x, y=y, title=title,
+                                                       filename_suffix=filename_suffix)
 
 
 class overlaid_plot(PylabPlotCommand):
@@ -500,11 +484,13 @@ class overlaid_plot(PylabPlotCommand):
     overlays for a single plot template and sheet.
     """
 
-   plot_template = param.Dict(default={'Hue':'OrientationPreference'},doc="""
+   plot_template = param.Dict(default={'Hue': 'OrientationPreference'}, doc="""
         Template for the underlying bitmap plot.""")
 
-   overlay = param.List(default=[('contours','OcularPreference',0.5,'black'),
-                                 ('arrows','DirectionPreference','DirectionSelectivity','white')],doc="""
+   overlay = param.List(default=[('contours', 'OcularPreference', 0.5, 'black'),
+                                 ('arrows', 'DirectionPreference',
+                                  'DirectionSelectivity', 'white')],
+                        doc="""
         List of overlaid plots, where each list item may be a 4-tuple
         specifying either a contour line or a field of arrows::
 
@@ -514,7 +500,7 @@ class overlaid_plot(PylabPlotCommand):
 
         Any number or combination of contours and arrows may be supplied.""")
 
-   normalize = param.Boolean(default='Individually',doc="""
+   normalize = param.Boolean(default='Individually', doc="""
         Type of normalization, if any, to use. Options include 'None',
         'Individually', and 'AllTogether'. See
         topo.plotting.plotgroup.TemplatePlotGroup.normalize for more
@@ -528,36 +514,38 @@ class overlaid_plot(PylabPlotCommand):
        p=ParamOverrides(self,params)
        name=p.plot_template.keys().pop(0)
        plot=make_template_plot(p.plot_template,
-                               p.sheet.sheet_views, p.sheet.xdensity,p.sheet.bounds,
+                               p.sheet.views.maps, p.sheet.xdensity,p.sheet.bounds,
                                p.normalize,name=p.plot_template[name])
-       fig = pylab.figure(figsize=(5,5))
+       fig = plt.figure(figsize=(5,5))
        if plot:
            bitmap=plot.bitmap
-           isint=pylab.isinteractive() # Temporarily make non-interactive for plotting
-           pylab.ioff()                                         # Turn interactive mode off
+           isint=plt.isinteractive() # Temporarily make non-interactive for plotting
+           plt.ioff()                                         # Turn interactive mode off
 
-           pylab.imshow(bitmap.image,origin='lower',interpolation='nearest')
-           pylab.axis('off')
+           plt.imshow(bitmap.image,origin='lower',interpolation='nearest')
+           plt.axis('off')
 
            for (t,pref,sel,c) in p.overlay:
-               v = pylab.flipud(p.sheet.sheet_views[pref].view()[0])
+               v = plt.flipud(p.sheet.views.maps[pref].view()[0])
                if (t=='contours'):
-                   pylab.contour(v,[sel,sel],colors=c,linewidths=2)
+                   plt.contour(v,[sel,sel],colors=c,linewidths=2)
 
                if (t=='arrows'):
-                   s = pylab.flipud(p.sheet.sheet_views[sel].view()[0])
-                   scale=int(pylab.ceil(log10(len(v))))
-                   X=pylab.array([x for x in xrange(len(v)/scale)])
-                   v_sc=pylab.zeros((len(v)/scale,len(v)/scale))
-                   s_sc=pylab.zeros((len(v)/scale,len(v)/scale))
+                   s = plt.flipud(p.sheet.views.maps[sel].view()[0])
+                   scale = int(np.ceil(np.log10(len(v))))
+                   X = np.array([x for x in xrange(len(v)/scale)])
+                   v_sc = np.zeros((len(v)/scale,len(v)/scale))
+                   s_sc = np.zeros((len(v)/scale,len(v)/scale))
                    for i in X:
                        for j in X:
-                           v_sc[i][j]=v[scale*i][scale*j]
-                           s_sc[i][j]=s[scale*i][scale*j]
-                   pylab.quiver(scale*X,scale*X,-cos(2*pi*v_sc)*s_sc,-sin(2*pi*v_sc)*s_sc,color=c,edgecolors=c,minshaft=3,linewidths=1)
+                           v_sc[i][j] = v[scale*i][scale*j]
+                           s_sc[i][j] = s[scale*i][scale*j]
+                   plt.quiver(scale*X, scale*X, -np.cos(2*np.pi*v_sc)*s_sc,
+                              -np.sin(2*np.pi*v_sc)*s_sc, color=c,
+                              edgecolors=c, minshaft=3, linewidths=1)
 
            p.title='%s overlaid with %s at time %s' %(plot.name,pref,topo.sim.timestr())
-           if isint: pylab.ion()
+           if isint: plt.ion()
            p.filename_suffix="_"+p.sheet.name
            self._generate_figure(p)
            return fig
@@ -587,101 +575,7 @@ class overlaid_plots(overlaid_plot):
 
 
 
-class unit_tuning_curve(PylabPlotCommand):
-    """
-    Plot a tuning curve for a feature, such as orientation, contrast, or size.
-
-    The curve datapoints are collected from the curve_dict for
-    the units at the specified coordinate in the specified sheet
-    (where the units and sheet may be set by a GUI, using
-    topo.analysis.featureresponses.UnitCurveCommand.sheet and
-    topo.analysis.featureresponses.UnitCurveCommand.coords,
-    or by hand).
-    """
-
-    sheet = param.ObjectSelector(
-        default=None,doc="""
-        Name of the sheet to use in measurements.""")
-
-    x_axis = param.String(default="",doc="""
-        Feature to plot on the x axis of the tuning curve""")
-
-    # Can we list some alternatives here, if there are any
-    # useful ones?
-    plot_type = param.Callable(default=pylab.plot,doc="""
-        Matplotlib command to generate the plot.""")
-
-    unit = param.String(default="",doc="""
-        String to use in labels to specify the units in which curves are plotted.""")
-
-    legend=param.Boolean(default=True, doc="""
-        Whether or not to include a legend in the plot.""")
-
-    coord = param.NumericTuple(default=(0,0), doc="""
-           The  sheet coordinate position to be plotted.""")
-
-    __abstract = True
-
-
-    def _format_x_tick_label(self,x):
-        return "%3.1f" % x
-
-    def _rotate(self, seq, n=1):
-        n = n % len(seq) # n=hop interval
-        return seq[n:] + seq[:n]
-
-    def _curve_values(self, i_value, j_value, curve):
-        """Return the x, y, and x ticks values for the specified curve from the curve_dict"""
-        x_values=sorted(curve.keys())
-        y_values=[curve[key].view()[0][i_value,j_value] for key in x_values]
-        return x_values,y_values,x_values
-
-    def _reduce_ticks(self,ticks):
-        x = [];
-        y=  [];
-        num_ticks = 5;
-        y.append(ticks[0])
-        x.append(0)
-        for i in xrange(0,num_ticks):
-            y.append(y[-1]+numpy.pi/(num_ticks+1));
-            x.append(x[-1]+numpy.pi/(num_ticks+1));
-        y.append(y[-1]+numpy.pi/(num_ticks+1));
-        x.append(3.14)
-        return (x,y)
-
-    def __call__(self, **params):
-        p=ParamOverrides(self,params)
-        sheet = p.sheet
-        i_value,j_value=sheet.sheet2matrixidx(p.coord[0],p.coord[1])
-
-        fig = pylab.figure(figsize=(7,7))
-        isint=pylab.isinteractive()
-        pylab.ioff()
-
-        pylab.ylabel('Response',fontsize='large')
-        pylab.xlabel('%s (%s)' % (p.x_axis.capitalize(),p.unit),fontsize='large')
-        pylab.title('Sheet %s, coordinate(x,y)=(%0.3f,%0.3f) at time %s' %
-                    (sheet.name,p.coord[0],p.coord[1],topo.sim.timestr()))
-        p.title='%s: %s Tuning Curve' % (topo.sim.name,p.x_axis.capitalize())
-
-        self.first_curve=True
-        for curve_label in sorted(sheet.curve_dict[p.x_axis].keys()):
-            x_values,y_values,ticks=self._curve_values(i_value,j_value,sheet.curve_dict[p.x_axis][curve_label])
-            x_tick_values,ticks = self._reduce_ticks(ticks)
-            labels = [self._format_x_tick_label(x) for x in ticks]
-            pylab.xticks(x_tick_values, labels,fontsize='large')
-            pylab.yticks(fontsize='large')
-            p.plot_type(x_values, y_values, label=curve_label,lw=3.0)
-            self.first_curve=False
-
-        if isint: pylab.ion()
-        if p.legend: pylab.legend(loc=2)
-        self._generate_figure(p)
-        return fig
-
-
-
-class tuning_curve(unit_tuning_curve):
+class tuning_curve(PylabPlotCommand):
     """
     Plot a tuning curve for a feature, such as orientation, contrast, or size.
 
@@ -693,114 +587,79 @@ class tuning_curve(unit_tuning_curve):
     or by hand).
     """
 
-    coords = param.List(default=[(0,0)],doc="""
+    center = param.Boolean(default=True, doc="""
+        Centers the tuning curve around the maximally responding feature.""")
+
+    coords = param.List(default=[(0 , 0)], doc="""
         List of coordinates of units to measure.""")
 
-    # Disable and hide parameters inherited from the base class
-    coord = param.NumericTuple(constant=True,  precedence=-1)
+    group_by = param.List(default=['Contrast'], doc="""
+        Feature dimensions for which curves are overlaid.""")
 
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        for coordinate in p.coords:
-            super(tuning_curve, self).__call__(coord=coordinate,
-                                               sheet=p.sheet,
-                                               x_axis=p.x_axis,
-                                               plot_type=p.plot_type,
-                                               unit=p.unit,
-                                               legend=p.legend)
+    legend = param.Boolean(default=True, doc="""
+        Whether or not to include a legend in the plot.""")
 
+    relative_labels = param.Boolean(default=False, doc="""
+        Relabel the x-axis with values relative to the preferred.""")
 
+    sheet = param.ObjectSelector(default=None, doc="""
+        Name of the sheet to use in measurements.""")
 
-class cyclic_unit_tuning_curve(unit_tuning_curve):
-    """
-    Same as tuning_curve, but rotates the curve so that minimum y
-    values are at the minimum x value to make the plots easier to
-    interpret.  Such rotation is valid only for periodic quantities
-    like orientation or direction, and only if the correct period
-    is set.
-
-    At present, the y_values and labels are rotated by an amount
-    determined by the minmum y_value for the first curve plotted
-    (usually the lowest contrast curve).
-    """
-
-    cyclic_range = param.Number(default=pi,bounds=(0,None),softbounds=(0,10),doc="""
-        Range of the cyclic quantity (e.g. pi for the orientation of
-        a symmetric stimulus, or 2*pi for motion direction or the
-        orientation of a non-symmetric stimulus).""")
-
-    unit = param.String(default="degrees",doc="""
-        String to use in labels to specify the units in which curves are plotted.""")
+    x_axis = param.String(default='', doc="""
+        Feature to plot on the x axis of the tuning curve""")
 
     # Disable and hide parameters inherited from the base class
     coord = param.NumericTuple(constant=True,  precedence=-1)
 
-    # This implementation should work for quantities periodic with
-    # some multiple of pi that we want to express in degrees, but it
-    # will need to be reimplemented in a subclass to work with other
-    # cyclic quantities.
-    def _format_x_tick_label(self,x):
-        return str(int(180*x/pi))
+    def __call__(self, **params):
+        p = ParamOverrides(self, params, allow_extra_keywords=True)
+
+        x_axis = p.x_axis.capitalize()
+        stack = p.sheet.views.curves[x_axis.capitalize()+"Tuning"]
+        time = stack.dim_range('Time')[1]
 
 
-    def _curve_values(self, i_value, j_value, curve):
+        curves = stack[time, :, :, :].sample(coords=p.coords).collate(p.x_axis.capitalize())
+        overlaid_curves = curves.overlay_dimensions(p.group_by)
+
+        if not isinstance(curves, GridLayout): curves = [overlaid_curves]
+
+        figs = []
+        for coord, curve in zip(p.coords,curves):
+            fig = plt.figure()
+            ax = plt.subplot(111)
+            DataPlot(curve, center=p.center, relative_labels=p.relative_labels,
+                     show_legend=p.legend)(ax)
+            self._generate_figure(p, fig)
+            figs.append((coord, fig))
+
+        return figs
+
+
+    def _generate_figure(self, p, fig):
         """
-        Return the x, y, and x ticks values for the specified curve from the curve_dict.
+        Helper function to display a figure on screen or save to a file.
 
-        With the current implementation, there may be cases (i.e.,
-        when the lowest contrast curve gives a lot of zero y_values)
-        in which the maximum is not in the center.  This may
-        eventually be changed so that the preferred orientation is in
-        the center.
+        p should be a ParamOverrides instance containing the current
+        set of parameters.
         """
-        if self.first_curve==True:
-            x_values= sorted(curve.keys())
-            y_values=[curve[key].view()[0][i_value,j_value] for key in x_values]
 
-            min_arg=argmin(y_values)
-            x_min=x_values[min_arg]
-            y_min=y_values[min_arg]
-            y_values=self._rotate(y_values, n=min_arg)
-            self.ticks=self._rotate(x_values, n=min_arg)
-            self.ticks+=[x_min]
-            x_max=min(x_values)+self.cyclic_range
-            x_values.append(x_max)
-            y_values.append(y_min)
-
-            self.x_values=x_values
+        plt.show._needmain=False
+        if p.filename is not None:
+            # JABALERT: need to reformat this as for other plots
+            fullname=p.filename+p.filename_suffix+str(topo.sim.time())+"."+p.file_format
+            fig.savefig(normalize_path(fullname), dpi=p.file_dpi)
+        elif p.display_window:
+            self._set_windowtitle(p.title)
+            fig.show()
         else:
-            y_values=[curve[key].view()[0][i_value,j_value] for key in self.ticks]
-
-        return self.x_values,y_values,self.ticks
+            fig.close()
 
 
+cyclic_tuning_curve = tuning_curve
 
-class cyclic_tuning_curve(cyclic_unit_tuning_curve):
-    """
-    Same as tuning_curve, but rotates the curve so that minimum y
-    values are at the minimum x value to make the plots easier to
-    interpret.  Such rotation is valid only for periodic quantities
-    like orientation or direction, and only if the correct period
-    is set.
-
-    At present, the y_values and labels are rotated by an amount
-    determined by the minmum y_value for the first curve plotted
-    (usually the lowest contrast curve).
-    """
-
-    coords = param.List(default=[(0,0)],doc="""
-        List of coordinates of units to measure.""")
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        for coordinate in p.coords:
-            super(cyclic_tuning_curve, self).__call__(coord=coordinate,
-                                                      sheet=p.sheet,
-                                                      x_axis=p.x_axis,
-                                                      plot_type=p.plot_type,
-                                                      unit=p.unit,
-                                                      legend=p.legend,
-                                                      cyclic_range = p.cyclic_range)
+def cyclic_unit_tuning_curve(coord=(0, 0), **kwargs):
+    return tuning_curve(coords=[coord], **kwargs)[0]
 
 
 
@@ -849,447 +708,6 @@ def plot_coord_mapping(mapper,sheet,style='b-'):
              style)
 
     hold(hold_on)
-
-
-
-# JABALERT: Should be updated to plot for a specified list of sheets,
-# and then the combination of all of them, so that it will work for
-# any network.  Will need to remove the simple_sheet_name and
-# complex_sheet_name parameters once that works.
-class plot_modulation_ratio(PylabPlotCommand):
-    """
-    This function computes the modulation ratios of neurons in the
-    specified sheets and plots their histograms. See
-    analysis.vision.complexity for more info.
-    """
-
-    # JABALERT: All but the first argument should probably be Parameters
-    def __call__(self,fullmatrix,simple_sheet_name=None,complex_sheet_name=None,bins=frange(0,2.0,0.1,inclusive=True),**params):
-        p=ParamOverrides(self,params)
-
-        fig = pylab.figure()
-        from topo.analysis.vision import complexity
-        if (topo.sim.objects().has_key(simple_sheet_name) and topo.sim.objects().has_key(complex_sheet_name)):
-            v1s = complexity(fullmatrix[topo.sim[simple_sheet_name]]).flatten()
-            v1c = complexity(fullmatrix[topo.sim[complex_sheet_name]]).flatten()
-            #double the number of complex cells to reflect large width of layer 2/3
-            v1c = numpy.concatenate((array(v1c),array(v1c)),axis=1)
-            n = pylab.subplot(311)
-            pylab.hist(v1s,bins)
-            pylab.axis([0,2.0,0,4100])
-	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
-
-	    n = pylab.subplot(312)
-            pylab.hist(v1c,bins)
-            pylab.axis([0,2.0,0,4100])
-	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
-
-	    n = pylab.subplot(313)
-            pylab.hist(numpy.concatenate((array(v1s),array(v1c)),axis=1),bins)
-            pylab.axis([0,2.0,0,4100])
-	    n.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
-
-        self._generate_figure(p)
-        return fig
-
-
-class measure_position_pref(PositionMeasurementCommand):
-    """Measure a position preference map by collating the response to patterns."""
-
-    scale = param.Number(default=0.3)
-
-    def _feature_list(self,p):
-        width =1.0*p.x_range[1]-p.x_range[0]
-        height=1.0*p.y_range[1]-p.y_range[0]
-        return [Feature(name="x",range=p.x_range,step=width/p.divisions,preference_fn=self.preference_fn),
-                Feature(name="y",range=p.y_range,step=height/p.divisions,preference_fn=self.preference_fn)]
-
-
-from topo.misc.distribution import DSF_WeightedAverage
-pg= create_plotgroup(name='Position Preference',category="Preference Maps",
-           doc='Measure preference for the X and Y position of a Gaussian.',
-           pre_plot_hooks=[measure_position_pref.instance(
-            preference_fn=DSF_WeightedAverage( selectivity_scale=(0.,17.) ))],
-           plot_hooks=[topographic_grid.instance()],
-           normalize='Individually')
-
-pg.add_plot('X Preference',[('Strength','XPreference')])
-pg.add_plot('Y Preference',[('Strength','YPreference')])
-pg.add_plot('Position Preference',[('Red','XPreference'),
-                                   ('Green','YPreference')])
-
-
-
-class measure_cog(ParameterizedFunction):
-    """
-    Calculate center of gravity (CoG) for each CF of each unit in each CFSheet.
-
-    Unlike measure_position_pref and other measure commands, this one
-    does not work by collating the responses to a set of input patterns.
-    Instead, the CoG is calculated directly from each set of incoming
-    weights.  The CoG value thus is an indirect estimate of what
-    patterns the neuron will prefer, but is not limited by the finite
-    number of test patterns as the other measure commands are.
-
-    Measures only one projection for each sheet, as specified by the
-    proj_name parameter.  The default proj_name of '' selects the
-    first non-self connection, which is usually useful to examine for
-    simple feedforward networks, but will not necessarily be useful in
-    other cases.
-    """
-
-    proj_name = param.String(default='',doc="""
-        Name of the projection to measure; the empty string means 'the first
-        non-self connection available'.""")
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-
-        measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
-                           if hasattr(s,'measure_maps') and s.measure_maps]
-
-        # Could easily be extended to measure CoG of all projections
-        # and e.g. register them using different names (e.g. "Afferent
-        # XCoG"), but then it's not clear how the PlotGroup would be
-        # able to find them automatically (as it currently supports
-        # only a fixed-named plot).
-        requested_proj=p.proj_name
-        for sheet in measured_sheets:
-            for proj in sheet.in_connections:
-                if (proj.name == requested_proj) or \
-                   (requested_proj == '' and (proj.src != sheet)):
-                    self._update_proj_cog(proj)
-                    if requested_proj=='':
-                        print "measure_cog: Measured %s projection %s from %s" % \
-                              (proj.dest.name,proj.name,proj.src.name)
-                        break
-
-
-    def _update_proj_cog(self,proj):
-        """Measure the CoG of the specified projection and register corresponding SheetViews."""
-
-        sheet=proj.dest
-        rows,cols=sheet.activity.shape
-        xpref=zeros((rows,cols),Float)
-        ypref=zeros((rows,cols),Float)
-
-        for r in xrange(rows):
-            for c in xrange(cols):
-                cf=proj.cfs[r,c]
-                r1,r2,c1,c2 = cf.input_sheet_slice
-                row_centroid,col_centroid = centroid(cf.weights)
-                xcentroid, ycentroid = proj.src.matrix2sheet(
-                        r1+row_centroid+0.5,
-                        c1+col_centroid+0.5)
-
-                xpref[r][c]= xcentroid
-                ypref[r][c]= ycentroid
-
-                sheet.sheet_views['XCoG']=SheetView((xpref,sheet.bounds), sheet.name,
-                                                    sheet.precedence,topo.sim.time(),sheet.row_precedence)
-
-                sheet.sheet_views['YCoG']=SheetView((ypref,sheet.bounds), sheet.name,
-                                                    sheet.precedence,topo.sim.time(),sheet.row_precedence)
-
-
-pg= create_plotgroup(name='Center of Gravity',category="Preference Maps",
-             doc='Measure the center of gravity of each ConnectionField in a Projection.',
-             pre_plot_hooks=[measure_cog.instance()],
-             plot_hooks=[topographic_grid.instance(xsheet_view_name="XCoG",ysheet_view_name="YCoG")],
-             normalize='Individually')
-pg.add_plot('X CoG',[('Strength','XCoG')])
-pg.add_plot('Y CoG',[('Strength','YCoG')])
-pg.add_plot('CoG',[('Red','XCoG'),('Green','YCoG')])
-
-
-class measure_or_tuning_fullfield(FeatureCurveCommand):
-    """
-    Measures orientation tuning curve(s) of a particular unit using a
-    full-field sine grating stimulus.
-
-    The curve can be plotted at various different values of the
-    contrast (or actually any other parameter) of q qthe stimulus.  If
-    using contrast and the network contains an LGN layer, then one
-    would usually specify michelson_contrast as the
-    contrast_parameter. If there is no explicit LGN, then scale
-    (offset=0.0) can be used to define the contrast.  Other relevant
-    contrast definitions (or other parameters) can also be used,
-    provided they are defined in PatternPresenter and the units
-    parameter is changed as appropriate.
-    """
-
-    coords = param.Parameter(default=None,doc="""Ignored; here just to suppress warning.""")
-
-    pattern_presenter = param.Callable(
-        default=PatternPresenter(pattern_generator=SineGrating(),
-                                 contrast_parameter="michelson_contrast"))
-
-
-create_plotgroup(template_plot_type="curve",name='Orientation Tuning Fullfield',category="Tuning Curves",doc="""
-            Plot orientation tuning curves for a specific unit, measured using full-field sine gratings.
-            Although the data takes a long time to collect, once it is ready the plots
-            are available immediately for any unit.""",
-        pre_plot_hooks=[measure_or_tuning_fullfield.instance()],
-        plot_hooks=[cyclic_tuning_curve.instance(x_axis="orientation")])
-
-
-
-class measure_or_tuning(UnitCurveCommand):
-    """
-    Measures orientation tuning curve(s) of a particular unit.
-
-    Uses a circular sine grating patch as the stimulus on the
-    retina.
-
-    The curve can be plotted at various different values of the
-    contrast (or actually any other parameter) of the stimulus.  If
-    using contrast and the network contains an LGN layer, then one
-    would usually specify weber_contrast as the contrast_parameter. If
-    there is no explicit LGN, then scale (offset=0.0) can be used to
-    define the contrast.  Other relevant contrast definitions (or
-    other parameters) can also be used, provided they are defined in
-    PatternPresenter and the units parameter is changed as
-    appropriate.
-    """
-
-    num_orientation = param.Integer(default=12)
-
-    static_parameters = param.List(default=["size","x","y"])
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        self.params('sheet').compute_default()
-        sheet=p.sheet
-
-        for coord in p.coords:
-            self.x=self._sheetview_unit(sheet,coord,'XPreference',default=coord[0])
-            self.y=self._sheetview_unit(sheet,coord,'YPreference',default=coord[1])
-            self._compute_curves(p,sheet)
-
-
-create_plotgroup(template_plot_type="curve",name='Orientation Tuning',category="Tuning Curves",doc="""
-            Measure orientation tuning for a specific unit at different contrasts,
-            using a pattern chosen to match the preferences of that unit.""",
-        pre_plot_hooks=[measure_or_tuning.instance()],
-        plot_hooks=[cyclic_tuning_curve.instance(x_axis="orientation")],
-        prerequisites=['XPreference'])
-
-
-
-# JABALERT: Is there some reason not to call it measure_size_tuning?
-class measure_size_response(UnitCurveCommand):
-    """
-    Measure receptive field size of one unit of a sheet.
-
-    Uses an expanding circular sine grating stimulus at the preferred
-    orientation and retinal position of the specified unit.
-    Orientation and position preference must be calulated before
-    measuring size response.
-
-    The curve can be plotted at various different values of the
-    contrast (or actually any other parameter) of the stimulus.  If
-    using contrast and the network contains an LGN layer, then one
-    would usually specify weber_contrast as the contrast_parameter. If
-    there is no explicit LGN, then scale (offset=0.0) can be used to
-    define the contrast.  Other relevant contrast definitions (or
-    other parameters) can also be used, provided they are defined in
-    PatternPresenter and the units parameter is changed as
-    appropriate.
-    """
-    size=None # Disabled unused parameter
-
-    static_parameters = param.List(default=["orientation","x","y"])
-
-    num_sizes = param.Integer(default=10,bounds=(1,None),softbounds=(1,50),
-                              doc="Number of different sizes to test.")
-
-    max_size = param.Number(default=1.0,bounds=(0.1,None),softbounds=(1,50),
-                              doc="Maximum extent of the grating")
-
-    x_axis = param.String(default='size',constant=True)
-
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        self.params('sheet').compute_default()
-        sheet=p.sheet
-
-        for coord in p.coords:
-            # Orientations are stored as a normalized value beween 0
-            # and 1, so we scale them by pi to get the true orientations.
-            self.orientation=pi*self._sheetview_unit(sheet,coord,'OrientationPreference')
-            self.x=self._sheetview_unit(sheet,coord,'XPreference',default=coord[0])
-            self.y=self._sheetview_unit(sheet,coord,'YPreference',default=coord[1])
-            self._compute_curves(p,sheet)
-
-
-    # Why not vary frequency too?  Usually it's just one number, but it could be otherwise.
-    def _feature_list(self,p):
-        return [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
-                Feature(name="frequency",values=p.frequencies),
-                Feature(name="size",range=(0.0,p.max_size),step=p.max_size/p.num_sizes,cyclic=False)]
-
-
-create_plotgroup(template_plot_type="curve",name='Size Tuning',category="Tuning Curves",
-        doc='Measure the size preference for a specific unit.',
-        pre_plot_hooks=[measure_size_response.instance()],
-        plot_hooks=[tuning_curve.instance(x_axis="size",unit="Diameter of stimulus")],
-        prerequisites=['OrientationPreference','XPreference'])
-
-
-
-class measure_contrast_response(UnitCurveCommand):
-    """
-    Measures contrast response curves for a particular unit.
-
-    Uses a circular sine grating stimulus at the preferred
-    orientation and retinal position of the specified unit.
-    Orientation and position preference must be calulated before
-    measuring contrast response.
-
-    The curve can be plotted at various different values of the
-    contrast (or actually any other parameter) of the stimulus.  If
-    using contrast and the network contains an LGN layer, then one
-    would usually specify weber_contrast as the contrast_parameter. If
-    there is no explicit LGN, then scale (offset=0.0) can be used to
-    define the contrast.  Other relevant contrast definitions (or
-    other parameters) can also be used, provided they are defined in
-    PatternPresenter and the units parameter is changed as
-    appropriate.
-    """
-
-    static_parameters = param.List(default=["size","x","y"])
-
-    contrasts = param.List(class_=int,default=[10,20,30,40,50,60,70,80,90,100])
-
-    relative_orientations = param.List(class_=float,default=[0.0, pi/6, pi/4, pi/2])
-
-    x_axis = param.String(default='contrast',constant=True)
-
-    units = param.String(default=" rad")
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        self.params('sheet').compute_default()
-        sheet=p.sheet
-
-        for coord in p.coords:
-            orientation=pi*self._sheetview_unit(sheet,coord,'OrientationPreference')
-            self.curve_parameters=[{"orientation":orientation+ro} for ro in self.relative_orientations]
-
-            self.x=self._sheetview_unit(sheet,coord,'XPreference',default=coord[0])
-            self.y=self._sheetview_unit(sheet,coord,'YPreference',default=coord[1])
-
-            self._compute_curves(p,sheet,val_format="%.4f")
-
-    def _feature_list(self,p):
-        return [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
-                Feature(name="frequency",values=p.frequencies),
-                Feature(name="contrast",values=p.contrasts,cyclic=False)]
-
-
-create_plotgroup(template_plot_type="curve",name='Contrast Response',category="Tuning Curves",
-        doc='Measure the contrast response function for a specific unit.',
-        pre_plot_hooks=[measure_contrast_response.instance()],
-        plot_hooks=[tuning_curve.instance(x_axis="contrast",unit="%")],
-        prerequisites=['OrientationPreference','XPreference'])
-
-
-
-class measure_orientation_contrast(UnitCurveCommand):
-    """
-    Measures the response to a center sine grating disk and a surround
-    sine grating ring at different contrasts of the central disk.
-
-    The central disk is set to the preferred orientation of the unit
-    to be measured. The surround disk orientation (relative to the
-    central grating) and contrast can be varied, as can the size of
-    both disks.
-    """
-
-    pattern_presenter = param.Callable(
-        default=PatternPresenter(pattern_generator=OrientationContrast(),
-                                 contrast_parameter="weber_contrast"))
-
-    size=None # Disabled unused parameter
-    # Maybe instead of the below, use size and some relative parameter, to allow easy scaling?
-
-    sizecenter=param.Number(default=0.5,bounds=(0,None),doc="""
-        The size of the central pattern to present.""")
-
-    sizesurround=param.Number(default=1.0,bounds=(0,None),doc="""
-        The size of the surround pattern to present.""")
-
-    thickness=param.Number(default=0.5,bounds=(0,None),softbounds=(0,1.5),doc="""Ring thickness.""")
-
-    contrastsurround=param.Number(default=100,bounds=(0,100),doc="""Contrast of the surround.""")
-
-    contrastcenter=param.Number(default=100,bounds=(0,100),doc="""Contrast of the center.""")
-
-    x_axis = param.String(default='orientationsurround',constant=True)
-
-    orientation_center = param.Number(default=0.0,softbounds=(0.0,numpy.pi),doc="""
-        Orientation of the center grating patch""")
-
-    units = param.String(default="%")
-
-    static_parameters = param.List(default=["x","y","sizecenter","sizesurround","orientationcenter","thickness","contrastcenter"])
-
-    curve_parameters=param.Parameter([{"contrastsurround":30},{"contrastsurround":60},{"contrastsurround":80},{"contrastsurround":90}],doc="""
-        List of parameter values for which to measure a curve.""")
-
-    or_surrounds = []
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        self.params('sheet').compute_default()
-        sheet=p.sheet
-        for coord in p.coords:
-            self.or_surrounds=[]
-            orientation=p.orientation_center
-            self.orientationcenter=orientation
-
-            for i in xrange(0,self.num_orientation):
-                self.or_surrounds.append(orientation+i*pi/(self.num_orientation))
-
-            self.x=self._sheetview_unit(sheet,coord,'XPreference',default=coord[0])
-            self.y=self._sheetview_unit(sheet,coord,'YPreference',default=coord[1])
-
-            self._compute_curves(p,sheet)
-
-    def _feature_list(self,p):
-        return [Feature(name="phase",range=(0.0,2*pi),step=2*pi/p.num_phase,cyclic=True),
-    	 	Feature(name="frequency",values=p.frequencies),
-		Feature(name="orientationsurround",values=self.or_surrounds,cyclic=True)]
-
-create_plotgroup(template_plot_type="curve",name='Orientation Contrast',category="Tuning Curves",
-                 doc='Measure the response of one unit to a center and surround sine grating disk.',
-                 pre_plot_hooks=[measure_orientation_contrast.instance()],
-                 plot_hooks=[tuning_curve.instance(x_axis="orientationsurround",unit="%")],
-                 prerequisites=['OrientationPreference','XPreference'])
-
-
-
-class test_measure(UnitCurveCommand):
-
-    static_parameters = param.List(default=["size","x","y"])
-
-    x_axis = param.String(default='contrast',constant=True)
-
-    units = param.String(default=" rad")
-
-    def __call__(self,**params):
-        p=ParamOverrides(self,params)
-        self.params('sheet').compute_default()
-        sheet=p.sheet
-        self.x = 0.0
-	self.y = 0.0
-        for coord in p.coords:
-            self._compute_curves(p,sheet,val_format="%.4f")
-
-    def _feature_list(self,p):
-        return [Feature(name="orientation",values=[1.0]*22,cyclic=True),
-    		Feature(name="contrast",values=[100],cyclic=False)]
 
 import types
 __all__ = list(set([k for k,v in locals().items()

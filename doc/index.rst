@@ -76,15 +76,3 @@ Topographica, such as this `2012 review paper`_.
 .. _BSD license: http://opensource.org/licenses/bsd-license.php
 .. _Publications list: Home/pubs.html
 .. _2012 review paper: http://dx.doi.org/10.1016/j.jphysparis.2011.12.001
-
-.. toctree::
-    News/index
-    Downloads/index
-    Tutorials/index
-    User_Manual/index
-    Developer_Manual/index
-    Forums/index
-    Team_Members/index
-    FAQ/index
-    Links/index
-    Home/pubs

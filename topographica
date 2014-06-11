@@ -2,36 +2,11 @@
 # Typical way to launch Topographica; simply extends module search
 # path and processes command-line arguments
 
-# Make sure submodules can be found (only needed for git installation)
-import os,sys
-import numpy
+# Add submodules to sys.path if using git
+try:    import external
+except: pass
 
-# Need to check this here, not using process_argv() and before importing
-# topo as the release file doesn't exist yet
-from sys import argv
-from subprocess import Popen, CalledProcessError, PIPE
-if len(argv) > 1 and argv[1] == 'make-release-file':
-    try:
-        git_process = Popen(["git", "describe"], stdout=PIPE)
-        git = git_process.communicate()[0].strip()
-        if git_process.poll():
-            raise OSError
-    except OSError, CalledProcessError:
-        print "Could not run `git describe`, failed to create the release file"
-        raise
-    release_filename = basepath + "/topo/.release"
-    try:
-        release_file = open(basepath + "/topo/.release", "w")
-        release_file.write(git)
-        release_file.close()
-    except IOError:
-        print "Failed to create the release file %s" % basepath + "/topo/.release"
-        raise
-    print "Release file %s created." % release_filename
-    sys.exit(0)
-
-import topo
-
+import  sys, topo
 # Process the command-line arguments
 from topo.misc.commandline import process_argv
-process_argv(argv[1:])
+process_argv(sys.argv[1:])

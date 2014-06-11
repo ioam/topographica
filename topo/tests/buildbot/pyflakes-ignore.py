@@ -170,7 +170,7 @@ def main(args, print_totals=False):
         warnings += check(sys.stdin.read(), '<stdin>')
 
     if print_totals:
-        print "Total: %s" % warnings
+        print "Pyflakes issues found: %s" % warnings
 
     raise SystemExit(warnings > 0)
 

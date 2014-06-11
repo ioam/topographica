@@ -1,14 +1,28 @@
 {% extends "!page.html" %}
 {# add our custom css and js #}
-{% set css_files = css_files + ["_static/topo.css"] %}
-{% set script_files = script_files + ["_static/topo.js"] %}
+{% set project_name = 'Topographica' %}
+{% set ioam_project = 'topographica' %}
+{% set css_files = css_files + ["_static/custom.css"] %}
+{% set script_files = script_files + ["_static/custom.js"] %}
+
+{% if 'Tutorial' in pagename %}
+{% set abs_path = "http://ioam.github.io/topographica/" %}
+{% else %}
+{% set abs_path = "" %}
+{% endif %}
 
 {# the menu at the top #}
 {% block rootrellink %}
+{% if 'Tutorial' in pagename %}
+<li><a href="{{ abs_path + 'index.html' }}">DataViews Home</a></li>
+<li><a href="{{ abs_path + 'Tutorials/index.html' }}">Tutorials</a></li>
+<li><a href="{{ abs_path + 'Reference_Manual/index.html' }}">Reference Manual</a></li>
+{% else %}
 <li><a href="{{ pathto('index') }}">Home</a></li>
 <li><a href="{{ pathto('Downloads/index') }}">Downloads</a></li>
 <li><a href="{{ pathto('Tutorials/index') }}">Tutorials</a></li>
 <li><a href="{{ pathto('User_Manual/index') }}">User Manual</a></li>
+{% endif %}
 {# display "Current section:" when in a manual subpage #}
 {% if parents %}
 <li><ul class="parents">
@@ -26,12 +40,31 @@
 {% block sidebarsourcelink %}
 <h3>{{ _('This Page') }}</h3>
 <ul class="this-page-menu">
-	<li><a	href="https://github.com/ioam/topographica/edit/master/doc/{{ pagename }}.rst" rel="nofollow">Edit on GitHub</a></li>
+	<li><a	href="https://github.com/ioam/{{ ioam_project }}/edit/master/doc/{{ pagename }}.rst" rel="nofollow">Edit on GitHub</a></li>
 </ul>
 {% endblock %}
 
 {% block sidebartoc %}
 <ul class="global-toc">
+{% if 'Tutorial' in pagename %}
+<li><a href="{{ abs_path + 'index.html' }}">Home</a></li>
+<li><a href="{{ abs_path + 'News/index.html' }}">News</a></li>
+<li><a href="{{ abs_path + 'Downloads/index.html' }}">Downloads</a></li>
+<li><a href="{{ abs_path + 'Tutorials/index.html' }}">Tutorials</a></li>
+<li><a href="{{ abs_path + 'User_Manual/index.html' }}">User Manual</a></li>
+<li><a href="{{ abs_path + 'Reference_Manual/index.html' }}">Reference Manual</a></li>
+<li><a href="{{ abs_path + 'Developer_Manual/index.html' }}">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/{{ ioam_project }}">Github Source Code</a></li>
+<li><a href="{{ abs_path + 'Forums/index.html' }}">Forums</a></li>
+<li><a href="{{ abs_path + 'Team_Members/index.html' }}">Team Members</a></li>
+<li><a href="{{ abs_path + 'Future_Work/index.html' }}">Future Work</a></li>
+<li><a href="{{ abs_path + 'FAQ/index.html' }}">FAQ</a></li>
+<li><a href="{{ abs_path + 'Links/index.html' }}">Links</a></li>
+<li><a href="{{ abs_path + 'Home/pubs.html' }}">Publications</a></li>
+<li><a href="{{ abs_path + 'site_map.html' }}">Site Map</a></li>
+</ul>
+<h3><a href="{{ abs_path + 'index.html' }}">{{ _('Table Of Contents') }}</a></h3>
+{% else %}
 <li><a href="{{ pathto('index') }}">Home</a></li>
 <li><a href="{{ pathto('News/index') }}">News</a></li>
 <li><a href="{{ pathto('Downloads/index') }}">Downloads</a></li>
@@ -39,13 +72,16 @@
 <li><a href="{{ pathto('User_Manual/index') }}">User Manual</a></li>
 <li><a href="{{ pathto('Reference_Manual/index') }}">Reference Manual</a></li>
 <li><a href="{{ pathto('Developer_Manual/index') }}">Developer Manual</a></li>
+<li><a href="http://github.com/ioam/{{ ioam_project }}">Github Source Code</a></li>
 <li><a href="{{ pathto('Forums/index') }}">Forums</a></li>
 <li><a href="{{ pathto('Team_Members/index') }}">Team Members</a></li>
 <li><a href="{{ pathto('Future_Work/index') }}">Future Work</a></li>
 <li><a href="{{ pathto('FAQ/index') }}">FAQ</a></li>
 <li><a href="{{ pathto('Links/index') }}">Links</a></li>
 <li><a href="{{ pathto('Home/pubs') }}">Publications</a></li>
+<li><a href="{{ pathto('site_map') }}">Site Map</a></li>
 </ul>
 <h3><a href="{{ pathto(master_doc) }}">{{ _('Table Of Contents') }}</a></h3>
+{% endif %}
 {{ toc }}
 {% endblock %}

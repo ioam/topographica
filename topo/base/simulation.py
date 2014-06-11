@@ -56,12 +56,7 @@ from copy import copy, deepcopy
 import time
 import bisect
 
-# CEBALERT: Is it dangerous to have 'Forever' implemented
-# like this? To start with, min(Forever,1) gives
-# FixedPoint('-1.00,2') i.e. Forever.
-# Forever = FixedPoint(-1)
-Forever = -1
-# (Python 2.6 includes support for float('inf') on all platforms?)
+from topo.misc.attrdict import AttrDict
 
 #: Default path to the current simulation, from main
 #: Only to be used by script_repr(), to allow it to generate
@@ -745,6 +740,36 @@ class SomeTimer(param.Parameterized):
         self.__measure(fduration,step)
 
 
+    def update_timer(self,name,current_presentation,total_presentations):
+        if current_presentation == 0:
+            self.recenttimes=[]
+
+        if current_presentation == total_presentations-1:
+            percent = 100
+            estimate = 0
+        else:
+            self.recenttimes.append(self.real_time_fn())
+
+            length = len(self.recenttimes)
+
+            if (length>self.estimate_interval):
+                self.recenttimes.pop(0)
+                length-=1
+
+            try:
+                percent = 100.0*current_presentation/total_presentations
+            except:
+                percent = 100
+            estimate = (total_presentations-current_presentation)* \
+                (self.recenttimes[-1]-self.recenttimes[0])/length
+
+        self.__pass_out_info(time=current_presentation,
+                             percent=percent,
+                             name=name,
+                             duration=total_presentations,
+                             remaining=estimate)
+
+
 
 # CEBALERT: This singleton-producing mechanism is pretty complicated,
 # and it would be great if someone could simplify it. Getting all of
@@ -827,74 +852,6 @@ class Simulation(param.Parameterized,OptionalSingleton):
     Simulation, no matter how many times it is instantiated.
     """
 
-    # CEBALERT: Must use convert_to_time_type() everywhere a time is
-    # specified to ensure all times are the appropriate type. Relying
-    # on everyone to convert times to the time type seems dangerous!
-
-    time_type = param.Parameter(default=float,constant=True,doc="""
-        Callable for converting user-specified times into the numeric
-        type to be used for Simulation's time values.
-
-        Simulation's time can be set to any numeric type that supports
-        the usual Python numeric operations, including at least
-        multiplication, addition, and subtraction.  Most of the code
-        assumes that fractional values are supported, as they are for
-        floats, but it may be possible to use an integer type instead
-        if various default fractional values are overridden.
-
-        For instance, one might wish to use arbitrary precision
-        floating-point time to avoid accumulating rounding errors.  If
-        stepping through a simulation every 0.05 time units, after 20
-        such steps using floats the simulation will not reach 1.0
-        exactly, but will instead be slightly higher or lower.  With
-        an arbitrary precision float type such a series of steps can
-        be guaranteed to reach 1.0 exactly.  Alternatively, one might
-        wish to use a rational type so that events can be guaranteed
-        to happen a certain number of times in a given interval, even
-        if the ratio cannot be expressed as an even decimal or binary
-        fraction.
-
-        time_type determines how the user can specify times. For
-        instance, if the user specifies a time as 0.05 (a float), this
-        will be represented in floating point as something like
-        0.050000000000000003. gmpy.mpq will correctly convert that to
-        mpq(1,20). Other types might require times to be specified as
-        strings (e.g. decimal.Decimal('0.05') in Python 2.6); in this
-        case the user would need to use a string whenever specifying a
-        time (e.g. a connection delay or a call to run() ). Some other
-        types will only produce the expected result if they are first
-        configured appropriately (e.g. decimal.Decimal(0.05) in Python
-        2.7 will give something like
-        Decimal('0.05000000000000000277555756156289135105907917022705078125')
-        by default, but this can be controlled by using an appropriate
-        decimal.Context).
-
-        Extra arguments can be passed to time_type when it is being used
-        to create the Simulation's time: see time_type_args.
-
-
-        Some potentially useful number classes::
-
-        - gmpy.mpq: gmpy provides Python with access to the fast GNU
-          Multi-Precision library (which requires GMP to be built);
-          gmpy.mpq is gmpy's rational type.
-
-        - fixedpoint.FixedPoint: pure Python fixed-point number, but
-          quite slow.
-
-        - Python's decimal.Decimal and fractions.Fraction classes.
-        """)
-
-    # CEBALERT: probably should remove this and allow people to deal
-    # with functions requiring arguments
-    # (e.g. fixedpoint.FixedPoint(time,precision=4)) by currying or
-    # creating their own wrapper function. We wouldn't then need
-    # convert_to_time_type(), it would instead just be a call to
-    # time_type() (which should also be renamed).
-    time_type_args = param.Parameter(default=(),constant=True,doc="""
-        Tuple of arguments passed to time_type after the first
-        argument (which is the time).""")
-
     register = param.Boolean(default=True,constant=True,doc="""
         Whether or not to register this Simulation. If True, this
         Simulation (when created explicitly or when unpickled)
@@ -915,6 +872,11 @@ class Simulation(param.Parameterized,OptionalSingleton):
         scheduled_commands are run.
         """)
 
+    time = param.Callable(default=param.Dynamic.time_fn, doc="""
+        The time object is a callable that can be set, incremented and
+        decremented with a chosen numeric type as necessary.
+        """)
+
     time_printing_format = param.String("%(_time)09.2f",doc="""
         Format string to be used when the simulation time must be
         formatted as a string, e.g. for display or for basename().
@@ -933,6 +895,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
     name = param.Parameter(constant=False)
 
+    forever = param.Infinity()
 
     ### Simulation(register=True) is a singleton
     #
@@ -1027,13 +990,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         """
         Convert the supplied time to the Simulation's time_type.
         """
-        # pylint: disable-msg=W0201
-        if self.time_type_args:
-            newtime = self.time_type(time,*self.time_type_args)
-        else:
-            newtime = self.time_type(time)
-        return newtime
-
+        return (self.forever if time == self.forever else self.time.time_type(time))
 
     # Note that __init__ can still be called after the
     # Simulation(register=True) instance has been created. E.g. with
@@ -1045,15 +1002,15 @@ class Simulation(param.Parameterized,OptionalSingleton):
     # creates an instance of a class, while __init__ is subsequently
     # given that instance (to initialize).
 
-    def __init__(self,*args,**params):
+
+    def __init__(self, *args,**params):
         """
         Initialize a Simulation instance.
         """
-        self._time = self.convert_to_time_type(0)
+        param.Parameterized.__init__(self, **params)
 
-        param.Parameterized.__init__(self,**params)
-
-
+        self.time(val=0.0)
+        self.views = AttrDict()
         self._event_processors = {}
 
         if self.register:
@@ -1062,9 +1019,6 @@ class Simulation(param.Parameterized,OptionalSingleton):
             # Set up debugging messages to include the simulator time
             param.parameterized.dbprint_prefix= \
                (lambda: "Time: "+self.timestr()+" ")
-
-            param.Dynamic.time_fn = self.time
-
 
         self.events = [] # CB: consider collections.deque? (PEP 290)
         self._events_stack = []
@@ -1131,6 +1085,9 @@ class Simulation(param.Parameterized,OptionalSingleton):
             ep.simulation = self
             self.eps_to_start.append(ep)
 
+            if hasattr(ep,'views'):
+                self.views[ep_name] = ep.views
+
 
     def __delitem__(self,ep_name):
         """
@@ -1195,21 +1152,10 @@ class Simulation(param.Parameterized,OptionalSingleton):
             raise AttributeError
 
 
-    def time(self):
-        """
-        Return the current simulation time.
-
-        If the time returned will be used in the computation of a
-        floating point variable, it should be cast into a floating
-        point number by float().
-        """
-        return self._time
-
-
     def timestr(self,specified_time=None):
         """
         Returns the specified time (or the current time, if none
-        specified) formatted using time_printing_format, which allows
+        specified) formatted using time.time_printing_format, which allows
         users to control how much precision, etc. is used for time
         displays.
         """
@@ -1219,6 +1165,11 @@ class Simulation(param.Parameterized,OptionalSingleton):
         all_vars.update(self.__dict__)
         if specified_time is not None:
             all_vars['_time']=specified_time
+        elif self.time is not None:
+            all_vars['_time'] = self.time()
+        else:
+            raise Exception('No time object available.')
+
         timestr = self.time_printing_format % all_vars
         return timestr
 
@@ -1251,20 +1202,21 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
     # CEBALERT: need to simplify duration/until code. Hiding 'until' option
     # until it's fixed (presumably nobody's using it).
-    def run_and_time(self,duration=Forever): # ,until=Forever):
+    def run_and_time(self, duration=forever):
 
-        if duration==Forever:
+        if duration==self.forever:
             # CEBALERT: timing code not setup to handle indefinite durations
-            # (e.g. 'Forever')
+            # (e.g. 'self.forever')
             self.run(duration)
             return
         else:
             self.timer.call_and_time(duration)
 
 
-    def run(self,duration=Forever,until=Forever):
+    def run(self, duration=forever, until=forever):
         """
-        Process simulation events for the specified duration or until the specified time.
+        Process simulation events for the specified duration or until the
+        specified time.
 
         Arguments:
 
@@ -1282,22 +1234,14 @@ class Simulation(param.Parameterized,OptionalSingleton):
         Note that duration and until should be specified in a format suitable for
         conversion (coercion?) into the Simulation's _time_type.
         """
-        # CEBALERT: need to do something about the global 'Forever';
-        # what it should be probably varies with _time_type.
-
         # CEBALERT: calls to topo.sim.run() within topo should use a
         # string to specify the time rather than a float (since float
         # is not compatible with all number types).
 
         duration = self.convert_to_time_type(duration)
+
+        # Use the until value of self.time if not explicitly specified
         until = self.convert_to_time_type(until)
-
-
-        # CEBHACKALERT: If I do topo.sim.run(10), then topo.sim.run(until=3),
-        # topo.sim._time returns to 3 (i.e. the simulation time can jump backwards).
-        # JP: This because of the weird sim._time = stop_time line at the end of this method.
-        # see my HACKALERT below.
-
         # Initialize any EPs that haven't been started yet
         #
         # Anything that manipulates the event stack in some way
@@ -1312,26 +1256,25 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         self.eps_to_start=[]
 
-
-        # Complicated expression for min(time+duration,until)
-        if duration == Forever:
-            stop_time = until
-        elif until == Forever:
-            stop_time = self._time + duration
-        else:
-            stop_time = min(self._time+duration,until)
+        stop_time = min(self.time() + duration, until)
+        # Use time.until if it is between the current time and stop_time.
+        # This ensures self.time.until act only as a 'soft' limit
+        if (self.time() < self.time.until <= stop_time):
+            stop_time = self.time.until
+        # Stops time going backward if until less than current time.
+        stop_time = self.time() if stop_time < self.time() else stop_time
 
         did_event = False
 
-        while self.events and (stop_time == Forever or self._time <= stop_time):
+        while self.events and (stop_time == self.forever or self.time() <= stop_time):
             # Loop while there are events and it's not time to stop.
 
-            if self.events[0].time < self._time:
+            if self.events[0].time < self.time():
                 # Warn and then discard events scheduled *before* the current time
                 self.warning('Discarding stale (unprocessed) event',repr(self.events[0]))
                 self.events.pop(0)
 
-            elif self.events[0].time > self._time:
+            elif self.events[0].time > self.time():
                 # Before moving on to the next time, do any processing
                 # necessary for the current time.  This is necessary only
                 # if some event has been delivered at the current time.
@@ -1345,8 +1288,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
                 # Set the time to the frontmost event.  Bear in mind
                 # that the front event may have been changed by the
                 # .process_current_time() calls.
-                if self.events[0].time > self._time:
-                    self.sleep(self.events[0].time-self._time)
+                if self.events[0].time > self.time():
+                    self.sleep(self.events[0].time - self.time())
 
             else:
                 # Pop and call the event at the head of the queue.
@@ -1355,16 +1298,11 @@ class Simulation(param.Parameterized,OptionalSingleton):
                 event(self)
                 did_event=True
 
-
         # The time needs updating if the events have not done it.
         #if self.events and self.events[0].time >= stop_time:
 
-        # JPHACKALERT: This is weird.  It can cause time to go backwards,
-        # (see CEBHACKALERT above).  Also, if the simulation runs out of
-        # events before stop_time is reached, shouldn't that be reflected in
-        # Simulation.time()?
-        if stop_time != Forever :
-            self._time = stop_time
+        if stop_time != self.forever:
+            self.time(stop_time)
 
     def sleep(self,delay):
         """
@@ -1373,7 +1311,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         override this method as they wish, e.g. to wait for an
         external real time clock to advance first.
         """
-        self._time += self.convert_to_time_type(delay)
+        time = self.time
+        time += delay
 
     def enqueue_event(self,event):
         """
@@ -1417,6 +1356,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         to save its own state.  This operation is useful for testing
         something while being able to roll back to the original state.
         """
+        if self.eps_to_start != []:
+            self.run(0.0)
         self.event_push()
         for ep in self._event_processors.values():
             ep.state_push()
@@ -1447,7 +1388,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # CBALERT: does it make more sense to put the original events onto the
         # stack, and replace self.events with the copies? Not sure this makes
         # any practical difference currently.
-        self._events_stack.append((self._time,[copy(event) for event in self.events]))
+        self._events_stack.append((self.time(),[copy(event) for event in self.events]))
 
 
     def event_pop(self):
@@ -1456,7 +1397,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         Same as state_pop(), but does not restore EventProcessors' state.
         """
-        self._time, self.events = self._events_stack.pop()
+        time, self.events = self._events_stack.pop()
+        self.time(time)
 
 
     def event_clear(self,event_type=EPConnectionEvent):
@@ -1557,7 +1499,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # CEBALERT: hack to support importing the time type since the
         # scheduled actions will have times printed using the
         # time_type.
-        imports.append("from %s import %s"%(self.time_type.__module__,self.time_type.__name__))
+        imports.append("from %s import %s"%(self.time.time_type.__module__,self.time.time_type.__name__))
 
         imps  = sorted(set(imports))
 
@@ -1672,7 +1614,7 @@ class RealTimeSimulation(Simulation):
             self.debug("sleeping. delay =",delay,"real delay =",sleep_ms,"ms.")
             time.sleep(sleep_ms/1000.0)
         self._real_timestamp = self.real_time()
-        self._time += delay
+        self.time += delay
 
 
 

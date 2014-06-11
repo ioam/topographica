@@ -8,8 +8,8 @@ Check README and buildbot to see how to run the tests, but here are some example
 default set:
 ./topographica topo/tests/runtests.py
 
-all:
-./topographica -p 'targets=["all"]' topo/tests/runtests.py
+exhaustive:
+./topographica -p 'targets=["exhaustive"]' topo/tests/runtests.py
 """
 
 # CEBALERT: need to fix the issue with global_params reporting name=X
@@ -26,17 +26,14 @@ all:
 #
 
 
-import glob
 import os
 import sys
-import tempfile
-import commands
 
 import param
 from topo.misc.commandline import global_params as p
 
 p.add(
-    targets = param.List(default=[],doc="Leave empty for default set, ['all'] for all tests except speedtests, ['speed'] for speed tests, or else list the targets required."),
+    targets = param.List(default=['quick'],doc="List the targets required, e.g. ['exhaustive'] for all tests except speedtests, or ['speed'] for speed tests."),
 
     timing = param.Boolean(default=False),
 
@@ -75,10 +72,6 @@ if not xvfb:
 else:
     xvfb = xvfb + " -a"
 
-if len(p.targets)==0:
-    # DEFAULT
-    p.targets = ['traintests','snapshots','gui','maptests'] # maptests wouldn't be default except it's caught platform different problems before (there aren't enough unit tests!)
-
 # Allow allsnapshottests as shortcut for snapshots and pickle.
 # CEBALERT: should just combine these tests anyway.
 if "allsnapshottests" in p.targets:
@@ -96,12 +89,12 @@ def _runc(cmd):
     return os.system(cmd)
 
 
-import topo.misc.keyedlist
-target = topo.misc.keyedlist.KeyedList()
-speedtarget = topo.misc.keyedlist.KeyedList()
+from collections import OrderedDict
+target = OrderedDict()
+speedtarget = OrderedDict()
 
 
-# CEBALERT: need to pick which scripts to include for traintests and
+# CEBALERT: need to pick which scripts to include for training and
 # speedtests and startupspeedtests (see test_script.py).
 #
 # From the Makefile:
@@ -140,16 +133,16 @@ TRAINSCRIPTS = [
 
 
 
-target['traintests'] = []
+target['training'] = []
 for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    target['traintests'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=p.testdp))
+    target['training'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=p.testdp))
 
 # CEBALERT: should use the code above but just with the changes for running without weave.
-target['unopttraintests'] = []
+target['unopt'] = []
 for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    target['unopttraintests'].append(topographica_script + " -c \"import_weave=False\"" +  " -c \"from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)\""%dict(script_path=repr(script_path),dp=p.testdp_unopt))
+    target['unopt'].append(topographica_script + " -c \"import_weave=False\"" +  " -c \"from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)\""%dict(script_path=repr(script_path),dp=p.testdp_unopt))
 
 
 speedtarget['speedtests'] = []
@@ -204,7 +197,8 @@ target['pickle'].append(topographica_script + '''-l -c "from topo.tests.test_scr
 # easily be able to replace this
 
 temp_dir = ""
-if "scriptrepr" in p.targets or "all" in p.targets:
+temp_dir_needed = ("quick" in p.targets or "scriptrepr" in p.targets or "exhaustive" in p.targets)
+if temp_dir_needed:
     from tempfile import mkdtemp
     temp_dir = mkdtemp()
     temp_dir = temp_dir.replace("\\", "\\\\")
@@ -234,25 +228,31 @@ target['batch'].append(topographica_script + ' -c "from topo.tests.test_script i
 
 # CEBALERT: should use lissom.ty and test more map types
 # pass a list of plotgroup names to test() instead of plotgroups_to_test to restrict the tests
-target['maptests'] = []
+target['maps'] = []
 script = os.path.join(scripts_dir,"models/lissom_oo_or.ty")
-target['maptests'].append(topographica_script + ' -c "cortex_density=8" %s -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)"'%script)
+target['maps'].append(topographica_script + ' -c "cortex_density=8" %s -c "topo.sim.run(100);from topo.tests.test_map_measurement import *; test(plotgroups_to_test)"'%script)
 
 
-def start():
+def list_tests(tests):
+    return "["+",".join(tests)+"]" if len(tests)>0 else ""
+
+
+def run_tests():
     errors = []
-
-    print "Running: %s"%p.targets
-    print
 
     # CEBALERT: rename one of target or targets!
 
-    if p.targets==['all']:
+    if p.targets==['quick']:
+        targets = ['batch','pickle','scriptrepr']
+    elif p.targets==['exhaustive']:
         targets = target.keys()
     elif p.targets==['speed']:
         targets = speedtarget.keys()
     else:
         targets = p.targets
+
+    print "Running: %s" % list_tests(targets)
+    print
 
     target.update(speedtarget)
 
@@ -262,11 +262,34 @@ def start():
             if _runc(cmd) > 0:
                 if name not in errors:
                     errors.append(name)
-
     print
     print "="*60
     print
-    print "runtests.start(): targets with errors: %s"%len(errors)
+    print "runtests: targets with errors: %s %s" % (len(errors),list_tests(errors))
+
+    return errors
+
+
+target_description = {'training':"Test for consistent results from training models.",
+                      'unopt':"Same as training, but without optimized components.",
+                      'snapshots':"Test saving and restoring models from snapshots.",
+                      'pickle':"Test whether components can be pickled and unpickled.",
+                      'scriptrepr':"Test whether a model can be saved as a script_repr.",
+                      'gui':"Test GUI components (requires a real or virtual display).",
+                      'batch':"Test operation in batch mode with run_batch.",
+                      'maps':"Test map measurement results."}
+
+description_keys = set(target_description.keys())
+target_keys = set(target.keys())
+if description_keys != target_keys:
+    raise Exception("Following mismatches between target defined and descriptions given: %s"
+                    % ", ".join(el for el in target_keys ^ description_keys))
+
+assert set(target_description.keys()) == set(target.keys())
+
+def start():
+    errors = run_tests()
+
     if len(errors)>0:
         print errors
         sys.exit(1)

@@ -434,3 +434,12 @@ class gmpyImporter(ModuleImporter):
             g.path = path
             return g
         return None
+
+
+def unit_value(str):
+    m = re.match(r'([^\d]*)(\d*\.?\d+)([^\d]*)', str)
+    if m:
+        g = m.groups()
+        return ' '.join((g[0], g[2])).strip(), float(g[1])
+    else:
+        return int(str)

@@ -3,6 +3,7 @@
 import sys
 from distutils.core import setup
 import glob
+import topo
 
 examples = glob.glob('examples/*.ty')
 models = glob.glob('models/*.ty')
@@ -76,7 +77,7 @@ setup_args.update(dict(
     # number of the next release combined with the svn revision
     # number, to match DEB convention. (Whereas for svn copy we are
     # using the opposite convention...)
-    version='0.9.8',
+    version=str(topo.__version__),
 
     description='A general-purpose neural simulator focusing on topographic maps.',
 
@@ -153,7 +154,6 @@ of `SciPy`_) for optimum performance.
               'topo.base',
               'topo.command',
               'topo.coordmapper',
-              'topo.ep',
               'topo.learningfn',
               'topo.misc',
               'topo.plotting',
@@ -180,13 +180,17 @@ of `SciPy`_) for optimum performance.
 
 # Help text for dependencies not PIP
 def help_dependency(package):
-	print "The required package %s is not installed on your system." % package
+    print "The required package %s is not installed on your system." % package
 
-if __name__=="__main__":
-	try:
-		import numpy
-	except ImportError:
-		help_dependency(package)
-		sys.exit(1)
+if __name__ == "__main__":
+    try:
+        import numpy
+    except ImportError:
+        help_dependency(package)
+        sys.exit(1)
+
+    # When creating a release, check the version is set correctly.
+    if 'bdist_wininst' in sys.argv or 'upload' in sys.argv:
+        topo.__version__.verify()
 
     setup(**setup_args)

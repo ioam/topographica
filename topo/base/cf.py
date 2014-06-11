@@ -19,9 +19,12 @@ CFProjection.
 
 
 from copy import copy
-
 import numpy as np
+
 import param
+from dataviews.ndmapping import AttrDict, Dimension
+from dataviews import CoordinateGrid
+from dataviews.sheetviews import BoundingBox, BoundingRegionParameter, Slice
 
 import patterngenerator
 from patterngenerator import PatternGenerator
@@ -30,14 +33,12 @@ from functionfamily import LearningFn,Hebbian,IdentityLF
 from functionfamily import ResponseFn,DotProduct
 from functionfamily import CoordinateMapperFn,IdentityMF
 from projection import Projection,ProjectionSheet
-from sheetcoords import Slice
-from sheetview import UnitView
-from boundingregion import BoundingBox,BoundingRegionParameter
+from sheetview import CFView, CFStack
 
 
 def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     """
-    Wrapper for Numpy.vectorize to make it work properly with different Numpy versions. 
+    Wrapper for Numpy.vectorize to make it work properly with different Numpy versions.
     """
 
     # Numpy.vectorize returns a callable object that applies the given
@@ -61,7 +62,7 @@ def simple_vectorize(fn,num_outputs=1,output_type=object,doc=''):
     # To make it work with all versions of Numpy, we use
     # numpy.vectorize as-is for versions > 1.7.0, and a nasty hack for
     # previous versions.
-    
+
     # Simple Numpy 1.7.0 version:
     if int(np.version.version[0]) >= 1 and int(np.version.version[2]) >= 7:
         return np.vectorize(fn,otypes=np.sctype2char(output_type)*num_outputs, doc=doc)
@@ -615,6 +616,21 @@ class CFProjection(Projection):
         ### happening
         self.input_buffer = None
         self.activity = np.array(self.dest.activity)
+        if 'cfs' not in self.dest.views:
+            self.dest.views.cfs = AttrDict()
+        self.dest.views.cfs[self.name] = self._cf_grid()
+
+
+    def _cf_grid(self, shape=None, **kwargs):
+        "Create ProjectionGrid with the correct metadata."
+        shape = self.dest.shape if shape is None else shape
+        grid = CoordinateGrid(self.dest.bounds, shape)
+        grid.metadata = AttrDict(timestamp=self.src.simulation.time(),
+                                 info=self.name,
+                                 proj_src_name=self.src.name,
+                                 proj_dest_name=self.dest.name,
+                                 **kwargs)
+        return grid
 
 
     def _generate_coords(self):
@@ -645,10 +661,10 @@ class CFProjection(Projection):
                 mask_template = self.mask_template
             else:
                 mask_template = _create_mask(self.cf_shape,self.bounds_template,
-                                            self.src,self.autosize_mask,
-                                            self.mask_threshold)
+                                             self.src,self.autosize_mask,
+                                             self.mask_threshold)
 
-            CF = self.cf_type(self.src,x=x,y=y,
+            CF = self.cf_type(self.src, x=x, y=y,
                               template=self._slice_template,
                               weights_generator=self.weights_generator,
                               mask=mask_template,
@@ -682,21 +698,78 @@ class CFProjection(Projection):
     def cf_bounds(self,r,c):
         """Return the bounds of the specified ConnectionField."""
         return self.cfs[r,c].get_bounds(self.src)
+    
+    
+    def grid(self, rows=10, cols=10, lbrt=None, situated=False, **kwargs):
+        if lbrt is None:
+            bounds = self.dest.bounds
+            l, b, r, t = bounds.lbrt()
+        else:
+            l, b, r, t = lbrt
+            bounds = BoundingBox(points=((l, b), (r, t)))
+
+        xd, yd = self.dest.xdensity, self.dest.ydensity
+        half_x_unit, half_y_unit = 1.0/xd, 1.0/yd
+
+        x, y = np.meshgrid(np.linspace(l+half_x_unit, r-half_x_unit, cols),
+                           np.linspace(b+half_y_unit, t-half_y_unit, rows))
+        coords = zip(x.flat, y.flat)
+
+        grid_items = {}
+        for x, y in coords:
+            grid_items[x, y] = self.view(x, y, situated=situated, **kwargs)
+
+        grid = CoordinateGrid(bounds, (cols, rows), initial_items=grid_items,
+                              title=' '.join([self.dest.name, self.name, '{label}']),
+                              label='CFs')
+        grid.metadata = AttrDict(info=self.name,
+                                 proj_src_name=self.src.name,
+                                 proj_dest_name=self.dest.name,
+                                 timestamp=self.src.simulation.time(),
+                                 **kwargs)
+        return grid
 
 
-    def get_view(self, sheet_x, sheet_y, timestamp=None):
+    def view(self, sheet_x, sheet_y, timestamp=None, situated=False, **kwargs):
         """
-        Return a single connection field UnitView, for the unit
+        Return a single connection field SheetView, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        matrix_data = np.zeros(self.src.activity.shape,dtype=np.float64)
-        (r,c) = self.dest.sheet2matrixidx(sheet_x,sheet_y)
-        r1,r2,c1,c2 = self.cfs[r,c].input_sheet_slice
-        matrix_data[r1:r2,c1:c2] = self.cfs[r,c].weights
+        time_dim = Dimension("Time", type=param.Dynamic.time_fn.time_type)
+        (r, c) = self.dest.sheet2matrixidx(sheet_x, sheet_y)
+        cf = self.cfs[r, c]
+        r1, r2, c1, c2 = cf.input_sheet_slice
+        situated_shape = self.src.activity.shape
+        situated_bounds = self.src.bounds
+        roi_bounds = cf.get_bounds(self.src)
+        if situated:
+            matrix_data = np.zeros(situated_shape, dtype=np.float64)
+            matrix_data[r1:r2, c1:c2] = cf.weights.copy()
+            bounds = situated_bounds
+        else:
+            matrix_data = cf.weights.copy()
+            bounds = roi_bounds
 
-        return UnitView((matrix_data,self.src.bounds),sheet_x,sheet_y,self,timestamp)
+        sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
+                    input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
+                    label=self.name+ " CF Weights", value='CF Weight')
+        sv.metadata=AttrDict(timestamp=timestamp)
+
+        cfstack = CFStack((timestamp, sv), dimensions=[time_dim])
+        cfstack.metadata = AttrDict(coords=(sheet_x, sheet_y),
+                                    dest_name=self.dest.name,
+                                    precedence=self.src.precedence, proj_name=self.name,
+                                    src_name=self.src.name,
+                                    row_precedence=self.src.row_precedence,
+                                    timestamp=timestamp, **kwargs)
+        return cfstack
+
+
+    def get_view(self, sheet_x, sheet_y, timestamp=None):
+        self.warning("Deprecated, call 'view' method instead.")
+        return self.view(sheet_x, sheet_y, timestamp)
 
 
     def activate(self,input_activity):
@@ -914,16 +987,11 @@ class CFSheet(ProjectionSheet):
             if not isinstance(p,CFProjection):
                 self.debug("Skipping non-CFProjection "+p.name)
             elif proj_name == '' or p.name==proj_name:
-                v = p.get_view(x,y,self.simulation.time())
-                src = v.projection.src
-                key = ('Weights',v.projection.dest.name,v.projection.name,x,y)
-                v.proj_src_name = v.projection.src.name
-                src.sheet_views[key] = v
-
-
-    ### JCALERT! This should probably be deleted...
-    def release_unit_view(self,x,y):
-        self.release_sheet_view(('Weights',x,y))
+                v = p.view(x, y, self.simulation.time())
+                cfs = self.views.cfs
+                if p.name not in cfs:
+                    cfs[p.name] = p._cf_grid()
+                cfs[p.name][x, y] = v
 
 
 
@@ -977,7 +1045,7 @@ class ResizableCFProjection(CFProjection):
 
         # it's ok so we can store the bounds and resize the weights
         mask_template = _create_mask(self.cf_shape,bounds_template,self.src,
-                                    self.autosize_mask,self.mask_threshold)
+                                     self.autosize_mask,self.mask_threshold)
 
         self.mask_template = mask_template
         self.n_units = self._calc_n_units()

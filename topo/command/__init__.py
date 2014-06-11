@@ -11,8 +11,12 @@ no matter what the context from which they are called.
 """
 
 import cPickle as pickle
-
-import os,sys,re,string,time,platform
+import sys
+import os
+import re
+import string
+import time
+import platform
 
 import __main__
 
@@ -26,6 +30,9 @@ import param
 from param.parameterized import ParameterizedFunction, ParamOverrides
 from param import normalize_path
 
+import imagen, numbergen
+from collections import OrderedDict
+
 import topo
 from topo.base.sheet import Sheet
 from topo.base.projection import ProjectionSheet
@@ -34,11 +41,9 @@ from topo.misc.util import MultiFile
 from topo.misc.picklemain import PickleMain
 from topo.misc.snapshots import PicklableClassAttributes
 from topo.misc.genexamples import generate as _generate
-from topo.base.functionfamily import PatternDrivenAnalysis
 
-# CEBALERT: Could say min Python 2.6 and use Python's own. Or is it
-# 2.7?
-from topo.misc.odict import OrderedDict
+from featuremapper import PatternDrivenAnalysis
+
 
 
 def generate_example(target):
@@ -207,7 +212,8 @@ class runscript(param.ParameterizedFunction):
         for (key, val) in kwargs.items():
             global_params.exec_in_context('%s=%s' % (key,val))
 
-        code = compile(open(source_file, 'r').read(), "<execution>", "exec")
+        source_path = param.resolve_path(source_file)
+        code = compile(open(source_path, 'r').read(), "<execution>", "exec")
         exec code in ns #globals and locals
 
         self.push(ns)
@@ -237,7 +243,6 @@ class UnpickleEnvironmentCreator(object):
         L.SnapshotSupport.install(self.release,self.version)
 
 
-
 def save_snapshot(snapshot_name=None):
     """
     Save a snapshot of the network's current state.
@@ -263,6 +268,11 @@ def save_snapshot(snapshot_name=None):
     topoPOclassattrs = PicklableClassAttributes(topo,exclusions=('plotting','tests','tkgui'),
                                                 startup_commands=topo.sim.startup_commands)
 
+    paramPOclassattrs = PicklableClassAttributes(param)
+    imagenPOclassattrs = PicklableClassAttributes(imagen)
+    numbergenPOclassattrs = PicklableClassAttributes(numbergen)
+
+
     from topo.misc.commandline import global_params
 
     topo.sim.RELEASE=topo.release
@@ -272,6 +282,9 @@ def save_snapshot(snapshot_name=None):
                PickleMain(),
                global_params,
                topoPOclassattrs,
+               paramPOclassattrs,
+               imagenPOclassattrs,
+               numbergenPOclassattrs,
                topo.sim)
 
     try:
@@ -340,11 +353,16 @@ Loading error:
     # Restore subplotting prefs without worrying if there is a
     # problem (e.g. if topo/analysis/ is not present)
     try:
-        from topo.analysis.featureresponses import Subplotting
+        from topo.plotting.plotgroup import Subplotting
         Subplotting.restore_subplots()
     except:
         p = param.Parameterized(name="load_snapshot")
         p.message("Unable to restore Subplotting settings")
+
+    # Temporary -- broadcast topo.sim.time to all subpackages
+    param.Dynamic.time_fn = topo.sim.time
+    numbergen.TimeDependent.time_fn = topo.sim.time
+    imagen.Translator.time_fn = topo.sim.time
 
 
 
@@ -505,7 +523,7 @@ def default_analysis_function():
     """
     # CEBALERT: why are these imports here rather than at the top?
     import topo
-    from topo.command.analysis import save_plotgroup
+    from topo.plotting.plotgroup import save_plotgroup
 
     # Save all plotgroups listed in default_analysis_plotgroups
     for pg in default_analysis_plotgroups:
@@ -520,6 +538,7 @@ def default_analysis_function():
 
     # Test response to a standardized pattern
     from topo.pattern import Gaussian
+    from analysis import pattern_present
     from math import pi
     pattern_present(inputs=Gaussian(orientation=pi/4,aspect_ratio=4.7))
     save_plotgroup("Activity",saver_params={"filename_suffix":"_45d"})
@@ -870,51 +889,10 @@ def print_sizes():
     (n_conns(),max(n_bytes()/1024.0/1024.0,1.0))
 
 # added these two function to the PatternDrivenAnalysis hooks
+PatternDrivenAnalysis.pre_presentation_hooks.append(topo.sim.state_push)
 PatternDrivenAnalysis.pre_presentation_hooks.append(wipe_out_activity)
 PatternDrivenAnalysis.pre_presentation_hooks.append(clear_event_queue)
-
-
-def pattern_present(inputs={}, duration=1.0, plastic=False,
-                    overwrite_previous=False, apply_output_fns=True, **kwargs):
-    """
-    Given a set of input patterns (dictionary of
-    GeneratorSheetName:PatternGenerator pairs), installs them into the
-    specified GeneratorSheets, runs the simulation for the specified
-    length of time, then restores the original patterns and the
-    original simulation time.  Thus this input is not considered part
-    of the regular simulation, and is usually for testing purposes.
-
-    As a special case, if 'inputs' is just a single pattern, and not
-    a dictionary, it is presented to all GeneratorSheets.
-
-    If a simulation is not provided, the active simulation, if one
-    exists, is requested.
-
-    If this process is interrupted by the user, the temporary patterns
-    may still be installed on the retina.
-
-    If overwrite_previous is true, the given inputs overwrite those
-    previously defined.
-
-    If plastic is False, overwrites the existing values of Sheet.plastic
-    to disable plasticity, then reenables plasticity.
-
-    In order to to see the sequence of values presented, you may use
-    the back arrow history mechanism in the GUI. Note that the GUI's
-    Activity window must be open and the display parameter set to true
-    (display=True).
-
-    Alternatively, the activity response of the sheets may be obtained
-    from the sheet_views dictionary of the respective sheets.
-
-    This function is a backward compatibility wrapper of the
-    pattern_response class.
-    """
-    from analysis import pattern_response
-    pattern_response(inputs=inputs, duration=duration, plastic=plastic,
-                     overwrite_previous=overwrite_previous,
-                     apply_output_fns=apply_output_fns,
-                     restore_state=False, restore_events=True, **kwargs)
+PatternDrivenAnalysis.post_presentation_hooks.append(topo.sim.state_pop)
 
 # maybe an explicit list would be better?
 import types

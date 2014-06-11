@@ -106,38 +106,3 @@ class IdentityMF(CoordinateMapperFn):
     """Return the x coordinate of the given coordinate."""
     def __call__(self,x,y):
         return x,y
-
-
-class PatternDrivenAnalysis(param.Parameterized):
-    """
-    Abstract base class for various stimulus-response types of analysis.
-
-    This type of analysis consists of presenting a set of input
-    patterns and collecting the responses to each one, which one will
-    often want to do in a way that does not affect the current state
-    of the network.
-
-    To achieve this, the class defines several types of hooks where
-    arbitrary function objects (i.e., callables) can be registered.
-    These hooks are generally used to ensure that unrelated previous
-    activity is eliminated, that subsequent patterns do not interact,
-    and that the initial state is restored after analysis.
-
-    Any subclasses must ensure that these hook lists are run at the
-    appropriate stage in their processing, using e.g.
-    "for f in some_hook_list: f()".
-    """
-
-    __abstract = True
-
-    pre_analysis_session_hooks = param.HookList(default=[],instantiate=False,doc="""
-        List of callable objects to be run before an analysis session begins.""")
-
-    pre_presentation_hooks = param.HookList(default=[],instantiate=False,doc="""
-        List of callable objects to be run before each pattern is presented.""")
-
-    post_presentation_hooks = param.HookList(default=[],instantiate=False,doc="""
-        List of callable objects to be run after each pattern is presented.""")
-
-    post_analysis_session_hooks = param.HookList(default=[],instantiate=False,doc="""
-        List of callable objects to be run after an analysis session ends.""")

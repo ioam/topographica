@@ -4,15 +4,14 @@ other in black.
 This class also gives instructions to move the camera.
 """
 
-
+import numpy as np
+from PIL import  Image
 
 import param
 from topo.base.sheet import Sheet
-from topo.misc.ptz import PTZ
+from topo.hardware.ptz import PTZ
 from topo.base.arrayutil import array_argmax
 
-import numpy as np
-from PIL import  Image
 
 try:
     import opencv

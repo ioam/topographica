@@ -58,7 +58,7 @@ from topoconsole import TopoConsole,ControllableMenu
 # derived from the one specified in each widget, and imported before
 # the relevant GUI window starts.
 from topo.coordmapper import *  # pyflakes:ignore (see comment above)
-from topo.ep import *  # pyflakes:ignore (see comment above)
+from topo.base.ep import *  # pyflakes:ignore (see comment above)
 from topo.learningfn import *  # pyflakes:ignore (see comment above)
 from topo.transferfn import *  # pyflakes:ignore (see comment above)
 from topo.pattern import *  # pyflakes:ignore (see comment above)
@@ -127,7 +127,7 @@ TK_SUPPORTS_DOCK = True
 
 # gets set to the TopoConsole instance created by start.
 console = None
-def start(mainloop=False,banner=True):
+def start(mainloop=False,banner=True,exit_on_quit=True):
     """
     Start Tk and read in an options_database file (if present), then
     open a TopoConsole.
@@ -173,7 +173,7 @@ def start(mainloop=False,banner=True):
     except Tkinter.TclError:
         pass
 
-    console = TopoConsole(paramtk.root)
+    console = TopoConsole(paramtk.root,exit_on_quit)
 
     # Provide a way for other code to access the GUI when necessary
     topo.guimain=console
@@ -199,10 +199,10 @@ def start(mainloop=False,banner=True):
 
 
 
-
+from topo.command import pylabplot
 #######################
 
 if __name__ == '__main__':
     start(mainloop=True)
-
+    pylabplot.PylabPlotCommand.display_window = True
 

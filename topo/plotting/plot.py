@@ -2,18 +2,17 @@
 Plot class.
 """
 
-
 import copy
-import numpy
-
-from numpy.oldnumeric import zeros, ones, Float, divide
 from math import sin, cos
 
+import numpy
+from numpy.oldnumeric import zeros, ones, Float, divide
+
 import param
-
+from dataviews.ndmapping import NdMapping
 from topo.base.sheetcoords import SheetCoordinateSystem,Slice
-
 from bitmap import HSVBitmap, RGBBitmap, Bitmap, DrawBitmap
+
 
 
 ### JCALERT!
@@ -228,18 +227,21 @@ class TemplatePlot(Plot):
         If the sheet_view derives from a cyclic distribution, and it
         will be used as Hue, the matrix is normalized in range 0..1
         """
-        sheet_view_key = self.channels.get(key,None)
-        sv = self.view_dict.get(sheet_view_key, None)
+
+        sheet_view_key = self.channels.get(key, None)
+        sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
+        if isinstance(sv, NdMapping):
+            sv = sv.last
+
         if sv == None:
             matrix = None
         else:
-            view = sv.view()
-            matrix = view[0].copy()
-            if key=='Hue' and sv.cyclic:
+            matrix = sv.data.copy()
+            if key=='Hue' and sv.cyclic_range is not None:
                 matrix /= sv.cyclic_range
 
             # Calculate timestamp for this plot
-            timestamp = sv.timestamp
+            timestamp = sv.metadata.timestamp
             if timestamp >=0:
                 if self.timestamp < 0:
                     self.timestamp = timestamp
@@ -255,13 +257,13 @@ class TemplatePlot(Plot):
         """ Set the Plot plot_src_name. Called when Plot is created"""
         for key in self.channels:
             sheet_view_key = self.channels.get(key,None)
-            sv = self.view_dict.get(sheet_view_key, None)
+            sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
             if sv != None:
-                 self.plot_src_name = sv.src_name
-                 self.precedence = sv.precedence
-                 self.row_precedence = sv.row_precedence
-                 if hasattr(sv,'proj_src_name'):
-                      self.proj_src_name=sv.proj_src_name
+                 self.plot_src_name = sv.metadata.src_name
+                 self.precedence = sv.metadata.precedence
+                 self.row_precedence = sv.metadata.row_precedence
+                 if hasattr(sv.metadata,'proj_src_name'):
+                      self.proj_src_name=sv.metadata.proj_src_name
 
 
     ### JCALERT: This could be inserted in the code of get_matrix
@@ -270,13 +272,14 @@ class TemplatePlot(Plot):
         Sub-function used by plot: get the matrix shape and the bounding box
         of the SheetViews that constitute the TemplatePlot.
         """
-        for name in self.channels.values():
-                sv = self.view_dict.get(name,None)
-                if sv != None:
-                     shape = sv.view()[0].shape
-                     box = sv.view()[1]
+        for channel, name in self.channels.items():
+            sv = self.view_dict.get(channel,{}).get(name, None)
+            if isinstance(sv, NdMapping): sv = sv.last
+            if sv != None:
+                shape = sv.data.shape
+                box = sv.bounds
 
-        return shape,box
+        return shape, box
 
 
     # CEBALERT: needs simplification! (To begin work on joint

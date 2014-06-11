@@ -11,7 +11,7 @@ automatically become available for any model.
 from topo.base.sheet import Sheet
 from topo.base.projection import ProjectionSheet  # pyflakes:ignore (API import)
 from topo.base.cf import CFSheet
-from topo.misc.generatorsheet import GeneratorSheet
+from topo.base.generatorsheet import GeneratorSheet
 
 # Imported here for ease of access by users
 from topo.base.boundingregion import BoundingBox  # pyflakes:ignore (API import)
@@ -150,7 +150,7 @@ class JointNormalizingCFSheet(CFSheet):
         If active_units_mask is True, only active units will have
         their weights normalized.
         """
-        for key,projlist in self._grouped_in_projections('JointNormalize'):
+        for key,projlist in self._grouped_in_projections('JointNormalize').items():
             if key == None:
                 normtype='Individually'
             else:

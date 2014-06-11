@@ -155,5 +155,5 @@ topo.sim['Retina'].layout_location=(279,500)
 # Measure feature maps based on unthresholded initial response for
 # speed and reliability
 from topo.analysis.featureresponses import MeasureResponseCommand
-MeasureResponseCommand.duration=0.175
-MeasureResponseCommand.apply_output_fns=False
+MeasureResponseCommand.durations=[0.175]
+MeasureResponseCommand.pattern_response_fn.apply_output_fns=False

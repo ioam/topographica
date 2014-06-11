@@ -18,7 +18,6 @@ that can be used with the above functions and classes::
   sheet          - Sheet classes: 2D arrays of processing units
   projection     - Projection classes: connections between Sheets
   pattern        - PatternGenerator classes: 2D input or weight patterns
-  ep             - EventProcessor classes: other simulation objects
   transferfn     - Transfer functions, for e.g. normalization or squashing
   responsefn     - Calculate the response of a Projection
   learningfn     - Adjust weights for a Projection
@@ -36,7 +35,6 @@ __all__ = ['analysis',
            'base',
            'command',
            'coordmapper',
-           'ep',
            'learningfn',
            'misc',
            'numbergen',
@@ -51,19 +49,11 @@ __all__ = ['analysis',
 # Find out Topographica's version.
 # First, try Git; if that fails, try to read the release file.
 
-from subprocess import Popen, CalledProcessError, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
-import os, sys
+from subprocess import Popen, PIPE #pyflakes:ignore (has to do with Python versions for CalledProcessError)
 
-(basepath, _) = os.path.split(os.path.abspath(__file__))
-sys.path = [os.path.join(basepath, '../', 'external', 'param')] + sys.path
-sys.path = [os.path.join(basepath, '../', 'external', 'paramtk')] + sys.path
-sys.path = [os.path.join(basepath, '../', 'external', 'imagen')] + sys.path
-sys.path = [os.path.join(basepath, '../', 'external', 'lancet')] + sys.path
-
+import os
 import param
-
-# Patch for versions of param prior to 10 May 2013
-param.main=param.Parameterized(name="main")
+import imagen
 
 
 def version_int(v):
@@ -73,73 +63,16 @@ def version_int(v):
     """
     return int("%02d%02d%02d%05d" % v)
 
+__version__ = param.Version(release=(0,9,8), fpath=__file__, commit="$Format:%h$")
+commit  = __version__.commit
+version = tuple(list(__version__.release) +[__version__.commit_count])
+release = int("%02d%02d%02d%05d" % version)
 
 
-def version_str(v):
-	"""
-	Convert a version four-tuple to a string format x.y.z
-	"""
-	return "%d.%d.%d" % (v[0], v[1], v[2])
+# Patch for versions of param prior to 10 May 2013
+param.main=param.Parameterized(name="main")
 
 
-
-def _find_version():
-    """
-    Return the version tuple, the release number, the git commit, and
-    whether reading pickle files is allowed (False if no version
-    information avaliable).
-    """
-
-    version_warning = """\
-Unable to determine the version information for this copy of Topographica.
-
-For an official release, the version information is stored in a file
-named topo/.release.  For a development copy checked out from Git, the
-version is requested using "git describe".  Neither of these options
-was successful (output: "%s"), 
-perhaps because Git is not available on this machine.  To work around
-this problem, either install Git on this machine, or temporarily use a
-machine that does have Git and run "topographica make-release-file",
-making sure you have write permissions on Topographica's root
-directory.
-
-In the meantime, reading and saving snapshots will be disabled,
-because version information is necessary for determining how to
-interpret saved files.\n\n""" 
-
-    version_string = None
-
-    (basepath,_) = os.path.split(os.path.abspath(__file__))
-
-    try:
-        git_process = Popen(["git","describe","--long","--match","v*.*.*"], stdout=PIPE, stderr=PIPE, cwd=basepath)
-        version_string = git_process.communicate()[0].strip()
-        if git_process.poll():
-            raise OSError
-
-    except OSError, CalledProcessError: #pyflakes:ignore (has to do with Python versions for CalledProcessError)
-        try:
-            release_file = open(basepath + "/.release")
-            version_string = release_file.read()
-            release_file.close()
-        except IOError:
-            pass
-
-    try:
-        (_version, count, _commit) = version_string[1:].split("-")
-        _version = _version.split(".")
-        _version = (int(_version[0]), int(_version[1]), int(_version[2]), int(count))
-        _release = version_int(_version)
-        pickle_allowed = True
-
-    except:
-        param.main.warning(version_warning % version_string)
-        (_version, _release, _commit, pickle_allowed) = ((0,0,0,0),0,0,False)
-
-    return (_version, _release, _commit, pickle_allowed)
-
-
-(version, release, commit, pickle_read_write_allowed) = _find_version()
 
 
 
@@ -244,17 +177,19 @@ from topo.base.simulation import Simulation
 
 # Set the default value of Simulation.time_type to gmpy.mpq. If gmpy
 # is unavailable, use the slower fixedpoint.FixedPoint.
+
+def fixedpoint_time_type(x, precision=4):
+    "A fixedpoint time type of given precision"
+    return fixedpoint.FixedPoint(x, precision)
+
 try:
     import gmpy
-    Simulation.time_type = gmpy.mpq
-    Simulation.time_type_args = ()
+    _time_type = gmpy.mpq
     _mpq_pickle_support()
 except ImportError:
     import topo.misc.fixedpoint as fixedpoint
     param.main.warning('gmpy.mpq not available; using slower fixedpoint.FixedPoint for simulation time.')
-    Simulation.time_type = fixedpoint.FixedPoint
-    Simulation.time_type_args = (4,)  # gives precision=4
-
+    _time_type = fixedpoint_time_type
     # Provide a fake gmpy.mpq (to allow e.g. pickled test data to be
     # loaded).
     # CEBALERT: can we move this into whatever test needs it? I guess
@@ -264,20 +199,15 @@ except ImportError:
     import sys
     sys.meta_path.append(gmpyImporter())
 
-
-
+param.Dynamic.time_fn(val=0.0, time_type=_time_type)
+param.Dynamic.time_dependent = True
 sim = Simulation()
-
 
 # numbergen used to be part of topo; import it there for backwards compatibility
 # and set the time function to be topo.sim.time()
 import sys,numbergen
 sys.modules['topo.numbergen']=numbergen
 sys.modules['topo.numbergen.basic']=numbergen
-try:
-    numbergen.TimeDependentValue.time_fn = sim.time
-except AttributeError: # For versions of numbergen before April 2013
-    numbergen.ExponentialDecay.time_fn = sim.time
 
 # imagen used to be part of topo; import its files at their former locations
 # for backwards compatibility and set the time function to be topo.sim.time()
@@ -320,11 +250,3 @@ license (http://www.opensource.org/licenses/bsd-license.php).
 # weights underflows are common and not a problem.
 from numpy import seterr
 old_seterr_settings=seterr(all="raise",under="ignore")
-
-
-# Load Topographica IPython extension if imported as module
-try:
-    ip = get_ipython() # pyflakes:ignore (try/except import)
-    ip.extension_manager.load_extension('topo.misc.ipython')
-except:
-    pass

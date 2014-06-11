@@ -6,10 +6,9 @@ import unittest
 
 import numpy.oldnumeric as Numeric
 
+from dataviews import SheetView
+
 from topo.base.sheet import Sheet
-from topo.base.boundingregion import BoundingBox
-from topo.base.sheetview import *
-from topo.plotting.bitmap import PaletteBitmap
 
 # Turn False once development is complete and this module is to be
 # included as part of the system unit testing.
@@ -30,18 +29,16 @@ class TestSheetView(unittest.TestCase):
 
     def test_init(self):
 
-        sv1 = SheetView((self.s.activity,self.s.bounds),
-                          src_name=self.s.name)
+        sv1 = SheetView(self.s.activity,self.s.bounds)
         # s.sheet_view() returns a SheetView
-        self.s.sheet_views['sv1']=sv1
-        sv2 = SheetView((self.s.activity,self.s.bounds),
-                                 src_name=self.s.name)
+        self.s.views.maps['sv1']=sv1
+        sv2 = SheetView(self.s.activity,self.s.bounds)
         # s.sheet_view() returns a SheetView
-        self.s.sheet_views['sv2']=sv2
+        self.s.views.maps['sv2']=sv2
 
         # Define a type 1 SheetView, with matrix and bounding box.
-        sv3 = SheetView((self.s.activity, self.s.bounds))
-        sv4 = SheetView((self.s2.activity,self.s2.bounds))
+        sv3 = SheetView(self.s.activity, self.s.bounds)
+        sv4 = SheetView(self.s2.activity,self.s2.bounds)
 
 
 # CEBALERT: replace with test using FileImage

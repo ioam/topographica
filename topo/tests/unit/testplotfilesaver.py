@@ -14,11 +14,7 @@ from topo.base.simulation import Simulation
 from topo.base.cf import CFSheet, CFProjection
 from topo.sheet import GeneratorSheet
 
-from topo.plotting.plotfilesaver import PlotGroupSaver
-
-from topo.plotting.plotgroup import PlotGroup
-
-from topo.command.analysis import save_plotgroup
+from topo.plotting.plotgroup import save_plotgroup
 
 
 import __main__
@@ -65,7 +61,7 @@ class TestPlotGroupSaver(TestPlotGroupSaverBase):
 
     def test_cf_saving(self):
         save_plotgroup("Connection Fields",sheet=self.sim['B'])
-        self.exists("testplotfilesaver_000000.00_Afferent_(from_A).png")
+        self.exists("testplotfilesaver_000000.00_Afferent.png")
 
 @istest
 class TestCFProjectionPlotGroupSaver(TestPlotGroupSaverBase):

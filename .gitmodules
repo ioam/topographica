@@ -13,3 +13,18 @@
 [submodule "external/eigen3"]
 	path = external/eigen3
 	url = https://github.com/vancegroup-mirrors/eigen.git
+[submodule "external/featuremapper"]
+	path = external/featuremapper
+	url = https://github.com/ioam/featuremapper.git
+[submodule "external/dataviews"]
+	path = external/dataviews
+	url = https://github.com/ioam/dataviews.git
+[submodule "doc/builder"]
+	path = doc/builder
+	url = https://github.com/ioam/ioam-builder.git
+[submodule "doc/nbpublisher"]
+	path = doc/nbpublisher
+	url = https://github.com/ioam/ioam-builder.git
+[submodule "doc/reference_data"]
+	path = doc/reference_data
+	url = https://github.com/ioam/ioam.github.com.git

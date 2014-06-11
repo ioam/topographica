@@ -16,15 +16,10 @@ feature), please try the following:
    the Git repository, even though they are not yet released
    officially.
 #. If the problem is still present in the current version, you can
-   search the list of `bug reports`_ on our project pages at GitHub
-   to see if we already know about the problem. If you find the
-   problem, please feel free to add additional comments to the
-   report.
-#. We also have a `task list`_, used by the developers to keep track
-   of tasks. Try searching this list for information about your
-   problem. If you find a related task, please send an e-mail to the
-   developer listed as being in charge of that item (if any). If no
-   one is yet listed as being responsible, feel free to volunteer!
+   search the list of issues on our project pages at GitHub
+   to see if we already know about the problem. Issues are stored
+   separately for each subproject (`Param <https://github.com/ioam/param/issues?state=open>`_, `ParamTk <https://github.com/ioam/paramtk/issues?state=open>`_, `ImaGen <https://github.com/ioam/imagen/issues?state=open>`_ (aliased to topo.pattern in Topographica), or `FeatureMapper <https://github.com/ioam/featuremapper/issues?state=open>`_). If you find your issue has already been reported, please feel free
+   to add additional comments to the report.  
 #. If you can locate where in the code there might be a problem
    (e.g. by going to the line numbers mentioned in a Python
    exception), you will often find a comment with the keyword
@@ -32,7 +27,16 @@ feature), please try the following:
    which we are aware but have not yet been able to address. If so,
    please let us know that fixing the problem is urgent, and/or
    suggest fixes for the offending code.
-#. Otherwise, please `file a bug report`_. If possible, please
+#. If you can can suggest specfic code to fix the problem you found,
+   we are happy to receive `GitHub pull requests`_.  Simple fixes
+   can then be applied very quickly, and you'll be marked as 
+   having contributed the fix!  You can also submit new features
+   this way, and after we verify that the code fits our guidelines
+   we can incorporate it into the official repositories.
+#. Otherwise, please create a new issue at the appropriate project
+   site (defaulting to 
+   `Topographica <https://github.com/ioam/topographica/issues/new>`_ if
+   you aren't sure where the problem arises. If possible, please
    include:
 
    -  the full error message, if any
@@ -61,7 +65,7 @@ feature), please try the following:
    Topographica (either released or from Git), and try to have a
    small, clear, quick-to-run example of the problem. Any bug report
    is better than none, so in any case please do send it in even if
-   you can't satisfy the above requests. Even so, the clearer and
+   you can't satisfy the above requests. In any case, the clearer and
    simpler it is, the more likely (and more quickly) we will be able
    to address the problem.
 
@@ -72,7 +76,6 @@ feature), please try the following:
    the appropriate messages to the appropriate developers.
 
 .. _Git: https://github.com/ioam/topographica
-.. _bug reports: https://github.com/ioam/topographica/issues?state=open
 .. _task list: ../Future_Work/current.html
-.. _file a bug report: https://github.com/ioam/topographica/issues/new
 .. _Jim: mailto:jbednar@inf.ed.ac.uk?subject=Bug%20report
+.. _GitHub pull requests: https://help.github.com/articles/using-pull-requests

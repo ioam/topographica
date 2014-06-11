@@ -10,8 +10,10 @@ that we have not been able to address. These will be listed in our
 GitHub `Issues`_ list, or or in the issues for a specific
 `subproject`_ if appropriate. Feel free to add suggestions of your
 own to those lists, or to `tackle one of the existing problems
-listed`_ if you need that feature for your work. Other general,
-ongoing tasks include:
+listed`_ if you need that feature for your work. In particular, we are
+always happy to receive your (well-written) 
+`pull requests! <https://github.com/ioam/topographica/pulls>`_
+Other general, ongoing tasks include:
 
 ALERTs
 ======
@@ -42,8 +44,8 @@ should be tests for everything.
 Pycheck/pylint
 ==============
 
-Topographica code is automatically checked using pyflakes, and
-should but more stringent tests can be performed by the pycheck and
+Topographica code is automatically checked using pyflakes, 
+but more stringent tests can be performed by the pycheck and
 pylint programs. It would be very useful to fix any suspicious items
 reported by those programs, and to disable the remaining warnings.
 That way, new code could be automatically checked with those
@@ -85,8 +87,3 @@ very welcome!
 .. _Issues: https://github.com/ioam/topographica/issues
 .. _subproject: https://github.com/ioam
 .. _tackle one of the existing problems listed: ../Developer_Manual/index.html#joining
-
-.. toctree::
-   :maxdepth: 1
-
-   current

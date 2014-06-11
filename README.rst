@@ -6,7 +6,7 @@ Topographica is a general-purpose neural simulator focusing on topographic maps.
 This program is free, open-source software available under the BSD license (see LICENSE.txt).
 
 
-This document describes how to get and edit the Topographica source code.  Most first-time users will instead want to use the pre-packaged distributions available for most platforms; see ioam/topographica `Downloads <http://github.com/ioam/topographica/downloads>`_  for links.
+This document describes how to get and edit the Topographica source code.  Most first-time users will instead want to use the pre-packaged distributions available for most platforms; see Topographica's `Downloads <http://ioam.github.io/topographica/Downloads/index.html>`_  page for links.
 
 CLONING TOPOGRAPHICA
 --------------------
@@ -23,9 +23,32 @@ The clone command above is read-only.  To push changes set up your `SSH key <htt
    cd topographica
    git submodule update --init
 
-If dependencies are missing, you can install them using pip.  Pip is available on most systems already, but if it is missing or if the installed version is old, you
-can install it using ``easy_install pip`` or the equivalent for your package manager, or install virtualenv instead.  The only required dependencies are numpy and PIL, which can be installed using
-``pip install numpy PIL``, but other highly recommended packages include scipy, ipython, and matplotlib, which can each be installed in the same way.
+If dependencies are missing, you can install them using pip.  Pip is
+available on most systems already, but if it is missing or if the
+installed version is old, you can install it using ``easy_install
+pip`` or the equivalent for your package manager, or install
+virtualenv instead.  The only required dependencies are numpy and PIL,
+which can be installed using::
+
+   pip install numpy PIL
+
+but other highly recommended packages include scipy, ipython, and
+matplotlib, which can each be installed in the same way::
+
+   pip install gmpy scipy ipython matplotlib
+
+If you wish to use `IPython Notebook <http://ipython.org/notebook>`_
+(optional) with Topographica, you can install the remaining
+dependencies as follows::
+
+   pip install ipython tornado pyzmq jinja2
+
+The notebook server may then be launched using the following command:
+
+::
+
+   ../../topographica -n
+
 
 MAKING DOCUMENTATION (OPTIONAL)
 -------------------------------
@@ -36,19 +59,10 @@ Once the documentation has been built, load doc/index.html into your web browser
 
 As a last resort, for each <file>.html you can simply read the corresponding source file <file>_text.php in a text editor.
 
-BUILDING FROM SOURCE (OPTIONAL)
--------------------------------
-
-As long as all the dependencies have been installed as described above, no separate build step is needed -- all core Topographica files are pure Python, and any optimized C files will be compiled on the fly as needed by Topographica.
-
-Alternatively, the dependencies can all be built from source, by changing to the "external" directory and typing ``make default``.  All non-standard external libraries will be fetched automatically and for most platforms will be built from source.  This approach makes the initial compilation time vastly longer and the simulator directory vastly larger, but it provides a full set of dependencies with known versions, including packages needed by Topographica's maintainers.  For specific instructions, see the "Build all Topographica's dependencies" and "Building Topographica" sections in the `Developer Manual installation instructions <http://topographica.org/Developer_Manual/installation.html>`_.
-
-If you use this Makefile, you will need to append the absolute path of ``./topographica/bin/python`` to your ``PATH`` environment variable in order to make use of the packages you have built::
-
-   export PATH=<PATH TO ./topographica/bin/>:$PATH
-
 RUNNING TOPOGRAPHICA
 --------------------
+
+As long as all the dependencies have been installed as described above, no separate build step is needed -- all core Topographica files are pure Python, and any optimized C files will be compiled on the fly as needed by Topographica.
 
 Once installed as described above, Topographica can be launched by running the ``topographica`` script in the main directory; e.g. ``topographica -g`` for the GUI version.  See doc/Tutorials/index.html for examples of getting started with Topographica, and doc/index.html for all of the documentation.  You can also get online help from the Topographica command line using ``help()``, or from the shell command line using ``pydoc some-text``.
 
@@ -62,13 +76,13 @@ up to date::
   git pull
   git submodule update
 
-Changes any file outside of external/ can be made in the usual git fashion::
+Changes to any file outside of external/ can be made in the usual git fashion::
 
   edit topo/dir/somefile.py
   git commit -m "Important change" topo/dir/somefile.py
   git push
 
-If you need to make changes to one of the submodules, there are several
+If you need to make changes to one of the submodules in external/, there are several
 points to remember, assuming you're starting in the topographica
 directory and you're modifying the param submodule (otherwise simply exchange param
 with the submodule you want to modify)::

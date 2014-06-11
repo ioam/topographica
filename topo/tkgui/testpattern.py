@@ -8,12 +8,6 @@ The Test Pattern window allows input patterns to be previewed.
 # * values like pi are written over
 # * need to sort the list of Pattern generators
 
-## Needs to be upgraded to behave how we want:
-### JABHACKALERT: Should use PatternPresenter (from
-### topo.command.analysis), which will allow flexible support for
-### making objects with different parameters in the different eyes,
-### e.g. to test ocular dominance or disparity.
-
 # CBENHANCEMENT: add 'use for learning' to install current pattern
 # (saving previous ones)?
 
@@ -22,15 +16,16 @@ from Tkinter import Frame
 import param
 import paramtk as tk
 
+from dataviews import SheetView, NdMapping
+
 import topo
 
-from topo.base.functionfamily import PatternDrivenAnalysis
-from topo.base.sheetview import SheetView
 from topo.base.patterngenerator import PatternGenerator, Constant
-from topo.misc.generatorsheet import GeneratorSheet
-from topo.command import pattern_present
+from topo.base.generatorsheet import GeneratorSheet
+from topo.misc.attrdict import AttrDict
 from topo.plotting.plot import make_template_plot
 from topo.plotting.plotgroup import SheetPlotGroup
+from topo.analysis.featureresponses import pattern_present
 
 from plotgrouppanel import SheetPanel
 
@@ -49,13 +44,25 @@ class TestPatternPlotGroup(SheetPlotGroup):
         dynamic_plots = []
         for kw in [dict(sheet=sheet) for sheet in self.sheets()]:
             sheet = kw['sheet']
-            new_view = SheetView((sheet.input_generator(),sheet.bounds),
-                                  sheet.name,sheet.precedence,topo.sim.time())
-            sheet.sheet_views['Activity']=new_view
-            channels = {'Strength':'Activity','Hue':None,'Confidence':None}
+            views = topo.sim.views[sheet.name].maps
 
+            sv = SheetView(sheet.input_generator(), bounds=sheet.bounds)
+            sv.metadata=AttrDict(timestamp=topo.sim.time())
+
+            if 'Activity' not in views:
+                views['Activity'] = NdMapping((topo.sim.time(), sv))
+                views['Activity'].metadata = AttrDict(precedence=sheet.precedence,
+                                                      row_precedence=sheet.row_precedence,
+                                                      src_name=sheet.name,
+                                                      timestamp=topo.sim.time())
+            else:
+                views['Activity'][topo.sim.time()] = sv
+            channels = {'Strength': 'Activity','Hue':None,'Confidence':None}
+
+            view = topo.sim.views[sheet.name].maps
+            view_dict = {'Strength':view,'Hue':view,'Confidence':view}
             ### JCALERT! it is not good to have to pass '' here... maybe a test in plot would be better
-            dynamic_plots.append(make_template_plot(channels,sheet.sheet_views,
+            dynamic_plots.append(make_template_plot(channels, view_dict,
                                                     sheet.xdensity,sheet.bounds,self.normalize,
                                                     name=''))
 
@@ -63,7 +70,7 @@ class TestPatternPlotGroup(SheetPlotGroup):
 
 
 
-class TestPattern(SheetPanel,PatternDrivenAnalysis):
+class TestPattern(SheetPanel):
 
     sheet_type = GeneratorSheet
 
@@ -174,15 +181,10 @@ class TestPattern(SheetPanel,PatternDrivenAnalysis):
         the specified length of time, then restore the original
         patterns.
         """
-        topo.sim.run(0.0)  # ensure EPs are start()ed
-
-        topo.sim.state_push()
-        for f in self.pre_presentation_hooks: f()
         input_dict = dict([(sheet.name,sheet.input_generator) \
                            for sheet in self.plotgroup.sheets()])
-        pattern_present(input_dict,self.duration,
-                        plastic=self.plastic,overwrite_previous=False)
+        pattern_present(inputs=input_dict, durations=[self.duration],
+                        plastic=self.plastic, overwrite_previous=False,
+                        install_sheetview=True, restore_state=True)
         topo.guimain.auto_refresh(update=False)
-        for f in self.post_presentation_hooks: f()
-        topo.sim.state_pop()
 

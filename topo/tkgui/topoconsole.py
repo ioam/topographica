@@ -11,32 +11,27 @@ import os
 import copy
 import sys
 import re
-import __main__
 import webbrowser
 import string
-
 from Tkinter import Frame, Button, \
      LEFT, YES, Label, DISABLED, \
      NORMAL, DoubleVar
 from tkFileDialog import asksaveasfilename,askopenfilename
 
+import __main__
 import param
 from param import normalize_path,resolve_path
 import paramtk as tk
-
-
+from collections import OrderedDict
 import topo
 from topo.plotting.plotgroup import plotgroups, FeatureCurvePlotGroup
-from topo.misc.keyedlist import KeyedList
 from topo.misc.commandline import sim_name_from_filename
 import topo.misc.genexamples
 import topo.command
-
 import topo.tkgui
-
 from templateplotgrouppanel import TemplatePlotGroupPanel
 from featurecurvepanel import FeatureCurvePanel
-from projectionpanel import CFProjectionPanel,ProjectionActivityPanel,ConnectionFieldsPanel,RFProjectionPanel
+from projectionpanel import SheetPanel,CFProjectionPanel,ProjectionActivityPanel,ConnectionFieldsPanel,RFProjectionPanel
 from testpattern import TestPattern
 from editor import ModelEditor
 
@@ -293,7 +288,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         """Allow dictionary-style access to the menu bar."""
         return self.menubar[menu_name]
 
-    def __init__(self,root,**params):
+    def __init__(self, root,exit_on_quit=True, **params):
         tk.AppWindow.__init__(self,root,status=True)
         tk.TkParameterized.__init__(self,root,**params)
 
@@ -302,6 +297,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         # CEBALERT: on destroy(), ought to revert this
         Tkinter.Misc._report_exception=_tkinter_report_exception
 
+        self.exit_on_quit = exit_on_quit
         self.auto_refresh_panels = []
         self._init_widgets()
         self.title(topo.sim.name) # If -g passed *before* scripts on commandline, this is useless.
@@ -460,7 +456,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         plots_menu.delete(0,'end')
 
         # create menu entries, and get list of categories
-        entries=KeyedList() # keep the order of plotgroup_templates (which is also KL)
+        entries=OrderedDict() # keep the order of plotgroup_templates (which is also KL)
         categories = []
         for label,plotgroup in plotgroups.items():
             entries[label] = PlotsMenuEntry(plotgroup)
@@ -470,7 +466,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
 
         # The Basic category items appear on the menu itself.
         assert 'Basic' in categories, "'Basic' is the category for the standard Plots menu entries."
-        for label,entry in entries:
+        for label,entry in entries.items():
             if entry.plotgroup.category=='Basic':
                     plots_menu.add_command(label=label,command=entry.__call__)
 
@@ -485,7 +481,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             plots_menu.add_cascade(label=category,menu=category_menu)
 
             # could probably search more efficiently than this
-            for label,entry in sorted(entries):
+            for label,entry in entries.items():
                 if entry.plotgroup.category==category:
                     category_menu.add_command(label=label,command=entry.__call__)
 
@@ -538,7 +534,7 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             except:
                 pass
 
-            print "Quit selected; exiting"
+            self.message("Quit selected%s" % ("; exiting" if  self.exit_on_quit else ""))
 
             # Workaround for obscure problem on some UNIX systems
             # as of 4/2007, probably including Fedora Core 5.
@@ -559,7 +555,8 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
             # happens) run "stty saved_settings"?
 
             # CEBALERT: there was no call to self.master.destroy()
-            sys.exit(exit_status)
+            if  self.exit_on_quit:
+                sys.exit(exit_status)
 
 
     def run_script(self):
@@ -812,6 +809,7 @@ class ControllableMenu(tk.Menu):
 
 
 if __name__ != '__main__':
+    plotpanel_classes['Activity'] = SheetPanel
     plotpanel_classes['Connection Fields'] = ConnectionFieldsPanel
     plotpanel_classes['RF Projection'] = RFProjectionPanel
     plotpanel_classes['Projection'] = CFProjectionPanel

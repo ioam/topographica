@@ -136,5 +136,5 @@ topo.sim.connect(
 # for speed and reliability.
 from topo.analysis.featureresponses import MeasureResponseCommand
 
-MeasureResponseCommand.duration = 0.175
-MeasureResponseCommand.apply_output_fns = False
+MeasureResponseCommand.durations = [0.175]
+MeasureResponseCommand.pattern_response_fn.apply_output_fns = False

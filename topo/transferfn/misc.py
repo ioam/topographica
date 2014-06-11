@@ -3,7 +3,6 @@ Transfer functions with more complex dependencies.
 
 $Id: basic.py 10790 2009-11-21 17:51:33Z antolikjan $
 """
-__version__='$Revision: 10790 $'
 
 import copy
 
@@ -20,9 +19,8 @@ from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.boundingregion import BoundingBox
 from topo.base.sheetcoords import SheetCoordinateSystem
 
-from topo.transferfn import TransferFn,TransferFnWithState
+from topo.transferfn import TransferFn, TransferFnWithState
 from topo.pattern import Gaussian
-
 
 # Not suitable for basic.py due to its dependence on patterns.
 class PatternCombine(TransferFn):
@@ -122,7 +120,6 @@ class KernelMax(TransferFn):
         x[rmin:rmax,cmin:cmax] = kernel
 
 
-
 class HalfRectify(TransferFn):
     """
     Transfer function that applies a half-wave rectification (clips at zero)
@@ -168,10 +165,13 @@ class HalfRectify(TransferFn):
 class HomeostaticResponse(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
-    constant desired average activity. Details can be found in the report
-    'Mechanisms for Stable and Robust Development of Orientation Maps
-    and Receptive Fields', by Judith S. Law, Jan Antolik, and James A.
-    Bednar, 2011 (http://www.inf.ed.ac.uk/publications/report/1404.html).
+    constant desired average activity. Defined in:
+
+    Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar.
+    Mechanisms for stable, robust, and adaptive development of orientation
+    maps in the primary visual cortex.
+    Journal of Neuroscience 33:15747-15766, 2013.
+    http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013
     """
 
     t_init = param.Number(default=0.15,doc="""
@@ -222,7 +222,8 @@ class HomeostaticResponse(TransferFnWithState):
         self.t=None     # To allow state_push at init
         self.y_avg=None # To allow state_push at init
 
-        self._next_update_timestamp = topo.sim.time_type(topo.sim.time()+self.period)
+        next_timestamp = topo.sim.time() + self.period
+        self._next_update_timestamp = topo.sim.convert_to_time_type(next_timestamp)
         self._y_avg_prev = None
         self._x_prev = None
 

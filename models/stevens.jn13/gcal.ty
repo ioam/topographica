@@ -1,0 +1,302 @@
+# -*- mode: python;-*-
+"""
+GCAL
+
+Simple but robust single-population V1 model orientation map from:
+
+   Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar.
+   Mechanisms for stable, robust, and adaptive development of orientation
+   maps in the primary visual cortex.
+
+@article{Stevens02102013,
+   author = {Stevens, Jean-Luc R. and Law, Judith S. and Antolik, Jan and Bednar, James A.},
+   title = {Mechanisms for Stable, Robust, and Adaptive Development of Orientation Maps in the Primary Visual Cortex},
+   journal = {The Journal of Neuroscience}
+   volume = {33},
+   number = {40},
+   pages = {15747-15766},
+   year = {2013},
+   doi = {10.1523/JNEUROSCI.1037-13.2013},
+   url = {http://www.jneurosci.org/content/33/40/15747.full}
+}
+"""
+
+from math import pi
+import os
+
+import numpy
+import param
+
+from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
+
+import topo.learningfn.optimized
+import topo.learningfn.projfn
+import topo.transferfn.optimized
+import topo.pattern.random
+import topo.pattern.image
+import topo.responsefn.optimized
+import topo.sheet.lissom
+import topo.sheet.optimized
+
+import topo.transferfn.misc
+from topo.base.arrayutil import DivideWithConstant
+from topo.transferfn.misc import HomeostaticResponse
+from topo.misc.commandline import global_params as p
+
+p.add(
+
+    input_seed = param.Integer(default=102, doc="""
+         The random seed to set the input patterns"""),
+
+    dataset=param.ObjectSelector(default='Gaussian',objects=
+        ['Gaussian','Nature', 'VGR'],doc="""
+        Set of input patterns to use::
+          :'Gaussian': Two-dimensional Gaussians
+          :'Nature':   Shouval's 1999 monochrome 256x256 images.
+          :'VGR':       Simulated vertical goggle rearing
+                       (anisotropically blurred Shouval)"""),
+
+    num_inputs=param.Integer(default=2,bounds=(1,None),doc="""
+        How many input patterns to present per unit area at each
+        iteration, when using discrete patterns (e.g. Gaussians)."""),
+
+    aff_strength=param.Number(default=1.5,bounds=(0.0,None),doc="""
+        Overall strength of the afferent projection to V1."""),
+
+    exc_strength=param.Number(default=1.7,bounds=(0.0,None),doc="""
+        Overall strength of the lateral excitatory projection to V1."""),
+
+    inh_strength=param.Number(default=1.4,bounds=(0.0,None),doc="""
+        Overall strength of the lateral inhibitory projection to V1."""),
+
+    aff_lr=param.Number(default=0.1,bounds=(0.0,None),doc="""
+        Learning rate for the afferent projection to V1."""),
+
+    exc_lr=param.Number(default=0.0,bounds=(0.0,None),doc="""
+        Learning rate for the lateral excitatory projection to V1."""),
+
+    inh_lr=param.Number(default=0.3,bounds=(0.0,None),doc="""
+        Learning rate for the lateral inhibitory projection to V1."""),
+
+    area=param.Number(default=1.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        Linear size of cortical area to simulate.
+        2.0 gives a 2.0x2.0 Sheet area in V1."""),
+
+    retina_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the retina."""),
+
+    lgn_density=param.Number(default=24.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for the LGN."""),
+
+    cortex_density=param.Number(default=49.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""),
+
+    # Noisy disk parameters
+
+    retinal_waves=param.Integer(default=0,bounds=(0,None),doc="""
+        How many retinal wave (noisy disk) presentations before the
+        chosen dataset is displayed. Zero for no noisy disk
+        presentations otherwise 6000 has been typically used.."""),
+
+    percent_noise = param.Number(default=50, doc="""
+       The percentage of the noise strength to the disk strength for noisy disks"""),
+
+    contrast=param.Number(default=100, bounds=(0,100),
+        inclusive_bounds=(True,True),doc="""
+        Brightness of the input patterns as a contrast (percent)."""),
+
+    # Toggle between the L, GCL, AL and GCAL models
+
+    gain_control = param.Boolean(default=True, doc="""
+        Whether or not gain-control (divisive lateral inhibitory) is to be
+        applied in the LGN"""),
+
+    homeostasis = param.Boolean(default=True, doc="""
+        Whether or not the homeostatic adaption should be applied in V1"""),
+
+    t_init = param.Number(default=0.20, doc="""
+        The initial V1 threshold value. This value is static in the L and GCL models
+        and adaptive in the AL and GCAL models.""")
+)
+
+# The retinal bounds are used for displaying patterns and for configuring the retinal sheet.
+retinal_bounds = sheet.BoundingBox(radius=p.area/2.0+0.25+0.375+0.5)
+
+### Input patterns
+
+# Scale of 1.0 is equivalent to 100% contrast.
+contrast_scale = p.contrast / 100.0
+if p.dataset=="Gaussian":
+    total_num_inputs=int(p.num_inputs*p.area**2)
+    inputs=[pattern.Gaussian(x=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
+                                                 ubound= (p.area/2.0+0.25),seed=p.input_seed+12+i),
+                       y=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
+                                                 ubound= (p.area/2.0+0.25),seed=p.input_seed+35+i),
+                       orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=p.input_seed+21+i),
+                       size=0.088388, aspect_ratio=4.66667, scale=contrast_scale)
+            for i in xrange(total_num_inputs)]
+    combined_inputs = pattern.SeparatedComposite(min_separation=0,generators=inputs,
+                                                 bounds = retinal_bounds)
+if p.dataset in ["Nature", "VGR"]:
+    # Do not randomly rotate GR patches (otherwise horizontal bias is meaningless)
+    patch_orientation = 0.0 if p.dataset=="VGR" else numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=p.input_seed+65)
+
+    if p.dataset=="Nature":
+        image_filenames= [param.resolve_path("images/shouval/combined%02d.png"%(i+1)) for i in xrange(25)]
+    else:
+        # Actual ordering used in the paper for historical reasons,
+        # makes little difference if ordering=range(1,26) is used instead.
+        ordering = [1,25,8,24,22,23,4,15,17,13,5,20,18,14,3,6,12,10,21,7,9,2,16,11,19]
+        image_filenames  = [param.resolve_path("images/VGR/combined%02d_VGR.png" % i) for i in ordering]
+
+    inputs=[pattern.image.FileImage(filename=f,
+                scale=contrast_scale,
+                size=10.0,
+                x=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=p.input_seed+12),
+                y=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=p.input_seed+36),
+                orientation=patch_orientation)  for f in image_filenames]
+
+    combined_inputs = pattern.Selector(generators=inputs)
+
+noise_ratio = (p.percent_noise / 100.0)
+disk_scale= 1.0 / (1.0 + noise_ratio)
+rand_scale= noise_ratio / (1.0 + noise_ratio)
+
+disks_inputs=[topo.pattern.Composite(operator=numpy.add,
+                   scale=contrast_scale,
+                   generators=[topo.pattern.Disk(
+                        x=numbergen.UniformRandom(lbound=-2.125,ubound=2.125, seed=p.input_seed+12),
+                        y=numbergen.UniformRandom(lbound=-2.125,ubound=2.125, seed=p.input_seed+36),
+                                                 size=2.0, aspect_ratio=1.0, scale = disk_scale,
+                                                 bounds=sheet.BoundingBox(radius=1.125),smoothing=0.1),
+                             topo.pattern.random.UniformRandom(scale=rand_scale)])]
+
+retina_inputs = topo.pattern.Selector(generators=disks_inputs)
+
+if p.retinal_waves == 0:
+    retina_inputs = combined_inputs
+else:
+    topo.sim.schedule_command(p.retinal_waves, 'topo.sim["Retina"].set_input_generator(combined_inputs, push_existing=False)')
+### Specify weight initialization, response function, and learning function
+projection.CFProjection.cf_shape=pattern.Disk(smoothing=0.0)
+projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
+projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
+projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+
+topo.sim['Retina']=sheet.GeneratorSheet(nominal_density=p.retina_density,
+    input_generator=retina_inputs, period=1.0, phase=0.05,
+    nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25+0.375+0.5))
+
+
+lgn_surroundg = pattern.Gaussian(size=0.25,aspect_ratio=1.0, output_fns=[transferfn.DivisiveNormalizeL1()])
+
+# LGN has lateral connections for divisive normalization for GCL and GCAL models
+for s in ['LGNOn','LGNOff']:
+
+    extra_kwargs = dict(tsettle=2,strict_tsettle=1) if p.gain_control else dict(tsettle=0,strict_tsettle=0)
+
+    topo.sim[s]=sheet.optimized.LISSOM_Opt(
+                    nominal_density=p.lgn_density,
+                    nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25+0.5),
+                    output_fns=[transferfn.misc.HalfRectify()],
+                    measure_maps=False, **extra_kwargs)
+
+    if p.gain_control:
+
+        topo.sim.connect(s,s,delay=0.05, name='LateralGC',
+                    dest_port=("Activity"),activity_group=(0.6, DivideWithConstant(c=0.11)),
+                    connection_type=projection.SharedWeightCFProjection,
+                    strength=0.6,weights_generator=lgn_surroundg,
+                    nominal_bounds_template=sheet.BoundingBox(radius=0.25))
+
+learning_rate = 0.01 if p.homeostasis else 0.0
+
+topo.sim["V1"] = sheet.lissom.LISSOM(nominal_density=p.cortex_density,
+    tsettle=16, plastic=True,
+    nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),
+    output_fns = [HomeostaticResponse(t_init=p.t_init, learning_rate=learning_rate)])
+
+topo.sim["V1"].joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt
+
+centerg   = pattern.Gaussian(size=0.07385,aspect_ratio=1.0,
+                             output_fns=[transferfn.DivisiveNormalizeL1()])
+
+surroundg = pattern.Gaussian(size=0.29540,aspect_ratio=1.0,
+                             output_fns=[transferfn.DivisiveNormalizeL1()])
+
+on_weights = pattern.Composite(generators=[centerg,surroundg],operator=numpy.subtract)
+
+off_weights = pattern.Composite(generators=[surroundg,centerg],operator=numpy.subtract)
+
+
+strength_factor = 6.0
+topo.sim.connect(
+    'Retina','LGNOn',delay=0.05,strength=2.33*strength_factor, name='Afferent',
+    connection_type=projection.SharedWeightCFProjection,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.375),
+    weights_generator=on_weights)
+
+topo.sim.connect(
+    'Retina','LGNOff',delay=0.05,strength=2.33*strength_factor, name='Afferent',
+    connection_type=projection.SharedWeightCFProjection,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.375),
+    weights_generator=off_weights)
+
+"Center surround (difference-of-Gaussian) weights successfully generated"
+
+# Adjust feedforward delays to allow a common measurement protocol with and without gain control.
+
+LGN_V1_delay = 0.05 if p.gain_control else 0.10
+
+topo.sim.connect(
+    'LGNOn','V1',delay=LGN_V1_delay,strength=p.aff_strength,name='LGNOnAfferent',
+    dest_port=('Activity','JointNormalize','Afferent'),
+    connection_type=projection.CFProjection,learning_rate=p.aff_lr,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
+    weights_generator= pattern.random.GaussianCloud(gaussian_size=2*0.27083),
+    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
+
+topo.sim.connect(
+    'LGNOff','V1',delay=LGN_V1_delay,strength=p.aff_strength,name='LGNOffAfferent',
+    dest_port=('Activity','JointNormalize','Afferent'),
+    connection_type=projection.CFProjection,learning_rate=p.aff_lr,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
+    weights_generator= pattern.random.GaussianCloud(gaussian_size=2*0.27083),
+    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
+
+"Afferent GaussianCloud weights successfully generated."
+
+lateral_excitatory_weights = pattern.Gaussian(aspect_ratio=1.0, size=0.05)
+
+topo.sim.connect(
+    'V1','V1',delay=0.05,strength=p.exc_strength,name='LateralExcitatory',
+    connection_type=projection.CFProjection,learning_rate=p.exc_lr,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.104),
+    weights_generator=lateral_excitatory_weights)
+
+"Lateral excitatory weights successfully generated"
+
+lateral_inhibitory_weights = pattern.random.GaussianCloud(gaussian_size=0.15)
+
+topo.sim.connect(
+    'V1','V1',delay=0.05,strength=-1.0*p.inh_strength,name='LateralInhibitory',
+    connection_type=projection.CFProjection,learning_rate=p.inh_lr,
+    nominal_bounds_template=sheet.BoundingBox(radius=0.22917),
+    weights_generator=lateral_inhibitory_weights)
+
+"Lateral inhibitory weights successfully generated"
+
+### Default locations for model editor
+topo.sim.grid_layout([[None,    'V1',     None],
+                      ['LGNOn', None,     'LGNOff'],
+                      [None,    'Retina', None]], xstart=150,item_scale=0.8)
+
+
+import topo.analysis.featureresponses
+topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier=2.0
+topo.analysis.featureresponses.FeatureCurveCommand.contrasts= [100, 80, 60, 40, 20, 10]

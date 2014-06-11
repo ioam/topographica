@@ -208,9 +208,3 @@ Have fun with Topographica, and be sure to subscribe to the
 .. _SOM: ../Tutorials/som_retinotopy.html
 .. _GCAL: ../Tutorials/gcal.html
 .. _topographica-announce: https://lists.sourceforge.net/lists/listinfo/topographica-announce
-
-.. toctree::
-   dependencies
-   update_script
-   win32notes
-

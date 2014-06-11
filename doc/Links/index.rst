@@ -62,7 +62,7 @@ described in `Bednar et al. Neuroinformatics, 2:275-302, 2004`_).
 
 Other useful simulators:
 
-`Neuron`_ and `GENESIS`_
+`Neuron`_, `GENESIS`_, and `MOOSE`_
 
 Detailed low-level modeling of neurons and small networks. It is
 possible to use these simulators for topographic maps, but the
@@ -71,13 +71,12 @@ users simulate much smaller networks. Note that there are now
 (3/2007) Python bindings for Neuron, so it should be practical to
 wrap a Neuron simulation into a Topographica Sheet for analysis.
 
-`Catacomb`_
+`Brian`_
 
-Highly graphical Java-based simulator covering numerous levels, from
-ion channels to behavioral experiments. Can be used for some of the
-same types of models supported by Topographica, but does not have an
-explicit focus on topographically organized areas. May not currently
-be maintained.
+Brian is a pure Python simulator (like Topographica) that supports
+spiking models using a very clear differential-equation-based
+specification style.  It's targeted more at networks of neurons than
+at organized maps, but can also be useful for maps.
 
 `NEST`_
 
@@ -131,6 +130,14 @@ Simple, basic artificial neural-network simulator (primarily
 abstract backpropagation networks, but also has support for Kohonen
 SOM models of topographic maps).
 
+`Catacomb`_
+
+Highly graphical Java-based simulator covering numerous levels, from
+ion channels to behavioral experiments. Can be used for some of the
+same types of models supported by Topographica, but does not have an
+explicit focus on topographically organized areas. May not currently
+be maintained.
+
 Other potentially useful simulators are listed at the `Emergent`_
 site.
 
@@ -150,6 +157,8 @@ site.
 .. _`Bednar et al. Neuroinformatics, 2:275-302, 2004`: http://nn.cs.utexas.edu/keyword?bednar:neuroinformatics04
 .. _Neuron: http://kacy.neuro.duke.edu/
 .. _GENESIS: http://www.genesis-sim.org/GENESIS/
+.. _MOOSE: http://moose.ncbs.res.in
+.. _Brian: http://briansimulator.org
 .. _Catacomb: http://askja.bu.edu/catacomb
 .. _NEST: http://www.nest-initiative.org
 .. _Bednar, Frontiers in Neuroinformatics 2009: http://dx.doi.org/10.3389/neuro.11.008.2009

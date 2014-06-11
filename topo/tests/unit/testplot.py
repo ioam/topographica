@@ -4,28 +4,21 @@ Test for the Plot class.
 
 
 import unittest
-from pprint import pprint
-from topo.plotting import plot
 from topo.base.sheet import *
-from topo.plotting.bitmap import RGBBitmap, HSVBitmap
 #from testsheetview import ImageGenerator
 
 SHOW_PLOTS = False
 
-
 ### JC: My new imports
-from topo.plotting.plot import TemplatePlot, make_template_plot
-import numpy.oldnumeric as Numeric
-from numpy.oldnumeric import zeros, divide, Float, ones,reshape,array
-from topo.base.boundingregion import BoundingBox
-from topo.base.sheetview import SheetView
-import numpy.oldnumeric.mlab as MLab
+from topo.plotting.plot import make_template_plot
+from numpy.oldnumeric import zeros, Float, array
 import numpy.oldnumeric.random_array as RandomArray
 
 import param
 
-from random import random
-
+from dataviews import SheetView, NdMapping
+from dataviews.ndmapping import AttrDict
+from dataviews.sheetviews import BoundingBox
 
 ### This function is defined here, where it might be useful for testing
 ### Plot
@@ -71,45 +64,66 @@ class TestPlot(unittest.TestCase):
 
     def setUp(self):
 
-        ### Simple case: we only pass a dictionnary to Plot()
+        ### Simple case: we only pass a dictionary to Plot()
         ### that does not belong to a Sheet:
-        self.view_dict = {}
+        views = {}
+
+        time = 0
+        metadata = AttrDict(timestamp=time)
 
         ### SheetView1:
         ### Find a way to assign randomly the matrix.
         self.matrix1 = zeros((10,10),Float) + RandomArray.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        self.sheet_view1 = SheetView((self.matrix1,self.bounds1),
-                                      src_name='TestInputParam')
+        sv = SheetView(self.matrix1, self.bounds1)
+        sv.metadata=metadata
+        self.sheet_view1 = NdMapping((None, sv))
+        self.sheet_view1.metadata = AttrDict(src_name='TestInputParam',
+                                            precedence=0.1, row_precedence=0.1,
+                                            cyclic_range=None, timestamp=time)
         self.key1 = 'sv1'
-        self.view_dict[self.key1] = self.sheet_view1
+        views[self.key1] = self.sheet_view1
 
         ### SheetView2:
         ### Find a way to assign randomly the matrix.
         self.matrix2 = zeros((10,10),Float) + 0.3
         self.bounds2 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        self.sheet_view2 = SheetView((self.matrix2,self.bounds2),
-                                      src_name='TestInputParam')
+        sv = SheetView(self.matrix2, self.bounds2)
+        sv.metadata=metadata
+        self.sheet_view2 = NdMapping((None, sv))
+        self.sheet_view2.metadata = AttrDict(src_name='TestInputParam',
+                                             precedence=0.2, row_precedence=0.2,
+                                             cyclic_range=None, timestamp=time)
         self.key2 = ('sv2',0,10)
-        self.view_dict[self.key2] = self.sheet_view2
+        views[self.key2] = self.sheet_view2
 
         ### SheetView3:
         ### Find a way to assign randomly the matrix.
         self.matrix3 = zeros((10,10),Float) + RandomArray.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        self.sheet_view3 = SheetView((self.matrix3,self.bounds3),
-                                      src_name='TestInputParam')
+        sv = SheetView(self.matrix3, self.bounds3)
+        sv.metadata=metadata
+        self.sheet_view3 = NdMapping((None, sv))
+        self.sheet_view3.metadata = AttrDict(src_name='TestInputParam',
+                                             precedence=0.3, row_precedence=0.3,
+                                             cyclic_range=None, timestamp=time)
         self.key3 = ('sv3',0,'hello',(10,0))
-        self.view_dict[self.key3] = self.sheet_view3
+        views[self.key3] = self.sheet_view3
 
         ### SheetView4: for testing clipping + different bounding box
         ### Find a way to assign randomly the matrix.
         self.matrix4 = zeros((10,10),Float) + 1.6
         self.bounds4 = BoundingBox(points=((-0.7,-0.7),(0.7,0.7)))
-        self.sheet_view4 = SheetView((self.matrix4,self.bounds4),
-                                      src_name='TestInputParam')
+        sv = SheetView(self.matrix4, self.bounds4)
+        sv.metadata=metadata
+        self.sheet_view4 = NdMapping((None, sv))
+        self.sheet_view4.metadata = AttrDict(src_name='TestInputParam',
+                                             precedence=0.4, row_precedence=0.4,
+                                             cyclic_range=None, timestamp=time)
         self.key4 = 'sv4'
-        self.view_dict[self.key4] = self.sheet_view4
+        views[self.key4] = self.sheet_view4
+
+        self.view_dict = {'Strength': views, 'Hue': views, 'Confidence': views}
 
         ### JCALERT! for the moment we can only pass a triple when creating plot
         ### adding more sheetView to test when plot will be fixed for accepting
@@ -159,13 +173,13 @@ class TestPlot(unittest.TestCase):
         ### also makes a sheet to test realease_sheetviews
 
         self.sheet = Sheet()
-        self.sheet.sheet_views[self.key1]=self.sheet_view1
-        self.sheet.sheet_views[self.key2]=self.sheet_view2
-        self.sheet.sheet_views[self.key3]=self.sheet_view3
-        self.sheet.sheet_views[self.key4]=self.sheet_view4
+        self.sheet.views.maps[self.key1]=self.sheet_view1
+        self.sheet.views.maps[self.key2]=self.sheet_view2
+        self.sheet.views.maps[self.key3]=self.sheet_view3
+        self.sheet.views.maps[self.key4]=self.sheet_view4
 
         plot_channels9 = {'Strength':self.key1,'Hue':self.key2,'Confidence':self.key3}
-        self.plot9 = make_template_plot(plot_channels9,self.sheet.sheet_views,density=10.0,name='plot9')
+        self.plot9 = make_template_plot(plot_channels9,self.sheet.views.maps,density=10.0,name='plot9')
 
 
 
@@ -356,3 +370,4 @@ class TestPlot(unittest.TestCase):
 if __name__ == "__main__":
 	import nose
 	nose.runmodule()
+

@@ -3,18 +3,15 @@ class TemplatePlotGroupPanel
 Panel for displaying preference maps and activity plot groups.
 """
 
-
-import copy
-
 from Tkinter import DISABLED, NORMAL
 from tkFileDialog import asksaveasfilename
 
-import param
 from param import normalize_path
 import paramtk as tk
 
 import topo.command.pylabplot
 from topo.plotting.plotgroup import TemplatePlotGroup
+from topo.base.sheet import Sheet
 
 from plotgrouppanel import SheetPanel
 
@@ -37,7 +34,7 @@ def available_plot_channels(plot):
     """
     available_channels = {}
     for name,channel in plot.channels.items():
-        if plot.view_dict.has_key(channel):
+        if channel in plot.view_dict[name]:
             available_channels[name]=channel
     return available_channels
 
@@ -50,50 +47,10 @@ class TemplatePlotGroupPanel(SheetPanel):
 
     plotgroup_type = TemplatePlotGroup
 
-    strength_only = param.Boolean(default=False,doc="""If true, disables all but the Strength channel of each plot,
-disabling all color coding for Strength/Hue/Confidence plots.""")
-
-    ####################################################################
-    # CEBALERT: Ugly hack!  Basic idea for method (deleting conf & hue
-    # from plot_templates) copied from previous tkgui.  Instead, we
-    # probably want a mechanism for doing this from the command line,
-    # probably a global 'monochrome' parameter that all plots respect,
-    # and then people can modify the plot templates directly if they
-    # need more control than that.
-    def _strength_only_hack(self):
-        # same as superclass, except that if strength only is true
-        # it temporarily removes hue&conf from plot_templates
-        original_templates = self.plotgroup.plot_templates
-        self.plotgroup.plot_templates = copy.deepcopy(self.plotgroup.plot_templates)
-        if self.strength_only:
-            for name,template in self.plotgroup.plot_templates:
-                for c in ['Confidence','Hue']:
-                    if c in template:
-                        del template[c]
-        return original_templates
-
-    def refresh_plots(self):
-        # same as superclass, except that if strength only is true
-        # it temporarily removes hue&conf from plot_templates
-        original_templates = self._strength_only_hack()
-        super(TemplatePlotGroupPanel,self).refresh_plots()
-        self.plotgroup.plot_templates = original_templates
-
-    def redraw_plots(self):
-        # same as superclass, except that if strength only is true
-        # it temporarily removes hue&conf from plot_templates
-        original_templates = self._strength_only_hack()
-        super(TemplatePlotGroupPanel,self).redraw_plots()
-        self.plotgroup.plot_templates = original_templates
-
-
     ## CB: update init args now we have no pgts.
     def __init__(self,master,plotgroup,**params):
 
         super(TemplatePlotGroupPanel,self).__init__(master,plotgroup,**params)
-
-        self.pack_param('strength_only',parent=self.control_frame_1,
-                        on_set=self.redraw_plots,side='right')
 
         # Display any plots that can be done with existing data, but
         # don't regenerate the SheetViews unless requested
@@ -139,10 +96,6 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         #self._sheet_menu.add_command(label="Print matrix values",
         #                             command=self.__print_matrix)
         #################################################################
-
-
-
-
 
     ### JABALERT: Should remove the assumption that the plot will be
     ### SHC (could e.g.  be RGB).
@@ -227,9 +180,9 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         plot = self._right_click_info['plot']
         description = "%s %s at time %s" % (plot.plot_src_name, plot.name, topo.sim.timestr())
         m=plot._get_matrix(channel)
-        view = plot.view_dict[plot.channels[channel]]
+        view = plot.view_dict[channel][plot.channels[channel]].last.data
         topo.command.pylabplot.gradientplot(m,title="Gradient: " + description,
-                                              cyclic=view.cyclic,cyclic_range=view.cyclic_range)
+                                            cyclic_range=view.cyclic_range)
 
     def __print_matrix(self,channel):
         plot = self._right_click_info['plot']
@@ -276,9 +229,6 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         print "%s %s" % (description, channels_info)
 
 
-
-
-
     def _dynamic_info_string(self,event_info,basic_text):
         """
         Also print whatever other channels are there and have views.
@@ -294,6 +244,39 @@ disabling all color coding for Strength/Hue/Confidence plots.""")
         return info_string
 
 
+class SheetPanel(TemplatePlotGroupPanel):
+
+    sheet_type = Sheet
+
+    def __init__(self,master,plotgroup,**params):
+        super(SheetPanel,self).__init__(master,plotgroup,**params)
+
+        self.pack_param('color_channel',parent=self.control_frame_2,
+                        on_set=self.change_color_channel,side="right")
 
 
+    def setup_plotgroup(self):
+        super(SheetPanel,self).setup_plotgroup()
+        self.populate_color_channel_param()
 
+
+    def change_color_channel(self):
+        for pt in self.plotgroup.plot_templates.values():
+            prefix = self.plotgroup.color_channel
+            if prefix is None:
+                pt.pop("Hue", None)
+                pt.pop("Confidence", None)
+            else:
+                pt["Hue"] = prefix + "Preference"
+                pt["Confidence"] = prefix + "Selectivity"
+        self.refresh_plots(update=False)
+
+
+    def populate_color_channel_param(self):
+        sheets = [s for s in topo.sim.objects(self.sheet_type).values()]
+        channels = ['None']
+        for sheet in sheets:
+            channels += [k.replace('Preference','') for k in sheet.views.maps.keys()
+                         if not k.startswith('_') and 'Preference' in k]
+        self.plotgroup.params()['color_channel'].objects = channels
+        self.plotgroup.color_channel = 'None'

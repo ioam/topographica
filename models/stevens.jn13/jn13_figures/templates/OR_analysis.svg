@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="337.34766"
+   height="151.81395"
+   id="svg5254"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="OR_template.svg">
+  <defs
+     id="defs5256">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5334">
+      <rect
+         style="color:#000000;fill:none;stroke:#ffffff;stroke-width:0.09620249;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect5336"
+         width="79.589745"
+         height="79.589745"
+         x="610.09998"
+         y="64.266068" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5334-2">
+      <rect
+         style="color:#000000;fill:none;stroke:#ffffff;stroke-width:0.09620249;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect5336-1"
+         width="79.589745"
+         height="79.589745"
+         x="610.09998"
+         y="64.266068" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8"
+     inkscape:cx="92.248867"
+     inkscape:cy="85.020325"
+     inkscape:document-units="px"
+     inkscape:current-layer="svg5254"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5259">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="+CFs"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-198.8711,-538.92535)"
+     style="display:inline">
+    <g
+       id="g5678"
+       transform="translate(-1.3793945e-6,-1.1633301e-5)">
+      <image
+         sodipodi:absref="/home/koba/Desktop/DB-stevens.jn13/jn13_figures/templates/CFs_[LABEL].png"
+         xlink:href="CFs_[LABEL].png"
+         y="540.75848"
+         x="359.61945"
+         id="image6402"
+         height="148.14771"
+         width="15.851269"
+         style="stroke-linecap:square;stroke-linejoin:round;display:inline" />
+      <image
+         sodipodi:absref="/home/koba/Desktop/DB-stevens.jn13/jn13_figures/templates/FFT_[LABEL].png"
+         xlink:href="FFT_[LABEL].png"
+         y="542.10693"
+         x="390.21472"
+         id="image6268"
+         height="145.45088"
+         width="145.45088"
+         style="stroke-linecap:square;stroke-linejoin:round;display:inline" />
+      <rect
+         style="color:#000000;fill:none;stroke:#000000;stroke-width:0.52409708;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect4139-0"
+         width="72.696304"
+         height="46.007122"
+         x="462.8024"
+         y="641.78552"
+         inkscape:label="HIST_[LABEL].svg" />
+      <image
+         sodipodi:absref="/home/koba/Desktop/DB-stevens.jn13/jn13_figures/templates/OR_[LABEL].png"
+         xlink:href="OR_[LABEL].png"
+         y="542.10693"
+         x="199.42421"
+         id="image6335"
+         height="145.45088"
+         width="145.45088"
+         style="stroke-linecap:square;stroke-linejoin:round;display:inline" />
+      <rect
+         style="color:#000000;fill:none;stroke:#000000;stroke-width:0.53548223;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect4131"
+         width="144.91537"
+         height="144.91534"
+         x="199.69197"
+         y="542.37463"
+         inkscape:label="OVERLAY_[LABEL].svg" />
+      <rect
+         y="541.8338"
+         x="199.15114"
+         height="145.99704"
+         width="145.99704"
+         id="rect8352"
+         style="fill:none;stroke:#000000;stroke-width:0.5474261;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline" />
+      <rect
+         y="541.8338"
+         x="389.94168"
+         height="145.99704"
+         width="145.99704"
+         id="rect8358"
+         style="color:#000000;fill:none;stroke:#000000;stroke-width:0.5474261;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="-CFs"
+     style="display:none">
+    <image
+       sodipodi:absref="/home/koba/Desktop/DB-stevens.jn13/jn13_figures/templates/FFT_[LABEL].png"
+       xlink:href="FFT_[LABEL].png"
+       y="0.87384433"
+       x="186.42259"
+       id="image6268-8"
+       height="150.06633"
+       width="150.06633"
+       style="stroke-linecap:square;stroke-linejoin:round;display:inline" />
+    <rect
+       inkscape:label="HIST_[LABEL].svg"
+       y="103.71558"
+       x="261.31351"
+       height="47.467022"
+       width="75.003105"
+       id="rect4139-0-6"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.54072773;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <image
+       sodipodi:absref="/home/koba/Desktop/DB-stevens.jn13/jn13_figures/templates/OR_[LABEL].png"
+       xlink:href="OR_[LABEL].png"
+       y="0.87390536"
+       x="0.87383771"
+       id="image6335-3"
+       height="150.06633"
+       width="150.06633"
+       style="stroke-linecap:square;stroke-linejoin:round;display:inline" />
+    <rect
+       inkscape:label="OVERLAY_[LABEL].svg"
+       y="1.1501505"
+       x="1.1500523"
+       height="149.51381"
+       width="149.51384"
+       id="rect4131-5"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.55247414;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:1.12959409;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect8352-9"
+       width="150.62981"
+       height="150.62981"
+       x="0.59206891"
+       y="0.59210604" />
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:1.12959409;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect8358-9"
+       width="150.62981"
+       height="150.62981"
+       x="186.14085"
+       y="0.59204501" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="-scalebox"
+     style="display:inline">
+    <rect
+       inkscape:label="SBAR_[LABEL].svg"
+       y="130.77292"
+       x="10.245821"
+       height="4.3493581"
+       width="148.20323"
+       id="rect4127"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.21817562;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="+scalebox"
+     style="display:none">
+    <rect
+       inkscape:label="SBOX_[LABEL].svg"
+       y="4.0039063e-06"
+       x="-2.6513671e-06"
+       height="151.81395"
+       width="151.81395"
+       id="rect232231"
+       style="opacity:0.74340012;color:#000000;fill:none;stroke:none;stroke-width:1.02221429;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+  </g>
+</svg>

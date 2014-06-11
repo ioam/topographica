@@ -14,9 +14,9 @@ import param
 import topo
 from topo.base.cf import CFProjection
 from topo.base.projection import ProjectionSheet, Projection
-from topo.misc.generatorsheet import GeneratorSheet
+from topo.base.generatorsheet import GeneratorSheet
 
-from templateplotgrouppanel import TemplatePlotGroupPanel
+from templateplotgrouppanel import SheetPanel
 
 
 
@@ -35,7 +35,7 @@ UNIT_PADDING = 1
 
 
 
-class ProjectionSheetPanel(TemplatePlotGroupPanel):
+class ProjectionSheetPanel(SheetPanel):
     """
     Abstract base class for panels relating to ProjectionSheets.
     """
@@ -72,7 +72,7 @@ class ProjectionSheetPanel(TemplatePlotGroupPanel):
     def setup_plotgroup(self):
         super(ProjectionSheetPanel,self).setup_plotgroup()
         self.populate_sheet_param()
-
+        self.populate_color_channel_param()
 
     def sheet_change(self):
         self.refresh_plots()

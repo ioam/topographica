@@ -25,21 +25,20 @@ from numpy import float64
 import param
 
 from simulation import EventProcessor
-from sheetcoords import SheetCoordinateSystem
-from boundingregion import BoundingBox, BoundingRegionParameter
+
 from functionfamily import TransferFn
 
+from dataviews.sheetviews import BoundingBox, BoundingRegionParameter,\
+    SheetCoordinateSystem, SheetView
 
 activity_type = float64
 
 class AttrDict(dict):
-    """
-    A dictionary type object that supports attribute access (e.g. for
-    IPython tab completion).
-    """
+    """Provides convenient attribute access."""
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
 
 # (disable W0223 because input_event is deliberately still not implemented)
 class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
@@ -86,14 +85,14 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
             incoming events.
             """)
 
-    precedence = param.Number(default = 0.1, softbounds=(0.0,1.0),doc="""
+    precedence = param.Number(default=0.1, softbounds=(0.0,1.0),doc="""
             Allows a sorting order for Sheets, e.g. in the GUI.""")
 
-    row_precedence = param.Number(default = 0.5, softbounds=(0.0,1.0),doc="""
+    row_precedence = param.Number(default=0.5, softbounds=(0.0,1.0),doc="""
             Allows grouping of Sheets before sorting precedence is
             applied, e.g. for two-dimensional plots in the GUI.""")
 
-    layout_location = param.NumericTuple(default = (-1,-1),precedence=-1,doc="""
+    layout_location = param.NumericTuple(default=(-1,-1),precedence=-1,doc="""
             Location for this Sheet in an arbitrary pixel-based space
             in which Sheets can be laid out for visualization.""")
 
@@ -107,14 +106,15 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
     def _get_density(self):
         return self.xdensity
 
-    density = property(_get_density,doc="""The sheet's true density (i.e. the xdensity, which is equal to the ydensity for a Sheet.)""")
+    density = property(_get_density,doc="""The sheet's true density (i.e. the
+        xdensity, which is equal to the ydensity for a Sheet.)""")
 
     def __init__(self,**params):
         """
         Initialize this object as an EventProcessor, then also as
         a SheetCoordinateSystem with equal xdensity and ydensity.
 
-        sheet_views is a dictionary that stores SheetViews,
+        views is an AttrDict, which stores associated measurements,
         i.e. representations of the sheet for use by analysis or plotting
         code.
         """
@@ -136,8 +136,10 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         # For non-plastic inputs
         self.__saved_activity = []
         self._plasticity_setting_stack = []
-        self.sheet_views =  AttrDict()
-        self.views = self.sheet_views
+
+        self.views = AttrDict()
+        self.views['maps'] = AttrDict()
+        self.views['curves'] = AttrDict()
 
 
     ### JABALERT: This should be deleted now that sheet_views is public
@@ -150,8 +152,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Delete the dictionary entry with key entry 'view_name' to save
         memory.
         """
-        if self.sheet_views.has_key(view_name):
-            del self.sheet_views[view_name]
+        if view_name in self.views.maps:
+            del self.views.maps[view_name]
 
 
     # CB: what to call this? sheetcoords()? sheetcoords_of_grid()? idxsheetcoords()?
@@ -299,4 +301,16 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         significant amount of data other than in the activity array.
         """
         return self.activity.nbytes
+
+
+    def __getitem__(self, coords):
+        metadata = AttrDict(precedence=self.precedence,
+                            row_precedence=self.row_precedence,
+                            timestamp=self.simulation.time())
+
+        sv = SheetView(self.activity.copy(), self.bounds,
+                       label=self.name+' Activity', value='Activity')[coords]
+        sv.metadata=metadata
+        return sv
+
 

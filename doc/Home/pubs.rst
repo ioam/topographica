@@ -5,6 +5,14 @@ Papers using or about Topographica
 Journal Articles
 ----------------
 
+-  Jean-Luc R. Stevens and James A. Bednar. 
+   `An automated and reproducible workflow for running and analyzing
+   neural simulations using Lancet and IPython Notebook`_.
+   *Frontiers in Neuroinformatics*, 7:44, 2013.
+-  Jan Antolik and Andrew Davison.
+   `Integrated workflows for spiking neuronal network simulations`_.
+   *Frontiers in Neuroinformatics*, 2013, 7:34. (Uses `Param`_ and
+   `ImaGen`_.)
 -  Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar. 
    `Mechanisms for stable, robust, and adaptive development of orientation
    maps in the primary visual cortex`_. *Journal of Neuroscience*, 
@@ -37,6 +45,9 @@ Journal Articles
 Book Chapters
 -------------
 
+-  James A. Bednar and Christopher E. Ball. Topographica. In
+   Eugene M. Izhikevich, editor, *The Encyclopedia of Computational
+   Neuroscience*. *Scholarpedia*, 2014. In preparation.
 -  James A. Bednar. Topographica. In Dieter Jaeger and Ranu Jung,
    editors, *The Encyclopedia of Computational Neuroscience*.
    Springer, 2013. In press.
@@ -44,10 +55,7 @@ Book Chapters
    unsupervised Hebbian self-organization. In *Growing Adaptive
    Machines: Combining Development and Learning in Artificial Neural
    Networks*, Studies in Computational Intelligence. Springer,
-   Berlin, 2012. In press.
--  James A. Bednar and Christopher E. Ball. Topographica. In
-   Eugene M. Izhikevich, editor, *The Encyclopedia of Computational
-   Neuroscience*. *Scholarpedia*, 2013. In preparation.
+   Berlin, 2013. In press.
 
 Conference Papers
 -----------------
@@ -137,6 +145,8 @@ to `Jim Bednar`_ so that they can be included here.
 .. _Development of maps of simple and complex cells in the primary visual cortex: http://dx.doi.org/10.3389/fncom.2011.00017
 .. _Modeling the emergence of whisker direction maps in rat barrel cortex: http://dx.doi.org/10.1371/journal.pone.0008778
 .. _`Topographica: Building and analyzing map-level simulations from Python, C/C++, MATLAB, NEST, or NEURON components`: http://dx.doi.org/10.3389/neuro.11.008.2009
+.. _Integrated workflows for spiking neuronal network simulations: http://dx.doi.org/10.3389/fninf.2013.00034
+.. _An automated and reproducible workflow for running and analyzing neural simulations using Lancet and IPython Notebook: http://dx.doi.org/10.3389/fninf.2013.00044
 .. _Understanding neural maps with Topographica: http://www.brains-minds-media.org/archive/1402
 .. _Modeling cortical maps with Topographica: http://nn.cs.utexas.edu/keyword?bednar:neurocomputing04-sw
 .. _Scaling self-organizing maps to model large cortical networks: http://nn.cs.utexas.edu/keyword?bednar:neuroinformatics04
@@ -153,3 +163,5 @@ to `Jim Bednar`_ so that they can be included here.
 .. _Self-organizing visual cortex model using a homeostatic plasticity mechanism: http://www.inf.ed.ac.uk/publications/thesis/online/IM060401.pdf
 .. _A self-organizing model of disparity maps in the primary visual cortex: http://www.inf.ed.ac.uk/publications/thesis/online/IM060400.pdf
 .. _Jim Bednar: mailto:jbednar@inf.ed.ac.uk
+.. _Param: http://ioam.github.io/param
+.. _ImaGen: http://ioam.github.io/imagen

@@ -1,7 +1,6 @@
 # Duplicates setup.py, doesn't it?
 include LICENSE.txt
 #recursive-include doc *.html *.png *.gif
-recursive-include paramtk/tcl *.tcl
 recursive-include examples *.ty
 recursive-include models *.ty
 recursive-include topo/tkgui/icons *.*

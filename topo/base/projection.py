@@ -8,12 +8,14 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from topo.misc.keyedlist import KeyedList # CEBALERT: not in base
+from dataviews import SheetView
+from collections import OrderedDict
+
+from topo.misc.attrdict import AttrDict
 
 from sheet import Sheet
 from simulation import EPConnection
 from functionfamily import TransferFn
-from sheetview import ProjectionView
 
 class SheetMask(param.Parameterized):
     """
@@ -289,9 +291,24 @@ class Projection(EPConnection):
                 of.restore_plasticity_state()
 
 
-    def get_projection_view(self, timestamp):
+    def projection_view(self, timestamp=None):
         """Returns the activity in a single projection"""
-        return ProjectionView((self.activity.copy(),self.dest.bounds),self,timestamp)
+        if timestamp is None:
+            timestamp = self.src.simulation.time()
+        sv = SheetView(self.activity.copy(), self.dest.bounds,
+                         label='Activity', title='%s {label}' % self.name)
+        sv.metadata=AttrDict(proj_src_name=self.src.name,
+                             precedence=self.src.precedence,
+                             proj_name=self.name,
+                             row_precedence=self.src.row_precedence,
+                             src_name=self.dest.name,
+                             timestamp=timestamp)
+        return sv
+
+
+    def get_projection_view(self, timestamp):
+        self.warning("Deprecated, call 'projection_view' method instead.")
+        return self.projection_view(timestamp)
 
 
     def n_bytes(self):
@@ -369,11 +386,13 @@ class ProjectionSheet(Sheet):
         functions.""")
 
 
-    def __init__(self,**params):
+    def __init__(self, **params):
         super(ProjectionSheet,self).__init__(**params)
         self.new_input = False
         self.mask.sheet = self
         self.old_a = self.activity.copy()*0.0
+        self.views['rfs'] = AttrDict()
+
 
     def _dest_connect(self, conn):
         """
@@ -429,7 +448,7 @@ class ProjectionSheet(Sheet):
         jointly normalised together, call
         __grouped_in_projection('JointNormalize').
         """
-        in_proj = KeyedList()
+        in_proj = OrderedDict()
         in_proj[None]=[] # Independent (ungrouped) connections
 
         for c in self.in_connections:
