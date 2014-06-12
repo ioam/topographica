@@ -581,9 +581,9 @@ def featuremapper_legacy():
                 metadata = dict(dimension_labels=['Time'])
                 metadata_names = ['cyclic_range', 'precedence',
                                   'row_precedence', 'src_name']
-                for param in metadata_names:
-                    if hasattr(sv, param):
-                        metadata[param] = getattr(sv, param)
+                for p in metadata_names:
+                    if hasattr(sv, p):
+                        metadata[p] = getattr(sv, p)
                 state['views'].maps[key] = NdMapping((sv.timestamp, new_sv),
                                                   **metadata)
         if 'curve_dict' in state:

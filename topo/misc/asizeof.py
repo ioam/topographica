@@ -1670,7 +1670,7 @@ class Asizer(object):
                 s[i] = self._sizer(o, 0, sized)
             t.append(s[i])
         if sized:
-            s = _sum([i.size for i in _values(s)])  # [] for Python 2.2
+            s = _sum([el.size for el in _values(s)])  # [] for Python 2.2
         else:
             s = _sum(_values(s))
         self._total += s  # accumulate
@@ -2516,9 +2516,9 @@ if __name__ == '__main__':
         t = len(_typedefs)
         w = len(str(t)) * ' '
         _printf('%s%d type definitions: basic- and itemsize (leng), kind ... %s', linesep, t, '-type[def]s')
-        for k, v in _sorted([(_prepr(k), v) for k, v in _items(_typedefs)]):  # [] for Python 2.2
-            s = '%(base)s and %(item)s%(leng)s, %(kind)s%(code)s' % v.format()
-            _printf('%s %s: %s', w, k, s)
+        for k2, v2 in _sorted([(_prepr(k1), v1) for k1, v1 in _items(_typedefs)]):  # [] for Python 2.2
+            s = '%(base)s and %(item)s%(leng)s, %(kind)s%(code)s' % v2.format()
+            _printf('%s %s: %s', w, k2, s)
 
     if _opts('-test'):
          # compare the results of flatsize() *without* using sys.getsizeof()
