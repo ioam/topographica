@@ -76,7 +76,7 @@ def flatten(l):
             sequence, j = stack.pop(-1)
             while j < len(sequence):
                 if type(sequence[j]) != list:
-                    k, j, lens = j, j+1, len(sequence)
+                    k, j = j, j+1
                     while j < len(sequence) and \
                           (type(sequence[j]) != list):
                         j += 1
