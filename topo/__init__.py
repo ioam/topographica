@@ -63,7 +63,8 @@ def version_int(v):
     """
     return int("%02d%02d%02d%05d" % v)
 
-__version__ = param.Version(release=(0,9,8), fpath=__file__, commit="$Format:%h$")
+__version__ = param.Version(release=(0,9,8), fpath=__file__,
+                            commit="$Format:%h$", reponame='topographica')
 commit  = __version__.commit
 version = tuple(list(__version__.release) +[__version__.commit_count])
 release = int("%02d%02d%02d%05d" % version)
