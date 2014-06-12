@@ -610,7 +610,7 @@ def t_action(option,opt_str,value,parser):
     from topo.tests.runtests import target_description
 
     if value is not None:
-        if value not in target_description:
+        if value not in ["quick","exhaustive"] and value not in target_description:
             print "\nCould not find test target %r.\n" % value
             local_targets =['list']
         else:
