@@ -234,7 +234,7 @@ except ImportError:
 # find an example of tkinter software displaying a gui exception on
 # the originating window.)
 def _tkinter_report_exception(widget):
-    exc, val, tb = sys.exc_type, sys.exc_value, sys.exc_traceback
+    exc, val = sys.exc_type, sys.exc_value
     msg = "(%s) %s"%(exc.__name__,val)
     # If the supplied widget has no master, it's probably the Tk
     # instance. In that case, resort to the 'last-one-set' hack (see
