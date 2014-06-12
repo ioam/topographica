@@ -34,7 +34,8 @@ from topo.plotting.plot import make_template_plot
 from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
-from dataviews.plots import DataPlot, GridLayout
+from dataviews import DataOverlay
+from dataviews.plots import DataPlot, GridLayout, CurvePlot
 
 from topo.command import Command
 
@@ -618,18 +619,26 @@ class tuning_curve(PylabPlotCommand):
         stack = p.sheet.views.curves[x_axis.capitalize()+"Tuning"]
         time = stack.dim_range('Time')[1]
 
-
-        curves = stack[time, :, :, :].sample(coords=p.coords).collate(p.x_axis.capitalize())
-        overlaid_curves = curves.overlay_dimensions(p.group_by)
-
-        if not isinstance(curves, GridLayout): curves = [overlaid_curves]
+        curves = []
+        if stack.dimension_labels[0] == 'X':
+            for coord in p.coords:
+                x, y = coord
+                current_stack = stack[x, y, time, :, :, :]
+                curve_stack = current_stack.sample(X=x, Y=y).collate(p.x_axis.capitalize())
+                curves.append(curve_stack.overlay_dimensions(p.group_by))
+        else:
+            current_stack = stack[time, :, :, :]
+            curve_stack = current_stack.sample(coords=p.coords).collate(p.x_axis.capitalize())
+            overlaid_curves = curve_stack.overlay_dimensions(p.group_by)
+            if not isinstance(curves, GridLayout): curves = [overlaid_curves]
 
         figs = []
         for coord, curve in zip(p.coords,curves):
             fig = plt.figure()
             ax = plt.subplot(111)
-            DataPlot(curve, center=p.center, relative_labels=p.relative_labels,
-                     show_legend=p.legend)(ax)
+            plot = DataPlot if isinstance(curve.last, DataOverlay) else CurvePlot
+            plot(curve, center=p.center, relative_labels=p.relative_labels,
+                 show_legend=p.legend)(ax)
             self._generate_figure(p, fig)
             figs.append((coord, fig))
 
