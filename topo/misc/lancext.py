@@ -21,7 +21,9 @@ from lancet import ViewFile, NumpyFile
 
 try:
    from external import sys_paths
-   submodules = sys_paths()
+   submodule_paths = sys_paths()
+   ordering = ['topographica', 'param', 'paramtk', 'imagen', 'lancet']
+   submodules = [[p for p in submodule_paths if p.endswith(name)][0] for name in ordering]
 except:
    submodules = []
 
