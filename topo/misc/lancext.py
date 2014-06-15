@@ -319,7 +319,8 @@ class TopoCommand(Command):
                  'snapshot':           self.snapshot,
                  'vc_info':            self.vc_info,
                  'save_global_params': self.save_global_params,
-                 'metadata_dir':       repr('metadata')}
+                 'metadata_dir':       repr('metadata'),
+                 'compress_metadata':  True}
 
       # Settings inferred using information from launcher ('info')
       tag_info = (info['batch_name'], info['batch_tag'])
