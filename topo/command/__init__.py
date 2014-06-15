@@ -17,6 +17,7 @@ import re
 import string
 import time
 import platform
+import tarfile
 
 import __main__
 
@@ -683,7 +684,13 @@ class run_batch(ParameterizedFunction):
         output_directory's name.""")
 
     metadata_dir = param.String(doc="""Specifies the name of a
-        subdirectory used to output metadata from run_batch if set.""")
+        subdirectory used to output metadata from run_batch (if set).""")
+
+
+    compress_metadata = param.Boolean(default=False, doc="""If set to
+         True with a metadata directory specified, the metadata
+         directory will be replaced by a tar.gz file. The compression
+         ratio is typically high due to repeated script_reprs.""")
 
 
     def _truncate(self,p,s):
@@ -696,7 +703,6 @@ class run_batch(ParameterizedFunction):
 
     def __call__(self,script_file,**params_to_override):
         p=ParamOverrides(self,params_to_override,allow_extra_keywords=True)
-
         import os
         import shutil
 
@@ -834,6 +840,13 @@ class run_batch(ParameterizedFunction):
             import traceback
             traceback.print_exc(file=sys.stdout)
             sys.stderr.write("Warning -- Error detected: execution halted.\n")
+
+        if p.metadata_dir != '' and p.compress_metadata:
+            _, name = os.path.split(metadata_dir)
+            tar = tarfile.open(normalize_path("%s.tar.gz" % name), "w:gz")
+            tar.add(metadata_dir, arcname=name)
+            tar.close()
+            shutil.rmtree(metadata_dir)
 
 
         print "\nBatch run completed at %s." % time.strftime("%a %d %b %Y %H:%M:%S +0000",
