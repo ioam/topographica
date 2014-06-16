@@ -65,10 +65,8 @@ package being released, e.g. param or imagen.
 #. Do "import <project> ; project.__version__.verify()" to test
    that the version information has been declared properly.
 #. Test creating a distribution and inspect the results:
-   ```
-   python setup.py sdist
-   cd dist; tar xvf <package>
-   ```
+   #. ```python setup.py sdist```
+   #. ```cd dist; tar xvf <package>```
    #. Use "ls -lFRA" or "find ." to ensure that no stray files were
       included and nothing is missing.
    #. Double-check the generated documentation to ensure that it is
