@@ -693,6 +693,12 @@ class run_batch(ParameterizedFunction):
          metadata directory will be replaced by either a tar.gz file
          or a .zip file.""")
 
+    save_script_repr = param.ObjectSelector(default='first',
+                    objects=[None, 'first', 'last', 'all'], doc="""
+       Whether to save a script_repr and if so, how often. If set to
+       'start, the script_repr is saved on the first time value, if
+       set to 'last' then it will be saved on the last time value. If
+       set to 'all' then a script repr is saved for all time values.""")
 
     def _truncate(self,p,s):
         """
@@ -827,7 +833,12 @@ class run_batch(ParameterizedFunction):
                 topo.sim.run(run_to - topo.sim.time())
                 p.analysis_fn()
                 normalize_path.prefix = metadata_dir
-                save_script_repr()
+                if p.save_script_repr == 'first'  and run_to == times[0]:
+                    save_script_repr()
+                elif p.save_script_repr == 'last'  and (run_to == times[-1]):
+                    save_script_repr()
+                elif p.save_script_repr == 'all':
+                    save_script_repr()
                 normalize_path.prefix = dirpath
                 elapsedtime=time.time()-starttime
                 param.Parameterized(name="run_batch").message(
