@@ -12,7 +12,7 @@ package being released, e.g. param or imagen.
    checked out in Git; if they do, make sure all of it gets checked
    in or does not need to be included in the release, and ensure
    that none of it will be checked in until the release is complete.
-#. Increment the release number in <project>.__init__.__version__
+#. Increment the release number in ``<project>.__init__.__version__``
    and the release notes in doc/index.rst.
 #. Update the documentation files, especially README.rst,
    doc/News/index\_text.rst, doc/Home/news\_text.rst and
@@ -57,37 +57,43 @@ package being released, e.g. param or imagen.
    might need to trigger new builds to check all platforms are ok.
 #. Save all open files from within any editor, and sure that they 
    have all been committed to git
-#. Tag the repository with something like 
-   "git tag -a v1.2.1 -m 'Release version 1.2.1'" and
-   "git push".  If you have to repeat this step, the next time you
-   will need "-f -a", not just "-a", and may need to push using
-   "git push -f origin v1.2.1".
-#. Do "import <project> ; project.__version__.verify()" to test
+#. Tag the repository with something like::
+
+   ``git tag -a v1.2.1 -m 'Release version 1.2.1'``
+   ``git push``
+   
+   If you have to repeat this step, the next time you
+   will need ``-f -a``, not just ``-a``, and may need to push using
+   ``git push -f origin v1.2.1``.
+#. In python, do ``import <project> ; project.__version__.verify()`` to test
    that the version information has been declared properly.
 #. Test creating a distribution and inspect the results:
 
-   #. ```python setup.py sdist```
-   #. ```cd dist; tar xvf <package>```
-   #. Use "ls -lFRA" or "find ." to ensure that no stray files were
+   #. ``python setup.py sdist``
+   #. ``cd dist; tar xvf <package>``
+   #. Use ``ls -lFRA`` or ``find .`` to ensure that no stray files were
       included and nothing is missing.
    #. Double-check the generated documentation to ensure that it is
       complete and was generated properly.
    #. Try out the source on various platforms, e.g. using virtual
       machines, ensuring that there are no errors. Also perform a
-      self-test on the various platforms ("nosetests" or
-      "./topographica -t quick -t exhaustive").
-#. Make a PyPI release by running "python setup.py register sdist upload"
+      self-test on the various platforms (``nosetests`` or
+      ``./topographica -t quick -t exhaustive``).
+#. Make a PyPI release by running::
+
+     python setup.py register sdist upload
+   
 #. Download the new package from https://pypi.python.org/pypi?name=<package>,
    again testing the issues listed in the previous step, but now
-   installing via virtualenv using ```pip install```, ```pip install
-   --upgrade```, etc.
+   installing via virtualenv using ``pip install``, ``pip install
+   --upgrade``, etc.
 #. If you find problems, go back to step 7 and start over.
 #. Publish Windows exe files on PyPi (from a Windows machine with git
-   installed): 
-   ```
-   python setup.py bdist_wininst --plat-name=win32 --user-access-control=auto upload
-python setup.py bdist_wininst --plat-name=win-amd64 --user-access-control=auto upload
-   ```
+   installed):: 
+   
+      python setup.py bdist_wininst --plat-name=win32 --user-access-control=auto upload
+      python setup.py bdist_wininst --plat-name=win-amd64 --user-access-control=auto upload
+   
 #. Check that the exe runs and installs correctly on Windows.
 #. When the package is ready, notify the other developers that they
    may once again push new code to the Git repository.
