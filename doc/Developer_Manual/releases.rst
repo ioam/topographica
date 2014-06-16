@@ -59,8 +59,8 @@ package being released, e.g. param or imagen.
    have all been committed to git
 #. Tag the repository with something like::
 
-   ``git tag -a v1.2.1 -m 'Release version 1.2.1'``
-   ``git push``
+     git tag -a v1.2.1 -m 'Release version 1.2.1'
+     git push
    
    If you have to repeat this step, the next time you
    will need ``-f -a``, not just ``-a``, and may need to push using
