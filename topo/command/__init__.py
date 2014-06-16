@@ -17,7 +17,7 @@ import re
 import string
 import time
 import platform
-import tarfile
+import tarfile, zipfile
 
 import __main__
 
@@ -687,10 +687,11 @@ class run_batch(ParameterizedFunction):
         subdirectory used to output metadata from run_batch (if set).""")
 
 
-    compress_metadata = param.Boolean(default=False, doc="""If set to
-         True with a metadata directory specified, the metadata
-         directory will be replaced by a tar.gz file. The compression
-         ratio is typically high due to repeated script_reprs.""")
+    compress_metadata = param.ObjectSelector(default=None,
+                              objects=[None, 'tar.gz', 'zip'], doc="""
+         If not None and a metadata directory is specified, the
+         metadata directory will be replaced by either a tar.gz file
+         or a .zip file.""")
 
 
     def _truncate(self,p,s):
@@ -841,12 +842,22 @@ class run_batch(ParameterizedFunction):
             traceback.print_exc(file=sys.stdout)
             sys.stderr.write("Warning -- Error detected: execution halted.\n")
 
-        if p.metadata_dir != '' and p.compress_metadata:
+        if p.metadata_dir != '' and p.compress_metadata == 'tar.gz':
             _, name = os.path.split(metadata_dir)
             tar = tarfile.open(normalize_path("%s.tar.gz" % name), "w:gz")
             tar.add(metadata_dir, arcname=name)
             tar.close()
             shutil.rmtree(metadata_dir)
+        elif p.metadata_dir != '' and p.compress_metadata == 'zip':
+            _, name = os.path.split(metadata_dir)
+            zipf = zipfile.ZipFile(normalize_path("%s.zip" % name), 'w')
+            zipf.write(metadata_dir, arcname=name)
+            for f in os.listdir(metadata_dir):
+                zipf.write(os.path.join(metadata_dir, f),
+                           os.path.join(p.metadata_dir,f))
+            zipf.close()
+            shutil.rmtree(metadata_dir)
+
 
 
         print "\nBatch run completed at %s." % time.strftime("%a %d %b %Y %H:%M:%S +0000",
