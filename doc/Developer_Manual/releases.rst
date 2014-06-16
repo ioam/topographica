@@ -5,6 +5,8 @@ Making Releases
 The latest version of an IOAM project is always available by Git, but
 we also make more stable versions available periodically. To make such
 a release, the steps we have followed in the past are listed below.
+Here <package> should be replaced with the GitHub project name of the
+package being released, e.g. param or imagen.
 
 #. Ensure that no one besides yourself has any modified files
    checked out in Git; if they do, make sure all of it gets checked
@@ -62,9 +64,11 @@ a release, the steps we have followed in the past are listed below.
    "git push -f origin v1.2.1".
 #. Do "import <project> ; project.__version__.verify()" to test
    that the version information has been declared properly.
-#. Make a PyPI release by running "python setup.py register sdist upload"
-#. Download the new package from https://pypi.python.org/pypi?name=<package>,
-   unpack the distribution archive and examine it:
+#. Test creating a distribution and inspect the results:
+   ```
+   python setup.py sdist
+   cd dist; tar xvf <package>
+   ```
    #. Use "ls -lFRA" or "find ." to ensure that no stray files were
       included and nothing is missing.
    #. Double-check the generated documentation to ensure that it is
@@ -73,10 +77,22 @@ a release, the steps we have followed in the past are listed below.
       machines, ensuring that there are no errors. Also perform a
       self-test on the various platforms ("nosetests" or
       "./topographica -t quick -t exhaustive").
-#. If you find problems, go back to step 6 and start over.
+#. Make a PyPI release by running "python setup.py register sdist upload"
+#. Download the new package from https://pypi.python.org/pypi?name=<package>,
+   again testing the issues listed in the previous step, but now
+   installing via virtualenv using ```pip install```, ```pip install
+   --upgrade```, etc.
+#. If you find problems, go back to step 7 and start over.
+#. Publish Windows exe files on PyPi (from a Windows machine with git
+   installed): 
+   ```
+   python setup.py bdist_wininst --plat-name=win32 --user-access-control=auto upload
+python setup.py bdist_wininst --plat-name=win-amd64 --user-access-control=auto upload
+   ```
+#. Check that the exe runs and installs correctly on Windows.
 #. When the package is ready, notify the other developers that they
-   may once again commit new code to the Git repository.
+   may once again push new code to the Git repository.
 #. Force build for the public web site for this project, and check
-   the results (should be updated automatically anyway). 
-#. Send an announcement to topographica-announce at lists.sf.net.
-
+   the results (should eventually be updated automatically anyway). 
+#. Send an announcement to topographica-announce at lists.sf.net and
+   neuroinfo@incf.org, if appropriate.
