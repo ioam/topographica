@@ -433,7 +433,7 @@ for e in eyes:
                         e+cone+'Retina'+n, e+'Blue-RedGreen'+' LGN'+l+n,
                         name='AfferentCenter'+cone,
                         delay=0.05,connection_type=projection.SharedWeightCFProjection,
-                        strength=4.7*(-1)**(1+center_polarities.index(l))/2,
+                        strength=strength_scale*(-1)**(1+center_polarities.index(l))/2,
                         nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius),
                         weights_generator=centerg)
 
@@ -442,7 +442,7 @@ for e in eyes:
                     e+'Blue'+'Retina'+n, e+'Blue-RedGreen'+' LGN'+l+n,
                     name='AfferentCenter'+'Blue',
                     delay=0.05,connection_type=projection.SharedWeightCFProjection,
-                    strength=4.7*(-1)**center_polarities.index(l),
+                    strength=strength_scale*(-1)**center_polarities.index(l),
                     nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius),
                     weights_generator=centerg)
 
