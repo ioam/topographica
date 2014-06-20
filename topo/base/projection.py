@@ -203,6 +203,7 @@ class Projection(EPConnection):
     def __init__(self,**params):
         super(Projection,self).__init__(**params)
         self.activity = array(self.dest.activity)
+        self.__saved_activity = []
         self._plasticity_setting_stack = []
 
 
@@ -304,6 +305,21 @@ class Projection(EPConnection):
                              src_name=self.dest.name,
                              timestamp=timestamp)
         return sv
+
+
+    def state_pop(self):
+        """
+        Pop the most recently pushed activity state of the stack.
+        """
+        self.activity = self.__saved_activity.pop()
+
+
+    def state_push(self):
+        """
+        Push the current activity state onto the stack.
+        """
+
+        self.__saved_activity.append(array(self.activity))
 
 
     def get_projection_view(self, timestamp):
@@ -608,6 +624,22 @@ class ProjectionSheet(Sheet):
         for proj in self.in_connections:
             if isinstance(proj,Projection):
                 proj.restore_plasticity_state()
+
+
+    def state_push(self):
+        """
+        Subclasses Sheet state_push to also push projection activities.
+        """
+        super(ProjectionSheet, self).state_push()
+        for p in self.projections().values(): p.state_push()
+
+
+    def state_pop(self):
+        """
+        Subclasses Sheet state_pop to also pop projection activities.
+        """
+        super(ProjectionSheet, self).state_pop()
+        for p in self.projections().values(): p.state_pop()
 
 
     def n_bytes(self):
