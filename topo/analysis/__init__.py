@@ -154,6 +154,17 @@ channels['ON_sub_OFF'] = ChannelOpts('ON_sub_OFF', "CF Weights * CF Weights")
 
 
 # Featuremapper hooks
+
+def empty_storage_hook(arg):
+    """Use this to unset storage hook because lambda will not work
+    with snapshots.
+
+    This function is used in notebook_setup.py of the topographica
+    IPython profile.
+    """
+    pass
+
+
 FeatureResponses.metadata_fns = [topo_metadata_fn]
 FeatureResponses.pattern_response_fn = pattern_response.instance()
 FeatureMaps.measurement_storage_hook = StorageHook.instance(sublabel='maps')
