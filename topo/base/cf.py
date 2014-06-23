@@ -699,9 +699,9 @@ class CFProjection(Projection):
     def cf_bounds(self,r,c):
         """Return the bounds of the specified ConnectionField."""
         return self.cfs[r,c].get_bounds(self.src)
-    
-    
-    def grid(self, rows=10, cols=10, lbrt=None, situated=False, **kwargs):
+
+
+    def grid(self, rows=11, cols=11, lbrt=None, situated=False, **kwargs):
         if lbrt is None:
             bounds = self.dest.bounds
             l, b, r, t = bounds.lbrt()
