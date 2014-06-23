@@ -702,18 +702,20 @@ class CFProjection(Projection):
 
 
     def grid(self, rows=11, cols=11, lbrt=None, situated=False, **kwargs):
+        xdensity, ydensity = self.dest.xdensity, self.dest.ydensity
+        l, b, r, t = self.dest.bounds.lbrt()
+        half_x_unit = ((r-l) / xdensity) / 2.
+        half_y_unit = ((t-b) / ydensity) / 2.
         if lbrt is None:
             bounds = self.dest.bounds
-            l, b, r, t = bounds.lbrt()
+            l, b, r, t = (l+half_x_unit, b+half_y_unit, r-half_x_unit, t-half_y_unit)
         else:
-            l, b, r, t = lbrt
-            bounds = BoundingBox(points=((l, b), (r, t)))
-
-        xd, yd = self.dest.xdensity, self.dest.ydensity
-        half_x_unit, half_y_unit = 1.0/xd, 1.0/yd
-
-        x, y = np.meshgrid(np.linspace(l+half_x_unit, r-half_x_unit, cols),
-                           np.linspace(b+half_y_unit, t-half_y_unit, rows))
+            l, b = self.dest.closest_cell_center(lbrt[0], lbrt[1])
+            r, t = self.dest.closest_cell_center(lbrt[2], lbrt[3])
+            bounds = BoundingBox(points=[(l-half_x_unit, b-half_y_unit),
+                                         (r+half_x_unit, t+half_y_unit)])
+        x, y = np.meshgrid(np.linspace(l, r, cols),
+                           np.linspace(b, t, rows))
         coords = zip(x.flat, y.flat)
 
         grid_items = {}
