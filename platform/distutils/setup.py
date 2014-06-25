@@ -3,7 +3,7 @@
 import sys
 from distutils.core import setup
 import glob
-import topo
+
 
 examples = glob.glob('examples/*.ty')
 models = glob.glob('models/*.ty')
@@ -77,7 +77,7 @@ setup_args.update(dict(
     # number of the next release combined with the svn revision
     # number, to match DEB convention. (Whereas for svn copy we are
     # using the opposite convention...)
-    version=str(topo.__version__),
+    version="0.9.8",
 
     description='A general-purpose neural simulator focusing on topographic maps.',
 
@@ -190,7 +190,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # When creating a release, check the version is set correctly.
-    if 'bdist_wininst' in sys.argv or 'upload' in sys.argv:
+    if 'upload' in sys.argv:
+        import topo
         topo.__version__.verify()
+        assert str(topo.__version__) == setup_args['version']
 
     setup(**setup_args)
