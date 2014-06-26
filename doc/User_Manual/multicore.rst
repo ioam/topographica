@@ -18,14 +18,14 @@ processor, and because most Topographica simulations rely heavily on
 memory accesses, you are unlikely to find that performance scales
 linearly with the number of cores.  Often, some of these cores will
 end up waiting while other cores access memory, giving you diminishing
-returns from the additional cores.  This issue is why leaving one core
-free for other processes is usually a good idea, at least for machines
-with more than a couple of cores.  You are only likely to find linear
-scaling for simulations involving high levels of computation per
-memory access, whereas most Topographica simulations involve simple
-computations performed on a very large number of memory elements.
-Even so, there is no reason not to use the extra cores if they are
-available!
+returns from the additional cores.  Thus there's usually not much harm
+from leaving one core free for other processes, such as your windowing
+system, at least for machines with more than a couple of cores.  You
+are only likely to find linear scaling for simulations involving high
+levels of computation per memory access, whereas most Topographica
+simulations involve simple computations performed on a very large
+number of memory elements.  Even so, there is no reason not to use the
+extra cores if they would otherwise go unused!
 
 
 Controlling OpenMP
@@ -44,7 +44,7 @@ OMP_NUM_THREADS=3 (for a four-core machine).  Or you can disable
 OpenMP altogether by specifying OMP_NUM_THREADS=1, to get
 single-threaded performance.
 
-Once Topographica is running, you can check that the right number of
+Once Topographica is running, you can check that the correct number of
 cores is being used by monitoring your system's processor usage
 externally, e.g. using the ``top`` command in Unix in a separate
 window.
