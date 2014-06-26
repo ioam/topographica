@@ -192,7 +192,6 @@ if __name__ == "__main__":
     # When creating a release, check the version is set correctly.
     if 'upload' in sys.argv:
         import topo
-        topo.__version__.verify()
-        assert str(topo.__version__) == setup_args['version']
+        topo.__version__.verify(setup_args['version'])
 
     setup(**setup_args)
