@@ -179,3 +179,6 @@ def load_ipython_extension(ip):
         from topo.command import runscript
         runscript.ns = ip.user_ns
         runscript.push = ip.push
+
+        from topo.misc.commandline import exec_startup_files
+        exec_startup_files()
