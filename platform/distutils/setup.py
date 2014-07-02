@@ -124,6 +124,12 @@ of `SciPy`_) for optimum performance.
    http://pypi.python.org/pypi/PIL
 .. _pip:
    http://pip.openplans.org/
+.. _Param:
+   http://ioam.github.io/param/
+.. _ParamTk:
+   http://ioam.github.io/paramtk/
+.. _ImaGen:
+   http://ioam.github.io/imagen/
 """,
 
     author= _topographica_devs,
