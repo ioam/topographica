@@ -56,8 +56,7 @@ p.add(
 
 # Using time dependent random streams.
 # Corresponding numbergen objects should be given suitable names.
-param.Dynamic.time_dependent=True
-numbergen.RandomDistribution.time_dependent = True
+topo.time_dependent()
 
 # input pattern
 sheet.GeneratorSheet.period = 1.0
