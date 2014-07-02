@@ -260,10 +260,15 @@ class ConnectionField(object):
         # that's specified (right now the size is assumed to be that
         # of the bounds)
         # shouldn't be extra computation of boundingbox because it's gone from Slice.__init__; could avoid extra lookups by getting straight from slice
-        w = weights_generator(x=x,y=y,bounds=self.get_bounds(input_sheet),
-                              xdensity=input_sheet.xdensity,
-                              ydensity=input_sheet.ydensity,
-                              mask=self.mask)
+
+        name = "CF (%.5f, %.5f)" % (x,y)
+        with param.Dynamic.time_fn as t:
+            t(0) # Always initialize weights at time zero.
+            w = weights_generator(x=x,y=y,bounds=self.get_bounds(input_sheet),
+                                  xdensity=input_sheet.xdensity,
+                                  ydensity=input_sheet.ydensity,
+                                  mask=self.mask,
+                                  name=name)
 
         # CEBALERT: unnecessary copy! Pass type to PG & have it draw
         # in that.  (Should be simple, except making it work for all
