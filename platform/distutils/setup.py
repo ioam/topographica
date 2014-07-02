@@ -93,7 +93,7 @@ Installation
 ============
 
 Please see http://topographica.org/Downloads for more complete
-instructions; a briefl summary for installation into an existing
+instructions; a brief summary for installation into an existing
 Python environment is given here.
 
 If you have `pip`_, you can use one of
