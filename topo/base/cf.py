@@ -176,6 +176,9 @@ class ConnectionField(object):
     def get_bounds(self,input_sheet):
         return self.input_sheet_slice.compute_bounds(input_sheet)
 
+    # Class attribute to switch to legacy weight generation if False
+    controlled_weight_generation = True
+
     # CEBALERT:
     # template and mask: usually created ONCE by CFProjection and
     # specified as a Slice and array (respectively). Otherwise,
@@ -261,14 +264,23 @@ class ConnectionField(object):
         # of the bounds)
         # shouldn't be extra computation of boundingbox because it's gone from Slice.__init__; could avoid extra lookups by getting straight from slice
 
-        name = "CF (%.5f, %.5f)" % (x,y)
-        with param.Dynamic.time_fn as t:
-            t(0) # Always initialize weights at time zero.
-            w = weights_generator(x=x,y=y,bounds=self.get_bounds(input_sheet),
-                                  xdensity=input_sheet.xdensity,
-                                  ydensity=input_sheet.ydensity,
-                                  mask=self.mask,
-                                  name=name)
+        pattern_params = dict(x=x,y=y,bounds=self.get_bounds(input_sheet),
+                              xdensity=input_sheet.xdensity,
+                              ydensity=input_sheet.ydensity,
+                              mask=self.mask)
+
+        controlled_weights = (param.Dynamic.time_dependent
+                              and isinstance(param.Dynamic.time_fn, param.Time)
+                              and self.controlled_weight_generation)
+
+        if controlled_weights:
+            with param.Dynamic.time_fn as t:
+                t(0)                             # Initialize weights at time zero.
+                name = "CF (%.5f, %.5f)" % (x,y) # Controls random streams
+                w = weights_generator(**dict(pattern_params, name=name))
+        else:
+            w = weights_generator(**pattern_params)
+
 
         # CEBALERT: unnecessary copy! Pass type to PG & have it draw
         # in that.  (Should be simple, except making it work for all
