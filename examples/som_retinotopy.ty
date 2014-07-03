@@ -58,6 +58,9 @@ p.add(
 # Corresponding numbergen objects should be given suitable names.
 topo.time_dependent()
 
+from topo.base.cf import ConnectionField
+ConnectionField.controlled_weight_generation = False
+
 # input pattern
 sheet.GeneratorSheet.period = 1.0
 sheet.GeneratorSheet.phase = 0.05
@@ -86,7 +89,7 @@ topo.sim['V1'] = sheet.CFSheet(
 
 topo.sim.connect('Retina','V1',name='Afferent',delay=0.05,
     connection_type=projection.CFProjection,
-    weights_generator = pattern.random.UniformRandom(),
+    weights_generator = pattern.random.UniformRandom(time_dependent=False),
     nominal_bounds_template=sheet.BoundingBox(radius=1.0), # fully connected network.
     learning_rate=numbergen.ExponentialDecay(
         starting_value = p.alpha_0,
