@@ -177,7 +177,7 @@ class ConnectionField(object):
         return self.input_sheet_slice.compute_bounds(input_sheet)
 
     # Class attribute to switch to legacy weight generation if False
-    controlled_weight_generation = True
+    independent_weight_generation = True
 
     # CEBALERT:
     # template and mask: usually created ONCE by CFProjection and
@@ -271,7 +271,7 @@ class ConnectionField(object):
 
         controlled_weights = (param.Dynamic.time_dependent
                               and isinstance(param.Dynamic.time_fn, param.Time)
-                              and self.controlled_weight_generation)
+                              and self.independent_weight_generation)
 
         if controlled_weights:
             with param.Dynamic.time_fn as t:
