@@ -584,7 +584,7 @@ class CFProjection(Projection):
         The default of 1 gives a minimum matrix of 3x3. 0 would
         allow a 1x1 matrix.""")
 
-    hash_format = param.String(default="{name}-{src}", doc="""
+    hash_format = param.String(default="{name}-{src}-{dest}", doc="""
        Format string to determine the hash value used to initialize
        random weight generation. Format keys available include {name}
        {src} and {dest}.""")
@@ -688,7 +688,7 @@ class CFProjection(Projection):
                                              self.mask_threshold)
             label = self.hash_format.format(name=self.name,
                                             src=self.src.name,
-                                            dst=self.dest.name)
+                                            dest=self.dest.name)
 
             CF = self.cf_type(self.src, x=x, y=y,
                               template=self._slice_template,
