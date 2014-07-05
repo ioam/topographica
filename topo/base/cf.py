@@ -190,7 +190,7 @@ class ConnectionField(object):
     def __init__(self,input_sheet,x=0.0,y=0.0,template=BoundingBox(radius=0.1),
                  weights_generator=patterngenerator.Constant(),
                  mask=patterngenerator.Constant(),
-                 output_fns=None,min_matrix_radius=1):
+                 output_fns=None,min_matrix_radius=1, label=None):
         """
         Create weights at the specified (x,y) location on the
         specified input_sheet.
@@ -275,8 +275,9 @@ class ConnectionField(object):
 
         if controlled_weights:
             with param.Dynamic.time_fn as t:
-                t(0)                             # Initialize weights at time zero.
-                name = "CF (%.5f, %.5f)" % (x,y) # Controls random streams
+                t(0)                        # Initialize weights at time zero.
+                # Controls random streams
+                name = "%s_CF (%.5f, %.5f)" % ('' if label is None else label, x,y)
                 w = weights_generator(**dict(pattern_params, name=name))
         else:
             w = weights_generator(**pattern_params)
@@ -583,6 +584,10 @@ class CFProjection(Projection):
         The default of 1 gives a minimum matrix of 3x3. 0 would
         allow a 1x1 matrix.""")
 
+    hash_format = param.String(default="{name}-{src}", doc="""
+       Format string to determine the hash value used to initialize
+       random weight generation. Format keys available include {name}
+       {src} and {dest}.""")
 
     precedence = param.Number(default=0.8)
 
@@ -681,12 +686,16 @@ class CFProjection(Projection):
                 mask_template = _create_mask(self.cf_shape,self.bounds_template,
                                              self.src,self.autosize_mask,
                                              self.mask_threshold)
+            label = self.hash_format.format(name=self.name,
+                                            src=self.src.name,
+                                            dst=self.dest.name)
 
             CF = self.cf_type(self.src, x=x, y=y,
                               template=self._slice_template,
                               weights_generator=self.weights_generator,
                               mask=mask_template,
-                              min_matrix_radius=self.min_matrix_radius)
+                              min_matrix_radius=self.min_matrix_radius,
+                              label = label)
         except NullCFError:
             if self.allow_null_cfs:
                 CF = None
