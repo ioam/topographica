@@ -63,7 +63,6 @@ def matrix_hsv_to_rgb(hMapArray,sMapArray,vMapArray):
 class TestPlot(unittest.TestCase):
 
     def setUp(self):
-        import numpy.oldnumeric.random_array as RandomArray
         ### Simple case: we only pass a dictionary to Plot()
         ### that does not belong to a Sheet:
         views = {}
@@ -73,7 +72,7 @@ class TestPlot(unittest.TestCase):
 
         ### SheetView1:
         ### Find a way to assign randomly the matrix.
-        self.matrix1 = np.zeros((10,10),dtype=np.float) + RandomArray.random((10,10))
+        self.matrix1 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix1, self.bounds1)
         sv.metadata=metadata
@@ -99,7 +98,7 @@ class TestPlot(unittest.TestCase):
 
         ### SheetView3:
         ### Find a way to assign randomly the matrix.
-        self.matrix3 = np.zeros((10,10),dtype=np.float) + RandomArray.random((10,10))
+        self.matrix3 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix3, self.bounds3)
         sv.metadata=metadata

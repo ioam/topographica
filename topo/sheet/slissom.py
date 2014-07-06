@@ -89,7 +89,6 @@ class SLISSOM(SettlingCFSheet):
         This function also updates and maintains internal values such as
         membrane_potential, spike, etc.
         """
-        import numpy.oldnumeric.random_array as RandomArray
         self.activity *= 0.0
 
         for proj in self.in_connections:
@@ -102,7 +101,7 @@ class SLISSOM(SettlingCFSheet):
         # Add noise, based on the noise_rate.
         if self.noise_rate > 0.0:
             self.activity = self.activity * (1.0-self.noise_rate) \
-                + RandomArray.random(self.activity.shape) * self.noise_rate
+                + np.random.random(self.activity.shape) * self.noise_rate
 
         # Thresholding: baseline + dynamic threshold + absolute refractory
         # period
