@@ -16,7 +16,7 @@ from topo.transferfn import PiecewiseLinear, DivisiveNormalizeL1
 from topo.transferfn import DivisiveNormalizeL2, DivisiveNormalizeLinf
 from topo.transferfn import DivisiveNormalizeLp, HomeostaticMaxEnt
 
-from numpy.oldnumeric import array
+import numpy as np
 from numpy.testing import assert_array_equal
 from math import sqrt
 
@@ -26,11 +26,11 @@ class TestPiecewiseLinear(unittest.TestCase):
 
     def setUp(self):
 
-        self.a1 = array([[0.5,-1.0,0.99],
-                        [1.001,-0.001,0.6]])
+        self.a1 = np.array([[0.5,-1.0,0.99],
+                            [1.001,-0.001,0.6]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                        [4.0,3.0,11.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,11.0]])
 
         self.fn1 = PiecewiseLinear()
         self.fn2 = PiecewiseLinear(lower_bound = 0.1,upper_bound = 0.5)
@@ -39,22 +39,22 @@ class TestPiecewiseLinear(unittest.TestCase):
     def test_piecewiselinear(self):
         # Test as a procedure
 
-        fn1_a1 = array([[0.5,0.0,0.99],
-                       [1.0,0.0,0.6]])
+        fn1_a1 = np.array([[0.5,0.0,0.99],
+                           [1.0,0.0,0.6]])
 
-        fn2_a1 = array([[1.0, 0.0, 1.0],
-                       [1.0,0.0, 1.0]])
+        fn2_a1 = np.array([[1.0, 0.0, 1.0],
+                           [1.0,0.0, 1.0]])
 
-        fn3_a2 = array([[0.1,0.0,0.7],
-                       [0.4,0.3,1.0]])
+        fn3_a2 = np.array([[0.1,0.0,0.7],
+                           [0.4,0.3,1.0]])
 
 
         self.fn1(self.a1)
         for item1,item2 in zip(self.a1.ravel(),fn1_a1.ravel()):
             self.assertAlmostEqual(item1, item2)
 
-        self.a1 = array([[0.5,-1.0,0.99],
-                        [1.001,-0.001,0.6]])
+        self.a1 = np.array([[0.5,-1.0,0.99],
+                            [1.001,-0.001,0.6]])
         self.fn2(self.a1)
         for item1,item2 in zip(self.a1.ravel(),fn2_a1.ravel()):
             self.assertAlmostEqual(item1, item2)
@@ -69,11 +69,11 @@ class TestDivisiveNormalizeL1(unittest.TestCase):
 
     def setUp(self):
 
-        self.a1 = array([[0.3,0.6,0.7],
-                        [0.8,0.4,0.2]])
+        self.a1 = np.array([[0.3,0.6,0.7],
+                            [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                        [4.0,3.0,11.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,11.0]])
 
         self.fn1 = DivisiveNormalizeL1()
         self.fn2 = DivisiveNormalizeL1(norm_value=4.0)
@@ -98,11 +98,11 @@ class TestDivisiveNormalizeL1(unittest.TestCase):
         for item1,item2 in zip(self.a2.ravel(),fn1_a2.ravel()):
             self.assertAlmostEqual(item1, item2)
 
-        self.a1 = array([[0.3,0.6,0.7],
-                        [0.8,0.4,0.2]])
+        self.a1 = np.array([[0.3,0.6,0.7],
+                            [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                        [4.0,3.0,11.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,11.0]])
 
         self.fn2(self.a1)
         for item1,item2 in zip(self.a1.ravel(),fn2_a1.ravel()):
@@ -117,12 +117,12 @@ class TestDivisiveLengthNormalize(unittest.TestCase):
 
     def setUp(self):
 
-        self.a1 = array([[0.3,0.6,0.7],
-                        [0.8,0.4,0.2]])
+        self.a1 = np.array([[0.3,0.6,0.7],
+                            [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                         [4.0,3.0,11.0],
-                         [2.0,5.0,9.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,11.0],
+                            [2.0,5.0,9.0]])
 
         self.fn1 = DivisiveNormalizeL2()
         self.fn2 = DivisiveNormalizeL2(norm_value=4.0)
@@ -147,12 +147,12 @@ class TestDivisiveLengthNormalize(unittest.TestCase):
         for item1,item2 in zip(self.a2.ravel(),fn1_a2.ravel()):
             self.assertAlmostEqual(item1, item2)
 
-        self.a1 = array([[0.3,0.6,0.7],
-                        [0.8,0.4,0.2]])
+        self.a1 = np.array([[0.3,0.6,0.7],
+                            [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                         [4.0,3.0,11.0],
-                         [2.0,5.0,9.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,11.0],
+                            [2.0,5.0,9.0]])
 
 
         self.fn2(self.a1)
@@ -168,12 +168,12 @@ class TestDivisiveMaxNormalize(unittest.TestCase):
 
     def setUp(self):
 
-        self.a1 = array([[0.3,0.6,0.7],
-                        [0.8,0.4,0.2]])
+        self.a1 = np.array([[0.3,0.6,0.7],
+                            [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                         [4.0,3.0,-11.0],
-                         [2.0,5.0,9.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,-11.0],
+                            [2.0,5.0,9.0]])
 
         self.fn1 = DivisiveNormalizeLinf()
         self.fn2 = DivisiveNormalizeLinf(norm_value=3.0)
@@ -195,12 +195,12 @@ class TestDivisiveMaxNormalize(unittest.TestCase):
         for item1,item2 in zip(self.a2.ravel(),fn1_a2.ravel()):
             self.assertAlmostEqual(item1, item2)
 
-        self.a1 = array([[0.3,0.6,0.7],
-                        [0.8,0.4,0.2]])
+        self.a1 = np.array([[0.3,0.6,0.7],
+                            [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                         [4.0,3.0,-11.0],
-                         [2.0,5.0,9.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,-11.0],
+                            [2.0,5.0,9.0]])
 
         self.fn2(self.a1)
         for item1,item2 in zip(self.a1.ravel(),fn2_a1.ravel()):
@@ -215,12 +215,12 @@ class TestDivisiveLpNormalize(unittest.TestCase):
 
     def setUp(self):
 
-        self.a1 = array([[0.3,0.6,0.7],
-                        [0.8,0.4,0.2]])
+        self.a1 = np.array([[0.3,0.6,0.7],
+                            [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
-                         [4.0,3.0,-11.0],
-                         [2.0,5.0,9.0]])
+        self.a2 = np.array([[1.0,-1.0,7.0],
+                            [4.0,3.0,-11.0],
+                            [2.0,5.0,9.0]])
 
         # The default value of p is 2, so in this case, same as L2
         self.fn1 = DivisiveNormalizeLp()
@@ -253,10 +253,10 @@ class TestDivisiveLpNormalize(unittest.TestCase):
         for item1,item2 in zip(self.a2.ravel(),fn1_a2.ravel()):
             self.assertAlmostEqual(item1, item2)
 
-        self.a1 = array([[0.3,0.6,0.7],
+        self.a1 = np.array([[0.3,0.6,0.7],
                         [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
+        self.a2 = np.array([[1.0,-1.0,7.0],
                          [4.0,3.0,-11.0],
                          [2.0,5.0,9.0]])
 
@@ -267,10 +267,10 @@ class TestDivisiveLpNormalize(unittest.TestCase):
         for item1,item2 in zip(self.a2.ravel(),fn2_a2.ravel()):
             self.assertAlmostEqual(item1, item2)
 
-        self.a1 = array([[0.3,0.6,0.7],
+        self.a1 = np.array([[0.3,0.6,0.7],
                         [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
+        self.a2 = np.array([[1.0,-1.0,7.0],
                          [4.0,3.0,-11.0],
                          [2.0,5.0,9.0]])
 
@@ -289,10 +289,10 @@ class TestDivisiveLpNormalize(unittest.TestCase):
 
         # The rest of this procedure might be redundant (already covered above)
 
-        self.a1 = array([[0.3,0.6,0.7],
+        self.a1 = np.array([[0.3,0.6,0.7],
                         [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
+        self.a2 = np.array([[1.0,-1.0,7.0],
                          [4.0,3.0,-11.0],
                          [2.0,5.0,9.0]])
 
@@ -304,10 +304,10 @@ class TestDivisiveLpNormalize(unittest.TestCase):
         for item1,item2 in zip(self.a2.ravel(),fn1_a2.ravel()):
             self.assertAlmostEqual(item1, item2)
 
-        self.a1 = array([[0.3,0.6,0.7],
+        self.a1 = np.array([[0.3,0.6,0.7],
                         [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
+        self.a2 = np.array([[1.0,-1.0,7.0],
                          [4.0,3.0,-11.0],
                          [2.0,5.0,9.0]])
 
@@ -320,10 +320,10 @@ class TestDivisiveLpNormalize(unittest.TestCase):
 
 
 
-        self.a1 = array([[0.3,0.6,0.7],
+        self.a1 = np.array([[0.3,0.6,0.7],
                         [0.8,0.4,0.2]])
 
-        self.a2 = array([[1.0,-1.0,7.0],
+        self.a2 = np.array([[1.0,-1.0,7.0],
                          [4.0,3.0,-11.0],
                          [2.0,5.0,9.0]])
 
@@ -342,7 +342,7 @@ class TestTransferFnWithRandomState(unittest.TestCase):
 
     def setUp(self):
 
-        self.a = array([[0.3,0.6,0.7],
+        self.a = np.array([[0.3,0.6,0.7],
                         [0.8,0.4,0.2]])
 
         self.hme = HomeostaticMaxEnt()

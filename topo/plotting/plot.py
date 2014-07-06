@@ -5,9 +5,7 @@ Plot class.
 import copy
 from math import sin, cos
 
-import numpy
-from numpy.oldnumeric import zeros, ones, Float, divide
-
+import numpy as np
 import param
 from dataviews.ndmapping import NdMapping
 from topo.base.sheetcoords import SheetCoordinateSystem,Slice
@@ -303,9 +301,9 @@ class TemplatePlot(Plot):
 
              if range_min==range_max:
                   if range_min>0:
-                       resu = ones(a.shape)
+                       resu = np.ones(a.shape)
                   else:
-                       resu = zeros(a.shape)
+                       resu = np.zeros(a.shape)
              else:
                   a_offset = a - range_min
                   resu = a_offset/(range_max-range_min)
@@ -325,12 +323,12 @@ class TemplatePlot(Plot):
                   max_a_offset = a_offset.max()
 
                   if max_a_offset>0:
-                       a = divide(a_offset,float(max_a_offset))
+                       a = np.divide(a_offset,float(max_a_offset))
                   else:
                        if min(a.ravel())<=0:
-                            a=zeros(a.shape,Float)
+                            a=np.zeros(a.shape,dtype=np.float)
                        else:
-                            a=ones(a.shape,Float)
+                            a=np.ones(a.shape,dtype=np.float)
                   return a
 
 
@@ -351,7 +349,7 @@ class TemplatePlot(Plot):
         # into SheetCoordinateSystem.
         if plot_bounding_box.containsbb_exclusive(box):
              ct = SheetCoordinateSystem(plot_bounding_box,density,density)
-             new_mat = zeros(ct.shape,Float)
+             new_mat = np.zeros(ct.shape,dtype=np.float)
              r1,r2,c1,c2 = Slice(box,ct)
              new_mat[r1:r2,c1:c2] = mat
         else:
@@ -421,8 +419,8 @@ class SHCPlot(TemplatePlot):
 
         Applies normalizing and cropping if required.
         """
-        zero=zeros(shape,Float)
-        one=ones(shape,Float)
+        zero=np.zeros(shape,dtype=np.float)
+        one=np.ones(shape,dtype=np.float)
 
         s,h,c = hsc_matrices
         # Determine appropriate defaults for each matrix
@@ -504,7 +502,7 @@ class RGBPlot(TemplatePlot):
 
         Applies normalizing and cropping if required.
         """
-        zero=zeros(shape,Float)
+        zero=np.zeros(shape,dtype=np.float)
 
         r,g,b = rgb_matrices
         # Determine appropriate defaults for each matrix
@@ -638,16 +636,16 @@ class MultiOrPlot(TemplatePlot):
         is the selectivity. The list is ordered by the orientation preference.
         """
 
-        vertices_from_or        = numpy.vectorize( self.__vertices_from_or, otypes=[numpy.object_] )
+        vertices_from_or        = np.vectorize( self.__vertices_from_or, otypes=[np.object_] )
         mat_list                = []
         for o, s in matrices:
             a   = s.mean()
             d   = s.std()
             ad  = a + d
-        if isinstance( ad, numpy.number ) and ad > 0:
+        if isinstance( ad, np.number ) and ad > 0:
             mat_list.append( ( vertices_from_or( o ), ( s - d ) / ad ) )
 
-        lines   = numpy.empty( shape, numpy.object_ )
+        lines   = np.empty( shape, np.object_ )
         for x in range( shape[ 0 ] ):
             for y in range( shape[ 1 ] ):
                 os_list = []

@@ -12,13 +12,10 @@
 ### visualize matrices during debugging.
 
 import unittest
+import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-from numpy.oldnumeric import array,Float,pi
-## from numpy.oldnumeric.mlab import rot90
-
 from param import resolve_path
-
 from topo.base.boundingregion import BoundingBox
 from topo.pattern.image import FileImage
 from topo.transferfn import IdentityTF
@@ -32,7 +29,7 @@ class TestImage(unittest.TestCase):
         Test vertical positioning for even sheet, odd image and horizontal
         positioning for even image, even sheet.
         """
-        image_array = array(
+        image_array = np.array(
 [[  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,],
  [   0.        ,  34.        ,  68.        , 102.        , 136.        ,
@@ -48,7 +45,7 @@ class TestImage(unittest.TestCase):
  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,],
  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
-         96.59090909,  96.59090909,  96.59090909,]],Float)
+         96.59090909,  96.59090909,  96.59090909,]],dtype=np.float)
 
 
         image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
@@ -75,7 +72,7 @@ class TestImage(unittest.TestCase):
         FileImage is smaller than Sheet on which it's displayed.
         """
         pass
-##         image_array = array(
+##         image_array = np.array(
 ## [[  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
 ##          96.59090909,  96.59090909,  96.59090909,  96.59090909,],
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
@@ -93,7 +90,7 @@ class TestImage(unittest.TestCase):
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
 ##          96.59090909,  96.59090909,  96.59090909,  96.59090909,],
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
-##          96.59090909,  96.59090909,  96.59090909,  96.59090909,]],Float)
+##          96.59090909,  96.59090909,  96.59090909,  96.59090909,]],dtype=np.float)
 
 
 ##         image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
@@ -114,7 +111,7 @@ class TestImage(unittest.TestCase):
         """
         ### Twice the default BoundingBox dimensions, image size of 2.0.
         ### In this case, 8 units represent 1.0 in sheet coordinates.
-        image_array = array(
+        image_array = np.array(
 [[  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
@@ -178,7 +175,7 @@ class TestImage(unittest.TestCase):
  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
-         96.59090909,]],Float)
+         96.59090909,]],dtype=np.float)
 
 
         image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
@@ -201,7 +198,7 @@ class TestImage(unittest.TestCase):
         Test that both image dimensions are made to fit 1.0.
         """
         ### 8 units represent 1.0 in sheet coordinates.
-        image_array = array(
+        image_array = np.array(
 [[  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
          96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
@@ -288,7 +285,7 @@ class TestImage(unittest.TestCase):
         is scaled by the same factor.
         """
         ### 15 units represent 1.0 in sheet coordinates.
-        image_array = array(
+        image_array = np.array(
  [[  34.,  68.,  68.,  68., 102., 102., 102., 136., 136., 136., 255., 255., 255.,
             0.,   0.,],
  [  34.,  68.,  68.,  68., 102., 102., 102., 136., 136., 136., 255., 255., 255.,
@@ -337,7 +334,7 @@ class TestImage(unittest.TestCase):
 
     # CB: test rotation for PatternGenerators.
 ##     def test_rotation(self):
-##         image_array = array(
+##         image_array = np.array(
 ## [[  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
 ##          96.59090909,  96.59090909,  96.59090909,],
 ##  [   0.        ,  34.        ,  68.        , 102.        , 136.        ,
@@ -353,7 +350,7 @@ class TestImage(unittest.TestCase):
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
 ##          96.59090909,  96.59090909,  96.59090909,],
 ##  [  96.59090909,  96.59090909,  96.59090909,  96.59090909,  96.59090909,
-##          96.59090909,  96.59090909,  96.59090909,]],Float)
+##          96.59090909,  96.59090909,  96.59090909,]],dtype=np.float)
 
 ##         image = FileImage(filename = resolve_path('topo/tests/unit/testimage.pgm'),
 ##                       density=8,
@@ -362,9 +359,9 @@ class TestImage(unittest.TestCase):
 ##                       whole_image_output_fn=IdentityTF(),
 ##                       size_normalization='original')
 
-##         assert_array_almost_equal(rot90(image_array,1),image(orientation=pi/2))
-##         assert_array_almost_equal(rot90(image_array,-1),image(orientation=-pi/2))
+##         assert_array_almost_equal(rot90(image_array,1),image(orientation=np.pi/2))
+##         assert_array_almost_equal(rot90(image_array,-1),image(orientation=-np.pi/2))
 
 if __name__ == "__main__":
-	import nose
-	nose.runmodule()
+    import nose
+    nose.runmodule()

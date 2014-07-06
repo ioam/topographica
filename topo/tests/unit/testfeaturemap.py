@@ -11,7 +11,8 @@ import unittest
 
 from topo.base.arrayutil import arg, wrap
 from math import pi
-from numpy.oldnumeric import array, exp
+import numpy as np
+from numpy import exp
 from topo.base.sheet import Sheet
 from topo.base.boundingregion import BoundingBox
 
@@ -41,9 +42,9 @@ class TestDistributionMatrix(unittest.TestCase):
         Sheet.nominal_bounds = BoundingBox(points=((-1,-2),(1,1)))
         test_sheet = Sheet()
         # simple activity arrays use to update the feature maps
-        self.a1 = array([[1,1], [1,1], [1,1]])
-        self.a2 = array([[3,3], [3,3], [3,3]])
-        self.a3 = array([[0,1], [0,1], [0,1]])
+        self.a1 = np.array([[1,1], [1,1], [1,1]])
+        self.a2 = np.array([[3,3], [3,3], [3,3]])
+        self.a3 = np.array([[0,1], [0,1], [0,1]])
 
         # object to test for non-cyclic distributions
         self.fm1 = DistributionMatrix(test_sheet.shape, axis_range=(0.0,1.0), cyclic=False)

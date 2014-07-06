@@ -1422,16 +1422,16 @@ class EditorSheet(EditorEP):
         and zeros in case of value inferior or equal to zero.
         """
         # AL is it possible to use the normalize method in plot?
-        from numpy.oldnumeric import zeros, ones, Float, divide
+        import numpy as np
         a_offset = a-min(a.ravel())
         max_a_offset = max(a_offset.ravel())
         if max_a_offset>0:
-             a = divide(a_offset,float(max_a_offset))
+             a = np.divide(a_offset,float(max_a_offset))
         else:
              if min(a.ravel())<=0:
-                  a=zeros(a.shape,Float)
+                  a=np.zeros(a.shape, dtype=np.float)
              else:
-                  a=ones(a.shape,Float)
+                  a=np.ones(a.shape, dtype=np.float)
         return a
 
     #   Util methods
