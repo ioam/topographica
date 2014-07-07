@@ -3,8 +3,7 @@ A Sheet class for composing activity from different sheets into a
 single activity matrix.  Primarily a simple example of how to make
 a sheet class, but can also be useful.
 """
-
-from numpy.oldnumeric import zeros
+import numpy as np
 
 from topo.base.sheet import Sheet
 from topo.misc.util import Struct, NxN
@@ -51,7 +50,7 @@ class Composer(Sheet):
     def process_current_time(self):
         if self.__dirty:
             self.send_output(data=self.activity)
-            self.activity = zeros(self.activity.shape)+0.0
+            self.activity = np.zeros(self.activity.shape)+0.0
             self.__dirty=False
 
     def input_event(self,conn,data):

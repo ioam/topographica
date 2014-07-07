@@ -4,9 +4,7 @@ The SLISSOM class.
 
 from math import exp
 
-import numpy.oldnumeric as Numeric
-import numpy.oldnumeric.random_array as RandomArray
-
+import numpy as np
 import param
 
 from topo.command.pylabplot import vectorplot, matrixplot
@@ -17,7 +15,7 @@ from topo.transferfn import PiecewiseLinear
 
 
 
-activity_type = Numeric.Float32
+activity_type = np.float32
 
 class SLISSOM(SettlingCFSheet):
     """
@@ -73,15 +71,15 @@ class SLISSOM(SettlingCFSheet):
         """
         super(SLISSOM,self).__init__(**params)
         self.dynamic_threshold = \
-            Numeric.zeros(self.activity.shape).astype(activity_type)
-        self.spike = Numeric.zeros(self.activity.shape)
-        self.spike_history = Numeric.zeros(self.activity.shape)
+            np.zeros(self.activity.shape).astype(activity_type)
+        self.spike = np.zeros(self.activity.shape)
+        self.spike_history = np.zeros(self.activity.shape)
         self.membrane_potential = \
-            Numeric.zeros(self.activity.shape).astype(activity_type)
+            np.zeros(self.activity.shape).astype(activity_type)
 
         num_traces = len(self.trace_coords)
         self.membrane_potential_trace = \
-            Numeric.zeros((num_traces,self.trace_n)).astype(activity_type)
+            np.zeros((num_traces,self.trace_n)).astype(activity_type)
 
     def activate(self):
         """
@@ -91,7 +89,6 @@ class SLISSOM(SettlingCFSheet):
         This function also updates and maintains internal values such as
         membrane_potential, spike, etc.
         """
-
         self.activity *= 0.0
 
         for proj in self.in_connections:
@@ -104,7 +101,7 @@ class SLISSOM(SettlingCFSheet):
         # Add noise, based on the noise_rate.
         if self.noise_rate > 0.0:
             self.activity = self.activity * (1.0-self.noise_rate) \
-                + RandomArray.random(self.activity.shape) * self.noise_rate
+                + np.random.random(self.activity.shape) * self.noise_rate
 
         # Thresholding: baseline + dynamic threshold + absolute refractory
         # period

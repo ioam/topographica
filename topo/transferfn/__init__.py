@@ -19,11 +19,13 @@ import copy
 
 import param
 
-import numpy, numpy.random
+import numpy as np
 from numpy import exp,zeros,ones,power
 
 from topo.base.sheet import activity_type
 from topo.base.arrayutil import clip_lower
+
+from numbergen import TimeAwareRandomState
 
 # Imported here so that all TransferFns will be in the same package
 from imagen.transferfn import TransferFn,IdentityTF,Threshold  # pyflakes:ignore (API import)
@@ -298,22 +300,20 @@ class TransferFnWithState(TransferFn):
 
 # CB: it's not ideal that all TransferFnWithRandomState fns have
 # the plastic stuff (from TransferFnWithState).
-class TransferFnWithRandomState(TransferFnWithState):
+class TransferFnWithRandomState(TransferFnWithState, TimeAwareRandomState):
     """
-    Abstract base class for TransferFns that use a random number generator.
+    Abstract base class for TransferFns that use a random
+    state. Inherits time-dependent control of the random state from
+    numbergen.TimeAwareRandomState. Consult the help of
+    TimeAwareRandomState for more information.
     """
 
     random_generator = param.Parameter(
-        default=numpy.random.RandomState(seed=(10,10)),doc=
+        default=np.random.RandomState(seed=(10,10)),precedence=-1,doc=
         """
-        numpy's RandomState provides methods for generating random
-        numbers (see RandomState's help for more information).
-
-        Note that all instances of subclasses of
-        TransferFnWithRandomState will share this RandomState object,
-        and hence its state. To create an instance of an
-        TransferFnWithRandomState subclass that has its own state, set
-        this parameter on the instance to a new RandomState instance.
+        Using Numpy's RandomState instead of random.Random as the
+        former can generate random arrays and more random
+        distributions. See RandomState's help for more information.
         """)
 
     __abstract = True
@@ -321,6 +321,7 @@ class TransferFnWithRandomState(TransferFnWithState):
     def __init__(self,**params):
         super(TransferFnWithRandomState,self).__init__(**params)
         self.__random_generators_stack = []
+        self._initialize_random_state(seed=(10,10), shared=True)
 
     def state_push(self):
         """
@@ -337,7 +338,6 @@ class TransferFnWithRandomState(TransferFnWithState):
         """
         self.random_generator = self.__random_generators_stack.pop()
         super(TransferFnWithRandomState,self).state_push()
-
 
 
 class PoissonSample(TransferFnWithRandomState):
@@ -371,6 +371,7 @@ class PoissonSample(TransferFnWithRandomState):
        Amount by which to scale the output (e.g. 1.0/in_scale).""")
 
     def __call__(self,x):
+        if self.time_dependent: self._hash_and_seed()
 
         x *= self.in_scale
         x += self.baseline_rate
@@ -483,6 +484,8 @@ class HomeostaticMaxEnt(TransferFnWithRandomState):
         self.y_avg=None
 
     def __call__(self,x):
+        if self.time_dependent: self._hash_and_seed()
+
         if self.first_call:
             self.first_call = False
             if self.a_init==None:

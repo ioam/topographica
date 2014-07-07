@@ -140,7 +140,7 @@ class ExportMagic(Magics):
 # Display hooks #
 #===============#
 
-from topo.base.sheetview import CFView
+from topo.base.sheetview import CFView, CFStack
 
 from dataviews.ipython import load_ipython_extension as load_imagen_extension
 from dataviews.ipython.display_hooks import stack_display, view_display
@@ -149,7 +149,8 @@ from dataviews.plots import SheetViewPlot, Plot
 from dataviews.ipython.widgets import RunProgress
 RunProgress.run_hook = topo.sim.run
 
-Plot.defaults.update({CFView: SheetViewPlot})
+Plot.defaults.update({CFView: SheetViewPlot,
+                      CFStack: SheetViewPlot})
 
 try:
     from lancet import ViewFrame
@@ -179,3 +180,6 @@ def load_ipython_extension(ip):
         from topo.command import runscript
         runscript.ns = ip.user_ns
         runscript.push = ip.push
+
+        from topo.misc.commandline import exec_startup_files
+        exec_startup_files()

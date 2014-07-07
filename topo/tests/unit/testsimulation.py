@@ -6,7 +6,7 @@ import unittest
 import copy
 import pickle
 
-from numpy.oldnumeric import array
+import numpy as np
 from topo.base.simulation import Simulation,EPConnection,EPConnectionEvent,Event
 from topo.base.ep import *
 
@@ -85,7 +85,7 @@ class TestSimulation(unittest.TestCase):
         on construction.
         """
         s = Simulation()
-        data = array([4,3])
+        data = np.array([4,3])
         epc = EPConnection()
         se = EPConnectionEvent(1,epc,data)
         se.data[0] = 5

@@ -23,8 +23,7 @@ import Image
 import ImageDraw
 import ImageFont
 from colorsys import hsv_to_rgb
-import numpy.oldnumeric as Numeric
-import numpy
+import numpy as np
 
 import param
 from param import resolve_path
@@ -119,7 +118,7 @@ class Bitmap(param.Parameterized):
             # CEBALERT: work around PIL bug (see SF #2820821) so that
             # integer scaling works in the typical case (where an
             # image is being enlarged).
-            a = numpy.array(self.image).repeat(int(factor),axis=0).repeat(int(factor),axis=1)
+            a = np.array(self.image).repeat(int(factor),axis=0).repeat(int(factor),axis=1)
             zoomed = Image.fromarray(a,mode=self.image.mode)
         else:
             x,y = self.image.size
@@ -145,10 +144,10 @@ class Bitmap(param.Parameterized):
         # input array to match.  The pixels are scaled by 255, not
         # 256, so that 1.0 maps to fully white.
         max_pixel_value=255
-        inArray = (Numeric.floor(inArray * max_pixel_value)).astype(Numeric.Int)
+        inArray = (np.floor(inArray * max_pixel_value)).astype(np.int)
 
         # Clip any values that are still larger than max_pixel_value
-        to_clip = (Numeric.greater(inArray.ravel(),max_pixel_value)).sum()
+        to_clip = (np.greater(inArray.ravel(),max_pixel_value)).sum()
         if (to_clip>0):
             # CEBALERT: no explanation of why clipped pixel count is
             # being accumulated.
@@ -217,9 +216,9 @@ class HSVBitmap(Bitmap):
     def __init__(self,hue,sat,val):
         """Each matrix must be the same size, with values in the range 0.0 to 1.0."""
         shape = hue.shape # Assumed same as sat.shape and val.shape
-        rmat = Numeric.zeros(shape,Numeric.Float)
-        gmat = Numeric.zeros(shape,Numeric.Float)
-        bmat = Numeric.zeros(shape,Numeric.Float)
+        rmat = np.zeros(shape, dtype=np.float)
+        gmat = np.zeros(shape, dtype=np.float)
+        bmat = np.zeros(shape, dtype=np.float)
 
         # Note: should someday file a feature request for PIL for them
         # to accept an image of type 'HSV', so that they will do this

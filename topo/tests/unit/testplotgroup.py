@@ -8,8 +8,7 @@ from pprint import pprint
 from topo.plotting import plot
 from topo.base.sheet import *
 from topo.plotting.plotgroup import *
-import numpy.oldnumeric as Numeric
-from numpy.oldnumeric import divide
+import numpy as np
 
 SHOW_PLOTS = False
 
@@ -52,7 +51,7 @@ class TestPlotGroup(unittest.TestCase):
 
 #     def test_plotgroup_release(self):
 #         self.s = Sheet()
-#         self.s.activity = Numeric.array([[1,2],[3,4]])
+#         self.s.activity = np.array([[1,2],[3,4]])
 #         # Call s.sheet_view(..) with a parameter
 #         sv2 = self.s.sheet_view('Activity')
 #         self.s.sheet_views['key']=sv2

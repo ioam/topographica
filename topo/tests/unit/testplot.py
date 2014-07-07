@@ -11,8 +11,8 @@ SHOW_PLOTS = False
 
 ### JC: My new imports
 from topo.plotting.plot import make_template_plot
-from numpy.oldnumeric import zeros, Float, array
-import numpy.oldnumeric.random_array as RandomArray
+import numpy as np
+
 
 import param
 
@@ -34,9 +34,9 @@ def matrix_hsv_to_rgb(hMapArray,sMapArray,vMapArray):
     """
 
     shape = hMapArray.shape
-    rmat = array(hMapArray,Float)
-    gmat = array(sMapArray,Float)
-    bmat = array(vMapArray,Float)
+    rmat = np.array(hMapArray,dtype=np.float)
+    gmat = np.array(sMapArray,dtype=np.float)
+    bmat = np.array(vMapArray,dtype=np.float)
 
     ## This code should never be seen.  It means that calling code did
     ## not take the precaution of clipping the input matrices.
@@ -63,7 +63,6 @@ def matrix_hsv_to_rgb(hMapArray,sMapArray,vMapArray):
 class TestPlot(unittest.TestCase):
 
     def setUp(self):
-
         ### Simple case: we only pass a dictionary to Plot()
         ### that does not belong to a Sheet:
         views = {}
@@ -73,7 +72,7 @@ class TestPlot(unittest.TestCase):
 
         ### SheetView1:
         ### Find a way to assign randomly the matrix.
-        self.matrix1 = zeros((10,10),Float) + RandomArray.random((10,10))
+        self.matrix1 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix1, self.bounds1)
         sv.metadata=metadata
@@ -86,7 +85,7 @@ class TestPlot(unittest.TestCase):
 
         ### SheetView2:
         ### Find a way to assign randomly the matrix.
-        self.matrix2 = zeros((10,10),Float) + 0.3
+        self.matrix2 = np.zeros((10,10),dtype=np.float) + 0.3
         self.bounds2 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix2, self.bounds2)
         sv.metadata=metadata
@@ -99,7 +98,7 @@ class TestPlot(unittest.TestCase):
 
         ### SheetView3:
         ### Find a way to assign randomly the matrix.
-        self.matrix3 = zeros((10,10),Float) + RandomArray.random((10,10))
+        self.matrix3 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
         sv = SheetView(self.matrix3, self.bounds3)
         sv.metadata=metadata
@@ -112,7 +111,7 @@ class TestPlot(unittest.TestCase):
 
         ### SheetView4: for testing clipping + different bounding box
         ### Find a way to assign randomly the matrix.
-        self.matrix4 = zeros((10,10),Float) + 1.6
+        self.matrix4 = np.zeros((10,10),dtype=np.float) + 1.6
         self.bounds4 = BoundingBox(points=((-0.7,-0.7),(0.7,0.7)))
         sv = SheetView(self.matrix4, self.bounds4)
         sv.metadata=metadata
@@ -194,8 +193,8 @@ class TestPlot(unittest.TestCase):
 #       self.assertEqual(self.plot1,test)
 
 #       # plot 2
-#       sat = zeros((10,10),Float)
-#       hue = zeros((10,10),Float)
+#       sat = np.zeros((10,10),dtype=np.float)
+#       hue = np.zeros((10,10),dtype=np.float)
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
@@ -204,8 +203,8 @@ class TestPlot(unittest.TestCase):
 #               self.assertAlmostEqual(each3,each4)
 
 #       # plot 3
-#       sat = ones((10,10),Float)
-#       hue = zeros((10,10),Float) + 0.3
+#       sat = ones((10,10),dtype=np.float)
+#       hue = np.zeros((10,10),dtype=np.float) + 0.3
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
@@ -215,7 +214,7 @@ class TestPlot(unittest.TestCase):
 
 #       # plot 4
 #       sat = self.matrix3
-#       hue = zeros((10,10),Float) + 0.3
+#       hue = np.zeros((10,10),dtype=np.float) + 0.3
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
@@ -224,8 +223,8 @@ class TestPlot(unittest.TestCase):
 #               self.assertAlmostEqual(each3,each4)
 
 #       # plot 5
-#       sat = zeros((10,10),Float)
-#       hue = zeros((10,10),Float)
+#       sat = np.zeros((10,10),dtype=np.float)
+#       hue = np.zeros((10,10),dtype=np.float)
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
@@ -235,8 +234,8 @@ class TestPlot(unittest.TestCase):
 
 #       # plot 6
 #       sat = self.matrix3
-#       hue = zeros((10,10),Float) + 0.3
-#       val = ones((10,10),Float)
+#       hue = np.zeros((10,10),dtype=np.float) + 0.3
+#       val = ones((10,10),dtype=np.float)
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
 #       for each1,each2 in zip(self.plot6.rgb_matrices,test):
@@ -245,7 +244,7 @@ class TestPlot(unittest.TestCase):
 
 #       # plot 7
 #       sat = self.matrix3
-#       hue = zeros((10,10),Float) + 0.3
+#       hue = np.zeros((10,10),dtype=np.float) + 0.3
 #       val = self.matrix4
 
 #         val = MLab.clip(val,0.0,1.0)
@@ -258,7 +257,7 @@ class TestPlot(unittest.TestCase):
 
 #       # plot 8
 #       sat = self.matrix3
-#       hue = zeros((10,10),Float) + 0.3
+#       hue = np.zeros((10,10),dtype=np.float) + 0.3
 #       val = self.matrix1
 
 #       val = divide(val,float(max(val.ravel())))
@@ -274,7 +273,7 @@ class TestPlot(unittest.TestCase):
 
 #       # plot 9
 #       sat = self.matrix3
-#       hue = zeros((10,10),Float) + 0.3
+#       hue = np.zeros((10,10),dtype=np.float) + 0.3
 #       val = self.matrix1
 
 #       test = matrix_hsv_to_rgb(hue,sat,val)
@@ -311,14 +310,14 @@ class TestPlot(unittest.TestCase):
 #         # rgb.show()
 
 #     def test_matrix_hsv_to_rgb2(self):
-#         h = Numeric.array([[0.0,0.0],[0.0,0.0]])
-#         s = Numeric.array([[0.0,0.0],[0.0,0.0]])
-#         v = Numeric.array([[0.5,0.5],[0.5,0.5]])
-#         h_orig = Numeric.array(h)
-#         s_orig = Numeric.array(s)
-#         v_orig = Numeric.array(v)
+#         h = Numeric.np.array([[0.0,0.0],[0.0,0.0]])
+#         s = Numeric.np.array([[0.0,0.0],[0.0,0.0]])
+#         v = Numeric.np.array([[0.5,0.5],[0.5,0.5]])
+#         h_orig = Numeric.np.array(h)
+#         s_orig = Numeric.np.array(s)
+#         v_orig = Numeric.np.array(v)
 #         r,g,b = matrix_hsv_to_rgb(h,s,v)
-#         rgb_target = Numeric.array([[0.5,0.5],[0.5,0.5]])
+#         rgb_target = Numeric.np.array([[0.5,0.5],[0.5,0.5]])
 #         self.assertEqual(h,h_orig)
 #         self.assertEqual(s,s_orig)
 #         self.assertEqual(v,v_orig)

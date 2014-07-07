@@ -5,9 +5,7 @@ For CFProjections, these function objects compute a response matrix
 when given an input pattern and a set of ConnectionField objects.
 """
 
-from numpy import sum,exp,zeros,ravel
-from numpy.oldnumeric import Float
-
+import numpy as np
 import param
 
 from topo.base.cf import CFPResponseFn
@@ -27,14 +25,14 @@ class CFPRF_EuclideanDistance(CFPResponseFn):
     def __call__(self, iterator, input_activity, activity, strength, **params):
         cfs = iterator.flatcfs
         rows,cols = activity.shape
-        euclidean_dist_mat = zeros((rows,cols),Float)
+        euclidean_dist_mat = np.zeros((rows,cols), np.float)
         for r in xrange(rows):
             for c in xrange(cols):
                 flati = r*cols+c
                 cf = cfs[flati]
                 r1,r2,c1,c2 = cf.input_sheet_slice
                 X = input_activity[r1:r2,c1:c2]
-                diff = ravel(X) - ravel(cf.weights)
+                diff = np.ravel(X) - np.ravel(cf.weights)
                 euclidean_dist_mat.flat[flati] = L2norm(diff)
 
         max_dist = max(euclidean_dist_mat.ravel())
@@ -87,9 +85,9 @@ class CFPRF_ActivityBased(CFPResponseFn):
         for cf,r,c in iterator():
             r1,r2,c1,c2 = cf.input_sheet_slice
             X = input_activity[r1:r2,c1:c2]
-            avg_activity=sum(X.flat)/len(X.flat)
+            avg_activity=np.sum(X.flat)/len(X.flat)
             x=avg_activity/normalize_factor
-            strength_fn=self.l+(self.u/(1+exp(-self.r*(x-2*self.m)))**(1.0/self.b))
+            strength_fn=self.l+(self.u/(1+np.exp(-self.r*(x-2*self.m)))**(1.0/self.b))
             activity[r,c] = single_cf_fn(X,cf.weights)
             activity[r,c] *= strength_fn
 

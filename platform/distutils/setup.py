@@ -93,7 +93,7 @@ Installation
 ============
 
 Please see http://topographica.org/Downloads for more complete
-instructions; a briefl summary for installation into an existing
+instructions; a brief summary for installation into an existing
 Python environment is given here.
 
 If you have `pip`_, you can use one of
@@ -124,6 +124,12 @@ of `SciPy`_) for optimum performance.
    http://pypi.python.org/pypi/PIL
 .. _pip:
    http://pip.openplans.org/
+.. _Param:
+   http://ioam.github.io/param/
+.. _ParamTk:
+   http://ioam.github.io/paramtk/
+.. _ImaGen:
+   http://ioam.github.io/imagen/
 """,
 
     author= _topographica_devs,

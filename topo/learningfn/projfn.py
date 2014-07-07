@@ -6,10 +6,7 @@ For example, CFProjectionLearningFunctions compute a new set of
 ConnectionFields when given an input and output pattern and a set of
 ConnectionField objects.
 """
-
-from numpy import ones,zeros
-import numpy.oldnumeric as Numeric
-from numpy.oldnumeric import Float
+import numpy as np
 
 import param
 
@@ -72,7 +69,7 @@ class CFPLF_EuclideanHebbian(CFPLearningFn):
 ##        cfs = iterator.proj._cfs
 ##        # Initialize thresholds the first time we learn the size of the output_activity.
 ##        if not hasattr(self,'unit_thresholds'):
-##            self.unit_thresholds=ones(output_activity.shape,Float32)*self.unit_threshold_0
+##            self.unit_thresholds=np.ones(output_activity.shape, dtype=np.float32)*self.unit_threshold_0
 ##
 ##        rows,cols = output_activity.shape
 ##
@@ -124,7 +121,7 @@ class CFPLF_Trace(CFPLearningFn):
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         ##Initialise traces to zero if they don't already exist
         if not hasattr(self,'traces'):
-            self.traces=zeros(output_activity.shape,activity_type)
+            self.traces=np.zeros(output_activity.shape,activity_type)
         for cf,i in iterator():
             unit_activity = output_activity.flat[i]
             #   print "unit activity is",unit_activity
@@ -158,7 +155,7 @@ class CFPLF_OutstarHebbian(CFPLearningFn):
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
         # avoid evaluating these references each time in the loop
         single_cf_fn = self.single_cf_fn
-        outstar_wsum = zeros(input_activity.shape)
+        outstar_wsum = np.zeros(input_activity.shape)
         for cf,i in iterator():
             single_cf_fn(cf.get_input_matrix(input_activity),
                          output_activity.flat[i], cf.weights, single_connection_learning_rate)
@@ -211,12 +208,12 @@ class HomeoSynaptic(CFPLearningFn):
         a per-connection learning rate.
         """
         if not hasattr(self,'averages'):
-            self.averages = ones(output_activity.shape,Float) * 0.1
+            self.averages = np.ones(output_activity.shape, dtype=np.float) * 0.1
 
 
             # normalize initial weights to 1.0
             for cf,i in iterator():
-                current_norm_value = 1.0*Numeric.sum(abs(cf.weights.ravel()))
+                current_norm_value = 1.0*np.sum(abs(cf.weights.ravel()))
                 if current_norm_value != 0:
                     factor = (1.0/current_norm_value)
                     cf.weights *= factor
@@ -243,7 +240,7 @@ class HomeoSynaptic(CFPLearningFn):
         # For analysis only; can be removed (in which case also remove the initializations above)
 # CEBALERT: I changed [0][7] to [0]!
         self.ave_hist.append(self.averages.flat[0])
-        self.temp_hist.append (Numeric.sum(abs(iterator.flatcfs[0].weights.ravel())))
+        self.temp_hist.append (np.sum(abs(iterator.flatcfs[0].weights.ravel())))
 
 
 
@@ -267,7 +264,7 @@ class CFPLF_PluginScaled(CFPLearningFn):
         """Apply the specified single_cf_fn to every CF."""
 
         if self.learning_rate_scaling_factor is None:
-            self.learning_rate_scaling_factor = ones(output_activity.shape)
+            self.learning_rate_scaling_factor = np.ones(output_activity.shape)
 
         single_cf_fn = self.single_cf_fn
         single_connection_learning_rate = self.constant_sum_connection_rate(iterator.proj_n_units,learning_rate)
