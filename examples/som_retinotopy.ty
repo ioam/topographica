@@ -19,6 +19,7 @@ the Visual Cortex, Springer.  Known differences include:
 from math import exp, sqrt
 
 import param
+import numbergen
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
@@ -56,7 +57,7 @@ p.add(
 
 # Using time dependent random streams.
 # Corresponding numbergen objects should be given suitable names.
-topo.time_dependent()
+numbergen.TimeAware.time_dependent = True
 
 from topo.base.cf import ConnectionField
 ConnectionField.controlled_weight_generation = False
