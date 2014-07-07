@@ -203,13 +203,6 @@ except ImportError:
 param.Dynamic.time_fn(val=0.0, time_type=_time_type)
 param.Dynamic.time_dependent = True
 
-def time_dependent(enabled=True):
-    """
-    Convenience function for toggling time-dependent random number
-    generation throughout Topographica.
-    """
-    numbergen.TimeAware.time_dependent = enabled
-
 # Global time_fn (param.Dynamic.time_fn) accessible via topo.sim.time
 sim = Simulation()
 
