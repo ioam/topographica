@@ -10,6 +10,9 @@ from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
     topo_metadata_fn, StorageHook, get_feature_preference
 from featuremapper.command import measure_response
 
+import featuremapper.colorspaces
+import topo.optimized.color
+
 import numpy as np
 
 from dataviews.collector import Reference
@@ -176,6 +179,11 @@ measure_cog.measurement_storage_hook = StorageHook.instance(sublabel='CoG')
 
 MeasureResponseCommand.preference_lookup_fn = get_feature_preference
 MeasureResponseCommand.pattern_response_fn = pattern_response.instance()
+
+
+## Set optimized versions of color conversion functions
+featuremapper.colorspaces.rgb_to_hsv = topo.optimized.color._rgb_to_hsv_array_opt
+featuremapper.colorspaces.hsv_to_rgb = topo.optimized.color._hsv_to_rgb_array_opt
 
 
 # Automatically discover all .py files in this directory.
