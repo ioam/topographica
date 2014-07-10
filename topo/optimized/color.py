@@ -2,6 +2,8 @@
 Provides optimized color conversion utilities to speedup featuremapper color conversion.
 """
 
+import numpy
+
 from topo.misc.inlinec import inline
 
 
