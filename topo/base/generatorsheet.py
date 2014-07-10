@@ -8,7 +8,7 @@ from topo.base.sheet import Sheet
 from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
 
-from topo.base.arrayutil import clip_upper
+import numpy as np
 
 
 # JLALERT: This sheet should have override_plasticity_state/restore_plasticity_state
@@ -125,7 +125,6 @@ class GeneratorSheet(Sheet):
 
 
 
-
 class NChannelGeneratorSheet(GeneratorSheet):
     """
     A GeneratorSheet that handles NChannel images.
@@ -172,7 +171,7 @@ class NChannelGeneratorSheet(GeneratorSheet):
                 self.channel_data.append(self.activity.copy())
 
         else: # monochrome
-            print "WARNING: Using non-NChannel input generator with NChannelGeneratorSheet. This will behave like a simple (single-channel) GeneratorSheet."
+            self.warning( "WARNING: Using non-NChannel input generator with NChannelGeneratorSheet. This will behave like a simple (single-channel) GeneratorSheet." )
             self.src_ports = ['Activity']
             self.channel_data = []
 
@@ -216,15 +215,11 @@ class NChannelGeneratorSheet(GeneratorSheet):
                 p = self.constant_mean_total_retina_output/M
                 for act in self.channel_data:
                     act *= p
-                    # CEBALERT: hidden away OF
-                    clip_upper(act,1.0)
+                    np.minimum(act,1.0,act)
 
 
         for i in range(len(self.channel_data)):
             self.send_output(src_port=self.src_ports[i+1], data=self.channel_data[i])
-
-
-
 
 
 
