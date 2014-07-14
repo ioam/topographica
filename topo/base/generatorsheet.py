@@ -125,53 +125,57 @@ class GeneratorSheet(Sheet):
 
 
 
+
 class NChannelGeneratorSheet(GeneratorSheet):
     """
-    A GeneratorSheet that handles NChannel images.
+    A GeneratorSheet that handles input patterns with multiple simultaneous channels.
 
     Accepts either a single-channel or an NChannel input_generator.  If the
     input_generator stores separate channel patterns, it
-    is used as-is; other (monochrome) PatternGenerators are first
-    wrapped using ExtendToNChannel to create the NChannel patterns.
+    is used as-is; if other (single-channel) PatternGenerators are used, the Class behaves
+    like a normal GeneratorSheet.
 
-    When a pattern is generated, a monochrome version (the average of the channels) is sent out on
-    the Activity port as usual for a GeneratorSheet, and channel activities are sent out on the Activity0,
+    When a pattern is generated, the average of the channels is sent out on the Activity port as 
+    usual for a GeneratorSheet, and channel activities are sent out on the Activity0,
     Activity1, ..., ActivityN-1 ports.  Thus this class can be used
     just like GeneratorSheet, but with optional color channels available, too.
 
 
-    If the input_generator is NChannel, this GeneratorSheet will handle the separate channels and create the specific output ports. If the input_generator is "monochrome" (ie, not NChannel) then this GeneratorSheet will behave as a normal non-NChannel (monochrome) GeneratorSheet.
+    If the input_generator is NChannel, this GeneratorSheet will handle the separate channels and 
+    create the specific output ports. If the input_generator is single-channel (eg, a monochrome image)
+    then this GeneratorSheet will behave as a normal non-NChannel GeneratorSheet.
     """
 
-    src_ports = ['Activity'] # __init__ sets the other channels as required ['Activity','Activity0','Activity1',...,'ActivityN']
-
-    constant_mean_total_retina_output = param.Number(default=None,doc="""
-                         If set, the sheet will rescale its activity to achieve the target 
-                         total activity average""")
+    constant_mean_total_channels_output = param.Number(default=None,doc="""
+        If set, it enforces the average of the mean channel values to be fixed. Eg,
+        M = ( activity0+activity1+...+activity(N-1) ).mean() / N = constant_mean_total_channels_output""")
 
     channel_output_fns = param.Dict(default={},doc="""
-                         Dictionary with arrays of channel-specific output functions:
-                         eg, {0:[fnc1, fnc2],3:[fnc3]}""")
+        Dictionary with arrays of channel-specific output functions: eg, {0:[fnc1, fnc2],3:[fnc3]}.
+        The dictionary isn't required to specify every channel, but rather only those required.""")
 
-    channel_data = []
 
     def __init__(self,**params):
+        self.channel_data = []
         super(NChannelGeneratorSheet,self).__init__(**params)
 
 
     def set_input_generator(self,new_ig,push_existing=False):
-        """Wrap new_ig in ExtendToNChannel if necessary."""
+        """If single-channel generators are used, the Class reverts to a simple GeneratorSheet behavior.
+           If NChannel inputs are used, it will update the number of channels of the NChannelGeneratorSheet
+           to match those of the input. If the number of channels doesn't change, there's no need to reset."""
 
         if hasattr(new_ig,'channel_data'):
-            self.src_ports = ['Activity']
-            self.channel_data = []
+            if( len(new_ig.channel_data) != len(self.channel_data) ):
+                self.src_ports = ['Activity']
+                self.channel_data = []
 
-            for i in range(len(new_ig.channel_data)):
-                self.src_ports.append( 'Activity'+str(i) )
-                self.channel_data.append(self.activity.copy())
+                for i in range(len(new_ig.channel_data)):
+                    self.src_ports.append( 'Activity'+str(i) )
+                    self.channel_data.append(self.activity.copy())
 
         else: # monochrome
-            self.warning( "WARNING: Using non-NChannel input generator with NChannelGeneratorSheet. This will behave like a simple (single-channel) GeneratorSheet." )
+            # Reset channels to match single-channel inputs.
             self.src_ports = ['Activity']
             self.channel_data = []
 
@@ -180,7 +184,7 @@ class NChannelGeneratorSheet(GeneratorSheet):
         
     def generate(self):
         """
-        Works as in the superclass, but also generates RGB output and sends
+        Works as in the superclass, but also generates NChannel output and sends
         it out on the Activity0, Activity1, ..., ActivityN ports.
         """
 
@@ -191,28 +195,24 @@ class NChannelGeneratorSheet(GeneratorSheet):
             for i in range(len(self.channel_data)):
                 self.channel_data[i][:] = self.input_generator.channel_data[i]
 
-        
-        # SPG: whatch out for previous code by CB that might exploit the old system
-        # old -- HACKATTACK: abuse of output_fns list to allow one OF to be
-        # old -- applied repeatedly to each channel, or one OF per channel!
-        # old -- Also note does not apply OF to activity!
+
         if self.apply_output_fns:
             ## Default output_fns are applied to all channels
             for f in self.output_fns:
                 for i in range(len(self.channel_data)):
                     f( self.channel_data[i] )
 
-                # Channel specific output functions, defined as a dictionary {chn_number:[functions]}
-                for i in range(len(self.channel_data)):
-                    if(i in self.channel_output_fns):
-                        for f in self.channel_output_fns[i]:
-                            f( self.channel_data[i] )
+            # Channel specific output functions, defined as a dictionary {chn_number:[functions]}
+            for i in range(len(self.channel_data)):
+                if(i in self.channel_output_fns):
+                    for f in self.channel_output_fns[i]:
+                        f( self.channel_data[i] )
 
 
-        if self.constant_mean_total_retina_output is not None:
+        if self.constant_mean_total_channels_output is not None:
             M = sum(act for act in self.channel_data).mean()/len(self.channel_data)
             if M>0:
-                p = self.constant_mean_total_retina_output/M
+                p = self.constant_mean_total_channels_output/M
                 for act in self.channel_data:
                     act *= p
                     np.minimum(act,1.0,act)
@@ -220,6 +220,7 @@ class NChannelGeneratorSheet(GeneratorSheet):
 
         for i in range(len(self.channel_data)):
             self.send_output(src_port=self.src_ports[i+1], data=self.channel_data[i])
+
 
 
 
