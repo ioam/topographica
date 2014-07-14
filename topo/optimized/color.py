@@ -1,14 +1,17 @@
 """
-Provides optimized color conversion utilities to speedup featuremapper color conversion.
+Provides optimized color conversion utilities to speedup imagen color conversion (imagen.colorspaces.rgb_to_hsv and imagen.colorspaces.hsv_to_rgb.
 """
+
 
 import numpy
 
-from topo.misc.inlinec import inline
+from topo.misc.inlinec import inline, provide_unoptimized_equivalent
+
+from imagen.colorspaces import _rgb_to_hsv_array, _hsv_to_rgb_array
 
 
 def _rgb_to_hsv_array_opt(RGB):
-    """Supposed to be equivalent to rgb_to_hsv_array()"""
+    """Equivalent to rgb_to_hsv_array()."""
     red = RGB[:,:,0]
     grn = RGB[:,:,1]
     blu = RGB[:,:,2]
@@ -23,15 +26,9 @@ def _rgb_to_hsv_array_opt(RGB):
     code = """
 //// MIN3,MAX3 macros from
 // http://en.literateprograms.org/RGB_to_HSV_color_space_conversion_(C)
-#define MIN3(x,y,z)  ((y) <= (z) ? \
-                         ((x) <= (y) ? (x) : (y)) \
-                     : \
-                         ((x) <= (z) ? (x) : (z)))
+#define MIN3(x,y,z)  ((y) <= (z) ? ((x) <= (y) ? (x) : (y)) : ((x) <= (z) ? (x) : (z)))
 
-#define MAX3(x,y,z)  ((y) >= (z) ? \
-                         ((x) >= (y) ? (x) : (y)) \
-                     : \
-                         ((x) >= (z) ? (x) : (z)))
+#define MAX3(x,y,z)  ((y) >= (z) ? ((x) >= (y) ? (x) : (y)) : ((x) >= (z) ? (x) : (z)))
 ////
 
 for (int i=0; i<Nred[0]; ++i) {
@@ -83,9 +80,13 @@ for (int i=0; i<Nred[0]; ++i) {
     return numpy.dstack((hue,sat,val))
 
 
+provide_unoptimized_equivalent("_rgb_to_hsv_array_opt","_rgb_to_hsv_array",locals())
+
+
+
 
 def _hsv_to_rgb_array_opt(HSV):
-    """Supposed to be equivalent to hsv_to_rgb_array()."""
+    """Equivalent to hsv_to_rgb_array()."""
     hue = HSV[:,:,0]
     sat = HSV[:,:,1]
     val = HSV[:,:,2]
@@ -123,35 +124,17 @@ for (int i=0; i<Nhue[0]; ++i) {
 
             switch(i) {
                 case 0:
-                    r = v;
-                    g = t;
-                    b = p;
-                    break;
+                    r = v;  g = t;  b = p;  break;
                 case 1:
-                    r = q;
-                    g = v;
-                    b = p;
-                    break;
+                    r = q;  g = v;  b = p;  break;
                 case 2:
-                    r = p;
-                    g = v;
-                    b = t;
-                    break;
+                    r = p;  g = v;  b = t;  break;
                 case 3:
-                    r = p;
-                    g = q;
-                    b = v;
-                    break;
+                    r = p;  g = q;  b = v;  break;
                 case 4:
-                    r = t;
-                    g = p;
-                    b = v;
-                    break;
+                    r = t;  g = p;  b = v;  break;
                 case 5:
-                    r = v;
-                    g = p;
-                    b = q;
-                    break;
+                    r = v;  g = p;  b = q;  break;
             }
         }
         RED2(i,j)=r;
@@ -163,5 +146,6 @@ for (int i=0; i<Nhue[0]; ++i) {
     inline(code, ['red','grn','blu','hue','sat','val'], local_dict=locals())
     return numpy.dstack((red,grn,blu))
 
+provide_unoptimized_equivalent("_hsv_to_rgb_array_opt","_hsv_to_rgb_array",locals())
 
 
