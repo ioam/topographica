@@ -156,7 +156,7 @@ class NChannelGeneratorSheet(GeneratorSheet):
 
 
     def __init__(self,**params):
-        self.channel_data = []
+        self._channel_data = []
         super(NChannelGeneratorSheet,self).__init__(**params)
 
 
@@ -165,19 +165,19 @@ class NChannelGeneratorSheet(GeneratorSheet):
            If NChannel inputs are used, it will update the number of channels of the NChannelGeneratorSheet
            to match those of the input. If the number of channels doesn't change, there's no need to reset."""
 
-        if hasattr(new_ig,'channel_data'):
-            if( len(new_ig.channel_data) != len(self.channel_data) ):
+        if hasattr(new_ig,'_channel_data'):
+            if( len(new_ig._channel_data) != len(self._channel_data) ):
                 self.src_ports = ['Activity']
-                self.channel_data = []
+                self._channel_data = []
 
-                for i in range(len(new_ig.channel_data)):
+                for i in range(len(new_ig._channel_data)):
                     self.src_ports.append( 'Activity'+str(i) )
-                    self.channel_data.append(self.activity.copy())
+                    self._channel_data.append(self.activity.copy())
 
         else: # monochrome
             # Reset channels to match single-channel inputs.
             self.src_ports = ['Activity']
-            self.channel_data = []
+            self._channel_data = []
 
         super(NChannelGeneratorSheet,self).set_input_generator(new_ig,push_existing=push_existing)
 
@@ -191,35 +191,35 @@ class NChannelGeneratorSheet(GeneratorSheet):
         super(NChannelGeneratorSheet,self).generate()
 
         # self.input_generator supports channel_data
-        if( hasattr(self.input_generator, 'channel_data') ):
-            for i in range(len(self.channel_data)):
-                self.channel_data[i][:] = self.input_generator.channel_data[i]
+        if( hasattr(self.input_generator, '_channel_data') ):
+            for i in range(len(self._channel_data)):
+                self._channel_data[i][:] = self.input_generator._channel_data[i]
 
 
         if self.apply_output_fns:
             ## Default output_fns are applied to all channels
             for f in self.output_fns:
-                for i in range(len(self.channel_data)):
-                    f( self.channel_data[i] )
+                for i in range(len(self._channel_data)):
+                    f( self._channel_data[i] )
 
             # Channel specific output functions, defined as a dictionary {chn_number:[functions]}
-            for i in range(len(self.channel_data)):
+            for i in range(len(self._channel_data)):
                 if(i in self.channel_output_fns):
                     for f in self.channel_output_fns[i]:
-                        f( self.channel_data[i] )
+                        f( self._channel_data[i] )
 
 
         if self.constant_mean_total_channels_output is not None:
-            M = sum(act for act in self.channel_data).mean()/len(self.channel_data)
+            M = sum(act for act in self._channel_data).mean()/len(self._channel_data)
             if M>0:
                 p = self.constant_mean_total_channels_output/M
-                for act in self.channel_data:
+                for act in self._channel_data:
                     act *= p
                     np.minimum(act,1.0,act)
 
 
-        for i in range(len(self.channel_data)):
-            self.send_output(src_port=self.src_ports[i+1], data=self.channel_data[i])
+        for i in range(len(self._channel_data)):
+            self.send_output(src_port=self.src_ports[i+1], data=self._channel_data[i])
 
 
 
