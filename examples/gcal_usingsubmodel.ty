@@ -1,0 +1,12 @@
+from topo.submodels.gcal import ModelGCAL
+
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+for param_name, param_value in ModelGCAL.params().items():
+    p.add(**{param_name:param_value})
+
+gcal = ModelGCAL(**dict(p.get_param_values()))
+gcal.setup(training_patterns=True, sheets=True, sheet_parameters=True,
+           matchconditions=True, projections=True,  projection_parameters=True,
+           analysis=True) # Alternatively: gcal.setup()
+gcal(sheets=True, projections=True) # Alternatively: gcal()
