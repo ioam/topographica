@@ -215,7 +215,7 @@ sys.modules['topo.numbergen.basic']=numbergen
 # imagen used to be part of topo; import its files at their former locations
 # for backwards compatibility and set the time function to be topo.sim.time()
 import imagen as pattern
-import imagen.random, imagen.image
+import imagen.random, imagen.image, imagen.patterncoordinator
 sys.modules['topo.base.boundingregion']=pattern.boundingregion
 sys.modules['topo.base.sheetcoords']=pattern.sheetcoords
 sys.modules['topo.base.patterngenerator']=pattern.patterngenerator
@@ -223,10 +223,16 @@ sys.modules['topo.misc.patternfn']=pattern.patternfn
 sys.modules['topo.pattern']=pattern
 sys.modules['topo.pattern.basic']=pattern
 sys.modules['topo.pattern.random']=pattern.random
+sys.modules['topo.pattern.patterncoordinator']=pattern.patterncoordinator
 sys.modules['topo.pattern.image']=pattern.image
 sys.modules['topo.pattern.rds']=imagen.random
 pattern.Translator.time_fn = sim.time
 
+from topo.misc.featurecoordinators import OcularityCoordinator, DisparityCoordinator, MotionCoordinator, SpatialFrequencyCoordinator
+imagen.patterncoordinator.PatternCoordinator.feature_coordinators.update({'od': OcularityCoordinator,
+                                                                          'dy': DisparityCoordinator,
+                                                                          'dr': MotionCoordinator,
+                                                                          'sf': SpatialFrequencyCoordinator})
 
 
 def about(display=True):
