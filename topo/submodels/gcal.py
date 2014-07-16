@@ -12,7 +12,7 @@ import topo.sheet.optimized
 import topo.transferfn.misc
 import topo.pattern.random
 
-from topo.submodels import EarlyVisionModel, ColorEarlyVisionModel, SheetRef
+from topo.submodels import EarlyVisionModel, ColorEarlyVisionModel, SheetSpec
 
 
 class ModelGCAL(ColorEarlyVisionModel):
@@ -54,8 +54,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         smallest and twice the size of the largest.""")
 
 
-    def __init__(self, **params):
-        super(ModelGCAL,self).__init__(**params)
+    def __init__(self, setup_options=True, **params):
+        super(ModelGCAL,self).__init__([], **params)
 
         for l in self.lags:
             self.match_parameter_mapping['AfferentV1On'+str(l)]=self._specify_V1afferent_projection
@@ -78,23 +78,24 @@ class ModelGCAL(ColorEarlyVisionModel):
         projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
         projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 
+        self.setup(setup_options)
+
 
     def _setup_sheets(self):
         super(ModelGCAL,self)._setup_sheets()
-        sheet_ref=SheetRef({'layer':'V1'},sheet.SettlingCFSheet)
+        sheet_ref=SheetSpec(sheet.SettlingCFSheet, {'level':'V1'})
         self.sheets.set_path(str(sheet_ref), sheet_ref)
 
 
     def _set_V1_sheet_parameters(self,v1_sheet_item):
-        homeostatic_learning_rate = 0.01 if self.homeostasis else 0.0
+        parameters={'tsettle':16, 'plastic':True,
+                    'joint_norm_fn':topo.sheet.optimized.compute_joint_norm_totals_opt,
+                    'output_fns':[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
+                                                    learning_rate=0.01 if self.homeostasis else 0.0)],
+                    'nominal_density':self.cortex_density,
+                    'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0)}
 
-        v1_sheet_item.parameters['tsettle']=16
-        v1_sheet_item.parameters['plastic']=True
-        v1_sheet_item.parameters['joint_norm_fn']=topo.sheet.optimized.compute_joint_norm_totals_opt
-        v1_sheet_item.parameters['output_fns']=[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
-                                                    learning_rate=homeostatic_learning_rate)]
-        v1_sheet_item.parameters['nominal_density']=self.cortex_density
-        v1_sheet_item.parameters['nominal_bounds']=sheet.BoundingBox(radius=self.area/2.0)
+        v1_sheet_item.parameters.update(parameters)
 
 
     def _set_V1_sheet_matchconditions(self, v1_sheet_item):
@@ -107,58 +108,56 @@ class ModelGCAL(ColorEarlyVisionModel):
         # TODO: Combine Afferent V1 On and Afferent V1 Off
         # As soon as time_dependent=True for weights
         for l in self.lags:
-            v1_sheet_item.matchconditions['AfferentV1On'+str(l)]={'layer': 'LGN', 'polarity': 'On'}
-            v1_sheet_item.matchconditions['AfferentV1Off'+str(l)]={'layer': 'LGN', 'polarity': 'Off'}
-        v1_sheet_item.matchconditions['LateralV1Excitatory']={'layer': 'V1'}
-        v1_sheet_item.matchconditions['LateralV1Inhibitory']={'layer': 'V1'}
+            v1_sheet_item.matchconditions['AfferentV1On'+str(l)]={'level': 'LGN', 'polarity': 'On'}
+            v1_sheet_item.matchconditions['AfferentV1Off'+str(l)]={'level': 'LGN', 'polarity': 'Off'}
+        v1_sheet_item.matchconditions['LateralV1Excitatory']={'level': 'V1'}
+        v1_sheet_item.matchconditions['LateralV1Inhibitory']={'level': 'V1'}
 
 
     def _specify_V1afferent_projection(self, proj):
-        sf_channel = proj.src.identifier['SF'] if 'SF' in proj.src.identifier else 1
+        sf_channel = proj.src.properties['SF'] if 'SF' in proj.src.properties else 1
         lag = proj.match_name[-1]
         # Adjust delays so same measurement protocol can be used with and without gain control.
         LGN_V1_delay = 0.05 if self.gain_control else 0.10
 
-        proj.parameters['delay']=LGN_V1_delay+int(lag)
-        proj.parameters['dest_port']=('Activity','JointNormalize','Afferent')
-        proj.parameters['weights_generator']=\
-            pattern.random.GaussianCloud(gaussian_size=2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1))
-        proj.parameters['nominal_bounds_template']=\
-            sheet.BoundingBox(radius=self.v1aff_radius*self.sf_spacing**(sf_channel-1))
-        proj.parameters['name']=''
-        if 'eye' in proj.src.identifier:
-            proj.parameters['name']+=proj.src.identifier['eye']
-        if 'opponent' in proj.src.identifier:
-            proj.parameters['name']+=proj.src.identifier['opponent']+proj.src.identifier['surround']
-        proj.parameters['name']+=('LGN'+proj.src.identifier['polarity']+'Afferent')
-        if int(lag)>0:
-            proj.parameters['name']+=('Lag'+lag)
-        if sf_channel>1:
-            proj.parameters['name']+=('SF'+str(proj.src.identifier['SF']))
-        proj.parameters['learning_rate']=self.aff_lr#/len(self.lags) #TODO: Divide by num_aff
-        proj.parameters['strength']=self.aff_strength*(1.0 if not self.gain_control else 1.5) # Divide by num_aff?
+        name=''
+        if 'eye' in proj.src.properties: name+=proj.src.properties['eye']
+        if 'opponent' in proj.src.properties:
+            name+=proj.src.properties['opponent']+proj.src.properties['surround']
+        name+=('LGN'+proj.src.properties['polarity']+'Afferent')
+        if int(lag)>0: name+=('Lag'+lag)
+        if sf_channel>1: name+=('SF'+str(proj.src.properties['SF']))
+
+        parameters={'delay':LGN_V1_delay+int(lag), 'dest_port':('Activity','JointNormalize','Afferent'),
+                    'name':name,'learning_rate':self.aff_lr,
+                    'strength':self.aff_strength*(1.0 if not self.gain_control else 1.5),
+                    'weights_generator':pattern.random.GaussianCloud(gaussian_size=
+                                            2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
+                    'nominal_bounds_template':sheet.BoundingBox(radius=
+                                                self.v1aff_radius*self.sf_spacing**(sf_channel-1))}
+
+        proj.parameters.update(parameters)
 
 
     def _specify_V1lateralexcitatory_projection(self, proj):
-        proj.parameters['delay']=0.05
-        proj.parameters['name']='LateralExcitatory'
-        proj.parameters['weights_generator']=pattern.Gaussian(aspect_ratio=1.0, size=0.05)
-        proj.parameters['strength']=self.exc_strength
-        proj.parameters['nominal_bounds_template']=sheet.BoundingBox(radius=self.latexc_radius)
-        proj.parameters['learning_rate']=self.exc_lr 
+        parameters={'delay':0.05,'name':'LateralExcitatory',
+                    'weights_generator':pattern.Gaussian(aspect_ratio=1.0, size=0.05),
+                    'strength':self.exc_strength, 'learning_rate':self.exc_lr,
+                    'nominal_bounds_template':sheet.BoundingBox(radius=self.latexc_radius)}
+
+        proj.parameters.update(parameters)
 
 
     def _specify_V1lateralinhibitory_projection(self, proj):
-        proj.parameters['delay']=0.05
-        proj.parameters['name']='LateralInhibitory'
-        proj.parameters['weights_generator']=pattern.random.GaussianCloud(gaussian_size=0.15)
-        proj.parameters['strength']=-1.0*self.inh_strength
-        proj.parameters['nominal_bounds_template']=sheet.BoundingBox(radius=self.latinh_radius)
-        proj.parameters['learning_rate']=self.inh_lr
+        parameters={'delay':0.05, 'name':'LateralInhibitory',
+                    'weights_generator':pattern.random.GaussianCloud(gaussian_size=0.15),
+                    'strength':-1.0*self.inh_strength, 'learning_rate':self.inh_lr,
+                    'nominal_bounds_template':sheet.BoundingBox(radius=self.latinh_radius)}
+
+        proj.parameters.update(parameters)
 
 
     def _setup_analysis(self):
-        ### Set up appropriate defaults for analysis
         # TODO: This is different in gcal.ty, stevens/gcal.ty and gcal_od.ty
         # And depends whether gain control is used or not
         import topo.analysis.featureresponses
