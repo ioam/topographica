@@ -272,6 +272,58 @@ def h_to_b(h):
     from colorsys import hsv_to_rgb
     return hsv_to_rgb(h,1.0,1.0)[2]
 
+# Legacy Sweeper class which used to be in imagen, but has been replaced there by
+# a newer version, which is not compatible here
+#
+# CB: I removed motion_sign from this class because I think it is
+# unnecessary. But maybe I misunderstood the original author's
+# intention?
+#
+# In any case, the original implementation was incorrect - it was not
+# possible to get some motion directions (directions in one whole
+# quadrant were missed out).
+#
+# Note that to get a 2pi range of directions, one must use a 2pi range
+# of orientations (there are two directions for any given
+# orientation).  Alternatively, we could generate a random sign, and
+# use an orientation restricted to a pi range.
+
+class Sweeper(pattern.PatternGenerator):
+    """
+    PatternGenerator that sweeps a supplied PatternGenerator in a direction
+    perpendicular to its orientation.
+    """
+
+    generator = param.Parameter(default=pattern.Gaussian(),precedence=0.97, doc="Pattern to sweep.")
+
+    speed = param.Number(default=0.25,bounds=(0.0,None),doc="""
+        Sweep speed: number of sheet coordinate units per unit time.""")
+
+    step = param.Number(default=1,doc="""
+        Number of steps at the given speed to move in the sweep direction.
+        The distance moved is speed*step.""")
+
+    # Provide access to value needed for measuring maps
+    def __get_phase(self): return self.generator.phase
+    def __set_phase(self,new_val): self.generator.phase = new_val
+    phase = property(__get_phase,__set_phase)
+
+    def function(self,p):
+        """Selects and returns one of the patterns in the list."""
+        pg = p.generator
+        motion_orientation=p.orientation+pi/2.0
+
+        new_x = p.x+p.size*pg.x
+        new_y = p.y+p.size*pg.y
+
+        image_array = pg(xdensity=p.xdensity,ydensity=p.ydensity,bounds=p.bounds,
+                         x=new_x + p.speed*p.step*numpy.cos(motion_orientation),
+                         y=new_y + p.speed*p.step*numpy.sin(motion_orientation),
+                         orientation=p.orientation,
+                         scale=pg.scale*p.scale,offset=pg.offset+p.offset)
+
+        return image_array
+
 
 for e in eyes:
     for n in lags:
@@ -337,7 +389,7 @@ for e in eyes:
 
 
             if n != '':
-                input_moved=pattern.Sweeper(
+                input_moved=Sweeper(
                     generator=copy.deepcopy(input_composite),
                     step=int(n),speed=speed,
                     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=input_seed-1))

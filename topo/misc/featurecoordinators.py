@@ -5,7 +5,7 @@ import param
 from param.parameterized import ParamOverrides
 
 from imagen.patterncoordinator import FeatureCoordinator
-from imagen import Gaussian, SmartSweeper
+from imagen import Gaussian, Sweeper
 
 import numbergen
 
@@ -114,9 +114,9 @@ class MotionCoordinator(FeatureCoordinator):
         assert(param.Dynamic.time_dependent), "param.Dynamic.time_dependent!=True for motion"
         assert(numbergen.RandomDistribution.time_dependent), "numbergen.RandomDistribution.time_dependent!=True for motion" 
 
-        moved_pattern = SmartSweeper(generator=copy.deepcopy(pattern),
-                                     speed=p.speed,
-                                     reset_period=p.reset_period,
-                                     time_fn=p.time_fn)
+        moved_pattern = Sweeper(generator=copy.deepcopy(pattern),
+                                speed=p.speed,
+                                reset_period=p.reset_period,
+                                time_fn=p.time_fn)
 
         return moved_pattern
