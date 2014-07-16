@@ -156,8 +156,8 @@ class ChannelGeneratorSheet(GeneratorSheet):
 
 
     def __init__(self,**params):
-        self._channel_data = []
         super(ChannelGeneratorSheet,self).__init__(**params)
+        self._channel_data = []
 
 
     def set_input_generator(self,new_ig,push_existing=False):
