@@ -8,6 +8,8 @@ from topo.base.sheet import Sheet
 from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
 
+import numpy as np
+
 
 # JLALERT: This sheet should have override_plasticity_state/restore_plasticity_state
 # functions that call override_plasticity_state/restore_plasticty_state on the
@@ -120,3 +122,107 @@ class GeneratorSheet(Sheet):
 
     def input_event(self,conn,data):
         raise NotImplementedError
+
+
+
+
+class NChannelGeneratorSheet(GeneratorSheet):
+    """
+    A GeneratorSheet that handles input patterns with multiple simultaneous channels.
+
+    Accepts either a single-channel or an NChannel input_generator.  If the
+    input_generator stores separate channel patterns, it
+    is used as-is; if other (single-channel) PatternGenerators are used, the Class behaves
+    like a normal GeneratorSheet.
+
+    When a pattern is generated, the average of the channels is sent out on the Activity port as 
+    usual for a GeneratorSheet, and channel activities are sent out on the Activity0,
+    Activity1, ..., ActivityN-1 ports.  Thus this class can be used
+    just like GeneratorSheet, but with optional color channels available, too.
+
+
+    If the input_generator is NChannel, this GeneratorSheet will handle the separate channels and 
+    create the specific output ports. If the input_generator is single-channel (eg, a monochrome image)
+    then this GeneratorSheet will behave as a normal non-NChannel GeneratorSheet.
+    """
+
+    constant_mean_total_channels_output = param.Number(default=None,doc="""
+        If set, it enforces the average of the mean channel values to be fixed. Eg,
+        M = ( activity0+activity1+...+activity(N-1) ).mean() / N = constant_mean_total_channels_output""")
+
+    channel_output_fns = param.Dict(default={},doc="""
+        Dictionary with arrays of channel-specific output functions: eg, {0:[fnc1, fnc2],3:[fnc3]}.
+        The dictionary isn't required to specify every channel, but rather only those required.""")
+
+
+    def __init__(self,**params):
+        self._channel_data = []
+        super(NChannelGeneratorSheet,self).__init__(**params)
+
+
+    def set_input_generator(self,new_ig,push_existing=False):
+        """If single-channel generators are used, the Class reverts to a simple GeneratorSheet behavior.
+           If NChannel inputs are used, it will update the number of channels of the NChannelGeneratorSheet
+           to match those of the input. If the number of channels doesn't change, there's no need to reset."""
+
+        channels = new_ig.channels()
+
+        if( len(channels)>1 ):
+            if( len(channels) != len(self._channel_data) ):
+                self.src_ports = ['Activity']
+                self._channel_data = []
+
+                for i in range(len(channels)):
+                    self.src_ports.append( 'Activity'+str(i) )
+                    self._channel_data.append(self.activity.copy())
+
+        else: # monochrome
+            # Reset channels to match single-channel inputs.
+            self.src_ports = ['Activity']
+            self._channel_data = []
+
+        super(NChannelGeneratorSheet,self).set_input_generator(new_ig,push_existing=push_existing)
+
+        
+    def generate(self):
+        """
+        Works as in the superclass, but also generates NChannel output and sends
+        it out on the Activity0, Activity1, ..., ActivityN ports.
+        """
+
+        super(NChannelGeneratorSheet,self).generate()
+
+        channels = self.input_generator.channels()
+        if( len(channels)>1 ):
+            for i in range(len(self._channel_data)):
+                self._channel_data[i][:] = channels[i]
+
+
+        if self.apply_output_fns:
+            ## Default output_fns are applied to all channels
+            for f in self.output_fns:
+                for i in range(len(self._channel_data)):
+                    f( self._channel_data[i] )
+
+            # Channel specific output functions, defined as a dictionary {chn_number:[functions]}
+            for i in range(len(self._channel_data)):
+                if(i in self.channel_output_fns):
+                    for f in self.channel_output_fns[i]:
+                        f( self._channel_data[i] )
+
+
+        if self.constant_mean_total_channels_output is not None:
+            M = sum(act for act in self._channel_data).mean()/len(self._channel_data)
+            if M>0:
+                p = self.constant_mean_total_channels_output/M
+                for act in self._channel_data:
+                    act *= p
+                    np.minimum(act,1.0,act)
+
+
+        for i in range(len(self._channel_data)):
+            self.send_output(src_port=self.src_ports[i+1], data=self._channel_data[i])
+
+
+
+
