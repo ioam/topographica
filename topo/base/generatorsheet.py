@@ -126,7 +126,7 @@ class GeneratorSheet(Sheet):
 
 
 
-class NChannelGeneratorSheet(GeneratorSheet):
+class ChannelGeneratorSheet(GeneratorSheet):
     """
     A GeneratorSheet that handles input patterns with multiple simultaneous channels.
 
@@ -157,12 +157,12 @@ class NChannelGeneratorSheet(GeneratorSheet):
 
     def __init__(self,**params):
         self._channel_data = []
-        super(NChannelGeneratorSheet,self).__init__(**params)
+        super(ChannelGeneratorSheet,self).__init__(**params)
 
 
     def set_input_generator(self,new_ig,push_existing=False):
         """If single-channel generators are used, the Class reverts to a simple GeneratorSheet behavior.
-           If NChannel inputs are used, it will update the number of channels of the NChannelGeneratorSheet
+           If NChannel inputs are used, it will update the number of channels of the ChannelGeneratorSheet
            to match those of the input. If the number of channels doesn't change, there's no need to reset."""
 
         channels = new_ig.channels()
@@ -181,7 +181,7 @@ class NChannelGeneratorSheet(GeneratorSheet):
             self.src_ports = ['Activity']
             self._channel_data = []
 
-        super(NChannelGeneratorSheet,self).set_input_generator(new_ig,push_existing=push_existing)
+        super(ChannelGeneratorSheet,self).set_input_generator(new_ig,push_existing=push_existing)
 
         
     def generate(self):
@@ -190,7 +190,7 @@ class NChannelGeneratorSheet(GeneratorSheet):
         it out on the Activity0, Activity1, ..., ActivityN ports.
         """
 
-        super(NChannelGeneratorSheet,self).generate()
+        super(ChannelGeneratorSheet,self).generate()
 
         channels = self.input_generator.channels()
         if( len(channels)>1 ):
