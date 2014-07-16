@@ -74,12 +74,17 @@ class OcularityCoordinator(FeatureCoordinator):
 
 class SpatialFrequencyCoordinator(FeatureCoordinator):
     """
-    Coordinates the size of pattern generators.
+    Coordinates the size of pattern generators. This is useful when multiple spatial frequency
+    channels are used, to cover a wide range of sizes of pattern generators.
     """
 
-    sf_spacing = param.Number(default=2.0,bounds=(0.0,None),doc="""TODO""")
+    sf_spacing = param.Number(default=2.0,bounds=(0.0,None),doc="""Determines the factor by which 
+        successive SF channels increase in size. Together with sf_max_channel, this is used
+        to compute the upper bound of the size of the supplied pattern generator.""")
 
-    sf_max_channel = param.Integer(default=2,bounds=(2,None),softbounds=(1,4),doc="""TODO""")
+    sf_max_channel = param.Integer(default=2,bounds=(2,None),softbounds=(1,4),doc="""Highest
+        spatial frequency channel. Together with sf_spacing, this is used
+        to compute the upper bound of the size of the supplied pattern generator.""")
 
     def __call__(self, pattern, pattern_label, pattern_number, master_seed, **params):
         p = ParamOverrides(self,params,allow_extra_keywords=True)
@@ -91,6 +96,7 @@ class SpatialFrequencyCoordinator(FeatureCoordinator):
                                                  name="SpatialFrequencyCoordinator"+str(pattern_number))
 
         return new_pattern
+
 
 
 class MotionCoordinator(FeatureCoordinator):
