@@ -228,11 +228,8 @@ sys.modules['topo.pattern.image']=pattern.image
 sys.modules['topo.pattern.rds']=imagen.random
 pattern.Translator.time_fn = sim.time
 
-from topo.misc.featurecoordinators import OcularityCoordinator, DisparityCoordinator, MotionCoordinator, SpatialFrequencyCoordinator
-imagen.patterncoordinator.PatternCoordinator.feature_coordinators.update({'od': OcularityCoordinator,
-                                                                          'dy': DisparityCoordinator,
-                                                                          'dr': MotionCoordinator,
-                                                                          'sf': SpatialFrequencyCoordinator})
+from topo.misc.featurecoordinators import feature_coordinators
+imagen.patterncoordinator.PatternCoordinator.feature_coordinators.update(feature_coordinators)
 
 
 def about(display=True):

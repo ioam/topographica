@@ -98,7 +98,6 @@ class SpatialFrequencyCoordinator(FeatureCoordinator):
         return new_pattern
 
 
-
 class MotionCoordinator(FeatureCoordinator):
     """
     Coordinates the motion of patterns.
@@ -126,3 +125,10 @@ class MotionCoordinator(FeatureCoordinator):
                                 time_fn=p.time_fn)
 
         return moved_pattern
+
+
+
+feature_coordinators=[('od',OcularityCoordinator),
+                      ('dy',DisparityCoordinator),
+                      ('sf',SpatialFrequencyCoordinator),
+                      ('dr',MotionCoordinator)]
