@@ -167,14 +167,17 @@ class ChannelGeneratorSheet(GeneratorSheet):
            If NChannel inputs are used, it will update the number of channels of the ChannelGeneratorSheet
            to match those of the input. If the number of channels doesn't change, there's no need to reset."""
 
-        average, channels = new_ig.channels()
+        num_channels = new_ig.num_channels()
 
-        if( len(channels)>0 ):
-            if( len(channels) != len(self._channel_data) ):
+        if( num_channels>1 ):
+            if( num_channels != len(self._channel_data) ):
                 self.src_ports = ['Activity']
                 self._channel_data = []
 
-                for i in range(len(channels)):
+                for i in range(num_channels):
+                    # TODO: in order to add support for generic naming of Activity ports, it's necessary
+                    #       to implement a .get_channel_names method.  Calling .channels() and inspecting
+                    #       the returned dictionary in fact could change the state of the input generator.
                     self.src_ports.append( 'Activity'+str(i) )
                     self._channel_data.append(self.activity.copy())
 
@@ -193,14 +196,14 @@ class ChannelGeneratorSheet(GeneratorSheet):
         """
 
         try:
-            average, channels = self.input_generator.channels()
+            channels_dict = self.input_generator.channels()
         except StopIteration:
             # Note that a generator may raise an exception StopIteration if it runs out of patterns.
             # Example is if the patterns are files that are loaded sequentially and are not re-used (e.g. the constructors
             # are  discarded to save memory).
             self.warning('Pattern generator {0} returned None. Unable to generate Activity pattern.'.format(self.input_generator.name))
         else:
-            self.activity[:] = average
+            self.activity[:] = channels_dict.items()[0][1]
 
             if self.apply_output_fns:
                 for of in self.output_fns:
@@ -211,7 +214,7 @@ class ChannelGeneratorSheet(GeneratorSheet):
 
             ## These loops are safe: if the pattern doesn't provide further channels, self._channel_data = []
             for i in range(len(self._channel_data)):
-                self._channel_data[i][:] = channels[i]
+                self._channel_data[i][:] = channels_dict.items()[i+1][1]
 
 
             if self.apply_output_fns:
