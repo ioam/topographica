@@ -1,11 +1,15 @@
-import math
+"""
+Additional FeatureCoordinators specific to cortical modelling work,
+supplementing the general-purpose ones in imagen.patterncoordinator.
+"""
+
 import copy
 
 import param
 from param.parameterized import ParamOverrides
 
 from imagen.patterncoordinator import FeatureCoordinator
-from imagen import Gaussian, Sweeper
+from imagen import Sweeper
 
 import numbergen
 
