@@ -167,9 +167,9 @@ class ChannelGeneratorSheet(GeneratorSheet):
            If NChannel inputs are used, it will update the number of channels of the ChannelGeneratorSheet
            to match those of the input. If the number of channels doesn't change, there's no need to reset."""
 
-        channels = new_ig.channels()
+        average, channels = new_ig.channels()
 
-        if( len(channels)>1 ):
+        if( len(channels)>0 ):
             if( len(channels) != len(self._channel_data) ):
                 self.src_ports = ['Activity']
                 self._channel_data = []
@@ -192,38 +192,52 @@ class ChannelGeneratorSheet(GeneratorSheet):
         it out on the Activity0, Activity1, ..., ActivityN ports.
         """
 
-        super(ChannelGeneratorSheet,self).generate()
+        try:
+            average, channels = self.input_generator.channels()
+        except StopIteration:
+            # Note that a generator may raise an exception StopIteration if it runs out of patterns.
+            # Example is if the patterns are files that are loaded sequentially and are not re-used (e.g. the constructors
+            # are  discarded to save memory).
+            self.warning('Pattern generator {0} returned None. Unable to generate Activity pattern.'.format(self.input_generator.name))
+        else:
+            self.activity[:] = average
 
-        channels = self.input_generator.channels()
-        if( len(channels)>1 ):
+            if self.apply_output_fns:
+                for of in self.output_fns:
+                    of(self.activity)
+            self.send_output(src_port='Activity',data=self.activity)
+
+
+
+            ## These loops are safe: if the pattern doesn't provide further channels, self._channel_data = []
             for i in range(len(self._channel_data)):
                 self._channel_data[i][:] = channels[i]
 
 
-        if self.apply_output_fns:
-            ## Default output_fns are applied to all channels
-            for f in self.output_fns:
-                for i in range(len(self._channel_data)):
-                    f( self._channel_data[i] )
-
-            # Channel specific output functions, defined as a dictionary {chn_number:[functions]}
-            for i in range(len(self._channel_data)):
-                if(i in self.channel_output_fns):
-                    for f in self.channel_output_fns[i]:
+            if self.apply_output_fns:
+                ## Default output_fns are applied to all channels
+                for f in self.output_fns:
+                    for i in range(len(self._channel_data)):
                         f( self._channel_data[i] )
 
-
-        if self.constant_mean_total_channels_output is not None:
-            M = sum(act for act in self._channel_data).mean()/len(self._channel_data)
-            if M>0:
-                p = self.constant_mean_total_channels_output/M
-                for act in self._channel_data:
-                    act *= p
-                    np.minimum(act,1.0,act)
+               # Channel specific output functions, defined as a dictionary {chn_number:[functions]}
+                for i in range(len(self._channel_data)):
+                    if(i in self.channel_output_fns):
+                        for f in self.channel_output_fns[i]:
+                            f( self._channel_data[i] )
 
 
-        for i in range(len(self._channel_data)):
-            self.send_output(src_port=self.src_ports[i+1], data=self._channel_data[i])
+            if self.constant_mean_total_channels_output is not None:
+                M = sum(act for act in self._channel_data).mean()/len(self._channel_data)
+                if M>0:
+                    p = self.constant_mean_total_channels_output/M
+                    for act in self._channel_data:
+                        act *= p
+                        np.minimum(act,1.0,act)
+
+
+            for i in range(len(self._channel_data)):
+                self.send_output(src_port=self.src_ports[i+1], data=self._channel_data[i])
 
 
 
