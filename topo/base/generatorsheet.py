@@ -128,12 +128,22 @@ class GeneratorSheet(Sheet):
 
 class ChannelGeneratorSheet(GeneratorSheet):
     """
-    A GeneratorSheet which adds support for input patterns with multiple simultaneous channels.
+    A GeneratorSheet that handles input patterns with multiple simultaneous channels.
 
-    If multi-channel patterns are used, the average of the channels is sent out on the Activity port as 
+    Accepts either a single-channel or an NChannel input_generator.  If the
+    input_generator stores separate channel patterns, it
+    is used as-is; if other (single-channel) PatternGenerators are used, the Class behaves
+    like a normal GeneratorSheet.
+
+    When a pattern is generated, the average of the channels is sent out on the Activity port as 
     usual for a GeneratorSheet, and channel activities are sent out on the Activity0,
     Activity1, ..., ActivityN-1 ports.  Thus this class can be used
     just like GeneratorSheet, but with optional color channels available, too.
+
+
+    If the input_generator is NChannel, this GeneratorSheet will handle the separate channels and 
+    create the specific output ports. If the input_generator is single-channel (eg, a monochrome image)
+    then this GeneratorSheet will behave as a normal non-NChannel GeneratorSheet.
     """
 
     constant_mean_total_channels_output = param.Number(default=None,doc="""
@@ -146,19 +156,20 @@ class ChannelGeneratorSheet(GeneratorSheet):
 
 
     def __init__(self,**params):
-        super(ChannelGeneratorSheet,self).__init__(**params)
+        # We need to setup our datastructures before calling super.init, as that will automatically
+        # call set_input_generator
         self._channel_data = []
+        super(ChannelGeneratorSheet,self).__init__(**params)
 
 
     def set_input_generator(self,new_ig,push_existing=False):
-        """Update the object's data structures depending on the number of the pattern's channels."""
+        """If single-channel generators are used, the Class reverts to a simple GeneratorSheet behavior.
+           If NChannel inputs are used, it will update the number of channels of the ChannelGeneratorSheet
+           to match those of the input. If the number of channels doesn't change, there's no need to reset."""
 
         channels = new_ig.channels()
 
         if( len(channels)>1 ):
-            print channels.__class__
-            print self._channel_data.__class__
-
             if( len(channels) != len(self._channel_data) ):
                 self.src_ports = ['Activity']
                 self._channel_data = []
@@ -177,7 +188,7 @@ class ChannelGeneratorSheet(GeneratorSheet):
         
     def generate(self):
         """
-        Works as in the superclass, but also generates multi-channel output and sends
+        Works as in the superclass, but also generates NChannel output and sends
         it out on the Activity0, Activity1, ..., ActivityN ports.
         """
 
