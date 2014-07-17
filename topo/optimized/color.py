@@ -7,7 +7,7 @@ import numpy
 
 from topo.misc.inlinec import inline, provide_unoptimized_equivalent
 
-from imagen.colorspaces import _rgb_to_hsv_array, _hsv_to_rgb_array
+from imagen.colorspaces import _rgb_to_hsv_array, _hsv_to_rgb_array  # pyflakes:ignore (optimized)
 
 
 def _rgb_to_hsv_array_opt(RGB):
