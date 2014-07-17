@@ -337,7 +337,7 @@ for e in eyes:
 
 
             if n != '':
-                input_moved=pattern.Sweeper(
+                input_moved=pattern.OldSweeper(
                     generator=copy.deepcopy(input_composite),
                     step=int(n),speed=speed,
                     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=input_seed-1))

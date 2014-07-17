@@ -9,7 +9,11 @@ Tutorials using the Tk GUI
 --------------------------
 
 The Tk GUI is a good way to explore a model without needing to
-write any additional code.
+write any additional code.  However, the GUI only supports a limited
+set of operations, and so after doing an initial exploration using the
+GUI, we recommend using the more-powerful IPython notebook interface
+illustrated in the following section.
+
 
 |gcal_gui_tutorial|_
 
@@ -48,20 +52,18 @@ develop new types of analyses not yet offered in the GUI.
 |som_ipynb|_
 
 
-How to run and explore the SOM algorithm in the notebook environment.
-This tutorial covers the same material as the first SOM tutorial,
-illustrating how a model may be explored without requiring the GUI. In
-addition, this notebook includes several videos showing how the SOM
-develops over time, showcasing a feature only available in the
-notebook environment.
+How to run and explore the SOM algorithm in the notebook environment
+(same topics as the above GUI tutorial, but now showing how the
+commands are invoked and can be modified).  In addition, this notebook
+includes several videos showing how the SOM develops over time,
+showcasing a feature only available in the notebook environment.
 
 
 |gcal_tutorial|_
 
 An exploration of GCAL or LISSOM model in the notebook environment.
-This tutorial covers the same material as the first GCAL tutorial but
-unlike the Tk GUI tutorial, this notebook includes animations showing
-the how GCAL develops over time.
+This tutorial covers the same material as the first GCAL tutorial, but
+adds animations showing how GCAL develops over time.
 
 
 |gcal_collector|_
@@ -73,7 +75,7 @@ the basic GCAL tutorial. Analysis over development includes
 orientation preference histograms, hypercolumn distance estimation,
 pinwheel finding and the pinwheel density estimation.
 
-GCAL notebook replicating `Stevens et al. (J. Neuroscience 2013)
+Other GCAL notebooks replicating `Stevens et al. (J. Neuroscience 2013)
 <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ may be found
 `here
 <https://github.com/ioam/topographica/tree/master/models/stevens.jn13>`_. These
