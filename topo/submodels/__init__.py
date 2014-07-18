@@ -239,9 +239,9 @@ class Model(param.Parameterized):
             setup_options = self.available_setup_options
 
         if 'training_patterns' in setup_options:
-            self._setup_training_patterns()
+            self.setup_training_patterns()
         if 'sheets' in setup_options:
-            self._setup_sheets()
+            self.setup_sheets()
             self._set_sheet_parameters()
             self._set_sheet_matchconditions()
         if 'projections' in setup_options:
@@ -251,7 +251,7 @@ class Model(param.Parameterized):
             self._setup_analysis()
 
 
-    def _setup_training_patterns(self):
+    def setup_training_patterns(self):
         """
         Adds new PatternGenerators to self.training_patterns, with
         the name of the input sheet where the training patterns should
@@ -260,7 +260,7 @@ class Model(param.Parameterized):
         raise NotImplementedError
 
 
-    def _setup_sheets(self):
+    def setup_sheets(self):
         """
         Adds new SheetSpec items to self.sheets.
         The AttrTree path is named after the sheet name.

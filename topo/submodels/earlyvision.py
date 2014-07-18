@@ -101,7 +101,7 @@ class VisualInputModel(SensoryModel):
         self.setup(setup_options)
 
 
-    def _setup_training_patterns(self):
+    def setup_training_patterns(self):
         # all the below will eventually end up in PatternCoordinator!
         disparity_bound = 0.0
         position_bound_x = self.area/2.0+0.25
@@ -173,7 +173,7 @@ class EarlyVisionModel(VisualInputModel):
         self.setup(setup_options)
 
 
-    def _setup_sheets(self):
+    def setup_sheets(self):
         retina_product = lancet.Args(level='Retina')
         if self.eyes:
             retina_product = retina_product * lancet.List('eye', self.eyes)
@@ -289,7 +289,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         self.setup(setup_options)
 
 
-    def _setup_sheets(self):
+    def setup_sheets(self):
         retina_product = lancet.Args(level='Retina')
         if self.eyes:
             retina_product = retina_product * lancet.List('eye', self.eyes)

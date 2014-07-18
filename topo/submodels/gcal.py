@@ -74,8 +74,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         self.setup(setup_options)
 
 
-    def _setup_sheets(self):
-        super(ModelGCAL,self)._setup_sheets()
+    def setup_sheets(self):
+        super(ModelGCAL,self).setup_sheets()
         sheet_ref=SheetSpec(sheet.SettlingCFSheet, {'level':'V1'})
         self.sheets.set_path(str(sheet_ref), sheet_ref)
 
