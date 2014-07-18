@@ -65,7 +65,8 @@ class SheetSpec(Specification):
         super(SheetSpec,self).__init__(spec_type, parameters)
 
         if name_ordering:
-            properties = [(k, properties[k]) for k in name_ordering]
+            properties = [(k, properties[k]) for k in name_ordering
+                          if k in properties]
         self.properties = OrderedDict(properties)
 
         self.matchconditions = matchconditions
