@@ -242,11 +242,11 @@ class Model(param.Parameterized):
             self.setup_training_patterns()
         if 'sheets' in setup_options:
             self.setup_sheets()
-            self._set_sheet_parameters()
-            self._set_sheet_matchconditions()
+            self._update_sheet_parameters()
+            self._compute_matchconditions()
         if 'projections' in setup_options:
             self._setup_projections()
-            self._set_projection_parameters()
+            self._update_projection_parameters()
         if 'analysis' in setup_options:
             self._setup_analysis()
 
@@ -305,7 +305,7 @@ class Model(param.Parameterized):
                                                                  properties=properties))
 
 
-    def _set_sheet_parameters(self):
+    def _update_sheet_parameters(self):
         for sheet_item in self.sheets.path_items.values():
             if(callable(self.level.registry[sheet_item.properties['level']])):
                 sheet_item.parameters.update(self.level.registry[sheet_item.properties['level']]
@@ -314,7 +314,7 @@ class Model(param.Parameterized):
                 sheet_item.parameters.update(self.level.registry[sheet_item.properties['level']])
 
 
-    def _set_sheet_matchconditions(self):
+    def _compute_matchconditions(self):
         for sheet_item in self.sheets.path_items.values():
             matchcondition = self.matchconditions.registry.get(sheet_item.properties['level'], False)
             if(callable(matchcondition)):
@@ -324,7 +324,7 @@ class Model(param.Parameterized):
                 sheet_item.matchconditions.update(matchcondition)
 
 
-    def _set_projection_parameters(self):
+    def _update_projection_parameters(self):
         for proj in self.projections.path_items.values():
             proj.parameters.update(self.connect.registry[proj.match_name](self,proj))
 
