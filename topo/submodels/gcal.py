@@ -12,8 +12,8 @@ import topo.sheet.optimized
 import topo.transferfn.misc
 import topo.pattern.random
 
-from topo.submodels import EarlyVisionModel, ColorEarlyVisionModel, SheetSpec
-
+from topo.submodels import Model, SheetSpec
+from topo.submodels.earlyvision import EarlyVisionModel, ColorEarlyVisionModel
 
 class ModelGCAL(ColorEarlyVisionModel):
     homeostasis = param.Boolean(default=True, doc="""
@@ -57,26 +57,19 @@ class ModelGCAL(ColorEarlyVisionModel):
     def __init__(self, setup_options=True, **params):
         super(ModelGCAL,self).__init__([], **params)
 
-        for l in self.lags:
-            self.match_parameter_mapping['AfferentV1On'+str(l)]=self._specify_V1afferent_projection
-            self.match_parameter_mapping['AfferentV1Off'+str(l)]=self._specify_V1afferent_projection
-            self.match_connectiontype_mapping['AfferentV1On'+str(l)]=projection.CFProjection
-            self.match_connectiontype_mapping['AfferentV1Off'+str(l)]=projection.CFProjection
-
-        self.match_parameter_mapping['LateralV1Excitatory']=self._specify_V1lateralexcitatory_projection
-        self.match_parameter_mapping['LateralV1Inhibitory']=self._specify_V1lateralinhibitory_projection
-        self.match_connectiontype_mapping['LateralV1Excitatory']=projection.CFProjection
-        self.match_connectiontype_mapping['LateralV1Inhibitory']=projection.CFProjection
-
-        self.sheet_parameters_mapping['V1']=self._set_V1_sheet_parameters
-        self.sheet_matchcondition_mapping['V1']=self._set_V1_sheet_matchconditions
-
         ### Specify weight initialization, response function, and learning function
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
         projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
         projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
         projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
         projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
+
+        self._specify_V1afferent_projection = Model.projection_spec(
+            'AfferentV1On', projection.CFProjection, {'lag': self.lags}) \
+            (self._specify_V1afferent_projection)
+        self._specify_V1afferent_projection = Model.projection_spec(
+            'AfferentV1Off', projection.CFProjection, {'lag': self.lags}) \
+            (self._specify_V1afferent_projection)
 
         self.setup(setup_options)
 
@@ -87,18 +80,19 @@ class ModelGCAL(ColorEarlyVisionModel):
         self.sheets.set_path(str(sheet_ref), sheet_ref)
 
 
-    def _set_V1_sheet_parameters(self,v1_sheet_item):
-        parameters={'tsettle':16, 'plastic':True,
-                    'joint_norm_fn':topo.sheet.optimized.compute_joint_norm_totals_opt,
-                    'output_fns':[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
-                                                    learning_rate=0.01 if self.homeostasis else 0.0)],
-                    'nominal_density':self.cortex_density,
-                    'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0)}
+    @Model.level('V1')
+    def _V1_level_parameters(self, properties):
+        return {'tsettle':16,
+                'plastic':True,
+                'joint_norm_fn':topo.sheet.optimized.compute_joint_norm_totals_opt,
+                'output_fns':[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
+                                                learning_rate=0.01 if self.homeostasis else 0.0)],
+                'nominal_density':self.cortex_density,
+                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0)}
 
-        v1_sheet_item.parameters.update(parameters)
 
-
-    def _set_V1_sheet_matchconditions(self, v1_sheet_item):
+    @Model.matchconditions('V1')
+    def _V1_level_matchconditions(self, properties):
         """
         V1 connects to all LGN sheets.
         Furthermore, it connects to itself with two projections:
@@ -107,16 +101,16 @@ class ModelGCAL(ColorEarlyVisionModel):
         """
         # TODO: Combine Afferent V1 On and Afferent V1 Off
         # As soon as time_dependent=True for weights
-        for l in self.lags:
-            v1_sheet_item.matchconditions['AfferentV1On'+str(l)]={'level': 'LGN', 'polarity': 'On'}
-            v1_sheet_item.matchconditions['AfferentV1Off'+str(l)]={'level': 'LGN', 'polarity': 'Off'}
-        v1_sheet_item.matchconditions['LateralV1Excitatory']={'level': 'V1'}
-        v1_sheet_item.matchconditions['LateralV1Inhibitory']={'level': 'V1'}
+        return {'AfferentV1On': {'level': 'LGN', 'polarity': 'On'},
+                'AfferentV1Off':{'level': 'LGN', 'polarity': 'Off'},
+                'LateralV1Excitatory': {'level': 'V1'},
+                'LateralV1Inhibitory': {'level': 'V1'}}
 
 
-    def _specify_V1afferent_projection(self, proj):
+    # This method is decorated dynamically in __init__
+    def _specify_V1afferent_projection(self, _, proj):
         sf_channel = proj.src.properties['SF'] if 'SF' in proj.src.properties else 1
-        lag = proj.match_name[-1]
+        lag = proj.properties['lag']
         # Adjust delays so same measurement protocol can be used with and without gain control.
         LGN_V1_delay = 0.05 if self.gain_control else 0.10
 
@@ -125,36 +119,38 @@ class ModelGCAL(ColorEarlyVisionModel):
         if 'opponent' in proj.src.properties:
             name+=proj.src.properties['opponent']+proj.src.properties['surround']
         name+=('LGN'+proj.src.properties['polarity']+'Afferent')
-        if int(lag)>0: name+=('Lag'+lag)
+        if lag>0: name+=('Lag'+str(lag))
         if sf_channel>1: name+=('SF'+str(proj.src.properties['SF']))
 
-        parameters={'delay':LGN_V1_delay+int(lag), 'dest_port':('Activity','JointNormalize','Afferent'),
-                    'name':name,'learning_rate':self.aff_lr,
-                    'strength':self.aff_strength*(1.0 if not self.gain_control else 1.5),
-                    'weights_generator':pattern.random.GaussianCloud(gaussian_size=
-                                            2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
-                    'nominal_bounds_template':sheet.BoundingBox(radius=
-                                                self.v1aff_radius*self.sf_spacing**(sf_channel-1))}
+        return {'delay':LGN_V1_delay+lag,
+                'dest_port':('Activity','JointNormalize','Afferent'),
+                'name':name,
+                'learning_rate':self.aff_lr,
+                'strength':self.aff_strength*(1.0 if not self.gain_control else 1.5),
+                'weights_generator':pattern.random.GaussianCloud(gaussian_size=
+                                        2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
+                'nominal_bounds_template':sheet.BoundingBox(radius=
+                                            self.v1aff_radius*self.sf_spacing**(sf_channel-1))}
 
-        proj.parameters.update(parameters)
 
-
+    @Model.projection_spec('LateralV1Excitatory', projection.CFProjection)
     def _specify_V1lateralexcitatory_projection(self, proj):
-        parameters={'delay':0.05,'name':'LateralExcitatory',
-                    'weights_generator':pattern.Gaussian(aspect_ratio=1.0, size=0.05),
-                    'strength':self.exc_strength, 'learning_rate':self.exc_lr,
-                    'nominal_bounds_template':sheet.BoundingBox(radius=self.latexc_radius)}
+        return {'delay':0.05,
+                'name':'LateralExcitatory',
+                'weights_generator':pattern.Gaussian(aspect_ratio=1.0, size=0.05),
+                'strength':self.exc_strength,
+                'learning_rate':self.exc_lr,
+                'nominal_bounds_template':sheet.BoundingBox(radius=self.latexc_radius)}
 
-        proj.parameters.update(parameters)
 
-
+    @Model.projection_spec('LateralV1Inhibitory', projection.CFProjection)
     def _specify_V1lateralinhibitory_projection(self, proj):
-        parameters={'delay':0.05, 'name':'LateralInhibitory',
-                    'weights_generator':pattern.random.GaussianCloud(gaussian_size=0.15),
-                    'strength':-1.0*self.inh_strength, 'learning_rate':self.inh_lr,
-                    'nominal_bounds_template':sheet.BoundingBox(radius=self.latinh_radius)}
-
-        proj.parameters.update(parameters)
+        return {'delay':0.05,
+                'name':'LateralInhibitory',
+                'weights_generator':pattern.random.GaussianCloud(gaussian_size=0.15),
+                'strength':-1.0*self.inh_strength,
+                'learning_rate':self.inh_lr,
+                'nominal_bounds_template':sheet.BoundingBox(radius=self.latinh_radius)}
 
 
     def _setup_analysis(self):
@@ -170,7 +166,11 @@ class ModelGCAL(ColorEarlyVisionModel):
             sf_relative_sizes = [self.sf_spacing**(sf_channel-1) for sf_channel in self.SF]
             wide_relative_sizes=[0.5*sf_relative_sizes[0]] + sf_relative_sizes + [2.0*sf_relative_sizes[-1]]
             relative_sizes=(wide_relative_sizes if self.expand_sf_test_range else sf_relative_sizes)
-            # TODO: Where the heck is the 2.4 coming from?
+            #The default 2.4 spatial frequency value here is
+            #chosen because it results in a sine grating with bars whose
+            #width approximately matches the width of the Gaussian training
+            #patterns, and thus the typical width of an ON stripe in one of the
+            #receptive fields
             measure_sine_pref.frequencies = [2.4*s for s in relative_sizes]
 
 
