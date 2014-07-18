@@ -196,7 +196,7 @@ class EarlyVisionModel(VisualInputModel):
 
     @Model.level('Retina')
     def _retina_level_parameters(self, properties):
-        return {'period':1.0
+        return {'period':1.0,
                 'phase':0.05,
                 'nominal_density':self.retina_density,
                 'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0 + \
