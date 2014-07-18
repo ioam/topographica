@@ -54,10 +54,10 @@ class ModelGCAL(ColorEarlyVisionModel):
         smallest and twice the size of the largest.""")
 
 
-    def __init__(self, setup_options=True, **params):
-        super(ModelGCAL,self).__init__([], **params)
+    def initialize(self):
+        super(ModelGCAL, self).initialize()
+        "Specify weight initialization, response function, and learning function"
 
-        ### Specify weight initialization, response function, and learning function
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
         projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
         projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
@@ -70,8 +70,6 @@ class ModelGCAL(ColorEarlyVisionModel):
         self._specify_V1afferent_projection = Model.connect(
             'AfferentV1Off', projection.CFProjection, {'lag': self.lags}) \
             (self._specify_V1afferent_projection)
-
-        self.setup(setup_options)
 
 
     def setup_sheets(self):

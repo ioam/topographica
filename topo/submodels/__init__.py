@@ -226,12 +226,23 @@ class Model(param.Parameterized):
 
     def __init__(self, setup_options=True, **params):
         super(Model,self).__init__(**params)
+        self.initialize()
 
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
         self.projections = AttrTree()
 
         self.setup(setup_options)
+
+
+    def initialize(self):
+        """
+        Method to precompute any useful self attributes from the class
+        parameters. For instance, if there is a ``num_lags``
+        parameter, this method could compute the actual projection
+        delays and store it in self.lags.
+        """
+        pass
 
 
     def setup(self,setup_options):

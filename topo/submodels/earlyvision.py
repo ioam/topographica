@@ -20,9 +20,6 @@ class SensoryModel(Model):
         How many input patterns to present per unit area at each
         iteration, when using discrete patterns (e.g. Gaussians).""")
 
-    def __init__(self, setup_options=True, **params):
-        super(SensoryModel,self).__init__([], **params)
-        self.setup(setup_options)
 
 class VisualInputModel(SensoryModel):
     dims = param.List(default=['xy','or'],class_=str,doc="""
@@ -70,8 +67,9 @@ class VisualInputModel(SensoryModel):
 
     __abstract = True
 
-    def __init__(self, setup_options=True, **params):
-        super(VisualInputModel,self).__init__([], **params)
+
+    def initialize(self):
+        super(VisualInputModel, self).initialize()
         if 'od' in self.dims or 'dy' in self.dims:
             self.eyes=['Left','Right']
         else:
@@ -97,8 +95,6 @@ class VisualInputModel(SensoryModel):
         else:
             self.num_lags=1
             self.lags = [0]
-
-        self.setup(setup_options)
 
 
     def setup_training_patterns(self):
@@ -167,10 +163,10 @@ class EarlyVisionModel(VisualInputModel):
         Factor by which the strength of afferent connections from retina sheets
         to LGN sheets is multiplied.""")
 
-    def __init__(self, setup_options=True, **params):
-        super(EarlyVisionModel,self).__init__([], **params)
+
+    def initialize(self):
+        super(EarlyVisionModel, self).initialize()
         self.center_polarities=['On','Off']
-        self.setup(setup_options)
 
 
     def setup_sheets(self):
@@ -274,9 +270,9 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     gain_control_color = param.Boolean(default=False,doc="""
         Whether to use divisive lateral inhibition in the LGN for contrast gain control in color sheets.""")
 
-    def __init__(self, setup_options=True, **params):
-        super(ColorEarlyVisionModel,self).__init__([], **params)
 
+    def initialize(self):
+        super(ColorEarlyVisionModel, self).initialize()
         if 'cr' in self.dims:
             self.opponent_types_center   = ['Red',   'Green', 'Blue',     'RedGreenBlue']
             self.opponent_types_surround = ['Green', 'Red',   'RedGreen', 'RedGreenBlue']
@@ -286,7 +282,6 @@ class ColorEarlyVisionModel(EarlyVisionModel):
             self.opponent_types_surround = []
             self.cone_types              = []
 
-        self.setup(setup_options)
 
 
     def setup_sheets(self):
