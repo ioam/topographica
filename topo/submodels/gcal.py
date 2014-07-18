@@ -64,13 +64,6 @@ class ModelGCAL(ColorEarlyVisionModel):
         projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
         projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 
-        self._specify_V1afferent_projection = Model.connect(
-            'AfferentV1On', projection.CFProjection, {'lag': self.lags}) \
-            (self._specify_V1afferent_projection)
-        self._specify_V1afferent_projection = Model.connect(
-            'AfferentV1Off', projection.CFProjection, {'lag': self.lags}) \
-            (self._specify_V1afferent_projection)
-
 
     def setup_sheets(self):
         return (super(ModelGCAL,self).setup_sheets()
@@ -104,10 +97,10 @@ class ModelGCAL(ColorEarlyVisionModel):
                 'LateralV1Inhibitory': {'level': 'V1'}}
 
 
-    # This method is decorated dynamically in __init__
-    def _specify_V1afferent_projection(self, _, proj):
+    @Model.connect('AfferentV1On',  projection.CFProjection)
+    @Model.connect('AfferentV1Off', projection.CFProjection)
+    def _specify_V1afferent_projection(self, proj):
         sf_channel = proj.src.properties['SF'] if 'SF' in proj.src.properties else 1
-        lag = proj.properties['lag']
         # Adjust delays so same measurement protocol can be used with and without gain control.
         LGN_V1_delay = 0.05 if self.gain_control else 0.10
 
@@ -116,18 +109,18 @@ class ModelGCAL(ColorEarlyVisionModel):
         if 'opponent' in proj.src.properties:
             name+=proj.src.properties['opponent']+proj.src.properties['surround']
         name+=('LGN'+proj.src.properties['polarity']+'Afferent')
-        if lag>0: name+=('Lag'+str(lag))
         if sf_channel>1: name+=('SF'+str(proj.src.properties['SF']))
 
-        return {'delay':LGN_V1_delay+lag,
-                'dest_port':('Activity','JointNormalize','Afferent'),
-                'name':name,
-                'learning_rate':self.aff_lr,
-                'strength':self.aff_strength*(1.0 if not self.gain_control else 1.5),
-                'weights_generator':pattern.random.GaussianCloud(gaussian_size=
+        return [{'delay':LGN_V1_delay+lag,
+                 'dest_port':('Activity','JointNormalize','Afferent'),
+                 'name':        name if lag==0 else name+('Lag'+str(lag)),
+                 'learning_rate':self.aff_lr,
+                 'strength':self.aff_strength*(1.0 if not self.gain_control else 1.5),
+                 'weights_generator':pattern.random.GaussianCloud(gaussian_size=
                                         2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
-                'nominal_bounds_template':sheet.BoundingBox(radius=
+                 'nominal_bounds_template':sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1))}
+                for lag in self.lags]
 
 
     @Model.connect('LateralV1Excitatory', projection.CFProjection)

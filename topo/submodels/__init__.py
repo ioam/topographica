@@ -170,9 +170,8 @@ class RegisteredMethod(object):
     def __init__(self):
         self.registry = {}
         self.types = {}
-        self.options = {}
 
-    def __call__(self, key, obj_type=None, option=None):
+    def __call__(self, key, obj_type=None):
         def decorator(f):
             @wraps(f)
             def inner(*args, **kwargs):
@@ -181,9 +180,6 @@ class RegisteredMethod(object):
             self.registry[key] = inner
             if obj_type is not None:
                 self.types[key] = obj_type
-            if option is not None:
-                self.options[key] = option
-
             return inner
         return decorator
 
@@ -262,11 +258,12 @@ class Model(param.Parameterized):
             sheet_specs = self.setup_sheets()
             for sheet_spec in sheet_specs:
                 self.sheets.set_path(str(sheet_spec), sheet_spec)
+
+            # Should the next two methods be merged with setup_sheets?
             self._update_sheet_parameters()
             self._compute_matchconditions()
         if 'projections' in setup_options:
             self._setup_projections()
-            self._update_projection_parameters()
         if 'analysis' in setup_options:
             self._setup_analysis()
 
@@ -289,9 +286,11 @@ class Model(param.Parameterized):
 
 
     def _setup_projections(self):
-        # Loop through all possible combinations of SheetSpec objects in self.sheets
-        # If the src_sheet fulfills all criteria specified in dest_sheet.matchconditions,
-        # create a new ProjectionSpec object and add this item to self.projections
+        """
+        Loop through all possible combinations of SheetSpec objects in self.sheets
+        If the src_sheet fulfills all criteria specified in dest_sheet.matchconditions,
+        create a new ProjectionSpec object and add this item to self.projections.
+        """
         self.projections = AttrTree()
 
         for src_sheet, dest_sheet in itertools.product(self.sheets.path_items.values(),
@@ -307,22 +306,12 @@ class Model(param.Parameterized):
                             break
 
                 if is_match:
-                    options = self.connect.options.get(matchname, {})
-                    options.update({'matchname':[matchname]})
-                    combinations = [i for i in options.values()]
-                    for combination_prod in itertools.product(*combinations):
-                        properties={}
-                        for idx, option in enumerate(options.keys()):
-                            properties.update({option:combination_prod[idx]})
-                        appendix=''
-                        for key, value in properties.items():
-                            if key is not 'matchname':
-                                appendix+=key
-                                appendix+=str(value)
-                        self.projections.set_path(str(dest_sheet)+'.'+str(src_sheet)+'.'+matchname+appendix,
-                                                  ProjectionSpec(self.connect.types[matchname],
-                                                                 src_sheet, dest_sheet, matchname,
-                                                                 properties=properties))
+                    proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
+                    paramsets = self.connect.registry[matchname](self, proj)
+                    paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
+                    for paramset in paramsets:
+                        proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname, parameters=paramset)
+                        self.projections.set_path(str(dest_sheet)+'.'+str(src_sheet)+'.'+ paramset['name'], proj)
 
 
     def _update_sheet_parameters(self):
@@ -342,11 +331,6 @@ class Model(param.Parameterized):
                                                   (self,sheet_item.properties))
             elif matchcondition:
                 sheet_item.matchconditions.update(matchcondition)
-
-
-    def _update_projection_parameters(self):
-        for proj in self.projections.path_items.values():
-            proj.parameters.update(self.connect.registry[proj.match_name](self,proj))
 
 
     def _setup_analysis(self):
