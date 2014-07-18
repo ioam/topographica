@@ -64,10 +64,10 @@ class ModelGCAL(ColorEarlyVisionModel):
         projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
         projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 
-        self._specify_V1afferent_projection = Model.projection_spec(
+        self._specify_V1afferent_projection = Model.connect(
             'AfferentV1On', projection.CFProjection, {'lag': self.lags}) \
             (self._specify_V1afferent_projection)
-        self._specify_V1afferent_projection = Model.projection_spec(
+        self._specify_V1afferent_projection = Model.connect(
             'AfferentV1Off', projection.CFProjection, {'lag': self.lags}) \
             (self._specify_V1afferent_projection)
 
@@ -133,7 +133,7 @@ class ModelGCAL(ColorEarlyVisionModel):
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1))}
 
 
-    @Model.projection_spec('LateralV1Excitatory', projection.CFProjection)
+    @Model.connect('LateralV1Excitatory', projection.CFProjection)
     def _specify_V1lateralexcitatory_projection(self, proj):
         return {'delay':0.05,
                 'name':'LateralExcitatory',
@@ -143,7 +143,7 @@ class ModelGCAL(ColorEarlyVisionModel):
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.latexc_radius)}
 
 
-    @Model.projection_spec('LateralV1Inhibitory', projection.CFProjection)
+    @Model.connect('LateralV1Inhibitory', projection.CFProjection)
     def _specify_V1lateralinhibitory_projection(self, proj):
         return {'delay':0.05,
                 'name':'LateralInhibitory',

@@ -232,7 +232,7 @@ class EarlyVisionModel(VisualInputModel):
                               if self.gain_control else None}
 
 
-    @Model.projection_spec('Afferent', projection.SharedWeightCFProjection)
+    @Model.connect('Afferent', projection.SharedWeightCFProjection)
     def _specify_lgn_afferent_projection(self, proj):
         channel = proj.dest.properties['SF'] if 'SF' in proj.dest.properties else 1
 
@@ -256,7 +256,7 @@ class EarlyVisionModel(VisualInputModel):
                 'weights_generator':on_weights if proj.dest.properties['polarity']=='On' else off_weights}
 
 
-    @Model.projection_spec('LateralGC', projection.SharedWeightCFProjection)
+    @Model.connect('LateralGC', projection.SharedWeightCFProjection)
     def _specify_lateralgc_projection(self, proj):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
         return {'delay':0.05,
@@ -354,7 +354,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                              if self.gain_control_color and 'opponent' in properties else None}
 
 
-    @Model.projection_spec('Afferent', projection.SharedWeightCFProjection)
+    @Model.connect('Afferent', projection.SharedWeightCFProjection)
     def _specify_lgn_afferent_projection(self, proj): # Is that needed?
         parameters = super(ColorEarlyVisionModel,self)._specify_lgn_afferent_projection(proj)
         if 'opponent' in proj.dest.properties:
@@ -362,7 +362,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         return parameters
 
 
-    @Model.projection_spec('AfferentCenter', projection.SharedWeightCFProjection)
+    @Model.connect('AfferentCenter', projection.SharedWeightCFProjection)
     def _specify_lgn_afferentcenter_projection(self, proj):
         #TODO: It shouldn't be too hard to figure out how many retina sheets it connects to,
         #      then all the below special cases can be generalized!
@@ -381,7 +381,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius)}
 
 
-    @Model.projection_spec('AfferentSurround', projection.SharedWeightCFProjection)
+    @Model.connect('AfferentSurround', projection.SharedWeightCFProjection)
     def _specify_lgn_afferentsurround_projection(self, proj):
         #TODO: strength=-strength_scale for 'On', +strength_scale for 'Off'
         #TODO: strength=-strength_scale/2 for dest_properties['opponent']=='Blue'

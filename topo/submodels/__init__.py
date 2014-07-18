@@ -194,9 +194,9 @@ class Model(param.Parameterized):
         registered methods in matchconditions
         :'projections': determines which connections should be present
         between the sheets according to the matchconditions of
-        SheetSpec objects, using projection_spec to specify the
+        SheetSpec objects, using connect to specify the
         connection type and sets their parameters according to the
-        registered methods in projection_spec
+        registered methods in connect
 
 
     The available instantiate options are:
@@ -215,7 +215,7 @@ class Model(param.Parameterized):
 
     level = RegisteredMethod()
     matchconditions = RegisteredMethod()
-    projection_spec = RegisteredMethod()
+    connect = RegisteredMethod()
 
     def __init__(self, setup_options=True, **params):
         super(Model,self).__init__(**params)
@@ -287,7 +287,7 @@ class Model(param.Parameterized):
                             break
 
                 if is_match:
-                    options = self.projection_spec.options.get(matchname, {})
+                    options = self.connect.options.get(matchname, {})
                     options.update({'matchname':[matchname]})
                     combinations = [i for i in options.values()]
                     for combination_prod in itertools.product(*combinations):
@@ -300,7 +300,7 @@ class Model(param.Parameterized):
                                 appendix+=key
                                 appendix+=str(value)
                         self.projections.set_path(str(dest_sheet)+'.'+str(src_sheet)+'.'+matchname+appendix,
-                                                  ProjectionSpec(self.projection_spec.types[matchname],
+                                                  ProjectionSpec(self.connect.types[matchname],
                                                                  src_sheet, dest_sheet, matchname,
                                                                  properties=properties))
 
@@ -326,7 +326,7 @@ class Model(param.Parameterized):
 
     def _set_projection_parameters(self):
         for proj in self.projections.path_items.values():
-            proj.parameters.update(self.projection_spec.registry[proj.match_name](self,proj))
+            proj.parameters.update(self.connect.registry[proj.match_name](self,proj))
 
 
     def _setup_analysis(self):
