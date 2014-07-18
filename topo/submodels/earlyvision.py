@@ -174,13 +174,13 @@ class EarlyVisionModel(VisualInputModel):
 
 
     def setup_sheets(self):
+        sheet_specs = []
         retina_product = lancet.Args(level='Retina')
         if self.eyes:
             retina_product = retina_product * lancet.List('eye', self.eyes)
 
         for retina_item in retina_product.specs:
-            sheet_ref=SheetSpec(sheet.GeneratorSheet,retina_item,['eye','level'])
-            self.sheets.set_path(str(sheet_ref), sheet_ref)
+            sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_item,['eye','level']))
 
         lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
         if self.eyes:
@@ -190,8 +190,8 @@ class EarlyVisionModel(VisualInputModel):
 
         lgn_order=['eye','level','polarity','SF']
         for lgn_item in lgn_product.specs:
-            sheet_ref=SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_item,lgn_order)
-            self.sheets.set_path(str(sheet_ref), sheet_ref)
+            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_item,lgn_order))
+        return sheet_specs
 
 
     @Model.level('Retina')
@@ -290,6 +290,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     def setup_sheets(self):
+        sheet_specs = []
         retina_product = lancet.Args(level='Retina')
         if self.eyes:
             retina_product = retina_product * lancet.List('eye', self.eyes)
@@ -298,8 +299,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
         retina_order = ['eye','level','cone']
         for retina_item in retina_product.specs:
-            sheet_ref=SheetSpec(sheet.GeneratorSheet,retina_item,retina_order)
-            self.sheets.set_path(str(sheet_ref), sheet_ref)
+            sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_item,retina_order))
 
         lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
         if self.eyes:
@@ -316,8 +316,9 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
         lgn_order = ['eye','level','polarity','SF','opponent','surround']
         for lgn_item in lgn_product.specs:
-            sheet_ref=SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_item,lgn_order)
-            self.sheets.set_path(str(sheet_ref), sheet_ref)
+            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_item,lgn_order))
+        return sheet_specs
+
 
 
     @Model.matchconditions('LGN')

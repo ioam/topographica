@@ -195,7 +195,7 @@ class Model(param.Parameterized):
         :'training_patterns': fills the training_patterns AttrTree
         with pattern generator instances. The path is the name of the
         input sheet. Usually calls PatternCoordinator to do this.
-        :'setup_sheets': determines the amount of sheets, their types
+        :'setup_sheets': determines the number of sheets, their types
         and names sets sheet parameters according to the registered
         methods in level sets sheet matchconditions according to the
         registered methods in matchconditions
@@ -248,7 +248,9 @@ class Model(param.Parameterized):
         if 'training_patterns' in setup_options:
             self.setup_training_patterns()
         if 'sheets' in setup_options:
-            self.setup_sheets()
+            sheet_specs = self.setup_sheets()
+            for sheet_spec in sheet_specs:
+                self.sheets.set_path(str(sheet_spec), sheet_spec)
             self._update_sheet_parameters()
             self._compute_matchconditions()
         if 'projections' in setup_options:
@@ -269,8 +271,8 @@ class Model(param.Parameterized):
 
     def setup_sheets(self):
         """
-        Adds new SheetSpec items to self.sheets.
-        The AttrTree path is named after the sheet name.
+        Adds new SheetSpec items to the self.sheets AttrTree.
+        Must return a list of SheetSpec objects.
         """
         raise NotImplementedError
 
