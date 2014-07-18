@@ -109,7 +109,7 @@ class ProjectionSpec(Specification):
     The following attributes can be accessed:
 
     :'src': SheetSpec of the source sheet
-    :'dest': SheetSpec of the destionation sheet
+    :'dest': SheetSpec of the destination sheet
     :'spec_type': Subclass of topo.base.projection.Projection
     :'match_name': Name of the matchcondition which has been used to
     set this projection up.  This might be used to set the parameters
@@ -146,7 +146,8 @@ class ProjectionSpec(Specification):
         """
         Instantiate the projection and register it in topo.sim.
         """
-        topo.sim.connect(str(self.src),str(self.dest),self.spec_type,**self.parameters)
+        topo.sim.connect(str(self.src),str(self.dest),self.spec_type,
+                         **self.parameters)
 
 
     def resolve(self):
