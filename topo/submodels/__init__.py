@@ -53,6 +53,10 @@ class SheetSpec(Specification):
     sheet should connect to.
     """
 
+    @property
+    def level(self):
+        return self.properties['level']
+
     def __init__(self, spec_type, properties, name_ordering=None,
                  parameters=None, matchconditions=None):
         """
@@ -63,6 +67,9 @@ class SheetSpec(Specification):
         allows a lookup which parameters can be set.
         """
         super(SheetSpec,self).__init__(spec_type, parameters)
+
+        if 'level' not in properties:
+            raise Exception("SheetSpec always requires 'level' in properties")
 
         if name_ordering:
             properties = [(k, properties[k]) for k in name_ordering
@@ -307,18 +314,18 @@ class Model(param.Parameterized):
 
     def _update_sheet_parameters(self):
         for sheet_item in self.sheets.path_items.values():
-            if(callable(self.level.registry[sheet_item.properties['level']])):
-                sheet_item.parameters.update(self.level.registry[sheet_item.properties['level']]
+            if(callable(self.level.registry[sheet_item.level])):
+                sheet_item.parameters.update(self.level.registry[sheet_item.level]
                                              (self,sheet_item.properties))
             else:
-                sheet_item.parameters.update(self.level.registry[sheet_item.properties['level']])
+                sheet_item.parameters.update(self.level.registry[sheet_item.level])
 
 
     def _compute_matchconditions(self):
         for sheet_item in self.sheets.path_items.values():
-            matchcondition = self.matchconditions.registry.get(sheet_item.properties['level'], False)
+            matchcondition = self.matchconditions.registry.get(sheet_item.level, False)
             if(callable(matchcondition)):
-                sheet_item.matchconditions.update(self.matchconditions.registry[sheet_item.properties['level']]
+                sheet_item.matchconditions.update(self.matchconditions.registry[sheet_item.level]
                                                   (self,sheet_item.properties))
             elif matchcondition:
                 sheet_item.matchconditions.update(matchcondition)
