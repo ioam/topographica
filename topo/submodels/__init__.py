@@ -138,9 +138,9 @@ class ProjectionSpec(Specification):
         self.match_name = match_name
         self.properties = properties
         # These parameters are directly passed into topo.sim.connect()!
-        del self.parameters['src']
-        del self.parameters['dest']
-
+        ignored_keys = ['src', 'dest']
+        self.parameters = dict((k,v) for (k,v) in self.parameters.items()
+                               if k not in ignored_keys)
 
     def __call__(self):
         """
