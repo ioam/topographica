@@ -53,7 +53,7 @@ class SheetSpec(Specification):
     sheet should connect to.
     """
 
-    def __init__(self, spec_type, properties, properties_order=None,
+    def __init__(self, spec_type, properties, name_ordering=None,
                  parameters=None, matchconditions=None):
         """
         Initialize a SheetSpec object. All arguments but parameters
@@ -64,15 +64,9 @@ class SheetSpec(Specification):
         """
         super(SheetSpec,self).__init__(spec_type, parameters)
 
-        if properties_order:
-            properties_ordered = OrderedDict()
-            for k in properties_order:
-                if k in properties:
-                    properties_ordered[k] = properties[k]
-
-            self.properties = properties_ordered
-        else:
-            self.properties = properties
+        if name_ordering:
+            properties = [(k, properties[k]) for k in name_ordering]
+        self.properties = OrderedDict(properties)
 
         self.matchconditions = matchconditions
         if self.matchconditions is None: self.matchconditions={}
