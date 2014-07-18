@@ -1,10 +1,12 @@
 """
-A set of tools which allow specifying a model consisting of sheets organized in levels,
-and projections connecting these sheets. The sheets have an attribute matchconditions
-allowing to specify which other (incoming) sheets a sheet should connect to.
+A set of tools which allow specifying a model consisting of sheets
+organized in levels, and projections connecting these sheets. The
+sheets have an attribute matchconditions allowing to specify which
+other (incoming) sheets a sheet should connect to.
 
-Instances of the RegisteredMethod decorator are offered for setting parameters/matchconditions
-for a sheet within a level, as well as parameters for projections.
+Instances of the RegisteredMethod decorator are offered for setting
+parameters/matchconditions for a sheet within a level, as well as
+parameters for projections.
 """
 
 from collections import OrderedDict
@@ -34,25 +36,31 @@ class Specification(object):
 
 class SheetSpec(Specification):
     """
-    SheetSpec acts as a template for sheet objects. It is also possible to resolve the
-    actual sheet object after it has been instantiated.
+    SheetSpec acts as a template for sheet objects. It is also
+    possible to resolve the actual sheet object after it has been
+    instantiated.
 
     The following attributes can be accessed:
-    :'properties': Dictionary specifying the properties of the sheet. There must be a value given
-    for the key 'level'.
+
+    :'properties': Dictionary specifying the properties of the
+    sheet. There must be a value given for the key 'level'.
     :'spec_type': Subclass of topo.base.sheet.Sheet.(read-only)
-    :'parameters': Dictionary specifying which parameters should be passed to the sheet object
-    specified with spec_type. Keys are the parameter names, values the parameter values.
-    :'matchconditions': Dictionary specifying the matchconditions of the sheet. This may be used
-    to determine which other sheets this sheet should connect to.
+    :'parameters': Dictionary specifying which parameters should be
+    passed to the sheet object specified with spec_type. Keys are the
+    parameter names, values the parameter values.
+    :'matchconditions': Dictionary specifying the matchconditions of
+    the sheet. This may be used to determine which other sheets this
+    sheet should connect to.
     """
 
-    def __init__(self, spec_type, properties, properties_order=None, parameters=None, matchconditions=None):
+    def __init__(self, spec_type, properties, properties_order=None,
+                 parameters=None, matchconditions=None):
         """
-        Initialize a SheetSpec object. All arguments but parameters are just passed to the internal
-        attributes. For parameters, additional key-value pairs with all possible parameters for the
-        sheet type specified with sheet_type are added. This allows a lookup which parameters can
-        be set.
+        Initialize a SheetSpec object. All arguments but parameters
+        are just passed to the internal attributes. For parameters,
+        additional key-value pairs with all possible parameters for
+        the sheet type specified with sheet_type are added. This
+        allows a lookup which parameters can be set.
         """
         super(SheetSpec,self).__init__(spec_type, parameters)
 
@@ -100,26 +108,34 @@ class SheetSpec(Specification):
 
 class ProjectionSpec(Specification):
     """
-    ProjectionSpec acts as a template for projections. It is also possible to resolve the
-    actual projection after it has been instantiated.
+    ProjectionSpec acts as a template for projections. It is also
+    possible to resolve the actual projection after it has been
+    instantiated.
 
     The following attributes can be accessed:
+
     :'src': SheetSpec of the source sheet
     :'dest': SheetSpec of the destionation sheet
     :'spec_type': Subclass of topo.base.projection.Projection
-    :'match_name': Name of the matchcondition which has been used to set this projection up.
-    This might be used to set the parameters of the ProjectionSpec
-    :'parameters': Dictionary specifying which parameters should be passed to the projection
-    specified with connection_type. Keys are the parameter names, values the parameter values.
+    :'match_name': Name of the matchcondition which has been used to
+    set this projection up.  This might be used to set the parameters
+    of the ProjectionSpec
+    :'parameters': Dictionary specifying which parameters should be
+    passed to the projection specified with connection_type. Keys are
+    the parameter names, values the parameter values.
     """
 
-    def __init__(self, spec_type, src, dest, match_name=None, parameters=None, properties=None):
+    def __init__(self, spec_type, src, dest, match_name=None,
+                 parameters=None, properties=None):
         """
-        Initialize a ProjectionSpec object. All arguments but parameters are just passed to the internal
-        attributes. For parameters, additional key-value pairs with all possible parameters for the
-        projection type specified with connection_type are added. This allows a lookup which parameters can
-        be set. Furthermore, parameters['src'] and parameters['dest'] are removed, as these must be set
-        with the 'src' and 'dest' arguments instead.
+        Initialize a ProjectionSpec object. All arguments but
+        parameters are just passed to the internal attributes. For
+        parameters, additional key-value pairs with all possible
+        parameters for the projection type specified with
+        connection_type are added. This allows a lookup which
+        parameters can be set. Furthermore, parameters['src'] and
+        parameters['dest'] are removed, as these must be set with the
+        'src' and 'dest' arguments instead.
         """
         super(ProjectionSpec, self).__init__(spec_type, parameters)
 
@@ -170,20 +186,34 @@ class RegisteredMethod(object):
 
 
 class Model(param.Parameterized):
-    available_setup_options = param.List(default=['training_patterns','sheets','projections','analysis'],
-                                         doc="""
-        :'training_patterns': fills the training_patterns AttrTree with pattern generator instances. The path
-        is the name of the input sheet. Usually calls PatternCoordinator to do this.
-        :'setup_sheets': determines the amount of sheets, their types and names
-        sets sheet parameters according to the registered methods in level
-        sets sheet matchconditions according to the registered methods in matchconditions
-        :'projections': determines which connections should be present between the sheets according to the
-        matchconditions of SheetSpec objects, using projection_spec to specify the connection type
-        and sets their parameters according to the registered methods in projection_spec""")
+    """
+    The available setup options are:
 
-    available_instantiate_options = param.List(default=['sheets','projections'],doc="""
-        :'sheets': instantiates all sheets and registers them in topo.sim
-        :'projections': instantiates all projections and registers them in topo.sim""")
+        :'training_patterns': fills the training_patterns AttrTree
+        with pattern generator instances. The path is the name of the
+        input sheet. Usually calls PatternCoordinator to do this.
+        :'setup_sheets': determines the amount of sheets, their types
+        and names sets sheet parameters according to the registered
+        methods in level sets sheet matchconditions according to the
+        registered methods in matchconditions
+        :'projections': determines which connections should be present
+        between the sheets according to the matchconditions of
+        SheetSpec objects, using projection_spec to specify the
+        connection type and sets their parameters according to the
+        registered methods in projection_spec
+
+
+    The available instantiate options are:
+
+        :'sheets': instantiates all sheets and registers them in
+        topo.sim
+        :'projections': instantiates all projections and registers
+        them in topo.sim
+    """
+
+    available_setup_options = ['training_patterns','sheets','projections','analysis']
+
+    available_instantiate_options = ['sheets','projections']
 
     __abstract = True
 
@@ -203,9 +233,10 @@ class Model(param.Parameterized):
 
     def setup(self,setup_options):
         """
-        This method can be used to setup certain aspects of the submodel.
-        If setup_options=True, all setup methods are called.
-        setup_options can also be a list, whereas all list items of available_setup_options are accepted.
+        This method can be used to setup certain aspects of the
+        submodel.  If setup_options=True, all setup methods are
+        called.  setup_options can also be a list, whereas all list
+        items of available_setup_options are accepted.
         """
 
         if setup_options==True:
@@ -247,7 +278,8 @@ class Model(param.Parameterized):
         # create a new ProjectionSpec object and add this item to self.projections
         self.projections = AttrTree()
 
-        for src_sheet, dest_sheet in itertools.product(self.sheets.path_items.values(), self.sheets.path_items.values()):
+        for src_sheet, dest_sheet in itertools.product(self.sheets.path_items.values(),
+                                                       self.sheets.path_items.values()):
             for matchname, matchconditions in dest_sheet.matchconditions.items():
                 is_match=True
                 if matchconditions is None:
@@ -310,11 +342,11 @@ class Model(param.Parameterized):
 
     def __call__(self,instantiate_options=True):
         """
-        Instantiates all sheets / projections in self.sheets / self.projections and registers them in
-        topo.sim
-        If instantiate_options=True, all items are initialised
-        instantiate_options can also be a list,
-        whereas all list items of available_instantiate_options are accepted.
+        Instantiates all sheets / projections in self.sheets /
+        self.projections and registers them in topo.sim If
+        instantiate_options=True, all items are initialised
+        instantiate_options can also be a list, whereas all list items
+        of available_instantiate_options are accepted.
         """
         if instantiate_options==True:
             instantiate_options=self.available_instantiate_options
