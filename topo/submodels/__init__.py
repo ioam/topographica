@@ -252,7 +252,7 @@ class Model(param.Parameterized):
 
     level =           LabelDecorator()
     matchconditions = LabelDecorator()
-    connect =         LabelDecorator()
+    connection =         LabelDecorator()
 
 
     def _register_global_params(self, params):
@@ -410,12 +410,12 @@ class Model(param.Parameterized):
             for matchname, matchconditions in dest_sheet.matchconditions.items():
 
                 if self._matchcondition_applies(matchconditions, src_sheet):
-                    proj = ProjectionSpec(self.connect.types[matchname],
+                    proj = ProjectionSpec(self.connection.types[matchname],
                                           src_sheet, dest_sheet, matchname)
-                    paramsets = self.connect.labelled[matchname](self, proj)
+                    paramsets = self.connection.labelled[matchname](self, proj)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
-                        proj = ProjectionSpec(self.connect.types[matchname],
+                        proj = ProjectionSpec(self.connection.types[matchname],
                                               src_sheet, dest_sheet, matchname)
                         proj.update_parameters(paramset)
                         path = (str(dest_sheet), str(src_sheet), paramset['name'])

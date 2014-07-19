@@ -97,8 +97,8 @@ class ModelGCAL(ColorEarlyVisionModel):
                 'LateralV1Inhibitory': {'level': 'V1'}}
 
 
-    @Model.connect('AfferentV1On',  projection.CFProjection)
-    @Model.connect('AfferentV1Off', projection.CFProjection)
+    @Model.connection('AfferentV1On',  projection.CFProjection)
+    @Model.connection('AfferentV1Off', projection.CFProjection)
     def _specify_V1afferent_projection(self, proj):
         sf_channel = proj.src.properties['SF'] if 'SF' in proj.src.properties else 1
         # Adjust delays so same measurement protocol can be used with and without gain control.
@@ -123,7 +123,7 @@ class ModelGCAL(ColorEarlyVisionModel):
                 for lag in self.lags]
 
 
-    @Model.connect('LateralV1Excitatory', projection.CFProjection)
+    @Model.connection('LateralV1Excitatory', projection.CFProjection)
     def _specify_V1lateralexcitatory_projection(self, proj):
         return {'delay':0.05,
                 'name':'LateralExcitatory',
@@ -133,7 +133,7 @@ class ModelGCAL(ColorEarlyVisionModel):
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.latexc_radius)}
 
 
-    @Model.connect('LateralV1Inhibitory', projection.CFProjection)
+    @Model.connection('LateralV1Inhibitory', projection.CFProjection)
     def _specify_V1lateralinhibitory_projection(self, proj):
         return {'delay':0.05,
                 'name':'LateralInhibitory',
