@@ -1,0 +1,7 @@
+from topo.submodels.gcal import ModelGCAL
+from topo.misc.commandline import register_global_params
+
+p = register_global_params(ModelGCAL)
+
+gcal = ModelGCAL(**dict(p.get_param_values())) # if needed, specify setup_options
+gcal() # if needed, specify instantiate_options
