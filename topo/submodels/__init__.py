@@ -21,6 +21,9 @@ from topo.base.sheet import Sheet
 
 from dataviews.collector import AttrTree
 
+from topo.misc.commandline import global_params
+
+
 class Specification(object):
     @property
     def spec_type(self):
@@ -184,6 +187,7 @@ class RegisteredMethod(object):
         return decorator
 
 
+
 class Model(param.Parameterized):
     """
     The available setup options are:
@@ -220,7 +224,24 @@ class Model(param.Parameterized):
     matchconditions = RegisteredMethod()
     connect = RegisteredMethod()
 
-    def __init__(self, setup_options=True, **params):
+
+    def _register_global_params(self, params):
+        """
+        Register the parameters of this object as global parameters
+        available for users to set from the command line.  Values
+        supplied as global parameters will override those of the given
+        dictionary of params.
+        """
+    
+        for param_name, param_value in self.params().items():
+            global_params.add(**{param_name:param_value})
+    
+        params.update(global_params.get_param_values())
+    
+
+    def __init__(self, setup_options=True, register=True, **params):
+        if register: 
+            self._register_global_params(params)
         super(Model,self).__init__(**params)
         self.initialize()
 

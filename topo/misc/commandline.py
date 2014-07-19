@@ -194,17 +194,6 @@ class GlobalParams(Parameterized,OptionalSingleton):
 global_params=GlobalParams(context=__main__.__dict__)
 
 
-def register_global_params(parameterizedClass):
-    """
-    Given a subclass of param.Parameterized, this method registers all parameters of this
-    subclass in global_params, and returns the modified global_params.
-    """
-    for param_name, param_value in parameterizedClass.params().items():
-        global_params.add(**{param_name:param_value})
-
-    return global_params
-
-
 ##### Command-prompt formatting
 #
 class IPCommandPromptHandler(object):
