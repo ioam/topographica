@@ -184,7 +184,7 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.level('Retina')
-    def _retina_level_parameters(self, properties):
+    def retinal_sheet_parameters(self, properties):
         return {'period':1.0,
                 'phase':0.05,
                 'nominal_density':self.retina_density,
@@ -197,7 +197,7 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.level('LGN')
-    def _lgn_level_parameters(self, properties):
+    def LGN_sheet_parameters(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
 
         return {'measure_maps':False,
@@ -210,19 +210,21 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.matchconditions('LGN')
-    def _lgn_level_matchconditions(self, properties):
+    def LGN_matchconditions(self, properties):
         """
-        A matchcondition is created allowing incoming projections of retina sheets of the same eye as the LGN sheet.
-        If gain control is enabled, also connect to LGN sheets of the same polarity (and, if SF is used, the
-        same SF channel).
+        A matchcondition is created allowing incoming projections of
+        retina sheets of the same eye as the LGN sheet.  If gain
+        control is enabled, also connect to LGN sheets of the same
+        polarity (and, if SF is used, the same SF channel).
         """
         return {'Afferent':  {'level': 'Retina', 'eye': properties.get('eye',None)},
-                'LateralGC': {'level': 'LGN', 'polarity':properties['polarity'], 'SF': properties.get('SF',None)}
+                'LateralGC': {'level': 'LGN', 'polarity':properties['polarity'],
+                              'SF': properties.get('SF',None)}
                               if self.gain_control else None}
 
 
     @Model.connection('Afferent', projection.SharedWeightCFProjection)
-    def _specify_lgn_afferent_projection(self, proj):
+    def LGN_afferent_projections(self, proj):
         channel = proj.dest.properties['SF'] if 'SF' in proj.dest.properties else 1
 
         centerg   = pattern.Gaussian(size=0.07385*self.sf_spacing**(channel-1),
@@ -246,7 +248,7 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.connection('LateralGC', projection.SharedWeightCFProjection)
-    def _specify_lateralgc_projection(self, proj):
+    def LGN_lateral_projections(self, proj):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
         return {'delay':0.05,
                 'dest_port':('Activity'),
@@ -308,7 +310,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.matchconditions('LGN')
-    def _lgn_level_matchconditions(self, properties):
+    def LGN_matchconditions(self, properties):
         """
         If it is a sheet related to color, two
         ProjectionMatchConditions objects named AfferentCenter and
@@ -346,15 +348,15 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.connection('Afferent', projection.SharedWeightCFProjection)
-    def _specify_lgn_afferent_projection(self, proj):
-        parameters = super(ColorEarlyVisionModel,self)._specify_lgn_afferent_projection(proj)
+    def LGN_afferent_projections(self, proj):
+        parameters = super(ColorEarlyVisionModel,self).LGN_afferent_projections(proj)
         if 'opponent' in proj.dest.properties:
             parameters['name']+=proj.dest.properties['opponent']+proj.src.properties['cone']
         return parameters
 
 
     @Model.connection('AfferentCenter', projection.SharedWeightCFProjection)
-    def _specify_lgn_afferentcenter_projection(self, proj):
+    def LGN_afferent_center_projections(self, proj):
         #TODO: It shouldn't be too hard to figure out how many retina sheets it connects to,
         #      then all the below special cases can be generalized!
         #TODO: strength=+strength_scale for 'On', strength=-strength_scale for 'Off'
@@ -373,7 +375,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.connection('AfferentSurround', projection.SharedWeightCFProjection)
-    def _specify_lgn_afferentsurround_projection(self, proj):
+    def LGN_afferent_surround_projections(self, proj):
         #TODO: strength=-strength_scale for 'On', +strength_scale for 'Off'
         #TODO: strength=-strength_scale/2 for dest_properties['opponent']=='Blue'
         #      dest_properties['surround']=='RedGreen' and dest_properties['polarity']=='On'

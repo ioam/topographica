@@ -82,7 +82,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.matchconditions('V1')
-    def _V1_level_matchconditions(self, properties):
+    def V1_matchconditions(self, properties):
         """
         V1 connects to all LGN sheets.
         Furthermore, it connects to itself with two projections:
@@ -99,7 +99,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
     @Model.connection('AfferentV1On',  projection.CFProjection)
     @Model.connection('AfferentV1Off', projection.CFProjection)
-    def _specify_V1afferent_projection(self, proj):
+    def V1_afferent_projections(self, proj):
         sf_channel = proj.src.properties['SF'] if 'SF' in proj.src.properties else 1
         # Adjust delays so same measurement protocol can be used with and without gain control.
         LGN_V1_delay = 0.05 if self.gain_control else 0.10
@@ -124,7 +124,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.connection('LateralV1Excitatory', projection.CFProjection)
-    def _specify_V1lateralexcitatory_projection(self, proj):
+    def V1_lateralexcitatory_projections(self, proj):
         return {'delay':0.05,
                 'name':'LateralExcitatory',
                 'weights_generator':pattern.Gaussian(aspect_ratio=1.0, size=0.05),
@@ -134,7 +134,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.connection('LateralV1Inhibitory', projection.CFProjection)
-    def _specify_V1lateralinhibitory_projection(self, proj):
+    def V1_lateralinhibitory_projections(self, proj):
         return {'delay':0.05,
                 'name':'LateralInhibitory',
                 'weights_generator':pattern.random.GaussianCloud(gaussian_size=0.15),
