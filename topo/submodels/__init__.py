@@ -29,8 +29,18 @@ class Specification(object):
     def spec_type(self):
         return self._spec_type
 
+
     def update_parameters(self, params):
         self.parameters.update(params)
+
+
+    def resolve(self):
+        """
+        Returns the actual projection after it has been instantiated.
+        """
+        from topo import sim
+        return eval('sim.'+str(self))
+
 
     def __init__(self, spec_type):
         self._spec_type = spec_type
@@ -170,14 +180,6 @@ class ProjectionSpec(Specification):
         """
         topo.sim.connect(str(self.src),str(self.dest),self.spec_type,
                          **self.parameters)
-
-
-    def resolve(self):
-        """
-        Returns the actual projection after it has been instantiated.
-        """
-        from topo import sim
-        return eval('sim.'+str(self))
 
     def __str__(self):
         return str(self.dest)+'.'+self.parameters['name']
