@@ -172,8 +172,8 @@ class EarlyVisionModel(VisualInputModel):
         if len(self.eyes)>1:
             retina_product = retina_product * lancet.List('eye', self.eyes)
 
-        for retina_item in retina_product.specs:
-            sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_item))
+        for retina_properties in retina_product.specs:
+            sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_properties))
 
         lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
         if len(self.eyes)>1:
@@ -181,8 +181,8 @@ class EarlyVisionModel(VisualInputModel):
         if max(self.SF)>1:
             lgn_product = lgn_product * lancet.List('SF', self.SF)
 
-        for lgn_item in lgn_product.specs:
-            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_item))
+        for lgn_properties in lgn_product.specs:
+            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_properties))
         return sheet_specs
 
 
@@ -288,8 +288,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         if self.cone_types:
             retina_product = retina_product * lancet.List('cone', self.cone_types)
 
-        for retina_item in retina_product.specs:
-            sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_item))
+        for retina_properties in retina_product.specs:
+            sheet_specs.append(SheetSpec(sheet.GeneratorSheet, retina_properties))
 
         lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
         if len(self.eyes)>1:
@@ -304,8 +304,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
             lgn_product = lgn_product * lancet.Args(specs=[dict(opponent=el1, surround=el2)
                               for el1, el2 in zip(self.opponent_types_center, self.opponent_types_surround)])
 
-        for lgn_item in lgn_product.specs:
-            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_item))
+        for lgn_properties in lgn_product.specs:
+            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_properties))
         return sheet_specs
 
 
