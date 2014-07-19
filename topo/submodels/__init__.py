@@ -257,9 +257,9 @@ class Model(param.Parameterized):
     """
     __abstract = True
 
-    level =           LabelDecorator()
+    level = LabelDecorator()
     matchconditions = LabelDecorator()
-    connection =         LabelDecorator()
+    connection = LabelDecorator()
 
 
     def _register_global_params(self, params):
@@ -270,8 +270,11 @@ class Model(param.Parameterized):
         dictionary of params.
         """
 
-        for param_name, param_value in self.params().items():
-            global_params.add(**{param_name:param_value})
+        for name,obj in self.params().items():
+            global_params.add(**{name:obj})
+
+        for name,val in params.items():
+            global_params.params()[name].default=val
 
         params.update(global_params.get_param_values())
 
