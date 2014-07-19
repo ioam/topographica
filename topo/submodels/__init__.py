@@ -290,6 +290,9 @@ class Model(param.Parameterized):
         parameters. For instance, if there is a ``num_lags``
         parameter, this method could compute the actual projection
         delays and store it in self.lags.
+
+        In addition, this method can be used to configure class
+        attributes of the model components.
         """
         pass
 
