@@ -359,6 +359,20 @@ class Model(param.Parameterized):
             self._setup_analysis()
 
 
+    def _update_sheet_specs(self):
+        for sheet_spec in self.sheets.path_items.values():
+            param_method = self.level.labelled.get(sheet_spec.level, None)
+            if not param_method:
+                raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
+
+            updated_params = param_method(self,sheet_spec.properties)
+            sheet_spec.update_parameters(updated_params)
+
+            matchcondition = self.matchconditions.labelled.get(sheet_spec.level, False)
+            if matchcondition:
+                sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
+
+
     def _matchcondition_applies(self, matchconditions, src_sheet):
         """
         Given a dictionary of properties to match and a target sheet
@@ -375,6 +389,7 @@ class Model(param.Parameterized):
 
         return matches
 
+
     def _compute_projection_specs(self):
         """
         Loop through all possible combinations of SheetSpec objects in
@@ -389,31 +404,16 @@ class Model(param.Parameterized):
             for matchname, matchconditions in dest_sheet.matchconditions.items():
 
                 if self._matchcondition_applies(matchconditions, src_sheet):
-                    proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
+                    proj = ProjectionSpec(self.connect.types[matchname],
+                                          src_sheet, dest_sheet, matchname)
                     paramsets = self.connect.labelled[matchname](self, proj)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
-                        proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
+                        proj = ProjectionSpec(self.connect.types[matchname],
+                                              src_sheet, dest_sheet, matchname)
                         proj.update_parameters(paramset)
                         path = (str(dest_sheet), str(src_sheet), paramset['name'])
                         self.projections.set_path(path, proj)
-
-
-    def _update_sheet_specs(self):
-        for sheet_spec in self.sheets.path_items.values():
-            param_method = self.level.labelled.get(sheet_spec.level, None)
-            if not param_method:
-                raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
-
-            updated_params = param_method(self,sheet_spec.properties)
-            sheet_spec.update_parameters(updated_params)
-
-            matchcondition = self.matchconditions.labelled.get(sheet_spec.level, False)
-            if matchcondition:
-                sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
-
-
-
 
 
     def __call__(self,instantiate_options=True):
