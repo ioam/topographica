@@ -313,13 +313,17 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     @Model.matchconditions('LGN')
     def _lgn_level_matchconditions(self, properties):
         """
-        If it is a sheet related to color, two ProjectionMatchConditions objects named AfferentCenter
-        and AfferentSurround are created allowing incoming projections of retina sheets of the same eye
-        as the LGN sheet, whereas the retina sheet must have the same cone type as the opponent center
-        / opponent surround.
+        If it is a sheet related to color, two
+        ProjectionMatchConditions objects named AfferentCenter and
+        AfferentSurround are created allowing incoming projections of
+        retina sheets of the same eye as the LGN sheet, whereas the
+        retina sheet must have the same cone type as the opponent
+        center / opponent surround.
 
-        If the sheet is not related to color, a ProjectionMatchCondition object
-        named Afferent is created allowing incoming projections of retina sheets of the same eye as the LGN sheet.
+        If the sheet is not related to color, a
+        ProjectionMatchCondition object named Afferent is created
+        allowing incoming projections of retina sheets of the same eye
+        as the LGN sheet.
         """
         return {'AfferentCenter':{'level': 'Retina',
                                   'cone': properties['opponent'],
@@ -345,7 +349,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.connect('Afferent', projection.SharedWeightCFProjection)
-    def _specify_lgn_afferent_projection(self, proj): # Is that needed?
+    def _specify_lgn_afferent_projection(self, proj):
         parameters = super(ColorEarlyVisionModel,self)._specify_lgn_afferent_projection(proj)
         if 'opponent' in proj.dest.properties:
             parameters['name']+=proj.dest.properties['opponent']+proj.src.properties['cone']
