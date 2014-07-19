@@ -16,6 +16,7 @@ from topo.submodels import Model, SheetSpec
 from topo.submodels.earlyvision import EarlyVisionModel, ColorEarlyVisionModel
 
 class ModelGCAL(ColorEarlyVisionModel):
+
     homeostasis = param.Boolean(default=True, doc="""
         Whether or not the homeostatic adaption should be applied in V1"""),
 
@@ -85,6 +86,7 @@ class ModelGCAL(ColorEarlyVisionModel):
     def V1_matchconditions(self, properties):
         """
         V1 connects to all LGN sheets.
+
         Furthermore, it connects to itself with two projections:
             * one lateral connection which is excitatory (short-range)
             * one lateral connection which is inhibitory (long-range)

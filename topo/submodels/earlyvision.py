@@ -12,6 +12,7 @@ from topo import sheet,transferfn,pattern,projection
 from topo.pattern.patterncoordinator import PatternCoordinator, PatternCoordinatorImages
 
 class SensoryModel(Model):
+
     dims = param.List(default=['xy'],class_=str,doc="""
         Stimulus dimensions to include, out of the possible list:
           :'xy': Position in x and y coordinates""")
@@ -22,6 +23,7 @@ class SensoryModel(Model):
 
 
 class VisualInputModel(SensoryModel):
+
     dims = param.List(default=['xy','or'],class_=str,doc="""
         Stimulus dimensions to include, out of the possible list:
           :'xy': Position in x and y coordinates
@@ -38,30 +40,32 @@ class VisualInputModel(SensoryModel):
         2.0 gives a 2.0x2.0 Sheet area in V1.""")
 
     dim_fraction = param.Number(default=0.7,bounds=(0.0,1.0),doc="""
-        Fraction by which the input brightness varies between the two eyes.
-        Only used if 'od' in 'dims'.""")
+        Fraction by which the input brightness varies between the two
+        eyes.  Only used if 'od' in 'dims'.""")
 
     contrast=param.Number(default=70, bounds=(0,100),doc="""
-        Brightness of the input patterns as a contrast (percent). Only used if
-        'od' not in 'dims'.""")
+        Brightness of the input patterns as a contrast (percent). Only
+        used if 'od' not in 'dims'.""")
 
     sf_spacing=param.Number(default=2.0,bounds=(1,None),doc="""
-        Determines the factor by which successive SF channels increase in size.
-        Only used if 'sf' in 'dims'.""")
+        Determines the factor by which successive SF channels increase
+        in size.  Only used if 'sf' in 'dims'.""")
 
     sf_channels=param.Integer(default=2,bounds=(1,None),softbounds=(1,4),doc="""
         Number of spatial frequency channels. Only used if 'sf' in 'dims'.""")
 
     max_disparity = param.Number(default=4.0,bounds=(0,None),doc="""
-        Maximum disparity between input pattern positions in the left and
-        right eye. Only used if 'dy' in 'dims'.""")
+        Maximum disparity between input pattern positions in the left
+        and right eye. Only used if 'dy' in 'dims'.""")
 
     num_lags = param.Integer(default=4, bounds=(1,None),doc="""
-        Number of successive frames before showing a new input pattern.
-        This also determines the number of connections between each individual
-        LGN sheet and V1. Only used if 'dr' in 'dims'.""")
+        Number of successive frames before showing a new input
+        pattern.  This also determines the number of connections
+        between each individual LGN sheet and V1. Only used if 'dr' in
+        'dims'.""")
 
-    speed=param.Number(default=2.0/24.0,bounds=(0,None),softbounds=(0,3.0/24.0),doc="""
+    speed=param.Number(default=2.0/24.0,bounds=(0,None),
+                       softbounds=(0,3.0/24.0),doc="""
         Distance in sheet coordinates between successive frames, when
         translating patterns. Only used if 'dr' in 'dims'.""")
 
@@ -105,7 +109,8 @@ class VisualInputModel(SensoryModel):
 
         if 'dy' in self.dims:
             disparity_bound = self.max_disparity*0.041665/2.0
-            position_bound_x -= disparity_bound #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
+            #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
+            position_bound_x -= disparity_bound
 
         pattern_labels=[s + 'Retina' for s in self.eyes]
         # all the above will eventually end up in PatternCoordinator!
@@ -128,6 +133,7 @@ class VisualInputModel(SensoryModel):
 
 
 class EarlyVisionModel(VisualInputModel):
+
     retina_density = param.Number(default=24.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
         The nominal_density to use for the retina.""")
@@ -141,21 +147,24 @@ class EarlyVisionModel(VisualInputModel):
         The nominal_density to use for V1.""")
 
     lgnaff_radius=param.Number(default=0.375,bounds=(0,None),doc="""
-        Connection field radius of a unit in the LGN level to units in a retina sheet.""")
+        Connection field radius of a unit in the LGN level to units in
+        a retina sheet.""")
 
     lgnlateral_radius=param.Number(default=0.5,bounds=(0,None),doc="""
-        Connection field radius of a unit in the LGN level to surrounding units,
-        in case gain control is used.""")
+        Connection field radius of a unit in the LGN level to
+        surrounding units, in case gain control is used.""")
 
     v1aff_radius=param.Number(default=0.27083,bounds=(0,None),doc="""
-        Connection field radius of a unit in V1 to units in a LGN sheet.""")
+        Connection field radius of a unit in V1 to units in a LGN
+        sheet.""")
 
     gain_control = param.Boolean(default=True,doc="""
-        Whether to use divisive lateral inhibition in the LGN for contrast gain control.""")
+        Whether to use divisive lateral inhibition in the LGN for
+        contrast gain control.""")
 
     strength_factor = param.Number(default=1.0,bounds=(0,None),doc="""
-        Factor by which the strength of afferent connections from retina sheets
-        to LGN sheets is multiplied.""")
+        Factor by which the strength of afferent connections from
+        retina sheets to LGN sheets is multiplied.""")
 
 
     def setup_attributes(self):
@@ -172,7 +181,8 @@ class EarlyVisionModel(VisualInputModel):
         for retina_properties in retina_product.specs:
             sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_properties))
 
-        lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
+        lgn_product = lancet.Args(level='LGN') * lancet.List('polarity',
+                                                             self.center_polarities)
         if len(self.eyes)>1:
             lgn_product= lgn_product * lancet.List('eye', self.eyes)
         if max(self.SF)>1:
@@ -192,8 +202,9 @@ class EarlyVisionModel(VisualInputModel):
                     self.v1aff_radius*self.sf_spacing**(max(self.SF)-1) + \
                     self.lgnaff_radius*self.sf_spacing**(max(self.SF)-1) + \
                     self.lgnlateral_radius),
-                'input_generator':self.training_patterns[properties['eye']+'Retina' if 'eye' in properties
-                                                             else 'Retina']}
+                'input_generator':self.training_patterns[properties['eye']+'Retina'
+                                                         if 'eye' in properties
+                                                         else 'Retina']}
 
 
     @Model.level('LGN')
@@ -203,8 +214,10 @@ class EarlyVisionModel(VisualInputModel):
         return {'measure_maps':False,
                 'output_fns': [transferfn.misc.HalfRectify()],
                 'nominal_density':self.lgn_density,
-                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0 + \
-                    self.v1aff_radius*self.sf_spacing**(channel-1) + self.lgnlateral_radius),
+                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0
+                                                   + self.v1aff_radius
+                                                   * self.sf_spacing**(channel-1)
+                                                   + self.lgnlateral_radius),
                 'tsettle':2 if self.gain_control else 0,
                 'strict_tsettle': 1 if self.gain_control else 0}
 
@@ -263,20 +276,20 @@ class EarlyVisionModel(VisualInputModel):
 
 class ColorEarlyVisionModel(EarlyVisionModel):
     gain_control_color = param.Boolean(default=False,doc="""
-        Whether to use divisive lateral inhibition in the LGN for contrast gain control in color sheets.""")
+        Whether to use divisive lateral inhibition in the LGN for
+        contrast gain control in color sheets.""")
 
 
     def setup_attributes(self):
         super(ColorEarlyVisionModel, self).setup_attributes()
         if 'cr' in self.dims:
-            self.opponent_types_center   = ['Red',   'Green', 'Blue',     'RedGreenBlue']
-            self.opponent_types_surround = ['Green', 'Red',   'RedGreen', 'RedGreenBlue']
+            self.opponent_types_center   = ['Red', 'Green', 'Blue', 'RedGreenBlue']
+            self.opponent_types_surround = ['Green', 'Red', 'RedGreen', 'RedGreenBlue']
             self.cone_types              = ['Red','Green','Blue']
         else:
             self.opponent_types_center   = []
             self.opponent_types_surround = []
             self.cone_types              = []
-
 
 
     def setup_sheets(self):
@@ -351,7 +364,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     def LGN_afferent_projections(self, proj):
         parameters = super(ColorEarlyVisionModel,self).LGN_afferent_projections(proj)
         if 'opponent' in proj.dest.properties:
-            parameters['name']+=proj.dest.properties['opponent']+proj.src.properties['cone']
+            parameters['name']+= (proj.dest.properties['opponent']
+                                  + proj.src.properties['cone'])
         return parameters
 
 
@@ -389,5 +403,3 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                                                      output_fns=[transferfn.DivisiveNormalizeL1()]),
                 'name':'AfferentSurround'+proj.src.properties['cone'],
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius)}
-
-

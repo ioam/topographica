@@ -68,7 +68,8 @@ class SheetSpec(Specification):
     sheet should connect to.
     """
 
-    name_ordering = ['eye','level', 'cone', 'polarity','SF','opponent','surround']
+    name_ordering = ['eye','level', 'cone', 'polarity',
+                     'SF','opponent','surround']
 
     @property
     def level(self):
@@ -108,7 +109,8 @@ class SheetSpec(Specification):
 
     def resolve(self):
         """
-        Returns the actual sheet object after it has been instantiated.
+        Returns the actual sheet object after it has been
+        instantiated.
         """
         from topo import sim
         return eval('sim.'+str(self))
@@ -116,8 +118,9 @@ class SheetSpec(Specification):
 
     def __str__(self):
         """
-        Returns a string representation combined from the properties values.
-        This might be used as name for the actual sheet object.
+        Returns a string representation combined from the properties
+        values.  This might be used as name for the actual sheet
+        object.
         """
         name=''
         for prop in self.properties.itervalues():
@@ -188,9 +191,10 @@ class ProjectionSpec(Specification):
     def __repr__(self):
         type_name = self._spec_type.__name__
         properties_repr = "{"+ ', '.join("%r:%r" % (k,v) for (k,v) in self.properties.items()) +"}"
-        return "ProjectionSpec(%s, %r, %r, %r%s)" % (type_name, self.src, self.dest,
-                                                       self.match_name,
-                                                       ", %s" % properties_repr if self.properties else '')
+        args = (type_name, self.src, self.dest,
+                self.match_name,
+                ", %s" % properties_repr if self.properties else '')
+        return "ProjectionSpec(%s, %r, %r, %r%s)" % args
 
 
 
