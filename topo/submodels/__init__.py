@@ -194,20 +194,30 @@ class ProjectionSpec(Specification):
 
 
 
-class RegisteredMethod(object):
+class LabelDecorator(object):
+    """
+    Decorator class which can be instantiated to create a decorator
+    object. This object can then be used to decorate methods or
+    functions with a label argument and optionally a type.
+
+    After decorating several methods or functions, the dictionary of
+    all the decorated callables can be accessed via the registry
+    attribute. Any types supplies are accessible through the types
+    attribute.
+    """
     def __init__(self):
         self.registry = {}
         self.types = {}
 
-    def __call__(self, key, obj_type=None):
+    def __call__(self, label, obj_type=None):
         def decorator(f):
             @wraps(f)
             def inner(*args, **kwargs):
                 return f(*args, **kwargs)
 
-            self.registry[key] = inner
+            self.registry[label] = inner
             if obj_type is not None:
-                self.types[key] = obj_type
+                self.types[label] = obj_type
             return inner
         return decorator
 
@@ -245,9 +255,9 @@ class Model(param.Parameterized):
 
     __abstract = True
 
-    level = RegisteredMethod()
-    matchconditions = RegisteredMethod()
-    connect = RegisteredMethod()
+    level = LabelDecorator()
+    matchconditions = LabelDecorator()
+    connect = LabelDecorator()
 
 
     def _register_global_params(self, params):
