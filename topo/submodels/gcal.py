@@ -15,6 +15,8 @@ import topo.pattern.random
 from topo.submodels import Model, SheetSpec
 from topo.submodels.earlyvision import EarlyVisionModel, ColorEarlyVisionModel
 
+
+
 class ModelGCAL(ColorEarlyVisionModel):
 
     homeostasis = param.Boolean(default=True, doc="""
@@ -69,7 +71,6 @@ class ModelGCAL(ColorEarlyVisionModel):
     def setup_sheets(self):
         return (super(ModelGCAL,self).setup_sheets()
                 + [SheetSpec(sheet.SettlingCFSheet, {'level':'V1'})])
-
 
     @Model.level('V1')
     def _V1_level_parameters(self, properties):

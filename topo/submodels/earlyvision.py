@@ -11,6 +11,8 @@ from topo.submodels import Model, SheetSpec
 from topo import sheet,transferfn,pattern,projection
 from topo.pattern.patterncoordinator import PatternCoordinator, PatternCoordinatorImages
 
+
+
 class SensoryModel(Model):
 
     dims = param.List(default=['xy'],class_=str,doc="""
@@ -20,6 +22,7 @@ class SensoryModel(Model):
     num_inputs = param.Integer(default=2,bounds=(1,None),doc="""
         How many input patterns to present per unit area at each
         iteration, when using discrete patterns (e.g. Gaussians).""")
+
 
 
 class VisualInputModel(SensoryModel):
@@ -132,6 +135,7 @@ class VisualInputModel(SensoryModel):
             patterns_per_label=int(self.num_inputs*self.area*self.area))()
 
 
+
 class EarlyVisionModel(VisualInputModel):
 
     retina_density = param.Number(default=24.0,bounds=(0,None),
@@ -198,10 +202,10 @@ class EarlyVisionModel(VisualInputModel):
         return {'period':1.0,
                 'phase':0.05,
                 'nominal_density':self.retina_density,
-                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0 + \
-                    self.v1aff_radius*self.sf_spacing**(max(self.SF)-1) + \
-                    self.lgnaff_radius*self.sf_spacing**(max(self.SF)-1) + \
-                    self.lgnlateral_radius),
+                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0
+                                  + self.v1aff_radius*self.sf_spacing**(max(self.SF)-1)
+                                  + self.lgnaff_radius*self.sf_spacing**(max(self.SF)-1)
+                                  + self.lgnlateral_radius),
                 'input_generator':self.training_patterns[properties['eye']+'Retina'
                                                          if 'eye' in properties
                                                          else 'Retina']}
@@ -274,7 +278,9 @@ class EarlyVisionModel(VisualInputModel):
                 'strength':0.6/len(self.eyes)}
 
 
+
 class ColorEarlyVisionModel(EarlyVisionModel):
+
     gain_control_color = param.Boolean(default=False,doc="""
         Whether to use divisive lateral inhibition in the LGN for
         contrast gain control in color sheets.""")
@@ -309,12 +315,14 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         if max(self.SF)>1 and self.opponent_types_center:
             lgn_product = lgn_product * (lancet.List('SF', self.SF)
                 + lancet.Args(specs=[dict(opponent=el1, surround=el2)
-                              for el1, el2 in zip(self.opponent_types_center, self.opponent_types_surround)]))
+                              for el1, el2 in zip(self.opponent_types_center,
+                                                  self.opponent_types_surround)]))
         elif max(self.SF)>1:
             lgn_product = lgn_product * lancet.List('SF', self.SF)
         elif self.opponent_types_center:
             lgn_product = lgn_product * lancet.Args(specs=[dict(opponent=el1, surround=el2)
-                              for el1, el2 in zip(self.opponent_types_center, self.opponent_types_surround)])
+                              for el1, el2 in zip(self.opponent_types_center,
+                                                  self.opponent_types_surround)])
 
         for lgn_properties in lgn_product.specs:
             sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_properties))

@@ -25,6 +25,7 @@ from topo.misc.commandline import global_params
 
 
 class Specification(object):
+
     @property
     def spec_type(self):
         return self._spec_type
@@ -47,6 +48,7 @@ class Specification(object):
         self.parameters = {}
         for param_name, default_value in spec_type.params().items():
             self.parameters[param_name]=default_value.default
+
 
 
 class SheetSpec(Specification):
@@ -74,6 +76,7 @@ class SheetSpec(Specification):
     @property
     def level(self):
         return self.properties['level']
+
 
     def __init__(self, spec_type, properties):
         """
@@ -185,8 +188,10 @@ class ProjectionSpec(Specification):
         topo.sim.connect(str(self.src),str(self.dest),self.spec_type,
                          **self.parameters)
 
+
     def __str__(self):
         return str(self.dest)+'.'+self.parameters['name']
+
 
     def __repr__(self):
         type_name = self._spec_type.__name__
@@ -212,6 +217,7 @@ class LabelDecorator(object):
     def __init__(self):
         self.labelled = {}
         self.types = {}
+
 
     def __call__(self, label, obj_type=None):
         def decorator(f):
@@ -386,7 +392,8 @@ class Model(param.Parameterized):
     def _matchcondition_applies(self, matchconditions, src_sheet):
         """
         Given a dictionary of properties to match and a target sheet
-        spec, test if the matchcondition applies.
+        spec, return True if the matchcondition applies otherwise
+        False.
         """
         matches=True
         if matchconditions is None:
