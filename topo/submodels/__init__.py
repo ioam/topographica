@@ -201,12 +201,12 @@ class LabelDecorator(object):
     functions with a label argument and optionally a type.
 
     After decorating several methods or functions, the dictionary of
-    all the decorated callables can be accessed via the registry
+    all the decorated callables can be accessed via the labelled
     attribute. Any types supplies are accessible through the types
     attribute.
     """
     def __init__(self):
-        self.registry = {}
+        self.labelled = {}
         self.types = {}
 
     def __call__(self, label, obj_type=None):
@@ -215,7 +215,7 @@ class LabelDecorator(object):
             def inner(*args, **kwargs):
                 return f(*args, **kwargs)
 
-            self.registry[label] = inner
+            self.labelled[label] = inner
             if obj_type is not None:
                 self.types[label] = obj_type
             return inner
@@ -363,7 +363,7 @@ class Model(param.Parameterized):
 
                 if is_match:
                     proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
-                    paramsets = self.connect.registry[matchname](self, proj)
+                    paramsets = self.connect.labelled[matchname](self, proj)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
                         proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
@@ -373,7 +373,7 @@ class Model(param.Parameterized):
 
     def _update_sheet_parameters(self):
         for sheet_spec in self.sheets.path_items.values():
-            param_method = self.level.registry.get(sheet_spec.level, None)
+            param_method = self.level.labelled.get(sheet_spec.level, None)
             if not param_method:
                 raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
 
@@ -383,7 +383,7 @@ class Model(param.Parameterized):
 
     def _compute_matchconditions(self):
         for sheet_spec in self.sheets.path_items.values():
-            matchcondition = self.matchconditions.registry.get(sheet_spec.level, False)
+            matchcondition = self.matchconditions.labelled.get(sheet_spec.level, False)
             if matchcondition:
                 sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
 
