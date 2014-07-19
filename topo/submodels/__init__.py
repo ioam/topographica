@@ -4,7 +4,7 @@ organized in levels, and projections connecting these sheets. The
 sheets have an attribute matchconditions allowing to specify which
 other (incoming) sheets a sheet should connect to.
 
-Instances of the RegisteredMethod decorator are offered for setting
+Instances of the LabelDecorator decorator are offered for setting
 parameters/matchconditions for a sheet within a level, as well as
 parameters for projections.
 """
