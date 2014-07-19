@@ -299,9 +299,9 @@ class Model(param.Parameterized):
 
     def setup_training_patterns(self):
         """
-        Adds new PatternGenerators to self.training_patterns, with
-        the name of the input sheet where the training patterns should
-        be installed as path.
+        Returns a dictionary of PatternGenerators to be added to
+        self.training_patterns, with the target sheet names as keys
+        and pattern generators as values.
         """
         raise NotImplementedError
 
@@ -316,7 +316,8 @@ class Model(param.Parameterized):
 
     def setup_analysis(self):
         """
-        Set up appropriate defaults for analysis functions in topo.analysis.featureresponses
+        Set up appropriate defaults for analysis functions in
+        topo.analysis.featureresponses.
         """
         pass
 
@@ -350,7 +351,9 @@ class Model(param.Parameterized):
         if 'attributes' in setup_options:
             self.setup_attributes()
         if 'training_patterns' in setup_options:
-            self.setup_training_patterns()
+            training_patterns = self.setup_training_patterns()
+            for name, training_pattern in training_patterns.items():
+                self.training_patterns.set_path(name, training_pattern)
         if 'sheets' in setup_options:
             sheet_specs = self.setup_sheets()
             for sheet_spec in sheet_specs:

@@ -110,7 +110,7 @@ class VisualInputModel(SensoryModel):
         pattern_labels=[s + 'Retina' for s in self.eyes]
         # all the above will eventually end up in PatternCoordinator!
 
-        pattern_generators = PatternCoordinator(
+        return PatternCoordinator(
             features_to_vary=self.dims,
             pattern_labels=pattern_labels,
             pattern_parameters={'size': 0.088388 if 'or' in self.dims else 3*0.088388,
@@ -125,9 +125,6 @@ class VisualInputModel(SensoryModel):
             sf_spacing=self.sf_spacing,
             sf_max_channel=max(self.SF),
             patterns_per_label=int(self.num_inputs*self.area*self.area))()
-
-        for name, pattern_generator in pattern_generators.iteritems():
-            self.training_patterns.set_path(name, pattern_generator)
 
 
 class EarlyVisionModel(VisualInputModel):
