@@ -273,7 +273,6 @@ class Model(param.Parameterized):
         if register:
             self._register_global_params(params)
         super(Model,self).__init__(**params)
-        self.setup_attributes()
 
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
@@ -332,12 +331,15 @@ class Model(param.Parameterized):
         Please consult the docstring of the Model class for more
         information about each setup option.
         """
-        available_setup_options = ['training_patterns','sheets',
+        available_setup_options = ['attributes',
+                                   'training_patterns','sheets',
                                    'projections','analysis']
 
         if setup_options==True:
             setup_options = available_setup_options
 
+        if 'attributes' in setup_options:
+            self.setup_attributes()
         if 'training_patterns' in setup_options:
             self.setup_training_patterns()
         if 'sheets' in setup_options:
