@@ -305,7 +305,8 @@ class Model(param.Parameterized):
         Please consult the docstring of the Model class for more
         information about each setup option.
         """
-        available_setup_options = ['training_patterns','sheets','projections','analysis']
+        available_setup_options = ['training_patterns','sheets',
+                                   'projections','analysis']
 
         if setup_options==True:
             setup_options = available_setup_options
@@ -319,9 +320,9 @@ class Model(param.Parameterized):
 
             # Should the next two methods be merged with setup_sheets?
             self._update_sheet_parameters()
-            self._compute_matchconditions()
+            self._update_matchconditions()
         if 'projections' in setup_options:
-            self._setup_projections()
+            self._compute_projection_specs()
         if 'analysis' in setup_options:
             self._setup_analysis()
 
@@ -343,14 +344,12 @@ class Model(param.Parameterized):
         raise NotImplementedError
 
 
-    def _setup_projections(self):
+    def _compute_projection_specs(self):
         """
         Loop through all possible combinations of SheetSpec objects in self.sheets
         If the src_sheet fulfills all criteria specified in dest_sheet.matchconditions,
         create a new ProjectionSpec object and add this item to self.projections.
         """
-        self.projections = AttrTree()
-
         for src_sheet, dest_sheet in itertools.product(self.sheets.path_items.values(),
                                                        self.sheets.path_items.values()):
             for matchname, matchconditions in dest_sheet.matchconditions.items():
@@ -370,7 +369,8 @@ class Model(param.Parameterized):
                     for paramset in paramsets:
                         proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
                         proj.update_parameters(paramset)
-                        self.projections.set_path(str(dest_sheet)+'.'+str(src_sheet)+'.'+ paramset['name'], proj)
+                        path = (str(dest_sheet), str(src_sheet), paramset['name'])
+                        self.projections.set_path(path, proj)
 
 
     def _update_sheet_parameters(self):
@@ -383,7 +383,7 @@ class Model(param.Parameterized):
             sheet_spec.update_parameters(updated_params)
 
 
-    def _compute_matchconditions(self):
+    def _update_matchconditions(self):
         for sheet_spec in self.sheets.path_items.values():
             matchcondition = self.matchconditions.labelled.get(sheet_spec.level, False)
             if matchcondition:
