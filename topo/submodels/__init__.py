@@ -29,12 +29,14 @@ class Specification(object):
     def spec_type(self):
         return self._spec_type
 
-    def __init__(self, spec_type, parameters=None):
+    def update_parameters(self, params):
+        self.parameters.update(params)
+
+    def __init__(self, spec_type):
         self._spec_type = spec_type
         self.parameters = {}
         for param_name, default_value in spec_type.params().items():
             self.parameters[param_name]=default_value.default
-        if parameters is not None: self.parameters.update(parameters)
 
 
 class SheetSpec(Specification):
@@ -62,7 +64,7 @@ class SheetSpec(Specification):
     def level(self):
         return self.properties['level']
 
-    def __init__(self, spec_type, properties,  parameters=None, matchconditions=None):
+    def __init__(self, spec_type, properties):
         """
         Initialize a SheetSpec object. All arguments but parameters
         are just passed to the internal attributes. For parameters,
@@ -70,7 +72,7 @@ class SheetSpec(Specification):
         the sheet type specified with sheet_type are added. This
         allows a lookup which parameters can be set.
         """
-        super(SheetSpec,self).__init__(spec_type, parameters)
+        super(SheetSpec,self).__init__(spec_type)
 
         if 'level' not in properties:
             raise Exception("SheetSpec always requires 'level' in properties")
@@ -80,8 +82,11 @@ class SheetSpec(Specification):
                       if k in properties]
         self.properties = OrderedDict(properties)
 
-        self.matchconditions = matchconditions
-        if self.matchconditions is None: self.matchconditions={}
+        self.matchconditions={}
+
+
+    def update_matchconditions(self, matchconditions):
+        self.matchconditions.update(matchconditions)
 
 
     def __call__(self):
@@ -131,8 +136,7 @@ class ProjectionSpec(Specification):
     the parameter names, values the parameter values.
     """
 
-    def __init__(self, spec_type, src, dest, match_name=None,
-                 parameters=None, properties=None):
+    def __init__(self, spec_type, src, dest, match_name=None, properties=None):
         """
         Initialize a ProjectionSpec object. All arguments but
         parameters are just passed to the internal attributes. For
@@ -143,7 +147,7 @@ class ProjectionSpec(Specification):
         parameters['dest'] are removed, as these must be set with the
         'src' and 'dest' arguments instead.
         """
-        super(ProjectionSpec, self).__init__(spec_type, parameters)
+        super(ProjectionSpec, self).__init__(spec_type)
 
         self.src = src
         self.dest = dest
@@ -332,15 +336,16 @@ class Model(param.Parameterized):
                     paramsets = self.connect.registry[matchname](self, proj)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
-                        proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname, parameters=paramset)
+                        proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
+                        proj.update_parameters(paramset)
                         self.projections.set_path(str(dest_sheet)+'.'+str(src_sheet)+'.'+ paramset['name'], proj)
 
 
     def _update_sheet_parameters(self):
         for sheet_item in self.sheets.path_items.values():
             if(callable(self.level.registry[sheet_item.level])):
-                sheet_item.parameters.update(self.level.registry[sheet_item.level]
-                                             (self,sheet_item.properties))
+                updated_params = self.level.registry[sheet_item.level](self,sheet_item.properties)
+                sheet_item.update_parameters(updated_params)
             else:
                 sheet_item.parameters.update(self.level.registry[sheet_item.level])
 
@@ -349,10 +354,9 @@ class Model(param.Parameterized):
         for sheet_item in self.sheets.path_items.values():
             matchcondition = self.matchconditions.registry.get(sheet_item.level, False)
             if(callable(matchcondition)):
-                sheet_item.matchconditions.update(self.matchconditions.registry[sheet_item.level]
-                                                  (self,sheet_item.properties))
+                sheet_item.update_matchconditions(matchcondition(self,sheet_item.properties))
             elif matchcondition:
-                sheet_item.matchconditions.update(matchcondition)
+                sheet_item.update_matchconditions(matchcondition)
 
 
     def _setup_analysis(self):
