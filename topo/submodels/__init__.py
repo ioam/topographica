@@ -343,20 +343,19 @@ class Model(param.Parameterized):
 
     def _update_sheet_parameters(self):
         for sheet_spec in self.sheets.path_items.values():
-            if(callable(self.level.registry[sheet_spec.level])):
-                updated_params = self.level.registry[sheet_spec.level](self,sheet_spec.properties)
-                sheet_spec.update_parameters(updated_params)
-            else:
-                sheet_spec.parameters.update(self.level.registry[sheet_spec.level])
+            param_method = self.level.registry.get(sheet_spec.level, None)
+            if not param_method:
+                raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
+
+            updated_params = param_method(self,sheet_spec.properties)
+            sheet_spec.update_parameters(updated_params)
 
 
     def _compute_matchconditions(self):
         for sheet_spec in self.sheets.path_items.values():
             matchcondition = self.matchconditions.registry.get(sheet_spec.level, False)
-            if(callable(matchcondition)):
+            if matchcondition:
                 sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
-            elif matchcondition:
-                sheet_spec.update_matchconditions(matchcondition)
 
 
     def _setup_analysis(self):
