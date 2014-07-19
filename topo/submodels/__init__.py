@@ -16,7 +16,7 @@ from functools import wraps
 import param
 
 import topo
-from topo import sheet,transferfn,pattern,projection
+from topo import sheet, transferfn, projection
 from topo.base.sheet import Sheet
 
 from dataviews.collector import AttrTree

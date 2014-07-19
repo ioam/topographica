@@ -4,13 +4,12 @@ import imagen
 
 from dataviews.collector import AttrTree
 
-from topo import projection,responsefn,learningfn,transferfn,sheet,pattern
+from topo import projection, responsefn, learningfn, transferfn, sheet
 import topo.learningfn.optimized
 import topo.transferfn.optimized
 import topo.responsefn.optimized
 import topo.sheet.optimized
 import topo.transferfn.misc
-import topo.pattern.random
 
 from topo.submodels import Model, SheetSpec
 from topo.submodels.earlyvision import EarlyVisionModel, ColorEarlyVisionModel
@@ -119,7 +118,7 @@ class ModelGCAL(ColorEarlyVisionModel):
                  'name':        name if lag==0 else name+('Lag'+str(lag)),
                  'learning_rate':self.aff_lr,
                  'strength':self.aff_strength*(1.0 if not self.gain_control else 1.5),
-                 'weights_generator':pattern.random.GaussianCloud(gaussian_size=
+                 'weights_generator':imagen.random.GaussianCloud(gaussian_size=
                                         2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
                  'nominal_bounds_template':sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1))}
@@ -130,7 +129,7 @@ class ModelGCAL(ColorEarlyVisionModel):
     def V1_lateralexcitatory_projections(self, proj):
         return {'delay':0.05,
                 'name':'LateralExcitatory',
-                'weights_generator':pattern.Gaussian(aspect_ratio=1.0, size=0.05),
+                'weights_generator':imagen.Gaussian(aspect_ratio=1.0, size=0.05),
                 'strength':self.exc_strength,
                 'learning_rate':self.exc_lr,
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.latexc_radius)}
@@ -140,7 +139,7 @@ class ModelGCAL(ColorEarlyVisionModel):
     def V1_lateralinhibitory_projections(self, proj):
         return {'delay':0.05,
                 'name':'LateralInhibitory',
-                'weights_generator':pattern.random.GaussianCloud(gaussian_size=0.15),
+                'weights_generator':imagen.random.GaussianCloud(gaussian_size=0.15),
                 'strength':-1.0*self.inh_strength,
                 'learning_rate':self.inh_lr,
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.latinh_radius)}

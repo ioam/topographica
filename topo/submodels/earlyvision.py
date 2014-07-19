@@ -5,12 +5,13 @@ import param
 import lancet
 import numpy
 import numbergen
+import imagen
+
+from imagen.patterncoordinator import PatternCoordinator, PatternCoordinatorImages
 
 from topo.base.arrayutil import DivideWithConstant
 from topo.submodels import Model, SheetSpec
-from topo import sheet,transferfn,pattern,projection
-from topo.pattern.patterncoordinator import PatternCoordinator, PatternCoordinatorImages
-
+from topo import sheet, transferfn, projection
 
 
 class SensoryModel(Model):
@@ -244,14 +245,14 @@ class EarlyVisionModel(VisualInputModel):
     def LGN_afferent_projections(self, proj):
         channel = proj.dest.properties['SF'] if 'SF' in proj.dest.properties else 1
 
-        centerg   = pattern.Gaussian(size=0.07385*self.sf_spacing**(channel-1),
-                                     aspect_ratio=1.0,
-                                     output_fns=[transferfn.DivisiveNormalizeL1()])
-        surroundg = pattern.Gaussian(size=(4*0.07385)*self.sf_spacing**(channel-1),
-                                     aspect_ratio=1.0,
-                                     output_fns=[transferfn.DivisiveNormalizeL1()])
-        on_weights  = pattern.Composite(generators=[centerg,surroundg],operator=numpy.subtract)
-        off_weights = pattern.Composite(generators=[surroundg,centerg],operator=numpy.subtract)
+        centerg   = imagen.Gaussian(size=0.07385*self.sf_spacing**(channel-1),
+                                    aspect_ratio=1.0,
+                                    output_fns=[transferfn.DivisiveNormalizeL1()])
+        surroundg = imagen.Gaussian(size=(4*0.07385)*self.sf_spacing**(channel-1),
+                                    aspect_ratio=1.0,
+                                    output_fns=[transferfn.DivisiveNormalizeL1()])
+        on_weights  = imagen.Composite(generators=[centerg,surroundg],operator=numpy.subtract)
+        off_weights = imagen.Composite(generators=[surroundg,centerg],operator=numpy.subtract)
 
         #TODO: strength=+strength_scale/len(cone_types) for 'On' center
         #TODO: strength=-strength_scale/len(cone_types) for 'Off' center
@@ -270,9 +271,9 @@ class EarlyVisionModel(VisualInputModel):
         return {'delay':0.05,
                 'dest_port':('Activity'),
                 'activity_group':(0.6,DivideWithConstant(c=0.11)),
-                'weights_generator':pattern.Gaussian(size=0.25,
-                                                     aspect_ratio=1.0,
-                                                     output_fns=[transferfn.DivisiveNormalizeL1()]),
+                'weights_generator':imagen.Gaussian(size=0.25,
+                                                    aspect_ratio=1.0,
+                                                    output_fns=[transferfn.DivisiveNormalizeL1()]),
                 'nominal_bounds_template':sheet.BoundingBox(radius=0.25),
                 'name':'LateralGC'+proj.src.properties['eye'] if 'eye' in proj.src.properties else 'LateralGC',
                 'strength':0.6/len(self.eyes)}
@@ -389,9 +390,9 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         #TODO: strength=-strength_scale/len(cone_types) for Luminosity 'Off'
         return {'delay':0.05,
                 'strength':2.33*self.strength_factor,
-                'weights_generator':pattern.Gaussian(size=0.07385,
-                                                     aspect_ratio=1.0,
-                                                     output_fns=[transferfn.DivisiveNormalizeL1()]),
+                'weights_generator':imagen.Gaussian(size=0.07385,
+                                                    aspect_ratio=1.0,
+                                                    output_fns=[transferfn.DivisiveNormalizeL1()]),
                 'name':'AfferentCenter'+proj.src.properties['cone'],
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius)}
 
@@ -406,8 +407,9 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         #TODO: strength=+strength_scale/len(cone_types) for Luminosity 'Off'
         return {'delay':0.05,
                 'strength':2.33*self.strength_factor,
-                'weights_generator':pattern.Gaussian(size=4*0.07385,
-                                                     aspect_ratio=1.0,
-                                                     output_fns=[transferfn.DivisiveNormalizeL1()]),
+                'weights_generator':imagen.Gaussian(size=4*0.07385,
+                                                    aspect_ratio=1.0,
+                                                    output_fns=[transferfn.DivisiveNormalizeL1()]),
                 'name':'AfferentSurround'+proj.src.properties['cone'],
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius)}
+
