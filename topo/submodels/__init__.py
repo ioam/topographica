@@ -359,25 +359,36 @@ class Model(param.Parameterized):
             self._setup_analysis()
 
 
+    def _matchcondition_applies(self, matchconditions, src_sheet):
+        """
+        Given a dictionary of properties to match and a target sheet
+        spec, test if the matchcondition applies.
+        """
+        matches=True
+        if matchconditions is None:
+            return False
+        for incoming_key, incoming_value in matchconditions.items():
+            if incoming_key in src_sheet.properties and \
+                    str(src_sheet.properties[incoming_key]) not in str(incoming_value):
+                matches=False
+                break
+
+        return matches
+
     def _compute_projection_specs(self):
         """
-        Loop through all possible combinations of SheetSpec objects in self.sheets
-        If the src_sheet fulfills all criteria specified in dest_sheet.matchconditions,
-        create a new ProjectionSpec object and add this item to self.projections.
+        Loop through all possible combinations of SheetSpec objects in
+        self.sheets If the src_sheet fulfills all criteria specified
+        in dest_sheet.matchconditions, create a new ProjectionSpec
+        object and add this item to self.projections.
         """
-        for src_sheet, dest_sheet in itertools.product(self.sheets.path_items.values(),
-                                                       self.sheets.path_items.values()):
-            for matchname, matchconditions in dest_sheet.matchconditions.items():
-                is_match=True
-                if matchconditions is None:
-                    continue
-                for incoming_key, incoming_value in matchconditions.items():
-                    if incoming_key in src_sheet.properties and \
-                        str(src_sheet.properties[incoming_key]) not in str(incoming_value):
-                            is_match=False
-                            break
 
-                if is_match:
+        sheetspec_product = itertools.product(self.sheets.path_items.values(),
+                                              self.sheets.path_items.values())
+        for src_sheet, dest_sheet in sheetspec_product:
+            for matchname, matchconditions in dest_sheet.matchconditions.items():
+
+                if self._matchcondition_applies(matchconditions, src_sheet):
                     proj = ProjectionSpec(self.connect.types[matchname], src_sheet, dest_sheet, matchname)
                     paramsets = self.connect.labelled[matchname](self, proj)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
