@@ -250,9 +250,9 @@ class Model(param.Parameterized):
     """
     __abstract = True
 
-    level = LabelDecorator()
+    level =           LabelDecorator()
     matchconditions = LabelDecorator()
-    connect = LabelDecorator()
+    connect =         LabelDecorator()
 
 
     def _register_global_params(self, params):
@@ -318,6 +318,10 @@ class Model(param.Parameterized):
         pass
 
 
+    #====================================================#
+    # Remaining methods should not need to be overridden #
+    #====================================================#
+
     def setup(self,setup_options):
         """
         This method can be used to setup certain aspects of the
@@ -332,8 +336,10 @@ class Model(param.Parameterized):
         information about each setup option.
         """
         available_setup_options = ['attributes',
-                                   'training_patterns','sheets',
-                                   'projections','analysis']
+                                   'training_patterns',
+                                   'sheets',
+                                   'projections',
+                                   'analysis']
 
         if setup_options==True:
             setup_options = available_setup_options
