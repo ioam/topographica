@@ -273,7 +273,7 @@ class Model(param.Parameterized):
         if register:
             self._register_global_params(params)
         super(Model,self).__init__(**params)
-        self.initialize()
+        self.setup_attributes()
 
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
@@ -281,13 +281,40 @@ class Model(param.Parameterized):
 
         self.setup(setup_options)
 
+    #==============================================#
+    # Public methods to be implemented by modelers #
+    #==============================================#
 
-    def initialize(self):
+    def setup_attributes(self):
         """
         Method to precompute any useful self attributes from the class
         parameters. For instance, if there is a ``num_lags``
         parameter, this method could compute the actual projection
         delays and store it in self.lags.
+        """
+        pass
+
+
+    def setup_training_patterns(self):
+        """
+        Adds new PatternGenerators to self.training_patterns, with
+        the name of the input sheet where the training patterns should
+        be installed as path.
+        """
+        raise NotImplementedError
+
+
+    def setup_sheets(self):
+        """
+        Adds new SheetSpec items to the self.sheets AttrTree.
+        Must return a list of SheetSpec objects.
+        """
+        raise NotImplementedError
+
+
+    def setup_analysis(self):
+        """
+        Set up appropriate defaults for analysis functions in topo.analysis.featureresponses
         """
         pass
 
@@ -325,30 +352,6 @@ class Model(param.Parameterized):
             self._compute_projection_specs()
         if 'analysis' in setup_options:
             self._setup_analysis()
-
-
-    def setup_training_patterns(self):
-        """
-        Adds new PatternGenerators to self.training_patterns, with
-        the name of the input sheet where the training patterns should
-        be installed as path.
-        """
-        raise NotImplementedError
-
-
-    def setup_sheets(self):
-        """
-        Adds new SheetSpec items to the self.sheets AttrTree.
-        Must return a list of SheetSpec objects.
-        """
-        raise NotImplementedError
-
-
-    def setup_analysis(self):
-        """
-        Set up appropriate defaults for analysis functions in topo.analysis.featureresponses
-        """
-        pass
 
 
     def _compute_projection_specs(self):

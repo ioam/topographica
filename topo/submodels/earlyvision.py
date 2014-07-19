@@ -68,8 +68,8 @@ class VisualInputModel(SensoryModel):
     __abstract = True
 
 
-    def initialize(self):
-        super(VisualInputModel, self).initialize()
+    def setup_attributes(self):
+        super(VisualInputModel, self).setup_attributes()
         if 'od' in self.dims or 'dy' in self.dims:
             self.eyes=['Left','Right']
         else:
@@ -161,8 +161,8 @@ class EarlyVisionModel(VisualInputModel):
         to LGN sheets is multiplied.""")
 
 
-    def initialize(self):
-        super(EarlyVisionModel, self).initialize()
+    def setup_attributes(self):
+        super(EarlyVisionModel, self).setup_attributes()
         self.center_polarities=['On','Off']
 
 
@@ -267,8 +267,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         Whether to use divisive lateral inhibition in the LGN for contrast gain control in color sheets.""")
 
 
-    def initialize(self):
-        super(ColorEarlyVisionModel, self).initialize()
+    def setup_attributes(self):
+        super(ColorEarlyVisionModel, self).setup_attributes()
         if 'cr' in self.dims:
             self.opponent_types_center   = ['Red',   'Green', 'Blue',     'RedGreenBlue']
             self.opponent_types_surround = ['Green', 'Red',   'RedGreen', 'RedGreenBlue']

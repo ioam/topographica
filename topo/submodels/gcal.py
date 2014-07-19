@@ -54,8 +54,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         smallest and twice the size of the largest.""")
 
 
-    def initialize(self):
-        super(ModelGCAL, self).initialize()
+    def setup_attributes(self):
+        super(ModelGCAL, self).setup_attributes()
         "Specify weight initialization, response function, and learning function"
 
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
