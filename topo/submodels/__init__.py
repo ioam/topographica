@@ -249,8 +249,6 @@ class Model(param.Parameterized):
         them in topo.sim
     """
 
-    available_setup_options = ['training_patterns','sheets','projections','analysis']
-
     available_instantiate_options = ['sheets','projections']
 
     __abstract = True
@@ -303,10 +301,14 @@ class Model(param.Parameterized):
         submodel.  If setup_options=True, all setup methods are
         called.  setup_options can also be a list, whereas all list
         items of available_setup_options are accepted.
+
+        The available setup options are
+        'training_patterns','sheets','projections' and 'analysis'.
         """
+        available_setup_options = ['training_patterns','sheets','projections','analysis']
 
         if setup_options==True:
-            setup_options = self.available_setup_options
+            setup_options = available_setup_options
 
         if 'training_patterns' in setup_options:
             self.setup_training_patterns()
