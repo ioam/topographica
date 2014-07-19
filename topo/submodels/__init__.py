@@ -352,10 +352,7 @@ class Model(param.Parameterized):
             sheet_specs = self.setup_sheets()
             for sheet_spec in sheet_specs:
                 self.sheets.set_path(str(sheet_spec), sheet_spec)
-
-            # Should the next two methods be merged with setup_sheets?
-            self._update_sheet_parameters()
-            self._update_matchconditions()
+            self._update_sheet_specs()
         if 'projections' in setup_options:
             self._compute_projection_specs()
         if 'analysis' in setup_options:
@@ -391,7 +388,7 @@ class Model(param.Parameterized):
                         self.projections.set_path(path, proj)
 
 
-    def _update_sheet_parameters(self):
+    def _update_sheet_specs(self):
         for sheet_spec in self.sheets.path_items.values():
             param_method = self.level.labelled.get(sheet_spec.level, None)
             if not param_method:
@@ -400,12 +397,12 @@ class Model(param.Parameterized):
             updated_params = param_method(self,sheet_spec.properties)
             sheet_spec.update_parameters(updated_params)
 
-
-    def _update_matchconditions(self):
-        for sheet_spec in self.sheets.path_items.values():
             matchcondition = self.matchconditions.labelled.get(sheet_spec.level, False)
             if matchcondition:
                 sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
+
+
+
 
 
     def __call__(self,instantiate_options=True):
