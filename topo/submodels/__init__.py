@@ -80,8 +80,8 @@ class SheetSpec(Specification):
 
         properties = [(k, properties[k]) for k in self.name_ordering
                       if k in properties]
-        self.properties = OrderedDict(properties)
 
+        self.properties = OrderedDict(properties)
         self.matchconditions={}
 
 
@@ -114,6 +114,11 @@ class SheetSpec(Specification):
             name+=prop
 
         return name
+
+    def __repr__(self):
+        type_name = self._spec_type.__name__
+        properties_repr = "{"+ ', '.join("%r:%r" % (k,v) for (k,v) in self.properties.items()) +"}"
+        return "SheetSpec(%s, %s)" % (type_name, properties_repr)
 
 
 
@@ -152,7 +157,8 @@ class ProjectionSpec(Specification):
         self.src = src
         self.dest = dest
         self.match_name = match_name
-        self.properties = properties
+
+        self.properties = {} if properties is None else properties
         # These parameters are directly passed into topo.sim.connect()!
         ignored_keys = ['src', 'dest']
         self.parameters = dict((k,v) for (k,v) in self.parameters.items()
@@ -171,7 +177,18 @@ class ProjectionSpec(Specification):
         Returns the actual projection after it has been instantiated.
         """
         from topo import sim
-        return eval('sim.'+str(self.dest)+'.'+self.parameters['name'])
+        return eval('sim.'+str(self))
+
+    def __str__(self):
+        return str(self.dest)+'.'+self.parameters['name']
+
+    def __repr__(self):
+        type_name = self._spec_type.__name__
+        properties_repr = "{"+ ', '.join("%r:%r" % (k,v) for (k,v) in self.properties.items()) +"}"
+        return "ProjectionSpec(%s, %r, %r, %r%s)" % (type_name, self.src, self.dest,
+                                                       self.match_name,
+                                                       ", %s" % properties_repr if self.properties else '')
+
 
 
 class RegisteredMethod(object):
