@@ -56,12 +56,13 @@ class SheetSpec(Specification):
     sheet should connect to.
     """
 
+    name_ordering = ['eye','level', 'cone', 'polarity','SF','opponent','surround']
+
     @property
     def level(self):
         return self.properties['level']
 
-    def __init__(self, spec_type, properties, name_ordering=None,
-                 parameters=None, matchconditions=None):
+    def __init__(self, spec_type, properties,  parameters=None, matchconditions=None):
         """
         Initialize a SheetSpec object. All arguments but parameters
         are just passed to the internal attributes. For parameters,
@@ -74,9 +75,9 @@ class SheetSpec(Specification):
         if 'level' not in properties:
             raise Exception("SheetSpec always requires 'level' in properties")
 
-        if name_ordering:
-            properties = [(k, properties[k]) for k in name_ordering
-                          if k in properties]
+
+        properties = [(k, properties[k]) for k in self.name_ordering
+                      if k in properties]
         self.properties = OrderedDict(properties)
 
         self.matchconditions = matchconditions
