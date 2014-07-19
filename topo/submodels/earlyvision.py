@@ -73,7 +73,7 @@ class VisualInputModel(SensoryModel):
         if 'od' in self.dims or 'dy' in self.dims:
             self.eyes=['Left','Right']
         else:
-            self.eyes=[]
+            self.eyes=['']
 
         if 'sf' in self.dims:
             # This list could be any list of the form
@@ -107,10 +107,7 @@ class VisualInputModel(SensoryModel):
             disparity_bound = self.max_disparity*0.041665/2.0
             position_bound_x -= disparity_bound #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
 
-        if self.eyes:
-            pattern_labels=[s + 'Retina' for s in self.eyes]
-        else:
-            pattern_labels=['Retina']
+        pattern_labels=[s + 'Retina' for s in self.eyes]
         # all the above will eventually end up in PatternCoordinator!
 
         pattern_generators = PatternCoordinator(
@@ -172,14 +169,14 @@ class EarlyVisionModel(VisualInputModel):
     def setup_sheets(self):
         sheet_specs = []
         retina_product = lancet.Args(level='Retina')
-        if self.eyes:
+        if len(self.eyes)>1:
             retina_product = retina_product * lancet.List('eye', self.eyes)
 
         for retina_item in retina_product.specs:
             sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_item,['eye','level']))
 
         lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
-        if self.eyes:
+        if len(self.eyes)>1:
             lgn_product= lgn_product * lancet.List('eye', self.eyes)
         if max(self.SF)>1:
             lgn_product = lgn_product * lancet.List('SF', self.SF)
@@ -263,7 +260,7 @@ class EarlyVisionModel(VisualInputModel):
                                                      output_fns=[transferfn.DivisiveNormalizeL1()]),
                 'nominal_bounds_template':sheet.BoundingBox(radius=0.25),
                 'name':'LateralGC'+proj.src.properties['eye'] if 'eye' in proj.src.properties else 'LateralGC',
-                'strength':0.6/len(self.eyes) if self.eyes else 0.6}
+                'strength':0.6/len(self.eyes)}
 
 
 class ColorEarlyVisionModel(EarlyVisionModel):
@@ -287,7 +284,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     def setup_sheets(self):
         sheet_specs = []
         retina_product = lancet.Args(level='Retina')
-        if self.eyes:
+        if len(self.eyes)>1:
             retina_product = retina_product * lancet.List('eye', self.eyes)
         if self.cone_types:
             retina_product = retina_product * lancet.List('cone', self.cone_types)
@@ -297,7 +294,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
             sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_item,retina_order))
 
         lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
-        if self.eyes:
+        if len(self.eyes)>1:
             lgn_product= lgn_product * lancet.List('eye', self.eyes)
         if max(self.SF)>1 and self.opponent_types_center:
             lgn_product = lgn_product * (lancet.List('SF', self.SF)
