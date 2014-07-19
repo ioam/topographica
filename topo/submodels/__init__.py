@@ -344,6 +344,13 @@ class Model(param.Parameterized):
         raise NotImplementedError
 
 
+    def setup_analysis(self):
+        """
+        Set up appropriate defaults for analysis functions in topo.analysis.featureresponses
+        """
+        pass
+
+
     def _compute_projection_specs(self):
         """
         Loop through all possible combinations of SheetSpec objects in self.sheets
@@ -388,13 +395,6 @@ class Model(param.Parameterized):
             matchcondition = self.matchconditions.labelled.get(sheet_spec.level, False)
             if matchcondition:
                 sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
-
-
-    def _setup_analysis(self):
-        """
-        Set up appropriate defaults for analysis functions in topo.analysis.featureresponses
-        """
-        pass
 
 
     def __call__(self,instantiate_options=True):
