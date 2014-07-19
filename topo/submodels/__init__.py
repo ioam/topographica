@@ -127,8 +127,9 @@ class SheetSpec(Specification):
 
     def __repr__(self):
         type_name = self._spec_type.__name__
-        properties_repr = "{"+ ', '.join("%r:%r" % (k,v) for (k,v) in self.properties.items()) +"}"
-        return "SheetSpec(%s, %s)" % (type_name, properties_repr)
+        properties_repr = ', '.join("%r:%r" % (k,v) for (k,v)
+                                    in self.properties.items())
+        return "SheetSpec(%s, {%s})" % (type_name, properties_repr)
 
 
 
@@ -256,15 +257,15 @@ class Model(param.Parameterized):
         supplied as global parameters will override those of the given
         dictionary of params.
         """
-    
+
         for param_name, param_value in self.params().items():
             global_params.add(**{param_name:param_value})
-    
+
         params.update(global_params.get_param_values())
-    
+
 
     def __init__(self, setup_options=True, register=True, **params):
-        if register: 
+        if register:
             self._register_global_params(params)
         super(Model,self).__init__(**params)
         self.initialize()
