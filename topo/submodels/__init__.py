@@ -248,9 +248,6 @@ class Model(param.Parameterized):
         :'projections': instantiates all projections and registers
         them in topo.sim
     """
-
-    available_instantiate_options = ['sheets','projections']
-
     __abstract = True
 
     level = LabelDecorator()
@@ -302,8 +299,11 @@ class Model(param.Parameterized):
         called.  setup_options can also be a list, whereas all list
         items of available_setup_options are accepted.
 
-        The available setup options are
+        Available setup options are:
         'training_patterns','sheets','projections' and 'analysis'.
+
+        Please consult the docstring of the Model class for more
+        information about each setup option.
         """
         available_setup_options = ['training_patterns','sheets','projections','analysis']
 
@@ -399,14 +399,23 @@ class Model(param.Parameterized):
 
     def __call__(self,instantiate_options=True):
         """
-        Instantiates all sheets / projections in self.sheets /
-        self.projections and registers them in topo.sim If
-        instantiate_options=True, all items are initialised
+        Instantiates all sheets or projections in self.sheets or
+        self.projections and registers them in the topo.sim instance.
+
+        If instantiate_options=True, all items are initialised
         instantiate_options can also be a list, whereas all list items
         of available_instantiate_options are accepted.
+
+        Available instantiation options are: 'sheets' and
+        'projections'.
+
+        Please consult the docstring of the Model class for more
+        information about each instantiation option.
         """
+
+        available_instantiate_options = ['sheets','projections']
         if instantiate_options==True:
-            instantiate_options=self.available_instantiate_options
+            instantiate_options=available_instantiate_options
 
         if 'sheets' in instantiate_options:
             self.message('Sheets:\n')
