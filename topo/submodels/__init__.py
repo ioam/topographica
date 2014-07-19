@@ -192,9 +192,9 @@ class ProjectionSpec(Specification):
         type_name = self._spec_type.__name__
         properties_repr = "{"+ ', '.join("%r:%r" % (k,v) for (k,v) in self.properties.items()) +"}"
         args = (type_name, self.src, self.dest,
-                self.match_name,
+                ", %s" % self.match_name if self.match_name else ''
                 ", %s" % properties_repr if self.properties else '')
-        return "ProjectionSpec(%s, %r, %r, %r%s)" % args
+        return "ProjectionSpec(%s, %r, %r, %s%s)" % args
 
 
 
