@@ -14,10 +14,7 @@ import itertools
 from functools import wraps
 
 import param
-
 import topo
-from topo import sheet, transferfn, projection
-from topo.base.sheet import Sheet
 
 from dataviews.collector import AttrTree
 
@@ -39,7 +36,7 @@ class Specification(object):
         """
         Returns the actual projection after it has been instantiated.
         """
-        from topo import sim
+        from topo import sim # pyflakes:ignore (needed for eval)
         return eval('sim.'+str(self))
 
 
@@ -115,7 +112,7 @@ class SheetSpec(Specification):
         Returns the actual sheet object after it has been
         instantiated.
         """
-        from topo import sim
+        from topo import sim     # pyflakes:ignore (needed for eval)
         return eval('sim.'+str(self))
 
 

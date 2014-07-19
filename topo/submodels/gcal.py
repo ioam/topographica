@@ -2,8 +2,6 @@ import topo
 import param
 import imagen
 
-from dataviews.collector import AttrTree
-
 from topo import projection, responsefn, learningfn, transferfn, sheet
 import topo.learningfn.optimized
 import topo.transferfn.optimized
@@ -12,7 +10,7 @@ import topo.sheet.optimized
 import topo.transferfn.misc
 
 from topo.submodels import Model, SheetSpec
-from topo.submodels.earlyvision import EarlyVisionModel, ColorEarlyVisionModel
+from topo.submodels.earlyvision import ColorEarlyVisionModel
 
 
 

@@ -7,7 +7,7 @@ import numpy
 import numbergen
 import imagen
 
-from imagen.patterncoordinator import PatternCoordinator, PatternCoordinatorImages
+from imagen.patterncoordinator import PatternCoordinator
 
 from topo.base.arrayutil import DivideWithConstant
 from topo.submodels import Model, SheetSpec
