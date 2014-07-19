@@ -342,21 +342,21 @@ class Model(param.Parameterized):
 
 
     def _update_sheet_parameters(self):
-        for sheet_item in self.sheets.path_items.values():
-            if(callable(self.level.registry[sheet_item.level])):
-                updated_params = self.level.registry[sheet_item.level](self,sheet_item.properties)
-                sheet_item.update_parameters(updated_params)
+        for sheet_spec in self.sheets.path_items.values():
+            if(callable(self.level.registry[sheet_spec.level])):
+                updated_params = self.level.registry[sheet_spec.level](self,sheet_spec.properties)
+                sheet_spec.update_parameters(updated_params)
             else:
-                sheet_item.parameters.update(self.level.registry[sheet_item.level])
+                sheet_spec.parameters.update(self.level.registry[sheet_spec.level])
 
 
     def _compute_matchconditions(self):
-        for sheet_item in self.sheets.path_items.values():
-            matchcondition = self.matchconditions.registry.get(sheet_item.level, False)
+        for sheet_spec in self.sheets.path_items.values():
+            matchcondition = self.matchconditions.registry.get(sheet_spec.level, False)
             if(callable(matchcondition)):
-                sheet_item.update_matchconditions(matchcondition(self,sheet_item.properties))
+                sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
             elif matchcondition:
-                sheet_item.update_matchconditions(matchcondition)
+                sheet_spec.update_matchconditions(matchcondition)
 
 
     def _setup_analysis(self):
@@ -379,9 +379,9 @@ class Model(param.Parameterized):
 
         if 'sheets' in instantiate_options:
             self.message('Sheets:\n')
-            for sheet_item in self.sheets.path_items.itervalues():
-                self.message(sheet_item)
-                sheet_item()
+            for sheet_spec in self.sheets.path_items.itervalues():
+                self.message(sheet_spec)
+                sheet_spec()
             self.message('\n\n')
 
         if 'projections' in instantiate_options:
