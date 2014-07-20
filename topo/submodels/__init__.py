@@ -24,8 +24,8 @@ from topo.misc.commandline import global_params
 class Specification(object):
 
     @property
-    def spec_type(self):
-        return self._spec_type
+    def object_type(self):
+        return self._object_type
 
 
     def update_parameters(self, params):
@@ -40,10 +40,10 @@ class Specification(object):
         return eval('sim.'+str(self))
 
 
-    def __init__(self, spec_type):
-        self._spec_type = spec_type
+    def __init__(self, object_type):
+        self._object_type = object_type
         self.parameters = {}
-        for param_name, default_value in spec_type.params().items():
+        for param_name, default_value in object_type.params().items():
             self.parameters[param_name]=default_value.default
 
 
@@ -58,10 +58,10 @@ class SheetSpec(Specification):
 
     :'properties': Dictionary specifying the properties of the
     sheet. There must be a value given for the key 'level'.
-    :'spec_type': Subclass of topo.base.sheet.Sheet.(read-only)
+    :'object_type': Subclass of topo.base.sheet.Sheet.(read-only)
     :'parameters': Dictionary specifying which parameters should be
-    passed to the sheet object specified with spec_type. Keys are the
-    parameter names, values the parameter values.
+    passed to the sheet object specified with object_type. Keys are
+    the parameter names, values the parameter values.
     :'matchconditions': Dictionary specifying the matchconditions of
     the sheet. This may be used to determine which other sheets this
     sheet should connect to.
@@ -75,7 +75,7 @@ class SheetSpec(Specification):
         return self.properties['level']
 
 
-    def __init__(self, spec_type, properties):
+    def __init__(self, object_type, properties):
         """
         Initialize a SheetSpec object. All arguments but parameters
         are just passed to the internal attributes. For parameters,
@@ -83,7 +83,7 @@ class SheetSpec(Specification):
         the sheet type specified with sheet_type are added. This
         allows a lookup which parameters can be set.
         """
-        super(SheetSpec,self).__init__(spec_type)
+        super(SheetSpec,self).__init__(object_type)
 
         if 'level' not in properties:
             raise Exception("SheetSpec always requires 'level' in properties")
@@ -104,7 +104,7 @@ class SheetSpec(Specification):
         """
         Instantiate the sheet and register it in topo.sim.
         """
-        topo.sim[str(self)]=self.spec_type(**self.parameters)
+        topo.sim[str(self)]=self.object_type(**self.parameters)
 
 
     def resolve(self):
@@ -129,7 +129,7 @@ class SheetSpec(Specification):
         return name
 
     def __repr__(self):
-        type_name = self._spec_type.__name__
+        type_name = self._object_type.__name__
         properties_repr = ', '.join("%r:%r" % (k,v) for (k,v)
                                     in self.properties.items())
         return "SheetSpec(%s, {%s})" % (type_name, properties_repr)
@@ -146,7 +146,7 @@ class ProjectionSpec(Specification):
 
     :'src': SheetSpec of the source sheet
     :'dest': SheetSpec of the destination sheet
-    :'spec_type': Subclass of topo.base.projection.Projection
+    :'object_type': Subclass of topo.base.projection.Projection
     :'match_name': Name of the matchcondition which has been used to
     set this projection up.  This might be used to set the parameters
     of the ProjectionSpec
@@ -155,7 +155,7 @@ class ProjectionSpec(Specification):
     the parameter names, values the parameter values.
     """
 
-    def __init__(self, spec_type, src, dest, match_name=None, properties=None):
+    def __init__(self, object_type, src, dest, match_name=None, properties=None):
         """
         Initialize a ProjectionSpec object. All arguments but
         parameters are just passed to the internal attributes. For
@@ -166,7 +166,7 @@ class ProjectionSpec(Specification):
         parameters['dest'] are removed, as these must be set with the
         'src' and 'dest' arguments instead.
         """
-        super(ProjectionSpec, self).__init__(spec_type)
+        super(ProjectionSpec, self).__init__(object_type)
 
         self.src = src
         self.dest = dest
@@ -182,7 +182,7 @@ class ProjectionSpec(Specification):
         """
         Instantiate the projection and register it in topo.sim.
         """
-        topo.sim.connect(str(self.src),str(self.dest),self.spec_type,
+        topo.sim.connect(str(self.src),str(self.dest),self.object_type,
                          **self.parameters)
 
 
@@ -191,7 +191,7 @@ class ProjectionSpec(Specification):
 
 
     def __repr__(self):
-        type_name = self._spec_type.__name__
+        type_name = self._object_type.__name__
         properties_repr = "{"+ ', '.join("%r:%r" % (k,v) for (k,v) in self.properties.items()) +"}"
         args = (type_name, self.src, self.dest,
                 ", %s" % self.match_name if self.match_name else ''
