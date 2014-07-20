@@ -35,7 +35,11 @@ class Specification(object):
 
     def resolve(self):
         """
-        Returns the actual projection after it has been instantiated.
+        Returns the correspond object from topo.sim using the name of
+        the specification (i.e typically a Sheet or a Projection).
+
+        The appropriate object must be instantiated in topo.sim before
+        the object can be resolved.
         """
         from topo import sim # pyflakes:ignore (needed for eval)
         return eval('sim.'+str(self))
