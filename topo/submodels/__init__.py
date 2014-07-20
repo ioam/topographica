@@ -35,8 +35,8 @@ class Specification(object):
 
     def resolve(self):
         """
-        Returns the correspond object from topo.sim using the name of
-        the specification (i.e typically a Sheet or a Projection).
+        Returns the object in topo.sim corresponding to the string
+        name of this object, typically a Sheet or a Projection.
 
         The appropriate object must be instantiated in topo.sim before
         the object can be resolved.
@@ -110,15 +110,6 @@ class SheetSpec(Specification):
         Instantiate the sheet and register it in topo.sim.
         """
         topo.sim[str(self)]=self.object_type(**self.parameters)
-
-
-    def resolve(self):
-        """
-        Returns the actual sheet object after it has been
-        instantiated.
-        """
-        from topo import sim     # pyflakes:ignore (needed for eval)
-        return eval('sim.'+str(self))
 
 
     def __str__(self):
