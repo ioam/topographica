@@ -176,26 +176,14 @@ class EarlyVisionModel(VisualInputModel):
         super(EarlyVisionModel, self).setup_attributes()
         self.center_polarities=['On','Off']
 
+        # Definitions useful for setting up sheets
+        self.args = {'eyes':lancet.List('eye', self.eyes) if len(self.eyes)>1 else lancet.Identity(),
+                     'polarities': lancet.List('polarity', self.center_polarities),
+                     'SFs': lancet.List('SF', self.SF) if max(self.SF)>1 else lancet.Identity()}
 
     def setup_sheets(self):
-        sheet_specs = []
-        retina_product = lancet.Args(level='Retina')
-        if len(self.eyes)>1:
-            retina_product = retina_product * lancet.List('eye', self.eyes)
-
-        for retina_properties in retina_product.specs:
-            sheet_specs.append(SheetSpec(sheet.GeneratorSheet,retina_properties))
-
-        lgn_product = lancet.Args(level='LGN') * lancet.List('polarity',
-                                                             self.center_polarities)
-        if len(self.eyes)>1:
-            lgn_product= lgn_product * lancet.List('eye', self.eyes)
-        if max(self.SF)>1:
-            lgn_product = lgn_product * lancet.List('SF', self.SF)
-
-        for lgn_properties in lgn_product.specs:
-            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_properties))
-        return sheet_specs
+        return {'Retina':self.args['eyes'],
+                'LGN': self.args['polarities'] * self.args['eyes'] * self.args['SFs']}
 
 
     @Model.level('Retina', sheet.GeneratorSheet)
@@ -299,36 +287,20 @@ class ColorEarlyVisionModel(EarlyVisionModel):
             self.cone_types              = []
 
 
+        # Definitions useful for setting up sheets
+        opponent_specs =[dict(opponent=el1, surround=el2) for el1, el2
+                         in zip(self.opponent_types_center, self.opponent_types_surround)]
+
+        self.args['opponents'] = (lancet.Args(specs=opponent_specs)
+                                  if  self.opponent_types_center else lancet.Args())
+        self.args['cones'] = (lancet.List('cone', self.cone_types)
+                              if self.cone_types else lancet.Identity())
+
+
     def setup_sheets(self):
-        sheet_specs = []
-        retina_product = lancet.Args(level='Retina')
-        if len(self.eyes)>1:
-            retina_product = retina_product * lancet.List('eye', self.eyes)
-        if self.cone_types:
-            retina_product = retina_product * lancet.List('cone', self.cone_types)
-
-        for retina_properties in retina_product.specs:
-            sheet_specs.append(SheetSpec(sheet.GeneratorSheet, retina_properties))
-
-        lgn_product = lancet.Args(level='LGN') * lancet.List('polarity', self.center_polarities)
-        if len(self.eyes)>1:
-            lgn_product= lgn_product * lancet.List('eye', self.eyes)
-        if max(self.SF)>1 and self.opponent_types_center:
-            lgn_product = lgn_product * (lancet.List('SF', self.SF)
-                + lancet.Args(specs=[dict(opponent=el1, surround=el2)
-                              for el1, el2 in zip(self.opponent_types_center,
-                                                  self.opponent_types_surround)]))
-        elif max(self.SF)>1:
-            lgn_product = lgn_product * lancet.List('SF', self.SF)
-        elif self.opponent_types_center:
-            lgn_product = lgn_product * lancet.Args(specs=[dict(opponent=el1, surround=el2)
-                              for el1, el2 in zip(self.opponent_types_center,
-                                                  self.opponent_types_surround)])
-
-        for lgn_properties in lgn_product.specs:
-            sheet_specs.append(SheetSpec(sheet.optimized.SettlingCFSheet_Opt,lgn_properties))
-        return sheet_specs
-
+        return {'Retina': self.args['eyes'] * self.args['cones'],
+                'LGN':    (self.args['polarities'] * self.args['eyes']
+                           * (self.args['SFs'] + self.args['opponents']))}
 
 
     @Model.matchconditions('LGN')

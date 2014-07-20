@@ -14,10 +14,11 @@ import itertools
 from functools import wraps
 
 import param
+import lancet
 import topo
 
-from dataviews.collector import AttrTree
 
+from dataviews.collector import AttrTree
 from topo.misc.commandline import global_params
 
 
@@ -327,8 +328,18 @@ class Model(param.Parameterized):
 
     def setup_sheets(self):
         """
-        Adds new SheetSpec items to the self.sheets AttrTree.
-        Must return a list of SheetSpec objects.
+        Returns a dictionary of properties or equivalent Lancet.Args
+        object. Each outer key must be the level name and the values
+        are lists of property dictionaries for the sheets at that
+        level (or equivalent Lancet Args object). For instance, two
+        LGN sheets at the 'LGN' level could be defined by either:
+
+        {'LGN':[{'polarity':'ON'}, {'polarity':'OFF'}]}
+        OR
+        {'LGN':lancet.List('polarity', ['ON', 'OFF'])}
+
+        The specified properties are used to initialize the sheets
+        AttrTree with SheetSpec objects.
         """
         raise NotImplementedError
 
@@ -374,9 +385,21 @@ class Model(param.Parameterized):
             for name, training_pattern in training_patterns.items():
                 self.training_patterns.set_path(name, training_pattern)
         if 'sheets' in setup_options:
-            sheet_specs = self.setup_sheets()
-            for sheet_spec in sheet_specs:
-                self.sheets.set_path(str(sheet_spec), sheet_spec)
+            sheet_properties = self.setup_sheets()
+
+            for level, property_list in sheet_properties.items():
+                sheet_type = self.level.types[level]
+
+                # If an empty lancet Args() object or an empty list
+                if not property_list: continue
+
+                if isinstance(property_list, lancet.Args):
+                    property_list = property_list.specs
+
+                for properties in property_list:
+                    spec_properties = dict(level=level, **properties)
+                    sheet_spec = SheetSpec(sheet_type, spec_properties)
+                    self.sheets.set_path(str(sheet_spec), sheet_spec)
             self._update_sheet_specs()
         if 'projections' in setup_options:
             self._compute_projection_specs()
