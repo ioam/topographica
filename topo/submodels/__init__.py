@@ -274,7 +274,7 @@ class Model(param.Parameterized):
             global_params.add(**{name:obj})
 
         for name,val in params.items():
-            global_params.params()[name].default=val
+            global_params.params(name).default=val
 
         params.update(global_params.get_param_values())
 
