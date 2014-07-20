@@ -69,7 +69,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         return (super(ModelGCAL,self).setup_sheets()
                 + [SheetSpec(sheet.SettlingCFSheet, {'level':'V1'})])
 
-    @Model.level('V1')
+    @Model.level('V1', sheet.SettlingCFSheet)
     def _V1_level_parameters(self, properties):
         return {'tsettle':16,
                 'plastic':True,

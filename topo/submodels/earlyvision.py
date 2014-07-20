@@ -198,7 +198,7 @@ class EarlyVisionModel(VisualInputModel):
         return sheet_specs
 
 
-    @Model.level('Retina')
+    @Model.level('Retina', sheet.GeneratorSheet)
     def retinal_sheet_parameters(self, properties):
         return {'period':1.0,
                 'phase':0.05,
@@ -212,7 +212,7 @@ class EarlyVisionModel(VisualInputModel):
                                                          else 'Retina']}
 
 
-    @Model.level('LGN')
+    @Model.level('LGN', sheet.optimized.SettlingCFSheet_Opt)
     def LGN_sheet_parameters(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
 

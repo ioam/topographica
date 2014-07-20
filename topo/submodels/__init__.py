@@ -211,20 +211,28 @@ class LabelDecorator(object):
     attribute. Any types supplies are accessible through the types
     attribute.
     """
-    def __init__(self):
+    def __init__(self, name, type_required=True):
+        self.name = name
+        self.type_required = type_required
         self.labelled = {}
         self.types = {}
 
 
-    def __call__(self, label, obj_type=None):
+    def __call__(self, label, object_type=None):
+
         def decorator(f):
+
+            if self.type_required and object_type is None:
+                raise Exception("The %s decorator of %s requires the object type" %
+                                (self.name, f.__name__))
+
             @wraps(f)
             def inner(*args, **kwargs):
                 return f(*args, **kwargs)
 
             self.labelled[label] = inner
-            if obj_type is not None:
-                self.types[label] = obj_type
+            if object_type is not None:
+                self.types[label] = object_type
             return inner
         return decorator
 
@@ -257,9 +265,9 @@ class Model(param.Parameterized):
     """
     __abstract = True
 
-    level = LabelDecorator()
-    matchconditions = LabelDecorator()
-    connection = LabelDecorator()
+    level = LabelDecorator('level')
+    matchconditions = LabelDecorator('matchconditions', type_required=False)
+    connection = LabelDecorator('connection')
 
 
     def _register_global_params(self, params):
