@@ -277,6 +277,7 @@ class Model(param.Parameterized):
             global_params.params(name).default=val
 
         params.update(global_params.get_param_values())
+        params["name"]=self.name
 
 
     def __init__(self, setup_options=True, register=True, **params):
