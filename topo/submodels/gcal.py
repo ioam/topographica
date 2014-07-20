@@ -70,7 +70,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.level('V1', sheet.SettlingCFSheet)
-    def _V1_level_parameters(self, properties):
+    def V1_sheet_parameters(self, properties):
         return {'tsettle':16,
                 'plastic':True,
                 'joint_norm_fn':topo.sheet.optimized.compute_joint_norm_totals_opt,

@@ -187,7 +187,7 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.level('Retina', sheet.GeneratorSheet)
-    def retinal_sheet_parameters(self, properties):
+    def photoreceptor_sheet_parameters(self, properties):
         return {'period':1.0,
                 'phase':0.05,
                 'nominal_density':self.retina_density,
@@ -201,7 +201,7 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.level('LGN', sheet.optimized.SettlingCFSheet_Opt)
-    def LGN_sheet_parameters(self, properties):
+    def DoG_sheet_parameters(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
 
         return {'measure_maps':False,
