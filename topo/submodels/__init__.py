@@ -385,11 +385,13 @@ class Model(param.Parameterized):
             for level, property_list in sheet_properties.items():
                 sheet_type = self.level.types[level]
 
-                # If an empty lancet Args() object or an empty list
-                if not property_list: continue
-
-                if isinstance(property_list, lancet.Args):
+                if isinstance(property_list, lancet.Identity):
+                    property_list = [{}]
+                elif isinstance(property_list, lancet.Args):
                     property_list = property_list.specs
+                # If an empty lancet Args() object or an empty list
+                elif not property_list:
+                    continue
 
                 for properties in property_list:
                     spec_properties = dict(level=level, **properties)
