@@ -223,13 +223,13 @@ class EarlyVisionModel(VisualInputModel):
         control is enabled, also connect to LGN sheets of the same
         polarity (and, if SF is used, the same SF channel).
         """
-        return {'Afferent':  {'level': 'Retina', 'eye': properties.get('eye',None)},
-                'LateralGC': {'level': 'LGN', 'polarity':properties['polarity'],
-                              'SF': properties.get('SF',None)}
-                              if self.gain_control else None}
+        return {'AfferentMatch':  {'level': 'Retina', 'eye': properties.get('eye',None)},
+                'LateralGCMatch': {'level': 'LGN', 'polarity':properties['polarity'],
+                                   'SF': properties.get('SF',None)}
+                if self.gain_control else None}
 
 
-    @Model.connection('Afferent', projection.SharedWeightCFProjection)
+    @Model.connection('AfferentMatch', projection.SharedWeightCFProjection)
     def LGN_afferent_projections(self, proj):
         channel = proj.dest.properties['SF'] if 'SF' in proj.dest.properties else 1
 
@@ -253,7 +253,7 @@ class EarlyVisionModel(VisualInputModel):
                 'weights_generator':on_weights if proj.dest.properties['polarity']=='On' else off_weights}
 
 
-    @Model.connection('LateralGC', projection.SharedWeightCFProjection)
+    @Model.connection('LateralGCMatch', projection.SharedWeightCFProjection)
     def LGN_lateral_projections(self, proj):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
         return {'delay':0.05,
@@ -318,30 +318,30 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         allowing incoming projections of retina sheets of the same eye
         as the LGN sheet.
         """
-        return {'AfferentCenter':{'level': 'Retina',
-                                  'cone': properties['opponent'],
-                                  'eye': properties.get('eye',None)}
-                                  if 'opponent' in properties else None,
+        return {'AfferentCenterMatch':{'level': 'Retina',
+                               'cone': properties['opponent'],
+                               'eye': properties.get('eye',None)}
+                if 'opponent' in properties else None,
 
-                'AfferentSurround':{'level': 'Retina',
-                                    'cone': properties['surround'],
-                                    'eye': properties.get('eye',None)}
-                                    if 'surround' in properties else None,
+                'AfferentSurroundMatch':{'level': 'Retina',
+                                 'cone': properties['surround'],
+                                 'eye': properties.get('eye',None)}
+                if 'surround' in properties else None,
 
-                'Afferent':{'level': 'Retina', 'eye': properties.get('eye')}
-                            if 'opponent' not in properties else None,
+                'AfferentMatch':{'level': 'Retina', 'eye': properties.get('eye')}
+                                if 'opponent' not in properties else None,
 
-                'LateralGC':{'level': 'LGN',
-                             'polarity': properties['polarity'],
-                             'SF': properties.get('SF',None)}
-                             if self.gain_control and 'opponent' not in properties else
-                            {'level': 'LGN', 'polarity':properties['polarity'],
-                             'opponent':properties['opponent'],
-                             'surround':properties['surround']}
-                             if self.gain_control_color and 'opponent' in properties else None}
+                'LateralGCMatch':{'level': 'LGN',
+                                  'polarity': properties['polarity'],
+                                  'SF': properties.get('SF',None)}
+                if self.gain_control and 'opponent' not in properties else
+                {'level': 'LGN', 'polarity':properties['polarity'],
+                 'opponent':properties['opponent'],
+                 'surround':properties['surround']}
+                if self.gain_control_color and 'opponent' in properties else None}
 
 
-    @Model.connection('Afferent', projection.SharedWeightCFProjection)
+    @Model.connection('AfferentMatch', projection.SharedWeightCFProjection)
     def LGN_afferent_projections(self, proj):
         parameters = super(ColorEarlyVisionModel,self).LGN_afferent_projections(proj)
         if 'opponent' in proj.dest.properties:
@@ -350,7 +350,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         return parameters
 
 
-    @Model.connection('AfferentCenter', projection.SharedWeightCFProjection)
+    @Model.connection('AfferentCenterMatch', projection.SharedWeightCFProjection)
     def LGN_afferent_center_projections(self, proj):
         #TODO: It shouldn't be too hard to figure out how many retina sheets it connects to,
         #      then all the below special cases can be generalized!
@@ -369,7 +369,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                 'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius)}
 
 
-    @Model.connection('AfferentSurround', projection.SharedWeightCFProjection)
+    @Model.connection('AfferentSurroundMatch', projection.SharedWeightCFProjection)
     def LGN_afferent_surround_projections(self, proj):
         #TODO: strength=-strength_scale for 'On', +strength_scale for 'Off'
         #TODO: strength=-strength_scale/2 for dest_properties['opponent']=='Blue'
