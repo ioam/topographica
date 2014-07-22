@@ -196,28 +196,26 @@ class ProjectionSpec(Specification):
 
 
 
-class LabelDecorator(object):
+class ObjectClass(object):
     """
     Decorator class which can be instantiated to create a decorator
-    object. This object can then be used to decorate methods or
-    functions with a label argument and optionally a type.
+    object to annotate method with a certain type.
 
     After decorating several methods or functions, the dictionary of
     all the decorated callables can be accessed via the labelled
     attribute. Any types supplies are accessible through the types
     attribute.
     """
-    def __init__(self, name, object_type=None):
+    def __init__(self, name, object_type):
         self.name = name
         self.labels = {}
         self.types = {}
         self.type = object_type
 
-        if object_type is not None:
-            # Enable IPython tab completion in the settings method
-            kwarg_string = ", ".join("%s=%s" % (name, type(p.default))
-                                     for (name, p) in object_type.params().items())
-            self.settings.__func__.__doc__ =  'settings(%s)' % kwarg_string
+        # Enable IPython tab completion in the settings method
+        kwarg_string = ", ".join("%s=%s" % (name, type(p.default))
+                                 for (name, p) in object_type.params().items())
+        self.settings.__func__.__doc__ =  'settings(%s)' % kwarg_string
 
 
     def settings(self, **kwargs):
@@ -228,22 +226,54 @@ class LabelDecorator(object):
         return kwargs
 
 
-    def __call__(self, label):
+    def __call__(self, f):
+        label = f.__name__
+        @wraps(f)
+        def inner(*args, **kwargs):
+            return f(*args, **kwargs)
+
+        self.types[label] = self.type
+        self.labels[label] = inner
+        return inner
+
+    def __repr__(self):
+        return "ObjectClass(%s, %s)" % (self.name, self.type.name)
+
+
+
+class MatchConditions(object):
+    """
+    Decorator class for matchconditions.
+    """
+    def __init__(self):
+        self._levels = {}
+
+    def compute_conditions(self, level, model, properties):
+        if level not in self:
+            raise Exeption("No level %r defined" % level)
+        return dict((k, fn(model, properties))
+                     for (k, fn) in self._levels[level].items())
+
+    def __call__(self, level):
         def decorator(f):
+            condition_name = f.__name__
             @wraps(f)
-            def inner(*args, **kwargs):
-                return f(*args, **kwargs)
+            def inner(self, *args, **kwargs):
+                return f(self, *args, **kwargs)
 
-            if self.type is not None:
-                self.types[label] = self.type
-
-            self.labels[label] = inner
+            if level not in self._levels:
+                self._levels[level] = {condition_name:inner}
+            else:
+                self._levels[level][condition_name] = inner
             return inner
         return decorator
 
     def __repr__(self):
-        return "LabelDecorator(%s, object_type=%s)" % (self.name,
-                                                       self.type.name)
+        return "MatchConditions()"
+
+    def __contains__(self, key):
+        return key in self._levels
+
 
 
 
@@ -274,7 +304,7 @@ class Model(param.Parameterized):
     """
     __abstract = True
 
-    matchconditions = LabelDecorator('matchconditions', object_type=None)
+    matchconditions = MatchConditions()
 
     sheet_decorators = set()
     projection_decorators = set()
@@ -282,7 +312,7 @@ class Model(param.Parameterized):
     @classmethod
     def register_decorator(cls, object_type):
         name = object_type.name.lower()
-        decorator = LabelDecorator(name, object_type)
+        decorator = ObjectClass(name, object_type)
         setattr(cls, name,  decorator)
 
         if issubclass(object_type, topo.sheet.Sheet):
@@ -463,9 +493,12 @@ class Model(param.Parameterized):
             updated_params = param_method(self,sheet_spec.properties)
             sheet_spec.update_parameters(updated_params)
 
-            matchcondition = self.matchconditions.labels.get(sheet_spec.level, False)
+            matchcondition = (sheet_spec.level in self.matchconditions)
             if matchcondition:
-                sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
+                conditions = self.matchconditions.compute_conditions(sheet_spec.level,
+                                                                     self,
+                                                                     sheet_spec.properties)
+                sheet_spec.update_matchconditions(conditions)
 
 
     def _matchcondition_applies(self, matchconditions, src_sheet):
