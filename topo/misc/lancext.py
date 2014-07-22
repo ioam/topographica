@@ -737,8 +737,11 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
                                          metadata=self._metadata)
 
    def verify(self, specs, model_params):
-      if hasattr(self, '_model_params'):
-         raise NotImplementedError("Implement once model parameters can be inspected easily.")
+      # FIXME: Model parameter checking not implemented.
+      for spec in specs:
+         if 'times' not in spec:
+            raise Exception("BatchCollector requires a times argument.")
+         self.collector.verify_times(spec['times'], strict=True)
 
    def summary(self):
       print "Collector definition summary:\n\n%s" % self.collector
@@ -793,7 +796,7 @@ class RunBatchCommand(TopoCommand):
       # FIXME: This functionality cannot be properly integrated with
       # Topographica until models are defined as classes, allowing
       # parameters to be listed without needing to load the model.
-      return self._model_params
+      return []
 
 
    def __call__(self, spec=None, tid=None, info={}):
@@ -830,10 +833,8 @@ class RunBatchCommand(TopoCommand):
       Check that the supplied arguments make sense given the specified
       analysis.
       """
-      # FIXME: Disabled until models allow inspection of their
-      # parameters without needing to be fully loaded into memory.
-      if hasattr(self, '_model_params'):
-         return self.analysis.verify(args.specs, self.get_model_params())
+      # FIXME: Not hooked up to check Model class parameters.
+      return self.analysis.verify(args.specs, self.get_model_params())
 
 
    def finalize(self, info):
