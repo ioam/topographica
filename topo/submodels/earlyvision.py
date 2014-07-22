@@ -188,31 +188,32 @@ class EarlyVisionModel(VisualInputModel):
 
     @Model.generatorsheet('Retina')
     def photoreceptor_sheet_parameters(self, properties):
-        return {'period':1.0,
-                'phase':0.05,
-                'nominal_density':self.retina_density,
-                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0
+        return Model.generatorsheet.settings(
+            period=1.0,
+            phase=0.05,
+            nominal_density=self.retina_density,
+            nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
                                   + self.v1aff_radius*self.sf_spacing**(max(self.SF)-1)
                                   + self.lgnaff_radius*self.sf_spacing**(max(self.SF)-1)
                                   + self.lgnlateral_radius),
-                'input_generator':self.training_patterns[properties['eye']+'Retina'
-                                                         if 'eye' in properties
-                                                         else 'Retina']}
+            input_generator=self.training_patterns[properties['eye']+'Retina'
+                                                   if 'eye' in properties
+                                                   else 'Retina'])
 
 
     @Model.settlingcfsheet_opt('LGN')
     def DoG_sheet_parameters(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
-
-        return {'measure_maps':False,
-                'output_fns': [transferfn.misc.HalfRectify()],
-                'nominal_density':self.lgn_density,
-                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0
-                                                   + self.v1aff_radius
-                                                   * self.sf_spacing**(channel-1)
-                                                   + self.lgnlateral_radius),
-                'tsettle':2 if self.gain_control else 0,
-                'strict_tsettle': 1 if self.gain_control else 0}
+        return Model.settlingcfsheet_opt.settings(
+            measure_maps=False,
+            output_fns=[transferfn.misc.HalfRectify()],
+            nominal_density=self.lgn_density,
+            nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
+                                             + self.v1aff_radius
+                                             * self.sf_spacing**(channel-1)
+                                             + self.lgnlateral_radius),
+            tsettle=2 if self.gain_control else 0,
+            strict_tsettle=1 if self.gain_control else 0)
 
 
     @Model.matchconditions('LGN')
@@ -246,25 +247,29 @@ class EarlyVisionModel(VisualInputModel):
         #TODO: strength=-strength_scale/len(cone_types) for 'Off' center
         #TODO: strength=-strength_scale/len(cone_types) for 'On' surround
         #TODO: strength=+strength_scale/len(cone_types) for 'Off' surround
-        return {'delay':0.05,
-                'strength':2.33*self.strength_factor,
-                'name':'Afferent',
-                'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius*self.sf_spacing**(channel-1)),
-                'weights_generator':on_weights if proj.dest.properties['polarity']=='On' else off_weights}
+        return Model.sharedweightcfprojection.settings(
+            delay=0.05,
+            strength=2.33*self.strength_factor,
+            name='Afferent',
+            nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius
+                                                      *self.sf_spacing**(channel-1)),
+            weights_generator=on_weights if proj.dest.properties['polarity']=='On' else off_weights)
 
 
     @Model.sharedweightcfprojection('LateralGCMatch')
     def LGN_lateral_projections(self, proj):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
-        return {'delay':0.05,
-                'dest_port':('Activity'),
-                'activity_group':(0.6,DivideWithConstant(c=0.11)),
-                'weights_generator':imagen.Gaussian(size=0.25,
-                                                    aspect_ratio=1.0,
-                                                    output_fns=[transferfn.DivisiveNormalizeL1()]),
-                'nominal_bounds_template':sheet.BoundingBox(radius=0.25),
-                'name':'LateralGC'+proj.src.properties['eye'] if 'eye' in proj.src.properties else 'LateralGC',
-                'strength':0.6/len(self.eyes)}
+        return Model.sharedweightcfprojection.settings(
+            delay=0.05,
+            dest_port=('Activity'),
+            activity_group=(0.6,DivideWithConstant(c=0.11)),
+            weights_generator=imagen.Gaussian(size=0.25,
+                                              aspect_ratio=1.0,
+                                              output_fns=[transferfn.DivisiveNormalizeL1()]),
+            nominal_bounds_template=sheet.BoundingBox(radius=0.25),
+            name=('LateralGC' + proj.src.properties['eye']
+                  if 'eye' in proj.src.properties else 'LateralGC'),
+            strength=0.6/len(self.eyes))
 
 
 
@@ -360,13 +365,14 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         #TODO: strength=-strength_scale for above, but 'Off'
         #TODO: strength=+strength_scale/len(cone_types) for Luminosity 'On'
         #TODO: strength=-strength_scale/len(cone_types) for Luminosity 'Off'
-        return {'delay':0.05,
-                'strength':2.33*self.strength_factor,
-                'weights_generator':imagen.Gaussian(size=0.07385,
-                                                    aspect_ratio=1.0,
-                                                    output_fns=[transferfn.DivisiveNormalizeL1()]),
-                'name':'AfferentCenter'+proj.src.properties['cone'],
-                'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius)}
+        return Model.sharedweightcfprojection.settings(
+            delay=0.05,
+            strength=2.33*self.strength_factor,
+            weights_generator=imagen.Gaussian(size=0.07385,
+                                              aspect_ratio=1.0,
+                                              output_fns=[transferfn.DivisiveNormalizeL1()]),
+            name='AfferentCenter'+proj.src.properties['cone'],
+            nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius))
 
 
     @Model.sharedweightcfprojection('AfferentSurroundMatch')
@@ -377,11 +383,12 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         #TODO: strength=+strength_scale/2 for above, but 'Off'
         #TODO: strength=-strength_scale/len(cone_types) for Luminosity 'On'
         #TODO: strength=+strength_scale/len(cone_types) for Luminosity 'Off'
-        return {'delay':0.05,
-                'strength':2.33*self.strength_factor,
-                'weights_generator':imagen.Gaussian(size=4*0.07385,
-                                                    aspect_ratio=1.0,
-                                                    output_fns=[transferfn.DivisiveNormalizeL1()]),
-                'name':'AfferentSurround'+proj.src.properties['cone'],
-                'nominal_bounds_template':sheet.BoundingBox(radius=self.lgnaff_radius)}
+        return Model.sharedweightcfprojection.settings(
+            delay=0.05,
+            strength=2.33*self.strength_factor,
+            weights_generator=imagen.Gaussian(size=4*0.07385,
+                                              aspect_ratio=1.0,
+                                              output_fns=[transferfn.DivisiveNormalizeL1()]),
+            name='AfferentSurround'+proj.src.properties['cone'],
+            nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius))
 

@@ -213,6 +213,21 @@ class LabelDecorator(object):
         self.types = {}
         self.type = object_type
 
+        if object_type is not None:
+            # Enable IPython tab completion in the settings method
+            kwarg_string = ", ".join("%s=%s" % (name, type(p.default))
+                                     for (name, p) in object_type.params().items())
+            self.settings.__func__.__doc__ =  'settings(%s)' % kwarg_string
+
+
+    def settings(self, **kwargs):
+        """
+        A convenient way of generating parameter dictionaries with
+        tab-completion in IPython.
+        """
+        return kwargs
+
+
     def __call__(self, label):
         def decorator(f):
             @wraps(f)

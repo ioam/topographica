@@ -71,13 +71,14 @@ class ModelGCAL(ColorEarlyVisionModel):
 
     @Model.settlingcfsheet('V1')
     def V1_sheet_parameters(self, properties):
-        return {'tsettle':16,
-                'plastic':True,
-                'joint_norm_fn':topo.sheet.optimized.compute_joint_norm_totals_opt,
-                'output_fns':[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
-                                                learning_rate=0.01 if self.homeostasis else 0.0)],
-                'nominal_density':self.cortex_density,
-                'nominal_bounds':sheet.BoundingBox(radius=self.area/2.0)}
+        return Model.settlingcfsheet.settings(
+            tsettle=16,
+            plastic=True,
+            joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt,
+            output_fns=[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
+                                                            learning_rate=0.01 if self.homeostasis else 0.0)],
+            nominal_density=self.cortex_density,
+            nominal_bounds=sheet.BoundingBox(radius=self.area/2.0))
 
 
     @Model.matchconditions('V1')
@@ -111,36 +112,39 @@ class ModelGCAL(ColorEarlyVisionModel):
         name+=('LGN'+proj.src.properties['polarity']+'Afferent')
         if sf_channel>1: name+=('SF'+str(proj.src.properties['SF']))
 
-        return [{'delay':LGN_V1_delay+lag,
-                 'dest_port':('Activity','JointNormalize','Afferent'),
-                 'name':        name if lag==0 else name+('Lag'+str(lag)),
-                 'learning_rate':self.aff_lr,
-                 'strength':self.aff_strength*(1.0 if not self.gain_control else 1.5),
-                 'weights_generator':imagen.random.GaussianCloud(gaussian_size=
+        return [Model.cfprojection.settings(
+                delay=LGN_V1_delay+lag,
+                dest_port=('Activity','JointNormalize','Afferent'),
+                name= name if lag==0 else name+('Lag'+str(lag)),
+                learning_rate=self.aff_lr,
+                strength=self.aff_strength*(1.0 if not self.gain_control else 1.5),
+                weights_generator=imagen.random.GaussianCloud(gaussian_size=
                                         2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
-                 'nominal_bounds_template':sheet.BoundingBox(radius=
-                                            self.v1aff_radius*self.sf_spacing**(sf_channel-1))}
+                nominal_bounds_template=sheet.BoundingBox(radius=
+                                            self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
                 for lag in self.lags]
 
 
     @Model.cfprojection('LateralV1ExcitatoryMatch')
     def V1_lateralexcitatory_projections(self, proj):
-        return {'delay':0.05,
-                'name':'LateralExcitatory',
-                'weights_generator':imagen.Gaussian(aspect_ratio=1.0, size=0.05),
-                'strength':self.exc_strength,
-                'learning_rate':self.exc_lr,
-                'nominal_bounds_template':sheet.BoundingBox(radius=self.latexc_radius)}
+        return Model.cfprojection.settings(
+            delay=0.05,
+            name='LateralExcitatory',
+            weights_generator=imagen.Gaussian(aspect_ratio=1.0, size=0.05),
+            strength=self.exc_strength,
+            learning_rate=self.exc_lr,
+            nominal_bounds_template=sheet.BoundingBox(radius=self.latexc_radius))
 
 
     @Model.cfprojection('LateralV1InhibitoryMatch')
     def V1_lateralinhibitory_projections(self, proj):
-        return {'delay':0.05,
-                'name':'LateralInhibitory',
-                'weights_generator':imagen.random.GaussianCloud(gaussian_size=0.15),
-                'strength':-1.0*self.inh_strength,
-                'learning_rate':self.inh_lr,
-                'nominal_bounds_template':sheet.BoundingBox(radius=self.latinh_radius)}
+        return Model.cfprojection.settings(
+            delay=0.05,
+            name='LateralInhibitory',
+            weights_generator=imagen.random.GaussianCloud(gaussian_size=0.15),
+            strength=-1.0*self.inh_strength,
+            learning_rate=self.inh_lr,
+            nominal_bounds_template=sheet.BoundingBox(radius=self.latinh_radius))
 
 
     def _setup_analysis(self):
