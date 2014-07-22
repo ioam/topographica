@@ -207,28 +207,22 @@ class LabelDecorator(object):
     attribute. Any types supplies are accessible through the types
     attribute.
     """
-    def __init__(self, name, type_required=True):
+    def __init__(self, name, object_type=None):
         self.name = name
-        self.type_required = type_required
-        self.labelled = {}
+        self.labels = {}
         self.types = {}
+        self.type = object_type
 
-
-    def __call__(self, label, object_type=None):
-
+    def __call__(self, label):
         def decorator(f):
-
-            if self.type_required and object_type is None:
-                raise Exception("The %s decorator of %s requires the object type" %
-                                (self.name, f.__name__))
-
             @wraps(f)
             def inner(*args, **kwargs):
                 return f(*args, **kwargs)
 
-            self.labelled[label] = inner
-            if object_type is not None:
-                self.types[label] = object_type
+            if self.type is not None:
+                self.types[label] = self.type
+
+            self.labels[label] = inner
             return inner
         return decorator
 
@@ -261,9 +255,46 @@ class Model(param.Parameterized):
     """
     __abstract = True
 
-    level = LabelDecorator('level')
-    matchconditions = LabelDecorator('matchconditions', type_required=False)
-    connection = LabelDecorator('connection')
+    matchconditions = LabelDecorator('matchconditions', object_type=None)
+
+    sheet_decorators = set()
+    projection_decorators = set()
+
+    @classmethod
+    def register_decorator(cls, object_type):
+        name = object_type.name.lower()
+        decorator = LabelDecorator(name, object_type)
+        setattr(cls, name,  decorator)
+
+        if issubclass(object_type, topo.sheet.Sheet):
+            cls.sheet_decorators.add(decorator)
+        if issubclass(object_type, topo.projection.Projection):
+            cls.projection_decorators.add(decorator)
+
+    @property
+    def sheet_labels(self):
+        "The mapping of level method to corresponding label"
+        return dict([el for d in self.sheet_decorators
+                     for el in d.labels.items()])
+
+    @property
+    def sheet_types(self):
+        "The mapping of level label to sheet type"
+        return dict([el for d in self.sheet_decorators
+                     for el in d.types.items()])
+
+    @property
+    def projection_labels(self):
+        "The mapping of projection method to corresponding label"
+        return dict([el for d in self.projection_decorators
+                     for el in d.labels.items()])
+
+    @property
+    def projection_types(self):
+        "The mapping of projection label to projection type"
+        return dict([el for d in self.projection_decorators
+                     for el in d.types.items()])
+
 
 
     def _register_global_params(self, params):
@@ -383,7 +414,7 @@ class Model(param.Parameterized):
             sheet_properties = self.setup_sheets()
 
             for level, property_list in sheet_properties.items():
-                sheet_type = self.level.types[level]
+                sheet_type = self.sheet_types[level]
 
                 if isinstance(property_list, lancet.Identity):
                     property_list = [{}]
@@ -406,14 +437,14 @@ class Model(param.Parameterized):
 
     def _update_sheet_specs(self):
         for sheet_spec in self.sheets.path_items.values():
-            param_method = self.level.labelled.get(sheet_spec.level, None)
+            param_method = self.sheet_labels.get(sheet_spec.level, None)
             if not param_method:
                 raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
 
             updated_params = param_method(self,sheet_spec.properties)
             sheet_spec.update_parameters(updated_params)
 
-            matchcondition = self.matchconditions.labelled.get(sheet_spec.level, False)
+            matchcondition = self.matchconditions.labels.get(sheet_spec.level, False)
             if matchcondition:
                 sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
 
@@ -450,12 +481,12 @@ class Model(param.Parameterized):
             for matchname, matchconditions in dest_sheet.matchconditions.items():
 
                 if self._matchcondition_applies(matchconditions, src_sheet):
-                    proj = ProjectionSpec(self.connection.types[matchname],
+                    proj = ProjectionSpec(self.projection_types[matchname],
                                           src_sheet, dest_sheet, matchname)
-                    paramsets = self.connection.labelled[matchname](self, proj)
+                    paramsets = self.projection_labels[matchname](self, proj)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
-                        proj = ProjectionSpec(self.connection.types[matchname],
+                        proj = ProjectionSpec(self.projection_types[matchname],
                                               src_sheet, dest_sheet, matchname)
                         proj.update_parameters(paramset)
                         path = (str(dest_sheet), str(src_sheet), paramset['name'])
@@ -504,3 +535,26 @@ class Model(param.Parameterized):
                              ' (Match name: ' + proj.match_name + \
                              ', connection name: ' + str(proj.parameters['name']) + ')')
                 proj()
+
+
+# Register the sheets and projections available in Topographica
+
+from topo.sheet import optimized as sheetopt
+from topo.projection import optimized as projopt
+from topo import projection
+
+sheet_classes = [c for c in topo.sheet.__dict__.values() if
+                 (isinstance(c, type) and issubclass(c, topo.sheet.Sheet))]
+
+sheet_classes_opt = [c for c in sheetopt.__dict__.values() if
+                     (isinstance(c, type) and issubclass(c, topo.sheet.Sheet))]
+
+projection_classes = [c for c in projection.__dict__.values() if
+                      (isinstance(c, type) and issubclass(c, projection.Projection))]
+
+projection_classes_opt = [c for c in projopt.__dict__.values() if
+                          (isinstance(c, type) and issubclass(c, topo.sheet.Sheet))]
+
+for obj_class in (sheet_classes + sheet_classes_opt
+                  + projection_classes + projection_classes_opt):
+    Model.register_decorator(obj_class)
