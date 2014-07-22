@@ -246,19 +246,34 @@ class MatchConditions(object):
     Decorator class for matchconditions.
     """
     def __init__(self):
-        self.labels = {}
+        self._levels = {}
 
-    def __call__(self, label):
+    def compute_conditions(self, level, model, properties):
+        if level not in self:
+            raise Exeption("No level %r defined" % level)
+        return dict((k, fn(model, properties))
+                     for (k, fn) in self._levels[level].items())
+
+    def __call__(self, level):
         def decorator(f):
+            condition_name = f.__name__
             @wraps(f)
-            def inner(*args, **kwargs):
-                return f(*args, **kwargs)
+            def inner(self, *args, **kwargs):
+                return f(self, *args, **kwargs)
 
-            self.labels[label] = inner
+            if level not in self._levels:
+                self._levels[level] = {condition_name:inner}
+            else:
+                self._levels[level][condition_name] = inner
             return inner
         return decorator
 
-    def __repr__(self): return "MatchConditions()"
+    def __repr__(self):
+        return "MatchConditions()"
+
+    def __contains__(self, key):
+        return key in self._levels
+
 
 
 
@@ -478,9 +493,12 @@ class Model(param.Parameterized):
             updated_params = param_method(self,sheet_spec.properties)
             sheet_spec.update_parameters(updated_params)
 
-            matchcondition = self.matchconditions.labels.get(sheet_spec.level, False)
+            matchcondition = (sheet_spec.level in self.matchconditions)
             if matchcondition:
-                sheet_spec.update_matchconditions(matchcondition(self,sheet_spec.properties))
+                conditions = self.matchconditions.compute_conditions(sheet_spec.level,
+                                                                     self,
+                                                                     sheet_spec.properties)
+                sheet_spec.update_matchconditions(conditions)
 
 
     def _matchcondition_applies(self, matchconditions, src_sheet):
