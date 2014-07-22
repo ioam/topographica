@@ -69,8 +69,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         return dict(V1=[{}],**super(ModelGCAL,self).setup_sheets())
 
 
-    @Model.settlingcfsheet('V1')
-    def V1_sheet_parameters(self, properties):
+    @Model.settlingcfsheet
+    def V1(self, properties):
         return Model.settlingcfsheet.settings(
             tsettle=16,
             plastic=True,
@@ -98,8 +98,6 @@ class ModelGCAL(ColorEarlyVisionModel):
                 'LateralV1InhibitoryMatch': {'level': 'V1'}}
 
 
-    @Model.cfprojection('AfferentV1OnMatch')
-    @Model.cfprojection('AfferentV1OffMatch')
     def V1_afferent_projections(self, proj):
         sf_channel = proj.src.properties['SF'] if 'SF' in proj.src.properties else 1
         # Adjust delays so same measurement protocol can be used with and without gain control.
@@ -124,9 +122,17 @@ class ModelGCAL(ColorEarlyVisionModel):
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
                 for lag in self.lags]
 
+    @Model.cfprojection
+    def AfferentV1OnMatch(self, proj):
+        return self.V1_afferent_projections(proj)
 
-    @Model.cfprojection('LateralV1ExcitatoryMatch')
-    def V1_lateralexcitatory_projections(self, proj):
+    @Model.cfprojection
+    def AfferentV1OffMatch(self, proj):
+        return self.V1_afferent_projections(proj)
+
+
+    @Model.cfprojection
+    def LateralV1ExcitatoryMatch(self, proj):
         return Model.cfprojection.settings(
             delay=0.05,
             name='LateralExcitatory',
@@ -136,8 +142,8 @@ class ModelGCAL(ColorEarlyVisionModel):
             nominal_bounds_template=sheet.BoundingBox(radius=self.latexc_radius))
 
 
-    @Model.cfprojection('LateralV1InhibitoryMatch')
-    def V1_lateralinhibitory_projections(self, proj):
+    @Model.cfprojection
+    def LateralV1InhibitoryMatch(self, proj):
         return Model.cfprojection.settings(
             delay=0.05,
             name='LateralInhibitory',
