@@ -241,6 +241,10 @@ class LabelDecorator(object):
             return inner
         return decorator
 
+    def __repr__(self):
+        return "LabelDecorator(%s, object_type=%s)" % (self.name,
+                                                       self.type.name)
+
 
 
 class Model(param.Parameterized):
