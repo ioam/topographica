@@ -12,14 +12,30 @@ parameters for projections.
 from collections import OrderedDict
 import itertools
 from functools import wraps
+from contextlib import contextmanager
 
+import os
+import sys
 import param
 import lancet
 import topo
 
-
 from dataviews.collector import AttrTree
 from topo.misc.commandline import global_params
+
+
+@contextmanager
+def stdout_redirected(new_stdout):
+    """
+    Example taken from PEP 343. Used to temporarily silence param
+    warnings about setting non-parameter class attributes.
+    """
+    save_stdout = sys.stdout
+    sys.stdout = new_stdout
+    try:
+        yield None
+    finally:
+        sys.stdout = save_stdout
 
 
 class Specification(object):
@@ -579,4 +595,6 @@ projection_classes_opt = [c for c in projopt.__dict__.values() if
 
 for obj_class in (sheet_classes + sheet_classes_opt
                   + projection_classes + projection_classes_opt):
-    Model.register_decorator(obj_class)
+
+    with stdout_redirected(open(os.devnull, 'w')):
+        Model.register_decorator(obj_class)
