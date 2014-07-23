@@ -16,6 +16,10 @@ from topo.submodels.earlyvision import ColorEarlyVisionModel
 
 class ModelGCAL(ColorEarlyVisionModel):
 
+    cortex_density=param.Number(default=47.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1.""")
+
     homeostasis = param.Boolean(default=True, doc="""
         Whether or not the homeostatic adaption should be applied in V1"""),
 

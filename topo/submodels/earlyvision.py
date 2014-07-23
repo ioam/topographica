@@ -147,10 +147,6 @@ class EarlyVisionModel(VisualInputModel):
         inclusive_bounds=(False,True),doc="""
         The nominal_density to use for the LGN.""")
 
-    cortex_density=param.Number(default=47.0,bounds=(0,None),
-        inclusive_bounds=(False,True),doc="""
-        The nominal_density to use for V1.""")
-
     lgnaff_radius=param.Number(default=0.375,bounds=(0,None),doc="""
         Connection field radius of a unit in the LGN level to units in
         a retina sheet.""")
