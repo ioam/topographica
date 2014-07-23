@@ -24,11 +24,6 @@ from topo.misc.commandline import global_params
 
 class Specification(object):
 
-    @property
-    def object_type(self):
-        return self._object_type
-
-
     def update_parameters(self, params):
         self.parameters.update(params)
 
@@ -46,7 +41,6 @@ class Specification(object):
 
 
     def __init__(self, object_type):
-        self._object_type = object_type
         self.parameters = {}
         for param_name, default_value in object_type.params().items():
             self.parameters[param_name]=default_value.default
@@ -80,7 +74,7 @@ class SheetSpec(Specification):
         return self.properties['level']
 
 
-    def __init__(self, object_type, properties):
+    def __init__(self, sheet_type, properties):
         """
         Initialize a SheetSpec object. All arguments but parameters
         are just passed to the internal attributes. For parameters,
@@ -88,7 +82,7 @@ class SheetSpec(Specification):
         the sheet type specified with sheet_type are added. This
         allows a lookup which parameters can be set.
         """
-        super(SheetSpec,self).__init__(object_type)
+        super(SheetSpec,self).__init__(sheet_type)
 
         if 'level' not in properties:
             raise Exception("SheetSpec always requires 'level' in properties")
@@ -97,6 +91,7 @@ class SheetSpec(Specification):
         properties = [(k, properties[k]) for k in self.name_ordering
                       if k in properties]
 
+        self.sheet_type = sheet_type
         self.properties = OrderedDict(properties)
 
 
@@ -104,7 +99,7 @@ class SheetSpec(Specification):
         """
         Instantiate the sheet and register it in topo.sim.
         """
-        topo.sim[str(self)]=self.object_type(**self.parameters)
+        topo.sim[str(self)]=self.sheet_type(**self.parameters)
 
 
     def __str__(self):
@@ -120,7 +115,7 @@ class SheetSpec(Specification):
         return name
 
     def __repr__(self):
-        type_name = self._object_type.__name__
+        type_name = self._sheet_type.__name__
         properties_repr = ', '.join("%r:%r" % (k,v) for (k,v)
                                     in self.properties.items())
         return "SheetSpec(%s, {%s})" % (type_name, properties_repr)
@@ -137,13 +132,13 @@ class ProjectionSpec(Specification):
 
     :'src': SheetSpec of the source sheet
     :'dest': SheetSpec of the destination sheet
-    :'object_type': Subclass of topo.base.projection.Projection
+    :'projection_type': Subclass of topo.base.projection.Projection
     :'parameters': Dictionary specifying which parameters should be
     passed to the projection specified with connection_type. Keys are
     the parameter names, values the parameter values.
     """
 
-    def __init__(self, object_type, src, dest):
+    def __init__(self, projection_type, src, dest):
         """
         Initialize a ProjectionSpec object. All arguments but
         parameters are just passed to the internal attributes. For
@@ -154,8 +149,9 @@ class ProjectionSpec(Specification):
         parameters['dest'] are removed, as these must be set with the
         'src' and 'dest' arguments instead.
         """
-        super(ProjectionSpec, self).__init__(object_type)
+        super(ProjectionSpec, self).__init__(projection_type)
 
+        self.projection_type = projection_type
         self.src = src
         self.dest = dest
 
@@ -168,7 +164,8 @@ class ProjectionSpec(Specification):
         """
         Instantiate the projection and register it in topo.sim.
         """
-        topo.sim.connect(str(self.src),str(self.dest),self.object_type,
+        topo.sim.connect(str(self.src),str(self.dest),
+                         self.projection_type,
                          **self.parameters)
 
     def __str__(self):
@@ -176,7 +173,7 @@ class ProjectionSpec(Specification):
 
 
     def __repr__(self):
-        type_name = self._object_type.__name__
+        type_name = self._projection_type.__name__
         return "ProjectionSpec(%s, %r, %r)" % (type_name, self.src, self.dest)
 
 
