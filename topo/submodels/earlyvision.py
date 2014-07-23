@@ -79,25 +79,17 @@ class VisualInputModel(SensoryModel):
 
     def setup_attributes(self):
         super(VisualInputModel, self).setup_attributes()
-        if 'od' in self.dims or 'dy' in self.dims:
-            self.eyes=['Left','Right']
-        else:
-            self.eyes=['']
 
-        if 'sf' in self.dims:
-            self.SF=range(1,self.sf_channels+1) # List of integers
-        else:
-            self.sf_channels=1
-            self.SF=[1]
+        self.eyes=(['Left','Right']
+                   if 'od' in self.dims or 'dy' in self.dims else [''])
+
+        self.SF=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
+        self.lags = range(self.num_lags) if 'dr' in self.dims else [0]
 
         if 'dr' in self.dims:
             param.Dynamic.time_dependent = True
             numbergen.RandomDistribution.time_dependent = True
             self.message('time_dependent set to true for motion model!')
-            self.lags = range(self.num_lags)   # List of integers
-        else:
-            self.num_lags=1
-            self.lags = [0]
 
 
     def setup_training_patterns(self):
