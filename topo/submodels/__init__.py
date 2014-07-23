@@ -9,13 +9,14 @@ parameters/matchconditions for a sheet within a level, as well as
 parameters for projections.
 """
 
-from collections import OrderedDict
-import itertools
-from functools import wraps
-from contextlib import contextmanager
-
 import os
 import sys
+import itertools
+
+from functools import wraps
+from contextlib import contextmanager
+from collections import OrderedDict
+
 import param
 import lancet
 import topo
@@ -182,9 +183,8 @@ class ObjectClass(object):
     object to annotate method with a certain type.
 
     After decorating several methods or functions, the dictionary of
-    all the decorated callables can be accessed via the labelled
-    attribute. Any types supplies are accessible through the types
-    attribute.
+    the decorated callables may be accessed via the labels
+    attribute. Object types are accessible via the types attribute.
     """
     def __init__(self, name, object_type):
         self.name = name
@@ -216,6 +216,7 @@ class ObjectClass(object):
         self.labels[label] = inner
         return inner
 
+
     def __repr__(self):
         return "ObjectClass(%s, %s)" % (self.name, self.type.name)
 
@@ -228,11 +229,17 @@ class MatchConditions(object):
     def __init__(self):
         self._levels = {}
 
+
     def compute_conditions(self, level, model, properties):
+        """
+        Collect the matchcondition dictionary for a particular level
+        given a certain Model instance and sheet properties.
+        """
         if level not in self:
             raise Exeption("No level %r defined" % level)
         return dict((k, fn(model, properties))
                      for (k, fn) in self._levels[level].items())
+
 
     def __call__(self, level):
         def decorator(f):
@@ -449,7 +456,7 @@ class Model(param.Parameterized):
                     property_list = [{}]
                 elif isinstance(property_list, lancet.Args):
                     property_list = property_list.specs
-                # If an empty lancet Args() object or an empty list
+                # If an empty lancet Args() or an empty list
                 elif not property_list:
                     continue
 
@@ -475,10 +482,10 @@ class Model(param.Parameterized):
             sheet_spec.update_parameters(updated_params)
 
 
-    def _matchcondition_applies(self, matchconditions, src_sheet):
+    def _matchcondition_holds(self, matchconditions, src_sheet):
         """
         Given a dictionary of properties to match and a target sheet
-        spec, return True if the matchcondition applies else False.
+        spec, return True if the matchcondition holds else False.
         """
         matches=True
         if matchconditions is None:
@@ -502,14 +509,14 @@ class Model(param.Parameterized):
                                               self.sheets.path_items.values())
         for src_sheet, dest_sheet in sheetspec_product:
 
-            matchcondition = (dest_sheet.level in self.matchconditions)
-            conditions = (self.matchconditions.compute_conditions(dest_sheet.level,
-                                                                  self, dest_sheet.properties)
-                          if matchcondition else {})
+            has_matchcondition = (dest_sheet.level in self.matchconditions)
+            conditions = (self.matchconditions.compute_conditions(
+                          dest_sheet.level, self,dest_sheet.properties)
+                          if has_matchcondition else {})
 
             for matchname, matchconditions in conditions.items():
 
-                if self._matchcondition_applies(matchconditions, src_sheet):
+                if self._matchcondition_holds(matchconditions, src_sheet):
                     proj = ProjectionSpec(self.projection_types[matchname],
                                           src_sheet, dest_sheet)
 
@@ -576,7 +583,7 @@ class Model(param.Parameterized):
 
         if 'projections' in instantiate_options:
             self.message('Connections:\n')
-            # No need to call _ordered_projections once time-dependent
+            # No need to call _ordered_projections if time-dependent
             projections = self.projections.path_items.itervalues()
             for proj in self._order_projections(projections):
                 self.message('Connect ' + str(proj.src) + ' with ' + str(proj.dest) + \

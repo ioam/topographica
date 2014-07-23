@@ -1,5 +1,6 @@
 """
-Contains a variety of sensory models, specifically models for the visual pathway.
+Contains a variety of sensory models, specifically models for the
+visual pathway.
 """
 import param
 import lancet
@@ -84,10 +85,7 @@ class VisualInputModel(SensoryModel):
             self.eyes=['']
 
         if 'sf' in self.dims:
-            # This list could be any list of the form
-            # [x_1,x_2,...,x_n]
-            # where x_1, x_2, ... are any arbitrary integers
-            self.SF=range(1,self.sf_channels+1)
+            self.SF=range(1,self.sf_channels+1) # List of integers
         else:
             self.sf_channels=1
             self.SF=[1]
@@ -96,8 +94,7 @@ class VisualInputModel(SensoryModel):
             param.Dynamic.time_dependent = True
             numbergen.RandomDistribution.time_dependent = True
             self.message('time_dependent set to true for motion model!')
-            # List of any arbitrary integers
-            self.lags = range(self.num_lags)
+            self.lags = range(self.num_lags)   # List of integers
         else:
             self.num_lags=1
             self.lags = [0]
@@ -170,10 +167,12 @@ class EarlyVisionModel(VisualInputModel):
         super(EarlyVisionModel, self).setup_attributes()
         self.center_polarities=['On','Off']
 
-        # Definitions useful for setting up sheets
-        self.args = {'eyes':lancet.List('eye', self.eyes) if len(self.eyes)>1 else lancet.Identity(),
-                     'polarities': lancet.List('polarity', self.center_polarities),
-                     'SFs': lancet.List('SF', self.SF) if max(self.SF)>1 else lancet.Identity()}
+        # Useful for setting up sheets
+        self.args = {
+            'eyes':lancet.List('eye', self.eyes) if len(self.eyes)>1 else lancet.Identity(),
+            'polarities': lancet.List('polarity', self.center_polarities),
+            'SFs': lancet.List('SF', self.SF) if max(self.SF)>1 else lancet.Identity()
+            }
 
     def setup_sheets(self):
         return {'Retina':self.args['eyes'],
@@ -209,9 +208,11 @@ class EarlyVisionModel(VisualInputModel):
             tsettle=2 if self.gain_control else 0,
             strict_tsettle=1 if self.gain_control else 0)
 
+
     @Model.matchconditions('LGN')
     def afferent_projections(self, properties):
         return {'level': 'Retina', 'eye': properties.get('eye',None)}
+
 
     @Model.sharedweightcfprojection
     def afferent_projections(self, proj):
@@ -237,7 +238,6 @@ class EarlyVisionModel(VisualInputModel):
             nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius
                                                       *self.sf_spacing**(channel-1)),
             weights_generator=on_weights if proj.dest.properties['polarity']=='On' else off_weights)
-
 
 
     @Model.matchconditions('LGN')
@@ -272,22 +272,19 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
     def setup_attributes(self):
         super(ColorEarlyVisionModel, self).setup_attributes()
-        if 'cr' in self.dims:
-            self.opponent_types_center   = ['Red', 'Green', 'Blue', 'RedGreenBlue']
-            self.opponent_types_surround = ['Green', 'Red', 'RedGreen', 'RedGreenBlue']
-            self.cone_types              = ['Red','Green','Blue']
-        else:
-            self.opponent_types_center   = []
-            self.opponent_types_surround = []
-            self.cone_types              = []
 
+        cr = 'cr' in self.dims
+        self.opponent_types_center =   ['Red','Green','Blue','RedGreenBlue'] if cr else []
+        self.opponent_types_surround = ['Green','Red','RedGreen','RedGreenBlue'] if cr else []
+        self.cone_types              = ['Red','Green','Blue'] if cr else []
 
         # Definitions useful for setting up sheets
         opponent_specs =[dict(opponent=el1, surround=el2) for el1, el2
-                         in zip(self.opponent_types_center, self.opponent_types_surround)]
+                         in zip(self.opponent_types_center,
+                                self.opponent_types_surround)]
 
         self.args['opponents'] = (lancet.Args(specs=opponent_specs)
-                                  if  self.opponent_types_center else lancet.Args())
+                                  if self.opponent_types_center else lancet.Args())
         self.args['cones'] = (lancet.List('cone', self.cone_types)
                               if self.cone_types else lancet.Identity())
 
@@ -302,6 +299,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     def afferent_projections(self, properties):
         return ({'level': 'Retina', 'eye': properties.get('eye')}
                 if 'opponent' not in properties else None)
+
 
     @Model.sharedweightcfprojection
     def afferent_projections(self, proj):
