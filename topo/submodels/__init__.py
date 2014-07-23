@@ -491,7 +491,6 @@ class Model(param.Parameterized):
 
         return matches
 
-
     def _compute_projection_specs(self):
         """
         Loop through all possible combinations of SheetSpec objects in
@@ -529,6 +528,25 @@ class Model(param.Parameterized):
                         self.projections.set_path(path, proj)
 
 
+    def _order_projections(self, projections):
+        """
+        A hack to take the order to initialize sheets into account As
+        soon as weight initialization is done with time_dependent=True
+        the projection order will no longer be important.
+        """
+        connection_order=['afferent_projections',
+                          'afferent_center_projections',
+                          'afferent_surround_projections',
+                          'lateral_gain_control_projections',
+                          'afferent_ON_projections',
+                          'afferent_OFF_projections',
+                          'lateral_excitatory_projections',
+                          'lateral_inhibitory_projections']
+
+        return sorted(projections,
+                      key=lambda p: connection_order.index(p.matchname))
+
+
     def __call__(self,instantiate_options=True):
         """
         Instantiates all sheets or projections in self.sheets or
@@ -558,21 +576,9 @@ class Model(param.Parameterized):
 
         if 'projections' in instantiate_options:
             self.message('Connections:\n')
-            #Ugly hack to take the order to initialize sheets into account
-            #As soon as weight initialization is done with time_dependent=True,
-            #this can be simplified to:
-            #for proj in self.projections.path_items.itervalues():
-            connection_order=['afferent_projections',
-                              'afferent_center_projections',
-                              'afferent_surround_projections',
-                              'lateral_gain_control_projections',
-                              'afferent_ON_projections',
-                              'afferent_OFF_projections',
-                              'lateral_excitatory_projections',
-                              'lateral_inhibitory_projections']
-
-            for proj in sorted(self.projections.path_items.itervalues(),
-                               key=lambda projection: connection_order.index(projection.matchname)):
+            # No need to call _ordered_projections once time-dependent
+            projections = self.projections.path_items.itervalues()
+            for proj in self._order_projections(projections):
                 self.message('Connect ' + str(proj.src) + ' with ' + str(proj.dest) + \
                              ' (Match name: ' + proj.matchname + \
                              ', connection name: ' + str(proj.parameters['name']) + ')')
