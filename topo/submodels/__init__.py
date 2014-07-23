@@ -138,15 +138,12 @@ class ProjectionSpec(Specification):
     :'src': SheetSpec of the source sheet
     :'dest': SheetSpec of the destination sheet
     :'object_type': Subclass of topo.base.projection.Projection
-    :'match_name': Name of the matchcondition which has been used to
-    set this projection up.  This might be used to set the parameters
-    of the ProjectionSpec
     :'parameters': Dictionary specifying which parameters should be
     passed to the projection specified with connection_type. Keys are
     the parameter names, values the parameter values.
     """
 
-    def __init__(self, object_type, src, dest, match_name=None, properties=None):
+    def __init__(self, object_type, src, dest):
         """
         Initialize a ProjectionSpec object. All arguments but
         parameters are just passed to the internal attributes. For
@@ -161,9 +158,7 @@ class ProjectionSpec(Specification):
 
         self.src = src
         self.dest = dest
-        self.match_name = match_name
 
-        self.properties = {} if properties is None else properties
         # These parameters are directly passed into topo.sim.connect()!
         ignored_keys = ['src', 'dest']
         self.parameters = dict((k,v) for (k,v) in self.parameters.items()
@@ -176,18 +171,13 @@ class ProjectionSpec(Specification):
         topo.sim.connect(str(self.src),str(self.dest),self.object_type,
                          **self.parameters)
 
-
     def __str__(self):
         return str(self.dest)+'.'+self.parameters['name']
 
 
     def __repr__(self):
         type_name = self._object_type.__name__
-        properties_repr = "{"+ ', '.join("%r:%r" % (k,v) for (k,v) in self.properties.items()) +"}"
-        args = (type_name, self.src, self.dest,
-                ", %s" % self.match_name if self.match_name else ''
-                ", %s" % properties_repr if self.properties else '')
-        return "ProjectionSpec(%s, %r, %r, %s%s)" % args
+        return "ProjectionSpec(%s, %r, %r)" % (type_name, self.src, self.dest)
 
 
 
@@ -528,13 +518,19 @@ class Model(param.Parameterized):
 
                 if self._matchcondition_applies(matchconditions, src_sheet):
                     proj = ProjectionSpec(self.projection_types[matchname],
-                                          src_sheet, dest_sheet, matchname)
+                                          src_sheet, dest_sheet)
+
                     paramsets = self.projection_labels[matchname](self, proj)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
                         proj = ProjectionSpec(self.projection_types[matchname],
-                                              src_sheet, dest_sheet, matchname)
+                                              src_sheet, dest_sheet)
                         proj.update_parameters(paramset)
+
+                        # HACK: Used by the other hack below for ordering
+                        # projections when time_dependent=False
+                        proj.matchname = matchname
+
                         path = (str(dest_sheet), str(src_sheet), paramset['name'])
                         self.projections.set_path(path, proj)
 
@@ -576,9 +572,9 @@ class Model(param.Parameterized):
                               'LateralGCMatch','AfferentV1OnMatch','AfferentV1OffMatch',
                               'LateralV1ExcitatoryMatch','LateralV1InhibitoryMatch']
             for proj in sorted(self.projections.path_items.itervalues(),
-                               key=lambda projection: connection_order.index(projection.match_name)):
+                               key=lambda projection: connection_order.index(projection.matchname)):
                 self.message('Connect ' + str(proj.src) + ' with ' + str(proj.dest) + \
-                             ' (Match name: ' + proj.match_name + \
+                             ' (Match name: ' + proj.matchname + \
                              ', connection name: ' + str(proj.parameters['name']) + ')')
                 proj()
 
