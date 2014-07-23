@@ -23,6 +23,16 @@ from topo.misc.commandline import global_params
 
 
 class Specification(object):
+    """
+    Specifications are templates for sheet or projection objects which
+    may be resolved to the corresponding simulation object once
+    instantiated.
+
+    All specifications have the following attribute:
+
+    :'parameters': Keyword argument dictionary specifying which
+    parameters should be passed to the sheet or projection object.
+    """
 
     def update_parameters(self, params):
         self.parameters.update(params)
@@ -49,21 +59,7 @@ class Specification(object):
 
 class SheetSpec(Specification):
     """
-    SheetSpec acts as a template for sheet objects. It is also
-    possible to resolve the actual sheet object after it has been
-    instantiated.
-
-    The following attributes can be accessed:
-
-    :'properties': Dictionary specifying the properties of the
-    sheet. There must be a value given for the key 'level'.
-    :'object_type': Subclass of topo.base.sheet.Sheet.(read-only)
-    :'parameters': Dictionary specifying which parameters should be
-    passed to the sheet object specified with object_type. Keys are
-    the parameter names, values the parameter values.
-    :'matchconditions': Dictionary specifying the matchconditions of
-    the sheet. This may be used to determine which other sheets this
-    sheet should connect to.
+    SheetSpec acts as a template for sheet objects.
     """
 
     name_ordering = ['eye','level', 'cone', 'polarity',
@@ -76,11 +72,12 @@ class SheetSpec(Specification):
 
     def __init__(self, sheet_type, properties):
         """
-        Initialize a SheetSpec object. All arguments but parameters
-        are just passed to the internal attributes. For parameters,
-        additional key-value pairs with all possible parameters for
-        the sheet type specified with sheet_type are added. This
-        allows a lookup which parameters can be set.
+        Initialize a SheetSpec object of a certain Sheet type with the
+        given properties.
+
+       :'sheet_type': Subclass of topo.base.sheet.Sheet.
+       :'properties': Dictionary specifying the properties of the
+       sheet. There must be a value given for the key 'level'.
         """
         super(SheetSpec,self).__init__(sheet_type)
 
@@ -104,9 +101,8 @@ class SheetSpec(Specification):
 
     def __str__(self):
         """
-        Returns a string representation combined from the properties
-        values.  This might be used as name for the actual sheet
-        object.
+        Returns a string representation of the SheetSpec from the
+        properties values.
         """
         name=''
         for prop in self.properties.itervalues():
@@ -124,30 +120,17 @@ class SheetSpec(Specification):
 
 class ProjectionSpec(Specification):
     """
-    ProjectionSpec acts as a template for projections. It is also
-    possible to resolve the actual projection after it has been
-    instantiated.
-
-    The following attributes can be accessed:
-
-    :'src': SheetSpec of the source sheet
-    :'dest': SheetSpec of the destination sheet
-    :'projection_type': Subclass of topo.base.projection.Projection
-    :'parameters': Dictionary specifying which parameters should be
-    passed to the projection specified with connection_type. Keys are
-    the parameter names, values the parameter values.
+    ProjectionSpec acts as a template for projection objects.
     """
 
     def __init__(self, projection_type, src, dest):
         """
-        Initialize a ProjectionSpec object. All arguments but
-        parameters are just passed to the internal attributes. For
-        parameters, additional key-value pairs with all possible
-        parameters for the projection type specified with
-        connection_type are added. This allows a lookup which
-        parameters can be set. Furthermore, parameters['src'] and
-        parameters['dest'] are removed, as these must be set with the
-        'src' and 'dest' arguments instead.
+        Initialize a ProjectionSpec object of a certain Projection
+        type with the given src and dest SheetSpecs.
+
+       :'projection_type': Subclass of topo.base.projection.Projection
+       :'src': SheetSpec of the source sheet
+       :'dest': SheetSpec of the destination sheet
         """
         super(ProjectionSpec, self).__init__(projection_type)
 
