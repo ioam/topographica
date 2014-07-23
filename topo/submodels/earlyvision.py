@@ -210,11 +210,11 @@ class EarlyVisionModel(VisualInputModel):
             strict_tsettle=1 if self.gain_control else 0)
 
     @Model.matchconditions('LGN')
-    def AfferentMatch(self, properties):
+    def afferent_projections(self, properties):
         return {'level': 'Retina', 'eye': properties.get('eye',None)}
 
     @Model.sharedweightcfprojection
-    def AfferentMatch(self, proj):
+    def afferent_projections(self, proj):
         channel = proj.dest.properties['SF'] if 'SF' in proj.dest.properties else 1
 
         centerg   = imagen.Gaussian(size=0.07385*self.sf_spacing**(channel-1),
@@ -241,13 +241,13 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.matchconditions('LGN')
-    def LateralGCMatch(self, properties):
+    def lateral_gain_control_projections(self, properties):
         return ({'level': 'LGN', 'polarity':properties['polarity'],
                  'SF': properties.get('SF',None)} if self.gain_control else None)
 
 
     @Model.sharedweightcfprojection
-    def LateralGCMatch(self, proj):
+    def lateral_gain_control_projections(self, proj):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
         return Model.sharedweightcfprojection.settings(
             delay=0.05,
@@ -299,13 +299,13 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.matchconditions('LGN')
-    def AfferentMatch(self, properties):
+    def afferent_projections(self, properties):
         return ({'level': 'Retina', 'eye': properties.get('eye')}
                 if 'opponent' not in properties else None)
 
     @Model.sharedweightcfprojection
-    def AfferentMatch(self, proj):
-        parameters = super(ColorEarlyVisionModel,self).AfferentMatch(proj)
+    def afferent_projections(self, proj):
+        parameters = super(ColorEarlyVisionModel,self).afferent_projections(proj)
         if 'opponent' in proj.dest.properties:
             parameters['name']+= (proj.dest.properties['opponent']
                                   + proj.src.properties['cone'])
@@ -313,14 +313,14 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.matchconditions('LGN')
-    def AfferentCenterMatch(self, properties):
+    def afferent_center_projections(self, properties):
         return ({'level': 'Retina', 'cone': properties['opponent'],
                  'eye': properties.get('eye',None)}
                 if 'opponent' in properties else None)
 
 
     @Model.sharedweightcfprojection
-    def AfferentCenterMatch(self, proj):
+    def afferent_center_projections(self, proj):
         #TODO: It shouldn't be too hard to figure out how many retina sheets it connects to,
         #      then all the below special cases can be generalized!
         #TODO: strength=+strength_scale for 'On', strength=-strength_scale for 'Off'
@@ -340,7 +340,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.matchconditions('LGN')
-    def AfferentSurroundMatch(self, properties):
+    def afferent_surround_projections(self, properties):
         return ({'level': 'Retina',
                  'cone': properties['surround'],
                  'eye': properties.get('eye',None)}
@@ -348,7 +348,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.sharedweightcfprojection
-    def AfferentSurroundMatch(self, proj):
+    def afferent_surround_projections(self, proj):
         #TODO: strength=-strength_scale for 'On', +strength_scale for 'Off'
         #TODO: strength=-strength_scale/2 for dest_properties['opponent']=='Blue'
         #      dest_properties['surround']=='RedGreen' and dest_properties['polarity']=='On'
@@ -366,7 +366,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.matchconditions('LGN')
-    def LateralGCMatch(self, properties):
+    def lateral_gain_control_projections(self, properties):
         # The projection itself is defined in the super class
         return ({'level': 'LGN',
                  'polarity': properties['polarity'],

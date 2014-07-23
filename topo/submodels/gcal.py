@@ -111,32 +111,32 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.matchconditions('V1')
-    def AfferentV1OnMatch(self, properties):
+    def afferent_ON_projections(self, properties):
         return {'level': 'LGN', 'polarity': 'On'}
 
 
     @Model.cfprojection
-    def AfferentV1OnMatch(self, proj):
+    def afferent_ON_projections(self, proj):
         return self.V1_afferent_projections(proj)
 
 
     @Model.matchconditions('V1')
-    def AfferentV1OffMatch(self, properties):
+    def afferent_OFF_projections(self, properties):
         return {'level': 'LGN', 'polarity': 'Off'}
 
 
     @Model.cfprojection
-    def AfferentV1OffMatch(self, proj):
+    def afferent_OFF_projections(self, proj):
         return self.V1_afferent_projections(proj)
 
 
     @Model.matchconditions('V1')
-    def LateralV1ExcitatoryMatch(self, properties):
+    def lateral_excitatory_projections(self, properties):
         return {'level': 'V1'}
 
 
     @Model.cfprojection
-    def LateralV1ExcitatoryMatch(self, proj):
+    def lateral_excitatory_projections(self, proj):
         return Model.cfprojection.settings(
             delay=0.05,
             name='LateralExcitatory',
@@ -147,12 +147,12 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.matchconditions('V1')
-    def LateralV1InhibitoryMatch(self, properties):
+    def lateral_inhibitory_projections(self, properties):
         return {'level': 'V1'}
 
 
     @Model.cfprojection
-    def LateralV1InhibitoryMatch(self, proj):
+    def lateral_inhibitory_projections(self, proj):
         return Model.cfprojection.settings(
             delay=0.05,
             name='LateralInhibitory',

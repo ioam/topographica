@@ -562,9 +562,15 @@ class Model(param.Parameterized):
             #As soon as weight initialization is done with time_dependent=True,
             #this can be simplified to:
             #for proj in self.projections.path_items.itervalues():
-            connection_order=['AfferentMatch','AfferentCenterMatch','AfferentSurroundMatch',
-                              'LateralGCMatch','AfferentV1OnMatch','AfferentV1OffMatch',
-                              'LateralV1ExcitatoryMatch','LateralV1InhibitoryMatch']
+            connection_order=['afferent_projections',
+                              'afferent_center_projections',
+                              'afferent_surround_projections',
+                              'lateral_gain_control_projections',
+                              'afferent_ON_projections',
+                              'afferent_OFF_projections',
+                              'lateral_excitatory_projections',
+                              'lateral_inhibitory_projections']
+
             for proj in sorted(self.projections.path_items.itervalues(),
                                key=lambda projection: connection_order.index(projection.matchname)):
                 self.message('Connect ' + str(proj.src) + ' with ' + str(proj.dest) + \
