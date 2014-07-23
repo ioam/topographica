@@ -98,11 +98,6 @@ class SheetSpec(Specification):
                       if k in properties]
 
         self.properties = OrderedDict(properties)
-        self.matchconditions={}
-
-
-    def update_matchconditions(self, matchconditions):
-        self.matchconditions.update(matchconditions)
 
 
     def __call__(self):
@@ -493,13 +488,6 @@ class Model(param.Parameterized):
             updated_params = param_method(self,sheet_spec.properties)
             sheet_spec.update_parameters(updated_params)
 
-            matchcondition = (sheet_spec.level in self.matchconditions)
-            if matchcondition:
-                conditions = self.matchconditions.compute_conditions(sheet_spec.level,
-                                                                     self,
-                                                                     sheet_spec.properties)
-                sheet_spec.update_matchconditions(conditions)
-
 
     def _matchcondition_applies(self, matchconditions, src_sheet):
         """
@@ -530,7 +518,13 @@ class Model(param.Parameterized):
         sheetspec_product = itertools.product(self.sheets.path_items.values(),
                                               self.sheets.path_items.values())
         for src_sheet, dest_sheet in sheetspec_product:
-            for matchname, matchconditions in dest_sheet.matchconditions.items():
+
+            matchcondition = (dest_sheet.level in self.matchconditions)
+            conditions = (self.matchconditions.compute_conditions(dest_sheet.level,
+                                                                  self, dest_sheet.properties)
+                          if matchcondition else {})
+
+            for matchname, matchconditions in conditions.items():
 
                 if self._matchcondition_applies(matchconditions, src_sheet):
                     proj = ProjectionSpec(self.projection_types[matchname],
