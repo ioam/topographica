@@ -165,12 +165,12 @@ class EarlyVisionModel(VisualInputModel):
 
     def setup_attributes(self):
         super(EarlyVisionModel, self).setup_attributes()
-        self.center_polarities=['On','Off']
+        center_polarities=['On','Off']
 
         # Useful for setting up sheets
         self.args = {
             'eyes':lancet.List('eye', self.eyes) if len(self.eyes)>1 else lancet.Identity(),
-            'polarities': lancet.List('polarity', self.center_polarities),
+            'polarities': lancet.List('polarity', center_polarities),
             'SFs': lancet.List('SF', self.SF) if max(self.SF)>1 else lancet.Identity()
             }
 
@@ -274,19 +274,19 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         super(ColorEarlyVisionModel, self).setup_attributes()
 
         cr = 'cr' in self.dims
-        self.opponent_types_center =   ['Red','Green','Blue','RedGreenBlue'] if cr else []
-        self.opponent_types_surround = ['Green','Red','RedGreen','RedGreenBlue'] if cr else []
-        self.cone_types              = ['Red','Green','Blue'] if cr else []
+        opponent_types_center =   ['Red','Green','Blue','RedGreenBlue'] if cr else []
+        opponent_types_surround = ['Green','Red','RedGreen','RedGreenBlue'] if cr else []
+        cone_types              = ['Red','Green','Blue'] if cr else []
 
         # Definitions useful for setting up sheets
         opponent_specs =[dict(opponent=el1, surround=el2) for el1, el2
-                         in zip(self.opponent_types_center,
-                                self.opponent_types_surround)]
+                         in zip(opponent_types_center,
+                                opponent_types_surround)]
 
         self.args['opponents'] = (lancet.Args(specs=opponent_specs)
-                                  if self.opponent_types_center else lancet.Args())
-        self.args['cones'] = (lancet.List('cone', self.cone_types)
-                              if self.cone_types else lancet.Identity())
+                                  if opponent_types_center else lancet.Args())
+        self.args['cones'] = (lancet.List('cone', cone_types)
+                              if cone_types else lancet.Identity())
 
 
     def setup_sheets(self):
