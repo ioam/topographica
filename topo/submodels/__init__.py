@@ -59,8 +59,7 @@ class Specification(object):
         Returns the object in topo.sim corresponding to the string
         name of this object, typically a Sheet or a Projection.
 
-        The appropriate object must be instantiated in topo.sim before
-        the object can be resolved.
+        The appropriate object must be instantiated in topo.sim first.
         """
         from topo import sim # pyflakes:ignore (needed for eval)
         return eval('sim.'+str(self))
@@ -98,7 +97,7 @@ class SheetSpec(Specification):
         super(SheetSpec,self).__init__(sheet_type)
 
         if 'level' not in properties:
-            raise Exception("SheetSpec always requires 'level' in properties")
+            raise Exception("SheetSpec always requires 'level' property.")
 
 
         properties = [(k, properties[k]) for k in self.name_ordering
@@ -326,6 +325,17 @@ class Model(param.Parameterized):
                      for el in d.types.items()])
 
 
+    def __init__(self, setup_options=True, register=True, **params):
+        if register:
+            self._register_global_params(params)
+        super(Model,self).__init__(**params)
+
+        self.training_patterns = AttrTree()
+        self.sheets = AttrTree()
+        self.projections = AttrTree()
+
+        self.setup(setup_options)
+
 
     def _register_global_params(self, params):
         """
@@ -344,17 +354,6 @@ class Model(param.Parameterized):
         params.update(global_params.get_param_values())
         params["name"]=self.name
 
-
-    def __init__(self, setup_options=True, register=True, **params):
-        if register:
-            self._register_global_params(params)
-        super(Model,self).__init__(**params)
-
-        self.training_patterns = AttrTree()
-        self.sheets = AttrTree()
-        self.projections = AttrTree()
-
-        self.setup(setup_options)
 
     #==============================================#
     # Public methods to be implemented by modelers #
@@ -376,8 +375,8 @@ class Model(param.Parameterized):
     def setup_training_patterns(self):
         """
         Returns a dictionary of PatternGenerators to be added to
-        self.training_patterns, with the target sheet names as keys
-        and pattern generators as values.
+        self.training_patterns, with the target sheet name keys and
+        pattern generator values.
         """
         raise NotImplementedError
 
@@ -414,7 +413,7 @@ class Model(param.Parameterized):
 
     def setup(self,setup_options):
         """
-        This method can be used to setup certain aspects of the
+        This method can be used to setup certain parts of the
         submodel.  If setup_options=True, all setup methods are
         called.  setup_options can also be a list, whereas all list
         items of available_setup_options are accepted.
@@ -458,14 +457,15 @@ class Model(param.Parameterized):
                     spec_properties = dict(level=level, **properties)
                     sheet_spec = SheetSpec(sheet_type, spec_properties)
                     self.sheets.set_path(str(sheet_spec), sheet_spec)
-            self._update_sheet_specs()
+
+            self._update_sheet_spec_parameters()
         if 'projections' in setup_options:
             self._compute_projection_specs()
         if 'analysis' in setup_options:
             self._setup_analysis()
 
 
-    def _update_sheet_specs(self):
+    def _update_sheet_spec_parameters(self):
         for sheet_spec in self.sheets.path_items.values():
             param_method = self.sheet_labels.get(sheet_spec.level, None)
             if not param_method:
@@ -478,8 +478,7 @@ class Model(param.Parameterized):
     def _matchcondition_applies(self, matchconditions, src_sheet):
         """
         Given a dictionary of properties to match and a target sheet
-        spec, return True if the matchcondition applies otherwise
-        False.
+        spec, return True if the matchcondition applies else False.
         """
         matches=True
         if matchconditions is None:
@@ -500,7 +499,6 @@ class Model(param.Parameterized):
         in dest_sheet.matchconditions, create a new ProjectionSpec
         object and add this item to self.projections.
         """
-
         sheetspec_product = itertools.product(self.sheets.path_items.values(),
                                               self.sheets.path_items.values())
         for src_sheet, dest_sheet in sheetspec_product:
@@ -576,7 +574,6 @@ class Model(param.Parameterized):
 
 
 # Register the sheets and projections available in Topographica
-
 from topo.sheet import optimized as sheetopt
 from topo.projection import optimized as projopt
 from topo import projection

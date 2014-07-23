@@ -96,9 +96,7 @@ class VisualInputModel(SensoryModel):
             param.Dynamic.time_dependent = True
             numbergen.RandomDistribution.time_dependent = True
             self.message('time_dependent set to true for motion model!')
-            # This list could be any list of the form
-            # [x_1,x_2,...,x_n]
-            # where x_1, x_2, ... are any arbitrary integers
+            # List of any arbitrary integers
             self.lags = range(self.num_lags)
         else:
             self.num_lags=1
