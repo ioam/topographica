@@ -522,7 +522,8 @@ class Model(param.Parameterized):
                     proj = ProjectionSpec(self.projection_types[matchname],
                                           src_sheet, dest_sheet)
 
-                    paramsets = self.projection_labels[matchname](self, proj)
+                    paramsets = self.projection_labels[matchname](self, src_sheet.properties, 
+                                                                  dest_sheet.properties)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
                         proj = ProjectionSpec(self.projection_types[matchname],
