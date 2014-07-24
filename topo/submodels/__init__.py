@@ -236,7 +236,7 @@ class MatchConditions(object):
         given a certain Model instance and sheet properties.
         """
         if level not in self:
-            raise Exeption("No level %r defined" % level)
+            raise Exception("No level %r defined" % level)
         return dict((k, fn(model, properties))
                      for (k, fn) in self._levels[level].items())
 
@@ -260,7 +260,6 @@ class MatchConditions(object):
 
     def __contains__(self, key):
         return key in self._levels
-
 
 
 
@@ -337,6 +336,7 @@ class Model(param.Parameterized):
             self._register_global_params(params)
         super(Model,self).__init__(**params)
 
+        self.attrs = AttrTree()
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
         self.projections = AttrTree()
@@ -366,17 +366,18 @@ class Model(param.Parameterized):
     # Public methods to be implemented by modelers #
     #==============================================#
 
-    def setup_attributes(self):
+    def setup_attributes(self, attrs):
         """
-        Method to precompute any useful self attributes from the class
+        Method to precompute any useful attributes from the class
         parameters. For instance, if there is a ``num_lags``
         parameter, this method could compute the actual projection
-        delays and store it in self.lags.
+        delays and store it as attrs.lags. The return value is the
+        updated attrs AttrTree.
 
         In addition, this method can be used to configure class
         attributes of the model components.
         """
-        pass
+        return attrs
 
 
     def setup_training_patterns(self):
@@ -441,7 +442,8 @@ class Model(param.Parameterized):
             setup_options = available_setup_options
 
         if 'attributes' in setup_options:
-            self.setup_attributes()
+            self.attrs = self.setup_attributes(self.attrs)
+
         if 'training_patterns' in setup_options:
             training_patterns = self.setup_training_patterns()
             for name, training_pattern in training_patterns.items():
@@ -576,20 +578,16 @@ class Model(param.Parameterized):
             instantiate_options=available_instantiate_options
 
         if 'sheets' in instantiate_options:
-            self.message('Sheets:\n')
             for sheet_spec in self.sheets.path_items.itervalues():
-                self.message(sheet_spec)
+                self.message('Level ' + sheet_spec.level + ': Sheet ' + str(sheet_spec))
                 sheet_spec()
-            self.message('\n\n')
 
         if 'projections' in instantiate_options:
-            self.message('Connections:\n')
             # No need to call _ordered_projections if time-dependent
             projections = self.projections.path_items.itervalues()
             for proj in self._order_projections(projections):
-                self.message('Connect ' + str(proj.src) + ' with ' + str(proj.dest) + \
-                             ' (Match name: ' + proj.matchname + \
-                             ', connection name: ' + str(proj.parameters['name']) + ')')
+                self.message('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
+                             '->' + str(proj.dest) + ' ' + proj.parameters['name'])
                 proj()
 
 
