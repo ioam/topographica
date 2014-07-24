@@ -122,7 +122,7 @@ class SheetSpec(Specification):
         """
         name=''
         for prop in self.properties.itervalues():
-            name+=prop
+            name+=str(prop)
 
         return name
 

@@ -169,10 +169,10 @@ class ModelGCAL(ColorEarlyVisionModel):
         topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier=2.0
         topo.analysis.featureresponses.FeatureCurveCommand.contrasts=[1, 10, 30, 50, 100]
         if 'dr' in self.dims:
-            topo.analysis.featureresponses.MeasureResponseCommand.durations=[(max(self.Lags)+1)*1.0]
+            topo.analysis.featureresponses.MeasureResponseCommand.durations=[(max(self.attrs.Lags)+1)*1.0]
         if 'sf' in self.dims:
             from topo.analysis.command import measure_sine_pref
-            sf_relative_sizes = [self.sf_spacing**(sf_channel-1) for sf_channel in self.SF]
+            sf_relative_sizes = [self.sf_spacing**(sf_channel-1) for sf_channel in self.attrs.SF]
             wide_relative_sizes=[0.5*sf_relative_sizes[0]] + sf_relative_sizes + [2.0*sf_relative_sizes[-1]]
             relative_sizes=(wide_relative_sizes if self.expand_sf_test_range else sf_relative_sizes)
             #The default 2.4 spatial frequency value here is
