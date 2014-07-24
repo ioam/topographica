@@ -1012,6 +1012,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         self.time(val=0.0)
         self.views = AttrDict()
         self._event_processors = {}
+        self.model = None
 
         if self.register:
             # Indicate that no specific name has been set
@@ -1213,6 +1214,19 @@ class Simulation(param.Parameterized,OptionalSingleton):
             self.timer.call_and_time(duration)
 
 
+    def __call__(self):
+        if self.model is None:
+            raise Exception("No model specified to be loaded.")
+
+        elif  not callable(self.model):
+            raise Exception("Model object %r is not callable" % self.model)
+
+        elif self.objects():
+            raise Exception("Cannot load specified model (components already loaded)")
+        else:
+            self.model()
+
+
     def run(self, duration=forever, until=forever):
         """
         Process simulation events for the specified duration or until the
@@ -1234,6 +1248,13 @@ class Simulation(param.Parameterized,OptionalSingleton):
         Note that duration and until should be specified in a format suitable for
         conversion (coercion?) into the Simulation's _time_type.
         """
+
+        if not self.objects() and self.model:
+            self.model()
+        elif not self.objects():
+            self.message("No model specified to the Simulation instance.")
+            return
+
         # CEBALERT: calls to topo.sim.run() within topo should use a
         # string to specify the time rather than a float (since float
         # is not compatible with all number types).

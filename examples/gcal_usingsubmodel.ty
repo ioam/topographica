@@ -1,3 +1,2 @@
 from topo.submodels.gcal import ModelGCAL
-gcal = ModelGCAL() # if needed, specify setup_options
-gcal() # if needed, specify instantiate_options
+topo.sim.model = ModelGCAL() # if needed, specify setup_options
