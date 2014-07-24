@@ -11,8 +11,8 @@ import imagen
 from imagen.patterncoordinator import PatternCoordinator
 
 from topo.base.arrayutil import DivideWithConstant
-from topo.submodels import Model, SheetSpec
-from topo import sheet, transferfn, projection
+from topo.submodels import Model
+from topo import sheet, transferfn
 
 
 class SensoryModel(Model):

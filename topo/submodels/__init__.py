@@ -236,7 +236,7 @@ class MatchConditions(object):
         given a certain Model instance and sheet properties.
         """
         if level not in self:
-            raise Exeption("No level %r defined" % level)
+            raise Exception("No level %r defined" % level)
         return dict((k, fn(model, properties))
                      for (k, fn) in self._levels[level].items())
 
