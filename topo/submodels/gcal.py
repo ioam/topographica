@@ -9,7 +9,7 @@ import topo.responsefn.optimized
 import topo.sheet.optimized
 import topo.transferfn.misc
 
-from topo.submodels import Model
+from topo.submodels import Model, SheetSpec
 from topo.submodels.earlyvision import ColorEarlyVisionModel
 
 
@@ -58,8 +58,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         smallest and twice the size of the largest.""")
 
 
-    def setup_attributes(self):
-        super(ModelGCAL, self).setup_attributes()
+    def setup_attributes(self, attrs):
+        attrs = super(ModelGCAL, self).setup_attributes(attrs)
         "Specify weight initialization, response function, and learning function"
 
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
@@ -67,7 +67,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
         projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
         projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
-
+        return attrs
 
     def setup_sheets(self):
         return dict(V1=[{}],**super(ModelGCAL,self).setup_sheets())
@@ -107,7 +107,7 @@ class ModelGCAL(ColorEarlyVisionModel):
                                         2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
                 nominal_bounds_template=sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
-                for lag in self.lags]
+                for lag in self.attrs.Lags]
 
 
     @Model.matchconditions('V1')
@@ -169,7 +169,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         topo.analysis.featureresponses.FeatureMaps.selectivity_multiplier=2.0
         topo.analysis.featureresponses.FeatureCurveCommand.contrasts=[1, 10, 30, 50, 100]
         if 'dr' in self.dims:
-            topo.analysis.featureresponses.MeasureResponseCommand.durations=[(max(self.lags)+1)*1.0]
+            topo.analysis.featureresponses.MeasureResponseCommand.durations=[(max(self.Lags)+1)*1.0]
         if 'sf' in self.dims:
             from topo.analysis.command import measure_sine_pref
             sf_relative_sizes = [self.sf_spacing**(sf_channel-1) for sf_channel in self.SF]

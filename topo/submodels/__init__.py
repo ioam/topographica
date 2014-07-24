@@ -263,7 +263,6 @@ class MatchConditions(object):
 
 
 
-
 class Model(param.Parameterized):
     """
     The available setup options are:
@@ -337,6 +336,7 @@ class Model(param.Parameterized):
             self._register_global_params(params)
         super(Model,self).__init__(**params)
 
+        self.attrs = AttrTree()
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
         self.projections = AttrTree()
@@ -366,17 +366,18 @@ class Model(param.Parameterized):
     # Public methods to be implemented by modelers #
     #==============================================#
 
-    def setup_attributes(self):
+    def setup_attributes(self, attrs):
         """
-        Method to precompute any useful self attributes from the class
+        Method to precompute any useful attributes from the class
         parameters. For instance, if there is a ``num_lags``
         parameter, this method could compute the actual projection
-        delays and store it in self.lags.
+        delays and store it as attrs.lags. The return value is the
+        updated attrs AttrTree.
 
         In addition, this method can be used to configure class
         attributes of the model components.
         """
-        pass
+        return attrs
 
 
     def setup_training_patterns(self):
@@ -441,7 +442,8 @@ class Model(param.Parameterized):
             setup_options = available_setup_options
 
         if 'attributes' in setup_options:
-            self.setup_attributes()
+            self.attrs = self.setup_attributes(self.attrs)
+
         if 'training_patterns' in setup_options:
             training_patterns = self.setup_training_patterns()
             for name, training_pattern in training_patterns.items():

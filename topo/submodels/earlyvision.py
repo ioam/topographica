@@ -77,19 +77,19 @@ class VisualInputModel(SensoryModel):
     __abstract = True
 
 
-    def setup_attributes(self):
-        super(VisualInputModel, self).setup_attributes()
+    def setup_attributes(self, attrs):
+        attrs = super(VisualInputModel, self).setup_attributes(attrs)
+        attrs.Eyes=(['Left','Right']
+                    if 'od' in self.dims or 'dy' in self.dims else [''])
 
-        self.eyes=(['Left','Right']
-                   if 'od' in self.dims or 'dy' in self.dims else [''])
-
-        self.SF=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
-        self.lags = range(self.num_lags) if 'dr' in self.dims else [0]
+        attrs.SF=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
+        attrs.Lags = range(self.num_lags) if 'dr' in self.dims else [0]
 
         if 'dr' in self.dims:
             param.Dynamic.time_dependent = True
             numbergen.RandomDistribution.time_dependent = True
             self.message('time_dependent set to true for motion model!')
+        return attrs
 
 
     def setup_training_patterns(self):
@@ -103,7 +103,7 @@ class VisualInputModel(SensoryModel):
             #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
             position_bound_x -= disparity_bound
 
-        pattern_labels=[s + 'Retina' for s in self.eyes]
+        pattern_labels=[s + 'Retina' for s in self.attrs.Eyes]
         # all the above will eventually end up in PatternCoordinator!
 
         return PatternCoordinator(
@@ -116,10 +116,10 @@ class VisualInputModel(SensoryModel):
             position_bound_x=position_bound_x,
             position_bound_y=position_bound_y,
             dim_fraction=self.dim_fraction,
-            reset_period=(max(self.lags)+1),
+            reset_period=(max(self.attrs.Lags)+1),
             speed=self.speed,
             sf_spacing=self.sf_spacing,
-            sf_max_channel=max(self.SF),
+            sf_max_channel=max(self.attrs.SF),
             patterns_per_label=int(self.num_inputs*self.area*self.area))()
 
 
@@ -155,20 +155,23 @@ class EarlyVisionModel(VisualInputModel):
         retina sheets to LGN sheets is multiplied.""")
 
 
-    def setup_attributes(self):
-        super(EarlyVisionModel, self).setup_attributes()
+    def setup_attributes(self, attrs):
+        attrs = super(EarlyVisionModel, self).setup_attributes(attrs)
         center_polarities=['On','Off']
 
         # Useful for setting up sheets
-        self.args = {
-            'eyes':lancet.List('eye', self.eyes) if len(self.eyes)>1 else lancet.Identity(),
+        attrs.Args = {
+            'eyes':lancet.List('eye', attrs.Eyes) if len(attrs.Eyes)>1 else lancet.Identity(),
             'polarities': lancet.List('polarity', center_polarities),
-            'SFs': lancet.List('SF', self.SF) if max(self.SF)>1 else lancet.Identity()
+            'SFs': lancet.List('SF', attrs.SF) if max(attrs.SF)>1 else lancet.Identity()
             }
+        return attrs
 
     def setup_sheets(self):
-        return {'Retina':self.args['eyes'],
-                'LGN': self.args['polarities'] * self.args['eyes'] * self.args['SFs']}
+        return {'Retina':self.attrs.Args['eyes'],
+                'LGN': self.attrs.Args['polarities']
+                * self.attrs.Args['eyes']
+                * self.attrs.Args['SFs']}
 
 
     @Model.generatorsheet
@@ -178,8 +181,8 @@ class EarlyVisionModel(VisualInputModel):
             phase=0.05,
             nominal_density=self.retina_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
-                                  + self.v1aff_radius*self.sf_spacing**(max(self.SF)-1)
-                                  + self.lgnaff_radius*self.sf_spacing**(max(self.SF)-1)
+                                  + self.v1aff_radius*self.sf_spacing**(max(self.attrs.SF)-1)
+                                  + self.lgnaff_radius*self.sf_spacing**(max(self.attrs.SF)-1)
                                   + self.lgnlateral_radius),
             input_generator=self.training_patterns[properties['eye']+'Retina'
                                                    if 'eye' in properties
@@ -251,7 +254,7 @@ class EarlyVisionModel(VisualInputModel):
             nominal_bounds_template=sheet.BoundingBox(radius=0.25),
             name=('LateralGC' + proj.src.properties['eye']
                   if 'eye' in proj.src.properties else 'LateralGC'),
-            strength=0.6/len(self.eyes))
+            strength=0.6/len(self.attrs.Eyes))
 
 
 
@@ -262,8 +265,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         contrast gain control in color sheets.""")
 
 
-    def setup_attributes(self):
-        super(ColorEarlyVisionModel, self).setup_attributes()
+    def setup_attributes(self, attrs):
+        attrs = super(ColorEarlyVisionModel, self).setup_attributes(attrs)
 
         cr = 'cr' in self.dims
         opponent_types_center =   ['Red','Green','Blue','RedGreenBlue'] if cr else []
@@ -275,16 +278,16 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                          in zip(opponent_types_center,
                                 opponent_types_surround)]
 
-        self.args['opponents'] = (lancet.Args(specs=opponent_specs)
-                                  if opponent_types_center else lancet.Args())
-        self.args['cones'] = (lancet.List('cone', cone_types)
-                              if cone_types else lancet.Identity())
-
+        attrs.Args['opponents'] = (lancet.Args(specs=opponent_specs)
+                                   if opponent_types_center else lancet.Args())
+        attrs.Args['cones'] = (lancet.List('cone', cone_types)
+                               if cone_types else lancet.Identity())
+        return attrs
 
     def setup_sheets(self):
-        return {'Retina': self.args['eyes'] * self.args['cones'],
-                'LGN':    (self.args['polarities'] * self.args['eyes']
-                           * (self.args['SFs'] + self.args['opponents']))}
+        return {'Retina': self.attrs.Args['eyes'] * self.attrs.Args['cones'],
+                'LGN':    (self.attrs.Args['polarities'] * self.attrs.Args['eyes']
+                           * (self.attrs.Args['SFs'] + self.attrs.Args['opponents']))}
 
 
     @Model.matchconditions('LGN')
