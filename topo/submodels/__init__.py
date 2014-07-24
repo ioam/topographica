@@ -575,20 +575,16 @@ class Model(param.Parameterized):
             instantiate_options=available_instantiate_options
 
         if 'sheets' in instantiate_options:
-            self.message('Sheets:\n')
             for sheet_spec in self.sheets.path_items.itervalues():
-                self.message(sheet_spec)
+                self.message('Level ' + sheet_spec.level + ': Sheet ' + str(sheet_spec))
                 sheet_spec()
-            self.message('\n\n')
 
         if 'projections' in instantiate_options:
-            self.message('Connections:\n')
             # No need to call _ordered_projections if time-dependent
             projections = self.projections.path_items.itervalues()
             for proj in self._order_projections(projections):
-                self.message('Connect ' + str(proj.src) + ' with ' + str(proj.dest) + \
-                             ' (Match name: ' + proj.matchname + \
-                             ', connection name: ' + str(proj.parameters['name']) + ')')
+                self.message('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
+                             '->' + str(proj.dest) + ' ' + proj.parameters['name'])
                 proj()
 
 
