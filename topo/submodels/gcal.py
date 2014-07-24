@@ -85,17 +85,17 @@ class ModelGCAL(ColorEarlyVisionModel):
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0))
 
 
-    def V1_afferent_projections(self, proj):
-        sf_channel = proj.src.properties['SF'] if 'SF' in proj.src.properties else 1
+    def V1_afferent_projections(self, src_properties, dest_properties):
+        sf_channel = src_properties['SF'] if 'SF' in src_properties else 1
         # Adjust delays so same measurement protocol can be used with and without gain control.
         LGN_V1_delay = 0.05 if self.gain_control else 0.10
 
         name=''
-        if 'eye' in proj.src.properties: name+=proj.src.properties['eye']
-        if 'opponent' in proj.src.properties:
-            name+=proj.src.properties['opponent']+proj.src.properties['surround']
-        name+=('LGN'+proj.src.properties['polarity']+'Afferent')
-        if sf_channel>1: name+=('SF'+str(proj.src.properties['SF']))
+        if 'eye' in src_properties: name+=src_properties['eye']
+        if 'opponent' in src_properties:
+            name+=src_properties['opponent']+src_properties['surround']
+        name+=('LGN'+src_properties['polarity']+'Afferent')
+        if sf_channel>1: name+=('SF'+str(src_properties['SF']))
 
         return [Model.cfprojection.settings(
                 delay=LGN_V1_delay+lag,
@@ -116,8 +116,8 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.cfprojection
-    def afferent_ON_projections(self, proj):
-        return self.V1_afferent_projections(proj)
+    def afferent_ON_projections(self, src_properties, dest_properties):
+        return self.V1_afferent_projections(src_properties, dest_properties)
 
 
     @Model.matchconditions('V1')
@@ -126,8 +126,8 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.cfprojection
-    def afferent_OFF_projections(self, proj):
-        return self.V1_afferent_projections(proj)
+    def afferent_OFF_projections(self, src_properties, dest_properties):
+        return self.V1_afferent_projections(src_properties, dest_properties)
 
 
     @Model.matchconditions('V1')
@@ -136,7 +136,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.cfprojection
-    def lateral_excitatory_projections(self, proj):
+    def lateral_excitatory_projections(self, src_properties, dest_properties):
         return Model.cfprojection.settings(
             delay=0.05,
             name='LateralExcitatory',
@@ -152,7 +152,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
 
     @Model.cfprojection
-    def lateral_inhibitory_projections(self, proj):
+    def lateral_inhibitory_projections(self, src_properties, dest_properties):
         return Model.cfprojection.settings(
             delay=0.05,
             name='LateralInhibitory',

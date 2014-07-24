@@ -215,8 +215,8 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.sharedweightcfprojection
-    def afferent_projections(self, proj):
-        channel = proj.dest.properties['SF'] if 'SF' in proj.dest.properties else 1
+    def afferent_projections(self, src_properties, dest_properties):
+        channel = dest_properties['SF'] if 'SF' in dest_properties else 1
 
         centerg   = imagen.Gaussian(size=0.07385*self.sf_spacing**(channel-1),
                                     aspect_ratio=1.0,
@@ -237,7 +237,7 @@ class EarlyVisionModel(VisualInputModel):
             name='Afferent',
             nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius
                                                       *self.sf_spacing**(channel-1)),
-            weights_generator=on_weights if proj.dest.properties['polarity']=='On' else off_weights)
+            weights_generator=on_weights if dest_properties['polarity']=='On' else off_weights)
 
 
     @Model.matchconditions('LGN')
@@ -247,7 +247,7 @@ class EarlyVisionModel(VisualInputModel):
 
 
     @Model.sharedweightcfprojection
-    def lateral_gain_control_projections(self, proj):
+    def lateral_gain_control_projections(self, src_properties, dest_properties):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
         return Model.sharedweightcfprojection.settings(
             delay=0.05,
@@ -257,8 +257,8 @@ class EarlyVisionModel(VisualInputModel):
                                               aspect_ratio=1.0,
                                               output_fns=[transferfn.DivisiveNormalizeL1()]),
             nominal_bounds_template=sheet.BoundingBox(radius=0.25),
-            name=('LateralGC' + proj.src.properties['eye']
-                  if 'eye' in proj.src.properties else 'LateralGC'),
+            name=('LateralGC' + src_properties['eye']
+                  if 'eye' in src_properties else 'LateralGC'),
             strength=0.6/len(self.eyes))
 
 
@@ -302,11 +302,11 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.sharedweightcfprojection
-    def afferent_projections(self, proj):
-        parameters = super(ColorEarlyVisionModel,self).afferent_projections(proj)
-        if 'opponent' in proj.dest.properties:
-            parameters['name']+= (proj.dest.properties['opponent']
-                                  + proj.src.properties['cone'])
+    def afferent_projections(self, src_properties, dest_properties):
+        parameters = super(ColorEarlyVisionModel,self).afferent_projections(src_properties, dest_properties)
+        if 'opponent' in dest_properties:
+            parameters['name']+= (dest_properties['opponent']
+                                  + src_properties['cone'])
         return parameters
 
 
@@ -318,7 +318,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.sharedweightcfprojection
-    def afferent_center_projections(self, proj):
+    def afferent_center_projections(self, src_properties, dest_properties):
         #TODO: It shouldn't be too hard to figure out how many retina sheets it connects to,
         #      then all the below special cases can be generalized!
         #TODO: strength=+strength_scale for 'On', strength=-strength_scale for 'Off'
@@ -333,7 +333,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
             weights_generator=imagen.Gaussian(size=0.07385,
                                               aspect_ratio=1.0,
                                               output_fns=[transferfn.DivisiveNormalizeL1()]),
-            name='AfferentCenter'+proj.src.properties['cone'],
+            name='AfferentCenter'+src_properties['cone'],
             nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius))
 
 
@@ -346,7 +346,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.sharedweightcfprojection
-    def afferent_surround_projections(self, proj):
+    def afferent_surround_projections(self, src_properties, dest_properties):
         #TODO: strength=-strength_scale for 'On', +strength_scale for 'Off'
         #TODO: strength=-strength_scale/2 for dest_properties['opponent']=='Blue'
         #      dest_properties['surround']=='RedGreen' and dest_properties['polarity']=='On'
@@ -359,7 +359,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
             weights_generator=imagen.Gaussian(size=4*0.07385,
                                               aspect_ratio=1.0,
                                               output_fns=[transferfn.DivisiveNormalizeL1()]),
-            name='AfferentSurround'+proj.src.properties['cone'],
+            name='AfferentSurround'+src_properties['cone'],
             nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius))
 
 
