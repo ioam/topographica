@@ -132,8 +132,9 @@ class SheetSpec(Specification):
         """
         Instantiate the sheet and register it in topo.sim.
         """
-        topo.sim[str(self)]=self.sheet_type(**self.parameters)
-
+        properties = dict(self.parameters['properties'], **self.properties)
+        topo.sim[str(self)]=self.sheet_type(**dict(self.parameters,
+                                                   properties=properties))
 
     def __str__(self):
         """
