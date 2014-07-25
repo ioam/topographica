@@ -633,7 +633,7 @@ class Model(param.Parameterized):
     def summary(self, printed=True):
 
         heading_line = '=' * len(self.name)
-        summary = [heading_line, self.name, heading_line]
+        summary = [heading_line, self.name, heading_line, '']
 
         for sheet_spec in sorted(self.sheets):
             summary.append(sheet_spec.summary(printed=False))
