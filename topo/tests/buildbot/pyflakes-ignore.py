@@ -134,6 +134,10 @@ def check(codeString, filename):
         w.messages.sort(lambda a, b: cmp(a.lineno, b.lineno))
         non_ignored_messages = 0
         for warning in w.messages:
+            if 'redefinition of unused' in str(warning):
+                if filename.split(os.path.sep)[1] == 'submodels':
+                    print "IGNORED: " + str(warning)
+                    continue
             if not ignore_re.match(lines[warning.lineno - 1]):
                 print warning
                 non_ignored_messages += 1
