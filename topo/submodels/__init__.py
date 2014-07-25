@@ -133,7 +133,7 @@ class SheetSpec(Specification):
         return name
 
     def __repr__(self):
-        type_name = self._sheet_type.__name__
+        type_name = self.sheet_type.__name__
         properties_repr = ', '.join("%r:%r" % (k,v) for (k,v)
                                     in self.properties.items())
         return "SheetSpec(%s, {%s})" % (type_name, properties_repr)
@@ -178,7 +178,7 @@ class ProjectionSpec(Specification):
 
 
     def __repr__(self):
-        type_name = self._projection_type.__name__
+        type_name = self.projection_type.__name__
         return "ProjectionSpec(%s, %r, %r)" % (type_name, self.src, self.dest)
 
 
