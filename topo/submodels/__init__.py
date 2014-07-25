@@ -60,6 +60,11 @@ class Specification(object):
     def update_parameters(self, params):
         self.parameters.update(params)
 
+    @property
+    def modified_parameters(self):
+        return {k:v for k, v in self.parameters.items()
+                if self.default_parameters[k] != v}
+
 
     def resolve(self):
         """
@@ -83,6 +88,7 @@ class Specification(object):
         self.sort_precedence = 0
         for param_name, default_value in object_type.params().items():
             self.parameters[param_name]=default_value.default
+        self.default_parameters = dict(**self.parameters)
 
     def summary(self, printed=True):
         """
