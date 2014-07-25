@@ -1214,7 +1214,15 @@ class Simulation(param.Parameterized,OptionalSingleton):
             self.timer.call_and_time(duration)
 
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
+        """
+        Load the model specified by topo.sim.model by calling the
+        model object (if not None). All arguments are passed into the
+        call to initialize the model.
+
+        Note that if any components are already attached to the
+        simulation, the model will not be loaded.
+        """
         if self.model is None:
             raise Exception("No model specified to be loaded.")
 
@@ -1224,7 +1232,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         elif self.objects():
             raise Exception("Cannot load specified model (components already loaded)")
         else:
-            self.model()
+            self.model(*args, **kwargs)
 
 
     def run(self, duration=forever, until=forever):
