@@ -84,6 +84,13 @@ class Specification(object):
         for param_name, default_value in object_type.params().items():
             self.parameters[param_name]=default_value.default
 
+    def summary(self, printed=True):
+        """
+        Generate a succinct summary of the Specification object. If
+        printed is set to True, the summary is printed, otherwise it
+        is returned as a string.
+        """
+        raise NotImplementedError
 
 
 class SheetSpec(Specification):
@@ -139,6 +146,11 @@ class SheetSpec(Specification):
 
         return name
 
+    def summary(self, printed=True):
+        summary = "%s : %s" % (self, self.sheet_type.name)
+        if printed: print summary
+        else:       return summary
+
     def __repr__(self):
         type_name = self.sheet_type.__name__
         properties_repr = ', '.join("%r:%r" % (k,v) for (k,v)
@@ -183,6 +195,12 @@ class ProjectionSpec(Specification):
     def __str__(self):
         return str(self.dest)+'.'+self.parameters['name']
 
+
+    def summary(self, printed=True):
+        summary = "%s [%s -> %s] : %s" % (self, self.src, self.dest,
+                                          self.projection_type.name)
+        if printed: print summary
+        else:       return summary
 
     def __repr__(self):
         type_name = self.projection_type.__name__
@@ -604,6 +622,28 @@ class Model(param.Parameterized):
                 self.message('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
                              '->' + str(proj.dest) + ' ' + proj.parameters['name'])
                 proj()
+
+    def summary(self, printed=True):
+
+        heading_line = '=' * len(self.name)
+        summary = [heading_line, self.name, heading_line]
+
+        for sheet_spec in sorted(self.sheets):
+            summary.append(sheet_spec.summary(printed=False))
+            projections = [proj for proj in self.projections
+                           if str(proj).startswith(str(sheet_spec))]
+            for projection_spec in sorted(projections, key=lambda p: str(p)):
+                summary.append("   " + projection_spec.summary(printed=False))
+            summary.append('')
+
+        if printed: print "\n".join(summary)
+        else:       return "\n".join(summary)
+
+    def __str__(self):
+        return self.summary(printed=False)
+
+    def _repr_pretty_(self, p, cycle):
+        p.text(str(self))
 
 
 # Register the sheets and projections available in Topographica
