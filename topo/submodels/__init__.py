@@ -26,17 +26,23 @@ from topo.misc.commandline import global_params
 
 
 @contextmanager
-def stdout_redirected(new_stdout):
+def param_logging_level(level):
     """
-    Example taken from PEP 343. Used to temporarily silence param
-    warnings about setting non-parameter class attributes.
+    Temporarily modify param's logging level.
     """
-    save_stdout = sys.stdout
-    sys.stdout = new_stdout
+    level = level.upper()
+    levels = ['DEBUG', 'WARNING', 'CRITICAL', 'VERBOSE', 'INFO']
+    if level not in levels:
+        raise Exception("Level %r not in %r" % (level, levels))
+
+    log_level = getattr(param.parameterized, level)
+    param_logger = param.parameterized.get_logger()
+    logging_level = param_logger.getEffectiveLevel()
+    param_logger.setLevel(log_level)
     try:
         yield None
     finally:
-        sys.stdout = save_stdout
+        param_logger.setLevel(logging_level)
 
 
 class Specification(object):
@@ -610,6 +616,5 @@ projection_classes_opt = [c for c in projopt.__dict__.values() if
 
 for obj_class in (sheet_classes + sheet_classes_opt
                   + projection_classes + projection_classes_opt):
-
-    with stdout_redirected(open(os.devnull, 'w')):
+    with param_logging_level('CRITICAL'):
         Model.register_decorator(obj_class)
