@@ -534,7 +534,7 @@ class Model(param.Parameterized):
                         # projections when time_dependent=False
                         proj.matchname = matchname
 
-                        path = path = (str(dest_sheet), paramset['name'])
+                        path = (str(dest_sheet), paramset['name'])
                         self.projections.set_path(path, proj)
 
 
