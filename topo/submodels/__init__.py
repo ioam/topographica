@@ -652,11 +652,13 @@ class Model(param.Parameterized):
         if printed: print "\n".join(summary)
         else:       return "\n".join(summary)
 
+
     def __str__(self):
-        return self.summary(printed=False)
+        return self.name
+
 
     def _repr_pretty_(self, p, cycle):
-        p.text(str(self))
+        p.text(self.summary(printed=False))
 
 
 # Register the sheets and projections available in Topographica
