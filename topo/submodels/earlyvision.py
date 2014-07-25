@@ -80,7 +80,7 @@ class VisualInputModel(SensoryModel):
     def setup_attributes(self, attrs):
         attrs = super(VisualInputModel, self).setup_attributes(attrs)
         attrs.Eyes=(['Left','Right']
-                    if 'od' in self.dims or 'dy' in self.dims else [''])
+                    if ('od' in self.dims or 'dy' in self.dims) else [''])
 
         attrs.SF=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
         attrs.Lags = range(self.num_lags) if 'dr' in self.dims else [0]
@@ -279,7 +279,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                                 opponent_types_surround)]
 
         attrs.Args['opponents'] = (lancet.Args(specs=opponent_specs)
-                                   if opponent_types_center else lancet.Args())
+                                   if opponent_types_center else lancet.Identity())
         attrs.Args['cones'] = (lancet.List('cone', cone_types)
                                if cone_types else lancet.Identity())
         return attrs
