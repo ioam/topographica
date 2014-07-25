@@ -661,6 +661,32 @@ class Model(param.Parameterized):
         p.text(self.summary(printed=False))
 
 
+    def modifications(self, components=['model', 'sheets', 'projections']):
+        """
+        Display the names of all modified parameters for the specified
+        set of components.
+
+        By default all modified parameters are listed - first with the
+        model parameters, then the sheet parameters and lastly the
+        projection parameters.
+        """
+        mapping = {'model': [self],
+                   'sheets':self.sheets,
+                   'projections':self.projections}
+
+        lines = []
+        for component in components:
+            heading = "=" * len(component)
+            lines.extend([heading, component.capitalize(), heading, ''])
+            specs = mapping[component]
+            padding = max(len(str(spec)) for spec in specs)
+            for spec in sorted(specs):
+                modified = [str(el) for el in sorted(spec.modified_parameters)]
+                lines.append("%s : [%s]" % (str(spec).ljust(padding), ", ".join(modified)))
+            lines.append('')
+        print "\n".join(lines)
+
+
 # Register the sheets and projections available in Topographica
 from topo.sheet import optimized as sheetopt
 from topo.projection import optimized as projopt
