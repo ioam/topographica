@@ -458,7 +458,7 @@ class Model(param.Parameterized):
                     property_list = [{}]
                 elif isinstance(property_list, lancet.Args):
                     property_list = property_list.specs
-                # If an empty lancet Args() or an empty list
+                # If an empty list or Args()
                 elif not property_list:
                     continue
 
@@ -522,7 +522,7 @@ class Model(param.Parameterized):
                     proj = ProjectionSpec(self.projection_types[matchname],
                                           src_sheet, dest_sheet)
 
-                    paramsets = self.projection_labels[matchname](self, src_sheet.properties, 
+                    paramsets = self.projection_labels[matchname](self, src_sheet.properties,
                                                                   dest_sheet.properties)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
                     for paramset in paramsets:
@@ -534,7 +534,7 @@ class Model(param.Parameterized):
                         # projections when time_dependent=False
                         proj.matchname = matchname
 
-                        path = (str(dest_sheet), str(src_sheet), paramset['name'])
+                        path = path = (str(dest_sheet), paramset['name'])
                         self.projections.set_path(path, proj)
 
 
