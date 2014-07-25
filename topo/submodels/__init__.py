@@ -62,6 +62,7 @@ class Specification(object):
 
     @property
     def modified_parameters(self):
+        "Dictionary of modified specification parameters"
         return {k:v for k, v in self.parameters.items()
                 if self.default_parameters[k] != v}
 
@@ -367,6 +368,11 @@ class Model(param.Parameterized):
         "The mapping of projection label to projection type"
         return dict([el for d in self.projection_decorators
                      for el in d.types.items()])
+
+    @property
+    def modified_parameters(self):
+        "Dictionary of modified model parameters"
+        return {k:v for k,v in self.get_param_values(onlychanged=True)}
 
 
     def __init__(self, setup_options=True, register=True, **params):
