@@ -102,6 +102,15 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
     apply_output_fns=param.Boolean(default=True,
         doc="Whether to apply the output_fn after computing an Activity matrix.")
 
+    properties = param.Dict(default={}, doc="""
+       A dictionary of property values associated with the Sheet
+       object.  For instance, the dictionary:
+
+       {'polarity':'ON', 'eye':'Left'}
+
+       could be used to indicate a left, LGN Sheet with ON-surround
+       receptive fields.""")
+
 
     def _get_density(self):
         return self.xdensity
