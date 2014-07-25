@@ -70,7 +70,9 @@ class ModelGCAL(ColorEarlyVisionModel):
         return attrs
 
     def setup_sheets(self):
-        return dict(V1=[{}],**super(ModelGCAL,self).setup_sheets())
+        sheets = super(ModelGCAL,self).setup_sheets()
+        sheets['V1'] = [{}]
+        return sheets
 
 
     @Model.settlingcfsheet

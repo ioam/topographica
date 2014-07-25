@@ -14,6 +14,8 @@ from topo.base.arrayutil import DivideWithConstant
 from topo.submodels import Model
 from topo import sheet, transferfn
 
+from collections import OrderedDict
+
 
 class SensoryModel(Model):
 
@@ -168,11 +170,12 @@ class EarlyVisionModel(VisualInputModel):
         return attrs
 
     def setup_sheets(self):
-        return {'Retina':self.attrs.Args['eyes'],
-                'LGN': self.attrs.Args['polarities']
-                * self.attrs.Args['eyes']
-                * self.attrs.Args['SFs']}
-
+        sheets = OrderedDict()
+        sheets['Retina'] = self.attrs.Args['eyes']
+        sheets['LGN'] =   (self.attrs.Args['polarities']
+                           * self.attrs.Args['eyes']
+                           * self.attrs.Args['SFs'])
+        return sheets
 
     @Model.generatorsheet
     def Retina(self, properties):
@@ -285,9 +288,11 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         return attrs
 
     def setup_sheets(self):
-        return {'Retina': self.attrs.Args['eyes'] * self.attrs.Args['cones'],
-                'LGN':    (self.attrs.Args['polarities'] * self.attrs.Args['eyes']
-                           * (self.attrs.Args['SFs'] + self.attrs.Args['opponents']))}
+        sheets = OrderedDict()
+        sheets['Retina'] = self.attrs.Args['eyes'] * self.attrs.Args['cones']
+        sheets['LGN'] = (self.attrs.Args['polarities'] * self.attrs.Args['eyes']
+                         * (self.attrs.Args['SFs'] + self.attrs.Args['opponents']))
+        return sheets
 
 
     @Model.matchconditions('LGN')

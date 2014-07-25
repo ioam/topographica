@@ -72,8 +72,15 @@ class Specification(object):
         return eval('sim.'+str(self))
 
 
+    def __lt__(self, other):
+        return self.sort_precedence < other.sort_precedence
+
+    def __eq__(self, other):
+        return self.sort_precedence == other.sort_precedence
+
     def __init__(self, object_type):
         self.parameters = {}
+        self.sort_precedence = 0
         for param_name, default_value in object_type.params().items():
             self.parameters[param_name]=default_value.default
 
@@ -457,7 +464,8 @@ class Model(param.Parameterized):
         if 'sheets' in setup_options:
             sheet_properties = self.setup_sheets()
 
-            for level, property_list in sheet_properties.items():
+            enumeration = enumerate(sheet_properties.items())
+            for (ordering, (level, property_list)) in enumeration:
                 sheet_type = self.sheet_types[level]
 
                 if isinstance(property_list, lancet.Identity):
@@ -471,6 +479,7 @@ class Model(param.Parameterized):
                 for properties in property_list:
                     spec_properties = dict(level=level, **properties)
                     sheet_spec = SheetSpec(sheet_type, spec_properties)
+                    sheet_spec.sort_precedence = ordering
                     self.sheets.set_path(str(sheet_spec), sheet_spec)
 
             self._update_sheet_spec_parameters()
