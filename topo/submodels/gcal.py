@@ -9,7 +9,7 @@ import topo.responsefn.optimized
 import topo.sheet.optimized
 import topo.transferfn.misc
 
-from topo.submodels import Model, SheetSpec
+from topo.submodels import Model
 from topo.submodels.earlyvision import ColorEarlyVisionModel
 
 

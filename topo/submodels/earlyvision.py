@@ -5,7 +5,6 @@ visual pathway.
 import param
 import lancet
 import numpy
-import numbergen
 import imagen
 
 from imagen.patterncoordinator import PatternCoordinator

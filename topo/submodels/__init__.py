@@ -9,8 +9,6 @@ parameters/matchconditions for a sheet within a level, as well as
 parameters for projections.
 """
 
-import os
-import sys
 import itertools
 
 from functools import wraps
