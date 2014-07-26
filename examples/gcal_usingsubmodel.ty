@@ -1,2 +1,21 @@
+import topo
+import param
+import numbergen
+
+from topo.submodels import order_projections
 from topo.submodels.gcal import ModelGCAL
+
+time_dependent = True
+numbergen.TimeAware.time_dependent = time_dependent
+
 topo.sim.model = ModelGCAL() # if needed, specify setup_options
+
+# Ordering required if time_dependent=False to reproduce old results
+order_projections(topo.sim.model, ['afferent_projections',
+                                   'afferent_center_projections',
+                                   'afferent_surround_projections',
+                                   'lateral_gain_control_projections',
+                                   ('V1_afferent_projections', {'polarity':'On'}),
+                                   ('V1_afferent_projections', {'polarity':'Off'}),
+                                   'lateral_excitatory_projections',
+                                   'lateral_inhibitory_projections'])

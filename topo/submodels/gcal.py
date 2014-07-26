@@ -87,6 +87,12 @@ class ModelGCAL(ColorEarlyVisionModel):
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0))
 
 
+    @Model.matchconditions('V1')
+    def V1_afferent_projections(self, properties):
+        return {'level': 'LGN'}
+
+
+    @Model.cfprojection
     def V1_afferent_projections(self, src_properties, dest_properties):
         sf_channel = src_properties['SF'] if 'SF' in src_properties else 1
         # Adjust delays so same measurement protocol can be used with and without gain control.
@@ -110,26 +116,6 @@ class ModelGCAL(ColorEarlyVisionModel):
                 nominal_bounds_template=sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
                 for lag in self.attrs.Lags]
-
-
-    @Model.matchconditions('V1')
-    def afferent_ON_projections(self, properties):
-        return {'level': 'LGN', 'polarity': 'On'}
-
-
-    @Model.cfprojection
-    def afferent_ON_projections(self, src_properties, dest_properties):
-        return self.V1_afferent_projections(src_properties, dest_properties)
-
-
-    @Model.matchconditions('V1')
-    def afferent_OFF_projections(self, properties):
-        return {'level': 'LGN', 'polarity': 'Off'}
-
-
-    @Model.cfprojection
-    def afferent_OFF_projections(self, src_properties, dest_properties):
-        return self.V1_afferent_projections(src_properties, dest_properties)
 
 
     @Model.matchconditions('V1')
