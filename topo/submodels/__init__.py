@@ -214,7 +214,7 @@ class ProjectionSpec(Specification):
 
 
 
-class ObjectClass(object):
+class ClassDecorator(object):
     """
     Decorator class which can be instantiated to create a decorator
     object to annotate method with a certain type.
@@ -255,7 +255,7 @@ class ObjectClass(object):
 
 
     def __repr__(self):
-        return "ObjectClass(%s, %s)" % (self.name, self.type.name)
+        return "ClassDecorator(%s, %s)" % (self.name, self.type.name)
 
 
 
@@ -335,7 +335,7 @@ class Model(param.Parameterized):
     @classmethod
     def register_decorator(cls, object_type):
         name = object_type.name.lower()
-        decorator = ObjectClass(name, object_type)
+        decorator = ClassDecorator(name, object_type)
         setattr(cls, name,  decorator)
 
         if issubclass(object_type, topo.sheet.Sheet):
