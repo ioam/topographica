@@ -105,14 +105,16 @@ class ModelGCAL(ColorEarlyVisionModel):
         name+=('LGN'+src_properties['polarity']+'Afferent')
         if sf_channel>1: name+=('SF'+str(src_properties['SF']))
 
+        gaussian_size = 2.0 * self.v1aff_radius *self.sf_spacing**(sf_channel-1)
+        weights_generator = imagen.random.GaussianCloud(gaussian_size=gaussian_size)
+
         return [Model.cfprojection.settings(
                 delay=LGN_V1_delay+lag,
                 dest_port=('Activity','JointNormalize','Afferent'),
                 name= name if lag==0 else name+('Lag'+str(lag)),
                 learning_rate=self.aff_lr,
                 strength=self.aff_strength*(1.0 if not self.gain_control else 1.5),
-                weights_generator=imagen.random.GaussianCloud(gaussian_size=
-                                        2.0*self.v1aff_radius*self.sf_spacing**(sf_channel-1)),
+                weights_generator=weights_generator,
                 nominal_bounds_template=sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
                 for lag in self.attrs.Lags]
@@ -169,5 +171,3 @@ class ModelGCAL(ColorEarlyVisionModel):
             #patterns, and thus the typical width of an ON stripe in one of the
             #receptive fields
             measure_sine_pref.frequencies = [2.4*s for s in relative_sizes]
-
-
