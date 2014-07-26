@@ -12,7 +12,6 @@ parameters for projections.
 import itertools
 
 from functools import wraps
-from contextlib import contextmanager
 from collections import OrderedDict
 
 import param
@@ -22,25 +21,6 @@ import topo
 from dataviews.collector import AttrTree
 from topo.misc.commandline import global_params
 
-
-@contextmanager
-def param_logging_level(level):
-    """
-    Temporarily modify param's logging level.
-    """
-    level = level.upper()
-    levels = ['DEBUG', 'WARNING', 'CRITICAL', 'VERBOSE', 'INFO']
-    if level not in levels:
-        raise Exception("Level %r not in %r" % (level, levels))
-
-    log_level = getattr(param.parameterized, level)
-    param_logger = param.parameterized.get_logger()
-    logging_level = param_logger.getEffectiveLevel()
-    param_logger.setLevel(log_level)
-    try:
-        yield None
-    finally:
-        param_logger.setLevel(logging_level)
 
 
 class Specification(object):
@@ -704,7 +684,7 @@ projection_classes_opt = [c for c in projopt.__dict__.values() if
 
 for obj_class in (sheet_classes + sheet_classes_opt
                   + projection_classes + projection_classes_opt):
-    with param_logging_level('CRITICAL'):
+    with param.param_logging_level('CRITICAL'):
         # Do not create a decorator if declared as abstract
         if not hasattr(obj_class, "_%s__abstract" % obj_class.name):
             Model.register_decorator(obj_class)
