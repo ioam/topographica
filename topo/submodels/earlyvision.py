@@ -86,10 +86,9 @@ class VisualInputModel(SensoryModel):
         attrs.SF=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
         attrs.Lags = range(self.num_lags) if 'dr' in self.dims else [0]
 
-        if 'dr' in self.dims:
-            param.Dynamic.time_dependent = True
+        if 'dr' in self.dims and not numbergen.RandomDistribution.time_dependent:
             numbergen.RandomDistribution.time_dependent = True
-            self.message('time_dependent set to true for motion model!')
+            self.message('Setting time_dependent to True for motion model.')
         return attrs
 
 

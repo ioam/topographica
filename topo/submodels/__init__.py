@@ -17,10 +17,13 @@ from collections import OrderedDict
 import param
 import lancet
 import topo
+import numbergen
 
 from dataviews.collector import AttrTree
 from topo.misc.commandline import global_params
 
+
+numbergen.TimeAware.time_dependent = True
 
 
 def order_projections(model, connection_order):
