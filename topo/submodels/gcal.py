@@ -77,7 +77,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
     @Model.settlingcfsheet
     def V1(self, properties):
-        return Model.settlingcfsheet.settings(
+        return Model.settlingcfsheet.params(
             tsettle=16,
             plastic=True,
             joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt,
@@ -108,7 +108,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         gaussian_size = 2.0 * self.v1aff_radius *self.sf_spacing**(sf_channel-1)
         weights_generator = imagen.random.GaussianCloud(gaussian_size=gaussian_size)
 
-        return [Model.cfprojection.settings(
+        return [Model.cfprojection.params(
                 delay=LGN_V1_delay+lag,
                 dest_port=('Activity','JointNormalize','Afferent'),
                 name= name if lag==0 else name+('Lag'+str(lag)),
@@ -127,7 +127,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
     @Model.cfprojection
     def lateral_excitatory_projections(self, src_properties, dest_properties):
-        return Model.cfprojection.settings(
+        return Model.cfprojection.params(
             delay=0.05,
             name='LateralExcitatory',
             weights_generator=imagen.Gaussian(aspect_ratio=1.0, size=0.05),
@@ -143,7 +143,7 @@ class ModelGCAL(ColorEarlyVisionModel):
 
     @Model.cfprojection
     def lateral_inhibitory_projections(self, src_properties, dest_properties):
-        return Model.cfprojection.settings(
+        return Model.cfprojection.params(
             delay=0.05,
             name='LateralInhibitory',
             weights_generator=imagen.random.GaussianCloud(gaussian_size=0.15),

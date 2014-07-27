@@ -269,10 +269,10 @@ class ClassDecorator(object):
         # Enable IPython tab completion in the settings method
         kwarg_string = ", ".join("%s=%s" % (name, type(p.default))
                                  for (name, p) in object_type.params().items())
-        self.settings.__func__.__doc__ =  'settings(%s)' % kwarg_string
+        self.params.__func__.__doc__ =  'params(%s)' % kwarg_string
 
 
-    def settings(self, **kwargs):
+    def params(self, **kwargs):
         """
         A convenient way of generating parameter dictionaries with
         tab-completion in IPython.

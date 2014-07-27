@@ -177,7 +177,7 @@ class EarlyVisionModel(VisualInputModel):
 
     @Model.generatorsheet
     def Retina(self, properties):
-        return Model.generatorsheet.settings(
+        return Model.generatorsheet.params(
             period=1.0,
             phase=0.05,
             nominal_density=self.retina_density,
@@ -193,7 +193,7 @@ class EarlyVisionModel(VisualInputModel):
     @Model.settlingcfsheet_opt
     def LGN(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
-        return Model.settlingcfsheet_opt.settings(
+        return Model.settlingcfsheet_opt.params(
             measure_maps=False,
             output_fns=[transferfn.misc.HalfRectify()],
             nominal_density=self.lgn_density,
@@ -227,7 +227,7 @@ class EarlyVisionModel(VisualInputModel):
         #TODO: strength=-strength_scale/len(cone_types) for 'Off' center
         #TODO: strength=-strength_scale/len(cone_types) for 'On' surround
         #TODO: strength=+strength_scale/len(cone_types) for 'Off' surround
-        return Model.sharedweightcfprojection.settings(
+        return Model.sharedweightcfprojection.params(
             delay=0.05,
             strength=2.33*self.strength_factor,
             name='Afferent',
@@ -245,7 +245,7 @@ class EarlyVisionModel(VisualInputModel):
     @Model.sharedweightcfprojection
     def lateral_gain_control_projections(self, src_properties, dest_properties):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
-        return Model.sharedweightcfprojection.settings(
+        return Model.sharedweightcfprojection.params(
             delay=0.05,
             dest_port=('Activity'),
             activity_group=(0.6,DivideWithConstant(c=0.11)),
@@ -325,7 +325,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         #TODO: strength=-strength_scale for above, but 'Off'
         #TODO: strength=+strength_scale/len(cone_types) for Luminosity 'On'
         #TODO: strength=-strength_scale/len(cone_types) for Luminosity 'Off'
-        return Model.sharedweightcfprojection.settings(
+        return Model.sharedweightcfprojection.params(
             delay=0.05,
             strength=2.33*self.strength_factor,
             weights_generator=imagen.Gaussian(size=0.07385,
@@ -351,7 +351,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         #TODO: strength=+strength_scale/2 for above, but 'Off'
         #TODO: strength=-strength_scale/len(cone_types) for Luminosity 'On'
         #TODO: strength=+strength_scale/len(cone_types) for Luminosity 'Off'
-        return Model.sharedweightcfprojection.settings(
+        return Model.sharedweightcfprojection.params(
             delay=0.05,
             strength=2.33*self.strength_factor,
             weights_generator=imagen.Gaussian(size=4*0.07385,
