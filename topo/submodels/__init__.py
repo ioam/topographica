@@ -89,7 +89,10 @@ class Specification(object):
     parameters should be passed to the sheet or projection object.
     """
 
-    def update_parameters(self, params):
+    def update(self, **params):
+        """
+        Convenience method to easy update specification parameters.
+        """
         self.parameters.update(params)
 
     @property
@@ -559,7 +562,7 @@ class Model(param.Parameterized):
                 raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
 
             updated_params = param_method(self,sheet_spec.properties)
-            sheet_spec.update_parameters(updated_params)
+            sheet_spec.update(**updated_params)
 
 
     def _matchcondition_holds(self, matchconditions, src_sheet):
@@ -606,7 +609,7 @@ class Model(param.Parameterized):
                     for paramset in paramsets:
                         proj = ProjectionSpec(self.projection_types[matchname],
                                               src_sheet, dest_sheet)
-                        proj.update_parameters(paramset)
+                        proj.update(**paramset)
                         # Only used when time_dependent=False
                         # (which is to be deprecated)
                         proj.matchname = matchname
