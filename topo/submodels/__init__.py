@@ -719,7 +719,7 @@ projection_classes_opt = [c for c in projopt.__dict__.values() if
 
 for obj_class in (sheet_classes + sheet_classes_opt
                   + projection_classes + projection_classes_opt):
-    with param.param_logging_level('CRITICAL'):
+    with param.logging_level('CRITICAL'):
         # Do not create a decorator if declared as abstract
         if not hasattr(obj_class, "_%s__abstract" % obj_class.name):
             Model.register_decorator(obj_class)
