@@ -1,6 +1,7 @@
 import topo
 import param
 import imagen
+import numbergen
 
 from topo import projection, responsefn, learningfn, transferfn, sheet
 import topo.learningfn.optimized
@@ -9,7 +10,7 @@ import topo.responsefn.optimized
 import topo.sheet.optimized
 import topo.transferfn.misc
 
-from topo.submodels import Model
+from topo.submodels import Model, order_projections
 from topo.submodels.earlyvision import ColorEarlyVisionModel
 
 
@@ -171,3 +172,32 @@ class ModelGCAL(ColorEarlyVisionModel):
             #patterns, and thus the typical width of an ON stripe in one of the
             #receptive fields
             measure_sine_pref.frequencies = [2.4*s for s in relative_sizes]
+
+
+
+class ExamplesGCAL(ModelGCAL):
+    """
+    Reproduces the results of the legacy examples/gcal.ty file.
+    """
+
+    def __init__(self, **params):
+        numbergen.TimeAware.time_dependent = False
+        super(ExamplesGCAL, self).__init__(**params)
+        if set(self.dims) != set([ 'xy', 'or']):
+            raise Exception("ExamplesGCAL only reproducible for dims = ['xy', 'or']")
+
+
+    def setup(self,setup_options):
+        super(ExamplesGCAL, self).setup(setup_options)
+        if setup_options is True or 'sheets' in setup_options:
+            self.sheets.Retina.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+1.125))
+            self.sheets.LGNOn.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
+            self.sheets.LGNOff.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
+            self.sheets.V1.update(nominal_density=48)
+        if setup_options is True or 'projections' in setup_options:
+            order_projections(self, ['afferent_projections',
+                                     'lateral_gain_control_projections',
+                                     ('V1_afferent_projections', {'polarity':'On'}),
+                                     ('V1_afferent_projections', {'polarity':'Off'}),
+                                     'lateral_excitatory_projections',
+                                     'lateral_inhibitory_projections'])
