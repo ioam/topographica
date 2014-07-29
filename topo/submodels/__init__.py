@@ -23,8 +23,6 @@ from dataviews.collector import AttrTree
 from topo.misc.commandline import global_params
 
 
-numbergen.TimeAware.time_dependent = True
-
 
 def order_projections(model, connection_order):
     """
@@ -415,6 +413,7 @@ class Model(param.Parameterized):
             self._register_global_params(params)
         super(Model,self).__init__(**params)
 
+        numbergen.TimeAware.time_dependent = True
         self.attrs = AttrTree()
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
