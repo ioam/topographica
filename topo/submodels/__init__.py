@@ -56,7 +56,7 @@ def order_projections(model, connection_order):
         if len(matches) == 0:
             raise Exception("Could not order projection %r" % spec)
         elif len(matches) == 1:
-            (i, (_, _)) = matches[0]
+            (i, (k, v)) = matches[0]
             spec.sort_precedence = i
             continue
 
@@ -68,7 +68,7 @@ def order_projections(model, connection_order):
 
         key = property_keys[0][0]
         spec_property_value = spec.src.properties[key]
-        match = [i for (i, (_, pdict)) in matches if pdict[key] == spec_property_value]
+        match = [ind for (ind, (_, pdict)) in matches if pdict[key] == spec_property_value]
         if len(match) != 1:
             raise Exception("Could not order projection %r by property %r" % (spec, key))
         spec.sort_precedence = match[0]

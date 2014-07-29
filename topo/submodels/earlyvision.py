@@ -3,9 +3,11 @@ Contains a variety of sensory models, specifically models for the
 visual pathway.
 """
 import param
+import numbergen
 import lancet
 import numpy
 import imagen
+
 
 from imagen.patterncoordinator import PatternCoordinator
 
