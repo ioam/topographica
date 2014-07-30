@@ -616,7 +616,7 @@ class Model(param.Parameterized):
                         self.projections.set_path(path, proj)
 
 
-    def __call__(self,instantiate_options=True):
+    def __call__(self,instantiate_options=True, verbose=False):
         """
         Instantiates all sheets or projections in self.sheets or
         self.projections and registers them in the topo.sim instance.
@@ -638,13 +638,15 @@ class Model(param.Parameterized):
 
         if 'sheets' in instantiate_options:
             for sheet_spec in self.sheets.path_items.itervalues():
-                self.message('Level ' + sheet_spec.level + ': Sheet ' + str(sheet_spec))
+                if verbose:
+                    self.message('Level ' + sheet_spec.level + ': Sheet ' + str(sheet_spec))
                 sheet_spec()
 
         if 'projections' in instantiate_options:
             for proj in sorted(self.projections):
-                self.message('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
-                             '->' + str(proj.dest) + ' ' + proj.parameters['name'])
+                if verbose:
+                    self.message('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
+                                     '->' + str(proj.dest) + ' ' + proj.parameters['name'])
                 proj()
 
     def summary(self, printed=True):
