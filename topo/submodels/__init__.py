@@ -408,12 +408,11 @@ class Model(param.Parameterized):
         return {k:v for k,v in self.get_param_values(onlychanged=True)}
 
 
-    def __init__(self, setup_options=True, register=True, **params):
+    def __init__(self, setup_options=True, register=True, time_dependent=True, **params):
+        numbergen.TimeAware.time_dependent = time_dependent
         if register:
             self._register_global_params(params)
         super(Model,self).__init__(**params)
-
-        numbergen.TimeAware.time_dependent = True
         self.attrs = AttrTree()
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()

@@ -181,8 +181,7 @@ class ExamplesGCAL(ModelGCAL):
     """
 
     def __init__(self, **params):
-        numbergen.TimeAware.time_dependent = False
-        super(ExamplesGCAL, self).__init__(**params)
+        super(ExamplesGCAL, self).__init__(time_dependent=False, **params)
         if set(self.dims) != set([ 'xy', 'or']):
             raise Exception("ExamplesGCAL only reproducible for dims = ['xy', 'or']")
 
