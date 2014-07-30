@@ -1230,7 +1230,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
             raise Exception("Model object %r is not callable" % self.model)
 
         elif self.objects():
-            raise Exception("Cannot load specified model (components already loaded)")
+            self.warning("Specified model ignored - components already loaded")
         else:
             self.model(*args, **kwargs)
 
