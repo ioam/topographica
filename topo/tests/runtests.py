@@ -114,7 +114,7 @@ TRAINSCRIPTS = [
     "models/sullivan_neurocomputing04.ty",
     "models/lissom.ty",
 #    "models/lissom_fsa.ty",  # CEBALERT: disabled for now (needs special case - look_at=fsa not v1, see below)
-    "examples/gcal.ty"
+    "topo/tests/gcal_legacy.ty"
     ]
 
 

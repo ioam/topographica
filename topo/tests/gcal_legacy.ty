@@ -1,0 +1,12 @@
+"""
+Model equivalent to examples/gcal.ty before moving to class-based
+approach. This version of the GCAL model does not use controlled
+random streams (i.e. time_dependent=False).
+
+This script is used to test against gcal_legacy.ty_DATA. This was the
+original training test data for the GCAL model (the first version of
+gcal.ty_DATA).
+"""
+
+from topo.submodels.gcal import ExamplesGCAL
+topo.sim.model = ExamplesGCAL()
