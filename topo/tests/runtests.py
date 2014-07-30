@@ -107,6 +107,7 @@ speedtarget = OrderedDict()
 # CEBALERT: this list should be defined in one place.
 #from setup import TRAINSCRIPTS
 TRAINSCRIPTS = [
+    "examples/gcal.ty",
     "examples/hierarchical.ty",
     "models/lissom_or.ty",
     "models/lissom_oo_or.ty",

@@ -1,9 +1,0 @@
-import topo
-import param
-import numbergen
-
-from topo.submodels.gcal import ModelGCAL, ExamplesGCAL
-
-legacy_example = False
-# By default, parameters set via script parameters
-topo.sim.model = ExamplesGCAL() if legacy_example else ModelGCAL()
