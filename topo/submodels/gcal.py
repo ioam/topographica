@@ -1,7 +1,6 @@
 import topo
 import param
 import imagen
-import numbergen
 
 from topo import projection, responsefn, learningfn, transferfn, sheet
 import topo.learningfn.optimized
