@@ -206,6 +206,10 @@ class runscript(param.ParameterizedFunction):
         Hook to push the updated namespace for handling more
         complicated namespaces, such as IPython Notebook.""")
 
+    load = param.Boolean(default=True, doc="""
+       Whether to automatically load class based models when called.
+       Useful for compatibility with older ty script definition files.""")
+
     def __call__(self, source_file, ns={}, **kwargs):
 
         from topo.misc.commandline import global_params
@@ -216,8 +220,9 @@ class runscript(param.ParameterizedFunction):
         source_path = param.resolve_path(source_file)
         code = compile(open(source_path, 'r').read(), "<execution>", "exec")
         exec code in ns #globals and locals
-
         self.push(ns)
+        if self.load:
+            topo.sim(verbose=kwargs.get('verbose', False))
 
 # This class is left around to support older snapshots: All snapshots
 # since 0.9.7 up until r11545 (addition of UnpickleEnvironmentCreator)
