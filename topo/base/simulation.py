@@ -1012,6 +1012,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         self.time(val=0.0)
         self.views = AttrDict()
         self._event_processors = {}
+
+        self._instantiated_model = False
         self.model = None
 
         if self.register:
@@ -1217,21 +1219,17 @@ class Simulation(param.Parameterized,OptionalSingleton):
     def __call__(self, *args, **kwargs):
         """
         Load the model specified by topo.sim.model by calling the
-        model object (if not None). All arguments are passed into the
-        call to initialize the model.
+        model object. The model will only be called if self.model not
+        None and if the model has not already instantiated.
 
-        Note that if any components are already attached to the
-        simulation, the model will not be loaded.
+        All positional and keyword arguments are passed through to the
+        call used to initialize the model.
         """
-        if self.model is None:
-            raise Exception("No model specified to be loaded.")
-
-        elif  not callable(self.model):
+        if self.model is None:  return
+        elif not callable(self.model):
             raise Exception("Model object %r is not callable" % self.model)
-
-        elif self.objects():
-            self.warning("Specified model ignored - components already loaded")
-        else:
+        elif not self._instantiated_model:
+            self._instantiated_model = True
             self.model(*args, **kwargs)
 
 
@@ -1257,7 +1255,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         conversion (coercion?) into the Simulation's _time_type.
         """
 
-        if not self.objects() and self.model:
+        if not self._instantiated_model and self.model:
             self.model()
         elif not self.objects():
             self.message("No model specified to the Simulation instance.")
