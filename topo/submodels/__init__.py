@@ -631,22 +631,20 @@ class Model(param.Parameterized):
         Please consult the docstring of the Model class for more
         information about each instantiation option.
         """
-
+        msglevel = self.message if verbose else self.debug
         available_instantiate_options = ['sheets','projections']
         if instantiate_options==True:
             instantiate_options=available_instantiate_options
 
         if 'sheets' in instantiate_options:
             for sheet_spec in self.sheets.path_items.itervalues():
-                if verbose:
-                    self.message('Level ' + sheet_spec.level + ': Sheet ' + str(sheet_spec))
+                msglevel('Level ' + sheet_spec.level + ': Sheet ' + str(sheet_spec))
                 sheet_spec()
 
         if 'projections' in instantiate_options:
             for proj in sorted(self.projections):
-                if verbose:
-                    self.message('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
-                                     '->' + str(proj.dest) + ' ' + proj.parameters['name'])
+                msglevel('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
+                             '->' + str(proj.dest) + ' ' + proj.parameters['name'])
                 proj()
 
     def summary(self, printed=True):
