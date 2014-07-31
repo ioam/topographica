@@ -2,6 +2,7 @@
 Contains a variety of sensory models, specifically models for the
 visual pathway.
 """
+import topo
 import param
 import numbergen
 import lancet
@@ -159,6 +160,7 @@ class EarlyVisionModel(VisualInputModel):
 
     def setup_attributes(self, attrs):
         attrs = super(EarlyVisionModel, self).setup_attributes(attrs)
+        sheet.SettlingCFSheet.joint_norm_fn = sheet.optimized.compute_joint_norm_totals_opt
         center_polarities=['On','Off']
 
         # Useful for setting up sheets
@@ -192,10 +194,11 @@ class EarlyVisionModel(VisualInputModel):
                                                    else 'Retina'])
 
 
-    @Model.SettlingCFSheet_Opt
+    @Model.SettlingCFSheet
     def LGN(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
-        return Model.SettlingCFSheet_Opt.params(
+        return Model.SettlingCFSheet.params(
+            mask = topo.base.projection.SheetMask(),
             measure_maps=False,
             output_fns=[transferfn.misc.HalfRectify()],
             nominal_density=self.lgn_density,

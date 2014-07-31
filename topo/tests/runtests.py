@@ -141,7 +141,7 @@ for script in TRAINSCRIPTS:
 
 # CEBALERT: should use the code above but just with the changes for running without weave.
 target['unopt'] = []
-for script in [script for script in TRAINSCRIPTS if 'gcal' not in script] :
+for script in TRAINSCRIPTS:
     # Magically switching components is not supported by class-based models
     script_path = os.path.join(scripts_dir,script)
     target['unopt'].append(topographica_script + " -c \"import_weave=False\"" +  " -c \"from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)\""%dict(script_path=repr(script_path),dp=p.testdp_unopt))
