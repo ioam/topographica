@@ -369,7 +369,7 @@ class Model(param.Parameterized):
 
     @classmethod
     def register_decorator(cls, object_type):
-        name = object_type.name.lower()
+        name = object_type.name
         decorator = ClassDecorator(name, object_type)
         setattr(cls, name,  decorator)
 

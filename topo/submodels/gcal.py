@@ -75,9 +75,9 @@ class ModelGCAL(ColorEarlyVisionModel):
         return sheets
 
 
-    @Model.settlingcfsheet
+    @Model.SettlingCFSheet
     def V1(self, properties):
-        return Model.settlingcfsheet.params(
+        return Model.SettlingCFSheet.params(
             tsettle=16,
             plastic=True,
             joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt,
@@ -92,7 +92,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         return {'level': 'LGN'}
 
 
-    @Model.cfprojection
+    @Model.CFProjection
     def V1_afferent_projections(self, src_properties, dest_properties):
         sf_channel = src_properties['SF'] if 'SF' in src_properties else 1
         # Adjust delays so same measurement protocol can be used with and without gain control.
@@ -108,7 +108,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         gaussian_size = 2.0 * self.v1aff_radius *self.sf_spacing**(sf_channel-1)
         weights_generator = imagen.random.GaussianCloud(gaussian_size=gaussian_size)
 
-        return [Model.cfprojection.params(
+        return [Model.CFProjection.params(
                 delay=LGN_V1_delay+lag,
                 dest_port=('Activity','JointNormalize','Afferent'),
                 name= name if lag==0 else name+('Lag'+str(lag)),
@@ -125,9 +125,9 @@ class ModelGCAL(ColorEarlyVisionModel):
         return {'level': 'V1'}
 
 
-    @Model.cfprojection
+    @Model.CFProjection
     def lateral_excitatory_projections(self, src_properties, dest_properties):
-        return Model.cfprojection.params(
+        return Model.CFProjection.params(
             delay=0.05,
             name='LateralExcitatory',
             weights_generator=imagen.Gaussian(aspect_ratio=1.0, size=0.05),
@@ -141,9 +141,9 @@ class ModelGCAL(ColorEarlyVisionModel):
         return {'level': 'V1'}
 
 
-    @Model.cfprojection
+    @Model.CFProjection
     def lateral_inhibitory_projections(self, src_properties, dest_properties):
-        return Model.cfprojection.params(
+        return Model.CFProjection.params(
             delay=0.05,
             name='LateralInhibitory',
             weights_generator=imagen.random.GaussianCloud(gaussian_size=0.15),
