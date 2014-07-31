@@ -1255,8 +1255,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         conversion (coercion?) into the Simulation's _time_type.
         """
 
-        if not self._instantiated_model and self.model:
-            self.model()
+        if not self._instantiated_model and self.model: self()
         elif not self.objects():
             self.message("No model specified to the Simulation instance.")
             return
