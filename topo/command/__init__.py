@@ -367,8 +367,12 @@ Loading error:
 
     # Temporary -- broadcast topo.sim.time to all subpackages
     param.Dynamic.time_fn = topo.sim.time
-    numbergen.TimeDependent.time_fn = topo.sim.time
+    numbergen.TimeAware.time_fn = topo.sim.time
     imagen.Translator.time_fn = topo.sim.time
+    imagen.Sweeper.time_fn = topo.sim.time
+    imagen.Animation.time_fn = topo.sim.time
+    # Another hack - this attribute should be unpickling correctly!
+    topo.sim._instantiated_model = True
 
 
 
