@@ -349,6 +349,9 @@ class StorageHook(param.ParameterizedFunction):
         Storage location on the sheet specific view object. If None simply
         inserts results into top level views object.""")
 
+    only_latest = param.Boolean(default=True, doc="""
+        Whether to replace any existing results in the global AttrTree.""")
+
     def __call__(self, viewcontainer, **params):
         p = ParamOverrides(self, params)
         objects = dict(topo.sim.objects(), **dict([(proj.name, proj) for proj in topo.sim.connections()]))
@@ -361,7 +364,7 @@ class StorageHook(param.ParameterizedFunction):
                 proj_store = source.dest.views[source.name] = {}
                 proj_store[p.sublabel] = {}
                 storage = proj_store[p.sublabel]
-            if label not in storage:
+            if label not in storage or p.only_latest:
                 storage[label] = container
             else:
                 storage[label].update(container)
