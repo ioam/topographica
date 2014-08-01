@@ -7,6 +7,11 @@ try:    import external
 except: pass
 
 import  sys, topo
+
+if not (sys.version_info[0] == 2 and sys.version_info[1] == 7):
+    print "Topographica requires Python 2.7+ (Python 3 currently not currently supported)."
+    sys.exit()
+
 # Process the command-line arguments
 from topo.misc.commandline import process_argv
 process_argv(sys.argv[1:])
