@@ -1602,7 +1602,7 @@ pg.add_plot('CoG',[('Red','XCoG'),('Green','YCoG')])
 pg = create_plotgroup(name='RF Projection', category='Other',
                       doc='Measure white noise receptive fields.',
                       pre_plot_hooks=[analysis.measure_rfs.instance(
-                          pattern_generator=UniformRandom())],
+                          pattern_generator=UniformRandom(name='UniformNoise'))],
                       normalize='Individually')
 
 pg.add_plot('RFs', [('Strength', 'RFs')])
