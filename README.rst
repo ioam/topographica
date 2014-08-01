@@ -1,3 +1,11 @@
+Full Build: |FullBuild|_
+
+Topographica Docs: |TopoDocs|_
+
+Coverage: |Coverage|_
+
+DICE Tests: |DICE|_
+
 TOPOGRAPHICA
 ============
 
@@ -108,3 +116,17 @@ right commit::
 
 That's it, you've now committed changes to the submodule and told topographica
 to point to the newly updated submodule.
+
+
+.. |FullBuild| image:: http://doozy.inf.ed.ac.uk:8010/png?builder=full_build
+.. _FullBuild: http://doozy.inf.ed.ac.uk:8010/waterfall
+
+.. |TopoDocs| image:: http://doozy.inf.ed.ac.uk:8010/png?builder=topographica_docs
+.. _TopoDocs: http://doozy.inf.ed.ac.uk:8010/waterfall
+
+.. |Coverage| image:: http://doozy.inf.ed.ac.uk:8010/png?builder=coverage
+.. _Coverage: http://doozy.inf.ed.ac.uk:8010/waterfall
+
+.. |DICE| image:: http://doozy.inf.ed.ac.uk:8010/png?builder=DICE_alltests
+.. _DICE: http://doozy.inf.ed.ac.uk:8010/waterfall
+
