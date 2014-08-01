@@ -28,16 +28,12 @@ from simulation import EventProcessor
 
 from functionfamily import TransferFn
 
+from dataviews import AttrDict
+from dataviews.collector import AttrTree
 from dataviews.sheetviews import BoundingBox, BoundingRegionParameter,\
     SheetCoordinateSystem, SheetView
 
 activity_type = float64
-
-class AttrDict(dict):
-    """Provides convenient attribute access."""
-    def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
 
 
 # (disable W0223 because input_event is deliberately still not implemented)
@@ -123,7 +119,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Initialize this object as an EventProcessor, then also as
         a SheetCoordinateSystem with equal xdensity and ydensity.
 
-        views is an AttrDict, which stores associated measurements,
+        views is an AttrTree, which stores associated measurements,
         i.e. representations of the sheet for use by analysis or plotting
         code.
         """
@@ -146,9 +142,9 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         self.__saved_activity = []
         self._plasticity_setting_stack = []
 
-        self.views = AttrDict()
-        self.views['maps'] = AttrDict()
-        self.views['curves'] = AttrDict()
+        self.views = AttrTree()
+        self.views['maps'] = AttrTree()
+        self.views['curves'] = AttrTree()
 
 
     ### JABALERT: This should be deleted now that sheet_views is public

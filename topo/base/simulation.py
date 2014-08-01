@@ -56,7 +56,7 @@ from copy import copy, deepcopy
 import time
 import bisect
 
-from topo.misc.attrdict import AttrDict
+from dataviews.collector import AttrTree
 
 #: Default path to the current simulation, from main
 #: Only to be used by script_repr(), to allow it to generate
@@ -1010,7 +1010,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         param.Parameterized.__init__(self, **params)
 
         self.time(val=0.0)
-        self.views = AttrDict()
+        self.views = AttrTree()
         self._event_processors = {}
 
         self._instantiated_model = False

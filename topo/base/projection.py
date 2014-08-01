@@ -5,13 +5,13 @@ Projection and related classes.
 import numpy
 from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 
+from collections import OrderedDict
+
 import param
 from param.parameterized import overridable_property
 
-from dataviews import SheetView
-from collections import OrderedDict
-
-from topo.misc.attrdict import AttrDict
+from dataviews import SheetView, AttrDict
+from dataviews.collector import AttrTree
 
 from sheet import Sheet
 from simulation import EPConnection
@@ -407,7 +407,7 @@ class ProjectionSheet(Sheet):
         self.new_input = False
         self.mask.sheet = self
         self.old_a = self.activity.copy()*0.0
-        self.views['rfs'] = AttrDict()
+        self.views['rfs'] = AttrTree()
 
 
     def _dest_connect(self, conn):
