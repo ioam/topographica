@@ -1,10 +1,11 @@
-Full Build: |FullBuild|_
+=============  =============  ===========  ========
+            Buildbot Status
+---------------------------------------------------
+  Full Build       Docs        Coverage     DICE
+=============  =============  ===========  ========
+|FullBuild|_    |TopoDocs|_   |Coverage|_  |DICE|_
+=============  =============  ===========  ========
 
-Topographica Docs: |TopoDocs|_
-
-Coverage: |Coverage|_
-
-DICE Tests: |DICE|_
 
 TOPOGRAPHICA
 ============
