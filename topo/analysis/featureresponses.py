@@ -15,6 +15,7 @@ import param
 from param.parameterized import ParamOverrides
 
 from dataviews import SheetView, SheetStack
+from dataviews.ipython.widgets import ProgressBar
 from dataviews.ndmapping import AttrDict
 
 import topo
@@ -266,12 +267,20 @@ class pattern_response(pattern_present):
         if current == 0:
             self.timer = copy.copy(topo.sim.timer)
             self.timer.stop = False
+            self._progress = current
             if hasattr(topo, 'guimain'):
                 topo.guimain.open_progress_window(self.timer)
                 self.install_sheetview = True
+                self.progressbar = None
+            else:
+                self.progressbar = ProgressBar(label='Measurement Progress')
         if self.timer.stop:
             raise MeasurementInterrupt(current, total)
         self.timer.update_timer('Measurement Timer', current, total)
+        progress = float(current)/total*100
+        if self.progressbar and progress > self._progress + 1:
+            self._progress = progress
+            self.progressbar(progress)
 
         responses = super(pattern_response, self).__call__(inputs=inputs,
                                                            outputs=outputs,
