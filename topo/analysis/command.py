@@ -69,7 +69,7 @@ def update_rgb_activities():
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
                 new_view = SheetView(activity_copy, bounds=sheet.bounds)
                 new_view.metadata=metadata
-                sheet.views.maps['%sActivity'%c]=new_view
+                sheet.views.Maps['%sActivity'%c]=new_view
 
 
 
@@ -117,7 +117,7 @@ class update_projectionactivity(ProjectionSheetMeasurementCommand):
                     else:
                         v = conn.projection_view(topo.sim.time())
                         key = v.metadata.proj_name + 'ProjectionActivity'
-                        topo.sim[v.metadata.src_name].views.maps[key] = v
+                        topo.sim[v.metadata.src_name].views.Maps[key] = v
 
 
 

@@ -22,8 +22,9 @@ from copy import copy
 import numpy as np
 
 import param
-from dataviews.ndmapping import AttrDict, Dimension
-from dataviews import CoordinateGrid
+from dataviews import CoordinateGrid, Dimension
+from dataviews.collector import AttrTree
+from dataviews.ndmapping import AttrDict
 from dataviews.sheetviews import BoundingBox, BoundingRegionParameter, Slice
 
 import patterngenerator
@@ -639,8 +640,8 @@ class CFProjection(Projection):
         self.input_buffer = None
         self.activity = np.array(self.dest.activity)
         if 'cfs' not in self.dest.views:
-            self.dest.views.cfs = AttrDict()
-        self.dest.views.cfs[self.name] = self._cf_grid()
+            self.dest.views.CFs = AttrTree()
+        self.dest.views.CFs[self.name] = self._cf_grid()
 
 
     def _cf_grid(self, shape=None, **kwargs):
@@ -1017,7 +1018,7 @@ class CFSheet(ProjectionSheet):
                 self.debug("Skipping non-CFProjection "+p.name)
             elif proj_name == '' or p.name==proj_name:
                 v = p.view(x, y, self.simulation.time())
-                cfs = self.views.cfs
+                cfs = self.views.CFs
                 if p.name not in cfs:
                     cfs[p.name] = p._cf_grid()
                 cfs[p.name][x, y] = v

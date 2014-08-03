@@ -647,9 +647,9 @@ class TemplatePlotGroup(SheetPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        view_dict = {'Strength': kw['sheet'].views.maps,
-                     'Hue': kw['sheet'].views.maps,
-                     'Confidence': kw['sheet'].views.maps}
+        view_dict = {'Strength': kw['sheet'].views.Maps,
+                     'Hue': kw['sheet'].views.Maps,
+                     'Confidence': kw['sheet'].views.Maps}
         return make_template_plot(plot_template,
                                   view_dict,
                                   kw['sheet'].xdensity,
@@ -796,9 +796,9 @@ class ProjectionSheetPlotGroup(TemplatePlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):#sheet,proj
-        view_dict = {'Strength': kw['sheet'].views.maps,
-                     'Hue': kw['sheet'].views.maps,
-                     'Confidence': kw['sheet'].views.maps}
+        view_dict = {'Strength': kw['sheet'].views.Maps,
+                     'Hue': kw['sheet'].views.Maps,
+                     'Confidence': kw['sheet'].views.Maps}
         return make_template_plot(self._channels(plot_template,**kw),
                                   view_dict,
                                   kw['proj'].src.xdensity,
@@ -887,9 +887,9 @@ class ProjectionActivityPlotGroup(ProjectionSheetPlotGroup):
     ########## overridden
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        view_dict = {'Strength': kw['proj'].dest.views.maps,
-                     'Hue': kw['proj'].dest.views.maps,
-                     'Confidence': kw['proj'].dest.views.maps}
+        view_dict = {'Strength': kw['proj'].dest.views.Maps,
+                     'Hue': kw['proj'].dest.views.Maps,
+                     'Confidence': kw['proj'].dest.views.Maps}
         return make_template_plot(self._channels(plot_template,**kw),
                                   view_dict,
                                   kw['proj'].dest.xdensity,
@@ -949,9 +949,9 @@ class GridPlotGroup(ProjectionSheetPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        view_dict = {'Strength': self.sheet.views.maps,
-                     'Hue': self.sheet.views.maps,
-                     'Confidence': self.sheet.views.maps}
+        view_dict = {'Strength': self.sheet.views.Maps,
+                     'Hue': self.sheet.views.Maps,
+                     'Confidence': self.sheet.views.Maps}
         return make_template_plot(self._channels(plot_template,**kw),
                                   view_dict,
                                   self.input_sheet.xdensity,
@@ -1033,7 +1033,7 @@ class RFProjectionPlotGroup(GridPlotGroup):
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
         input=self.input_sheet.name
-        rf_view = self.sheet.views.rfs.get(input, {})
+        rf_view = self.sheet.views.RFs.get(input, {})
         view_dict = {'Hue': rf_view, 'Strength': rf_view, 'Confidence': rf_view}
         return make_template_plot(self._channels(plot_template, **kw),
                                   view_dict,
@@ -1059,9 +1059,9 @@ class TwoOrientationsPlotGroup( TemplatePlotGroup ):
     # _make_template_plot	- use density argument slot to parse unit_size
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        view_dict = {'Strength': kw['sheet'].views.maps,
-                     'Hue': kw['sheet'].views.maps,
-                     'Confidence': kw['sheet'].views.maps}
+        view_dict = {'Strength': kw['sheet'].views.Maps,
+                     'Hue': kw['sheet'].views.Maps,
+                     'Confidence': kw['sheet'].views.Maps}
         return make_template_plot(plot_template,
                                   view_dict,
                                   self.unit_size,
@@ -1122,7 +1122,7 @@ class ProjectionPlotGroup(GridPlotGroup):
         nodata = []
         for proj in projlist:
             d = self._kw_for_one_proj(proj)[0] # only checking one (x,y)
-            if self._key(**d) not in proj.dest.views.cfs[proj.name]:
+            if self._key(**d) not in proj.dest.views.CFs[proj.name]:
                 nodata.append(proj.name)
         if len(nodata)>0:
             raise ValueError("Joint normalization cannot proceed unless data has been measured for all jointly normalized projections (no data for %s)"%nodata)
@@ -1166,9 +1166,9 @@ class CFProjectionPlotGroup(ProjectionPlotGroup):
     ########## overridden
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        view_dict = {'Strength': kw['proj'].dest.views.cfs[kw['proj'].name],
-                     'Hue': kw['proj'].src.views.maps,
-                     'Confidence': kw['proj'].src.views.maps}
+        view_dict = {'Strength': kw['proj'].dest.views.CFs[kw['proj'].name],
+                     'Hue': kw['proj'].src.views.Maps,
+                     'Confidence': kw['proj'].src.views.Maps}
         return make_template_plot(self._channels(plot_template,**kw),
                                   view_dict,
                                   kw['proj'].src.xdensity,
@@ -1269,11 +1269,11 @@ class ConnectionFieldsPlotGroup(UnitPlotGroup):
 
 
     def _make_template_plot(self,plot_template_name,plot_template,**kw):
-        if kw['proj'].name not in kw['proj'].dest.views.cfs:
-            kw['proj']._make_cf_grid()
-        view_dict = {'Strength': kw['proj'].dest.views.cfs[kw['proj'].name],
-                     'Hue': kw['proj'].src.views.maps,
-                     'Confidence': kw['proj'].src.views.maps}
+        if kw['proj'].name not in kw['proj'].dest.views.CFs:
+            kw['proj']._cf_grid()
+        view_dict = {'Strength': kw['proj'].dest.views.CFs.get(kw['proj'].name, {}),
+                     'Hue': kw['proj'].src.views.Maps,
+                     'Confidence': kw['proj'].src.views.Maps}
         return make_template_plot(self._channels(plot_template,**kw),
                                   view_dict,
                                   kw['proj'].src.xdensity,
@@ -1309,7 +1309,7 @@ class FeatureCurvePlotGroup(UnitPlotGroup):
         use the max timestamp as the plot label
         Displays a warning if not all curves have been measured at the same time.
         """
-        timestamps = [curve_view.timestamp for curve_view in self.sheet.views.curves.itervalues()]
+        timestamps = [curve_view.timestamp for curve_view in self.sheet.views.Curves.itervalues()]
 
         if timestamps != []:
             self.time = max(timestamps)
@@ -1555,7 +1555,7 @@ pg = create_plotgroup(name='Activity', category='Basic',
                       doc='Plot the activity for all Sheets.',
                       auto_refresh=True, pre_plot_hooks=[analysis.update_activity],
                       plot_immediately=True)
-pg.add_plot('Activity', [('Strength', '_activity_buffer')])
+pg.add_plot('Activity', [('Strength', 'ActivityBuffer')])
 
 
 pg = create_plotgroup(name='Connection Fields', category="Basic",

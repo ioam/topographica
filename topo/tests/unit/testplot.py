@@ -80,7 +80,7 @@ class TestPlot(unittest.TestCase):
         self.sheet_view1.metadata = AttrDict(src_name='TestInputParam',
                                             precedence=0.1, row_precedence=0.1,
                                             cyclic_range=None, timestamp=time)
-        self.key1 = 'sv1'
+        self.key1 = 'SV1'
         views[self.key1] = self.sheet_view1
 
         ### SheetView2:
@@ -93,7 +93,7 @@ class TestPlot(unittest.TestCase):
         self.sheet_view2.metadata = AttrDict(src_name='TestInputParam',
                                              precedence=0.2, row_precedence=0.2,
                                              cyclic_range=None, timestamp=time)
-        self.key2 = ('sv2',0,10)
+        self.key2 = 'SV2'
         views[self.key2] = self.sheet_view2
 
         ### SheetView3:
@@ -106,7 +106,7 @@ class TestPlot(unittest.TestCase):
         self.sheet_view3.metadata = AttrDict(src_name='TestInputParam',
                                              precedence=0.3, row_precedence=0.3,
                                              cyclic_range=None, timestamp=time)
-        self.key3 = ('sv3',0,'hello',(10,0))
+        self.key3 = 'SV3'
         views[self.key3] = self.sheet_view3
 
         ### SheetView4: for testing clipping + different bounding box
@@ -119,7 +119,7 @@ class TestPlot(unittest.TestCase):
         self.sheet_view4.metadata = AttrDict(src_name='TestInputParam',
                                              precedence=0.4, row_precedence=0.4,
                                              cyclic_range=None, timestamp=time)
-        self.key4 = 'sv4'
+        self.key4 = 'SV4'
         views[self.key4] = self.sheet_view4
 
         self.view_dict = {'Strength': views, 'Hue': views, 'Confidence': views}
@@ -172,13 +172,13 @@ class TestPlot(unittest.TestCase):
         ### also makes a sheet to test realease_sheetviews
 
         self.sheet = Sheet()
-        self.sheet.views.maps[self.key1]=self.sheet_view1
-        self.sheet.views.maps[self.key2]=self.sheet_view2
-        self.sheet.views.maps[self.key3]=self.sheet_view3
-        self.sheet.views.maps[self.key4]=self.sheet_view4
+        self.sheet.views.Maps[self.key1]=self.sheet_view1
+        self.sheet.views.Maps[self.key2]=self.sheet_view2
+        self.sheet.views.Maps[self.key3]=self.sheet_view3
+        self.sheet.views.Maps[self.key4]=self.sheet_view4
 
         plot_channels9 = {'Strength':self.key1,'Hue':self.key2,'Confidence':self.key3}
-        self.plot9 = make_template_plot(plot_channels9,self.sheet.views.maps,density=10.0,name='plot9')
+        self.plot9 = make_template_plot(plot_channels9,self.sheet.views.Maps,density=10.0,name='plot9')
 
 
 

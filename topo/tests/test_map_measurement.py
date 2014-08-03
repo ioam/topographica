@@ -23,10 +23,12 @@ import pickle
 import numpy
 
 from param import resolve_path
+
+from dataviews.collector import AttrTree
+
 from topo.command.analysis import *
 from topo.command.pylabplot import *
 from topo.plotting.plotgroup import plotgroups
-from topo.misc.attrdict import AttrDict
 from topo.misc.util import unit_value
 
 from nose.tools import nottest
@@ -73,10 +75,10 @@ plotgroups_to_test = [
 
 
 def _reset_views(sheet):
-    if hasattr(sheet.views,'maps'):
-        sheet.views.maps = AttrDict()
-    if hasattr(sheet.views,'curves'):
-        sheet.views.curves = AttrDict()
+    if hasattr(sheet.views,'Maps'):
+        sheet.views.Maps = AttrTree()
+    if hasattr(sheet.views,'Curves'):
+        sheet.views.Curves = AttrTree()
 
 
 def generate(plotgroup_names):
@@ -97,9 +99,9 @@ def generate(plotgroup_names):
         sheets_views = views[sheet.name] = {}
 
         if hasattr(sheet.views,'maps'):
-            sheets_views['sheet_views'] = sheet.views.maps
+            sheets_views['sheet_views'] = sheet.views.Maps
         if hasattr(sheet.views,'curves'):
-            sheets_views['curves'] = sheet.views.curves
+            sheets_views['curves'] = sheet.views.Curves
 
         filename = normalize_path('tests/%s_t%s_%s.data'%(sim_name,topo.sim.timestr(),
                                                           name.replace(' ','_')))
@@ -175,7 +177,7 @@ def test(plotgroup_names):
             previous_sheet_views = previous_views[sheet.name]['sheet_views']
             for view_name in previous_sheet_views:
                 failing_tests += checkclose(sheet.name + " " + view_name,topo_version,
-                                            sheet.views.maps[view_name].last.data,
+                                            sheet.views.Maps[view_name].last.data,
                                             previous_sheet_views[view_name].view()[0])
 
         if 'curve_dict' in previous_views[sheet.name]:
@@ -186,7 +188,7 @@ def test(plotgroup_names):
                 for other_param in previous_curve_dicts[curve_name]:
                     other_param_val = unit_value(other_param)[-1]
                     for val in previous_curve_dicts[curve_name][other_param]:
-                        new_curves = sheet.views.curves[curve_name.capitalize()+"Tuning"]
+                        new_curves = sheet.views.Curves[curve_name.capitalize()+"Tuning"]
                         new = new_curves[time, duration, other_param_val-0.01:other_param_val+0.01, val].values()[0].data
                         old = previous_curve_dicts[curve_name][other_param][val].view()[0]
                         failing_tests += checkclose("%s %s %s %s" %(sheet.name,curve_name,other_param,val),

@@ -726,11 +726,11 @@ class ExtraSheetTests(unittest.TestCase):
         # Call s.sheet_view(..) with a parameter
         sv2 = SheetView(s.activity,bounds=s.bounds)
         sv2.metadata = dict(src_name=s.name)
-        self.assertEqual(len(s.views.maps.keys()),0)
-        s.views.maps['Activity']=sv2
-        self.assertEqual(len(s.views.maps.keys()),1)
+        self.assertEqual(len(s.views.Maps.keys()),0)
+        s.views.Maps['Activity']=sv2
+        self.assertEqual(len(s.views.Maps.keys()),1)
         s.release_sheet_view('Activity')
-        self.assertEqual(len(s.views.maps.keys()),0)
+        self.assertEqual(len(s.views.Maps.keys()),0)
 
 if __name__ == "__main__":
 	import nose

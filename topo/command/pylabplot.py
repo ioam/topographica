@@ -347,7 +347,7 @@ class fftplot(matrixplot):
     """
     Compute and show the 2D Fast Fourier Transform (FFT) of the supplied data.
 
-    Example:: fftplot(topo.sim["V1"].views.maps["OrientationPreference"].data,filename="out")
+    Example:: fftplot(topo.sim["V1"].views.Maps["OrientationPreference"].data,filename="out")
     """
 
     def __call__(self, data, **params):
@@ -361,7 +361,7 @@ class autocorrelationplot(matrixplot):
     Compute and show the 2D autocorrelation of the supplied data.
     Requires the external SciPy package.
 
-    Example:: autocorrelationplot(topo.sim["V1"].views.maps["OrientationPreference"].data,filename="out")
+    Example:: autocorrelationplot(topo.sim["V1"].views.Maps["OrientationPreference"].data,filename="out")
     """
 
     plot_type = param.Callable(default=plt.autumn)
@@ -467,10 +467,10 @@ class topographic_grid(xy_grid):
         p = ParamOverrides(self, params)
 
         for sheet in topo.sim.objects(Sheet).values():
-            if ((p.xsheet_view_name in sheet.views.maps) and
-                    (p.ysheet_view_name in sheet.views.maps)):
-                x = sheet.views.maps[p.xsheet_view_name].last.data
-                y = sheet.views.maps[p.ysheet_view_name].last.data
+            if ((p.xsheet_view_name in sheet.views.Maps) and
+                    (p.ysheet_view_name in sheet.views.Maps)):
+                x = sheet.views.Maps[p.xsheet_view_name].last.data
+                y = sheet.views.Maps[p.ysheet_view_name].last.data
 
                 filename_suffix = "_" + sheet.name
                 title = 'Topographic mapping to ' + sheet.name + ' at time ' \
@@ -515,7 +515,7 @@ class overlaid_plot(PylabPlotCommand):
        p=ParamOverrides(self,params)
        name=p.plot_template.keys().pop(0)
        plot=make_template_plot(p.plot_template,
-                               p.sheet.views.maps, p.sheet.xdensity,p.sheet.bounds,
+                               p.sheet.views.Maps, p.sheet.xdensity,p.sheet.bounds,
                                p.normalize,name=p.plot_template[name])
        fig = plt.figure(figsize=(5,5))
        if plot:
@@ -527,12 +527,12 @@ class overlaid_plot(PylabPlotCommand):
            plt.axis('off')
 
            for (t,pref,sel,c) in p.overlay:
-               v = plt.flipud(p.sheet.views.maps[pref].view()[0])
+               v = plt.flipud(p.sheet.views.Maps[pref].view()[0])
                if (t=='contours'):
                    plt.contour(v,[sel,sel],colors=c,linewidths=2)
 
                if (t=='arrows'):
-                   s = plt.flipud(p.sheet.views.maps[sel].view()[0])
+                   s = plt.flipud(p.sheet.views.Maps[sel].view()[0])
                    scale = int(np.ceil(np.log10(len(v))))
                    X = np.array([x for x in xrange(len(v)/scale)])
                    v_sc = np.zeros((len(v)/scale,len(v)/scale))
@@ -616,7 +616,7 @@ class tuning_curve(PylabPlotCommand):
         p = ParamOverrides(self, params, allow_extra_keywords=True)
 
         x_axis = p.x_axis.capitalize()
-        stack = p.sheet.views.curves[x_axis.capitalize()+"Tuning"]
+        stack = p.sheet.views.Curves[x_axis.capitalize()+"Tuning"]
         time = stack.dim_range('Time')[1]
 
         curves = []

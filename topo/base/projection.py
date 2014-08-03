@@ -407,7 +407,7 @@ class ProjectionSheet(Sheet):
         self.new_input = False
         self.mask.sheet = self
         self.old_a = self.activity.copy()*0.0
-        self.views['rfs'] = AttrTree()
+        self.views['RFs'] = AttrTree()
 
 
     def _dest_connect(self, conn):

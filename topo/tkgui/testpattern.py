@@ -44,7 +44,7 @@ class TestPatternPlotGroup(SheetPlotGroup):
         dynamic_plots = []
         for kw in [dict(sheet=sheet) for sheet in self.sheets()]:
             sheet = kw['sheet']
-            views = topo.sim.views[sheet.name].maps
+            views = topo.sim.views[sheet.name].Maps
 
             sv = SheetView(sheet.input_generator(), bounds=sheet.bounds)
             sv.metadata=AttrDict(timestamp=topo.sim.time())
@@ -59,7 +59,7 @@ class TestPatternPlotGroup(SheetPlotGroup):
                 views['Activity'][topo.sim.time()] = sv
             channels = {'Strength': 'Activity','Hue':None,'Confidence':None}
 
-            view = topo.sim.views[sheet.name].maps
+            view = topo.sim.views[sheet.name].Maps
             view_dict = {'Strength':view,'Hue':view,'Confidence':view}
             ### JCALERT! it is not good to have to pass '' here... maybe a test in plot would be better
             dynamic_plots.append(make_template_plot(channels, view_dict,

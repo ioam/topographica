@@ -143,8 +143,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         self._plasticity_setting_stack = []
 
         self.views = AttrTree()
-        self.views['maps'] = AttrTree()
-        self.views['curves'] = AttrTree()
+        self.views.Maps = AttrTree()
+        self.views.Curves = AttrTree()
 
 
     ### JABALERT: This should be deleted now that sheet_views is public
@@ -157,8 +157,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Delete the dictionary entry with key entry 'view_name' to save
         memory.
         """
-        if view_name in self.views.maps:
-            del self.views.maps[view_name]
+        if view_name in self.views.Maps:
+            del self.views.Maps[view_name]
 
 
     # CB: what to call this? sheetcoords()? sheetcoords_of_grid()? idxsheetcoords()?

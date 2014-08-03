@@ -170,9 +170,9 @@ def empty_storage_hook(arg):
 
 FeatureResponses.metadata_fns = [topo_metadata_fn]
 FeatureResponses.pattern_response_fn = pattern_response.instance()
-FeatureMaps.measurement_storage_hook = StorageHook.instance(sublabel='maps')
-FeatureCurves.measurement_storage_hook = StorageHook.instance(sublabel='curves')
-ReverseCorrelation.measurement_storage_hook = StorageHook.instance(sublabel='rfs')
+FeatureMaps.measurement_storage_hook = StorageHook.instance(sublabel='Maps')
+FeatureCurves.measurement_storage_hook = StorageHook.instance(sublabel='Curves')
+ReverseCorrelation.measurement_storage_hook = StorageHook.instance(sublabel='RFs')
 measure_response.measurement_storage_hook = StorageHook.instance(sublabel=None)
 measure_cog.measurement_storage_hook = StorageHook.instance(sublabel='CoG')
 

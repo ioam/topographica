@@ -255,7 +255,7 @@ class TemplatePlot(Plot):
         """ Set the Plot plot_src_name. Called when Plot is created"""
         for key in self.channels:
             sheet_view_key = self.channels.get(key,None)
-            sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
+            sv = self.view_dict.get(key,{}).get(sheet_view_key)
             if sv != None:
                  self.plot_src_name = sv.metadata.src_name
                  self.precedence = sv.metadata.precedence

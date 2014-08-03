@@ -43,9 +43,9 @@ def update_sheet_activity(sheet_name, force=False):
     If force is False and the existing Activity SheetView isn't stale,
     the existing view is returned.
     """
-    name = '_activity_buffer'
+    name = 'ActivityBuffer'
     sheet = topo.sim.objects(Sheet)[sheet_name]
-    view = sheet.views.maps.get(name, False)
+    view = sheet.views.Maps.get(name, False)
     time = topo.sim.time()
     metadata = AttrDict(precedence=sheet.precedence,
                         row_precedence=sheet.row_precedence,
@@ -56,7 +56,7 @@ def update_sheet_activity(sheet_name, force=False):
         sv.metadata=metadata
         view = SheetStack((time, sv), dimensions=[Time])
         view.metadata = metadata
-        sheet.views.maps[name] = view
+        sheet.views.Maps[name] = view
     else:
         if force or view.dim_range('Time')[1] < time:
             sv = SheetView(np.array(sheet.activity), sheet.bounds)
@@ -111,7 +111,7 @@ class pattern_present(PatternPresentingCommand):
     In order to to see the sequence of values presented, you may use
     the back arrow history mechanism in the GUI. Note that the GUI's Activity
     window must be open. Alternatively or access the activities through the
-    Activity entry in the views.maps dictionary on the specified sheets.
+    Activity entry in the views.Maps dictionary on the specified sheets.
     """
 
     apply_output_fns = param.Boolean(default=True, doc="""
@@ -376,7 +376,7 @@ def get_feature_preference(feature, sheet_name, coords, default=0.0):
         sheet = topo.sim[sheet_name]
         map_name = feature.capitalize() + "Preference"
         x, y = coords
-        return sheet.views.maps[map_name].last[x, y]
+        return sheet.views.Maps[map_name].last[x, y]
     except:
         topo.sim.warning(
             ("%s should be measured before plotting this tuning curve -- "
