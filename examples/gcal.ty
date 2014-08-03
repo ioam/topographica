@@ -10,5 +10,5 @@ Simple but robust single-population V1 model orientation map from:
    http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013
 """
 import topo
-from topo.submodels.gcal import ModelGCAL
+from topo.submodel.gcal import ModelGCAL
 topo.sim.model = ModelGCAL()
