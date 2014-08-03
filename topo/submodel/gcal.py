@@ -9,8 +9,8 @@ import topo.responsefn.optimized
 import topo.sheet.optimized
 import topo.transferfn.misc
 
-from topo.submodels import Model, order_projections
-from topo.submodels.earlyvision import ColorEarlyVisionModel
+from topo.submodel import Model, order_projections
+from topo.submodel.earlyvision import ColorEarlyVisionModel
 
 
 

@@ -13,7 +13,7 @@ import imagen
 from imagen.patterncoordinator import PatternCoordinator
 
 from topo.base.arrayutil import DivideWithConstant
-from topo.submodels import Model
+from topo.submodel import Model
 from topo import sheet, transferfn
 
 from collections import OrderedDict
