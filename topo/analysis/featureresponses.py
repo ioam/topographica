@@ -277,7 +277,7 @@ class pattern_response(pattern_present):
         if self.timer.stop:
             raise MeasurementInterrupt(current, total)
         self.timer.update_timer('Measurement Timer', current, total)
-        progress = float(current+1)/total*100
+        progress = float(current+1)/total*100 if total else 100
         if self.progressbar and progress > self._progress + 1:
             self._progress = progress
             self.progressbar(progress)
