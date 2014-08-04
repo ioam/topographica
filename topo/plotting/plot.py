@@ -214,6 +214,14 @@ class TemplatePlot(Plot):
         # def annotated_bitmap(self):
         # enable other construction....
 
+    def _get_sv(self, key):
+        sheet_view_key = self.channels.get(key, None)
+        sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
+        if isinstance(sv, NdMapping):
+            sv = sv.last
+
+        return sv
+
 
     def _get_matrix(self,key):
         """
@@ -226,10 +234,7 @@ class TemplatePlot(Plot):
         will be used as Hue, the matrix is normalized in range 0..1
         """
 
-        sheet_view_key = self.channels.get(key, None)
-        sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
-        if isinstance(sv, NdMapping):
-            sv = sv.last
+        sv = self._get_sv(key)
 
         if sv == None:
             matrix = None

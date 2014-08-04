@@ -234,12 +234,12 @@ class TemplatePlotGroupPanel(SheetPanel):
         Also print whatever other channels are there and have views.
         """
         plot = event_info['plot']
-        r,c = event_info['coords'][0]
+        r,c = event_info['coords'][1]
 
         info_string = basic_text
 
         for channel,channel_name in available_plot_channels(plot).items():
-            info_string+=" %s: % 1.3f"%(channel_name,plot._get_matrix(channel)[r,c])
+            info_string+=" %s: % 1.3f"%(channel_name,plot._get_sv(channel)[r,c])
 
         return info_string
 
