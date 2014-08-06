@@ -670,9 +670,13 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
    """
 
    metadata = param.List(default=[], doc="""
-       Keys to include as metadata in the output file along with
-       'time' (Topographica simulation time).""")
+       Spec keys or collector paths to include as metadata in the
+       output file along with 'time' (simulation time).
 
+       AttrTree paths are specified by dotted paths
+       e.g. 'PinwheelAnalysis.V1' would add the pinwheel analysis on
+       V1 to the metadata.
+       """)
 
    @classmethod
    def pickle_path(cls, root_directory, batch_name):
@@ -720,9 +724,6 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       self.collector.interval_hook = topo.sim.run
 
       topo_time = topo.sim.time()
-      metadata_items = [(key, self._info.specs[key]) for key in self.metadata]
-      metadata = dict(metadata_items + [('time',topo_time)])
-
       filename = '%s%s_%s' % (self._info.batch_name,
                               ('[%s]' % self._info.batch_tag
                                if self._info.batch_tag else ''),
@@ -731,10 +732,19 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       viewtree = AttrTree()
       viewtree = self.collector(viewtree, times=[topo_time])
 
+      spec_metadata = [(key, self._info.specs[key])
+                       for key in self.metadata if '.' not in key]
+
+
+      path_metadata = [(key, viewtree.path_items.get(tuple(key.split('.')), float('nan'))
+                        for key in self.metadata if '.' in key]
+
       ViewFile(directory= param.normalize_path.prefix,
                hash_suffix = False).save(filename,
                                          viewtree,
-                                         metadata=metadata)
+                                         metadata=dict(spec_metadata
+                                                     + path_metadata
+                                                     + [('time',topo_time)]))
 
    def verify(self, specs, model_params):
       # FIXME: Model parameter checking not implemented.
