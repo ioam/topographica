@@ -388,13 +388,13 @@ class Model(param.Parameterized):
     def sheet_types(self):
         "The mapping of level label to sheet type"
         return dict([el for d in self.sheet_decorators
-                     for el in d.types.items()])
+                     for el in d.types.items()], **self._sheet_types)
 
     @property
     def projection_labels(self):
         "The mapping of projection method to corresponding label"
         return dict([el for d in self.projection_decorators
-                     for el in d.labels.items()])
+                     for el in d.labels.items()], **self._projection_types)
 
     @property
     def projection_types(self):
@@ -413,6 +413,10 @@ class Model(param.Parameterized):
         if register:
             self._register_global_params(params)
         super(Model,self).__init__(**params)
+
+        self._sheet_types = {}
+        self._projection_types = {}
+
         self.attrs = AttrTree()
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
@@ -437,6 +441,28 @@ class Model(param.Parameterized):
 
         params.update(global_params.get_param_values())
         params["name"]=self.name
+
+
+    def set_sheet_types(self, **sheet_types):
+        """
+        Overrides sheet types as defined by the method
+        decorators. Each item is must be the level name paired with
+        the appropriate sheet type.
+
+        Used for runtime switching of sheet types as necessary.
+        """
+        self._sheet_types = sheet_types
+
+
+    def set_projection_types(self, **projection_types):
+        """
+        Override the projection types defined by the method
+        decorators. Each item must be the level name paired with the
+        appropriate projection type.
+
+        Used for runtime switching of projection types as necessary.
+        """
+        self._projection_types = projection_types
 
 
     #==============================================#
