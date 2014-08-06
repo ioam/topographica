@@ -736,8 +736,8 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
                        for key in self.metadata if '.' not in key]
 
 
-      path_metadata = [(key, viewtree.path_items.get(tuple(key.split('.')), float('nan'))
-                        for key in self.metadata if '.' in key]
+      path_metadata = [(key, viewtree.path_items.get(tuple(key.split('.')), float('nan')))
+                       for key in self.metadata if '.' in key]
 
       ViewFile(directory= param.normalize_path.prefix,
                hash_suffix = False).save(filename,
