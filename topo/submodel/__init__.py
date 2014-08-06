@@ -483,11 +483,15 @@ class Model(param.Parameterized):
         return attrs
 
 
-    def setup_training_patterns(self):
+    def setup_training_patterns(self, **overrides):
         """
         Returns a dictionary of PatternGenerators to be added to
         self.training_patterns, with the target sheet name keys and
         pattern generator values.
+
+        The overrides keywords can be used by a subclass to
+        parameterize the training patterns e.g. override the default
+        parameters of a PatternCoordinator object.
         """
         raise NotImplementedError
 

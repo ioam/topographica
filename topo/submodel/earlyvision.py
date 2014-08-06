@@ -95,7 +95,7 @@ class VisualInputModel(SensoryModel):
         return attrs
 
 
-    def setup_training_patterns(self):
+    def setup_training_patterns(self, **overrides):
         # all the below will eventually end up in PatternCoordinator!
         disparity_bound = 0.0
         position_bound_x = self.area/2.0+0.25
@@ -109,21 +109,22 @@ class VisualInputModel(SensoryModel):
         pattern_labels=[s + 'Retina' for s in self.attrs.Eyes]
         # all the above will eventually end up in PatternCoordinator!
 
-        return PatternCoordinator(
-            features_to_vary=self.dims,
-            pattern_labels=pattern_labels,
-            pattern_parameters={'size': 0.088388 if 'or' in self.dims else 3*0.088388,
-                                'aspect_ratio': 4.66667 if 'or' in self.dims else 1.0,
-                                'scale': self.contrast/100.0},
-            disparity_bound=disparity_bound,
-            position_bound_x=position_bound_x,
-            position_bound_y=position_bound_y,
-            dim_fraction=self.dim_fraction,
-            reset_period=(max(self.attrs.Lags)+1),
-            speed=self.speed,
-            sf_spacing=self.sf_spacing,
-            sf_max_channel=max(self.attrs.SF),
-            patterns_per_label=int(self.num_inputs*self.area*self.area))()
+        params = dict(features_to_vary=self.dims,
+                      pattern_labels=pattern_labels,
+                      pattern_parameters={'size': 0.088388 if 'or' in self.dims else 3*0.088388,
+                                          'aspect_ratio': 4.66667 if 'or' in self.dims else 1.0,
+                                          'scale': self.contrast/100.0},
+                      disparity_bound=disparity_bound,
+                      position_bound_x=position_bound_x,
+                      position_bound_y=position_bound_y,
+                      dim_fraction=self.dim_fraction,
+                      reset_period=(max(self.attrs.Lags)+1),
+                      speed=self.speed,
+                      sf_spacing=self.sf_spacing,
+                      sf_max_channel=max(self.attrs.SF),
+                      patterns_per_label=int(self.num_inputs*self.area*self.area))
+
+        return PatternCoordinator(**dict(params, **overrides))()
 
 
 
