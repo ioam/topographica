@@ -8,5 +8,5 @@ original training test data for the GCAL model (the first version of
 gcal.ty_DATA).
 """
 
-from topo.submodels.gcal import ExamplesGCAL
+from topo.submodel.gcal import ExamplesGCAL
 topo.sim.model = ExamplesGCAL()
