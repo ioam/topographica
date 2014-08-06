@@ -721,7 +721,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
 
       topo_time = topo.sim.time()
       metadata_items = [(key, self._info.specs[key]) for key in self.metadata]
-      self._metadata = dict(metadata_items + [('time',topo_time)])
+      metadata = dict(metadata_items + [('time',topo_time)])
 
       filename = '%s%s_%s' % (self._info.batch_name,
                               ('[%s]' % self._info.batch_tag
@@ -734,7 +734,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       ViewFile(directory= param.normalize_path.prefix,
                hash_suffix = False).save(filename,
                                          viewtree,
-                                         metadata=self._metadata)
+                                         metadata=metadata)
 
    def verify(self, specs, model_params):
       # FIXME: Model parameter checking not implemented.
