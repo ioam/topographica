@@ -394,13 +394,13 @@ class Model(param.Parameterized):
     def projection_labels(self):
         "The mapping of projection method to corresponding label"
         return dict([el for d in self.projection_decorators
-                     for el in d.labels.items()], **self._projection_types)
+                     for el in d.labels.items()])
 
     @property
     def projection_types(self):
         "The mapping of projection label to projection type"
         return dict([el for d in self.projection_decorators
-                     for el in d.types.items()])
+                     for el in d.types.items()], **self._projection_types)
 
     @property
     def modified_parameters(self):
