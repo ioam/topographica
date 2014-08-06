@@ -8,7 +8,7 @@ to be executed during a simulation run.
 """
 
 import os, sys, types, pickle, inspect
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 import numpy.version as np_version
 import topo
@@ -18,6 +18,8 @@ from lancet import PrettyPrinted, vcs_metadata
 from lancet import Command
 from lancet import Launcher, review_and_launch
 from lancet import ViewFile, NumpyFile
+from lancet import Log, FileInfo, FileType
+from lancet import List, Args
 
 try:
    from external import sys_paths
@@ -27,11 +29,14 @@ try:
 except:
    submodules = []
 
+
+from dataviews import NdMapping, Stack
+from dataviews.collector import AttrTree, Collector
+
 from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
 Launcher.output_directory = default_output_path()
 
-from topo.analysis import Collector
 
 class topo_metadata(param.Parameterized):
    """
@@ -766,6 +771,230 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
          spec_strs.append('(%s,%s%s%r),' % (key, split, tab, val))
 
       return 'Collector([%s%s%s])' % (split, split.join(spec_strs)[:-1], split)
+
+
+
+class BatchCollator(NdMapping):
+    """
+    BatchCollator provides a convenient interface to load the output
+    of a BatchCollector run, which is spread across a number of
+    files. As input it takes a Lancet FileInfo object, an NdMapping or
+    a Pandas DataFrame, which contains all the filenames indexed by
+    the parameter space values. The regular NdMapping slicing and
+    selecting syntax can be used to narrow down the parameter space
+    and load just the data that is needed.
+
+    By supplying a log, BatchCollector can also find missing data
+    files and return an Args object to relaunch them.
+
+    Internally it uses Pandas operations, making Pandas a core
+    dependency.
+    """
+
+    filekey = param.String(default='filename', doc="""
+        The column key in which file paths are stored.""")
+
+    filetype = param.ClassSelector(FileType, doc="""
+       FileType object required to load data files, can be passed directly
+       or via the FileInfo object.""")
+
+    fileinfo = param.ClassSelector(FileInfo, doc="""
+       FileInfo object contains the filenames and associated metadata of all
+       files to be loaded.""")
+
+    log = param.ClassSelector(Log, doc="""
+        The Log object contains information about the full batch and may be
+        passed optionally to find missing data files.""")
+
+    _deep_indexable = False
+
+    def __init__(self, data, filetype=None, filekey='filename', log=None, **params):
+        if not isinstance(data, FileInfo) and filetype is None:
+            raise Exception('BatchCollator requires a FileType '
+                            'to be specified.')
+
+        if isinstance(data, (OrderedDict, list)):
+            dimensions = params.pop('dimensions')
+        else:
+            if isinstance(data, FileInfo):
+                params['fileinfo'] = data
+                filekey = data.key
+                filetype = data.filetype
+                data = data.dframe
+            elif isinstance(data, NdMapping):
+                data = data.dframe()
+            data, dimensions = self._process_dframe(data, log, filekey)
+
+        super(BatchCollator, self).__init__(data, dimensions=dimensions, log=log,
+                                            filetype=filetype, filekey=filekey,
+                                            **params)
+
+        if self.log and self.fileinfo:
+            if len(self.missing_args()):
+                self.warning("Missing data files. Use .missing_args method "
+                             "to view missing entries.")
+
+
+    def _process_dframe(self, dframe, log, filekey):
+        """
+        Takes a dframe as input, merges it with the log dframe if
+        supplied, and converts it to an OrderedDict.
+        """
+
+        if log:
+            if 'tid' not in dframe:
+                self.warning('Without a tid field, missing runs cannot be determined.')
+            else:
+                dframe = dframe.merge(log.dframe.drop('times', axis=1))
+
+        data = OrderedDict()
+        for filename, df in dframe.groupby(filekey):
+            df = df.drop(filekey, 1)
+            data[tuple(df.values[0])] = filename
+            dimensions = list(df.columns)
+
+        return data, dimensions
+
+
+    @property
+    def dim_ranges(self):
+        """
+        Get the ranges of all dimensions.
+        """
+        return [(d, self.dim_range(d)) for d in self.dimension_labels]
+
+
+    @property
+    def constant_dims(self):
+        """
+        Return all constant dimensions.
+        """
+        return [d for d, drange in self.dim_ranges if drange[0]==drange[1]]
+
+
+    @property
+    def varying_dims(self):
+        """
+        Return all varying dimensions.
+        """
+        return [d for d, drange in self.dim_ranges if drange[0]!=drange[1]]
+
+
+    def only_varying(self):
+        """
+        Return a copy of the BatchCollator containing just the varying
+        dimensions.
+        """
+        return self.reindex([self.varying_dimensions])
+
+
+    def missing_args(self):
+        """
+        Finds any missing data by merging the FileInfo and Log,
+        returning an Args object, which can be used to fill in the
+        missing runs.
+        """
+        if not self.log or not self.fileinfo:
+            raise Exception('Lancet FileInfo and Lancet log required '
+                            'to determine missing args.')
+
+        # Expand 'times' list into 'time'
+        spec = self.log.specs[0]
+        expanded_log = self.log * List('time', spec['times'])
+
+        # Expand fileinfo with constant dims
+        expanded_info = self.fileinfo
+        expanded_info *= Args(**dict((d, self.dim_values(d)[0])
+                                     for d in self.constant_dims
+                                     if d not in expanded_info))
+
+        # Compute set of sorted log and file spec tuples
+        sort_fn = lambda k: self.dimension_labels.index(k[0])
+        log_specs = [tuple(sorted(tuple((k, v) for k, v in spec.items()
+                                        if k != 'times'), key=sort_fn))
+                     for spec in expanded_log.specs]
+        file_specs = [tuple(sorted(tuple((k, v) for k, v in spec.items()
+                                         if k != 'filename'), key=sort_fn))
+                      for spec in expanded_info.specs]
+
+        return Args([dict(spec) for spec in (set(log_specs) - set(file_specs))])
+
+
+    def clone(self, items=None, **kwargs):
+        settings = dict(self.get_param_values(), **kwargs)
+        return self.__class__(items, **settings)
+
+
+    def _filter_attrtree(self, attrtree, path_filters):
+        """
+        Filters the loaded AttrTree using the supplied path_filters.
+        """
+        if not path_filters: return attrtree
+
+        # Convert string path filters
+        path_filters = [tuple(pf.split('.')) if not isinstance(pf, tuple)
+                        else pf for pf in path_filters]
+
+        # Search for substring matches between paths and path filters
+        new_attrtree = AttrTree()
+        for path, item in attrtree.path_items.items():
+            if any([all([subpath in path for subpath in pf]) for pf in path_filters]):
+                new_attrtree.set_path(path, item)
+
+        return new_attrtree
+
+
+    def _add_dimensions(self, item, dims, constant_keys):
+        """
+        Recursively descend through an AttrTree and NdMapping objects
+        in order to add the supplied dimension values to all contained
+        Stack objects.
+        """
+        if isinstance(item, AttrTree):
+            item.fixed = False
+
+        new_item = item.clone({}) if isinstance(item, NdMapping) else item
+        for k in item.keys():
+            v = item[k]
+            if isinstance(v, Stack):
+                for dim, val in dims[::-1]:
+                    if dim.capitalize() not in v.dimension_labels:
+                        v = v.add_dimension(dim, 0, val)
+                if constant_keys: v.constant_keys = constant_keys
+                new_item[k] = v
+            else:
+                new_item[k] = self._add_dimensions(v, dims, constant_keys)
+        if isinstance(new_item, AttrTree):
+            new_item.fixed = True
+
+        return new_item
+
+
+    def load(self, path_filters=[], merge=True):
+        """
+        Load and filter the file contents for the selected parameter
+        space.  If merge is set to True all AttrTrees are merged,
+        otherwise an NdMapping containing all the AttrTrees is
+        returned.
+        """
+        constant_dims = self.constant_dims
+        ndmapping = NdMapping(dimensions=self.dimensions)
+        for key, filename in self.items():
+           file_data = self.filetype.data(filename)
+           attrtree = self._filter_attrtree(file_data[self.filetype.data_key],
+                                            path_filters)
+           if merge:
+              dim_keys = zip(self.dimension_labels, key)
+              varying_keys = [(d, k) for d, k in dim_keys
+                              if d not in constant_dims]
+              constant_keys = [(d, k) for d, k in dim_keys
+                               if d in constant_dims]
+              attrtree = self._add_dimensions(attrtree, varying_keys,
+                                              dict(constant_keys))
+           ndmapping[key] = attrtree
+        if merge:
+           return AttrTree.merge(ndmapping.values())
+        return ndmapping
 
 
 
