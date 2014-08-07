@@ -24,6 +24,19 @@ from topo.misc.commandline import global_params
 
 
 
+def switch(index, *decorators):
+    """
+    A meta-decorator that applies one-of-N possible decorators based
+    on the index. The index may be a boolean value for switching
+    between two options.
+
+    """
+    def wrapped(*args, **kwargs):
+        return decorators[int(index)](*args, **kwargs)
+    return wrapped
+
+
+
 def order_projections(model, connection_order):
     """
     Helper function for reproducing random streams when
