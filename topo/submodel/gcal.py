@@ -87,13 +87,13 @@ class ModelGCAL(ColorEarlyVisionModel):
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0))
 
 
-    @Model.matchconditions('V1')
-    def V1_afferent_projections(self, properties):
+    @Model.matchconditions('V1', 'V1_afferent')
+    def V1_afferent_conditions(self, properties):
         return {'level': 'LGN'}
 
 
     @Model.CFProjection
-    def V1_afferent_projections(self, src_properties, dest_properties):
+    def V1_afferent(self, src_properties, dest_properties):
         sf_channel = src_properties['SF'] if 'SF' in src_properties else 1
         # Adjust delays so same measurement protocol can be used with and without gain control.
         LGN_V1_delay = 0.05 if self.gain_control else 0.10
@@ -120,13 +120,13 @@ class ModelGCAL(ColorEarlyVisionModel):
                 for lag in self.attrs.Lags]
 
 
-    @Model.matchconditions('V1')
-    def lateral_excitatory_projections(self, properties):
+    @Model.matchconditions('V1', 'lateral_excitatory')
+    def lateral_excitatory_conditions(self, properties):
         return {'level': 'V1'}
 
 
     @Model.CFProjection
-    def lateral_excitatory_projections(self, src_properties, dest_properties):
+    def lateral_excitatory(self, src_properties, dest_properties):
         return Model.CFProjection.params(
             delay=0.05,
             name='LateralExcitatory',
@@ -136,13 +136,13 @@ class ModelGCAL(ColorEarlyVisionModel):
             nominal_bounds_template=sheet.BoundingBox(radius=self.latexc_radius))
 
 
-    @Model.matchconditions('V1')
-    def lateral_inhibitory_projections(self, properties):
+    @Model.matchconditions('V1', 'lateral_inhibitory')
+    def lateral_inhibitory_conditions(self, properties):
         return {'level': 'V1'}
 
 
     @Model.CFProjection
-    def lateral_inhibitory_projections(self, src_properties, dest_properties):
+    def lateral_inhibitory(self, src_properties, dest_properties):
         return Model.CFProjection.params(
             delay=0.05,
             name='LateralInhibitory',
@@ -193,9 +193,9 @@ class ExamplesGCAL(ModelGCAL):
             self.sheets.LGNOff.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
             self.sheets.V1.update(nominal_density=48)
         if setup_options is True or 'projections' in setup_options:
-            order_projections(self, ['afferent_projections',
-                                     'lateral_gain_control_projections',
-                                     ('V1_afferent_projections', {'polarity':'On'}),
-                                     ('V1_afferent_projections', {'polarity':'Off'}),
-                                     'lateral_excitatory_projections',
-                                     'lateral_inhibitory_projections'])
+            order_projections(self, ['afferent',
+                                     'lateral_gain_control',
+                                     ('V1_afferent', {'polarity':'On'}),
+                                     ('V1_afferent', {'polarity':'Off'}),
+                                     'lateral_excitatory',
+                                     'lateral_inhibitory'])

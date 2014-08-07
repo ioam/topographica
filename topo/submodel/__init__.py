@@ -333,17 +333,16 @@ class MatchConditions(object):
                      for (k, fn) in self._levels[level].items())
 
 
-    def __call__(self, level):
+    def __call__(self, level, method_name):
         def decorator(f):
-            condition_name = f.__name__
             @wraps(f)
             def inner(self, *args, **kwargs):
                 return f(self, *args, **kwargs)
 
             if level not in self._levels:
-                self._levels[level] = {condition_name:inner}
+                self._levels[level] = {method_name:inner}
             else:
-                self._levels[level][condition_name] = inner
+                self._levels[level][method_name] = inner
             return inner
         return decorator
 
