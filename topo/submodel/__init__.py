@@ -24,10 +24,10 @@ from topo.misc.commandline import global_params
 
 
 
-def switch(index, *decorators):
+def select(index, *decorators):
     """
     A meta-decorator that applies one-of-N possible decorators based
-    on the index. The index may be a boolean value for switching
+    on the index. The index may be a boolean value for selecting
     between two options.
 
     """
