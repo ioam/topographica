@@ -271,6 +271,12 @@ class ClassDecorator(object):
     the decorated callables may be accessed via the labels
     attribute. Object types are accessible via the types attribute.
     """
+
+    # Priority is needed to ensure that a decorator method in a
+    # subclass takes priority over a decorated method (of the same
+    # name) in the superclass
+    priority = 0
+
     def __init__(self, name, object_type):
         self.name = name
         self.labels = {}
@@ -297,8 +303,9 @@ class ClassDecorator(object):
         def inner(*args, **kwargs):
             return f(*args, **kwargs)
 
-        self.types[label] = self.type
-        self.labels[label] = inner
+        self.types[label] = (ClassDecorator.priority, self.type)
+        self.labels[label] = (ClassDecorator.priority, inner)
+        ClassDecorator.priority += 1
         return inner
 
 
