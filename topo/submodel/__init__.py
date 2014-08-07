@@ -471,28 +471,6 @@ class Model(param.Parameterized):
         params["name"]=self.name
 
 
-    def set_sheet_types(self, **sheet_types):
-        """
-        Overrides sheet types as defined by the method
-        decorators. Each item is must be the level name paired with
-        the appropriate sheet type.
-
-        Used for runtime switching of sheet types as necessary.
-        """
-        self._sheet_types = sheet_types
-
-
-    def set_projection_types(self, **projection_types):
-        """
-        Override the projection types defined by the method
-        decorators. Each item must be the level name paired with the
-        appropriate projection type.
-
-        Used for runtime switching of projection types as necessary.
-        """
-        self._projection_types = projection_types
-
-
     #==============================================#
     # Public methods to be implemented by modelers #
     #==============================================#
