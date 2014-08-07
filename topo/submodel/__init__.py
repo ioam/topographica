@@ -398,29 +398,37 @@ class Model(param.Parameterized):
         if issubclass(object_type, topo.projection.Projection):
             cls.projection_decorators.add(decorator)
 
+    @classmethod
+    def _collect(cls, decorators, name):
+        """
+        Given a list of ClassDecorators (e.g self.sheet_decorators or
+        self.projection_decorators), collate the named attribute
+        (i.e. 'types' or 'labels') across the decorators according to
+        priority.
+        """
+        flattened = [el for d in decorators for el in getattr(d, name).items()]
+        return dict((k,v) for (k, (_, v)) in sorted(flattened, key=lambda x: x[1][0]))
+
+
     @property
     def sheet_labels(self):
         "The mapping of level method to corresponding label"
-        return dict([el for d in self.sheet_decorators
-                     for el in d.labels.items()])
+        return self._collect(self.sheet_decorators, 'labels')
 
     @property
     def sheet_types(self):
         "The mapping of level label to sheet type"
-        return dict([el for d in self.sheet_decorators
-                     for el in d.types.items()], **self._sheet_types)
+        return self._collect(self.sheet_decorators, 'types')
 
     @property
     def projection_labels(self):
         "The mapping of projection method to corresponding label"
-        return dict([el for d in self.projection_decorators
-                     for el in d.labels.items()])
+        return self._collect(self.projection_decorators, 'labels')
 
     @property
     def projection_types(self):
         "The mapping of projection label to projection type"
-        return dict([el for d in self.projection_decorators
-                     for el in d.types.items()], **self._projection_types)
+        return self._collect(self.projection_decorators, 'types')
 
     @property
     def modified_parameters(self):
