@@ -36,7 +36,7 @@ feature), please try the following:
 #. Otherwise, please create a new issue at the appropriate project
    site (defaulting to 
    `Topographica <https://github.com/ioam/topographica/issues/new>`_ if
-   you aren't sure where the problem arises. If possible, please
+   you aren't sure where the problem arises). If possible, please
    include:
 
    -  the full error message, if any
