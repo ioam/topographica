@@ -71,6 +71,20 @@ class Specification(param.Parameterized):
         raise NotImplementedError
 
 
+    def __getitem__(self, key):
+        "Convenient property access."
+        return self.properties[key]
+
+    def keys(self):
+        "The list of available property keys."
+        return self.properties.keys()
+
+    def items(self):
+        "The property items."
+        return self.properties.items()
+
+
+
 
 class SheetSpec(Specification):
     """
@@ -158,6 +172,7 @@ class ProjectionSpec(Specification):
         self.projection_type = projection_type
         self.src = src
         self.dest = dest
+        self.properties = {}
 
         # These parameters are directly passed into topo.sim.connect()!
         ignored_keys = ['src', 'dest']
@@ -194,10 +209,12 @@ class ModelSpec(Specification):
     training patterns, sheets and projections.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, properties):
         self.training_patterns = AttrTree()
         self.sheets = AttrTree()
         self.projections = AttrTree()
+
+        self.properties = properties
         super(ModelSpec, self).__init__(model)
         self.model= model
 

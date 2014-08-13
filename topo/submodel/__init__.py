@@ -370,12 +370,13 @@ class Model(param.Parameterized):
                                    'projections',
                                    'analysis']
 
-        model = ModelSpec(self)
         if setup_options==True:
             setup_options = available_setup_options
 
         if 'attributes' in setup_options:
             self.properties = self.setup_properties({})
+
+        model = ModelSpec(self, self.properties)
 
         if 'training_patterns' in setup_options:
             training_patterns = self.setup_training_patterns()
