@@ -58,8 +58,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         smallest and twice the size of the largest.""")
 
 
-    def setup_attributes(self, attrs):
-        attrs = super(ModelGCAL, self).setup_attributes(attrs)
+    def setup_properties(self, properties):
+        properties = super(ModelGCAL, self).setup_properties(properties)
         "Specify weight initialization, response function, and learning function"
 
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
@@ -67,7 +67,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
         projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
         projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
-        return attrs
+        return properties
 
     def setup_sheets(self):
         sheets = super(ModelGCAL,self).setup_sheets()

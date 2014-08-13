@@ -267,9 +267,9 @@ class Model(param.Parameterized):
         self._sheet_types = {}
         self._projection_types = {}
 
-        self.attrs = {}
+        self.properties = {}
         # Training patterns need to be accessed by GeneratorSheets
-        self.attrs['training_patterns'] = AttrTree()
+        self.properties['training_patterns'] = AttrTree()
 
 
     def _register_global_params(self, params):
@@ -294,18 +294,18 @@ class Model(param.Parameterized):
     # Public methods to be implemented by modelers #
     #==============================================#
 
-    def setup_attributes(self, attrs):
+    def setup_properties(self, properties):
         """
-        Method to precompute any useful attributes from the class
+        Method to precompute any useful properties from the class
         parameters. For instance, if there is a ``num_lags``
         parameter, this method could compute the actual projection
-        delays and store it as attrs['lags']. The return value is the
-        updated 'attrs' dictionary.
+        delays and store it as properties['lags']. The return value is
+        the updated 'properties' dictionary.
 
         In addition, this method can be used to configure class
         attributes of the model components.
         """
-        return attrs
+        return properties
 
 
     def setup_training_patterns(self, **overrides):
@@ -375,14 +375,14 @@ class Model(param.Parameterized):
             setup_options = available_setup_options
 
         if 'attributes' in setup_options:
-            self.attrs = self.setup_attributes({})
+            self.properties = self.setup_properties({})
 
         if 'training_patterns' in setup_options:
             training_patterns = self.setup_training_patterns()
             for name, training_pattern in training_patterns.items():
                 model.training_patterns.set_path(name, training_pattern)
 
-            self.attrs['training_patterns'] = training_patterns
+            self.properties['training_patterns'] = training_patterns
         if 'sheets' in setup_options:
             sheet_properties = self.setup_sheets()
 
@@ -487,17 +487,24 @@ class Model(param.Parameterized):
         model(instantiate_options, verbose)
         return model
 
+
     def __getitem__(self, key):
-        return self.attrs[key]
+        "Convenient property access."
+        return self.properties[key]
+
 
     def __setitem__(self, key, val):
-        raise NotImplementedError("Models must define item entries via the setup_attributes method")
+        raise NotImplementedError("Models must define properties via the setup_properties method")
+
 
     def keys(self):
-        return self.attrs.keys()
+        "The list of available property keys."
+        return self.properties.keys()
+
 
     def items(self):
-        return self.attrs.items()
+        "The property items."
+        return self.properties.items()
 
 
 
