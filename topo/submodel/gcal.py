@@ -186,16 +186,17 @@ class ExamplesGCAL(ModelGCAL):
 
 
     def setup(self,setup_options):
-        super(ExamplesGCAL, self).setup(setup_options)
+        model = super(ExamplesGCAL, self).setup(setup_options)
         if setup_options is True or 'sheets' in setup_options:
-            self.sheets.Retina.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+1.125))
-            self.sheets.LGNOn.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
-            self.sheets.LGNOff.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
-            self.sheets.V1.update(nominal_density=48)
+            model.sheets.Retina.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+1.125))
+            model.sheets.LGNOn.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
+            model.sheets.LGNOff.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
+            model.sheets.V1.update(nominal_density=48)
         if setup_options is True or 'projections' in setup_options:
-            order_projections(self, ['afferent',
-                                     'lateral_gain_control',
-                                     ('V1_afferent', {'polarity':'On'}),
-                                     ('V1_afferent', {'polarity':'Off'}),
-                                     'lateral_excitatory',
-                                     'lateral_inhibitory'])
+            order_projections(model, ['afferent',
+                                      'lateral_gain_control',
+                                      ('V1_afferent', {'polarity':'On'}),
+                                      ('V1_afferent', {'polarity':'Off'}),
+                                      'lateral_excitatory',
+                                      'lateral_inhibitory'])
+        return model

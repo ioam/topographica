@@ -190,9 +190,9 @@ class EarlyVisionModel(VisualInputModel):
                                   + self.v1aff_radius*self.sf_spacing**(max(self.attrs.SF)-1)
                                   + self.lgnaff_radius*self.sf_spacing**(max(self.attrs.SF)-1)
                                   + self.lgnlateral_radius),
-            input_generator=self.training_patterns[properties['eye']+'Retina'
-                                                   if 'eye' in properties
-                                                   else 'Retina'])
+            input_generator=self.attrs.training_patterns[properties['eye']+'Retina'
+                                                         if 'eye' in properties
+                                                         else 'Retina'])
 
 
     @Model.SettlingCFSheet
