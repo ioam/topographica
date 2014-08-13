@@ -1362,15 +1362,18 @@ class Simulation(param.Parameterized,OptionalSingleton):
             # are executed FIFO.
             bisect.insort_right(self.events,event)
 
-    def schedule_command(self,time,command_string):
+    def schedule_command(self,times,command_string):
         """
         Add a command to execute in __main__.__dict__ at the
         specified time.
 
-        The command should be a string.
+        The command should be a string and times may be either a
+        single time value or a list of times.
         """
-        event = CommandEvent(time=self.convert_to_time_type(time),command_string=command_string)
-        self.enqueue_event(event)
+        times = times if isinstance(times, list) else [times]
+        for time in times:
+            event = CommandEvent(time=self.convert_to_time_type(time), command_string=command_string)
+            self.enqueue_event(event)
 
 
     def state_push(self):
