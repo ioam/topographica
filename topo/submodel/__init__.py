@@ -487,6 +487,18 @@ class Model(param.Parameterized):
         model(instantiate_options, verbose)
         return model
 
+    def __getitem__(self, key):
+        return self.attrs[key]
+
+    def __setitem__(self, key, val):
+        raise NotImplementedError("Models must define item entries via the setup_attributes method")
+
+    def keys(self):
+        return self.attrs.keys()
+
+    def items(self):
+        return self.attrs.items()
+
 
 
 # Register the sheets and projections available in Topographica
