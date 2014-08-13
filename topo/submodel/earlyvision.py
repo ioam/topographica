@@ -83,11 +83,9 @@ class VisualInputModel(SensoryModel):
 
     def setup_attributes(self, attrs):
         attrs = super(VisualInputModel, self).setup_attributes(attrs)
-        attrs.Eyes=(['Left','Right']
-                    if ('od' in self.dims or 'dy' in self.dims) else [''])
-
-        attrs.SF=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
-        attrs.Lags = range(self.num_lags) if 'dr' in self.dims else [0]
+        attrs['binocular'] = 'od' in self.dims or 'dy' in self.dims
+        attrs['SF']=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
+        attrs['lags'] = range(self.num_lags) if 'dr' in self.dims else [0]
 
         if 'dr' in self.dims and not numbergen.RandomDistribution.time_dependent:
             numbergen.RandomDistribution.time_dependent = True
@@ -106,9 +104,8 @@ class VisualInputModel(SensoryModel):
             #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
             position_bound_x -= disparity_bound
 
-        pattern_labels=[s + 'Retina' for s in self.attrs.Eyes]
+        pattern_labels=['LeftRetina','RightRetina'] if self.attrs['binocular'] else ['Retina']
         # all the above will eventually end up in PatternCoordinator!
-
         params = dict(features_to_vary=self.dims,
                       pattern_labels=pattern_labels,
                       pattern_parameters={'size': 0.088388 if 'or' in self.dims else 3*0.088388,
@@ -118,10 +115,10 @@ class VisualInputModel(SensoryModel):
                       position_bound_x=position_bound_x,
                       position_bound_y=position_bound_y,
                       dim_fraction=self.dim_fraction,
-                      reset_period=(max(self.attrs.Lags)+1),
+                      reset_period=(max(self.attrs['lags'])+1),
                       speed=self.speed,
                       sf_spacing=self.sf_spacing,
-                      sf_max_channel=max(self.attrs.SF),
+                      sf_max_channel=max(self.attrs['SF']),
                       patterns_per_label=int(self.num_inputs*self.area*self.area))
 
         return PatternCoordinator(**dict(params, **overrides))()
@@ -165,19 +162,15 @@ class EarlyVisionModel(VisualInputModel):
         center_polarities=['On','Off']
 
         # Useful for setting up sheets
-        attrs.Args = {
-            'eyes':lancet.List('eye', attrs.Eyes) if len(attrs.Eyes)>1 else lancet.Identity(),
-            'polarities': lancet.List('polarity', center_polarities),
-            'SFs': lancet.List('SF', attrs.SF) if max(attrs.SF)>1 else lancet.Identity()
-            }
+        attrs['polarities'] = lancet.List('polarity', center_polarities)
+        attrs['eyes'] =       lancet.List('eye', ['Left','Right']) if attrs['binocular'] else lancet.Identity()
+        attrs['SFs'] =        lancet.List('SF', attrs['SF']) if max(attrs['SF'])>1 else lancet.Identity()
         return attrs
 
     def setup_sheets(self):
         sheets = OrderedDict()
-        sheets['Retina'] = self.attrs.Args['eyes']
-        sheets['LGN'] =   (self.attrs.Args['polarities']
-                           * self.attrs.Args['eyes']
-                           * self.attrs.Args['SFs'])
+        sheets['Retina'] = self.attrs['eyes']
+        sheets['LGN'] = self.attrs['polarities'] * self.attrs['eyes'] * self.attrs['SFs']
         return sheets
 
     @Model.GeneratorSheet
@@ -187,12 +180,12 @@ class EarlyVisionModel(VisualInputModel):
             phase=0.05,
             nominal_density=self.retina_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
-                                  + self.v1aff_radius*self.sf_spacing**(max(self.attrs.SF)-1)
-                                  + self.lgnaff_radius*self.sf_spacing**(max(self.attrs.SF)-1)
-                                  + self.lgnlateral_radius),
-            input_generator=self.attrs.training_patterns[properties['eye']+'Retina'
-                                                         if 'eye' in properties
-                                                         else 'Retina'])
+                                + self.v1aff_radius*self.sf_spacing**(max(self.attrs['SF'])-1)
+                                + self.lgnaff_radius*self.sf_spacing**(max(self.attrs['SF'])-1)
+                                + self.lgnlateral_radius),
+            input_generator=self.attrs['training_patterns'][properties['eye']+'Retina'
+                                                            if 'eye' in properties
+                                                            else 'Retina'])
 
 
     @Model.SettlingCFSheet
@@ -261,7 +254,7 @@ class EarlyVisionModel(VisualInputModel):
             nominal_bounds_template=sheet.BoundingBox(radius=0.25),
             name=('LateralGC' + src_properties['eye']
                   if 'eye' in src_properties else 'LateralGC'),
-            strength=0.6/len(self.attrs.Eyes))
+            strength=0.6/(2 if self.attrs['binocular'] else 1))
 
 
 
@@ -284,18 +277,17 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         opponent_specs =[dict(opponent=el1, surround=el2) for el1, el2
                          in zip(opponent_types_center,
                                 opponent_types_surround)]
-
-        attrs.Args['opponents'] = (lancet.Args(specs=opponent_specs)
+        attrs['opponents'] = (lancet.Args(specs=opponent_specs)
                                    if opponent_types_center else lancet.Identity())
-        attrs.Args['cones'] = (lancet.List('cone', cone_types)
+        attrs['cones'] = (lancet.List('cone', cone_types)
                                if cone_types else lancet.Identity())
         return attrs
 
     def setup_sheets(self):
         sheets = OrderedDict()
-        sheets['Retina'] = self.attrs.Args['eyes'] * self.attrs.Args['cones']
-        sheets['LGN'] = (self.attrs.Args['polarities'] * self.attrs.Args['eyes']
-                         * (self.attrs.Args['SFs'] + self.attrs.Args['opponents']))
+        sheets['Retina'] = self.attrs['eyes'] * self.attrs['cones']
+        sheets['LGN'] = (self.attrs['polarities'] * self.attrs['eyes']
+                         * (self.attrs['SFs'] + self.attrs['opponents']))
         return sheets
 
 

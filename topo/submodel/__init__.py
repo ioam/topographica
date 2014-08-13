@@ -267,9 +267,9 @@ class Model(param.Parameterized):
         self._sheet_types = {}
         self._projection_types = {}
 
-        self.attrs = AttrTree()
+        self.attrs = {}
         # Training patterns need to be accessed by GeneratorSheets
-        self.attrs.training_patterns = AttrTree()
+        self.attrs['training_patterns'] = AttrTree()
 
 
     def _register_global_params(self, params):
@@ -299,8 +299,8 @@ class Model(param.Parameterized):
         Method to precompute any useful attributes from the class
         parameters. For instance, if there is a ``num_lags``
         parameter, this method could compute the actual projection
-        delays and store it as attrs.lags. The return value is the
-        updated attrs AttrTree.
+        delays and store it as attrs['lags']. The return value is the
+        updated 'attrs' dictionary.
 
         In addition, this method can be used to configure class
         attributes of the model components.
@@ -375,14 +375,14 @@ class Model(param.Parameterized):
             setup_options = available_setup_options
 
         if 'attributes' in setup_options:
-            self.attrs = self.setup_attributes(AttrTree())
+            self.attrs = self.setup_attributes({})
 
         if 'training_patterns' in setup_options:
             training_patterns = self.setup_training_patterns()
             for name, training_pattern in training_patterns.items():
                 model.training_patterns.set_path(name, training_pattern)
 
-            self.attrs.training_patterns = training_patterns
+            self.attrs['training_patterns'] = training_patterns
         if 'sheets' in setup_options:
             sheet_properties = self.setup_sheets()
 
