@@ -104,7 +104,7 @@ class VisualInputModel(SensoryModel):
             #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
             position_bound_x -= disparity_bound
 
-        pattern_labels=['LeftRetina','RightRetina'] if self.attrs['binocular'] else ['Retina']
+        pattern_labels=['LeftRetina','RightRetina'] if self['binocular'] else ['Retina']
         # all the above will eventually end up in PatternCoordinator!
         params = dict(features_to_vary=self.dims,
                       pattern_labels=pattern_labels,
@@ -115,10 +115,10 @@ class VisualInputModel(SensoryModel):
                       position_bound_x=position_bound_x,
                       position_bound_y=position_bound_y,
                       dim_fraction=self.dim_fraction,
-                      reset_period=(max(self.attrs['lags'])+1),
+                      reset_period=(max(self['lags'])+1),
                       speed=self.speed,
                       sf_spacing=self.sf_spacing,
-                      sf_max_channel=max(self.attrs['SF']),
+                      sf_max_channel=max(self['SF']),
                       patterns_per_label=int(self.num_inputs*self.area*self.area))
 
         return PatternCoordinator(**dict(params, **overrides))()
@@ -169,8 +169,8 @@ class EarlyVisionModel(VisualInputModel):
 
     def setup_sheets(self):
         sheets = OrderedDict()
-        sheets['Retina'] = self.attrs['eyes']
-        sheets['LGN'] = self.attrs['polarities'] * self.attrs['eyes'] * self.attrs['SFs']
+        sheets['Retina'] = self['eyes']
+        sheets['LGN'] = self['polarities'] * self['eyes'] * self['SFs']
         return sheets
 
     @Model.GeneratorSheet
@@ -180,12 +180,12 @@ class EarlyVisionModel(VisualInputModel):
             phase=0.05,
             nominal_density=self.retina_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
-                                + self.v1aff_radius*self.sf_spacing**(max(self.attrs['SF'])-1)
-                                + self.lgnaff_radius*self.sf_spacing**(max(self.attrs['SF'])-1)
+                                + self.v1aff_radius*self.sf_spacing**(max(self['SF'])-1)
+                                + self.lgnaff_radius*self.sf_spacing**(max(self['SF'])-1)
                                 + self.lgnlateral_radius),
-            input_generator=self.attrs['training_patterns'][properties['eye']+'Retina'
-                                                            if 'eye' in properties
-                                                            else 'Retina'])
+            input_generator=self['training_patterns'][properties['eye']+'Retina'
+                                                      if 'eye' in properties
+                                                      else 'Retina'])
 
 
     @Model.SettlingCFSheet
@@ -254,7 +254,7 @@ class EarlyVisionModel(VisualInputModel):
             nominal_bounds_template=sheet.BoundingBox(radius=0.25),
             name=('LateralGC' + src_properties['eye']
                   if 'eye' in src_properties else 'LateralGC'),
-            strength=0.6/(2 if self.attrs['binocular'] else 1))
+            strength=0.6/(2 if self['binocular'] else 1))
 
 
 
@@ -285,9 +285,9 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
     def setup_sheets(self):
         sheets = OrderedDict()
-        sheets['Retina'] = self.attrs['eyes'] * self.attrs['cones']
-        sheets['LGN'] = (self.attrs['polarities'] * self.attrs['eyes']
-                         * (self.attrs['SFs'] + self.attrs['opponents']))
+        sheets['Retina'] = self['eyes'] * self['cones']
+        sheets['LGN'] = (self['polarities'] * self['eyes']
+                         * (self['SFs'] + self['opponents']))
         return sheets
 
 
