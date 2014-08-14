@@ -726,9 +726,9 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       context. Invoked as an analysis function by RunBatchCommand.
       """
       from dataviews.collector import AttrTree
-      from topo.misc.ipython import RunProgress
+      from dataviews.ipython.widgets import ProgressBar
+      ProgressBar.display = False
 
-      RunProgress.enabled = False
       self.collector.interval_hook = topo.sim.run
 
       topo_time = topo.sim.time()
