@@ -710,6 +710,11 @@ class run_batch(ParameterizedFunction):
        set to 'all' then a script repr is saved for all time values.
        Saving is disabled entirely if set to None.""")
 
+    progress_bar = param.String(default='stdout', doc="""
+      The display mode for the progress bar. By default, the progress
+      of run_batch is displayed using standard output but may also be
+      set to 'disabled' as necessary.""")
+
     def _truncate(self,p,s):
         """
         If s is greater than the max_name_length parameter, truncate it
@@ -838,9 +843,24 @@ class run_batch(ParameterizedFunction):
             print_sizes()
             topo.sim.name=simname
 
+            from dataviews.ipython.widgets import ProgressBar, RunProgress
+            import numpy as np
+            ProgressBar.display = p.progress_bar
+            progress_bar = RunProgress(run_hook = topo.sim.run,
+                                       display = p.progress_bar)
+
+            if len(set(times)) == 1:
+                completion = [0, 100]
+            else:
+                times = np.array(times)
+                completion = 100 * (times - times.min()) / (times.max() - times.min())
+                completion = np.array([0] + list(completion))
+
             # Run each segment, doing the analysis and saving the script state each time
-            for run_to in times:
-                topo.sim.run(run_to - topo.sim.time())
+            for i, run_to in enumerate(times):
+                progress_bar.percent_range = (completion[i], completion[i+1])
+                progress_bar(run_to - topo.sim.time())
+
                 p.analysis_fn()
                 normalize_path.prefix = metadata_dir
                 if p.save_script_repr == 'first'  and run_to == times[0]:

@@ -255,6 +255,8 @@ class TopoCommand(Command):
 
    save_global_params = param.Boolean(default=True, doc="Matches run_batch parameter of same name.")
 
+   progress_bar = param.Boolean(default='disabled', doc="Matches run_batch parameter of same name.")
+
 
    def __init__(self, tyfile, executable=None, **kwargs):
 
@@ -324,6 +326,7 @@ class TopoCommand(Command):
                  'snapshot':           self.snapshot,
                  'vc_info':            self.vc_info,
                  'save_global_params': self.save_global_params,
+                 'progress_bar':       self.progress_bar,
                  'metadata_dir':       repr('metadata'),
                  'compress_metadata':  repr('zip'),
                  'save_script_repr':   repr('first')}
@@ -726,9 +729,6 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       context. Invoked as an analysis function by RunBatchCommand.
       """
       from dataviews.collector import AttrTree
-      from dataviews.ipython.widgets import ProgressBar
-      ProgressBar.display = False
-
       self.collector.interval_hook = topo.sim.run
 
       topo_time = topo.sim.time()
