@@ -255,7 +255,7 @@ class TopoCommand(Command):
 
    save_global_params = param.Boolean(default=True, doc="Matches run_batch parameter of same name.")
 
-   progress_bar = param.Boolean(default='disabled', doc="Matches run_batch parameter of same name.")
+   progress_bar = param.String(default='disabled', doc="Matches run_batch parameter of same name.")
 
 
    def __init__(self, tyfile, executable=None, **kwargs):
