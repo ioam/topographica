@@ -907,9 +907,11 @@ class BatchCollator(NdMapping):
 
         # Expand fileinfo with constant dims
         expanded_info = self.fileinfo
-        expanded_info *= Args(**dict((d, self.dim_values(d)[0])
-                                     for d in self.constant_dims
-                                     if d not in expanded_info))
+        constant_args = Args(**dict((d, self.dim_values(d)[0])
+                                        for d in self.constant_dims
+                                        if d not in expanded_info))
+        if constant_args:
+           expanded_info *= constant_args
 
         # Compute set of sorted log and file spec tuples
         sort_fn = lambda k: self.dimension_labels.index(k[0])
