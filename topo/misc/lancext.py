@@ -326,7 +326,7 @@ class TopoCommand(Command):
                  'snapshot':           self.snapshot,
                  'vc_info':            self.vc_info,
                  'save_global_params': self.save_global_params,
-                 'progress_bar':       self.progress_bar,
+                 'progress_bar':       repr(self.progress_bar),
                  'metadata_dir':       repr('metadata'),
                  'compress_metadata':  repr('zip'),
                  'save_script_repr':   repr('first')}
