@@ -30,8 +30,8 @@ except:
    submodules = []
 
 
-from dataviews import NdMapping, Stack
-from dataviews.collector import AttrTree, Collector
+from dataviews import NdMapping
+from dataviews.collector import Collector, Collator
 
 from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
@@ -777,7 +777,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
 
 
 
-class BatchCollator(NdMapping):
+class BatchCollator(Collator):
     """
     BatchCollator provides a convenient interface to load the output
     of a BatchCollector run, which is spread across a number of
@@ -837,6 +837,9 @@ class BatchCollator(NdMapping):
                 self.warning("Missing data files. Use .missing_args method "
                              "to view missing entries.")
 
+    def _process_data(self, data):
+        return self.filetype.data(data)[self.filetype.data_key]
+
 
     def _process_dframe(self, dframe, log, filekey):
         """
@@ -857,38 +860,6 @@ class BatchCollator(NdMapping):
             dimensions = list(df.columns)
 
         return data, dimensions
-
-
-    @property
-    def dim_ranges(self):
-        """
-        Get the ranges of all dimensions.
-        """
-        return [(d, self.dim_range(d)) for d in self.dimension_labels]
-
-
-    @property
-    def constant_dims(self):
-        """
-        Return all constant dimensions.
-        """
-        return [d for d, drange in self.dim_ranges if drange[0]==drange[1]]
-
-
-    @property
-    def varying_dims(self):
-        """
-        Return all varying dimensions.
-        """
-        return [d for d, drange in self.dim_ranges if drange[0]!=drange[1]]
-
-
-    def only_varying(self):
-        """
-        Return a copy of the BatchCollator containing just the varying
-        dimensions.
-        """
-        return self.reindex([self.varying_dimensions])
 
 
     def missing_args(self):
@@ -930,76 +901,7 @@ class BatchCollator(NdMapping):
         return self.__class__(items, **settings)
 
 
-    def _filter_attrtree(self, attrtree, path_filters):
-        """
-        Filters the loaded AttrTree using the supplied path_filters.
-        """
-        if not path_filters: return attrtree
 
-        # Convert string path filters
-        path_filters = [tuple(pf.split('.')) if not isinstance(pf, tuple)
-                        else pf for pf in path_filters]
-
-        # Search for substring matches between paths and path filters
-        new_attrtree = AttrTree()
-        for path, item in attrtree.path_items.items():
-            if any([all([subpath in path for subpath in pf]) for pf in path_filters]):
-                new_attrtree.set_path(path, item)
-
-        return new_attrtree
-
-
-    def _add_dimensions(self, item, dims, constant_keys):
-        """
-        Recursively descend through an AttrTree and NdMapping objects
-        in order to add the supplied dimension values to all contained
-        Stack objects.
-        """
-        if isinstance(item, AttrTree):
-            item.fixed = False
-
-        new_item = item.clone({}) if isinstance(item, NdMapping) else item
-        for k in item.keys():
-            v = item[k]
-            if isinstance(v, Stack):
-                for dim, val in dims[::-1]:
-                    if dim.capitalize() not in v.dimension_labels:
-                        v = v.add_dimension(dim, 0, val)
-                if constant_keys: v.constant_keys = constant_keys
-                new_item[k] = v
-            else:
-                new_item[k] = self._add_dimensions(v, dims, constant_keys)
-        if isinstance(new_item, AttrTree):
-            new_item.fixed = True
-
-        return new_item
-
-
-    def load(self, path_filters=[], merge=True):
-        """
-        Load and filter the file contents for the selected parameter
-        space.  If merge is set to True all AttrTrees are merged,
-        otherwise an NdMapping containing all the AttrTrees is
-        returned.
-        """
-        constant_dims = self.constant_dims
-        ndmapping = NdMapping(dimensions=self.dimensions)
-        for key, filename in self.items():
-           file_data = self.filetype.data(filename)
-           attrtree = self._filter_attrtree(file_data[self.filetype.data_key],
-                                            path_filters)
-           if merge:
-              dim_keys = zip(self.dimension_labels, key)
-              varying_keys = [(d, k) for d, k in dim_keys
-                              if d not in constant_dims]
-              constant_keys = [(d, k) for d, k in dim_keys
-                               if d in constant_dims]
-              attrtree = self._add_dimensions(attrtree, varying_keys,
-                                              dict(constant_keys))
-           ndmapping[key] = attrtree
-        if merge:
-           return AttrTree.merge(ndmapping.values())
-        return ndmapping
 
 
 
