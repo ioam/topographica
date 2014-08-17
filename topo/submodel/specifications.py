@@ -191,7 +191,7 @@ class ProjectionSpec(Specification):
 
     def resolve(self):
         from topo import sim
-        return topo.sim[str(self.dest)].projections(self.parameters['name'])
+        return sim[str(self.dest)].projections(self.parameters['name'])
 
 
     def __call__(self):

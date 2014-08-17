@@ -604,8 +604,8 @@ class BatchCollator(Collator):
                             'to determine missing args.')
 
         # Expand 'times' list into 'time'
-        spec = self.log.specs[0]
-        expanded_log = self.log * List('time', spec['times'])
+        specs = self.log.specs[0]
+        expanded_log = self.log * List('time', specs['times'])
 
         # Expand fileinfo with constant dims
         expanded_info = self.fileinfo
