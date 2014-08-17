@@ -74,6 +74,9 @@ class SimRef(Reference):
             return Sheet
 
     def __init__(self, obj=None, array_ref=None):
+
+        print "DEPRECATION WARNING: use topo.submodel.specifications instead of SimRef."
+
         if [obj, array_ref] == [None,None]:
             raise Exception("Please specify an object, a path string or an array_ref.")
 
