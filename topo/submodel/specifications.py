@@ -45,14 +45,12 @@ class Specification(param.Parameterized):
 
     def resolve(self):
         """
-        Returns the object in topo.sim corresponding to the string
-        name of this object, typically a Sheet or a Projection.
+        Returns the object in topo.sim corresponding to this object,
+        typically a Sheet or a Projection.
 
-        The appropriate object must be instantiated in topo.sim first.
+        The appropriate object must be available in topo.sim.
         """
-        from topo import sim # pyflakes:ignore (needed for eval)
-        return eval('sim.'+str(self))
-
+        raise NotImplementedError
 
     def __lt__(self, other):
         return self.sort_precedence < other.sort_precedence
@@ -127,6 +125,11 @@ class SheetSpec(Specification):
         self.properties = OrderedDict(properties)
 
 
+    def resolve(self):
+        from topo import sim
+        return sim[str(self)]
+
+
     def __call__(self):
         """
         Instantiate the sheet and register it in topo.sim.
@@ -185,6 +188,12 @@ class ProjectionSpec(Specification):
         self.parameters = dict((k,v) for (k,v) in self.parameters.items()
                                if k not in ignored_keys)
 
+
+    def resolve(self):
+        from topo import sim
+        return topo.sim[str(self.dest)].projections(self.parameters['name'])
+
+
     def __call__(self):
         """
         Instantiate the projection and register it in topo.sim.
@@ -194,7 +203,7 @@ class ProjectionSpec(Specification):
                          **self.parameters)
 
     def __str__(self):
-        return str(self.dest)+'.'+self.parameters['name']
+        return str(self.dest)+'.' + self.parameters['name']
 
 
     def summary(self, printed=True):
