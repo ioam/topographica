@@ -755,11 +755,33 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
                                                      + [('time',topo_time)]))
 
    def verify(self, specs, model_params):
-      # FIXME: Model parameter checking not implemented.
+      """
+      Check that a times list has been supplied, call verify_times on
+      the Collator and if model_params has been supplied, check that a
+      valid parameter set has been used.
+      """
+      # Note: Parameter types could also be checked...
+      unknown_params = set()
+      known_params = (set(model_params if model_params else []) # Model
+                      | set(['times']))                         # Extras
+
       for spec in specs:
          if 'times' not in spec:
             raise Exception("BatchCollector requires a times argument.")
          self.collector.verify_times(spec['times'], strict=True)
+
+         if model_params is None: continue
+
+         unknown_params = unknown_params | (set(spec) - known_params)
+
+         if not set(self.metadata).issubset(spec.keys()):
+            raise Exception("Metadata keys not always available: %s"
+                            % ', '.join(self.metadata))
+
+      if unknown_params:
+         raise KeyError("The following keys do not belong to "
+                        "the model parameters or RunBatchCommand: %s"
+                        % ', '.join('%r' % p for p in unknown_params))
 
    def summary(self):
       print "Collector definition summary:\n\n%s" % self.collector
@@ -924,6 +946,12 @@ class RunBatchCommand(TopoCommand):
       Collector or BatchCollector (which wraps a Collector). Analysis
       objects are now deprecated and only retained for legacy reasons.""" )
 
+   model_params = param.Parameter(default={}, doc="""
+     A list or dictionary of model parameters to be passed to the
+     model via run_batch. This is used to validate the parameter names
+     specified. If set to an empty container, no checking is applied
+     (default).""")
+
    def __init__(self, tyfile, analysis, **kwargs):
       super(RunBatchCommand, self).__init__(tyfile=tyfile,
                                             analysis_fn = 'analysis_fn',
@@ -935,14 +963,6 @@ class RunBatchCommand(TopoCommand):
          self.analysis = BatchCollector(analysis, metadata=self.metadata)
       elif isinstance(self.analysis, Analysis):
          self.warning("Analysis objects are deprecated: Collectors should be used instead.")
-
-
-   def get_model_params(self):
-      """Obtains all the script parameters used in the model file."""
-      # FIXME: This functionality cannot be properly integrated with
-      # Topographica until models are defined as classes, allowing
-      # parameters to be listed without needing to load the model.
-      return []
 
 
    def __call__(self, spec=None, tid=None, info={}):
@@ -979,8 +999,7 @@ class RunBatchCommand(TopoCommand):
       Check that the supplied arguments make sense given the specified
       analysis.
       """
-      # FIXME: Not hooked up to check Model class parameters.
-      return self.analysis.verify(args.specs, self.get_model_params())
+      return self.analysis.verify(args.specs, self.model_params)
 
 
    def finalize(self, info):
