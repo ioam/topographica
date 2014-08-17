@@ -38,6 +38,11 @@ class Specification(param.Parameterized):
                 if self.default_parameters[k] != v}
 
 
+    @property
+    def resolved_type(self):
+        return self._object_type
+
+
     def resolve(self):
         """
         Returns the object in topo.sim corresponding to the string
@@ -56,6 +61,7 @@ class Specification(param.Parameterized):
         return self.sort_precedence == other.sort_precedence
 
     def __init__(self, object_type):
+        self._object_type = object_type
         self.parameters = {}
         self.sort_precedence = 0
         for param_name, default_value in object_type.params().items():
