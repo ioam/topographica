@@ -2,12 +2,12 @@
 The Topographica Lancet extension allows Topographica simulations to
 be easily integrated into a Lancet workflow (see
 github.com/ioam/lancet). The TopoCommand is appropriate for simple
-runs using the default analysis function, whereas the Analysis and
-RunBatchCommand allow for more sophisticated measurements and analysis
-to be executed during a simulation run.
+runs using the default analysis function, whereas the RunBatchCommand
+allow for more sophisticated measurements and analysis to be executed
+during a simulation run using a dataviews Collector object.
 """
 
-import os, sys, types, pickle, inspect
+import os, pickle
 from collections import namedtuple, OrderedDict
 
 import numpy.version as np_version
@@ -17,7 +17,7 @@ import param
 from lancet import PrettyPrinted, vcs_metadata
 from lancet import Command
 from lancet import Launcher, review_and_launch
-from lancet import ViewFile, NumpyFile
+from lancet import ViewFile
 from lancet import Log, FileInfo, FileType
 from lancet import List, Args
 
@@ -378,303 +378,12 @@ class TopoCommand(Command):
 
 
 
-class AnalysisFn(PrettyPrinted, object):
-   """
-   An AnalysisFn records information about a function so that run_batch
-   can invoke it via an Analysis object. It also allows checks on the
-   function's signature using Python's introspection mechanisms.
-
-   The supplied function may return any data type and may be a Python
-   function or a parameterized function class (but not an instance).
-   """
-
-   def __init__(self, fn):
-      name, argspec, signature = self._register(fn)
-      self.module = str(fn.__module__)
-      self.name = name
-      self.argspec = argspec
-      self.signature = signature
-
-      # Would be good to check if module is available
-
-
-   def _register(self, fn):
-      """
-      Helper method to establish function name and determine the
-      argument signature. Works with both Python functions and
-      ParameterizedFunctions (but not instances).
-      """
-      if isinstance(fn, param.ParameterizedFunction):
-         raise Exception("Parameterized function instances not supported")
-
-      parameterizedfn = (not isinstance(fn, types.FunctionType)
-                         and issubclass(fn, param.ParameterizedFunction))
-      name = fn.__name__ if parameterizedfn else fn.__name__
-      func = fn.__call__ if  parameterizedfn else fn
-      argspec = inspect.getargspec(func)
-      (names, alist, kwdict, defaults) = argspec
-      args =  names[-len(defaults) if defaults else 0:]
-      kwargs = names[:-len(defaults) if defaults else 0]
-
-      if parameterizedfn:
-         args = [arg for arg in args if arg!='self']
-         kwargs = [k for k in (kwargs + fn.params().keys())
-                   if k not in ['name', 'self']]
-      return name, argspec, (args, kwargs, alist, kwdict)
-
-
-   def get_module(self):
-      """Return a module object that contains the analysis function."""
-      # In Python 2.7+, importlib.import_module should be used instead
-      __import__(self.module)
-      return sys.modules[self.module]
-
-   def __repr__(self):
-      """Used for pretty printing declaratively."""
-      return "AnalysisFn(%s.%s)" % (self.module, self.name)
-
-
-
-class Analysis(PrettyPrinted, param.Parameterized):
-   """
-   Analysis is a callable that behaves like a general analysis_fn for
-   run_batch. You can add multiple analysis functions, the return
-   values of which will be collated and saved as a numpy file
-   containing topo.sim.time metadata as well as any extra metadata
-   supplied by the analysis functions.
-   """
-
-   paths = param.List(default=[], doc="""
-       Extra directories to add to the sys.path before trying to load
-       the analysis functions.""")
-
-   strict_verify = param.Boolean(default=False, doc="""
-       Makes sure no keywords are allowed to fallback to their default
-       values for any of the analysis functions.""")
-
-   analysis_fns = param.List(default=[], doc="""
-       The list of analysis functions to execute in run_batch""")
-
-   metadata = param.List(default=[], doc="""
-       Keys to include as metadata in the output numpy file along with
-       'time' (Topographica simulation time).""")
-
-
-   @classmethod
-   def pickle_path(cls, root_directory, batch_name):
-      """
-      Locates the pickle file based on the given launch info
-      dictionary. Used by load as a classmethod and by save as an
-      instance method.
-      """
-      return os.path.join(root_directory, '%s.analysis' % batch_name)
-
-
-   @classmethod
-   def load(cls, tid, specs, root_directory, batch_name, batch_tag):
-      """
-      Classmethod used to load the RunBatchCommand callable into a
-      Topographica run_batch context. Loads the pickle file based on
-      the batch_name and root directory in batch_info.
-      """
-
-      pkl_path = cls.pickle_path(root_directory, batch_name)
-      with open(pkl_path,'rb') as pkl: analysis =  pickle.load(pkl)
-
-      sys.path += analysis.paths
-      callable_specs  = [(afn.name, afn.get_module())
-                         for afn in analysis.analysis_fns]
-      analysis._callables = dict((name, getattr(module, name))
-                                 for (name, module) in callable_specs)
-      info = namedtuple('info',['tid', 'specs', 'batch_name', 'batch_tag'])
-      analysis._info = info(tid, specs, batch_name, batch_tag)
-      return analysis
-
-
-   def __init__(self, **kwargs):
-      self._pprint_args = ([],[],None,{})
-      super(Analysis, self).__init__(**kwargs)
-      #self.pprint_args(['analysis_fns','paths'],['strict_verify'])
-      # Information about the batch.
-      self._info = ()
-      # The callables specified by analysis_fns
-      self._callables = {}
-      # The data and metadata accumulators
-      self._data = {}
-      self._metadata = {}
-
-
-   def add_analysis_fn(self, fn):
-      """
-      Add an analysis function of type AnalysisFn. If path is not
-      None, the module needs to be on the path.
-
-      If the return type of the function is a dictionary, the keys are
-      assumed to be labels for data. If there is a key 'metadata' that
-      holds a dictionary, those items will be merged into the saved
-      metadata dictionary.
-      """
-      sys_paths = sys.path[:]
-      sys.path += self.paths
-      self.analysis_fns.append(AnalysisFn(fn))
-      sys.path = sys_paths
-
-
-   def __call__(self):
-      """
-      Calls the necessary analysis functions specified by the user in
-      the run_batch context. Invoked as a single analysis function on
-      the commandline by RunBatchCommand.
-      """
-      topo_time = topo.sim.time()
-      metadata_items = [(key, self._info.specs[key]) for key in self.metadata]
-      self._metadata = dict(metadata_items + [('time',topo_time)])
-
-      filename = '%s%s_%s' % (self._info.batch_name,
-                              ('[%s]' % self._info.batch_tag
-                               if self._info.batch_tag else ''),
-                              topo_time)
-
-      for afn in self.analysis_fns:
-         (args, kws,_,_) = afn.signature
-         fn = self._callables[afn.name]
-         args = dict((key, self._info.specs[key]) for key in args)
-         fn_kws = dict((key, self._info.specs[key]) for key in kws
-                       if (key in self._info.specs))
-         retval = fn(**dict(args, **fn_kws))
-         self._accumulate_results(afn.name, retval)
-         # If the analysis function fails let run_batch catch the Exception
-
-         # The filename is unique as time increases during run_batch
-         # Note that normalize_path prefix is set by run_batch
-         if self._metadata.keys() != ['time'] or self._data:
-            NumpyFile(directory= param.normalize_path.prefix,
-                      hash_suffix = False).save(filename,
-                                                metadata=self._metadata,
-                                                **self._data)
-      self._data = {}; self._metadata = {}
-
-
-   def verify(self, specs, model_params):
-      """
-      The final check of argument specification before launch. Used to
-      make sure the analysis functions have all the necessary
-      arguments and warns about unused keys. If set to strict_verify,
-      keywords are not allowed to be left unspecified.
-      """
-
-      (argset, kwargset) = self._argument_sets()
-
-      known = ( argset | kwargset                # Analysisfn params...
-                | set(model_params)              # Model params...
-                | set(RunBatchCommand.params())  # Run batch params...
-                | set(['times']))                # Common extras...
-                                                 # Note: ignore list?
-      missing, unknown = set(), set()
-      for spec in specs:
-         unknown = unknown | (set(spec)  - known)
-         if self.strict_verify :
-            missing = missing | ((argset | kwargset) - set(spec.keys()))
-         else:
-            missing = missing | (argset - set(spec.keys()))
-
-         if not set(self.metadata).issubset(spec.keys()):
-            raise Exception("Metadata keys not always available: %s"
-                            % ', '.join(self.metadata))
-
-      if unknown:
-         print (("The following keys are not explicitly"
-                 " consumed by RunBatchCommand: %s")
-                % ', '.join('%r' % el for el in unknown))
-      if not self.analysis_fns:
-         raise Exception("Please specify at least one analysis function.")
-      if missing:
-         raise Exception("The following keys must be provided: %s"
-                         % ", ".join('%r' % el for el in missing))
-
-
-   def summary(self):
-      """Summary of the analysis and the analysis functions used."""
-
-      (args, kwargs) = self._argument_sets()
-      print("Analysis functions:\n")
-      for (ind, el) in enumerate(self.analysis_fns):
-         print "   %d. %s%s" % (ind, el.name, inspect.formatargspec(*el.argspec))
-
-
-   def _accumulate_results(self, fn_name, retval):
-       """
-       Accumulates the results of the analysis functions into the
-       self._data and self._metadata attributes.
-       """
-
-       metadict = {}
-       if isinstance(retval, dict):
-           metadict = retval.pop('metadata', {})
-           datadict = retval
-           if not isinstance(metadict, dict):
-               param.main.warning("Non-dictionary value of 'metadata'"
-                                  " returned by %s. Ignoring." % fn_name)
-       elif retval is not None:
-           datadict = {fn_name:retval}
-       else: return
-       # Record returned data
-       self._overwrite_warning(fn_name, self._data, datadict, 'data')
-       self._data.update(datadict)
-       # Record returned metadata
-       self._overwrite_warning(fn_name, self._metadata, metadict, 'metadata')
-       self._metadata.update(metadict)
-
-
-   def _overwrite_warning(self, fn_name, current, additions, label):
-      """Warn when overwriting previously returned or defined data."""
-
-      intersection = set(current) & set(additions)
-      overwrite_msg = "Analysis function %s overwriting existing %s keys: %s"
-      if intersection:
-         param.main.warning(overwrite_msg % (fn_name, label,
-                                             ', '.join(intersection)))
-
-   def _argument_sets(self):
-      """
-      Returns the full set of args and kwargs across all the
-      registered analysis functions.
-      """
-      arglists = [afn.signature[0] for afn in self.analysis_fns]
-      kwarglists = [afn.signature[1] for afn in self.analysis_fns]
-      argset = set(arg for args in arglists for arg in args)
-      kwargset = set(kw for kws in kwarglists for kw in kws)
-      return (argset, kwargset)
-
-
-   def _pprint(self, cycle=False, flat=False, annotate=False,
-               onlychanged=True, level=1, tab = '   '):
-      """Pretty print the Analysis in a declarative style."""
-
-      path_str = '%spaths=%r,\n' % ((level*tab), self.paths)
-      path_str = '' if (onlychanged and not self.paths) else path_str
-      fn_level = level + 1
-      if len(self.analysis_fns) == 0:
-         return "Analysis(%s)" % path_str
-      elif len(self.analysis_fns) == 1:
-         fn_list = repr(self.analysis_fns[0])
-      else:
-         listing = ['%r,' % afn for afn in self.analysis_fns[:-1]]
-         listing.append(repr(self.analysis_fns[-1]))
-         fn_list = [("\n"+tab*fn_level)+el for el in listing]
-      return ("Analysis(\n%s" % path_str
-              + (level*tab)
-              + "analysis_fns=[%s]" % "".join(fn_list)
-              + "\n"+(level*tab)+")")
-
-
 
 class BatchCollector(PrettyPrinted, param.Parameterized):
    """
    BatchCollector is a wrapper class used to execute a Collector in a
    Topographica run_batch context, saving the dataviews to disk as
-   *.view files. It supports the same core interface as the deprecated
-   Analysis objects.
+   *.view files.
    """
 
    metadata = param.List(default=[], doc="""
@@ -925,11 +634,9 @@ class BatchCollator(Collator):
 
 
 
-
-
 class RunBatchCommand(TopoCommand):
    """
-   Runs a custom analysis function of type Analysis or Collector with
+   Runs a custom analysis function specified by a Collector using
    run_batch. This command is far more flexible for regular usage than
    TopoCommand as it allows you to build a run_batch analysis
    incrementally.
@@ -939,12 +646,11 @@ class RunBatchCommand(TopoCommand):
        Keys to include as metadata in the output file along with
        'time' (Topographica simulation time).""")
 
-   analysis = param.ClassSelector(default=None, class_=(Analysis, Collector, BatchCollector),
+   analysis = param.ClassSelector(default=None, class_=(Collector, BatchCollector),
                                   allow_None=True, doc="""
       The object used to define the analysis executed in
-      RunBatch. This object may be an Analysis object a Topographica
-      Collector or BatchCollector (which wraps a Collector). Analysis
-      objects are now deprecated and only retained for legacy reasons.""" )
+      RunBatch. This object may be a Topographica Collector or a
+      BatchCollector which is a wrapper of a Collector.""" )
 
    model_params = param.Parameter(default={}, doc="""
      A list or dictionary of model parameters to be passed to the
@@ -961,8 +667,6 @@ class RunBatchCommand(TopoCommand):
       self.pprint_args(['executable', 'tyfile', 'analysis'], [])
       if isinstance(self.analysis, Collector):
          self.analysis = BatchCollector(analysis, metadata=self.metadata)
-      elif isinstance(self.analysis, Analysis):
-         self.warning("Analysis objects are deprecated: Collectors should be used instead.")
 
 
    def __call__(self, spec=None, tid=None, info={}):
@@ -977,11 +681,10 @@ class RunBatchCommand(TopoCommand):
       allopts = dict(formatted_spec,**kwarg_opts) # Override spec values if
                                                   # mistakenly included.
 
-      # Load and configure the Analysis object.
-      class_type = 'Analysis' if isinstance(self.analysis, Analysis) else 'BatchCollector'
-      prelude = ['from topo.misc.lancext import %s' % class_type]
-      prelude += ["analysis_fn=%s.load(%r, %r, %r, %r, %r)"
-                  % (class_type, tid, spec, info['root_directory'],
+      # Load and configure the analysis
+      prelude = ['from topo.misc.lancext import BatchCollector']
+      prelude += ["analysis_fn=BatchCollector.load(%r, %r, %r, %r, %r)"
+                  % (tid, spec, info['root_directory'],
                      info['batch_name'], info['batch_tag']) ]
 
       # Create the keyword representation to pass into run_batch
