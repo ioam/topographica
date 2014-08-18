@@ -35,7 +35,7 @@ from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
 from dataviews import DataOverlay
-from dataviews.plots import DataPlot, GridLayout, CurvePlot
+from dataviews.plotting import DataPlot, GridLayout, CurvePlot
 
 from topo.command import Command
 
