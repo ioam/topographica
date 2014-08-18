@@ -479,7 +479,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
             raise Exception("BatchCollector requires a times argument.")
          self.collector.verify_times(spec['times'], strict=True)
 
-         if model_params is None: continue
+         if model_params: continue
 
          unknown_params = unknown_params | (set(spec) - known_params)
 
