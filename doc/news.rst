@@ -1,9 +1,20 @@
+**20 Aug 2014:** Two additional general-purpose projects
+have been spun out from Topographica.
+`DataViews`_ provides nearly code-free visualizations of 
+arbitrary scientific data, ideal for use with `IPython Notebook`_.
+`FeatureMapper`_ measures feature maps, receptive fields, 
+tuning curves, and similar input-output relationships for any 
+simulator or experimental system.  Together with 
+`Param`_, `ParamTk`_, and `ImaGen`_, these packages provide
+nearly all of the functionality of Topographica for any 
+researcher to use in their own independent projects.
+
 **4 Nov 2013:** An IPython Notebook reproducing the results of 
 `Stevens et al. (J. Neuroscience 2013)
 <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ is now
 available as an `example in the Tutorials section`_.  This notebook is
 designed to show how to write a reproducible paper using Topographica,
-`IPython Notebook <http://ipython.org/notebook.html>`_, and `Lancet
+`IPython Notebook`_, and `Lancet
 <https://github.com/ioam/lancet>`_.
 
 **2 Oct 2013:** Topographica GCAL V1 modelling paper `(Stevens et al.,
@@ -40,3 +51,7 @@ Topographica.
 .. _Param: http://ioam.github.com/param/
 .. _ParamTk: http://ioam.github.com/paramtk/
 .. _ImaGen: http://ioam.github.com/imagen/
+.. _DataViews: http://ioam.github.com/dataviews/
+.. _FeatureMapper: http://ioam.github.com/featuremapper/
+.. _IPython Notebook: http://ipython.org/notebook.html
+
