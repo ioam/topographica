@@ -36,7 +36,7 @@ To change this behavior, you can set the ``OMP_NUM_THREADS``
 environment variable, either in your shell's startup files or by
 specifying the number of cores in your call to Topographica::
 
-   OMP_NUM_THREADS=3 ./topographica /examples/gcal.ty -c "topo.sim.run(10000)"
+   OMP_NUM_THREADS=3 ./topographica examples/gcal.ty -c "topo.sim.run(10000)"
 
 For instance, you might want to leave one core free to keep your
 system responding quickly during interactive use, specifying
