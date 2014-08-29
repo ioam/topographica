@@ -204,8 +204,8 @@ class measure_cog(ParameterizedFunction):
                             src_name=sheet.name)
 
         timestamp = topo.sim.time()
-        xsv = SheetView(xcog, sheet.bounds, label='X CoG', title='%s {label}' %  sheet.name)
-        ysv = SheetView(ycog, sheet.bounds, label='Y CoG', title='%s {label}' %  sheet.name)
+        xsv = SheetView(xcog, sheet.bounds, label='X CoG', title='%s {label}' % proj.name)
+        ysv = SheetView(ycog, sheet.bounds, label='Y CoG', title='%s {label}' % proj.name)
 
         lines = []
         hlines, vlines = xsv.data.shape
@@ -213,7 +213,7 @@ class measure_cog(ParameterizedFunction):
             lines.append(np.vstack([xsv.data[hind,:].T, ysv.data[hind,:]]).T)
         for vind in range(vlines)[::p.stride]:
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
-        cogmesh = Contours(lines, sheet.bounds, label='Center of Gravity')
+        cogmesh = Contours(lines, sheet.bounds, label='Center of Gravity', title='%s {label}' % proj.name)
 
         xcog_stack = SheetStack((timestamp, xsv), dimensions=[features.Time])
         xcog_stack.metadata = metadata
