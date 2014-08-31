@@ -253,6 +253,10 @@ class pattern_response(pattern_present):
     return_responses = param.Boolean(default=True, doc="""
         If True, return a dictionary of the measured sheet activities.""")
 
+    progress_bar = param.Boolean(default=True, doc="""
+       Whether or not to display a textual progress bar during
+       measurements. Disabled when using the Tk GUI.""")
+
     def __call__(self, inputs={}, outputs=[], current=0, total=1, **params):
         all_input_names = topo.sim.objects(GeneratorSheet).keys()
 
@@ -272,8 +276,10 @@ class pattern_response(pattern_present):
                 topo.guimain.open_progress_window(self.timer)
                 self.install_sheetview = True
                 self.progressbar = None
-            else:
+            elif self.progress_bar:
                 self.progressbar = ProgressBar(label='Measurement Progress')
+            else:
+                self.progressbar = None
         if self.timer.stop:
             raise MeasurementInterrupt(current, total)
         self.timer.update_timer('Measurement Timer', current, total)
