@@ -5,14 +5,6 @@ Configures the interface to the featuremapper and dataviews projects
 and sets the appropriate Topographica-specific hooks.
 """
 
-from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
-    FeatureMaps, ReverseCorrelation, MeasureResponseCommand, pattern_response,\
-    topo_metadata_fn, StorageHook, get_feature_preference
-from featuremapper.command import measure_response
-
-import imagen.colorspaces
-import topo.optimized.color
-
 import numpy as np
 
 from dataviews.collector import Reference
@@ -20,16 +12,23 @@ from dataviews.options import channels, ChannelOpts
 from dataviews.operation import cmap2rgb, operator, chain
 from dataviews.testing import IPTestCase
 
+from imagen import Animation
+import imagen.colorspaces
+
+from featuremapper.command import Collector, measure_response
+
 import topo
-from featuremapper.command import Collector
-from topo.base.sheet import Sheet
+from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
+    FeatureMaps, ReverseCorrelation, MeasureResponseCommand, pattern_response,\
+    topo_metadata_fn, StorageHook, get_feature_preference
 from topo.base.projection import Projection
+from topo.base.sheet import Sheet
+from topo.base.sheetview import CFView, CFStack
 from topo.misc.ipython import RunProgress
+from topo.misc import color
 
 from command import measure_cog
 
-from topo.base.sheetview import CFView, CFStack
-from imagen import Animation
 
 class TopoIPTestCase(IPTestCase):
 
@@ -186,8 +185,8 @@ MeasureResponseCommand.pattern_response_fn = pattern_response.instance()
 
 
 ## Set optimized versions of color conversion functions
-imagen.colorspaces.rgb_to_hsv = topo.optimized.color._rgb_to_hsv_array_opt
-imagen.colorspaces.hsv_to_rgb = topo.optimized.color._hsv_to_rgb_array_opt
+imagen.colorspaces.rgb_to_hsv = color._rgb_to_hsv_array_opt
+imagen.colorspaces.hsv_to_rgb = color._hsv_to_rgb_array_opt
 
 
 # Automatically discover all .py files in this directory.
