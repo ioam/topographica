@@ -114,8 +114,10 @@ class ExportMagic(Magics):
     %define_exporter OUT ./output.txt
 
     will define an %%OUT cell magic that writes to the file
-    output.txt. This cell magic takes a single, optional argument
-    'clear' which should be used for the first cell to be exported.
+    output.txt. This cell magic takes a optional arguments 'clear' and
+    'run'. If 'clear' should be specified for the first cell to be
+    exported. If 'run' is specified, the cell is executed in the
+    active notebook as well as exported.
     """
     @line_magic
     def define_exporter(self, line):
@@ -123,12 +125,14 @@ class ExportMagic(Magics):
         if len(split) != 2:
             raise Exception("Please supply the export magic name and target filename")
         [name, filename] = split
-        def exporter(line, cell):
 
-            mode = 'w' if line.strip() == 'clear' else 'a'
+        def exporter(line, cell):
+            mode = 'w' if 'clear' in line.split() else 'a'
             with open(os.path.abspath(filename), mode) as f:
                     f.write(cell+'\n')
-            self.shell.run_cell(cell)
+
+            if 'run' in line.split():
+                self.shell.run_cell(cell)
 
         self.shell.register_magic_function(exporter, magic_kind='cell',
                                            magic_name=name)
