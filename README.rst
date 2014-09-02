@@ -1,8 +1,8 @@
-=============  =============  ===========  ========
-  Full Build       Docs        Coverage     DICE
-=============  =============  ===========  ========
-|FullBuild|_    |TopoDocs|_   |Coverage|_  |DICE|_
-=============  =============  ===========  ========
+=============  =============  ===========  ========  ==========
+  Full Build       Docs        Coverage     DICE     Jenkins
+=============  =============  ===========  ========  ==========
+|FullBuild|_    |TopoDocs|_   |Coverage|_  |DICE|_   |Jenkins|_
+=============  =============  ===========  ========  ==========
 
 
 TOPOGRAPHICA
@@ -129,3 +129,5 @@ to point to the newly updated submodule.
 .. |DICE| image:: http://doozy.inf.ed.ac.uk:8010/png?builder=DICE_alltests
 .. _DICE: http://doozy.inf.ed.ac.uk:8010/waterfall
 
+.. |Jenkins| image:: https://qa.nest-initiative.org/view/Topographica/job/topographica-test/buildStatus/
+.. _Jenkins: https://qa.nest-initiative.org/view/Topographica/job/topographica-test
