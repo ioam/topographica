@@ -186,7 +186,7 @@ class Model(param.Parameterized):
         :'training_patterns': fills the training_patterns AttrTree
         with pattern generator instances. The path is the name of the
         input sheet. Usually calls PatternCoordinator to do this.
-        :'setup_sheets': determines the number of sheets, their types
+        :'sheets_setup': determines the number of sheets, their types
         and names sets sheet parameters according to the registered
         methods in level sets sheet matchconditions according to the
         registered methods in matchconditions
@@ -294,7 +294,7 @@ class Model(param.Parameterized):
     # Public methods to be implemented by modelers #
     #==============================================#
 
-    def setup_properties(self, properties):
+    def property_setup(self, properties):
         """
         Method to precompute any useful properties from the class
         parameters. For instance, if there is a ``num_lags``
@@ -308,7 +308,7 @@ class Model(param.Parameterized):
         return properties
 
 
-    def setup_training_patterns(self, **overrides):
+    def training_pattern_setup(self, **overrides):
         """
         Returns a dictionary of PatternGenerators to be added to
         self.training_patterns, with the target sheet name keys and
@@ -321,7 +321,7 @@ class Model(param.Parameterized):
         raise NotImplementedError
 
 
-    def setup_sheets(self):
+    def sheet_setup(self):
         """
         Returns a dictionary of properties or equivalent Lancet.Args
         object. Each outer key must be the level name and the values
@@ -339,7 +339,7 @@ class Model(param.Parameterized):
         raise NotImplementedError
 
 
-    def setup_analysis(self):
+    def analysis_setup(self):
         """
         Set up appropriate defaults for analysis functions in
         topo.analysis.featureresponses.
@@ -374,18 +374,18 @@ class Model(param.Parameterized):
             setup_options = available_setup_options
 
         if 'attributes' in setup_options:
-            self.properties = self.setup_properties({})
+            self.properties = self.property_setup({})
 
         model = ModelSpec(self, self.properties)
 
         if 'training_patterns' in setup_options:
-            training_patterns = self.setup_training_patterns()
+            training_patterns = self.training_pattern_setup()
             for name, training_pattern in training_patterns.items():
                 model.training_patterns.set_path(name, training_pattern)
 
             self.properties['training_patterns'] = training_patterns
         if 'sheets' in setup_options:
-            sheet_properties = self.setup_sheets()
+            sheet_properties = self.sheet_setup()
 
             enumeration = enumerate(sheet_properties.items())
             for (ordering, (level, property_list)) in enumeration:
@@ -410,7 +410,7 @@ class Model(param.Parameterized):
         if 'projections' in setup_options:
             model = self._compute_projection_specs(model)
         if 'analysis' in setup_options:
-            self.setup_analysis()
+            self.analysis_setup()
         return model
 
 
@@ -495,7 +495,7 @@ class Model(param.Parameterized):
 
 
     def __setitem__(self, key, val):
-        raise NotImplementedError("Models must define properties via the setup_properties method")
+        raise NotImplementedError("Models must define properties via the property_setup method")
 
 
     def keys(self):

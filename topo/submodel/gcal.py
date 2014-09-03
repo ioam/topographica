@@ -58,8 +58,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         smallest and twice the size of the largest.""")
 
 
-    def setup_properties(self, properties):
-        properties = super(ModelGCAL, self).setup_properties(properties)
+    def property_setup(self, properties):
+        properties = super(ModelGCAL, self).property_setup(properties)
         "Specify weight initialization, response function, and learning function"
 
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
@@ -69,8 +69,8 @@ class ModelGCAL(ColorEarlyVisionModel):
         projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
         return properties
 
-    def setup_sheets(self):
-        sheets = super(ModelGCAL,self).setup_sheets()
+    def sheet_setup(self):
+        sheets = super(ModelGCAL,self).sheet_setup()
         sheets['V1'] = [{}]
         return sheets
 
@@ -152,7 +152,7 @@ class ModelGCAL(ColorEarlyVisionModel):
             nominal_bounds_template=sheet.BoundingBox(radius=self.latinh_radius))
 
 
-    def _setup_analysis(self):
+    def analysis_setup(self):
         # TODO: This is different in gcal.ty, stevens/gcal.ty and gcal_od.ty
         # And depends whether gain control is used or not
         import topo.analysis.featureresponses

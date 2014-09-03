@@ -81,8 +81,8 @@ class VisualInputModel(SensoryModel):
     __abstract = True
 
 
-    def setup_properties(self, properties):
-        properties = super(VisualInputModel, self).setup_properties(properties)
+    def property_setup(self, properties):
+        properties = super(VisualInputModel, self).property_setup(properties)
         properties['binocular'] = 'od' in self.dims or 'dy' in self.dims
         properties['SF']=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
         properties['lags'] = range(self.num_lags) if 'dr' in self.dims else [0]
@@ -93,7 +93,7 @@ class VisualInputModel(SensoryModel):
         return properties
 
 
-    def setup_training_patterns(self, **overrides):
+    def training_pattern_setup(self, **overrides):
         # all the below will eventually end up in PatternCoordinator!
         disparity_bound = 0.0
         position_bound_x = self.area/2.0+0.25
@@ -156,8 +156,8 @@ class EarlyVisionModel(VisualInputModel):
         retina sheets to LGN sheets is multiplied.""")
 
 
-    def setup_properties(self, properties):
-        properties = super(EarlyVisionModel, self).setup_properties(properties)
+    def property_setup(self, properties):
+        properties = super(EarlyVisionModel, self).property_setup(properties)
         sheet.SettlingCFSheet.joint_norm_fn = sheet.optimized.compute_joint_norm_totals_opt
         center_polarities=['On','Off']
 
@@ -169,7 +169,7 @@ class EarlyVisionModel(VisualInputModel):
                              if max(properties['SF'])>1 else lancet.Identity())
         return properties
 
-    def setup_sheets(self):
+    def sheet_setup(self):
         sheets = OrderedDict()
         sheets['Retina'] = self['eyes']
         sheets['LGN'] = self['polarities'] * self['eyes'] * self['SFs']
@@ -267,8 +267,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         contrast gain control in color sheets.""")
 
 
-    def setup_properties(self, properties):
-        properties = super(ColorEarlyVisionModel, self).setup_properties(properties)
+    def property_setup(self, properties):
+        properties = super(ColorEarlyVisionModel, self).property_setup(properties)
 
         cr = 'cr' in self.dims
         opponent_types_center =   ['Red','Green','Blue','RedGreenBlue'] if cr else []
@@ -285,7 +285,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                                if cone_types else lancet.Identity())
         return properties
 
-    def setup_sheets(self):
+    def sheet_setup(self):
         sheets = OrderedDict()
         sheets['Retina'] = self['eyes'] * self['cones']
         sheets['LGN'] = (self['polarities'] * self['eyes']
