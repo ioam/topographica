@@ -50,20 +50,24 @@ Book Chapters
    Neuroscience*. *Scholarpedia*, 2014. In preparation.
 -  James A. Bednar. Topographica. In Dieter Jaeger and Ranu Jung,
    editors, *The Encyclopedia of Computational Neuroscience*.
-   Springer, 2013. In press.
+   Springer, 2014.
 -  James A. Bednar. Constructing complex systems via activity-driven
    unsupervised Hebbian self-organization. In *Growing Adaptive
    Machines: Combining Development and Learning in Artificial Neural
    Networks*, Studies in Computational Intelligence. Springer,
-   Berlin, 2013. In press.
+   Berlin, 2014.
 
 Conference Papers
 -----------------
 
+-  Jaewook Yoo, Jinho Choi, and Yoonsuck Choe. Development of target
+   reaching gesture map in the cortex and its relation to the motor map:
+   A simulation study. In *Advances in Self-Organizing Maps: Proceedings
+   of the 10th International Workshop*, pages 187-197. Springer, 2014.
 -  James A. Bednar. Visual cortex as a general-purpose
    information-processing device. In A. Fusiello et al., editors,
    *ECCV 2012 Workshops*, Part I, Lecture Notes in Computer Science
-   7583, pages 480-485, Berlin, 2012. Springer. In press.
+   7583, pages 480-485, Berlin, 2012. Springer.
 -  Choonseog Park, Yoon H. Bai, and Yoonsuck Choe. `Tactile or
    visual?: Stimulus characteristics determine receptive field type
    in a self-organizing map model of cortical development`_. In
@@ -106,6 +110,22 @@ PhD Theses
 MSc Theses
 ----------
 
+-  Tobias Fischer. Model of all known spatial maps in primary
+   visual cortex.  Master's thesis, The University of Edinburgh,
+   Scotland, UK, 2014.
+-  Giacomo Spigler. Neural modelling of the McCollough Effect in
+   Colour Vision.  Master's thesis,
+   The University of Edinburgh, Scotland, UK, 2014.
+-  Annabelle Gee. Neural Modelling of Congenitally Abnormal Visual
+   Pathways.  Master's thesis, The University of Edinburgh, Scotland, 
+   UK, 2014.
+-  Bharath Chandra Talluri. Characterising the Properties of Natural
+   and Laboratory Animal-Rearing Environments and Their Impact on
+   Models of Visual Cortex Development. Master's thesis, The
+   University of Edinburgh, Scotland, UK, 2013.
+-  Yvonne Kneisel. Feasibility of random wiring in primate colour
+   vision. Master's thesis, The University of Edinburgh, Scotland, UK,
+   2013.
 -  Gautham Ganapathy. Reconciling models of visual cortex
    development with anatomical patterns of lateral connectivity.
    Master's thesis, The University of Edinburgh, Scotland, UK, 2011.
