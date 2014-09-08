@@ -10,7 +10,7 @@ import numpy
 import imagen
 
 
-from imagen.patterncoordinator import PatternCoordinator
+from imagen.patterncoordinator import PatternCoordinator, PatternCoordinatorImages
 
 from topo.base.arrayutil import DivideWithConstant
 from topo.submodel import Model
@@ -32,6 +32,15 @@ class SensoryModel(Model):
 
 
 class VisualInputModel(SensoryModel):
+
+    dataset = param.ObjectSelector(default='Gaussian',objects=
+        ['Gaussian','Nature','FoliageA','FoliageB'],doc="""
+        Set of input patterns to use::
+
+          :'Gaussian': Two-dimensional Gaussians
+          :'Nature':   Shouval's 1999 monochrome 256x256 images
+          :'FoliageA': McGill calibrated LMS foliage/ image subset (5)
+          :'FoliageB': McGill calibrated LMS foliage/ image subset (25)""")
 
     dims = param.List(default=['xy','or'],class_=str,doc="""
         Stimulus dimensions to include, out of the possible list:
@@ -118,7 +127,8 @@ class VisualInputModel(SensoryModel):
         # all the above will eventually end up in PatternCoordinator!
         params = dict(features_to_vary=self.dims,
                       pattern_labels=pattern_labels,
-                      pattern_parameters={'size': 0.088388 if 'or' in self.dims else 3*0.088388,
+                      pattern_parameters={'size': 0.088388 if 'or' in self.dims and self.dataset=='Gaussian' \
+                                           else 3*0.088388 if self.dataset=='Gaussian' else 10.0,
                                           'aspect_ratio': 4.66667 if 'or' in self.dims else 1.0,
                                           'scale': self.contrast/100.0},
                       disparity_bound=disparity_bound,
@@ -131,7 +141,14 @@ class VisualInputModel(SensoryModel):
                       sf_max_channel=max(self['SF']),
                       patterns_per_label=int(self.num_inputs*self.area*self.area))
 
-        return PatternCoordinator(**dict(params, **overrides))()
+        if self.dataset=='Gaussian':
+            return PatternCoordinator(**dict(params, **overrides))()
+        else:
+            image_folder = 'images/shouval' if self.dataset=='Nature' \
+                           else 'images/mcgill/foliage_a_combined' if self.dataset=='FoliageA' \
+                           else 'images/mcgill/foliage_b_combined' if self.dataset=='FoliageB' \
+                           else None
+            return PatternCoordinatorImages(image_folder, **dict(params, **overrides))()
 
 
 
