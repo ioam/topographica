@@ -230,7 +230,7 @@ class EarlyVisionModel(VisualInputModel):
     def LGN(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
 
-        sf_aff_multiplier = self.sf_spacing**(max(self.attrs.SF)-1) if self.gain_control_SF else \
+        sf_aff_multiplier = self.sf_spacing**(max(self['SF'])-1) if self.gain_control_SF else \
                             self.sf_spacing**(channel-1)
 
         is_gaincontrol_sheet = self.gain_control_SF if 'SF' in properties else \
@@ -451,7 +451,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
 
     @Model.SharedWeightCFProjection
-    def afferent_surround_projections(self, src_properties, dest_properties):
+    def afferent_surround(self, src_properties, dest_properties):
         surrounds=[]
         for color, color_code in self.ColorToChannel.items():
             if color in dest_properties['surround']:
@@ -473,7 +473,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     @Model.matchconditions('LGN', 'lateral_gain_control')
     def lateral_gain_control_conditions(self, properties):
         # The projection itself is defined in the super class
-        luminosity_channel='RedGreenBlue' if color_sim_type=='Trichromatic' else 'GreenBlue'
+        luminosity_channel='RedGreenBlue' if self.color_sim_type=='Trichromatic' else 'GreenBlue'
         return ({'level': 'LGN', 'polarity':properties['polarity'],
                  'opponent':properties['opponent'],
                  'surround':properties['surround']} if self.gain_control and 'opponent' in properties and properties['opponent']==luminosity_channel else

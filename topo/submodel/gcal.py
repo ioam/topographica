@@ -110,8 +110,8 @@ class ModelGCAL(ColorEarlyVisionModel):
 
         if 'opponent' in src_properties:
             # Determine strength per channel from how many luminosity and color channels there are
-            num_tot=len(self.attrs.Args['polarities'])*len(self.attrs.Args['opponents'])
-            num_lum=len(self.attrs.Args['polarities'])
+            num_tot=len(self['polarities'])*len(self['opponents'])
+            num_lum=len(self['polarities'])
             num_col=num_tot-num_lum
             color_scale=((1.0*num_tot/num_lum*(1.0-self.color_strength)) if src_properties['opponent']=="RedGreenBlue" else
                          (1.0*num_tot/num_col*self.color_strength))
