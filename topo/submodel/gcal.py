@@ -21,7 +21,7 @@ class ModelGCAL(ColorEarlyVisionModel):
         The nominal_density to use for V1.""")
 
     homeostasis = param.Boolean(default=True, doc="""
-        Whether or not the homeostatic adaption should be applied in V1"""),
+        Whether or not the homeostatic adaption should be applied in V1""")
 
     t_init = param.Number(default=0.15, doc="""
         The initial V1 threshold value. This value is static in the L and GCL models
