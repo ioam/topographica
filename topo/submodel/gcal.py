@@ -108,12 +108,25 @@ class ModelGCAL(ColorEarlyVisionModel):
         gaussian_size = 2.0 * self.v1aff_radius *self.sf_spacing**(sf_channel-1)
         weights_generator = imagen.random.GaussianCloud(gaussian_size=gaussian_size)
 
+        if 'opponent' in src_properties:
+            # Determine strength per channel from how many luminosity and color channels there are
+            num_tot=len(self.attrs.Args['polarities'])*len(self.attrs.Args['opponents'])
+            num_lum=len(self.attrs.Args['polarities'])
+            num_col=num_tot-num_lum
+            color_scale=((1.0*num_tot/num_lum*(1.0-self.color_strength)) if src_properties['opponent']=="RedGreenBlue" else
+                         (1.0*num_tot/num_col*self.color_strength))
+        else: color_scale=1.0
+
         return [Model.CFProjection.params(
                 delay=LGN_V1_delay+lag,
                 dest_port=('Activity','JointNormalize','Afferent'),
                 name= name if lag==0 else name+('Lag'+str(lag)),
                 learning_rate=self.aff_lr,
-                strength=self.aff_strength*(1.0 if not self.gain_control else 1.5),
+                strength=self.aff_strength*color_scale*
+                            (1.0 if (not self.gain_control
+                                     or ('opponent' in src_properties
+                                         and not self.gain_control_color))
+                            else 1.5),
                 weights_generator=weights_generator,
                 nominal_bounds_template=sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
@@ -171,6 +184,11 @@ class ModelGCAL(ColorEarlyVisionModel):
             #patterns, and thus the typical width of an ON stripe in one of the
             #receptive fields
             measure_sine_pref.frequencies = [2.4*s for s in relative_sizes]
+        if 'cr' in self.dims:
+            from topo.analysis.command import measure_hue_pref, measure_od_pref
+            from featuremapper.metaparams import contrast2scale, hue2rgbscaleChrisBallNewRetina, ocular2leftrightscaleNewRetina
+            measure_hue_pref.metafeature_fns=[contrast2scale, hue2rgbscaleChrisBallNewRetina]
+            measure_od_pref.metafeature_fns=[contrast2scale, ocular2leftrightscaleNewRetina]
 
 
 
