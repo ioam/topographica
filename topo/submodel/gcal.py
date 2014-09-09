@@ -186,8 +186,8 @@ class ModelGCAL(ColorEarlyVisionModel):
             measure_sine_pref.frequencies = [2.4*s for s in relative_sizes]
         if 'cr' in self.dims:
             from topo.analysis.command import measure_hue_pref, measure_od_pref
-            from featuremapper.metaparams import contrast2scale, hue2rgbscaleChrisBallNewRetina, ocular2leftrightscaleNewRetina
-            measure_hue_pref.metafeature_fns=[contrast2scale, hue2rgbscaleChrisBallNewRetina]
+            from featuremapper.metaparams import contrast2scale, hue2rgbscaleNewRetina, ocular2leftrightscaleNewRetina
+            measure_hue_pref.metafeature_fns=[contrast2scale, hue2rgbscaleNewRetina]
             measure_od_pref.metafeature_fns=[contrast2scale, ocular2leftrightscaleNewRetina]
 
 
