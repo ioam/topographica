@@ -124,8 +124,8 @@ class VisualInputModel(SensoryModel):
 
         if 'dr' in self.dims:
             #TFALERT: Should probably depend on speed
-            position_bound_x+=self.position_buffer_motion
-            position_bound_y+=self.position_buffer_motion
+            position_bound_x+=self.motion_buffer
+            position_bound_y+=self.motion_buffer
 
         pattern_labels=['LeftRetina','RightRetina'] if self['binocular'] else ['Retina']
         # all the above will eventually end up in PatternCoordinator!
