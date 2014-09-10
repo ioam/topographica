@@ -389,7 +389,7 @@ class SHCPlot(TemplatePlot):
         c_mat = self._get_matrix('Confidence')
 
         # If it is an empty plot: self.bitmap=None
-        if (s_mat==None and c_mat==None and h_mat==None):
+        if (s_mat is None and c_mat is None and h_mat is None):
             self.debug('Empty plot.')
 
         # Otherwise, we construct self.bitmap according to what is specified by the channels.
