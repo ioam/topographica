@@ -233,8 +233,10 @@ class EarlyVisionModel(VisualInputModel):
         sf_aff_multiplier = self.sf_spacing**(max(self['SF'])-1) if self.gain_control_SF else \
                             self.sf_spacing**(channel-1)
 
+        luminosity_channel='RedGreenBlue' if self.color_sim_type=='Trichromatic' else 'GreenBlue'
+
         is_gaincontrol_sheet = self.gain_control_SF if 'SF' in properties else \
-                               self.gain_control_color if 'opponent' in properties and properties['opponent']!='RedGreenBlue' else \
+                               self.gain_control_color if 'opponent' in properties and properties['opponent']!=luminosity_channel else \
                                self.gain_control
 
         return Model.SettlingCFSheet.params(
