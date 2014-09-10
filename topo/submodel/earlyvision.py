@@ -326,15 +326,6 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                 if 'opponent' not in properties else None)
 
 
-    @Model.SharedWeightCFProjection
-    def afferent(self, src_properties, dest_properties):
-        parameters = super(ColorEarlyVisionModel,self).afferent(src_properties, dest_properties)
-        if 'opponent' in dest_properties:
-            parameters['name']+= (dest_properties['opponent']
-                                  + src_properties['cone'])
-        return parameters
-
-
     @Model.matchconditions('LGN', 'afferent_center')
     def afferent_center_conditions(self, properties):
         return ({'level': 'Retina', 'cone': properties['opponent'],
