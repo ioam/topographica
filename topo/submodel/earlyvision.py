@@ -178,6 +178,10 @@ class EarlyVisionModel(VisualInputModel):
         Whether to use divisive lateral inhibition in the LGN for
         contrast gain control.""")
 
+    gain_control_SF = param.Boolean(default=True,doc="""
+        Whether to use divisive lateral inhibition in the LGN for
+        contrast gain control across Spatial Frequency Sheets.""")
+
     strength_factor = param.Number(default=1.0,bounds=(0,None),doc="""
         Factor by which the strength of afferent connections from
         retina sheets to LGN sheets is multiplied.""")
@@ -220,6 +224,12 @@ class EarlyVisionModel(VisualInputModel):
     @Model.SettlingCFSheet
     def LGN(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
+
+        sf_aff_multiplier = self.sf_spacing**(max(self['SF'])-1) if self.gain_control_SF else \
+                            self.sf_spacing**(channel-1)
+
+        gain_control = self.gain_control_SF if 'SF' in properties else self.gain_control
+
         return Model.SettlingCFSheet.params(
             mask = topo.base.projection.SheetMask(),
             measure_maps=False,
@@ -227,10 +237,10 @@ class EarlyVisionModel(VisualInputModel):
             nominal_density=self.lgn_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
                                              + self.v1aff_radius
-                                             * self.sf_spacing**(channel-1)
+                                             * sf_aff_multiplier
                                              + self.lgnlateral_radius),
-            tsettle=2 if self.gain_control else 0,
-            strict_tsettle=1 if self.gain_control else 0)
+            tsettle=2 if gain_control else 0,
+            strict_tsettle=1 if gain_control else 0)
 
 
     @Model.matchconditions('LGN', 'afferent')
@@ -266,13 +276,22 @@ class EarlyVisionModel(VisualInputModel):
 
     @Model.matchconditions('LGN', 'lateral_gain_control')
     def lateral_gain_control_conditions(self, properties):
-        return ({'level': 'LGN', 'polarity':properties['polarity'],
-                 'SF': properties.get('SF',None)} if self.gain_control else None)
+        return ({'level': 'LGN', 'polarity':properties['polarity']}
+            if self.gain_control and self.gain_control_SF else
+            {'level': 'LGN', 'polarity':properties['polarity'],
+             'SF': properties.get('SF',None)}
+            if self.gain_control else None)
 
 
     @Model.SharedWeightCFProjection
     def lateral_gain_control(self, src_properties, dest_properties):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
+        name='LateralGC'
+        if 'eye' in src_properties:
+            name+=src_properties['eye']
+        if 'SF' in src_properties and self.gain_control_SF:
+            name+=('SF'+str(src_properties['SF']))
+
         return Model.SharedWeightCFProjection.params(
             delay=0.05,
             dest_port=('Activity'),
@@ -281,8 +300,7 @@ class EarlyVisionModel(VisualInputModel):
                                               aspect_ratio=1.0,
                                               output_fns=[transferfn.DivisiveNormalizeL1()]),
             nominal_bounds_template=sheet.BoundingBox(radius=0.25),
-            name=('LateralGC' + src_properties['eye']
-                  if 'eye' in src_properties else 'LateralGC'),
+            name=name,
             strength=0.6/(2 if self['binocular'] else 1))
 
 
