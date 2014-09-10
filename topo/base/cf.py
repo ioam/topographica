@@ -823,7 +823,7 @@ class CFProjection(Projection):
         """
         # Learning is performed if the input_buffer has already been set,
         # i.e. there is an input to the Projection.
-        if self.input_buffer != None:
+        if self.input_buffer is not None:
             self.learning_fn(CFIter(self),self.input_buffer,self.dest.activity,self.learning_rate)
 
 
