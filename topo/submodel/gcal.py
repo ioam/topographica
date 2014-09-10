@@ -185,7 +185,7 @@ class ExamplesGCAL(ModelGCAL):
             raise Exception("ExamplesGCAL only reproducible for dims = ['xy', 'or']")
 
 
-    def setup(self,setup_options):
+    def setup(self,setup_options=True):
         model = super(ExamplesGCAL, self).setup(setup_options)
         if setup_options is True or 'sheets' in setup_options:
             model.sheets.Retina.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+1.125))
