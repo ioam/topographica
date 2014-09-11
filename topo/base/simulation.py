@@ -1228,8 +1228,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         supplied instantiate options and verbose flag.
         """
         if self.specification is not None:
-            self.specification()
-            return
+            return self.specification() if load else None
+
         if self.model is None:  return
         elif not callable(self.model):
             raise Exception("Model object %r is not callable" % self.model)
