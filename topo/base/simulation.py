@@ -1013,7 +1013,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         self.views = AttrDict()
         self._event_processors = {}
 
-        self._instantiated_model = False
+        self.specification = None
         self.model = None
 
         if self.register:
@@ -1216,21 +1216,28 @@ class Simulation(param.Parameterized,OptionalSingleton):
             self.timer.call_and_time(duration)
 
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, load=True, setup_options=True,
+                 instantiate_options=True, verbose=False):
         """
-        Load the model specified by topo.sim.model by calling the
-        model object. The model will only be called if self.model not
-        None and if the model has not already instantiated.
+        Set the simulation specification and instantiate the model
+        (when load is set to True). The specification is created with
+        the supplied setup_options - see the docstring of Model.setup
+        for more information.
 
-        All positional and keyword arguments are passed through to the
-        call used to initialize the model.
+        If load is set to True, the model is instantiated using the
+        supplied instantiate options and verbose flag.
         """
+        if self.specification is not None:
+            self.specification()
+            return
         if self.model is None:  return
         elif not callable(self.model):
             raise Exception("Model object %r is not callable" % self.model)
-        elif not self._instantiated_model:
-            self._instantiated_model = True
-            self.model(*args, **kwargs)
+        elif isinstance(self.model, type):
+            raise Exception("Please supply an instantiated model object and not a Model class.")
+        self.specification = self.model.setup(setup_options=setup_options)
+        if load:
+            self.specification(instantiate_options=True, verbose=False)
 
 
     def run(self, duration=forever, until=forever):
@@ -1254,9 +1261,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         Note that duration and until should be specified in a format suitable for
         conversion (coercion?) into the Simulation's _time_type.
         """
-
-        if not self._instantiated_model and self.model: self()
-        elif not self.objects():
+        self()
+        if not self.objects():
             self.message("No model specified to the Simulation instance.")
             return
 
