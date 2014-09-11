@@ -1,6 +1,13 @@
 """
 This file is a duplicate of topo/submodel/gcal.py with the extension
-of some color-related code.
+of some color-related code. The class ModelGCALInheritingColor is an
+exact copy of ModelGCAL (the only difference being the different
+class name in the super() calls). ModelGCALColor is a subclass of
+ModelGCALInheritingColor and shows the changes needed in the cortical
+sheet to include color, namely a different strength from the LGN sheets
+to V1 depending whether it is the luminosity LGN sheet as well as 
+the addition of measurement code.
+This class can be used to replicate the results in fischer:ms14
 """
 
 import topo
@@ -19,7 +26,7 @@ from topo.submodel.earlyvision_color import ColorEarlyVisionModel
 
 
 
-class ModelGCALColor(ColorEarlyVisionModel):
+class ModelGCALInheritingColor(ColorEarlyVisionModel):
 
     cortex_density=param.Number(default=47.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
@@ -64,7 +71,7 @@ class ModelGCALColor(ColorEarlyVisionModel):
 
 
     def property_setup(self, properties):
-        properties = super(ModelGCALColor, self).property_setup(properties)
+        properties = super(ModelGCALInheritingColor, self).property_setup(properties)
         "Specify weight initialization, response function, and learning function"
 
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
@@ -75,7 +82,7 @@ class ModelGCALColor(ColorEarlyVisionModel):
         return properties
 
     def sheet_setup(self):
-        sheets = super(ModelGCALColor,self).sheet_setup()
+        sheets = super(ModelGCALInheritingColor,self).sheet_setup()
         sheets['V1'] = [{}]
         return sheets
 
@@ -113,25 +120,12 @@ class ModelGCALColor(ColorEarlyVisionModel):
         gaussian_size = 2.0 * self.v1aff_radius *self.sf_spacing**(sf_channel-1)
         weights_generator = imagen.random.GaussianCloud(gaussian_size=gaussian_size)
 
-        if 'opponent' in src_properties:
-            # Determine strength per channel from how many luminosity and color channels there are
-            num_tot=len(self['polarities'])*len(self['opponents'])
-            num_lum=len(self['polarities'])
-            num_col=num_tot-num_lum
-            color_scale=((1.0*num_tot/num_lum*(1.0-self.color_strength)) if src_properties['opponent']=="RedGreenBlue" else
-                         (1.0*num_tot/num_col*self.color_strength))
-        else: color_scale=1.0
-
         return [Model.CFProjection.params(
                 delay=LGN_V1_delay+lag,
                 dest_port=('Activity','JointNormalize','Afferent'),
                 name= name if lag==0 else name+('Lag'+str(lag)),
                 learning_rate=self.aff_lr,
-                strength=self.aff_strength*color_scale*
-                            (1.0 if (not self.gain_control
-                                     or ('opponent' in src_properties
-                                         and not self.gain_control_color))
-                            else 1.5),
+                strength=self.aff_strength*(1.0 if not self.gain_control else 1.5),
                 weights_generator=weights_generator,
                 nominal_bounds_template=sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
@@ -189,6 +183,57 @@ class ModelGCALColor(ColorEarlyVisionModel):
             #patterns, and thus the typical width of an ON stripe in one of the
             #receptive fields
             measure_sine_pref.frequencies = [2.4*s for s in relative_sizes]
+
+
+
+class ModelGCALColor(ModelGCALInheritingColor):
+
+    @Model.CFProjection
+    def V1_afferent(self, src_properties, dest_properties):
+        sf_channel = src_properties['SF'] if 'SF' in src_properties else 1
+        # Adjust delays so same measurement protocol can be used with and without gain control.
+        LGN_V1_delay = 0.05 if self.gain_control else 0.10
+
+        name=''
+        if 'eye' in src_properties: name+=src_properties['eye']
+        if 'opponent' in src_properties:
+            name+=src_properties['opponent']+src_properties['surround']
+        name+=('LGN'+src_properties['polarity']+'Afferent')
+        if sf_channel>1: name+=('SF'+str(src_properties['SF']))
+
+        gaussian_size = 2.0 * self.v1aff_radius *self.sf_spacing**(sf_channel-1)
+        weights_generator = imagen.random.GaussianCloud(gaussian_size=gaussian_size)
+
+        #TFALERT: Changes regarding color begin
+        if 'opponent' in src_properties:
+            # Determine strength per channel from how many luminosity and color channels there are
+            num_tot=len(self['polarities'])*len(self['opponents'])
+            num_lum=len(self['polarities'])
+            num_col=num_tot-num_lum
+            color_scale=((1.0*num_tot/num_lum*(1.0-self.color_strength)) if src_properties['opponent']=="RedGreenBlue" else
+                         (1.0*num_tot/num_col*self.color_strength))
+        else: color_scale=1.0
+        #TFALERT: Changes regarding color end
+
+        #TFALERT: Mind the change in the strength compared to the non-color version
+        return [Model.CFProjection.params(
+                delay=LGN_V1_delay+lag,
+                dest_port=('Activity','JointNormalize','Afferent'),
+                name= name if lag==0 else name+('Lag'+str(lag)),
+                learning_rate=self.aff_lr,
+                strength=self.aff_strength*color_scale*
+                            (1.0 if (not self.gain_control
+                                     or ('opponent' in src_properties
+                                         and not self.gain_control_color))
+                            else 1.5),
+                weights_generator=weights_generator,
+                nominal_bounds_template=sheet.BoundingBox(radius=
+                                            self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
+                for lag in self['lags']]
+
+
+    def analysis_setup(self):
+        super(ModelGCALInheritingColor,self).analysis_setup()
         if 'cr' in self.dims:
             from topo.analysis.command import measure_hue_pref, measure_od_pref
             from featuremapper.metaparams import contrast2scale, hue2rgbscaleNewRetina, ocular2leftrightscaleNewRetina
