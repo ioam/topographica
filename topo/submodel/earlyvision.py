@@ -87,11 +87,6 @@ class VisualInputModel(SensoryModel):
         Distance in sheet coordinates between successive frames, when
         translating patterns. Only used if 'dr' in 'dims'.""")
 
-    motion_buffer=param.Number(default=0.15,bounds=(0,None),doc="""
-        Buffer in sheet coordinates by which the range should be
-        extended where pattern are drawn from. Only used if
-        'dr' in 'dims'.""")
-
     __abstract = True
 
 
@@ -119,9 +114,8 @@ class VisualInputModel(SensoryModel):
             position_bound_x -= disparity_bound
 
         if 'dr' in self.dims:
-            #TFALERT: Should probably depend on speed
-            position_bound_x+=self.motion_buffer
-            position_bound_y+=self.motion_buffer
+            position_bound_x+=self.speed*max(self['lags'])
+            position_bound_y+=self.speed*max(self['lags'])
 
         pattern_labels=['LeftRetina','RightRetina'] if self['binocular'] else ['Retina']
         # all the above will eventually end up in PatternCoordinator!
