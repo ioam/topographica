@@ -1,3 +1,15 @@
+"""
+This file is a duplicate of topo/submodel/gcal.py with the extension
+of some color-related code. The class ModelGCALInheritingColor is an
+exact copy of ModelGCAL (the only difference being the different
+class name in the super() calls). ModelGCALColor is a subclass of
+ModelGCALInheritingColor and shows the changes needed in the cortical
+sheet to include color, namely a different strength from the LGN sheets
+to V1 depending whether it is the luminosity LGN sheet as well as 
+the addition of measurement code.
+This class can be used to replicate the results in fischer:ms14
+"""
+
 import topo
 import param
 import imagen
@@ -10,11 +22,11 @@ import topo.sheet.optimized
 import topo.transferfn.misc
 
 from topo.submodel import Model, order_projections
-from topo.submodel.earlyvision import EarlyVisionModel
+from topo.submodel.earlyvision_color import ColorEarlyVisionModel
 
 
 
-class ModelGCAL(EarlyVisionModel):
+class ModelGCALInheritingColor(ColorEarlyVisionModel):
 
     cortex_density=param.Number(default=47.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
@@ -59,7 +71,7 @@ class ModelGCAL(EarlyVisionModel):
 
 
     def property_setup(self, properties):
-        properties = super(ModelGCAL, self).property_setup(properties)
+        properties = super(ModelGCALInheritingColor, self).property_setup(properties)
         "Specify weight initialization, response function, and learning function"
 
         projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
@@ -70,7 +82,7 @@ class ModelGCAL(EarlyVisionModel):
         return properties
 
     def sheet_setup(self):
-        sheets = super(ModelGCAL,self).sheet_setup()
+        sheets = super(ModelGCALInheritingColor,self).sheet_setup()
         sheets['V1'] = [{}]
         return sheets
 
@@ -174,29 +186,56 @@ class ModelGCAL(EarlyVisionModel):
 
 
 
-class ExamplesGCAL(ModelGCAL):
-    """
-    Reproduces the results of the legacy examples/gcal.ty file.
-    """
+class ModelGCALColor(ModelGCALInheritingColor):
 
-    def __init__(self, **params):
-        super(ExamplesGCAL, self).__init__(time_dependent=False, **params)
-        if set(self.dims) != set([ 'xy', 'or']):
-            raise Exception("ExamplesGCAL only reproducible for dims = ['xy', 'or']")
+    @Model.CFProjection
+    def V1_afferent(self, src_properties, dest_properties):
+        sf_channel = src_properties['SF'] if 'SF' in src_properties else 1
+        # Adjust delays so same measurement protocol can be used with and without gain control.
+        LGN_V1_delay = 0.05 if self.gain_control else 0.10
+
+        name=''
+        if 'eye' in src_properties: name+=src_properties['eye']
+        if 'opponent' in src_properties:
+            name+=src_properties['opponent']+src_properties['surround']
+        name+=('LGN'+src_properties['polarity']+'Afferent')
+        if sf_channel>1: name+=('SF'+str(src_properties['SF']))
+
+        gaussian_size = 2.0 * self.v1aff_radius *self.sf_spacing**(sf_channel-1)
+        weights_generator = imagen.random.GaussianCloud(gaussian_size=gaussian_size)
+
+        #TFALERT: Changes regarding color begin
+        if 'opponent' in src_properties:
+            # Determine strength per channel from how many luminosity and color channels there are
+            num_tot=len(self['polarities'])*len(self['opponents'])
+            num_lum=len(self['polarities'])
+            num_col=num_tot-num_lum
+            color_scale=((1.0*num_tot/num_lum*(1.0-self.color_strength)) if src_properties['opponent']=="RedGreenBlue" else
+                         (1.0*num_tot/num_col*self.color_strength))
+        else: color_scale=1.0
+        #TFALERT: Changes regarding color end
+
+        #TFALERT: Mind the change in the strength compared to the non-color version
+        return [Model.CFProjection.params(
+                delay=LGN_V1_delay+lag,
+                dest_port=('Activity','JointNormalize','Afferent'),
+                name= name if lag==0 else name+('Lag'+str(lag)),
+                learning_rate=self.aff_lr,
+                strength=self.aff_strength*color_scale*
+                            (1.0 if (not self.gain_control
+                                     or ('opponent' in src_properties
+                                         and not self.gain_control_color))
+                            else 1.5),
+                weights_generator=weights_generator,
+                nominal_bounds_template=sheet.BoundingBox(radius=
+                                            self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
+                for lag in self['lags']]
 
 
-    def setup(self,setup_options=True):
-        model = super(ExamplesGCAL, self).setup(setup_options)
-        if setup_options is True or 'sheets' in setup_options:
-            model.sheets.Retina.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+1.125))
-            model.sheets.LGNOn.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
-            model.sheets.LGNOff.update(nominal_bounds=sheet.BoundingBox(radius=self.area/2.0+0.75))
-            model.sheets.V1.update(nominal_density=48)
-        if setup_options is True or 'projections' in setup_options:
-            order_projections(model, ['afferent',
-                                      'lateral_gain_control',
-                                      ('V1_afferent', {'polarity':'On'}),
-                                      ('V1_afferent', {'polarity':'Off'}),
-                                      'lateral_excitatory',
-                                      'lateral_inhibitory'])
-        return model
+    def analysis_setup(self):
+        super(ModelGCALInheritingColor,self).analysis_setup()
+        if 'cr' in self.dims:
+            from topo.analysis.command import measure_hue_pref, measure_od_pref
+            from featuremapper.metaparams import contrast2scale, hue2rgbscaleNewRetina, ocular2leftrightscaleNewRetina
+            measure_hue_pref.metafeature_fns=[contrast2scale, hue2rgbscaleNewRetina]
+            measure_od_pref.metafeature_fns=[contrast2scale, ocular2leftrightscaleNewRetina]
