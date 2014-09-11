@@ -10,7 +10,7 @@ import numpy
 import imagen
 
 
-from imagen.patterncoordinator import PatternCoordinator
+from imagen.patterncoordinator import PatternCoordinator, PatternCoordinatorImages
 
 from topo.base.arrayutil import DivideWithConstant
 from topo.submodel import Model
@@ -32,6 +32,15 @@ class SensoryModel(Model):
 
 
 class VisualInputModel(SensoryModel):
+
+    dataset = param.ObjectSelector(default='Gaussian',objects=
+        ['Gaussian','Nature','FoliageA','FoliageB'],doc="""
+        Set of input patterns to use::
+
+          :'Gaussian': Two-dimensional Gaussians
+          :'Nature':   Shouval's 1999 monochrome 256x256 images
+          :'FoliageA': McGill calibrated LMS foliage/ image subset (5)
+          :'FoliageB': McGill calibrated LMS foliage/ image subset (25)""")
 
     dims = param.List(default=['xy','or'],class_=str,doc="""
         Stimulus dimensions to include, out of the possible list:
@@ -104,11 +113,16 @@ class VisualInputModel(SensoryModel):
             #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
             position_bound_x -= disparity_bound
 
+        if 'dr' in self.dims:
+            position_bound_x+=self.speed*max(self['lags'])
+            position_bound_y+=self.speed*max(self['lags'])
+
         pattern_labels=['LeftRetina','RightRetina'] if self['binocular'] else ['Retina']
         # all the above will eventually end up in PatternCoordinator!
         params = dict(features_to_vary=self.dims,
                       pattern_labels=pattern_labels,
-                      pattern_parameters={'size': 0.088388 if 'or' in self.dims else 3*0.088388,
+                      pattern_parameters={'size': 0.088388 if 'or' in self.dims and self.dataset=='Gaussian' \
+                                           else 3*0.088388 if self.dataset=='Gaussian' else 10.0,
                                           'aspect_ratio': 4.66667 if 'or' in self.dims else 1.0,
                                           'scale': self.contrast/100.0},
                       disparity_bound=disparity_bound,
@@ -121,7 +135,14 @@ class VisualInputModel(SensoryModel):
                       sf_max_channel=max(self['SF']),
                       patterns_per_label=int(self.num_inputs*self.area*self.area))
 
-        return PatternCoordinator(**dict(params, **overrides))()
+        if self.dataset=='Gaussian':
+            return PatternCoordinator(**dict(params, **overrides))()
+        else:
+            image_folder = 'images/shouval' if self.dataset=='Nature' \
+                           else 'images/mcgill/foliage_a_combined' if self.dataset=='FoliageA' \
+                           else 'images/mcgill/foliage_b_combined' if self.dataset=='FoliageB' \
+                           else None
+            return PatternCoordinatorImages(image_folder, **dict(params, **overrides))()
 
 
 
@@ -150,6 +171,10 @@ class EarlyVisionModel(VisualInputModel):
     gain_control = param.Boolean(default=True,doc="""
         Whether to use divisive lateral inhibition in the LGN for
         contrast gain control.""")
+
+    gain_control_SF = param.Boolean(default=True,doc="""
+        Whether to use divisive lateral inhibition in the LGN for
+        contrast gain control across Spatial Frequency Sheets.""")
 
     strength_factor = param.Number(default=1.0,bounds=(0,None),doc="""
         Factor by which the strength of afferent connections from
@@ -193,6 +218,12 @@ class EarlyVisionModel(VisualInputModel):
     @Model.SettlingCFSheet
     def LGN(self, properties):
         channel=properties['SF'] if 'SF' in properties else 1
+
+        sf_aff_multiplier = self.sf_spacing**(max(self['SF'])-1) if self.gain_control_SF else \
+                            self.sf_spacing**(channel-1)
+
+        gain_control = self.gain_control_SF if 'SF' in properties else self.gain_control
+
         return Model.SettlingCFSheet.params(
             mask = topo.base.projection.SheetMask(),
             measure_maps=False,
@@ -200,10 +231,10 @@ class EarlyVisionModel(VisualInputModel):
             nominal_density=self.lgn_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
                                              + self.v1aff_radius
-                                             * self.sf_spacing**(channel-1)
+                                             * sf_aff_multiplier
                                              + self.lgnlateral_radius),
-            tsettle=2 if self.gain_control else 0,
-            strict_tsettle=1 if self.gain_control else 0)
+            tsettle=2 if gain_control else 0,
+            strict_tsettle=1 if gain_control else 0)
 
 
     @Model.matchconditions('LGN', 'afferent')
@@ -239,13 +270,22 @@ class EarlyVisionModel(VisualInputModel):
 
     @Model.matchconditions('LGN', 'lateral_gain_control')
     def lateral_gain_control_conditions(self, properties):
-        return ({'level': 'LGN', 'polarity':properties['polarity'],
-                 'SF': properties.get('SF',None)} if self.gain_control else None)
+        return ({'level': 'LGN', 'polarity':properties['polarity']}
+            if self.gain_control and self.gain_control_SF else
+            {'level': 'LGN', 'polarity':properties['polarity'],
+             'SF': properties.get('SF',None)}
+            if self.gain_control else None)
 
 
     @Model.SharedWeightCFProjection
     def lateral_gain_control(self, src_properties, dest_properties):
         #TODO: Are those 0.25 the same as lgnlateral_radius/2.0?
+        name='LateralGC'
+        if 'eye' in src_properties:
+            name+=src_properties['eye']
+        if 'SF' in src_properties and self.gain_control_SF:
+            name+=('SF'+str(src_properties['SF']))
+
         return Model.SharedWeightCFProjection.params(
             delay=0.05,
             dest_port=('Activity'),
@@ -254,8 +294,7 @@ class EarlyVisionModel(VisualInputModel):
                                               aspect_ratio=1.0,
                                               output_fns=[transferfn.DivisiveNormalizeL1()]),
             nominal_bounds_template=sheet.BoundingBox(radius=0.25),
-            name=('LateralGC' + src_properties['eye']
-                  if 'eye' in src_properties else 'LateralGC'),
+            name=name,
             strength=0.6/(2 if self['binocular'] else 1))
 
 
@@ -297,15 +336,6 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     def afferent_conditions(self, properties):
         return ({'level': 'Retina', 'eye': properties.get('eye')}
                 if 'opponent' not in properties else None)
-
-
-    @Model.SharedWeightCFProjection
-    def afferent(self, src_properties, dest_properties):
-        parameters = super(ColorEarlyVisionModel,self).afferent(src_properties, dest_properties)
-        if 'opponent' in dest_properties:
-            parameters['name']+= (dest_properties['opponent']
-                                  + src_properties['cone'])
-        return parameters
 
 
     @Model.matchconditions('LGN', 'afferent_center')
