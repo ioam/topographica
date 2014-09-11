@@ -255,10 +255,6 @@ class EarlyVisionModel(VisualInputModel):
         on_weights  = imagen.Composite(generators=[centerg,surroundg],operator=numpy.subtract)
         off_weights = imagen.Composite(generators=[surroundg,centerg],operator=numpy.subtract)
 
-        #TODO: strength=+strength_scale/len(cone_types) for 'On' center
-        #TODO: strength=-strength_scale/len(cone_types) for 'Off' center
-        #TODO: strength=-strength_scale/len(cone_types) for 'On' surround
-        #TODO: strength=+strength_scale/len(cone_types) for 'Off' surround
         return Model.SharedWeightCFProjection.params(
             delay=0.05,
             strength=2.33*self.strength_factor,
