@@ -229,6 +229,8 @@ class ModelSpec(Specification):
         self.sheets = AttrTree()
         self.projections = AttrTree()
 
+        self._instantiated = False
+
         self.properties = properties
         super(ModelSpec, self).__init__(model)
         self.model= model
@@ -253,6 +255,11 @@ class ModelSpec(Specification):
         information about each instantiation option.
         """
         msglevel = self.message if verbose else self.debug
+
+        if self._instantiated:
+            msglevel('ModelSpec %r already instantiated. Returning.' % self.model.name)
+            return
+
         available_instantiate_options = ['sheets','projections']
         if instantiate_options==True:
             instantiate_options=available_instantiate_options
@@ -267,6 +274,7 @@ class ModelSpec(Specification):
                 msglevel('Match: ' + proj.matchname + ': Connection ' + str(proj.src) + \
                              '->' + str(proj.dest) + ' ' + proj.parameters['name'])
                 proj()
+        self._instantiated = True
 
 
     def summary(self, printed=True):
