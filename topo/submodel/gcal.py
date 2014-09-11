@@ -10,11 +10,11 @@ import topo.sheet.optimized
 import topo.transferfn.misc
 
 from topo.submodel import Model, order_projections
-from topo.submodel.earlyvision import ColorEarlyVisionModel
+from topo.submodel.earlyvision import EarlyVisionModel
 
 
 
-class ModelGCAL(ColorEarlyVisionModel):
+class ModelGCAL(EarlyVisionModel):
 
     cortex_density=param.Number(default=47.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
