@@ -87,6 +87,13 @@ class VisualInputModel(SensoryModel):
         Distance in sheet coordinates between successive frames, when
         translating patterns. Only used if 'dr' in 'dims'.""")
 
+    align_orientations = param.Boolean(default=None,
+                                       allow_None=True, doc="""
+        Whether or not to align pattern orientations together if
+        composing multiple patterns together. If None,
+        align_orientations will be set to True when speed is non-zero
+        (and 'dr' in dims), otherwise it is set to False.""")
+
     __abstract = True
 
 
@@ -113,6 +120,9 @@ class VisualInputModel(SensoryModel):
             #TFALERT: Formerly: position_bound_x = self.area/2.0+0.2
             position_bound_x -= disparity_bound
 
+        align_orientations = (bool(self.speed) and ('dr' in self.dims)
+                              if self.align_orientations is None
+                              else self.align_orientations)
         if 'dr' in self.dims:
             position_bound_x+=self.speed*max(self['lags'])
             position_bound_y+=self.speed*max(self['lags'])
@@ -131,6 +141,7 @@ class VisualInputModel(SensoryModel):
                       dim_fraction=self.dim_fraction,
                       reset_period=(max(self['lags'])+1),
                       speed=self.speed,
+                      align_orientations = align_orientations,
                       sf_spacing=self.sf_spacing,
                       sf_max_channel=max(self['SF']),
                       patterns_per_label=int(self.num_inputs*self.area*self.area))
