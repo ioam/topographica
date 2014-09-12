@@ -222,7 +222,12 @@ class ColorEarlyVisionModel(EarlyVisionModel):
         luminosity_channel='RedGreenBlue' if self.color_sim_type=='Trichromatic' else 'GreenBlue'
         return ({'level': 'LGN', 'polarity':properties['polarity'],
                  'opponent':properties['opponent'],
-                 'surround':properties['surround']} if self.gain_control and 'opponent' in properties and properties['opponent']==luminosity_channel else
+                 'surround':properties['surround']}
+                if (self.gain_control and 'opponent' in properties \
+                                      and properties['opponent']==luminosity_channel) or \
+                   (self.gain_control_color and 'opponent' in properties
+                                            and properties['opponent']!=luminosity_channel)
+                else
                 {'level': 'LGN',
                  'polarity': properties['polarity']}
                 if self.gain_control and \
@@ -231,11 +236,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                 else
                 {'level': 'LGN', 'polarity':properties['polarity'],
                  'SF': properties.get('SF',None)}
-                if self.gain_control and 'opponent' not in properties else
-                {'level': 'LGN', 'polarity':properties['polarity'],
-                 'opponent':properties['opponent'],
-                 'surround':properties['surround']}
-                if self.gain_control_color and 'opponent' in properties and properties['opponent']!=luminosity_channel else None)
+                if self.gain_control and 'opponent' not in properties
+                else None)
 
 
     #TFALERT: This method is duplicated. The only change compared to
