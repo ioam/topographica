@@ -285,7 +285,7 @@ class ModelSpec(Specification):
         for sheet_spec in sorted(self.sheets):
             summary.append(sheet_spec.summary(printed=False))
             projections = [proj for proj in self.projections
-                           if str(proj).startswith(str(sheet_spec))]
+                           if str(proj.dest)==str(sheet_spec)]
             for projection_spec in sorted(projections, key=lambda p: str(p)):
                 summary.append("   " + projection_spec.summary(printed=False))
             summary.append('')
