@@ -15,12 +15,14 @@ import numbergen
 
 class DisparityCoordinator(FeatureCoordinator):
     """
-    Coordinates the disparity (difference of pattern locations) of two pattern generators.
-    The pattern_label of the generators must contain 'Left' or 'Right'
+    Coordinates the disparity (difference of pattern locations) of two
+    pattern generators.  The pattern_label of the generators must
+    contain 'Left' or 'Right'
     """
 
     disparity_bound = param.Number(default=4.0*0.041665/2.0,doc="""
-        Maximum difference of the pattern locations between the two eyes (on the x axis).""")
+        Maximum difference of the pattern locations between the two
+        eyes (on the x axis).""")
 
     def __call__(self, pattern, pattern_label, pattern_number, master_seed, **params):
         p = ParamOverrides(self,params,allow_extra_keywords=True)
@@ -39,7 +41,8 @@ class DisparityCoordinator(FeatureCoordinator):
                                         seed=master_seed+45+pattern_number,
                                         name="DisparityCoordinator"+str(pattern_number))
         else:
-            self.warning('Skipping region %s; Disparity is defined only for Left and Right retinas.' % pattern)
+            self.warning('Skipping region %s; Disparity is defined '
+                         'only for Left and Right retinas.' % pattern)
 
         return new_pattern
 
@@ -47,8 +50,9 @@ class DisparityCoordinator(FeatureCoordinator):
 
 class OcularityCoordinator(FeatureCoordinator):
     """
-    Coordinates the ocularity (brightness difference) of two pattern generators.
-    The pattern_label of the generators must contain 'Left' or 'Right'
+    Coordinates the ocularity (brightness difference) of two pattern
+    generators.  The pattern_label of the generators must contain
+    'Left' or 'Right'
     """
 
     dim_fraction = param.Number(default=0.7,bounds=(0.0,1.0),doc="""
@@ -70,7 +74,8 @@ class OcularityCoordinator(FeatureCoordinator):
                                                          seed=master_seed+55+pattern_number,
                                                          name="OcularityCoordinator"+str(pattern_number))
         else:
-            self.warning('Skipping region %s; Ocularity is defined only for Left and Right retinas.' % pattern)
+            self.warning('Skipping region %s; Ocularity is defined'
+                         ' only for Left and Right retinas.' % pattern)
 
         return new_pattern
 
@@ -78,17 +83,22 @@ class OcularityCoordinator(FeatureCoordinator):
 
 class SpatialFrequencyCoordinator(FeatureCoordinator):
     """
-    Coordinates the size of pattern generators. This is useful when multiple spatial frequency
-    channels are used, to cover a wide range of sizes of pattern generators.
+    Coordinates the size of pattern generators. This is useful when
+    multiple spatial frequency channels are used, to cover a wide
+    range of sizes of pattern generators.
     """
 
-    sf_spacing = param.Number(default=2.0,bounds=(0.0,None),doc="""Determines the factor by which 
-        successive SF channels increase in size. Together with sf_max_channel, this is used
-        to compute the upper bound of the size of the supplied pattern generator.""")
+    sf_spacing = param.Number(default=2.0,bounds=(0.0,None),doc="""
+        Determines the factor by which successive SF channels increase
+        in size. Together with sf_max_channel, this is used to compute
+        the upper bound of the size of the supplied pattern
+        generator.""")
 
-    sf_max_channel = param.Integer(default=2,bounds=(2,None),softbounds=(1,4),doc="""Highest
-        spatial frequency channel. Together with sf_spacing, this is used
-        to compute the upper bound of the size of the supplied pattern generator.""")
+    sf_max_channel = param.Integer(default=2,bounds=(2,None),
+                                   softbounds=(1,4), doc="""
+        Highest spatial frequency channel. Together with sf_spacing,
+        this is used to compute the upper bound of the size of the
+        supplied pattern generator.""")
 
     def __call__(self, pattern, pattern_label, pattern_number, master_seed, **params):
         p = ParamOverrides(self,params,allow_extra_keywords=True)
@@ -120,8 +130,12 @@ class MotionCoordinator(FeatureCoordinator):
     def __call__(self, pattern, pattern_label, pattern_number, master_seed, **params):
         p = ParamOverrides(self,params,allow_extra_keywords=True)
 
-        assert(param.Dynamic.time_dependent), "param.Dynamic.time_dependent!=True for motion"
-        assert(numbergen.RandomDistribution.time_dependent), "numbergen.RandomDistribution.time_dependent!=True for motion" 
+        err_msg = "%s must be enabled for motion"
+        if not param.Dynamic.time_dependent:
+            raise RuntimeError(err_msg % "param.Dynamic.time_dependent")
+
+        if not numbergen.RandomDistribution.time_dependent:
+            raise RuntimeError(err_msg % "numbergen.RandomDistribution.time_dependent")
 
         moved_pattern = Sweeper(generator=copy.deepcopy(pattern),
                                 speed=p.speed,
