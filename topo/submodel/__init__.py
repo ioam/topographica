@@ -433,12 +433,11 @@ class Model(param.Parameterized):
         matches=True
         if matchconditions is None:
             return False
+
         for incoming_key, incoming_value in matchconditions.items():
-            if incoming_key in src_sheet.properties and \
-                    str(src_sheet.properties[incoming_key]) != str(incoming_value):
-                matches=False
-                break
-            elif incoming_key not in src_sheet.properties:
+            if (incoming_key in src_sheet.properties and \
+                    str(src_sheet.properties[incoming_key]) != str(incoming_value)) \
+                    or (incoming_key not in src_sheet.properties and incoming_value is not None):
                 matches=False
                 break
 
