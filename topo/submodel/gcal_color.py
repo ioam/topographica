@@ -1,13 +1,13 @@
 """
 This file is a duplicate of topo/submodel/gcal.py with the extension
 of some color-related code. The class ModelGCALInheritingColor is an
-exact copy of ModelGCAL (the only difference being the different
-class name in the super() calls). ModelGCALColor is a subclass of
+exact copy of ModelGCAL (the only difference being the different class
+name in the super() calls). ModelGCALColor is a subclass of
 ModelGCALInheritingColor and shows the changes needed in the cortical
-sheet to include color, namely a different strength from the LGN sheets
-to V1 depending whether it is the luminosity LGN sheet as well as 
-the addition of measurement code.
-This class can be used to replicate the results in fischer:ms14
+sheet to include color, namely a different strength from the LGN
+sheets to V1 depending whether it is the luminosity LGN sheet as well
+as the addition of measurement code.  This class can be used to
+replicate the results in fischer:ms14
 """
 
 import topo
@@ -21,10 +21,8 @@ import topo.responsefn.optimized
 import topo.sheet.optimized
 import topo.transferfn.misc
 
-from topo.submodel import Model, order_projections
+from topo.submodel import Model
 from topo.submodel.earlyvision_color import ColorEarlyVisionModel
-
-
 
 class ModelGCALInheritingColor(ColorEarlyVisionModel):
 
