@@ -435,7 +435,10 @@ class Model(param.Parameterized):
             return False
         for incoming_key, incoming_value in matchconditions.items():
             if incoming_key in src_sheet.properties and \
-                    str(src_sheet.properties[incoming_key]) not in str(incoming_value):
+                    str(src_sheet.properties[incoming_key]) != str(incoming_value):
+                matches=False
+                break
+            elif incoming_key not in src_sheet.properties:
                 matches=False
                 break
 
