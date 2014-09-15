@@ -504,7 +504,7 @@ class ModelGCALColor(ModelGCALInheritingColor):
 
 
     def analysis_setup(self):
-        super(ModelGCALInheritingColor,self).analysis_setup()
+        super(ModelGCALColor, self).analysis_setup()
         if 'cr' in self.dims:
             from topo.analysis.command import measure_hue_pref, measure_od_pref
             from featuremapper.metaparams import contrast2scale, hue2rgbscaleNewRetina, ocular2leftrightscaleNewRetina
