@@ -187,6 +187,19 @@ class EarlyVisionModel(VisualInputModel):
         Connection field radius of a unit in V1 to units in a LGN
         sheet.""")
 
+    center_size = param.Number(default=0.07385,bounds=(0,None),doc="""
+        The size of the central Gaussian used to compute the
+        center-surround receptive field.""")
+
+    surround_size = param.Number(default=4*0.07385,bounds=(0,None),doc="""
+        The size of the surround Gaussian used to compute the
+        center-surround receptive field.""")
+
+    gain_control_size = param.Number(default=0.25,bounds=(0,None),doc="""
+        The size of the divisive inhibitory suppressive field used for
+        contrast-gain control in the LGN sheets. This also acts as the
+        corresponding bounds radius.""")
+
     gain_control = param.Boolean(default=True,doc="""
         Whether to use divisive lateral inhibition in the LGN for
         contrast gain control.""")
@@ -265,10 +278,10 @@ class EarlyVisionModel(VisualInputModel):
     def afferent(self, src_properties, dest_properties):
         channel = dest_properties['SF'] if 'SF' in dest_properties else 1
 
-        centerg   = imagen.Gaussian(size=0.07385*self.sf_spacing**(channel-1),
+        centerg   = imagen.Gaussian(size=self.center_size*self.sf_spacing**(channel-1),
                                     aspect_ratio=1.0,
                                     output_fns=[transferfn.DivisiveNormalizeL1()])
-        surroundg = imagen.Gaussian(size=(4*0.07385)*self.sf_spacing**(channel-1),
+        surroundg = imagen.Gaussian(size=self.surround_size*self.sf_spacing**(channel-1),
                                     aspect_ratio=1.0,
                                     output_fns=[transferfn.DivisiveNormalizeL1()])
         on_weights  = imagen.Composite(generators=[centerg,surroundg],operator=numpy.subtract)
@@ -305,9 +318,9 @@ class EarlyVisionModel(VisualInputModel):
             delay=0.05,
             dest_port=('Activity'),
             activity_group=(0.6,DivideWithConstant(c=0.11)),
-            weights_generator=imagen.Gaussian(size=0.25,
+            weights_generator=imagen.Gaussian(size=self.gain_control_size,
                                               aspect_ratio=1.0,
                                               output_fns=[transferfn.DivisiveNormalizeL1()]),
-            nominal_bounds_template=sheet.BoundingBox(radius=0.25),
+            nominal_bounds_template=sheet.BoundingBox(radius=self.gain_control_size),
             name=name,
             strength=0.6/(2 if self['binocular'] else 1))

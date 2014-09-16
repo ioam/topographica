@@ -33,6 +33,12 @@ class ModelGCAL(EarlyVisionModel):
     latinh_radius=param.Number(default=0.22917,bounds=(0,None),doc="""
         Size of the radius of the lateral inhibitory connections within V1.""")
 
+    latexc_size=param.Number(default=0.05,bounds=(0,None),doc="""
+        Size of the lateral excitatory connections within V1.""")
+
+    latinh_size=param.Number(default=0.15,bounds=(0,None),doc="""
+        Size of the lateral inhibitory connections within V1.""")
+
     aff_lr=param.Number(default=0.1,bounds=(0.0,None),doc="""
         Learning rate for the afferent projection(s) to V1.""")
 
@@ -124,13 +130,12 @@ class ModelGCAL(EarlyVisionModel):
     def lateral_excitatory_conditions(self, properties):
         return {'level': 'V1'}
 
-
     @Model.CFProjection
     def lateral_excitatory(self, src_properties, dest_properties):
         return Model.CFProjection.params(
             delay=0.05,
             name='LateralExcitatory',
-            weights_generator=imagen.Gaussian(aspect_ratio=1.0, size=0.05),
+            weights_generator=imagen.Gaussian(aspect_ratio=1.0, size=self.latexc_size),
             strength=self.exc_strength,
             learning_rate=self.exc_lr,
             nominal_bounds_template=sheet.BoundingBox(radius=self.latexc_radius))
@@ -146,7 +151,7 @@ class ModelGCAL(EarlyVisionModel):
         return Model.CFProjection.params(
             delay=0.05,
             name='LateralInhibitory',
-            weights_generator=imagen.random.GaussianCloud(gaussian_size=0.15),
+            weights_generator=imagen.random.GaussianCloud(gaussian_size=self.latinh_size),
             strength=-1.0*self.inh_strength,
             learning_rate=self.inh_lr,
             nominal_bounds_template=sheet.BoundingBox(radius=self.latinh_radius))
