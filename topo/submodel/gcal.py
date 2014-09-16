@@ -28,10 +28,10 @@ class ModelGCAL(EarlyVisionModel):
         and adaptive in the AL and GCAL models.""")
 
     latexc_radius=param.Number(default=0.104,bounds=(0,None),doc="""
-        Size of the radius of the lateral excitatory connections within V1.""")
+        Radius of the lateral excitatory bounds within V1.""")
 
     latinh_radius=param.Number(default=0.22917,bounds=(0,None),doc="""
-        Size of the radius of the lateral inhibitory connections within V1.""")
+        Radius of the lateral inhibitory bounds within V1.""")
 
     latexc_size=param.Number(default=0.05,bounds=(0,None),doc="""
         Size of the lateral excitatory connections within V1.""")
