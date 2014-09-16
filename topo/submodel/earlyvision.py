@@ -33,6 +33,11 @@ class SensoryModel(Model):
 
 class VisualInputModel(SensoryModel):
 
+    period = param.Number(default=None, allow_None=True, doc="""
+       Simulation time between pattern updates on the generator
+       sheets. If None, the model is allowed to compute an appropriate
+       value for the period property (a period of 1.0 is typical)""")
+
     dataset = param.ObjectSelector(default='Gaussian',objects=
         ['Gaussian','Nature','FoliageA','FoliageB'],doc="""
         Set of input patterns to use::
@@ -99,6 +104,9 @@ class VisualInputModel(SensoryModel):
 
     def property_setup(self, properties):
         properties = super(VisualInputModel, self).property_setup(properties)
+
+        # The default period for most Topographica models is 1.0
+        properties['period'] = 1.0 if self.period is None else self.period
         properties['binocular'] = 'od' in self.dims or 'dy' in self.dims
         properties['SF']=range(1,self.sf_channels+1) if 'sf' in self.dims else [1]
         properties['lags'] = range(self.num_lags) if 'dr' in self.dims else [0]
@@ -139,7 +147,7 @@ class VisualInputModel(SensoryModel):
                       position_bound_x=position_bound_x,
                       position_bound_y=position_bound_y,
                       dim_fraction=self.dim_fraction,
-                      reset_period=(max(self['lags'])+1),
+                      reset_period=(max(self['lags'])*self['period'] + self['period']),
                       speed=self.speed,
                       align_orientations = align_orientations,
                       sf_spacing=self.sf_spacing,
@@ -214,7 +222,7 @@ class EarlyVisionModel(VisualInputModel):
     @Model.GeneratorSheet
     def Retina(self, properties):
         return Model.GeneratorSheet.params(
-            period=1.0,
+            period=self['period'],
             phase=0.05,
             nominal_density=self.retina_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0

@@ -132,7 +132,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
                     ScaleChannels(channel_factors = channel_factors))
 
         return Model.ChannelGeneratorSheet.params(
-            period=1.0,
+            period=self['period'],
             phase=0.05,
             nominal_density=self.retina_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0
