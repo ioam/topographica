@@ -40,6 +40,8 @@ class ColorEarlyVisionModel(EarlyVisionModel):
     An EarlyVisionModel extended with color support.
     """
 
+    allowed_dims = EarlyVisionModel.allowed_dims + ['cr']
+
     gain_control_color = param.Boolean(default=False,doc="""
         Whether to use divisive lateral inhibition in the LGN for
         contrast gain control in color sheets.""")

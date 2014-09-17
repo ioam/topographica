@@ -33,6 +33,8 @@ class SensoryModel(Model):
 
 class VisualInputModel(SensoryModel):
 
+    allowed_dims = ['xy', 'or', 'od', 'dy', 'dr', 'sf']
+
     period = param.Number(default=None, allow_None=True, doc="""
        Simulation time between pattern updates on the generator
        sheets. If None, the model is allowed to compute an appropriate
@@ -55,7 +57,7 @@ class VisualInputModel(SensoryModel):
           :'dy': Disparity
           :'dr': Direction of motion
           :'sf': Spatial frequency
-          :'cr': Color (not implemented yet)""")
+          :'cr': Color (if available, see submodels.color)""")
 
     area = param.Number(default=1.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
@@ -103,6 +105,12 @@ class VisualInputModel(SensoryModel):
 
 
     def property_setup(self, properties):
+
+        disallowed_dims = [dim for dim in self.dims if dim not in self.allowed_dims]
+        if disallowed_dims:
+            raise Exception('%s not in the list of allowed dimensions'
+                            % ','.join(repr(d) for d in disallowed_dims))
+
         properties = super(VisualInputModel, self).property_setup(properties)
 
         # The default period for most Topographica models is 1.0
