@@ -8,6 +8,7 @@ from topo.base.sheet import Sheet
 from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
 
+from dataviews import AttrDict, SheetView
 import numpy as np
 
 
@@ -264,3 +265,19 @@ class ChannelGeneratorSheet(GeneratorSheet):
 
             for i in range(len(self._channel_data)):
                 self.send_output(src_port=self.src_ports[i+1], data=self._channel_data[i])
+
+
+    def __getitem__(self, coords):
+        metadata = AttrDict(precedence=self.precedence,
+                            row_precedence=self.row_precedence,
+                            timestamp=self.simulation.time())
+
+        if self._channel_data:
+            arr = np.dstack(self._channel_data)
+        else:
+            arr = self.activity.copy()
+
+        sv = SheetView(arr, self.bounds,
+                       label=self.name+' Activity', value='Activity')[coords]
+        sv.metadata=metadata
+        return sv
