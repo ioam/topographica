@@ -119,7 +119,7 @@ class ModelGCAL(EarlyVisionModel):
                 dest_port=('Activity','JointNormalize','Afferent'),
                 name= name if lag==0 else name+('Lag'+str(lag)),
                 learning_rate=self.aff_lr,
-                strength=self.aff_strength*(1.0 if not self.gain_control else 1.5),
+                strength=self.aff_strength*(1.5 if self.gain_control else 1.0),
                 weights_generator=weights_generator,
                 nominal_bounds_template=sheet.BoundingBox(radius=
                                             self.v1aff_radius*self.sf_spacing**(sf_channel-1)))
