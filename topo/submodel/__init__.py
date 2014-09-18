@@ -10,8 +10,6 @@ parameters for projections.
 """
 
 import itertools
-
-from functools import wraps
 from collections import defaultdict
 
 import param
@@ -92,39 +90,17 @@ class MatchConditions(object):
     """
     Decorator class for matchconditions.
     """
-    def __init__(self):
-        self._levels = {}
-
-
-    def compute_conditions(self, level, model, properties):
-        """
-        Collect the matchcondition dictionary for a particular level
-        given a certain Model instance and sheet properties.
-        """
-        if level not in self:
-            raise Exception("No level %r defined" % level)
-        return dict((k, fn(model, properties))
-                     for (k, fn) in self._levels[level].items())
-
 
     def __call__(self, level, method_name):
-        def decorator(f):
-            @wraps(f)
-            def inner(self, *args, **kwargs):
-                return f(self, *args, **kwargs)
 
-            if level not in self._levels:
-                self._levels[level] = {method_name:inner}
-            else:
-                self._levels[level][method_name] = inner
-            return inner
+        def decorator(f):
+            f._matchcondition_level = level
+            f._target_method_name = method_name
+            return f
         return decorator
 
     def __repr__(self):
         return "MatchConditions()"
-
-    def __contains__(self, key):
-        return key in self._levels
 
 
 class ComponentDecorator(object):
@@ -175,6 +151,24 @@ class ComponentRegistry(object):
     def __init__(self):
         self.method_registry = defaultdict(dict)
         self.type_registry = defaultdict(dict)
+        self.matchconditions = []
+
+
+    def compute_conditions(self, level, model, properties):
+        """
+        Collect the matchcondition dictionary for a particular level
+        given a certain Model instance and sheet properties. If no
+        matchconditions are available, an empty dictionary is
+        returned.
+
+        Respects the appropriate method resolution order (mro) of the
+        given model instance.  """
+        mro = [el.__name__ for el in model.__class__.mro()]
+        filtered = [(target, fn) for (cls, lvl, target, fn) in self.matchconditions
+                    if (cls in mro) and lvl == level]
+
+        return dict((target, fn(model, properties)) for (target, fn) in filtered)
+
 
     def lookup(self, cls, name, mode):
         """
@@ -182,7 +176,7 @@ class ComponentRegistry(object):
         component type (if mode='type) or the appropriate method (if
         mode='method').
         """
-        mro = [el.__name__ for el in cls.mro()][:3]
+        mro = [el.__name__ for el in cls.mro()]
         registry = self.method_registry if mode=='method' else self.type_registry
 
         for class_name in mro:
@@ -202,6 +196,12 @@ class ComponentRegistry(object):
                 method_name = method.__name__
                 self.method_registry[class_name].update({method_name:method})
                 self.type_registry[class_name].update({method_name:component_type})
+
+            match_level = getattr(method, '_matchcondition_level', False)
+            target_method_name = getattr(method, '_target_method_name', False)
+            if match_level and target_method_name:
+                info = (class_name, match_level, target_method_name, method)
+                self.matchconditions.append(info)
         return cls
 
 
@@ -454,11 +454,8 @@ class Model(param.Parameterized):
                                               model.sheets.path_items.values())
         for src_sheet, dest_sheet in sheetspec_product:
 
-            has_matchcondition = (dest_sheet.level in self.matchconditions)
-            conditions = (self.matchconditions.compute_conditions(
-                          dest_sheet.level, self,dest_sheet.properties)
-                          if has_matchcondition else {})
-
+            conditions = self.definition.compute_conditions(dest_sheet.level, self,
+                                                            dest_sheet.properties)
             for matchname, matchconditions in conditions.items():
 
                 if self._matchcondition_holds(matchconditions, src_sheet):
