@@ -13,7 +13,7 @@ from topo.submodel import Model, order_projections
 from topo.submodel.earlyvision import EarlyVisionModel
 
 
-
+@Model.definition
 class ModelGCAL(EarlyVisionModel):
 
     cortex_density=param.Number(default=47.0,bounds=(0,None),
@@ -179,6 +179,7 @@ class ModelGCAL(EarlyVisionModel):
 
 
 
+@Model.definition
 class ExamplesGCAL(ModelGCAL):
     """
     Reproduces the results of the legacy examples/gcal.ty file.

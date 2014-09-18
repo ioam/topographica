@@ -172,7 +172,7 @@ class VisualInputModel(SensoryModel):
             return PatternCoordinatorImages(image_folder, **dict(params, **overrides))()
 
 
-
+@Model.definition
 class EarlyVisionModel(VisualInputModel):
 
     retina_density = param.Number(default=24.0,bounds=(0,None),

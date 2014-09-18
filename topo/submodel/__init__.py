@@ -12,6 +12,7 @@ parameters for projections.
 import itertools
 
 from functools import wraps
+from collections import defaultdict
 
 import param
 import lancet
@@ -87,58 +88,6 @@ def order_projections(model, connection_order):
         spec.sort_precedence = match[0]
 
 
-class ClassDecorator(object):
-    """
-    Decorator class which can be instantiated to create a decorator
-    object to annotate method with a certain type.
-
-    After decorating several methods or functions, the dictionary of
-    the decorated callables may be accessed via the labels
-    attribute. Object types are accessible via the types attribute.
-    """
-
-    # Priority is needed to ensure that a decorator method in a
-    # subclass takes priority over a decorated method (of the same
-    # name) in the superclass
-    priority = 0
-
-    def __init__(self, name, object_type):
-        self.name = name
-        self.labels = {}
-        self.types = {}
-        self.type = object_type
-
-        # Enable IPython tab completion in the settings method
-        kwarg_string = ", ".join("%s=%s" % (name, type(p.default))
-                                 for (name, p) in object_type.params().items())
-        self.params.__func__.__doc__ =  'params(%s)' % kwarg_string
-
-
-    def params(self, **kwargs):
-        """
-        A convenient way of generating parameter dictionaries with
-        tab-completion in IPython.
-        """
-        return kwargs
-
-
-    def __call__(self, f):
-        label = f.__name__
-        @wraps(f)
-        def inner(*args, **kwargs):
-            return f(*args, **kwargs)
-
-        self.types[label] = (ClassDecorator.priority, self.type)
-        self.labels[label] = (ClassDecorator.priority, inner)
-        ClassDecorator.priority += 1
-        return inner
-
-
-    def __repr__(self):
-        return "ClassDecorator(%s, %s)" % (self.name, self.type.name)
-
-
-
 class MatchConditions(object):
     """
     Decorator class for matchconditions.
@@ -178,6 +127,87 @@ class MatchConditions(object):
         return key in self._levels
 
 
+class ComponentDecorator(object):
+    """
+    Decorator class that can be instantiated with a component type to
+    create a decorator used to associate methods with the
+    corresponding component.
+
+    This class works by setting a '_component_type' attribute on the
+    decorated method. Methods that have been annotated in this way may
+    be tracked in classes decorated with the ComponentRegistry class
+    decorator.
+    """
+    def __init__(self, name, object_type):
+        self.name = name
+        self.type = object_type
+
+        # Enable IPython tab completion in the settings method
+        kwarg_string = ", ".join("%s=%s" % (name, type(p.default))
+                                 for (name, p) in object_type.params().items())
+        self.params.__func__.__doc__ =  'params(%s)' % kwarg_string
+
+
+    def params(self, **kwargs):
+        """
+        A convenient way of generating parameter dictionaries with
+        tab-completion in IPython.
+        """
+        return kwargs
+
+
+    def __call__(self, f):
+        f._component_type = self.type
+        return f
+
+    def __repr__(self):
+        return "ComponentDecorator(%s, %s)" % (self.name, self.type.name)
+
+
+
+class ComponentRegistry(object):
+    """
+    An instance of this class is to be used as class decorator. Any
+    decorated class using ClassDecorators on their methods will be
+    registered with their corresponding component types.
+    """
+
+    def __init__(self):
+        self.method_registry = defaultdict(dict)
+        self.type_registry = defaultdict(dict)
+
+    def lookup(self, cls, name, mode):
+        """
+        Given a class, a method name and a mode, return either the
+        component type (if mode='type) or the appropriate method (if
+        mode='method').
+        """
+        mro = [el.__name__ for el in cls.mro()][:3]
+        registry = self.method_registry if mode=='method' else self.type_registry
+
+        for class_name in mro:
+            entries = registry[class_name]
+            if name in entries:
+                return entries[name]
+        raise KeyError("Could not find method named %r."
+                       " Please ensure classes using component decorators"
+                       " are decorated with the Model.definition"
+                       " class decorator." % name)
+
+    def __call__(self, cls):
+        for name, method in cls.__dict__.iteritems():
+            class_name = cls.__name__
+            component_type = getattr(method, "_component_type", False)
+            if component_type:
+                method_name = method.__name__
+                self.method_registry[class_name].update({method_name:method})
+                self.type_registry[class_name].update({method_name:component_type})
+        return cls
+
+
+# A singleton to be used by model class using decorators
+definition = ComponentRegistry()
+
 
 class Model(param.Parameterized):
     """
@@ -206,6 +236,9 @@ class Model(param.Parameterized):
     """
     __abstract = True
 
+    # A convenient handle on the definition class decorator
+    definition = definition
+
     matchconditions = MatchConditions()
     sheet_decorators = set()
     projection_decorators = set()
@@ -213,7 +246,7 @@ class Model(param.Parameterized):
     @classmethod
     def register_decorator(cls, object_type):
         name = object_type.name
-        decorator = ClassDecorator(name, object_type)
+        decorator = ComponentDecorator(name, object_type)
         setattr(cls, name,  decorator)
 
         if issubclass(object_type, topo.sheet.Sheet):
@@ -221,37 +254,6 @@ class Model(param.Parameterized):
         if issubclass(object_type, topo.projection.Projection):
             cls.projection_decorators.add(decorator)
 
-    @classmethod
-    def _collect(cls, decorators, name):
-        """
-        Given a list of ClassDecorators (e.g self.sheet_decorators or
-        self.projection_decorators), collate the named attribute
-        (i.e. 'types' or 'labels') across the decorators according to
-        priority.
-        """
-        flattened = [el for d in decorators for el in getattr(d, name).items()]
-        return dict((k,v) for (k, (_, v)) in sorted(flattened, key=lambda x: x[1][0]))
-
-
-    @property
-    def sheet_labels(self):
-        "The mapping of level method to corresponding label"
-        return self._collect(self.sheet_decorators, 'labels')
-
-    @property
-    def sheet_types(self):
-        "The mapping of level label to sheet type"
-        return self._collect(self.sheet_decorators, 'types')
-
-    @property
-    def projection_labels(self):
-        "The mapping of projection method to corresponding label"
-        return self._collect(self.projection_decorators, 'labels')
-
-    @property
-    def projection_types(self):
-        "The mapping of projection label to projection type"
-        return self._collect(self.projection_decorators, 'types')
 
     @property
     def modified_parameters(self):
@@ -264,8 +266,6 @@ class Model(param.Parameterized):
         if register:
             self._register_global_params(params)
         super(Model,self).__init__(**params)
-        self._sheet_types = {}
-        self._projection_types = {}
 
         self.properties = {}
         # Training patterns need to be accessed by GeneratorSheets
@@ -389,7 +389,7 @@ class Model(param.Parameterized):
 
             enumeration = enumerate(sheet_properties.items())
             for (ordering, (level, property_list)) in enumeration:
-                sheet_type = self.sheet_types[level]
+                sheet_type =  self.definition.lookup(self.__class__, level, mode='type')
 
                 if isinstance(property_list, lancet.Identity):
                     property_list = [{}]
@@ -416,7 +416,7 @@ class Model(param.Parameterized):
 
     def _update_sheet_spec_parameters(self, model):
         for sheet_spec in model.sheets.path_items.values():
-            param_method = self.sheet_labels.get(sheet_spec.level, None)
+            param_method = self.definition.lookup(self.__class__, sheet_spec.level, 'method')
             if not param_method:
                 raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
 
@@ -462,15 +462,17 @@ class Model(param.Parameterized):
             for matchname, matchconditions in conditions.items():
 
                 if self._matchcondition_holds(matchconditions, src_sheet):
-                    proj = ProjectionSpec(self.projection_types[matchname],
-                                          src_sheet, dest_sheet)
 
-                    paramsets = self.projection_labels[matchname](self, src_sheet.properties,
-                                                                  dest_sheet.properties)
+                    paramfn = self.definition.lookup(self.__class__, matchname, 'method')
+                    projtype = self.definition.lookup(self.__class__, matchname, 'type')
+
+                    proj = ProjectionSpec(projtype, src_sheet, dest_sheet)
+
+                    paramsets = paramfn(self, src_sheet.properties, dest_sheet.properties)
                     paramsets = [paramsets] if isinstance(paramsets, dict) else paramsets
+
                     for paramset in paramsets:
-                        proj = ProjectionSpec(self.projection_types[matchname],
-                                              src_sheet, dest_sheet)
+                        proj = ProjectionSpec(projtype, src_sheet, dest_sheet)
                         proj.update(**paramset)
                         # Only used when time_dependent=False
                         # (which is to be deprecated)
@@ -534,3 +536,5 @@ for obj_class in (sheet_classes + sheet_classes_opt
         # Do not create a decorator if declared as abstract
         if not hasattr(obj_class, "_%s__abstract" % obj_class.name):
             Model.register_decorator(obj_class)
+
+

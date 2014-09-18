@@ -34,7 +34,7 @@ from collections import OrderedDict
 from topo.submodel import Model
 from topo.submodel.earlyvision import EarlyVisionModel
 
-
+@Model.definition
 class ColorEarlyVisionModel(EarlyVisionModel):
     """
     An EarlyVisionModel extended with color support.
@@ -284,6 +284,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
             strength=0.6/(2 if self['binocular'] else 1))
 
 
+@Model.definition
 class ModelGCALInheritingColor(ColorEarlyVisionModel):
     """
     This class file is identical to ModelGCAL (gcal.py) except for
@@ -449,7 +450,7 @@ class ModelGCALInheritingColor(ColorEarlyVisionModel):
             measure_sine_pref.frequencies = [2.4*s for s in relative_sizes]
 
 
-
+@Model.definition
 class ModelGCALColor(ModelGCALInheritingColor):
     """
     Implementing of ModelGCAL including color support.
