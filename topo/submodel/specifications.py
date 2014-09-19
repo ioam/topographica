@@ -37,7 +37,6 @@ class Specification(param.Parameterized):
         return {k:v for k, v in self.parameters.items()
                 if self.default_parameters[k] != v}
 
-
     @property
     def resolved_type(self):
         return self._object_type
@@ -55,8 +54,10 @@ class Specification(param.Parameterized):
     def __lt__(self, other):
         return self.sort_precedence < other.sort_precedence
 
+
     def __eq__(self, other):
         return self.sort_precedence == other.sort_precedence
+
 
     def __init__(self, object_type):
         self._object_type = object_type
@@ -69,6 +70,7 @@ class Specification(param.Parameterized):
             for param_name, default_value in object_type.params().items():
                 self.parameters[param_name]=default_value.default
             self.default_parameters = dict(**self.parameters)
+
 
     def summary(self, printed=True):
         """
@@ -83,9 +85,11 @@ class Specification(param.Parameterized):
         "Convenient property access."
         return self.properties[key]
 
+
     def keys(self):
         "The list of available property keys."
         return self.properties.keys()
+
 
     def items(self):
         "The property items."
@@ -197,13 +201,14 @@ class SheetSpec(Specification):
         name=''
         for prop in self.properties.itervalues():
             name+=str(prop)
-
         return name
+
 
     def summary(self, printed=True):
         summary = "%s : %s" % (self, self.sheet_type.name)
         if printed: print summary
         else:       return summary
+
 
     def __repr__(self):
         type_name = self.sheet_type.__name__
@@ -263,6 +268,7 @@ class ProjectionSpec(Specification):
         if printed: print summary
         else:       return summary
 
+
     def __repr__(self):
         type_name = self.projection_type.__name__
         return "ProjectionSpec(%s, %r, %r)" % (type_name, self.src, self.dest)
@@ -286,9 +292,11 @@ class ModelSpec(Specification):
         super(ModelSpec, self).__init__(model)
         self.model= model
 
+
     def resolve(self):
         from topo import sim     # pyflakes:ignore (needed for eval)
         return eval('sim.model')
+
 
     def __call__(self, instantiate_options=True, verbose=False):
         """
@@ -347,6 +355,7 @@ class ModelSpec(Specification):
 
     def __str__(self):
         return self.model.__class__.__name__
+
 
     def _repr_pretty_(self, p, cycle):
         p.text(self.summary(printed=False))
