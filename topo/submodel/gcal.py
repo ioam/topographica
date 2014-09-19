@@ -9,7 +9,7 @@ import topo.responsefn.optimized
 import topo.sheet.optimized
 import topo.transferfn.misc
 
-from topo.submodel import Model, ArraySpec, order_projections
+from topo.submodel import Model, ArraySpec, order_projections # pyflakes:ignore (API import)
 from topo.submodel.earlyvision import EarlyVisionModel
 
 

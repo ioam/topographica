@@ -31,7 +31,7 @@ from imagen.image import ScaleChannels
 from topo.base.arrayutil import DivideWithConstant
 from collections import OrderedDict
 
-from topo.submodel import Model
+from topo.submodel import Model, ArraySpec # pyflakes:ignore (API import)
 from topo.submodel.earlyvision import EarlyVisionModel
 
 @Model.definition

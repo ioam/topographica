@@ -120,7 +120,7 @@ class ArraySpec(Specification):
 
 
     def resolve(self):
-        from topo import sim
+        from topo import sim   # pyflakes:ignore (import for eval)
         return eval("sim.%s" % self.pathspec)
 
 
