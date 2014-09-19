@@ -1013,8 +1013,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
         self.views = AttrDict()
         self._event_processors = {}
 
-        self.specification = None
-        self.model = None
+        self._model = None
 
         if self.register:
             # Indicate that no specific name has been set
@@ -1037,6 +1036,25 @@ class Simulation(param.Parameterized,OptionalSingleton):
         # no matter what duration (0.005 or 5, etc).
         self.timer = SomeTimer(func=self.run,
                                simulation_time_fn=self.time)
+
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, model):
+        """
+        Setting a Model object automatically calls the setup method of
+        the object.
+        """
+        if model is None:  return
+        elif not callable(model):
+            raise Exception("Model object %r is not callable" % model)
+        elif isinstance(model, type):
+            raise Exception("Please supply an instantiated model object and not a Model class.")
+
+        self._model = model
+        model.setup()
 
 
     def __getitem__(self,item_name):
@@ -1216,28 +1234,25 @@ class Simulation(param.Parameterized,OptionalSingleton):
             self.timer.call_and_time(duration)
 
 
-    def __call__(self, load=True, setup_options=True,
+    def __call__(self, load=True, setup_options=None,
                  instantiate_options=True, verbose=False):
         """
-        Set the simulation specification and instantiate the model
-        (when load is set to True). The specification is created with
-        the supplied setup_options - see the docstring of Model.setup
-        for more information.
+        Optionally regenerate the simulation specification and
+        instantiate the model (when load is set to True). If
+        setup_options is not None, a new specification will be created
+        with the given options - see the docstring of Model.setup for
+        more information.
 
         If load is set to True, the model is instantiated using the
         supplied instantiate options and verbose flag.
         """
-        if self.specification is not None:
-            return self.specification() if load else None
-
-        if self.model is None:  return
-        elif not callable(self.model):
-            raise Exception("Model object %r is not callable" % self.model)
-        elif isinstance(self.model, type):
-            raise Exception("Please supply an instantiated model object and not a Model class.")
-        self.specification = self.model.setup(setup_options=setup_options)
-        if load:
-            self.specification(instantiate_options=True, verbose=False)
+        if self.model is None: return
+        if setup_options is not None:
+            self.model.setup(setup_options=setup_options)
+        if load and self.model.specification is not None:
+            self.model.specification(instantiate_options=True, verbose=False)
+        elif load:
+            self.warning("No specification found on the self.model object")
 
 
     def run(self, duration=forever, until=forever):

@@ -267,6 +267,7 @@ class Model(param.Parameterized):
             self._register_global_params(params)
         super(Model,self).__init__(**params)
 
+        self.specification = None
         self.properties = {}
         # Training patterns need to be accessed by GeneratorSheets
         self.properties['training_patterns'] = AttrTree()
@@ -361,6 +362,9 @@ class Model(param.Parameterized):
         Available setup options are:
         'training_patterns','sheets','projections' and 'analysis'.
 
+        This method returns a ModelSpec object which is also set as
+        the value of the 'specification' attribute.
+
         Please consult the docstring of the Model class for more
         information about each setup option.
         """
@@ -411,6 +415,8 @@ class Model(param.Parameterized):
             model = self._compute_projection_specs(model)
         if 'analysis' in setup_options:
             self.analysis_setup()
+
+        self.specification = model
         return model
 
 
