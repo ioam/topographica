@@ -62,9 +62,13 @@ class Specification(param.Parameterized):
         self._object_type = object_type
         self.parameters = {}
         self.sort_precedence = 0
-        for param_name, default_value in object_type.params().items():
-            self.parameters[param_name]=default_value.default
-        self.default_parameters = dict(**self.parameters)
+
+        if not hasattr(object_type,'params'):
+            self.default_parameters = {}
+        else:
+            for param_name, default_value in object_type.params().items():
+                self.parameters[param_name]=default_value.default
+            self.default_parameters = dict(**self.parameters)
 
     def summary(self, printed=True):
         """
