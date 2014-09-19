@@ -13,6 +13,7 @@ from param import ParameterizedFunction, ParamOverrides
 
 from dataviews import SheetView, SheetStack, Contours
 from dataviews.collector import AttrTree
+from dataviews.options import options, StyleOpts
 
 from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
@@ -225,6 +226,8 @@ class measure_cog(ParameterizedFunction):
 
         return {'XCoG': xcog_stack, 'YCoG': ycog_stack, 'CoG': contour_stack}
 
+
+options.Gravity_Contours = StyleOpts(linewidth=1.0)
 
 import types
 
