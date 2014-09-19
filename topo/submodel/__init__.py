@@ -17,7 +17,7 @@ import lancet
 import topo
 import numbergen
 
-from specifications import SheetSpec, ProjectionSpec, ModelSpec
+from specifications import SheetSpec, ProjectionSpec, ModelSpec, ArraySpec
 from dataviews.collector import AttrTree
 from topo.misc.commandline import global_params
 
