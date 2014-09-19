@@ -371,9 +371,6 @@ Loading error:
     imagen.Translator.time_fn = topo.sim.time
     imagen.Sweeper.time_fn = topo.sim.time
     imagen.Animation.time_fn = topo.sim.time
-    # Another hack - this attribute should be unpickling correctly!
-    topo.sim._instantiated_model = True
-
 
 
 
