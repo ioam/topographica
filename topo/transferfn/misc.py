@@ -277,7 +277,7 @@ class HomeostaticResponse(TransferFnWithState):
             self._y_avg_prev = self.y_avg   # Copy only if not in continuous mode
 
         self._apply_threshold(x)            # Apply the threshold only after it is updated
-        self._x_prev[...,...] = x[...,...]  # Recording activity for the next periodic update
+        self._x_prev[:] = x[:]  # Recording activity for the next periodic update
 
 
     def state_push(self):
