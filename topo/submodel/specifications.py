@@ -93,6 +93,53 @@ class Specification(param.Parameterized):
 
 
 
+class ArraySpec(Specification):
+    """
+    A simple specification used to resolve numpy arrays relative to a
+    Topographica simulation (i.e. topo.sim). This class is primarily
+    aimed for specifying arrays to a Collector.
+    """
+
+    def __init__(self, pathspec, properties={}):
+        """
+        ArraySpec uses a fairly unsophisticated implementation, making
+        use of eval to resolve the desired array.
+
+       :'pathspec': A string specifying how to access the array
+                    relative to topo.sim.
+       :'properties': Optional specification of array properties
+        """
+        import numpy
+        self.pathspec = pathspec
+        super(ArraySpec,self).__init__(numpy.ndarray)
+        self.properties = OrderedDict(properties)
+
+
+    def resolve(self):
+        from topo import sim
+        return eval("sim.%s" % self.pathspec)
+
+
+    def __call__(self):
+        raise NotImplementedError
+
+
+    def __str__(self):
+        return "topo.sim.%s" % self.pathspec
+
+
+    def summary(self, printed=True):
+        summary = "%s : Numpy array" % self
+        if printed: print summary
+        else:       return summary
+
+
+    def __repr__(self):
+        properties_repr = ', '.join("%r:%r" % (k,v) for (k,v)
+                                    in self.properties.items())
+        return "ArraySpec(%r, {%s})" % (self.pathspec, properties_repr)
+
+
 
 class SheetSpec(Specification):
     """
