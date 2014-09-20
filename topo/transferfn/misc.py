@@ -281,7 +281,8 @@ class TemporalScatter(TransferFnWithState):
 
         (min_lim, max_lim) = self.limits
         self.raw_depth_map = self.distribution(name='ScatterDepth',
-                                              xdensity=d1, ydensity=d2)
+                                               xdensity=d1, ydensity=d2,
+                                               bounds=BoundingBox(radius=0.5))
 
         bin_edges = list(np.linspace(min_lim, max_lim, self.depth))
         # Note that np.digitize indexes from 1
