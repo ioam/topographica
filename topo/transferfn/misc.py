@@ -10,17 +10,17 @@ import numpy, numpy.random
 from numpy import ones
 
 import param
+import imagen
 
 import topo
 import topo.base.functionfamily
 
 from topo.base.arrayutil import clip_lower,array_argmax
-from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.boundingregion import BoundingBox
 from topo.base.sheetcoords import SheetCoordinateSystem
 
 from topo.transferfn import TransferFn, TransferFnWithState
-from topo.pattern import Gaussian
+
 
 # Not suitable for basic.py due to its dependence on patterns.
 class PatternCombine(TransferFn):
@@ -32,8 +32,8 @@ class PatternCombine(TransferFn):
     items or around the edges of non-rectangular shapes.
     """
 
-    generator = param.ClassSelector(PatternGenerator,
-        default=Constant(), doc="""
+    generator = param.ClassSelector(imagen.PatternGenerator,
+        default=imagen.Constant(), doc="""
         Pattern to combine with the supplied matrix.""")
 
     operator = param.Parameter(numpy.multiply,precedence=0.98,doc="""
@@ -78,8 +78,8 @@ class KernelMax(TransferFn):
     kernel_radius = param.Number(default=0.0,bounds=(0,None),doc="""
         Kernel radius in Sheet coordinates.""")
 
-    neighborhood_kernel_generator = param.ClassSelector(PatternGenerator,
-        default=Gaussian(x=0.0,y=0.0,aspect_ratio=1.0),
+    neighborhood_kernel_generator = param.ClassSelector(imagen.PatternGenerator,
+        default=imagen.Gaussian(x=0.0,y=0.0,aspect_ratio=1.0),
         doc="Neighborhood function")
 
     crop_radius_multiplier = param.Number(default=3.0,doc="""
@@ -150,7 +150,7 @@ class HalfRectify(TransferFn):
             self.first_call = False
             if self.randomized_init:
                 self.t = ones(x.shape, x.dtype.char) * self.t_init + \
-		(topo.pattern.random.UniformRandom() \
+                    (imagen.random.UniformRandom() \
                  (xdensity=x.shape[0],ydensity=x.shape[1])-0.5) * \
                  self.noise_magnitude*2
             else:
@@ -234,7 +234,7 @@ class HomeostaticResponse(TransferFnWithState):
 
         if self.randomized_init:
             self.t = ones(x.shape, x.dtype.char) * self.t_init + \
-                (topo.pattern.random.UniformRandom( \
+                (imagen.random.UniformRandom( \
                     random_generator=numpy.random.RandomState(seed=self.seed)) \
                      (xdensity=x.shape[0],ydensity=x.shape[1]) \
                      -0.5)*self.noise_magnitude*2
