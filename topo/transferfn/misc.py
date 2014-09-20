@@ -191,7 +191,7 @@ class TemporalScatter(TransferFnWithState):
        """)
 
     distribution = param.ClassSelector(imagen.PatternGenerator,
-                                       default=imagen.random.GaussianRandom(offset=-0.5,scale=30),
+            default=imagen.random.GaussianRandom(offset=0.0, scale=30),
        doc="""
        The pattern generator that defines the scatter distribution in
        milliseconds. Any random distribution may be used
