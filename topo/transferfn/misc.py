@@ -5,9 +5,7 @@ $Id: basic.py 10790 2009-11-21 17:51:33Z antolikjan $
 """
 
 import copy
-
-import numpy, numpy.random
-from numpy import ones
+import numpy as np
 
 import param
 import imagen
@@ -36,7 +34,7 @@ class PatternCombine(TransferFn):
         default=imagen.Constant(), doc="""
         Pattern to combine with the supplied matrix.""")
 
-    operator = param.Parameter(numpy.multiply,precedence=0.98,doc="""
+    operator = param.Parameter(np.multiply,precedence=0.98,doc="""
         Binary Numeric function used to combine the two patterns.
 
         Any binary Numeric array "ufunc" returning the same type of
@@ -149,12 +147,12 @@ class HalfRectify(TransferFn):
         if self.first_call:
             self.first_call = False
             if self.randomized_init:
-                self.t = ones(x.shape, x.dtype.char) * self.t_init + \
+                self.t = np.ones(x.shape, x.dtype.char) * self.t_init + \
                     (imagen.random.UniformRandom() \
                  (xdensity=x.shape[0],ydensity=x.shape[1])-0.5) * \
                  self.noise_magnitude*2
             else:
-                self.t = ones(x.shape, x.dtype.char) * self.t_init
+                self.t = np.ones(x.shape, x.dtype.char) * self.t_init
 
         x -= self.t
         clip_lower(x,0)
@@ -229,18 +227,18 @@ class HomeostaticResponse(TransferFnWithState):
 
 
     def _initialize(self,x):
-        self._x_prev = numpy.copy(x)
-        self._y_avg_prev = ones(x.shape, x.dtype.char) * self.target_activity
+        self._x_prev = np.copy(x)
+        self._y_avg_prev = np.ones(x.shape, x.dtype.char) * self.target_activity
 
         if self.randomized_init:
-            self.t = ones(x.shape, x.dtype.char) * self.t_init + \
+            self.t = np.ones(x.shape, x.dtype.char) * self.t_init + \
                 (imagen.random.UniformRandom( \
-                    random_generator=numpy.random.RandomState(seed=self.seed)) \
+                    random_generator=np.random.RandomState(seed=self.seed)) \
                      (xdensity=x.shape[0],ydensity=x.shape[1]) \
                      -0.5)*self.noise_magnitude*2
         else:
-            self.t = ones(x.shape, x.dtype.char) * self.t_init
-        self.y_avg = ones(x.shape, x.dtype.char) * self.target_activity
+            self.t = np.ones(x.shape, x.dtype.char) * self.t_init
+        self.y_avg = np.ones(x.shape, x.dtype.char) * self.target_activity
 
 
     def _apply_threshold(self,x):
@@ -248,7 +246,7 @@ class HomeostaticResponse(TransferFnWithState):
         x -= self.t
         clip_lower(x,0)
         if self.linear_slope != 1.0:
-            x *= self.linear_slope 
+            x *= self.linear_slope
 
 
     def _update_threshold(self, prev_t, x, prev_avg, smoothing, learning_rate, target_activity):
