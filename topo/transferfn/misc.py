@@ -285,10 +285,10 @@ class TemporalScatter(TransferFnWithState):
                                                bounds=BoundingBox(radius=0.5))
 
         bin_edges = list(np.linspace(min_lim, max_lim, self.depth))
-        # Note that np.digitize indexes from 1
-        return np.digitize(self.raw_depth_map.flatten(),
-                           bin_edges).reshape(*shape) - 1
-
+        discretized = np.digitize(self.raw_depth_map.flatten(), bin_edges)
+        # Out of bounds bins (to +inf) need to be pulled back in.
+        discretized[discretized==len(bin_edges)]=len(bin_edges)-1
+        return discretized.reshape(*shape)
 
     def __call__(self,x):
         (d1,d2) = x.shape
