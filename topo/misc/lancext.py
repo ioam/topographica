@@ -25,6 +25,7 @@ try:
    from external import sys_paths
    submodule_paths = sys_paths()
    ordering = ['topographica', 'param', 'paramtk', 'imagen', 'lancet']
+   summarized = ['topographica', 'param', 'imagen', 'lancet']
    submodules = [[p for p in submodule_paths if p.endswith(name)][0] for name in ordering]
 except:
    submodules = []
@@ -64,6 +65,12 @@ class topo_metadata(param.Parameterized):
    will be returned as a dictionary when called. The most important
    information is pretty printed when the summary method is called.""")
 
+   repository_names = param.List(default=[el.capitalize() for el in ordering],
+     doc="Names of the repositories corresponding to the supplied paths")
+
+   summarized = param.List(default=[el.capitalize() for el in summarized], doc="""
+     The repositories to summarize as a subset of the repository names.""")
+
    commands = param.Dict(default={'.git':(['git', 'rev-parse', 'HEAD'],
                                           ['git', 'log', '--oneline', '-n', '1'],
                                           ['git', 'diff'])},
@@ -73,9 +80,7 @@ class topo_metadata(param.Parameterized):
 
    def __init__(self, **kwargs):
       super(topo_metadata,self).__init__(**kwargs)
-      self._repos = ['Topographica', 'Param', 'Param Tk', 'Imagen', 'Lancet']
-      self._summarized = ['Topographica', 'Param', 'Imagen', 'Lancet']
-      self._paths = dict(zip(self._repos, self.paths))
+      self._paths = dict(zip(self.repository_names, self.paths))
       self._info = {}
 
 
@@ -107,14 +112,14 @@ class topo_metadata(param.Parameterized):
       np_name = 'Numpy'
       info = self._info if self._info else self()
 
-      messages = [info['vcs_messages'][self._paths[repo]] for repo in self._summarized]
-      diffs = [info['vcs_diffs'][self._paths[repo]] for repo in self._summarized]
+      messages = [info['vcs_messages'][self._paths[repo]] for repo in self.summarized]
+      diffs = [info['vcs_diffs'][self._paths[repo]] for repo in self.summarized]
 
       diff_message = "   %s  [%d files have uncommited changes as captured by git diff]"
-      longest_name = max(len(name) for name in self._summarized + [np_name])
+      longest_name = max(len(name) for name in self.summarized + [np_name])
 
       print "Topographica version control summary:\n"
-      for repo_name, message, diff in zip(self._summarized, messages, diffs):
+      for repo_name, message, diff in zip(self.summarized, messages, diffs):
          truncate_len = (self.max_log_length - 3)
          if len(message) > truncate_len:
             message = message[:truncate_len]+'...'
