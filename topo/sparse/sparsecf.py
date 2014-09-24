@@ -757,7 +757,7 @@ class SparseCFProjection(CFProjection):
         del temp_sparse
         self.weights.compress()
         self.apply_learn_output_fns()
-        print self.name , "loaded"
+        self.debug("Sparse projection %r loaded" % self.name)
 
 
     def _create_cf(self,x,y):
