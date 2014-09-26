@@ -683,6 +683,9 @@ class SparseCFProjection(CFProjection):
         if initialize_cfs:
             self._create_cfs()
 
+        if self.apply_output_fns_init:
+            self.apply_learn_output_fns()
+
         self.input_buffer = None
 
 
@@ -756,7 +759,6 @@ class SparseCFProjection(CFProjection):
             x_array *= 0; y_array *= 0; val_array *= 0.0
         del temp_sparse
         self.weights.compress()
-        self.apply_learn_output_fns()
         self.debug("Sparse projection %r loaded" % self.name)
 
 
