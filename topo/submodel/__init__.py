@@ -531,7 +531,7 @@ projection_classes = [c for c in projection.__dict__.values() if
                       (isinstance(c, type) and issubclass(c, projection.Projection))]
 
 projection_classes_opt = [c for c in projopt.__dict__.values() if
-                          (isinstance(c, type) and issubclass(c, topo.sheet.Sheet))]
+                          (isinstance(c, type) and issubclass(c, projection.Projection))]
 
 for obj_class in (sheet_classes + sheet_classes_opt
                   + projection_classes + projection_classes_opt):
