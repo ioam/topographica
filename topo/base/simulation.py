@@ -1250,7 +1250,8 @@ class Simulation(param.Parameterized,OptionalSingleton):
         if setup_options is not None:
             self.model.setup(setup_options=setup_options)
         if load and self.model.specification is not None:
-            self.model.specification(instantiate_options=True, verbose=False)
+            self.model.specification(instantiate_options=True,
+                                     verbose=verbose)
         elif load:
             self.warning("No specification found on the self.model object")
 
