@@ -555,12 +555,16 @@ class SparseConnectionField(param.Parameterized):
     def _init_weights(self,mask_template):
 
         if not hasattr(mask_template,'view'):
-            mask = _create_mask(mask_template,self.weights_slice.compute_bounds(self.input_sheet),self.input_sheet,True,0.5)
+            mask = _create_mask(mask_template,
+                                self.weights_slice.compute_bounds(
+                                    self.input_sheet),
+                                self.input_sheet,True,0.5)
 
         mask = self.weights_slice.submatrix(mask_template)
         mask = np.array(mask,copy=1)
 
-        w = self.weights_generator(x=self.x,y=self.y,bounds=self.get_bounds(self.input_sheet),
+        w = self.weights_generator(x=self.x,y=self.y,
+                                   bounds=self.get_bounds(self.input_sheet),
                                    xdensity=self.input_sheet.xdensity,
                                    ydensity=self.input_sheet.ydensity,
                                    mask=mask)
