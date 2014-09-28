@@ -836,3 +836,20 @@ if not use_sparse:
     print "WARNING: Sparse component could not be imported, replacing SparseCFProjection with regular CFProjection"
     def SparseCFProjection(*args, **kwargs): # pyflakes:ignore (optimized version provided)
         return CFProjection(*args,**kwargs)
+
+
+sparse_components = [CFSPLF_Plugin,
+                     CFSPOF_Plugin,
+                     CFSPOF_Prune,
+                     CFSPOF_SproutRetract,
+                     CFSPRF_Plugin,
+                     compute_sparse_joint_norm_totals,
+                     CFPOF_DivisiveNormalizeL1_Sparse,
+                     CFPLF_Hebbian_Sparse,
+                     CFPLF_Hebbian_Sparse_opt,
+                     CFPRF_DotProduct_Sparse,
+                     CFPRF_DotProduct_Sparse_opt,
+                     SparseConnectionField,
+                     SparseCFProjection]
+
+__all__ = sparse_components
