@@ -779,6 +779,12 @@ class SparseCFProjection(CFProjection):
 
         return CF
 
+    def get_sheet_mask(self):
+        return np.ones(self.activity.shape, dtype=self.activity.dtype)
+
+    def get_active_units_mask(self):
+        return np.ones(self.activity.shape, dtype=self.activity.dtype)
+
 
     def activate(self,input_activity):
         """Activate using the specified response_fn and output_fn."""
