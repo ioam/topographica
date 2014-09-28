@@ -443,6 +443,9 @@ class SparseConnectionField(param.Parameterized):
         Can be used for normalization, thresholding, etc.""")
 
 
+    # Class attribute to switch to legacy weight generation if False
+    independent_weight_generation = True
+
     def get_bounds(self,input_sheet=None):
         if not input_sheet == None:
             return self.input_sheet_slice.compute_bounds(input_sheet)
@@ -527,7 +530,7 @@ class SparseConnectionField(param.Parameterized):
     weights = property(__get_weights,__set_weights)
 
 
-    def __init__(self,template,input_sheet,projection,**params):
+    def __init__(self,template,input_sheet,projection,label=None,**params):
         """
         Initializes the CF object and stores meta information about the CF's
         shape and position in the SparseCFProjection to allow for easier
@@ -538,6 +541,7 @@ class SparseConnectionField(param.Parameterized):
 
         self.input_sheet = input_sheet
         self.projection = projection
+        self.label = label
 
         self.matrix_idx = self.projection.dest.sheet2matrixidx(self.x,self.y)
         self.oned_idx = self.matrix_idx[0] * self.projection.dest.shape[1] + self.matrix_idx[1]
@@ -563,11 +567,29 @@ class SparseConnectionField(param.Parameterized):
         mask = self.weights_slice.submatrix(mask_template)
         mask = np.array(mask,copy=1)
 
-        w = self.weights_generator(x=self.x,y=self.y,
-                                   bounds=self.get_bounds(self.input_sheet),
-                                   xdensity=self.input_sheet.xdensity,
-                                   ydensity=self.input_sheet.ydensity,
-                                   mask=mask)
+
+
+        pattern_params = dict(x=self.x,y=self.y,
+                              bounds=self.get_bounds(self.input_sheet),
+                              xdensity=self.input_sheet.xdensity,
+                              ydensity=self.input_sheet.ydensity,
+                              mask=mask)
+
+        controlled_weights = (param.Dynamic.time_dependent
+                              and isinstance(param.Dynamic.time_fn,
+                                             param.Time)
+                              and self.independent_weight_generation)
+
+        if controlled_weights:
+            with param.Dynamic.time_fn as t:
+                t(0)                        # Initialize at time zero.
+                # Controls random streams
+                label = '' if self.label is None else self.label
+                name = "%s_CF (%.5f, %.5f)" % (label, self.x, self.y)
+                w = self.weights_generator(**dict(pattern_params,
+                                                  name=name))
+        else:
+            w = self.weights_generator(**pattern_params)
 
         w = w.astype(sparse_type)
 
@@ -771,10 +793,15 @@ class SparseCFProjection(CFProjection):
         Create a ConnectionField at x,y in the src sheet.
         """
 
+        label = self.hash_format.format(name=self.name,
+                                        src=self.src.name,
+                                        dest=self.dest.name)
         try:
-            CF = self.cf_type(template=self._slice_template,projection=self,input_sheet=self.src,x=x,y=y,
+            CF = self.cf_type(template=self._slice_template,
+                              projection=self,input_sheet=self.src,x=x,y=y,
                               weights_generator=self.weights_generator,
-                              min_matrix_radius=self.min_matrix_radius)
+                              min_matrix_radius=self.min_matrix_radius,
+                              label=label)
         except NullCFError:
             if self.allow_null_cfs:
                 CF = None
