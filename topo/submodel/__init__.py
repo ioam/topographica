@@ -190,7 +190,7 @@ class ComponentRegistry(object):
 
     def __call__(self, cls):
         for name, method in cls.__dict__.iteritems():
-            class_name = cls.__name__
+            class_name = cls.__dict__.get('__name__', cls.__name__)
             component_type = getattr(method, "_component_type", False)
             if component_type:
                 method_name = method.__name__

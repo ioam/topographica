@@ -337,7 +337,7 @@ class ModelSpec(Specification):
 
 
     def summary(self, printed=True):
-        name = self.model.name
+        name = self.model.__class__.__name__
         heading_line = '=' * len(name)
         summary = [heading_line, name, heading_line, '']
 
