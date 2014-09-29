@@ -14,7 +14,7 @@ class ModelSCAL(ModelGCAL):
     """
     Spatially-tuned GCAL (SCAL) calibrated to represent a 3 degree
     parafoveal region of macaque primary visual cortex, assuming a
-    3 mm/deg magnification factor and 1 mm orientation hypercolumn
+    3 mm/deg magnification factor and 0.71 mm orientation hypercolumn
     distance.
 
     Changes from ModelGCAL include relative strengths, homeostatic
@@ -25,17 +25,20 @@ class ModelSCAL(ModelGCAL):
 
     num_inputs = param.Integer(default=1, bounds=(1,None))
 
-    aff_strength = param.Number(default=3.2, bounds=(0.0, None), doc="""
+    aff_strength = param.Number(default=2.8, bounds=(0.0, None), doc="""
         Overall strength of the afferent projection to V1.""")
 
-    exc_strength = param.Number(default=2.6, bounds=(0.0, None), doc="""
+    exc_strength = param.Number(default=1.1, bounds=(0.0, None), doc="""
         Overall strength of the lateral excitatory projection to V1.""")
 
-    inh_strength = param.Number(default=4.5, bounds=(0.0, None), doc="""
+    inh_strength = param.Number(default=1.8, bounds=(0.0, None), doc="""
         Overall strength of the lateral inhibitory projection to V1.""")
 
     t_init = param.Number(default=0.35, doc="""
         The initial threshold value for homeostatic adaptation in V1.""")
+
+    strength_factor = param.Number(default=4.292, doc="""
+        Factor to scale the default afferent strength of 2.33 by.""")
 
     #=================#
     # Spatial extents #
@@ -44,13 +47,13 @@ class ModelSCAL(ModelGCAL):
     latexc_radius = param.Number(default=0.1, bounds=(0, None), doc="""
         Radius of the lateral excitatory bounds within V1.""")
 
-    latinh_radius = param.Number(default=0.22917, bounds=(0, None), doc="""
+    latinh_radius = param.Number(default=0.18, bounds=(0, None), doc="""
         Radius of the lateral inhibitory bounds within V1.""")
 
-    latexc_size = param.Number(default=0.087, bounds=(0, None), doc="""
+    latexc_size = param.Number(default=0.06, bounds=(0, None), doc="""
         Size of the lateral excitatory connections within V1.""")
 
-    latinh_size = param.Number(default=0.16, bounds=(0, None), doc="""
+    latinh_size = param.Number(default=0.115, bounds=(0, None), doc="""
         Size of the lateral inhibitory connections within V1.""")
 
     v1aff_radius = param.Number(default=0.5, bounds=(0, None), doc="""
@@ -74,7 +77,7 @@ class ModelSCAL(ModelGCAL):
         Connection field radius of a unit in the LGN level to units in
         a retina sheet.""")
 
-    lgnlateral_radius = param.Number(default=0.4, bounds=(0, None), doc="""
+    lgnlateral_radius = param.Number(default=0.5, bounds=(0, None), doc="""
         Connection field radius of a unit in the LGN level to
         surrounding units, in case gain control is used.""")
 
