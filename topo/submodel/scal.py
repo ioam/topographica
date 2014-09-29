@@ -90,8 +90,12 @@ class ModelSCAL(ModelGCAL):
 
 
     def training_pattern_setup(self, **overrides):
+        """
+        Only the size of Gaussian training patterns has been modified.
+        The 'aspect_ratio' and 'scale' parameter values are unchanged.
+        """
         or_dim = 'or' in self.dims
-        gaussian = self.dataset == 'Gaussian'
+        gaussian = (self.dataset == 'Gaussian')
         pattern_parameters = {'size':(0.2 if or_dim and gaussian
                                       else 3 * 0.2 if gaussian else 10.0),
                               'aspect_ratio': 4.66667 if or_dim else 1.0,
@@ -102,6 +106,9 @@ class ModelSCAL(ModelGCAL):
 
     @Model.CFProjection
     def lateral_inhibitory(self, src_properties, dest_properties):
+        """
+        Switch to divisive inhibition, otherwise parameters unchanged.
+        """
         return Model.CFProjection.params(
             delay=0.05,
             name='LateralInhibitory',
