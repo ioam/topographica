@@ -37,9 +37,6 @@ class ModelSCAL(ModelGCAL):
     t_init = param.Number(default=0.35, doc="""
         The initial threshold value for homeostatic adaptation in V1.""")
 
-    target_activity = param.Number(default=0.016, doc="""
-        The target activity for homeostatic adaptation in V1,""")
-
     #=================#
     # Spatial extents #
     #=================#
