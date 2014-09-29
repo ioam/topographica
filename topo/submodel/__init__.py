@@ -234,6 +234,10 @@ class Model(param.Parameterized):
         :'projections': instantiates all projections and registers
         them in topo.sim
     """
+
+    random_seed = param.Integer(default=None, doc="""
+       Overrides the default global seed on param.random_seed when not None.""")
+
     __abstract = True
 
     # A convenient handle on the definition class decorator
@@ -373,6 +377,9 @@ class Model(param.Parameterized):
                                    'sheets',
                                    'projections',
                                    'analysis']
+
+        if self.random_seed is not None:
+            param.random_seed = self.random_seed
 
         if setup_options==True:
             setup_options = available_setup_options
