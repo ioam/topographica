@@ -95,7 +95,8 @@ class ModelSCAL(ModelGCAL):
     def training_pattern_setup(self, **overrides):
         or_dim = 'or' in self.dims
         gaussian = self.dataset == 'Gaussian'
-        pattern_parameters = {'size': 0.2 if or_dim and gaussian else 3 * 0.2 if gaussian else 10.0,
+        pattern_parameters = {'size':(0.2 if or_dim and gaussian
+                                      else 3 * 0.2 if gaussian else 10.0),
                               'aspect_ratio': 4.66667 if or_dim else 1.0,
                               'scale': self.contrast / 100.0}
         return super(ModelSCAL, self).training_pattern_setup(
@@ -107,20 +108,27 @@ class ModelSCAL(ModelGCAL):
         return Model.CFProjection.params(
             delay=0.05,
             name='LateralInhibitory',
-            weights_generator=imagen.random.GaussianCloud(gaussian_size=self.latinh_size),
+            weights_generator=imagen.random.GaussianCloud(
+                gaussian_size=self.latinh_size),
             strength=self.inh_strength,
-            activity_group=(0.6, DivideWithConstant(c=self.division_constant)),
+            activity_group=(0.6,
+                            DivideWithConstant(c=self.division_constant)),
             learning_rate=self.inh_lr,
-            nominal_bounds_template=sheet.BoundingBox(radius=self.latinh_radius))
+            nominal_bounds_template=sheet.BoundingBox(
+                radius=self.latinh_radius))
 
 
     def analysis_setup(self):
         super(ModelSCAL, self).analysis_setup()
         from topo.analysis.command import measure_sine_pref
 
-        sf_relative_sizes = [self.sf_spacing ** (sf_channel - 1) for sf_channel
-                             in self['SF']]
-        wide_relative_sizes = [0.5 * sf_relative_sizes[0]] +\
-                              sf_relative_sizes + [2.0 * sf_relative_sizes[-1]]
-        relative_sizes = (wide_relative_sizes if self.expand_sf_test_range else sf_relative_sizes)
+        sf_relative_sizes = [self.sf_spacing ** (sf_channel - 1)
+                             for sf_channel in self['SF']]
+
+        wide_relative_sizes = ([0.5 * sf_relative_sizes[0]]
+                               + sf_relative_sizes
+                               + [2.0 * sf_relative_sizes[-1]])
+
+        relative_sizes = (wide_relative_sizes if self.expand_sf_test_range
+                          else sf_relative_sizes)
         measure_sine_pref.frequencies = [1.65 * s for s in relative_sizes]
