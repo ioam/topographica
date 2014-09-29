@@ -23,7 +23,7 @@ class ModelSCAL(ModelGCAL):
     calibration process is explained in a forthcoming notebook.
     """
 
-    num_inputs = param.Number(default=1.0)
+    num_inputs = param.Integer(default=1, bounds=(1,None))
 
     aff_strength = param.Number(default=3.2, bounds=(0.0, None), doc="""
         Overall strength of the afferent projection to V1.""")
