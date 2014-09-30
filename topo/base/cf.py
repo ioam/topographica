@@ -684,9 +684,11 @@ class CFProjection(Projection):
             if self.same_cf_shape_for_all_cfs:
                 mask_template = self.mask_template
             else:
+                name = '%s(%.5f, %.5f)' % (self.cf_shape.name, x,y)
                 mask_template = _create_mask(self.cf_shape,self.bounds_template,
                                              self.src,self.autosize_mask,
-                                             self.mask_threshold)
+                                             self.mask_threshold,
+                                             name=name)
             label = self.hash_format.format(name=self.name,
                                             src=self.src.name,
                                             dest=self.dest.name)
@@ -870,7 +872,8 @@ class CFProjection(Projection):
 
 # CEB: have not yet decided proper location for this method
 # JAB: should it be in PatternGenerator?
-def _create_mask(shape,bounds_template,sheet,autosize=True,threshold=0.5):
+def _create_mask(shape,bounds_template,sheet,
+                 autosize=True,threshold=0.5, name='Mask'):
     """
     Create the mask (see ConnectionField.__init__()).
     """
@@ -885,10 +888,13 @@ def _create_mask(shape,bounds_template,sheet,autosize=True,threshold=0.5):
     center_r,center_c = sheet.sheet2matrixidx(0,0)
     center_x,center_y = sheet.matrixidx2sheet(center_r,center_c)
 
-    mask = shape(x=center_x,y=center_y,
-                 bounds=bounds_template,
-                 xdensity=sheet.xdensity,
-                 ydensity=sheet.ydensity)
+    with param.Dynamic.time_fn as t:
+        t(0)                        # Initialize masks at time 0
+        mask = shape(name=name,
+              x=center_x,y=center_y,
+              bounds=bounds_template,
+              xdensity=sheet.xdensity,
+              ydensity=sheet.ydensity)
 
     mask = np.where(mask>=threshold,mask,0.0)
 
