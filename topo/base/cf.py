@@ -888,13 +888,18 @@ def _create_mask(shape,bounds_template,sheet,
     center_r,center_c = sheet.sheet2matrixidx(0,0)
     center_x,center_y = sheet.matrixidx2sheet(center_r,center_c)
 
-    with param.Dynamic.time_fn as t:
-        t(0)                        # Initialize masks at time 0
-        mask = shape(name=name,
-              x=center_x,y=center_y,
-              bounds=bounds_template,
-              xdensity=sheet.xdensity,
-              ydensity=sheet.ydensity)
+    kwargs = dict(name=name,
+                  x=center_x,y=center_y,
+                  bounds=bounds_template,
+                  xdensity=sheet.xdensity,
+                  ydensity=sheet.ydensity)
+
+    if isinstance(param.Dynamic.time_fn, param.Time):
+        with param.Dynamic.time_fn as t:
+            t(0)                        # Initialize masks at time 0
+            mask = shape(**kwargs)
+    else:
+        mask = shape(**kwargs)
 
     mask = np.where(mask>=threshold,mask,0.0)
 
