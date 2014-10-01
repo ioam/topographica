@@ -28,13 +28,13 @@ class ModelSCAL(ModelGCAL):
     aff_strength = param.Number(default=2.8, bounds=(0.0, None), doc="""
         Overall strength of the afferent projection to V1.""")
 
-    exc_strength = param.Number(default=1.1, bounds=(0.0, None), doc="""
+    exc_strength = param.Number(default=1.0, bounds=(0.0, None), doc="""
         Overall strength of the lateral excitatory projection to V1.""")
 
     inh_strength = param.Number(default=1.8, bounds=(0.0, None), doc="""
         Overall strength of the lateral inhibitory projection to V1.""")
 
-    t_init = param.Number(default=0.35, doc="""
+    t_init = param.Number(default=0.4, doc="""
         The initial threshold value for homeostatic adaptation in V1.""")
 
     strength_factor = param.Number(default=4.292, doc="""
@@ -64,7 +64,7 @@ class ModelSCAL(ModelGCAL):
         The size of the central Gaussian used to compute the
         center-surround receptive field.""")
 
-    surround_size = param.Number(default=4 * 0.2, bounds=(0, None), doc="""
+    surround_size = param.Number(default=0.3, bounds=(0, None), doc="""
         The size of the surround Gaussian used to compute the
         center-surround receptive field.""")
 
