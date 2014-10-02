@@ -183,6 +183,10 @@ class EarlyVisionModel(VisualInputModel):
         inclusive_bounds=(False,True),doc="""
         The nominal_density to use for the LGN.""")
 
+    lgnaff_strength = param.Number(default=2.33, doc="""
+        Overall strength of the afferent projection from the retina to
+        the LGN sheets.""")
+
     lgnaff_radius=param.Number(default=0.375,bounds=(0,None),doc="""
         Connection field radius of a unit in the LGN level to units in
         a retina sheet.""")
@@ -215,10 +219,6 @@ class EarlyVisionModel(VisualInputModel):
     gain_control_SF = param.Boolean(default=True,doc="""
         Whether to use divisive lateral inhibition in the LGN for
         contrast gain control across Spatial Frequency Sheets.""")
-
-    strength_factor = param.Number(default=1.0,bounds=(0,None),doc="""
-        Factor by which the strength of afferent connections from
-        retina sheets to LGN sheets is multiplied.""")
 
 
     def property_setup(self, properties):
@@ -297,7 +297,7 @@ class EarlyVisionModel(VisualInputModel):
 
         return Model.SharedWeightCFProjection.params(
             delay=0.05,
-            strength=2.33*self.strength_factor,
+            strength=self.lgnaff_strength,
             name='Afferent',
             nominal_bounds_template=sheet.BoundingBox(radius=self.lgnaff_radius
                                                       *self.sf_spacing**(channel-1)),

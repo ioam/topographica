@@ -195,7 +195,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
         return [Model.SharedWeightCFProjection.params(
             delay=0.05,
-            strength=4.7*self.strength_factor/len(opponents)*(1 if dest_properties['polarity'] == 'On' else -1),
+            strength=(4.7/2.33)*self.lgnaff_strength/len(opponents)*(1 if dest_properties['polarity'] == 'On' else -1),
             src_port='Activity%d'%opponent,
             dest_port='Activity',
             weights_generator=imagen.Gaussian(size=0.07385,
@@ -222,7 +222,7 @@ class ColorEarlyVisionModel(EarlyVisionModel):
 
         return [Model.SharedWeightCFProjection.params(
             delay=0.05,
-            strength=4.7*self.strength_factor/len(surrounds)*(-1 if dest_properties['polarity'] == 'On' else 1),
+            strength=(4.7/2.33)*self.lgnaff_strength/len(surrounds)*(-1 if dest_properties['polarity'] == 'On' else 1),
             src_port='Activity%d'%surround,
             dest_port='Activity',
             weights_generator=imagen.Gaussian(size=0.07385*(4 if dest_properties['opponent'] is not 'Blue' else 1),

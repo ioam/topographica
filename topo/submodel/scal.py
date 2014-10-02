@@ -25,6 +25,10 @@ class ModelSCAL(ModelGCAL):
 
     num_inputs = param.Integer(default=1, bounds=(1,None))
 
+    lgnaff_strength = param.Number(default=10, doc="""
+        Overall strength of the afferent projection from the retina to
+        the LGN sheets.""")
+
     aff_strength = param.Number(default=2.8, bounds=(0.0, None), doc="""
         Overall strength of the afferent projection to V1.""")
 
@@ -37,8 +41,6 @@ class ModelSCAL(ModelGCAL):
     t_init = param.Number(default=0.4, doc="""
         The initial threshold value for homeostatic adaptation in V1.""")
 
-    strength_factor = param.Number(default=4.292, doc="""
-        Factor to scale the default afferent strength of 2.33 by.""")
 
     #=================#
     # Spatial extents #
