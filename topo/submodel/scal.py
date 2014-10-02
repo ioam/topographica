@@ -129,7 +129,7 @@ class ModelSCAL(ModelGCAL):
 
     def analysis_setup(self):
         super(ModelSCAL, self).analysis_setup()
-        from topo.analysis.command import measure_sine_pref
+        from topo.analysis.command import measure_sine_pref, measure_or_pref
 
         sf_relative_sizes = [self.sf_spacing ** (sf_channel - 1)
                              for sf_channel in self['SF']]
@@ -140,4 +140,6 @@ class ModelSCAL(ModelGCAL):
 
         relative_sizes = (wide_relative_sizes if self.expand_sf_test_range
                           else sf_relative_sizes)
-        measure_sine_pref.frequencies = [1.65 * s for s in relative_sizes]
+        frequencies = [1.65 * s for s in relative_sizes]
+        measure_sine_pref.frequencies = frequencies
+        measure_or_pref.frequencies= frequencies
