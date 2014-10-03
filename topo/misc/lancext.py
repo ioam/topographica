@@ -252,15 +252,20 @@ class TopoCommand(Command):
    param_formatter = param.Callable(param_formatter.instance(),
       doc="""Used to specify run_batch formatting.""")
 
-   max_name_length= param.Number(default=200, doc="Matches run_batch parameter of same name.")
+   max_name_length= param.Number(default=200,
+      doc="Matches run_batch parameter of same name.")
 
-   snapshot = param.Boolean(default=True, doc="Matches run_batch parameter of same name.")
+   snapshot = param.Boolean(default=True,
+      doc="Matches run_batch parameter of same name.")
 
-   vc_info = param.Boolean(default=True, doc="Matches run_batch parameter of same name.")
+   vc_info = param.Boolean(default=True,
+      doc="Matches run_batch parameter of same name.")
 
-   save_global_params = param.Boolean(default=True, doc="Matches run_batch parameter of same name.")
+   save_global_params = param.Boolean(default=True,
+     doc="Matches run_batch parameter of same name.")
 
-   progress_bar = param.String(default='disabled', doc="Matches run_batch parameter of same name.")
+   progress_bar = param.String(default='disabled',
+     doc="Matches run_batch parameter of same name.")
 
 
    def __init__(self, tyfile, executable=None, **kwargs):
