@@ -1055,6 +1055,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
         self._model = model
         model.setup()
+        self.name = model.name
 
 
     def __getitem__(self,item_name):
