@@ -23,6 +23,14 @@ class ModelSCAL(ModelGCAL):
     calibration process is explained in a forthcoming notebook.
     """
 
+    area = param.Number(default=2.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        Linear size of cortical area to simulate.
+
+        SCAL and other spatially calibrated variants of GCAL require
+        cortical areas larger than 1.0x1.0 to avoid strong suppressive
+        edge effects.""")
+
     num_inputs = param.Integer(default=1, bounds=(1,None))
 
     lgnaff_strength = param.Number(default=10, doc="""
