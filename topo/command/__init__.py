@@ -712,6 +712,10 @@ class run_batch(ParameterizedFunction):
       of run_batch is displayed using standard output but may also be
       set to 'disabled' as necessary.""")
 
+    progress_interval = param.Number(default=100, doc="""
+      Interval between updates of the progress bar (if enabled) in
+      units of topo.sim.time.""")
+
     def _truncate(self,p,s):
         """
         If s is greater than the max_name_length parameter, truncate it
@@ -844,7 +848,8 @@ class run_batch(ParameterizedFunction):
             import numpy as np
             ProgressBar.display = p.progress_bar
             progress_bar = RunProgress(run_hook = topo.sim.run,
-                                       display = p.progress_bar)
+                                       display  = p.progress_bar,
+                                       interval = p.progress_interval)
 
             if len(set(times)) == 1:
                 completion = [0, 100]

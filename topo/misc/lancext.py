@@ -267,6 +267,8 @@ class TopoCommand(Command):
    progress_bar = param.String(default='disabled',
      doc="Matches run_batch parameter of same name.")
 
+   progress_interval = param.Number(default=100,
+     doc="Matches run_batch parameter of same name.")
 
    def __init__(self, tyfile, executable=None, **kwargs):
 
@@ -336,6 +338,7 @@ class TopoCommand(Command):
                  'snapshot':           self.snapshot,
                  'vc_info':            self.vc_info,
                  'save_global_params': self.save_global_params,
+                 'progress_interval':  self.progress_interval,
                  'progress_bar':       repr(self.progress_bar),
                  'metadata_dir':       repr('metadata'),
                  'compress_metadata':  repr('zip'),
