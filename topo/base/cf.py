@@ -683,6 +683,8 @@ class CFProjection(Projection):
         label = self.hash_format.format(name=self.name,
                                         src=self.src.name,
                                         dest=self.dest.name)
+
+        name = "%s_CF (%.5f, %.5f)" % ('' if label is None else label, x,y)
         try:
             if self.same_cf_shape_for_all_cfs:
                 mask_template = self.mask_template
@@ -691,7 +693,7 @@ class CFProjection(Projection):
                                              self.bounds_template,
                                              self.src,self.autosize_mask,
                                              self.mask_threshold,
-                                             label=label)
+                                             name=name)
 
             CF = self.cf_type(self.src, x=x, y=y,
                               template=self._slice_template,
@@ -873,7 +875,7 @@ class CFProjection(Projection):
 # CEB: have not yet decided proper location for this method
 # JAB: should it be in PatternGenerator?
 def _create_mask(shape,bounds_template,sheet,
-                 autosize=True,threshold=0.5, label='Mask'):
+                 autosize=True,threshold=0.5, name='Mask'):
     """
     Create the mask (see ConnectionField.__init__()).
     """
@@ -888,7 +890,7 @@ def _create_mask(shape,bounds_template,sheet,
     center_r,center_c = sheet.sheet2matrixidx(0,0)
     center_x,center_y = sheet.matrixidx2sheet(center_r,center_c)
 
-    kwargs = dict(name=label,
+    kwargs = dict(name=name,
                   x=center_x,y=center_y,
                   bounds=bounds_template,
                   xdensity=sheet.xdensity,
