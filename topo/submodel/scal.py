@@ -114,7 +114,9 @@ class ModelSCAL(ModelGCAL):
                               'aspect_ratio': 4.66667 if or_dim else 1.0,
                               'scale': self.contrast / 100.0}
         return super(ModelSCAL, self).training_pattern_setup(
-            pattern_parameters=pattern_parameters)
+            pattern_parameters=pattern_parameters,
+            position_bound_x=self.area/2.0+self.v1aff_radius,
+            position_bound_y=self.area/2.0+self.v1aff_radius)
 
 
     @Model.CFProjection
