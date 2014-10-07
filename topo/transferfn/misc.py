@@ -314,10 +314,10 @@ class TemporalScatter(TransferFnWithState):
         return x
 
     def state_push(self):
-        self._buffer *= 0.0
         self.__current_state_stack.append((copy.copy(self._buffer),
                                            copy.copy(self.first_call)))
         super(TemporalScatter,self).state_push()
+        self._buffer *= 0.0
 
     def state_pop(self):
         self._buffer,self.first_call =  self.__current_state_stack.pop()
