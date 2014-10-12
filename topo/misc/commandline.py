@@ -7,6 +7,7 @@ Topographica files within a separate Python.
 
 
 from optparse import OptionParser
+from unittest import SkipTest
 
 import sys, __main__, math, os, re
 
@@ -782,7 +783,12 @@ def process_argv(argv):
                 ipshell.call_pdb = True
 
             # Load Topographica IPython extension in embedded shell
-            ipshell.extension_manager.load_extension('topo.misc.ipython')
+            try:
+                ipshell.extension_manager.load_extension('topo.misc.ipython')
+            except SkipTest:                
+                cmdline_main.warning(
+                    "Could not load IPython extension 'topo.misc.ipython'; load the extension manually for more information.")
+                
             ipshell()
 
     global return_code
