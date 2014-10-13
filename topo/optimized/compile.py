@@ -7,7 +7,7 @@ import numpy
 try:
     from Cython.Distutils import build_ext
 except:
-    from nose.plugins.skip import SkipTest
+    from unittest import SkipTest
     raise SkipTest('Cython could not be imported, '
                    'cannot compile sparse components.')
 from distutils.core import setup

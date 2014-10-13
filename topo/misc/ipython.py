@@ -16,7 +16,7 @@ try:
     import IPython # pyflakes:ignore (Required import)
     from IPython.core.magic import Magics, magics_class, line_magic
 except:
-    from nose.plugins.skip import SkipTest
+    from unittest import SkipTest
     raise SkipTest("IPython extension requires IPython >= 0.12")
 
 
