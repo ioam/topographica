@@ -13,7 +13,7 @@ import numpy as np
 
 import param
 
-from dataviews import SheetView as ImagenSheetView
+from dataviews import SheetView as dataviewsSheetView
 from dataviews.sheetviews import BoundingRegion, SheetCoordinateSystem, SheetStack
 from dataviews.options import options, StyleOpts
 
@@ -88,7 +88,7 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
     return unitview
 
 
-class CFView(ImagenSheetView):
+class CFView(dataviewsSheetView):
 
     situated_bounds = param.ClassSelector(class_=BoundingRegion, default=None, doc="""
         The situated bounds can be set to embed the SheetLayer in a larger
@@ -104,6 +104,7 @@ class CFView(ImagenSheetView):
     @property
     def situated(self):
         if self.bounds.lbrt() == self.situated_bounds.lbrt():
+            self.warning("CFView is already situated.")
             return self
         l, b, r, t = self.bounds.lbrt()
         xd = int(np.round(self.data.shape[1] / (r-l)))
@@ -115,9 +116,9 @@ class CFView(ImagenSheetView):
         r1, r2, c1, c2 = self.input_sheet_slice
         data[r1:r2, c1:c2] = self.data
 
-        return ImagenSheetView(data, self.situated_bounds, roi_bounds=self.roi_bounds,
-                               situated_bounds=self.situated_bounds,
-                               label=self.label, value=self.value)
+        return CFView(data, self.situated_bounds, roi_bounds=self.bounds,
+                      situated_bounds=self.situated_bounds,
+                      label=self.label, value=self.value)
 
 
 class CFStack(SheetStack):
