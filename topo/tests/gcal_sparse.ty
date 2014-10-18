@@ -1,0 +1,13 @@
+"""
+Model equivalent to examples/gcal.ty before moving to class-based
+approach. This version uses sparse representation for projections.
+
+This script is used to test against gcal_sparse.ty_DATA. This was the
+original training test data for the GCAL model (the first version of
+gcal.ty_DATA) and should match identically with gcal.ty_DATA.
+"""
+
+
+from topo.submodel.gcal import SparseGCAL
+
+topo.sim.model = SparseGCAL()
