@@ -219,11 +219,6 @@ class SparseGCAL(ModelGCAL):
     Reproduces the results of the examples/gcal.ty file using sparse representation.
     """
 
-    def property_setup(self, properties):
-        properties = super(ModelGCAL, self).property_setup(properties)
-        "Specify weight initialization, response function, and learning function"
-
-        projection.CFProjection = sparse.sparsecf.SparseCFProjection
-        projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
-        projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
-        return properties
+    @Model.SparseCFProjection
+    def V1_afferent(self, src_properties, dest_properties):
+        return super(SparseGCAL, self).V1_afferent(src_properties, dest_properties)

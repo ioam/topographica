@@ -107,15 +107,15 @@ speedtarget = OrderedDict()
 # CEBALERT: this list should be defined in one place.
 #from setup import TRAINSCRIPTS
 TRAINSCRIPTS = [
-    "examples/gcal.ty",
+    #"examples/gcal.ty",
     "examples/hierarchical.ty",
-    "models/lissom_or.ty",
-    "models/lissom_oo_or.ty",
-    "examples/som_retinotopy.ty",
-    "models/sullivan_neurocomputing04.ty",
-    "models/lissom.ty",
+    #"models/lissom_or.ty",
+    #"models/lissom_oo_or.ty",
+    #"examples/som_retinotopy.ty",
+    #"models/sullivan_neurocomputing04.ty",
+    #"models/lissom.ty",
 #    "models/lissom_fsa.ty",  # CEBALERT: disabled for now (needs special case - look_at=fsa not v1, see below)
-    "topo/tests/gcal_legacy.ty",
+    #"topo/tests/gcal_legacy.ty",
     "topo/tests/gcal_sparse.ty"
     ]
 

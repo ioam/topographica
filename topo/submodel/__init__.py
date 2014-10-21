@@ -527,6 +527,7 @@ class Model(param.Parameterized):
 from topo.sheet import optimized as sheetopt
 from topo.projection import optimized as projopt
 from topo import projection
+from topo.sparse import sparsecf as sparseproj
 
 sheet_classes = [c for c in topo.sheet.__dict__.values() if
                  (isinstance(c, type) and issubclass(c, topo.sheet.Sheet))]
@@ -540,8 +541,11 @@ projection_classes = [c for c in projection.__dict__.values() if
 projection_classes_opt = [c for c in projopt.__dict__.values() if
                           (isinstance(c, type) and issubclass(c, projection.Projection))]
 
+projection_classes_sparse = [c for c in sparseproj.__dict__.values() if
+                             (isinstance(c, type) and issubclass(c, projection.Projection))]
+
 for obj_class in (sheet_classes + sheet_classes_opt
-                  + projection_classes + projection_classes_opt):
+                  + projection_classes + projection_classes_opt + projection_classes_sparse):
     with param.logging_level('CRITICAL'):
         # Do not create a decorator if declared as abstract
         if not hasattr(obj_class, "_%s__abstract" % obj_class.name):
