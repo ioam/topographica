@@ -123,6 +123,10 @@ try:
         'compiler':'gcc',
         'verbose':0}
 
+    # Suppress bogus #warning "Using deprecated NumPy API" warnings from weave;
+    # (unfortunately also suppresses any other explicit #warning)
+    inline_named_params['extra_compile_args'].append('-Wno-cpp')
+
     if openmp_threads != 1:
         c_decorators['cfs_loop_pragma']="#pragma omp parallel for schedule(guided, 8)"
         inline_named_params['extra_compile_args'].append('-fopenmp')
