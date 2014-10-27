@@ -10,10 +10,9 @@ import numpy as np
 
 import param
 from param import ParameterizedFunction, ParamOverrides
-
-from dataviews import SheetView, SheetStack, Contours
-from dataviews.collector import AttrTree
-from dataviews.options import options, StyleOpts
+from holoviews import SheetMatrix, ViewMap, Contours
+from holoviews.interface.collector import AttrTree
+from holoviews.core.options import options, StyleOpts
 
 from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
@@ -68,7 +67,7 @@ def update_rgb_activities():
             # should this ensure all of r,g,b are present?
             if hasattr(sheet,'activity_%s'%c.lower()):
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
-                new_view = SheetView(activity_copy, bounds=sheet.bounds)
+                new_view = SheetMatrix(activity_copy, bounds=sheet.bounds)
                 new_view.metadata=metadata
                 sheet.views.Maps['%sActivity'%c]=new_view
 
@@ -205,8 +204,8 @@ class measure_cog(ParameterizedFunction):
                             src_name=sheet.name)
 
         timestamp = topo.sim.time()
-        xsv = SheetView(xcog, sheet.bounds, label='X CoG', title='%s {label}' % proj.name)
-        ysv = SheetView(ycog, sheet.bounds, label='Y CoG', title='%s {label}' % proj.name)
+        xsv = SheetMatrix(xcog, sheet.bounds, label='X CoG', title='%s {label}' % proj.name)
+        ysv = SheetMatrix(ycog, sheet.bounds, label='Y CoG', title='%s {label}' % proj.name)
 
         lines = []
         hlines, vlines = xsv.data.shape
@@ -216,12 +215,12 @@ class measure_cog(ParameterizedFunction):
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
         cogmesh = Contours(lines, sheet.bounds, label='Center of Gravity', title='%s {label}' % proj.name)
 
-        xcog_stack = SheetStack((timestamp, xsv), dimensions=[features.Time])
+        xcog_stack = ViewMap((timestamp, xsv), dimensions=[features.Time])
         xcog_stack.metadata = metadata
-        ycog_stack = SheetStack((timestamp, ysv), dimensions=[features.Time])
+        ycog_stack = ViewMap((timestamp, ysv), dimensions=[features.Time])
         ycog_stack.metadata = metadata
 
-        contour_stack = SheetStack((timestamp, cogmesh), dimensions=[features.Time])
+        contour_stack = ViewMap((timestamp, cogmesh), dimensions=[features.Time])
         contour_stack.metadata = metadata
 
         return {'XCoG': xcog_stack, 'YCoG': ycog_stack, 'CoG': contour_stack}

@@ -17,21 +17,17 @@ scale it up to run at higher densities (or down for lower densities)
 simply by changing e.g. Sheet.nominal_density.
 """
 
-
-
 from numpy import zeros,array,arange,meshgrid
 from numpy import float64
 
 import param
 
+from holoviews.core import BoundingBox, BoundingRegionParameter, SheetCoordinateSystem
+from holoviews.interface.collector import AttrDict, AttrTree
+from holoviews.views import SheetMatrix
+
 from simulation import EventProcessor
-
 from functionfamily import TransferFn
-
-from dataviews import AttrDict
-from dataviews.collector import AttrTree
-from dataviews.sheetviews import BoundingBox, BoundingRegionParameter,\
-    SheetCoordinateSystem, SheetView
 
 activity_type = float64
 
@@ -313,7 +309,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
                             row_precedence=self.row_precedence,
                             timestamp=self.simulation.time())
 
-        sv = SheetView(self.activity.copy(), self.bounds,
+        sv = SheetMatrix(self.activity.copy(), self.bounds,
                        label=self.name+' Activity', value='Activity')[coords]
         sv.metadata=metadata
         return sv

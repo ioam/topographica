@@ -1,20 +1,19 @@
 """
 Analysis tools for Topographica, other than plotting tools.
 
-Configures the interface to the featuremapper and dataviews projects
+Configures the interface to the featuremapper and holoviews projects
 and sets the appropriate Topographica-specific hooks.
 """
 
 import numpy as np
 
-from dataviews.collector import Reference
-from dataviews.options import channels, ChannelOpts
-from dataviews.operation import cmap2rgb, operator, chain
-from dataviews.testing import IPTestCase
-
+from holoviews.interface.collector import Reference
+from holoviews.core.options import channels, ChannelOpts
+from holoviews.testing import IPTestCase
+from holoviews.operations.channel import cmap2rgb
+from holoviews.operations.view import chain, operator
 from imagen import Animation
 import imagen.colorspaces
-
 from featuremapper.command import Collector, measure_response
 
 import topo
@@ -23,7 +22,7 @@ from topo.analysis.featureresponses import FeatureResponses, FeatureCurves,\
     topo_metadata_fn, StorageHook, get_feature_preference
 from topo.base.projection import Projection
 from topo.base.sheet import Sheet
-from topo.base.sheetview import CFView, CFStack
+from topo.base.sheetview import CFView
 from topo.misc.ipython import RunProgress
 from topo.misc import color
 
@@ -35,17 +34,13 @@ class TopoIPTestCase(IPTestCase):
     def __init__(self, *args, **kwargs):
         super(TopoIPTestCase, self).__init__(*args, **kwargs)
         self.addTypeEqualityFunc(CFView,   self.compare_cfviews)
-        self.addTypeEqualityFunc(CFStack,   self.compare_cfstack)
         self.addTypeEqualityFunc(Animation,   self.compare_animation)
 
     def compare_cfviews(self, view1, view2, msg):
         self.compare_sheetviews(view1, view2, msg)
 
-    def compare_cfstack(self, view1, view2, msg):
-        self.compare_sheetstack(view1, view2, msg)
-
     def compare_animation(self, view1, view2, msg):
-        self.compare_sheetstack(view1, view2, msg)
+        self.compare_viewmap(view1, view2, msg)
 
 
 
@@ -61,7 +56,7 @@ class SimRef(Reference):
     Projections) themselves.
 
     More information about references can be found in the docstring of
-    the dataviews.collector.Reference.
+    the holoviews.collector.Reference.
     """
     @property
     def resolved_type(self):
@@ -128,14 +123,14 @@ Collector.interval_hook = RunProgress
 
 def sheet_hook(obj, *args, **kwargs):
     """
-    Return a SheetView of the Sheet activity.
+    Return a SheetMatrix of the Sheet activity.
     """
     return obj[:]
 
 def projection_hook(obj, *args, **kwargs):
     """
-    Return a SheetView of the projection activity, otherwise if
-    grid=True, return a CoordinateGrid of the CFs.
+    Return a SheetMatrix of the projection activity, otherwise if
+    grid=True, return a Grid of the CFs.
     """
     if kwargs.pop('grid', False):
         return obj.grid(**kwargs)

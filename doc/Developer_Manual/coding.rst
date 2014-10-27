@@ -109,7 +109,7 @@ specific term. Examples of acceptable, well-defined terms:
   ProjectionSheet
   CFSheet
   GeneratorSheet
-  SheetView
+  SheetMatrix
   UnitView
   Event
   EventProcessor

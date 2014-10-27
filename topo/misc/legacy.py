@@ -555,7 +555,8 @@ def featuremapper_legacy():
     # Convert old sheet_views and curve_dict
     from topo.misc.attrdict import AttrDict
     from topo.base.sheet import Sheet
-    from dataviews import SheetView, NdMapping
+    from holoviews import SheetMatrix, NdMapping
+
     def _set_sheet_views(instance, state):
         if state['simulation'] is None:
             return None
@@ -577,7 +578,7 @@ def featuremapper_legacy():
             svs = state['sheet_views']
             for key, sv in svs.items():
                 data, bounds = sv.view()
-                new_sv = SheetView(data, bounds)
+                new_sv = SheetMatrix(data, bounds)
                 metadata = dict(dimension_labels=['Time'])
                 metadata_names = ['cyclic_range', 'precedence',
                                   'row_precedence', 'src_name']
@@ -605,7 +606,7 @@ def featuremapper_legacy():
                                                                        label=label,
                                                                        timestamp=old_sv.timestamp)
                         data, bounds = old_sv.view()
-                        sv = SheetView(data, bounds)
+                        sv = SheetMatrix(data, bounds)
                         curves[key][timestamp][l_val][f_val] = sv
         state.pop('curve_dict', None)
         state.pop('sheet_views', None)
@@ -627,11 +628,11 @@ support[90800361] = topo_misc_odict_removed
 
 
 def ndmapping_ndim_remove():
-    import dataviews
+    import holoviews
     def remove_ndmapping(instance,state):
         if 'ndim' in state:
             del state['ndim']
-    preprocess_state(dataviews.NdMapping, remove_ndmapping)
+    preprocess_state(holoviews.NdMapping, remove_ndmapping)
 
 support[90800401] = ndmapping_ndim_remove
 
@@ -700,11 +701,11 @@ def fmapper_rename():
     import featuremapper
     allow_import(featuremapper, 'fmapper')
 
-    param_no_restore = {'SheetView': ('bounds',),
+    param_no_restore = {'SheetMatrix': ('bounds',),
                         'ProjectionGrid': ('bounds',)}
     PicklableClassAttributes.deleted_params.update(param_no_restore)
 
-    import dataviews
+    import holoviews
     def remove_shape(instance,state):
         if 'shape' in state:
             x, y = state.pop('shape')
@@ -714,21 +715,10 @@ def fmapper_rename():
             bounds = state.pop('_bounds_param_value')
         elif 'scs' in state:
             bounds = state.pop('scs').bounds
-        l, b, r, t = bounds.lbrt()
 
-        cl_name = 'SheetCoordinateSystem'
-        xdensity = x/(r-l)
-        ydensity = y/(t-b)
-        state['_{cl}__xdensity'.format(cl=cl_name)] = xdensity
-        state['_{cl}__xstep'.format(cl=cl_name)] = 1.0/xdensity
-        state['_{cl}__ydensity'.format(cl=cl_name)] = ydensity
-        state['_{cl}__ystep'.format(cl=cl_name)] = 1.0/ydensity
-        state['_{cl}__shape'.format(cl=cl_name)] = (x, y)
-        state['lbrt'] = (l, b, r, t)
-        state['bounds'] = bounds
 
-    preprocess_state(dataviews.SheetView, remove_shape)
-    preprocess_state(dataviews.CoordinateGrid, remove_shape)
+    preprocess_state(holoviews.SheetMatrix, remove_shape)
+    preprocess_state(holoviews.Grid, remove_shape)
 
 support[90800536] = fmapper_rename
 

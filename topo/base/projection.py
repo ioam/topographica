@@ -2,20 +2,21 @@
 Projection and related classes.
 """
 
+from collections import OrderedDict
+
 import numpy
 from numpy import array,asarray,ones,sometrue, logical_and, logical_or
-
-from collections import OrderedDict
 
 import param
 from param.parameterized import overridable_property
 
-from dataviews import SheetView, AttrDict
-from dataviews.collector import AttrTree
+from holoviews.interface.collector import AttrDict, AttrTree
+from holoviews.views import SheetMatrix
 
 from sheet import Sheet
 from simulation import EPConnection
 from functionfamily import TransferFn
+
 
 class SheetMask(param.Parameterized):
     """
@@ -296,7 +297,7 @@ class Projection(EPConnection):
         """Returns the activity in a single projection"""
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        sv = SheetView(self.activity.copy(), self.dest.bounds,
+        sv = SheetMatrix(self.activity.copy(), self.dest.bounds,
                          label='Activity', title='%s {label}' % self.name)
         sv.metadata=AttrDict(proj_src_name=self.src.name,
                              precedence=self.src.precedence,
