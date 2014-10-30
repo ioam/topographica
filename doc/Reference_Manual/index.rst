@@ -34,7 +34,7 @@ Subprojects
  Support for generating streams of scalars, e.g. random
  distributions; currently available through the imagen module
  (below)
-`dataviews`_
+`holoviews`_
  Support for composable and declarative data structures to hold
  and visualize data and metadata. 
 `imagen`_
@@ -45,7 +45,7 @@ Subprojects
  and analyzing the responses to measure feature maps, tuning curves,
  receptive fields, PSTHs, etc.
 
-The param, paramtk, numbergen, dataviews, imagen and featuremapper
+The param, paramtk, numbergen, holoviews, imagen and featuremapper
 modules are each developed and maintained separately from
 Topographica, because they are general-purpose packages that can be
 useful for a wide variety of Python programs. However, they are
@@ -144,7 +144,7 @@ separately.
 .. _main reference manual page: topo.html
 .. _param: http://ioam.github.io/param/Reference_Manual/param.html
 .. _paramtk: http://ioam.github.io/param/Reference_Manual/paramtk.html
-.. _dataviews: http://ioam.github.io/dataviews/Reference_Manual/dataviews.html
+.. _holoviews: http://ioam.github.io/holoviews/Reference_Manual/holoviews.html
 .. _imagen: http://ioam.github.io/imagen/Reference_Manual/imagen.html
 .. _numbergen: http://ioam.github.io/imagen/Reference_Manual/numbergen.html
 .. _featuremapper: http://ioam.github.io/featuremapper/Reference_Manual/featuremapper.html

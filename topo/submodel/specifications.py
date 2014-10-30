@@ -6,11 +6,12 @@ The components of a model specification can be individually inspected,
 modified, resolved or instantiated.
 """
 
-import topo
-import param
-
-from dataviews.collector import AttrTree
 from collections import OrderedDict
+
+import param
+from holoviews.interface.collector import AttrTree
+
+import topo
 
 
 class Specification(param.Parameterized):

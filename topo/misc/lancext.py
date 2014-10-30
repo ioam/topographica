@@ -4,15 +4,18 @@ be easily integrated into a Lancet workflow (see
 github.com/ioam/lancet). The TopoCommand is appropriate for simple
 runs using the default analysis function, whereas the RunBatchCommand
 allow for more sophisticated measurements and analysis to be executed
-during a simulation run using a dataviews Collector object.
+during a simulation run using a holoviews Collector object.
 """
 
 import os, pickle
 from collections import namedtuple, OrderedDict
 
 import numpy.version as np_version
-import topo
+
 import param
+
+from holoviews.core.ndmapping import NdMapping
+from holoviews.interface.collector import Collector, Collator
 
 from lancet import PrettyPrinted, vcs_metadata
 from lancet import Command
@@ -20,6 +23,8 @@ from lancet import Launcher, review_and_launch
 from lancet import ViewFile
 from lancet import Log, FileInfo, FileType
 from lancet import List, Args
+
+import topo
 
 try:
    from external import sys_paths
@@ -29,10 +34,6 @@ try:
    submodules = [[p for p in submodule_paths if p.endswith(name)][0] for name in ordering]
 except:
    submodules = []
-
-
-from dataviews import NdMapping
-from dataviews.collector import Collector, Collator
 
 from topo.misc.commandline import default_output_path
 review_and_launch.output_directory = default_output_path()
@@ -395,7 +396,7 @@ class TopoCommand(Command):
 class BatchCollector(PrettyPrinted, param.Parameterized):
    """
    BatchCollector is a wrapper class used to execute a Collector in a
-   Topographica run_batch context, saving the dataviews to disk as
+   Topographica run_batch context, saving the holoviews to disk as
    *.view files.
    """
 
@@ -450,7 +451,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       Calls the collector specified by the user in the run_batch
       context. Invoked as an analysis function by RunBatchCommand.
       """
-      from dataviews.collector import AttrTree
+      from holoviews.interface.collector import AttrTree
       self.collector.interval_hook = topo.sim.run
 
       topo_time = topo.sim.time()

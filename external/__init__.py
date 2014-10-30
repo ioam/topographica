@@ -1,6 +1,6 @@
 import sys, os
 
-submodules = ['param', 'paramtk', 'imagen', 'featuremapper', 'lancet', 'dataviews']
+submodules = ['param', 'paramtk', 'imagen', 'featuremapper', 'lancet', 'holoviews']
 
 def sys_paths():
     cwd = os.path.abspath(os.path.split(__file__)[0])

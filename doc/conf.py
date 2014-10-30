@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath('.'))
 from builder.shared_conf import * # pyflakes:ignore (API import)
 
 paths = ['../external/imagen/', '../external/lancet/', '../external/param/',
-         '../external/paramtk/', '../external/dataviews/', '../external/featuremapper/',
+         '../external/paramtk/', '../external/holoviews/', '../external/featuremapper/',
          '..']
 add_paths(paths)
 
@@ -91,7 +91,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None,
                        'http://ipython.org/ipython-doc/2/': None,
-                       'http://ioam.github.io/dataviews/': None,
+                       'http://ioam.github.io/holoviews/': None,
                        'http://ioam.github.io/imagen/': None,
                        'http://ioam.github.io/featuremapper/': None,
                        'http://ioam.github.io/param/': None}

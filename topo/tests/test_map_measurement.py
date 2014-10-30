@@ -23,8 +23,7 @@ import pickle
 import numpy
 
 from param import resolve_path
-
-from dataviews.collector import AttrTree
+from holoviews.interface.collector import AttrTree
 
 from topo.command.analysis import *
 from topo.command.pylabplot import *
@@ -146,9 +145,9 @@ def test(plotgroup_names):
         ########################################
         except AttributeError:
             # PRALERT: Code to allow loading of old data files after
-            # boundingregion was moved to dataviews.
+            # boundingregion was moved to holoviews.
             import sys
-            from dataviews.sheetviews import boundingregion
+            from holoviews.core import boundingregion
             sys.modules['imagen.boundingregion'] = boundingregion
 
 

@@ -1,6 +1,6 @@
 **20 Aug 2014:** Two additional general-purpose projects
 have been spun out from Topographica.
-`DataViews`_ provides nearly code-free visualizations of 
+`holoviews`_ provides nearly code-free visualizations of
 arbitrary scientific data, ideal for use with `IPython Notebook`_.
 `FeatureMapper`_ measures feature maps, receptive fields, 
 tuning curves, and similar input-output relationships for any 
@@ -51,7 +51,7 @@ Topographica.
 .. _Param: http://ioam.github.com/param/
 .. _ParamTk: http://ioam.github.com/paramtk/
 .. _ImaGen: http://ioam.github.com/imagen/
-.. _DataViews: http://ioam.github.com/dataviews/
+.. _holoviews: http://ioam.github.com/holoviews/
 .. _FeatureMapper: http://ioam.github.com/featuremapper/
 .. _IPython Notebook: http://ipython.org/notebook.html
 

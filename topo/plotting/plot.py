@@ -7,8 +7,8 @@ from math import sin, cos
 
 import numpy as np
 import param
-from dataviews.ndmapping import NdMapping
-from topo.base.sheetcoords import SheetCoordinateSystem,Slice
+
+from holoviews.core import NdMapping, SheetCoordinateSystem, Slice
 from bitmap import HSVBitmap, RGBBitmap, Bitmap, DrawBitmap
 
 
@@ -31,7 +31,7 @@ class Plot(param.Parameterized):
      staleness_warning=param.Number(default=10,bounds=(0,None),doc="""
        Time length allowed between bitmaps making up a single plot before warning.
 
-       If the difference between the SheetView with the earliest
+       If the difference between the SheetMatrix with the earliest
        timestamp and the one with the latest timestamp is larger
        than this parameter's value, produce a warning.
        """)
@@ -156,7 +156,7 @@ class TemplatePlot(Plot):
 
         channels is a plot_template, i.e. a dictionary with keys
         (i.e. 'Strength','Hue','Confidence' ...).  Each key typically
-        has a string value naming specifies a SheetView in
+        has a string value naming specifies a SheetMatrix in
         sheet_views, though specific channels may contain other
         types of information as required by specific Plot subclasses.
         channels that are not used by a particular Plot subclass will
@@ -170,7 +170,7 @@ class TemplatePlot(Plot):
 
         plot_bounding_box is the outer bounding_box of the plot to
         apply if specified.  If not, the bounds of
-        the smallest SheetView are used.
+        the smallest SheetMatrix are used.
 
         normalize specifies how the Plot should be normalized: any
         value of normalize other than 'None' will result in normalization

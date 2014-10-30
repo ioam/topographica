@@ -16,7 +16,8 @@ from Tkinter import Frame
 import param
 import paramtk as tk
 
-from dataviews import SheetView, NdMapping
+from holoviews.core import NdMapping
+from holoviews.views import SheetMatrix
 
 import topo
 
@@ -46,7 +47,7 @@ class TestPatternPlotGroup(SheetPlotGroup):
             sheet = kw['sheet']
             views = topo.sim.views[sheet.name].Maps
 
-            sv = SheetView(sheet.input_generator(), bounds=sheet.bounds)
+            sv = SheetMatrix(sheet.input_generator(), bounds=sheet.bounds)
             sv.metadata=AttrDict(timestamp=topo.sim.time())
 
             if 'Activity' not in views:

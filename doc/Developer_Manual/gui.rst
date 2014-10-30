@@ -20,7 +20,7 @@ For instance, many of the analysis and plotting routines will
 commonly be used in the context of a GUI. However, the vast majority
 of this code is not specific to a GUI, i.e. it does not require a
 user to actually move a mouse or manipulate widgets. E.g. a
-SheetView is a bitmap representation of a Sheet; the resulting
+SheetMatrix is a bitmap representation of a Sheet; the resulting
 bitmap can of course be displayed in a GUI window, but it could also
 be saved to a file, and in batch mode or unit tests often *will* be
 saved directly to a file, with no GUI window ever created. Most of

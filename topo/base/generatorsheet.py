@@ -8,7 +8,9 @@ from topo.base.sheet import Sheet
 from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
 
-from dataviews import AttrDict, SheetView
+from holoviews.interface.collector import AttrDict
+from holoviews.views import SheetMatrix
+
 import numpy as np
 
 
@@ -277,7 +279,7 @@ class ChannelGeneratorSheet(GeneratorSheet):
         else:
             arr = self.activity.copy()
 
-        sv = SheetView(arr, self.bounds,
+        sv = SheetMatrix(arr, self.bounds,
                        label=self.name+' Activity', value='Activity')[coords]
         sv.metadata=metadata
         return sv

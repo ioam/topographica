@@ -18,7 +18,7 @@ import topo
 import numbergen
 
 from specifications import SheetSpec, ProjectionSpec, ModelSpec, ArraySpec # pyflakes:ignore (API import)
-from dataviews.collector import AttrTree
+from holoviews.interface.collector import AttrTree
 from topo.misc.commandline import global_params
 
 

@@ -34,8 +34,8 @@ from topo.plotting.plot import make_template_plot
 from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
-from dataviews import DataOverlay
-from dataviews.plotting import DataPlot, GridLayout, CurvePlot
+from holoviews import Overlay
+from holoviews.plotting import OverlayPlot, GridLayout, CurvePlot
 
 from topo.command import Command
 
@@ -454,10 +454,10 @@ class topographic_grid(xy_grid):
     """
 
     xsheet_view_name = param.String(default='XPreference',doc="""
-        Name of the SheetView holding the X position locations.""")
+        Name of the SheetMatrix holding the X position locations.""")
 
     ysheet_view_name = param.String(default='YPreference',doc="""
-        Name of the SheetView holding the Y position locations.""")
+        Name of the SheetMatrix holding the Y position locations.""")
 
     # Disable and hide parameters inherited from the base class
     x = param.Array(constant=True, precedence=-1)
@@ -636,7 +636,7 @@ class tuning_curve(PylabPlotCommand):
         for coord, curve in zip(p.coords,curves):
             fig = plt.figure()
             ax = plt.subplot(111)
-            plot = DataPlot if isinstance(curve.last, DataOverlay) else CurvePlot
+            plot = OverlayPlot if isinstance(curve.last, Overlay) else CurvePlot
             plot(curve, center=p.center, relative_labels=p.relative_labels,
                  show_legend=p.legend)(ax)
             self._generate_figure(p, fig)

@@ -9,7 +9,7 @@ import numpy as np
 
 import param
 import imagen
-from dataviews import SheetView
+from holoviews import SheetMatrix
 
 import topo
 import topo.base.functionfamily
@@ -234,7 +234,7 @@ class TemporalScatter(TransferFnWithState):
 
     def view_depth_map(self, mode='both'):
         """
-        Visualize the depth map using dataviews, including
+        Visualize the depth map using holoviews, including
         distribution histograms.
 
         Mode may be one of 'discrete', 'raw' or 'both':
@@ -253,13 +253,13 @@ class TemporalScatter(TransferFnWithState):
         """
         views = []
         if mode in ['raw', 'both']:
-            views.append(SheetView(self.raw_depth_map,
+            views.append(SheetMatrix(self.raw_depth_map,
                                    label = 'Pattern',
                                    name='Raw Depth map').hist())
 
         if mode in ['discrete', 'both']:
             scaled_map = (self.depth_map * self.timestep)
-            discrete_sv = SheetView(scaled_map,
+            discrete_sv = SheetMatrix(scaled_map,
                                     label = 'Pattern', name='Depth map')
             views.append(discrete_sv.hist(num_bins=self.depth,
                                           bin_range=(0, self.span)))

@@ -13,14 +13,14 @@ import numpy as np
 
 import param
 
-from dataviews import SheetView as dataviewsSheetView
-from dataviews.sheetviews import BoundingRegion, SheetCoordinateSystem, SheetStack
-from dataviews.options import options, StyleOpts
+from holoviews.core import BoundingRegion, SheetCoordinateSystem
+from holoviews.core.options import options, StyleOpts
+from holoviews.views import SheetMatrix
 
 
 class SheetView(param.Parameterized):
     """
-    Class provided for backward compatibility with earlier SheetView
+    Class provided for backward compatibility with earlier SheetMatrix
     component.
     """
 
@@ -46,7 +46,7 @@ class SheetView(param.Parameterized):
         """
         Return the requested view as a (data, bbox) tuple.  Provided
         for backward compatibility with the original Topographica
-        SheetView model. It is now easier to access the data and
+        SheetMatrix model. It is now easier to access the data and
         bounds attributes directly.
         """
         if hasattr(self, 'data'):
@@ -56,7 +56,7 @@ class SheetView(param.Parameterized):
 
     def __init__(self, (data, bounds), src_name=None, precedence=0.0,
                  timestamp=-1, row_precedence=0.5,**params):
-        self.warning('Initializing old SheetView class')
+        self.warning('Initializing old SheetMatrix class')
         super(SheetView,self).__init__(bounds=bounds,
                                        src_name = src_name,
                                        precedence = precedence,
@@ -72,7 +72,7 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
     component. Original docstring for UnitView:
 
     Consists of an X,Y position for the unit that this View is
-    created for.  Subclasses SheetView.
+    created for.  Subclasses SheetMatrix.
 
     UnitViews should be stored in Sheets via a tuple
     ('Weights',Sheet,Projection,X,Y).  The dictionary in Sheets can be
@@ -88,7 +88,7 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
     return unitview
 
 
-class CFView(dataviewsSheetView):
+class CFView(SheetMatrix):
 
     situated_bounds = param.ClassSelector(class_=BoundingRegion, default=None, doc="""
         The situated bounds can be set to embed the SheetLayer in a larger
@@ -96,10 +96,6 @@ class CFView(dataviewsSheetView):
 
     input_sheet_slice = param.NumericTuple(default=(0, 0, 0, 0), doc="""
         Slice indices of the embedded view into the situated matrix.""")
-
-    @property
-    def stack_type(self):
-        return CFStack
 
     @property
     def situated(self):
@@ -119,13 +115,6 @@ class CFView(dataviewsSheetView):
         return CFView(data, self.situated_bounds, roi_bounds=self.bounds,
                       situated_bounds=self.situated_bounds,
                       label=self.label, value=self.value)
-
-
-class CFStack(SheetStack):
-
-    @property
-    def situated(self):
-        return self.map(lambda x, _: x.situated)
 
 
 options.CFView = StyleOpts(interpolation='nearest')

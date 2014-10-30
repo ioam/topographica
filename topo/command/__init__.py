@@ -844,7 +844,7 @@ class run_batch(ParameterizedFunction):
             print_sizes()
             topo.sim.name=simname
 
-            from dataviews.ipython.widgets import ProgressBar, RunProgress
+            from holoviews.ipython.widgets import ProgressBar, RunProgress
             import numpy as np
             ProgressBar.display = p.progress_bar
             progress_bar = RunProgress(run_hook = topo.sim.run,
