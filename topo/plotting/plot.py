@@ -8,9 +8,7 @@ from math import sin, cos
 import numpy as np
 import param
 
-from holoviews.core import NdMapping
-
-from topo.base.sheetcoords import SheetCoordinateSystem,Slice
+from holoviews.core import NdMapping, SheetCoordinateSystem, Slice
 from bitmap import HSVBitmap, RGBBitmap, Bitmap, DrawBitmap
 
 

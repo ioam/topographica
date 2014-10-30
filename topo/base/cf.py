@@ -750,9 +750,8 @@ class CFProjection(Projection):
         for x, y in coords:
             grid_items[x, y] = self.view(x, y, situated=situated, **kwargs)
 
-        grid = Grid(bounds, (cols, rows), initial_items=grid_items,
-                    title=' '.join([self.dest.name, self.name, '{label}']),
-                    label='CFs')
+        grid = Grid(grid_items, label='CFs',
+                    title=' '.join([self.dest.name, self.name, '{label}']))
         grid.metadata = AttrDict(info=self.name,
                                  proj_src_name=self.src.name,
                                  proj_dest_name=self.dest.name,
