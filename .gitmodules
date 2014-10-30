@@ -18,7 +18,7 @@
 	url = https://github.com/ioam/featuremapper.git
 [submodule "external/holoviews"]
 	path = external/holoviews
-	url = https://github.com/ioam/dataviews.git
+	url = https://github.com/ioam/holoviews.git
 [submodule "doc/builder"]
 	path = doc/builder
 	url = https://github.com/ioam/ioam-builder.git
