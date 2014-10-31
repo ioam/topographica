@@ -11,7 +11,7 @@ import param
 from param.parameterized import overridable_property
 
 from holoviews.interface.collector import AttrDict, AttrTree
-from holoviews.views import SheetMatrix
+from holoviews.view import SheetMatrix
 
 from sheet import Sheet
 from simulation import EPConnection

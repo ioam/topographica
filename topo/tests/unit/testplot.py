@@ -17,7 +17,7 @@ import param
 
 from holoviews.core import BoundingBox, NdMapping
 from holoviews.interface.collector import AttrDict
-from holoviews.views import SheetMatrix
+from holoviews.view import SheetMatrix
 
 
 ### This function is defined here, where it might be useful for testing

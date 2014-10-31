@@ -15,7 +15,8 @@ import param
 
 from holoviews.core import BoundingRegion, SheetCoordinateSystem
 from holoviews.core.options import options, StyleOpts
-from holoviews.views import SheetMatrix
+from holoviews.core.options import options
+from holoviews.view import SheetMatrix
 
 
 class SheetView(param.Parameterized):
