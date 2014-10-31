@@ -712,9 +712,9 @@ def fmapper_rename():
         elif '_shape_param_value' in state:
             x, y = state.pop('_shape_param_value')
         if '_bounds_param_value' in state:
-            bounds = state.pop('_bounds_param_value')
+            state.pop('_bounds_param_value')
         elif 'scs' in state:
-            bounds = state.pop('scs').bounds
+            state.pop('scs').bounds
 
 
     preprocess_state(holoviews.SheetMatrix, remove_shape)

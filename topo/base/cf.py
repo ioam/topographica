@@ -735,13 +735,10 @@ class CFProjection(Projection):
         half_x_unit = ((r-l) / xdensity) / 2.
         half_y_unit = ((t-b) / ydensity) / 2.
         if lbrt is None:
-            bounds = self.dest.bounds
             l, b, r, t = (l+half_x_unit, b+half_y_unit, r-half_x_unit, t-half_y_unit)
         else:
             l, b = self.dest.closest_cell_center(lbrt[0], lbrt[1])
             r, t = self.dest.closest_cell_center(lbrt[2], lbrt[3])
-            bounds = BoundingBox(points=[(l-half_x_unit, b-half_y_unit),
-                                         (r+half_x_unit, t+half_y_unit)])
         x, y = np.meshgrid(np.linspace(l, r, cols),
                            np.linspace(b, t, rows))
         coords = zip(x.flat, y.flat)
