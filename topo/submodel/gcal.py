@@ -27,6 +27,9 @@ class ModelGCAL(EarlyVisionModel):
         The initial V1 threshold value. This value is static in the L and GCL models
         and adaptive in the AL and GCAL models.""")
 
+    target_activity = param.Number(default=0.024,doc="""
+        The target average activity for the homeostatic threshold mechanism.""")
+
     latexc_radius=param.Number(default=0.104,bounds=(0,None),doc="""
         Radius of the lateral excitatory bounds within V1.""")
 
@@ -88,6 +91,7 @@ class ModelGCAL(EarlyVisionModel):
             plastic=True,
             joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt,
             output_fns=[transferfn.misc.HomeostaticResponse(t_init=self.t_init,
+                                                            target_activity = self.target_activity,
                                                             learning_rate=0.01 if self.homeostasis else 0.0)],
             nominal_density=self.cortex_density,
             nominal_bounds=sheet.BoundingBox(radius=self.area/2.0))
