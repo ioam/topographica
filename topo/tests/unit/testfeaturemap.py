@@ -38,6 +38,8 @@ class TestDistributionMatrix(unittest.TestCase):
     def setUp(self):
 
         # sheet to test. As it is, its activity matrix dimension is (3,2)
+        self._Sheet_nominal_density = Sheet.nominal_density
+        self._Sheet_nominal_bounds = Sheet.nominal_bounds
         Sheet.nominal_density = 1
         Sheet.nominal_bounds = BoundingBox(points=((-1,-2),(1,1)))
         test_sheet = Sheet()
@@ -55,8 +57,11 @@ class TestDistributionMatrix(unittest.TestCase):
         self.fm2.update(self.a1,0.5)
 
 
-    # need to add a test_update()
+    def tearDown(self):
+        Sheet.nominal_density = self._Sheet_nominal_density
+        Sheet.nominal_bounds = self._Sheet_nominal_bounds
 
+    # need to add a test_update()
 
     def test_preference(self):
 
