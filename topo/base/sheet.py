@@ -24,7 +24,7 @@ import param
 
 from holoviews.core import BoundingBox, BoundingRegionParameter, SheetCoordinateSystem
 from holoviews.interface.collector import AttrDict, AttrTree
-from holoviews.views import SheetMatrix
+from holoviews.view import SheetMatrix
 
 from simulation import EventProcessor
 from functionfamily import TransferFn

@@ -17,7 +17,7 @@ import param
 import paramtk as tk
 
 from holoviews.core import NdMapping
-from holoviews.views import SheetMatrix
+from holoviews.view import SheetMatrix
 
 import topo
 

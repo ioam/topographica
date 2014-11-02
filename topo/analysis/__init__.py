@@ -10,8 +10,8 @@ import numpy as np
 from holoviews.interface.collector import Reference
 from holoviews.core.options import channels, ChannelOpts
 from holoviews.testing import IPTestCase
-from holoviews.operations.channel import cmap2rgb
-from holoviews.operations.view import chain, operator
+from holoviews.operation.channel import cmap2rgb
+from holoviews.operation.view import chain, operator
 from imagen import Animation
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
