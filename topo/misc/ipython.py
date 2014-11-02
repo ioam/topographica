@@ -147,7 +147,7 @@ class ExportMagic(Magics):
 from topo.base.sheetview import CFView
 
 from holoviews.ipython import load_ipython_extension as load_imagen_extension
-from holoviews.ipython.display_hooks import stack_display, view_display
+from holoviews.ipython.display_hooks import map_display, view_display
 from holoviews.plotting import MatrixPlot, Plot
 
 from holoviews.ipython.widgets import RunProgress
@@ -157,7 +157,7 @@ Plot.defaults.update({CFView: MatrixPlot})
 
 try:
     from lancet import ViewFrame
-    ViewFrame.display_fns.append(stack_display)
+    ViewFrame.display_fns.append(map_display)
     ViewFrame.display_fns.append(view_display)
 except:
     pass

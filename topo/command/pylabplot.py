@@ -616,20 +616,20 @@ class tuning_curve(PylabPlotCommand):
         p = ParamOverrides(self, params, allow_extra_keywords=True)
 
         x_axis = p.x_axis.capitalize()
-        stack = p.sheet.views.Curves[x_axis.capitalize()+"Tuning"]
-        time = stack.dim_range('Time')[1]
+        vmap = p.sheet.views.Curves[x_axis.capitalize()+"Tuning"]
+        time = vmap.dim_range('Time')[1]
 
         curves = []
-        if stack.dimension_labels[0] == 'X':
+        if vmap.dimension_labels[0] == 'X':
             for coord in p.coords:
                 x, y = coord
-                current_stack = stack[x, y, time, :, :, :]
-                curve_stack = current_stack.sample(X=x, Y=y).collate(p.x_axis.capitalize())
-                curves.append(curve_stack.overlay_dimensions(p.group_by))
+                current_map = vmap[x, y, time, :, :, :]
+                curve_map = current_map.sample(X=x, Y=y).collate(p.x_axis.capitalize())
+                curves.append(curve_map.overlay_dimensions(p.group_by))
         else:
-            current_stack = stack[time, :, :, :]
-            curve_stack = current_stack.sample(coords=p.coords).collate(p.x_axis.capitalize())
-            overlaid_curves = curve_stack.overlay_dimensions(p.group_by)
+            current_map = vmap[time, :, :, :]
+            curve_map = current_map.sample(coords=p.coords).collate(p.x_axis.capitalize())
+            overlaid_curves = curve_map.overlay_dimensions(p.group_by)
             if not isinstance(curves, GridLayout): curves = [overlaid_curves]
 
         figs = []

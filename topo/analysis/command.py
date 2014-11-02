@@ -215,15 +215,15 @@ class measure_cog(ParameterizedFunction):
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
         cogmesh = Contours(lines, label='Center of Gravity', title='%s {label}' % proj.name)
 
-        xcog_stack = ViewMap((timestamp, xsv), dimensions=[features.Time])
-        xcog_stack.metadata = metadata
-        ycog_stack = ViewMap((timestamp, ysv), dimensions=[features.Time])
-        ycog_stack.metadata = metadata
+        xcog_map = ViewMap((timestamp, xsv), dimensions=[features.Time])
+        xcog_map.metadata = metadata
+        ycog_map = ViewMap((timestamp, ysv), dimensions=[features.Time])
+        ycog_map.metadata = metadata
 
-        contour_stack = ViewMap((timestamp, cogmesh), dimensions=[features.Time])
-        contour_stack.metadata = metadata
+        contour_map = ViewMap((timestamp, cogmesh), dimensions=[features.Time])
+        contour_map.metadata = metadata
 
-        return {'XCoG': xcog_stack, 'YCoG': ycog_stack, 'CoG': contour_stack}
+        return {'XCoG': xcog_map, 'YCoG': ycog_map, 'CoG': contour_map}
 
 
 options.Gravity_Contours = StyleOpts(linewidth=1.0)
