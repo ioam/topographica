@@ -213,7 +213,8 @@ class measure_cog(ParameterizedFunction):
             lines.append(np.vstack([xsv.data[hind,:].T, ysv.data[hind,:]]).T)
         for vind in range(vlines)[::p.stride]:
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
-        cogmesh = Contours(lines, label='Center of Gravity', title='%s {label}' % proj.name)
+        cogmesh = Contours(lines, lbrt=sheet.bounds.lbrt(),
+                           label='Center of Gravity', title='%s {label}' % proj.name)
 
         xcog_map = ViewMap((timestamp, xsv), dimensions=[features.Time])
         xcog_map.metadata = metadata
