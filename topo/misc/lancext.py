@@ -563,7 +563,7 @@ class BatchCollator(Collator):
 
         if isinstance(data, (OrderedDict, list)):
             dimensions = params.pop('dimensions')
-        else:
+        elif len(data):
             if isinstance(data, FileInfo):
                 params['fileinfo'] = data
                 filekey = data.key
@@ -572,6 +572,8 @@ class BatchCollator(Collator):
             elif isinstance(data, NdMapping):
                 data = data.dframe()
             data, dimensions = self._process_dframe(data, log, filekey)
+        else:
+            raise Exception('Input data contains no items.')
 
         super(BatchCollator, self).__init__(data, dimensions=dimensions, log=log,
                                             filetype=filetype, filekey=filekey,
