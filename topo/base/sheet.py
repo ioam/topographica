@@ -24,7 +24,7 @@ import param
 
 from holoviews.core import BoundingBox, BoundingRegionParameter, SheetCoordinateSystem
 from holoviews.interface.collector import AttrDict, AttrTree
-from holoviews.view import SheetMatrix
+from holoviews.view import Matrix
 
 from simulation import EventProcessor
 from functionfamily import TransferFn
@@ -309,8 +309,8 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
                             row_precedence=self.row_precedence,
                             timestamp=self.simulation.time())
 
-        sv = SheetMatrix(self.activity.copy(), self.bounds,
-                       label=self.name+' Activity', value='Activity')[coords]
+        sv = Matrix(self.activity.copy(), self.bounds,
+                    label=self.name+' Activity', value='Activity')[coords]
         sv.metadata=metadata
         return sv
 

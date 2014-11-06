@@ -123,13 +123,13 @@ Collector.interval_hook = RunProgress
 
 def sheet_hook(obj, *args, **kwargs):
     """
-    Return a SheetMatrix of the Sheet activity.
+    Return a Matrix of the Sheet activity.
     """
     return obj[:]
 
 def projection_hook(obj, *args, **kwargs):
     """
-    Return a SheetMatrix of the projection activity, otherwise if
+    Return a Matrix of the projection activity, otherwise if
     grid=True, return a Grid of the CFs.
     """
     if kwargs.pop('grid', False):

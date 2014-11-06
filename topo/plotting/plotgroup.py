@@ -462,7 +462,7 @@ class TemplatePlotGroup(SheetPlotGroup):
     The plot_templates list should contain tuples (plot_name,
     plot_template).  Each plot_template is a list of (name, value)
     pairs, where each name specifies a plotting channel (such as Hue
-    or Confidence), and the value is the name of a SheetMatrix (such as
+    or Confidence), and the value is the name of a Matrix (such as
     Activity or OrientationPreference).
 
     Various types of plots support different channels.  An SHC
@@ -483,11 +483,11 @@ class TemplatePlotGroup(SheetPlotGroup):
 
     This specifies that the final TemplatePlotGroup will contain up to
     one Plot named Activity per Sheet, although there could be no
-    plots at all if no Sheet has a SheetMatrix named Activity once
+    plots at all if no Sheet has a Matrix named Activity once
     'measure_activity()' has been run.  The Plot will be colored by
-    OrientationPreference if such a SheetMatrix exists for that Sheet,
+    OrientationPreference if such a Matrix exists for that Sheet,
     and the value (luminance) channel will be determined by the
-    SheetMatrix Activity.  This plot will be listed in the category
+    Matrix Activity.  This plot will be listed in the category
     'Basic' anywhere such categories are relevant (e.g. in the GUI).
 
 
@@ -1487,9 +1487,9 @@ class Subplotting(param.Parameterized):
         preference value as the hue, and a selectivity as the
         confidence.
 
-        The specified hue, if any, should be the name of a SheetMatrix,
+        The specified hue, if any, should be the name of a Matrix,
         such as OrientationPreference.  The specified confidence, if
-        any, should be the name of a (usually) different SheetMatrix,
+        any, should be the name of a (usually) different Matrix,
         such as OrientationSelectivity.
 
         The prefix option is a shortcut making the usual case easier

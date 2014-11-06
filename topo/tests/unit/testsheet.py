@@ -7,7 +7,7 @@ import unittest
 from nose.tools import istest, nottest
 import numpy as np
 
-from holoviews.view import SheetMatrix
+from holoviews.view import Matrix
 
 from topo.base.sheetcoords import Slice
 from topo.base.sheet import *
@@ -726,7 +726,7 @@ class ExtraSheetTests(unittest.TestCase):
         s = Sheet()
         s.activity = np.array([[1,2],[3,4]])
         # Call s.sheet_view(..) with a parameter
-        sv2 = SheetMatrix(s.activity,bounds=s.bounds)
+        sv2 = Matrix(s.activity,bounds=s.bounds)
         sv2.metadata = dict(src_name=s.name)
         self.assertEqual(len(s.views.Maps.keys()),0)
         s.views.Maps['Activity']=sv2

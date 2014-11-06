@@ -15,12 +15,12 @@ import param
 
 from holoviews.core import BoundingRegion, SheetCoordinateSystem
 from holoviews.core.options import options, StyleOpts
-from holoviews.view import SheetMatrix
+from holoviews.view import Matrix
 
 
 class SheetView(param.Parameterized):
     """
-    Class provided for backward compatibility with earlier SheetMatrix
+    Class provided for backward compatibility with earlier SheetView
     component.
     """
 
@@ -46,7 +46,7 @@ class SheetView(param.Parameterized):
         """
         Return the requested view as a (data, bbox) tuple.  Provided
         for backward compatibility with the original Topographica
-        SheetMatrix model. It is now easier to access the data and
+        SheetView model. It is now easier to access the data and
         bounds attributes directly.
         """
         if hasattr(self, 'data'):
@@ -56,7 +56,7 @@ class SheetView(param.Parameterized):
 
     def __init__(self, (data, bounds), src_name=None, precedence=0.0,
                  timestamp=-1, row_precedence=0.5,**params):
-        self.warning('Initializing old SheetMatrix class')
+        self.warning('Initializing old SheetView class')
         super(SheetView,self).__init__(bounds=bounds,
                                        src_name = src_name,
                                        precedence = precedence,
@@ -72,7 +72,7 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
     component. Original docstring for UnitView:
 
     Consists of an X,Y position for the unit that this View is
-    created for.  Subclasses SheetMatrix.
+    created for. Returns an appropriately defined SheetView.
 
     UnitViews should be stored in Sheets via a tuple
     ('Weights',Sheet,Projection,X,Y).  The dictionary in Sheets can be
@@ -88,7 +88,7 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
     return unitview
 
 
-class CFView(SheetMatrix):
+class CFView(Matrix):
 
     situated_bounds = param.ClassSelector(class_=BoundingRegion, default=None, doc="""
         The situated bounds can be set to embed the SheetLayer in a larger

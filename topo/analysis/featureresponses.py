@@ -14,7 +14,7 @@ import numpy as np
 import param
 from param.parameterized import ParamOverrides
 
-from holoviews import SheetMatrix, ViewMap
+from holoviews import Matrix, ViewMap
 from holoviews.ipython.widgets import ProgressBar
 from holoviews.interface.collector import AttrDict
 
@@ -40,7 +40,7 @@ def update_sheet_activity(sheet_name, force=False):
     """
     Update the '_activity_buffer' ViewMap for a given sheet by name.
 
-    If force is False and the existing Activity SheetMatrix isn't stale,
+    If force is False and the existing Activity Matrix isn't stale,
     the existing view is returned.
     """
     name = 'ActivityBuffer'
@@ -52,14 +52,14 @@ def update_sheet_activity(sheet_name, force=False):
                         src_name=sheet.name, shape=sheet.activity.shape,
                         timestamp=time)
     if not view:
-        sv = SheetMatrix(np.array(sheet.activity), sheet.bounds)
+        sv = Matrix(np.array(sheet.activity), sheet.bounds)
         sv.metadata=metadata
         view = ViewMap((time, sv), dimensions=[Time])
         view.metadata = metadata
         sheet.views.Maps[name] = view
     else:
         if force or view.dim_range('Time')[1] < time:
-            sv = SheetMatrix(np.array(sheet.activity), sheet.bounds)
+            sv = Matrix(np.array(sheet.activity), sheet.bounds)
             sv.metadata=metadata
             view[time] = sv
     return view

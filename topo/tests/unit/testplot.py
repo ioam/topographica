@@ -17,7 +17,7 @@ import param
 
 from holoviews.core import BoundingBox, NdMapping
 from holoviews.interface.collector import AttrDict
-from holoviews.view import SheetMatrix
+from holoviews.view import Matrix
 
 
 ### This function is defined here, where it might be useful for testing
@@ -74,7 +74,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix1 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = SheetMatrix(self.matrix1, self.bounds1)
+        sv = Matrix(self.matrix1, self.bounds1)
         sv.metadata=metadata
         self.sheet_view1 = NdMapping((None, sv))
         self.sheet_view1.metadata = AttrDict(src_name='TestInputParam',
@@ -87,7 +87,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix2 = np.zeros((10,10),dtype=np.float) + 0.3
         self.bounds2 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = SheetMatrix(self.matrix2, self.bounds2)
+        sv = Matrix(self.matrix2, self.bounds2)
         sv.metadata=metadata
         self.sheet_view2 = NdMapping((None, sv))
         self.sheet_view2.metadata = AttrDict(src_name='TestInputParam',
@@ -100,7 +100,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix3 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = SheetMatrix(self.matrix3, self.bounds3)
+        sv = Matrix(self.matrix3, self.bounds3)
         sv.metadata=metadata
         self.sheet_view3 = NdMapping((None, sv))
         self.sheet_view3.metadata = AttrDict(src_name='TestInputParam',
@@ -113,7 +113,7 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix4 = np.zeros((10,10),dtype=np.float) + 1.6
         self.bounds4 = BoundingBox(points=((-0.7,-0.7),(0.7,0.7)))
-        sv = SheetMatrix(self.matrix4, self.bounds4)
+        sv = Matrix(self.matrix4, self.bounds4)
         sv.metadata=metadata
         self.sheet_view4 = NdMapping((None, sv))
         self.sheet_view4.metadata = AttrDict(src_name='TestInputParam',

@@ -454,10 +454,10 @@ class topographic_grid(xy_grid):
     """
 
     xsheet_view_name = param.String(default='XPreference',doc="""
-        Name of the SheetMatrix holding the X position locations.""")
+        Name of the Matrix holding the X position locations.""")
 
     ysheet_view_name = param.String(default='YPreference',doc="""
-        Name of the SheetMatrix holding the Y position locations.""")
+        Name of the Matrix holding the Y position locations.""")
 
     # Disable and hide parameters inherited from the base class
     x = param.Array(constant=True, precedence=-1)

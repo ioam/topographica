@@ -9,7 +9,7 @@ import numpy as np
 
 import param
 import imagen
-from holoviews import SheetMatrix
+from holoviews import Matrix
 
 import topo
 import topo.base.functionfamily
@@ -253,14 +253,13 @@ class TemporalScatter(TransferFnWithState):
         """
         views = []
         if mode in ['raw', 'both']:
-            views.append(SheetMatrix(self.raw_depth_map,
-                                   label = 'Pattern',
-                                   name='Raw Depth map').hist())
+            views.append(Matrix(self.raw_depth_map, label='Pattern',
+                                name='Raw Depth map').hist())
 
         if mode in ['discrete', 'both']:
             scaled_map = (self.depth_map * self.timestep)
-            discrete_sv = SheetMatrix(scaled_map,
-                                    label = 'Pattern', name='Depth map')
+            discrete_sv = Matrix(scaled_map, label='Pattern',
+                                 name='Depth map')
             views.append(discrete_sv.hist(num_bins=self.depth,
                                           bin_range=(0, self.span)))
 

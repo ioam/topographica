@@ -759,7 +759,7 @@ class CFProjection(Projection):
 
     def view(self, sheet_x, sheet_y, timestamp=None, situated=False, **kwargs):
         """
-        Return a single connection field SheetMatrix, for the unit
+        Return a single connection field Matrix, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
         if timestamp is None:

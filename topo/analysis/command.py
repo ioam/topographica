@@ -10,7 +10,7 @@ import numpy as np
 
 import param
 from param import ParameterizedFunction, ParamOverrides
-from holoviews import SheetMatrix, ViewMap, Contours
+from holoviews import Matrix, ViewMap, Contours
 from holoviews.interface.collector import AttrTree
 from holoviews.core.options import options, StyleOpts
 
@@ -67,7 +67,7 @@ def update_rgb_activities():
             # should this ensure all of r,g,b are present?
             if hasattr(sheet,'activity_%s'%c.lower()):
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
-                new_view = SheetMatrix(activity_copy, bounds=sheet.bounds)
+                new_view = Matrix(activity_copy, bounds=sheet.bounds)
                 new_view.metadata=metadata
                 sheet.views.Maps['%sActivity'%c]=new_view
 
@@ -204,8 +204,8 @@ class measure_cog(ParameterizedFunction):
                             src_name=sheet.name)
 
         timestamp = topo.sim.time()
-        xsv = SheetMatrix(xcog, sheet.bounds, label='X CoG', title='%s {label}' % proj.name)
-        ysv = SheetMatrix(ycog, sheet.bounds, label='Y CoG', title='%s {label}' % proj.name)
+        xsv = Matrix(xcog, sheet.bounds, label='X CoG', title='%s {label}' % proj.name)
+        ysv = Matrix(ycog, sheet.bounds, label='Y CoG', title='%s {label}' % proj.name)
 
         lines = []
         hlines, vlines = xsv.data.shape

@@ -11,7 +11,7 @@ import param
 from param.parameterized import overridable_property
 
 from holoviews.interface.collector import AttrDict, AttrTree
-from holoviews.view import SheetMatrix
+from holoviews.view import Matrix
 
 from sheet import Sheet
 from simulation import EPConnection
@@ -297,8 +297,8 @@ class Projection(EPConnection):
         """Returns the activity in a single projection"""
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        sv = SheetMatrix(self.activity.copy(), self.dest.bounds,
-                         label='Activity', title='%s {label}' % self.name)
+        sv = Matrix(self.activity.copy(), self.dest.bounds,
+                    label='Activity', title='%s {label}' % self.name)
         sv.metadata=AttrDict(proj_src_name=self.src.name,
                              precedence=self.src.precedence,
                              proj_name=self.name,
