@@ -238,12 +238,29 @@ dist: doc distdir FORCE
 	${CD} ${DIST_DIR}; ${MAKE} distarc
 
 
-# Note that the output needs to be appended to a copy of the old file,
-# to keep old fixes to formatting. The HEAD:XXXXX can be omitted to get
-# the full list, but this is faster.
+# Generate a GNU-style ChangeLog.txt from the git commit log.   
+#
+# The old file is copied to a temporary file, and the contents of this
+# file (which will normally include manual fixes to previous entries)
+# should be inserted into the new file manually.
+#
+# Once obtained, the new file can be reformatted to avoid long lines
+# using something like this Emacs Lisp code:
+#
+#(defun fill-changelog ()
+#  "Wrap long lines from commit messages"
+#  (interactive)
+#  (make-local-variable 'adaptive-fill-regexp)
+#  (set-variable 'fill-column 100)
+#  (set-variable 'adaptive-fill-regexp "[ 	]*\\([ 	]*\\)*")
+#  (fill-nonuniform-paragraphs (point-min) (point-max)))
+#
+# Here only lines with commit messages longer than 80 characters
+# will get wrapped (given the 20 characters preceding the message
+# in this file format).
 ChangeLog.txt: FORCE
-	make -C external svn2cl
-	external/svn2cl -r HEAD:12000 --include-rev --group-by-day --separate-daylogs --break-before-msg --stdout https://topographica.svn.sourceforge.net/svnroot/topographica/ | sed -e 's|/trunk/topographica/||g' > ChangeLog.txt
+	mv --backup=numbered ChangeLog.txt ChangeLog.txt_old 
+	git --no-pager log --name-only --format="%n%ai %aN %n%n%x09* [%h] %s%d" | sed -e 's/\(^[^12	]\)/\t\1/' -e 's/^\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\) [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [+-][0-9][0-9][0-9][0-9] /\1 /' -e 's/  *$$//' > ChangeLog.txt
 
 
 ######################################################################
