@@ -32,8 +32,6 @@ privileges), you can follow the steps below:
  ./Anaconda-2.1.0-Linux-x86_64.sh -b -p ~/topo-env
  export PATH=~/topo-env:~/topo-env/bin:${PATH}
  conda install --yes numpy=1.8 matplotlib scipy
- conda remove --yes PIL
- conda install --yes pillow
  conda install --yes --channel https://conda.binstar.org/oarodriguez gmpy
  pip install topographica==0.9.8-1
  
