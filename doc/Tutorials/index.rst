@@ -75,6 +75,15 @@ the basic GCAL tutorial. Analysis over development includes
 orientation preference histograms, hypercolumn distance estimation,
 pinwheel finding and the pinwheel density estimation.
 
+|gcal_all|_
+
+The above tutorials all focus on orientation maps.  This tutorial
+shows how to use GCAL for developing maps for other visual feature
+dimensions, in any combination.  Making all maps develop well together
+is an ongoing project (and requires much greater computational
+resources than individual maps), but the individual maps and most
+combinations should be usable already.
+
 Other GCAL notebooks replicating `Stevens et al. (J. Neuroscience 2013)
 <http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013>`_ may be found
 `here
@@ -98,6 +107,9 @@ add them here!
 
 .. _gcal_collector: http://ioam.github.io/media/topo/GCAL_Collector.html
 .. |gcal_collector| replace:: GCAL Collector Tutorial
+
+.. _gcal_all: http://ioam.github.io/media/topo/gcal_all.html
+.. |gcal_all| replace:: GCAL All-Maps Tutorial
 
 .. GUI tutorials
 .. _gcal_gui_tutorial: ./gcal.html
