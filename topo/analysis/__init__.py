@@ -37,7 +37,7 @@ class TopoIPTestCase(IPTestCase):
         self.addTypeEqualityFunc(Animation,   self.compare_animation)
 
     def compare_cfviews(self, view1, view2, msg):
-        self.compare_sheetmatrix(view1, view2, msg)
+        self.compare_matrix(view1, view2, msg)
 
     def compare_animation(self, view1, view2, msg):
         self.compare_viewmap(view1, view2, msg)
