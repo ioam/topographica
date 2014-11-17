@@ -40,13 +40,11 @@ Python environment, so will not interfere with any existing software, nor
 will it be affected by any subsequent changes to the system. Note that if you decide not
 to keep Topographica, you can uninstall by deleting the ~/topo-env directory. 
 
-TODO: what about C compiler on linux? apt-get install build-essential on ubuntu?
-
 Having followed the quick start guide, you can skip ahead
 to `Running Topographica`_. The remaining sections
 below explain the general cross-platform installation procedure, but if you have
 problems on any particular platform, you might consider using e.g. a 64-bit
-Ubuntu 14.04 virtual machine (using `VirtualBox`_, for instance) to try out Topographica so that you can
+Ubuntu 14.04 virtual machine (via `VirtualBox`_, for instance) to try out Topographica so that you can
 use the simple recipe above.  Similar approaches should work on other
 platforms, but we don't currently have a list of the precise steps in
 each case. User-contributed recipes are welcome: please submit a `github issue`_.
@@ -83,13 +81,13 @@ Topographica is via `pip`_ from the command prompt:
 
  pip install topographica
 
-This will fetch Topographica and its required dependencies (i.e.,
-param, paramtk, imagen, numpy, and PIL, for the 0.9.8-1 release) from
-`PyPI`_ and install them into your existing Python environment. 
+This will install Topographica and any required dependencies your Python environment does not have
+(from `PyPI`_). Apart from the dependencies listed above, Topographica also requires three other IOAM
+packages: param, paramtk, and imagen.
 
 Note that pip can instead install packages into your home directory (via the ``--user`` option),
 or you may use `virtualenv`_ to keep Topographica's Python environment separate
-from any others you may have. 
+from any others you may have.
 
 Beyond these absolutely required packages, you will probably also want to install packages that provide some optional types of plotting, and to
 improve the command-line interface:
