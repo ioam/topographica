@@ -77,7 +77,7 @@ pinwheel finding and the pinwheel density estimation.
 
 |gcal_all|_
 
-The above tutorials all focus on orientation maps.  This tutorial
+The above GCAL tutorials all focus on orientation maps.  This tutorial
 shows how to use GCAL for developing maps for other visual feature
 dimensions, in any combination.  Making all maps develop well together
 is an ongoing project (and requires much greater computational
