@@ -408,10 +408,11 @@ def CFPRF_DotProduct_Sparse(projection):
     """
 
     #projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
-    weights_gpu = gpuarray.to_gpu(np.reshape(projection.weights.toarray().astype(np.float64), (64, 3600), 'F'))
-    input_buffer_gpu = gpuarray.to_gpu(np.reshape(projection.input_buffer, (3600, 1), 'C'))
+    weights_rows, weights_cols = projection.weights.shape
+    weights_gpu = gpuarray.to_gpu(np.reshape(projection.weights.toarray().astype(np.float64), (weights_cols, weights_rows), 'F'))
+    input_buffer_gpu = gpuarray.to_gpu(np.reshape(projection.input_buffer, (weights_rows, 1), 'C'))
     c_gpu = linalg.dot(weights_gpu, input_buffer_gpu)
-    projection.activity = np.reshape((c_gpu * projection.strength).get(), (8, 8), 'C')
+    projection.activity = np.reshape((c_gpu * projection.strength).get(), projection.activity.shape, 'C')
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
