@@ -26,9 +26,13 @@ from topo.base.functionfamily import LearningFn, Hebbian
 from topo.base.functionfamily import ResponseFn, DotProduct
 from topo.base.sheetcoords import Slice
 
+import pycuda.gpuarray as gpuarray
 import pycuda.driver as cuda
 import pycuda.autoinit
-from pycuda.compiler import SourceModule
+from scikits.cuda import linalg
+
+linalg.init()
+
 
 use_sparse = True
 try:
@@ -403,31 +407,11 @@ def CFPRF_DotProduct_Sparse(projection):
     between incoming activities and CF weights.
     """
 
-    projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
-
-    input_buffer = projection.input_buffer.ravel('c')
-    weights = projection.weights.toarray()
-
-    # pycuda here:
-    mod = SourceModule("""
-        #include <stdio.h>
-        #include <Eigen/Core>
-
-        extern "C" {
-
-            __global__ void say_hi()
-            {
-              printf("I am %d.%d\\n", threadIdx.x, threadIdx.y);
-            }
-
-        }
-        """,
-        include_dirs=[param.resolve_path("external/eigen3-nvcc",path_to_file=False)],
-        no_extern_c=True)
-
-    func = mod.get_function("say_hi")
-    func(block=(4,4,1))
-
+    #projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
+    weights_gpu = gpuarray.to_gpu(np.reshape(projection.weights.toarray().astype(np.float64), (64, 3600), 'F'))
+    input_buffer_gpu = gpuarray.to_gpu(np.reshape(projection.input_buffer, (3600, 1), 'C'))
+    c_gpu = linalg.dot(weights_gpu, input_buffer_gpu)
+    projection.activity = np.reshape((c_gpu * projection.strength).get(), (8, 8), 'C')
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
