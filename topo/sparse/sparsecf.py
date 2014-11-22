@@ -26,6 +26,10 @@ from topo.base.functionfamily import LearningFn, Hebbian
 from topo.base.functionfamily import ResponseFn, DotProduct
 from topo.base.sheetcoords import Slice
 
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
+
 use_sparse = True
 try:
     import sparse
@@ -400,6 +404,30 @@ def CFPRF_DotProduct_Sparse(projection):
     """
 
     projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
+
+    input_buffer = projection.input_buffer.ravel('c')
+    weights = projection.weights.toarray()
+
+    # pycuda here:
+    mod = SourceModule("""
+        #include <stdio.h>
+        #include <Eigen/Core>
+
+        extern "C" {
+
+            __global__ void say_hi()
+            {
+              printf("I am %d.%d\\n", threadIdx.x, threadIdx.y);
+            }
+
+        }
+        """,
+        include_dirs=[param.resolve_path("external/eigen3-nvcc",path_to_file=False)],
+        no_extern_c=True)
+
+    func = mod.get_function("say_hi")
+    func(block=(4,4,1))
+
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
