@@ -406,8 +406,14 @@ def CFPRF_DotProduct_Sparse(projection):
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights.
     """
+    projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
 
-    #projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
+
+def CFPRF_DotProduct_Sparse_GPU(projection):
+    """
+    Sparse CF Projection response function calculating the dot-product
+    between incoming activities and CF weights. Uses GPU.
+    """
     weights_rows, weights_cols = projection.weights.shape
     weights_gpu = gpuarray.to_gpu(np.reshape(projection.weights.toarray().astype(np.float64), (weights_cols, weights_rows), 'F'))
     input_buffer_gpu = gpuarray.to_gpu(np.reshape(projection.input_buffer, (weights_rows, 1), 'C'))
