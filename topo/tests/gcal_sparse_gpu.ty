@@ -8,6 +8,6 @@ gcal.ty_DATA) and should match identically with gcal.ty_DATA.
 """
 
 
-from topo.submodel.gcal import SparseGCAL
+from topo.submodel.gcal import SparseGPUGCAL
 
-topo.sim.model = SparseGCAL()
+topo.sim.model = SparseGPUGCAL()
