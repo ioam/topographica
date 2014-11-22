@@ -26,6 +26,7 @@ TOPOGRAPHICAHOME = param.normalize_path.prefix
 TESTSDATADIR = os.path.join(TOPOGRAPHICAHOME,"tests")
 MACHINETESTSDATADIR = os.path.join(TESTSDATADIR,socket.gethostname())
 FIXEDDATADIR = resolve_path("topo/tests/data_traintests",path_to_file=False)
+GPUDATADIR = resolve_path("topo/tests/data_gputests", path_to_file=False)
 
 
 
@@ -184,7 +185,7 @@ def test_script(script,decimal=None):
     data_filename = os.path.join(TESTSDATADIR,data_filename_only)
 
     try:
-        locn = resolve_path(data_filename_only,search_paths=[FIXEDDATADIR,TESTSDATADIR])
+        locn = resolve_path(data_filename_only,search_paths=[GPUDATADIR, FIXEDDATADIR,TESTSDATADIR])
     except IOError:
         print "No existing data"
         #_run_in_forked_process(_generate_data,script,data_filename,run_for=RUN_FOR,cortex_density=TRAINTESTS_CORTEXDENSITY,lgn_density=LGN_DENSITY, retina_density=RETINA_DENSITY)
