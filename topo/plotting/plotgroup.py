@@ -1610,8 +1610,7 @@ pg.add_plot('RFs', [('Strength', 'RFs')])
 
 pg = create_plotgroup(name='Orientation Preference', category="Preference Maps",
                       doc='Measure preference for sine grating orientation.',
-                      pre_plot_hooks=[analysis.measure_sine_pref.instance(
-                          preference_fn=distribution.DSF_WeightedAverage())])
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance()])
 pg.add_plot('Orientation Preference', [('Hue', 'OrientationPreference')])
 pg.add_plot('Orientation Preference&Selectivity',
             [('Hue', 'OrientationPreference'),
@@ -1679,8 +1678,7 @@ pg = create_plotgroup(name='Spatial Frequency Preference',
                       category="Preference Maps",
                       doc='Measure preference for sine grating orientation '
                           'and frequency.',
-                      pre_plot_hooks=[analysis.measure_sine_pref.instance(
-                          preference_fn=distribution.DSF_WeightedAverage())])
+                      pre_plot_hooks=[analysis.measure_sine_pref.instance()])
 pg.add_plot('Spatial Frequency Preference',
             [('Strength', 'FrequencyPreference')])
 pg.add_plot('Spatial Frequency Selectivity',
