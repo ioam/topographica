@@ -785,9 +785,9 @@ def process_argv(argv):
             # Load Topographica IPython extension in embedded shell
             try:
                 ipshell.extension_manager.load_extension('topo.misc.ipython')
-            except SkipTest:                
+            except Exception as e:
                 cmdline_main.warning(
-                    "Could not load IPython extension 'topo.misc.ipython'; load the extension manually for more information.")
+                    "Could not load IPython extension 'topo.misc.ipython': %s"%e)
                 
             ipshell()
 
