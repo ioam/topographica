@@ -68,7 +68,7 @@ components to be used.
 However you obtain a Python environment, note the following minimum
 requirements:
 
-* Python 2 (2.6 or 2.7; we do not yet support Python 3)
+* Python 2.7 (we do not yet support Python 3)
 * NumPy
 * PIL (from pillow)
 
