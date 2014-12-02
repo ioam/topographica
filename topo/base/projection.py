@@ -316,6 +316,10 @@ class Projection(EPConnection):
         Pop the most recently pushed activity state of the stack.
         """
         self.activity = self.__saved_activity.pop()
+        for ofn in self.output_fns:
+            ofn.state_pop()
+        for ifn in self.input_fns:
+            ifn.state_pop()
 
 
     def state_push(self):
@@ -324,6 +328,10 @@ class Projection(EPConnection):
         """
 
         self.__saved_activity.append(array(self.activity))
+        for ofn in self.output_fns:
+            ofn.state_push()
+        for ifn in self.input_fns:
+            ifn.state_push()
 
 
     def get_projection_view(self, timestamp):
