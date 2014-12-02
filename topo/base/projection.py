@@ -178,7 +178,10 @@ class Projection(EPConnection):
     dest_port = param.Parameter(default='Activity')
 
     output_fns = param.HookList(default=[],class_=TransferFn,doc="""
-        Function(s) applied to the Projection activity after it is computed.""")
+        Function(s) applied to the projection activity after it is computed.""")
+
+    input_fns = param.HookList(default=[],class_=TransferFn,doc="""
+        Function(s) applied to the input before the projection activity is computed.""")
 
     plastic = param.Boolean(default=True, doc="""
         Whether or not to update the internal state on each call.
