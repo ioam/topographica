@@ -509,9 +509,6 @@ class CFProjection(Projection):
         default=CFPRF_Plugin(),
         doc='Function for computing the Projection response to an input pattern.')
 
-    input_fns = param.HookList(default=[],class_=TransferFn,doc="""
-        Function(s) applied to the input before the projection activity is computed.""")
-
     cf_type = param.Parameter(default=ConnectionField,constant=True,
         doc="Type of ConnectionField to use when creating individual CFs.")
 
