@@ -386,6 +386,34 @@ def CFPLF_Hebbian_Sparse(projection):
                                projection.norm_total,single_conn_lr)
     projection.has_norm_total = True
 
+def CFPLF_Hebbian_Sparse_GPU(projection):
+    """
+    Sparse CF Projection learning function applying Hebbian learning
+    to the weights in a projection.
+    """
+    single_conn_lr = projection.learning_rate/projection.n_units
+
+    weights_rows, weights_cols = projection.weights.shape
+    weights_gpu = gpuarray.to_gpu(projection.weights.toarray())
+
+    src_activity_gpu = gpuarray.to_gpu(np.reshape(projection.src.activity, (weights_rows, 1)))
+    dest_activity_gpu = gpuarray.to_gpu(np.reshape(projection.dest.activity, (1, weights_cols)))
+    
+    weights_gpu += (linalg.dot(src_activity_gpu, dest_activity_gpu) * single_conn_lr)
+    # projection.weights = weights_gpu.get()
+
+    # projection.norm_total = np.sum(projection.weights, axis=0)
+
+    projection.norm_total *= 0.0
+    projection.weights.Hebbian(projection.src.activity,projection.dest.activity,
+                               projection.norm_total,single_conn_lr)
+    projection.has_norm_total = True
+
+    print "Thang: ", weights_gpu.get()
+    print "Thing: ", projection.weights.toarray()
+
+    np.testing.assert_almost_equal(weights_gpu.get(), projection.weights.toarray())
+
 
 def CFPLF_Hebbian_Sparse_opt(projection):
     """

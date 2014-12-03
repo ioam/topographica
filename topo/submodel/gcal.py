@@ -209,4 +209,3 @@ class ExamplesGCAL(ModelGCAL):
                                       'lateral_excitatory',
                                       'lateral_inhibitory'])
         return model
-
