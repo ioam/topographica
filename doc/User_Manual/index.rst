@@ -22,6 +22,7 @@ section.
  introduction
  overview
  time
+ coords
  Representing space in Topographica (coordinate systems) <space>
  scripts
  The Topographica command line and script language <commandline>
@@ -34,4 +35,4 @@ section.
  interfacing
  publishing
  multicore
- coords
+
