@@ -412,6 +412,15 @@ topo_parser.add_option("-v","--verbose",action="callback",callback=v_action,dest
 enable verbose messaging output""")
 
 
+def V_action(option,opt_str,value,parser):
+    """Callback function for the -V option."""
+    print topo.__version__
+    sys.exit()
+
+topo_parser.add_option("-V","--version",action="callback",callback=V_action,dest="verbose",default=False,help="""\
+print the Topographica version string and exit""")
+
+
 def d_action(option,opt_str,value,parser):
     """Callback function for the -d option."""
     cmdline_main.message("Enabling debugging message output.")
