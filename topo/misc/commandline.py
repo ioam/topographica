@@ -25,8 +25,9 @@ from topo.base.simulation import OptionalSingleton
 
 try:
     # By default, use a non-GUI backend for matplotlib.
-    from matplotlib import rcParams
-    rcParams['backend']='Agg'
+    from matplotlib import pyplot as plt
+    plt.switch_backend('agg')
+
     matplotlib_imported=True
 except ImportError:
     matplotlib_imported=False
@@ -457,7 +458,7 @@ topo_parser.add_option("-o","--outputpath",action="callback",callback=o_action,t
 def gui(start=True,exit_on_quit=True):
     """Start the GUI as if -g were supplied in the command used to launch Topographica."""
     if matplotlib_imported:
-        rcParams['backend']='TkAgg'
+        plt.switch_backend('TkAgg')
     auto_import_commands()
     if start:
         import topo.tkgui
