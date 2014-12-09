@@ -625,11 +625,11 @@ class tuning_curve(PylabPlotCommand):
                 x, y = coord
                 current_map = vmap[x, y, time, :, :, :]
                 curve_map = current_map.sample(X=x, Y=y).collate(p.x_axis.capitalize())
-                curves.append(curve_map.overlay_dimensions(p.group_by))
+                curves.append(curve_map.overlay(p.group_by))
         else:
             current_map = vmap[time, :, :, :]
             curve_map = current_map.sample(p.coords).collate(p.x_axis.capitalize())
-            overlaid_curves = curve_map.overlay_dimensions(p.group_by)
+            overlaid_curves = curve_map.overlay(p.group_by)
             if not isinstance(curves, GridLayout): curves = [overlaid_curves]
 
         figs = []
