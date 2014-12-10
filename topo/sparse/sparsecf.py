@@ -29,9 +29,7 @@ from topo.base.sheetcoords import Slice
 import pycuda.gpuarray as gpuarray
 import pycuda.driver as cuda
 import pycuda.autoinit
-from scikits.cuda import linalg
-
-linalg.init()
+from scikits.cuda.cusparse import *
 
 
 use_sparse = True
@@ -41,6 +39,7 @@ except:
     use_sparse = False
 
 sparse_type = np.float32
+cusparse_handle = cusparseCreate()
 
 
 class CFSPLF_Plugin(param.Parameterized):
@@ -442,11 +441,12 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
     """
-    weights_rows, weights_cols = projection.weights.shape
-    weights_gpu = gpuarray.to_gpu(np.reshape(projection.weights.toarray().astype(np.float64), (weights_cols, weights_rows), 'F'))
-    input_buffer_gpu = gpuarray.to_gpu(np.reshape(projection.input_buffer, (weights_rows, 1), 'C'))
-    c_gpu = linalg.dot(weights_gpu, input_buffer_gpu)
-    projection.activity = np.reshape((c_gpu * projection.strength).get(), projection.activity.shape, 'C')
+    
+    weights_gpu = CSR.to_CSR(projection.weights.toarray().T.astype(np.float64), cusparse_handle)
+    input_buffer_gpu = gpuarray.to_gpu(np.ravel(projection.input_buffer))
+    activity_gpu = weights_gpu.mv(input_buffer_gpu.astype(np.float64))
+
+    projection.activity = np.reshape((activity_gpu * projection.strength).get(), projection.activity.shape)
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
