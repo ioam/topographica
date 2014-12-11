@@ -30,6 +30,10 @@ import pycuda.gpuarray as gpuarray
 import pycuda.driver as cuda
 import pycuda.autoinit
 from scikits.cuda.cusparse import *
+# from scikits.cuda import linalg
+
+# linalg.init()
+
 
 
 use_sparse = True
@@ -393,22 +397,26 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     single_conn_lr = projection.learning_rate/projection.n_units
 
     weights_rows, weights_cols = projection.weights.shape
-    weights_gpu = gpuarray.to_gpu(projection.weights.toarray())
-
-    src_activity_gpu = gpuarray.to_gpu(np.reshape(projection.src.activity, (weights_rows, 1)))
-    dest_activity_gpu = gpuarray.to_gpu(np.reshape(projection.dest.activity, (1, weights_cols)))
+    weights_gpu = CSR.to_CSR(projection.weights.toarray().T.astype(np.float64), cusparse_handle)
     
-    weights_gpu += (linalg.dot(src_activity_gpu, dest_activity_gpu) * single_conn_lr)
+
+    src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float64))
+    dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).T.astype(np.float64))
+    
+    partial_gpu = CSR.to_CSR(linalg.dot(src_activity_gpu, dest_activity_gpu) * single_conn_lr)
+
+    weights_gpu = CSR.geam(partial_gpu)
     # projection.weights = weights_gpu.get()
 
-    # projection.norm_total = np.sum(projection.weights, axis=0)
+    norm_gpu = weights_gpu.mv(gpuarray.to_gpu(np.array([1.0] * weights_cols).astype(np.float64)))
+    projection.norm_total = np.reshape(norm_gpu.get(), projection.norm_total.shape)
 
     projection.norm_total *= 0.0
     projection.weights.Hebbian(projection.src.activity,projection.dest.activity,
                                projection.norm_total,single_conn_lr)
     projection.has_norm_total = True
 
-    print "Thang: ", weights_gpu.get()
+    print "Thang: ", weights_gpu.todense(to_cpu=True)
     print "Thing: ", projection.weights.toarray()
 
     np.testing.assert_almost_equal(weights_gpu.get(), projection.weights.toarray())
@@ -444,7 +452,7 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     
     weights_gpu = CSR.to_CSR(projection.weights.toarray().T.astype(np.float64), cusparse_handle)
     input_buffer_gpu = gpuarray.to_gpu(np.ravel(projection.input_buffer))
-    activity_gpu = weights_gpu.mv(input_buffer_gpu.astype(np.float64))
+    activity_gpu = weights_gpu.mv(input_buffer_gpu)
 
     projection.activity = np.reshape((activity_gpu * projection.strength).get(), projection.activity.shape)
 

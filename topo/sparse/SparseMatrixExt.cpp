@@ -116,25 +116,14 @@ template <class T, int S=Eigen::ColMajor>
   }
 
   void Hebbian(double* src_act,double* dest_act, double* norm_total, const double lr) {
-	//#pragma omp parallel
+	#pragma omp parallel
 	{
 	  unsigned int k, y;
-      //#pragma omp for schedule(guided, 8)
+      #pragma omp for schedule(guided, 8)
 	  for (int k=0; k<this->outerSize(); ++k) {
 		for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
-		  /*std::cout << "Column: " << it.col() << "\n";
-          std::cout << "Row: " << it.row() << "\n";
-          std::cout << "Value: " << it.value() << "\n";
-          std::cout << "Valueref: " << it.valueRef() << "\n";
-          
-          std::cout << "+= " << dest_act[y] * lr * src_act[it.row()] << "\n";
-*/
           y = it.col();
 		  it.valueRef() += dest_act[y] * lr * src_act[it.row()];
-		  
-/*          std::cout << "Value: " << it.value() << "\n";
-          std::cout << "Valueref: " << it.valueRef() << "\n";
-*/
           norm_total[y] += it.value();
 		}
 	  }
