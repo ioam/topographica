@@ -79,8 +79,8 @@ class topo_metadata(param.Parameterized):
       necessary version control information. Uses the same
       specification format as the lancet.vsc_metdata helper function.""")
 
-   def __init__(self, **kwargs):
-      super(topo_metadata,self).__init__(**kwargs)
+   def __init__(self, **params):
+      super(topo_metadata,self).__init__(**params)
       self._paths = dict(zip(self.repository_names, self.paths))
       self._info = {}
 
@@ -271,13 +271,13 @@ class TopoCommand(Command):
    progress_interval = param.Number(default=100,
      doc="Matches run_batch parameter of same name.")
 
-   def __init__(self, tyfile, executable=None, **kwargs):
+   def __init__(self, tyfile, executable=None, **params):
 
       auto_executable =  os.path.realpath(
          os.path.join(topo.__file__, '..', '..', 'topographica'))
 
       executable = executable if executable else auto_executable
-      super(TopoCommand, self).__init__(tyfile=tyfile, executable=executable, **kwargs)
+      super(TopoCommand, self).__init__(tyfile=tyfile, executable=executable, **params)
       self.pprint_args(['executable', 'tyfile', 'analysis_fn'],['topo_switches', 'snapshot'])
       self._typath = os.path.abspath(self.tyfile)
 
@@ -435,10 +435,10 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       return collectorfn
 
 
-   def __init__(self, collector, **kwargs):
+   def __init__(self, collector, **params):
       from topo.analysis import Collector
       self._pprint_args = ([],[],None,{})
-      super(BatchCollector, self).__init__(**kwargs)
+      super(BatchCollector, self).__init__(**params)
       if not isinstance(collector, Collector):
          raise TypeError("Please supply a Collector to BatchCollector")
       self.collector = collector
@@ -674,12 +674,12 @@ class RunBatchCommand(TopoCommand):
      specified. If set to an empty container, no checking is applied
      (default).""")
 
-   def __init__(self, tyfile, analysis, **kwargs):
+   def __init__(self, tyfile, analysis, **params):
       super(RunBatchCommand, self).__init__(tyfile=tyfile,
                                             analysis_fn = 'analysis_fn',
                                             analysis = analysis,
                                             do_format=False,
-                                            **kwargs)
+                                            **params)
       self.pprint_args(['executable', 'tyfile', 'analysis'], [])
       if isinstance(self.analysis, Collector):
          self.analysis = BatchCollector(analysis, metadata=self.metadata)
