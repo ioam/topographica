@@ -418,7 +418,7 @@ def V_action(option,opt_str,value,parser):
     print topo.__version__
     sys.exit()
 
-topo_parser.add_option("-V","--version",action="callback",callback=V_action,dest="verbose",default=False,help="""\
+topo_parser.add_option("-V","--version",action="callback",callback=V_action,dest="version",default=False,help="""\
 print the Topographica version string and exit""")
 
 
