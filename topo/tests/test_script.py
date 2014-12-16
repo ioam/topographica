@@ -264,7 +264,10 @@ def _time_sim_run(script,iterations=10):
     topo.sim.run(1) # ensure compilations etc happen outside timing
     # CB: we enable garbage collection
     # (http://docs.python.org/lib/module-timeit.html)
-    return timeit.Timer('topo.sim.run('+`iterations`+')','gc.enable(); import topo').timeit(number=1)
+    import cProfile
+    
+    cProfile.run('topo.sim.run('+`iterations`+')', filename='sparse.prof')
+    #return timeit.Timer('topo.sim.run('+`iterations`+')','gc.enable(); import topo').timeit(number=1)
 
 
 def _generate_speed_data(script,data_filename,iterations=100,**args):
