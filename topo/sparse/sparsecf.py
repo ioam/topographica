@@ -348,7 +348,6 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
     Compute norm_total for each CF in each projection from a group to be
     normalized jointly.
     """
-    return
     # Assumes that all Projections in the list have the same r,c size
     assert len(projlist)>=1
     joint_sum = np.zeros(projlist[0].dest.shape,dtype=np.float64)
@@ -376,6 +375,7 @@ def CFPOF_DivisiveNormalizeL1_Sparse(projection):
     projection.has_norm_total = False
 
 def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
+    print "Normalize GPU"
     return
 
 
@@ -397,6 +397,7 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
     """
+    print "Hebbian GPU"
     return
     # single_conn_lr = projection.learning_rate/projection.n_units
 
@@ -460,6 +461,7 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
     """
+    print "Dot product GPU"
     return
     if not hasattr(projection, 'weights_gpu'):
         print "OK"
