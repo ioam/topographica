@@ -32,3 +32,4 @@ doc/Reference_Manual/*.rst
 /*.ipynb
 topo/optimized/optimized.c
 notebooks/sftp-config.json
+*sftp-config.json
