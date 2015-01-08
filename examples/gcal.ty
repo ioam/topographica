@@ -1,5 +1,5 @@
 """
-GCAL: A Simple but robust single-population V1 map model.  The default
+GCAL: A simple but robust single-population V1 map model.  The default
 values support the orientation map from:
 
    Jean-Luc R. Stevens, Judith S. Law, Jan Antolik, and James A. Bednar.
@@ -8,10 +8,13 @@ values support the orientation map from:
    Journal of Neuroscience 33:15747-15766, 2013.
    http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013
 
-But by changing parameters defined in topo.submodel, the same model
-file can be used for any other spatial dimension, including ocular
-dominance, motion direction, color, etc.  See topo.submodel.* for the
-parameters supported by this model.
+By changing parameters defined in topo.submodel, the same model file
+can be used for any other spatial dimension, including ocular
+dominance, motion direction, color, etc.  There are several ways
+to supply such parameter values, such as adding them to the call below, 
+e.g. "ModelGCAL(cortex_density=24, dims = ['xy','or','od'])".
+See help(ModelGCAL) or the source code in topo.submodel.* for the
+complete set of parameters supported by this model.
 """
 
 import topo
