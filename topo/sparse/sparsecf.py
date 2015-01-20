@@ -34,8 +34,6 @@ from scikits.cuda import linalg
 
 linalg.init()
 
-
-
 use_sparse = True
 try:
     import sparse
@@ -375,7 +373,6 @@ def CFPOF_DivisiveNormalizeL1_Sparse(projection):
     projection.has_norm_total = False
 
 def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
-    print "Normalize GPU"
     return
 
 
@@ -397,11 +394,10 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
     """
-    print "Hebbian GPU"
     return
     # single_conn_lr = projection.learning_rate/projection.n_units
 
-    # #print "LR: ", single_conn_lr
+    # # #print "LR: ", single_conn_lr
 
 
     # weights_rows, weights_cols = projection.weights.shape
@@ -414,22 +410,22 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     
     # partial_gpu = CSR.to_CSR(linalg.dot(src_activity_gpu, dest_activity_gpu) * single_conn_lr, cusparse_handle)
 
-    # #print "Partial shape: ", partial_gpu.shape
-    # #print "Weights shape: ", weights_gpu.shape
+    # # #print "Partial shape: ", partial_gpu.shape
+    # # #print "Weights shape: ", weights_gpu.shape
 
     # projection.weights_gpu = projection.weights_gpu.geam(partial_gpu)
     # # projection.weights = weights_gpu.get()
 
-    # print projection.weights_gpu.nnz
+    # # print projection.weights_gpu.nnz
 
     # norm_gpu = projection.weights_gpu.mv(gpuarray.to_gpu(np.array([1.0] * weights_rows).astype(np.float32)), CUSPARSE_OPERATION_TRANSPOSE)
     
     # norm_total = np.reshape(norm_gpu.get(), projection.norm_total.shape)
     
-    # projection.norm_total *= 0.0
-    # projection.weights.Hebbian(projection.src.activity, projection.dest.activity, 
-    #                            projection.norm_total, single_conn_lr)
-    # projection.has_norm_total = True
+    # # projection.norm_total *= 0.0
+    # # projection.weights.Hebbian(projection.src.activity, projection.dest.activity, 
+    # #                            projection.norm_total, single_conn_lr)
+    # # projection.has_norm_total = True
 
 
     #print projection.norm_total
@@ -455,21 +451,18 @@ def CFPRF_DotProduct_Sparse(projection):
     """
     projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
 
-
 def CFPRF_DotProduct_Sparse_GPU(projection):
     """
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
     """
     if not hasattr(projection, 'weights_gpu'):
-        projection.weights_gpu = CSR.to_CSR(projection.weights.toarray().astype(sparse_type), cusparse_handle)
+        projection.weights_gpu = CSR.to_CSR(projection.weights.toarray().astype(sparse_type).transpose(), cusparse_handle)
     
+    input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(sparse_type))
+    activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, autosync=False)
 
-    input_buffer_gpu = gpuarray.to_gpu(np.ravel(projection.input_buffer).astype(sparse_type))
-    activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, transA=CUSPARSE_OPERATION_TRANSPOSE)
-
-    projection.activity = np.reshape((activity_gpu * projection.strength).get(), projection.activity.shape)
-
+    projection.activity = np.reshape(activity_gpu.get(), projection.activity.shape)
 
 def CFPRF_DotProduct_Sparse_opt(projection):
     """
