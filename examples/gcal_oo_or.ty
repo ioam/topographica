@@ -1,5 +1,5 @@
 """
-GCAL
+GCAL with high cortical density
 
 Simple but robust single-population V1 model orientation map from:
 
@@ -67,7 +67,7 @@ p.add(
         inclusive_bounds=(False,True),doc="""
         The nominal_density to use for the LGN."""),
 
-    cortex_density=param.Number(default=48.0,bounds=(0,None),
+    cortex_density=param.Number(default=142.0,bounds=(0,None),
         inclusive_bounds=(False,True),doc="""
         The nominal_density to use for V1."""),
 
