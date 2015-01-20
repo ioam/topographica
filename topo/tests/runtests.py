@@ -119,7 +119,7 @@ TRAINSCRIPTS = [
     "topo/tests/gcal_sparse.ty"
     ]
 
-GPUSCRIPTS = [
+GPU_CORRECTNESS_SCRIPTS = [
     "topo/tests/gcal_sparse_gpu.ty"
 ]
 
@@ -136,10 +136,12 @@ GPUSCRIPTS = [
 ##topo/tests/lissom_whisker_barrels.ty_DATA:
 ##	./topographica -c 'from topo.tests.test_script import generate_data; generate_data(script="examples/lissom_whisker_barrels.ty",data_filename="tests/lissom_whisker_barrels.ty_DATA",run_for=[1,99,150],look_at="S1")'
 
-target['gpu'] = []
-for script in GPUSCRIPTS:
+target['gpu_correctness'] = []
+for script in GPU_CORRECTNESS_SCRIPTS:
     script_path = os.path.join(scripts_dir,script)
-    target['gpu'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=p.testdp))
+    target['gpu_correctness'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=p.testdp))
+
+target['gpu_speed'] = [topographica_script + ''' -c "from topo.tests.test_script import compare_script_speeds; compare_script_speeds(%s)"'''%dict(cpu='examples/gcal_oo_or.ty', gpu='examples/gpu_sparse_gcal_oo_or.ty')]
 
 target['training'] = []
 for script in TRAINSCRIPTS:
@@ -287,7 +289,8 @@ target_description = {'training':"Test for consistent results from training mode
                       'gui':"Test GUI components (requires a real or virtual display).",
                       'batch':"Test operation in batch mode with run_batch.",
                       'maps':"Test map measurement results.",
-                      'gpu':"Test GPU implementation of response, output and learning functions"}
+                      'gpu_correctness':"Test the correctness of GPU implementation of response, output and learning functions",
+                      'gpu_speed':"Test the speed of the GPU implementation against a CPU implementation"}
 
 description_keys = set(target_description.keys())
 target_keys = set(target.keys())
