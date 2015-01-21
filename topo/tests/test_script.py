@@ -265,27 +265,7 @@ def _time_sim_run(script,iterations=10):
     topo.sim.run(1) # ensure compilations etc happen outside timing
     # CB: we enable garbage collection
     # (http://docs.python.org/lib/module-timeit.html)
-    return timeit.Timer('topo.sim.run('+`iterations`+')','gc.enable(); import topo').timeit(number=1)
-
-
-def compare_script_speeds(script_dict, iterations=50):
-    """
-    This test compares the running time of given scripts for the same number of iterations.
-    It accepts a dict of script name to script path mappings and prints the runtime for each.
-    """
-    runtime_dict = {}
-
-    for script_name, script_path in script_dict.iteritems():
-        print "Initialising '%s' script..." % script_name
-        execfile(script_path, __main__.__dict__)
-        topo.sim.run(1) # ensure compilations etc happen outside timing
-        # CB: we enable garbage collection
-        # (http://docs.python.org/lib/module-timeit.html)
-        print "Running '%s' script for %s iterations..." % (script_name, iterations)
-        runtime_dict[script_name] = timeit.Timer('topo.sim.run('+`iterations`+')','gc.enable(); import topo').timeit(number=1)
-    
-    for script_name, script_time in runtime_dict.iteritems():
-        print script_name, ": ", script_time, 'seconds' 
+    return timeit.Timer('topo.sim.run('+`iterations`+')','gc.enable(); import topo').timeit(number=1) 
 
 
 def generate_speed_profile(script, outfile, iterations=100):
