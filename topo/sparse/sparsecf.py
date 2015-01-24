@@ -399,9 +399,7 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     """
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
-    """
-    weights_rows, weights_cols = projection.weights.shape    
-
+    """ 
     # partial_gpu = CSR.to_CSR(linalg.dot(src_activity_gpu, dest_activity_gpu) * single_conn_lr, cusparse_handle)
 
     # # #print "Partial shape: ", partial_gpu.shape
@@ -420,11 +418,11 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
 
     # Getting the indices of non-zero entries of the projection:
     if not hasattr(projection, 'nzrows'):
-        projection.nzrows, projection.nzcols = projection.weights.nonzero()
-
-        projection.nzrows_gpu = gpuarray.to_gpu(projection.nzrows)
-        projection.nzcols_gpu = gpuarray.to_gpu(projection.nzcols)
+        nzrows, nzcols = projection.weights.nonzero()
+        projection.nzcount = projection.weights.getnnz()
         # Only 3% of the gcal_sparse model are nonzero
+        projection.nzrows_gpu = gpuarray.to_gpu(nzrows)
+        projection.nzcols_gpu = gpuarray.to_gpu(nzcols)
 
     # Reserving place for learning results:
     if not hasattr(projection, 'learn_results'):
@@ -433,26 +431,15 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32))
     dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
 
-
-    print dest_activity_gpu.dtype
-    print src_activity_gpu.dtype
-    print projection.nzrows_gpu.dtype
-    print projection.nzcols_gpu.dtype
-    
-
     # Kernel that calculates the learning:
     hebbian_kernel = ElementwiseKernel(
         "float single_conn_lr, long *row, long *col, float *src_activity, float *dest_activity, float *result",
-        "result[row[i]*64 + col[i]] = single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]",
+        "result[row[i]*%d + col[i]] = single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]"%projection.weights.shape[1],
         "hebbian_learning")
 
-    hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learn_results, range=slice(0, 8768, 1))
+    hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learn_results, range=slice(0, projection.nzcount, 1))
 
     my_result = projection.learn_results.get()
-
-
-    old_weights = projection.weights.toarray()
-
 
     # Old code:
 
@@ -461,24 +448,6 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     projection.weights.Hebbian(projection.src.activity, projection.dest.activity, 
                                projection.norm_total, single_conn_lr)
     projection.has_norm_total = True
-
-    new_weights = projection.weights.toarray()
-
-    for row in range(len(my_result)):
-        for col in range(len(my_result[row])):
-            if my_result[row][col] != 0:
-                print "YEP"
-                print "My result:", my_result[row][col]
-                print "Their result:", new_weights[row][col]-old_weights[row][col]
-                print row, col
-                print "---------------------------"
-
-            # if my_result[row][col] != (new_weights[row][col]-old_weights[row][col]):
-            #     print "INCORRECT"
-            #     print my_result[row][col]
-            #     print new_weights[row][col]-old_weights[row][col]
-            #     print row, col
-            #     print "---------------------------"
 
 
 def CFPLF_Hebbian_Sparse_opt(projection):
