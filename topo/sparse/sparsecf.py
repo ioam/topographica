@@ -400,54 +400,34 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
     """ 
-    # partial_gpu = CSR.to_CSR(linalg.dot(src_activity_gpu, dest_activity_gpu) * single_conn_lr, cusparse_handle)
-
-    # # #print "Partial shape: ", partial_gpu.shape
-    # # #print "Weights shape: ", weights_gpu.shape
-
-    # projection.weights_gpu = projection.weights_gpu.geam(partial_gpu)
-    # # projection.weights = weights_gpu.get()
-
-    # # print projection.weights_gpu.nnz
-
-    # norm_gpu = projection.weights_gpu.mv(gpuarray.to_gpu(np.array([1.0] * weights_rows).astype(np.float32)), CUSPARSE_OPERATION_TRANSPOSE)
-    
-    # norm_total = np.reshape(norm_gpu.get(), projection.norm_total.shape)
-    
     single_conn_lr = projection.learning_rate/projection.n_units
 
     # Getting the indices of non-zero entries of the projection:
     if not hasattr(projection, 'nzrows'):
         nzrows, nzcols = projection.weights.nonzero()
         projection.nzcount = projection.weights.getnnz()
-        # Only 3% of the gcal_sparse model are nonzero
         projection.nzrows_gpu = gpuarray.to_gpu(nzrows)
         projection.nzcols_gpu = gpuarray.to_gpu(nzcols)
 
     # Reserving place for learning results:
-    if not hasattr(projection, 'learn_results'):
-        projection.learn_results = gpuarray.zeros(projection.weights.shape, np.float32)
+    if not hasattr(projection, 'learning_results'):
+        projection.learning_results = gpuarray.zeros((projection.weights.shape[1], projection.weights.shape[0]), np.float32)
 
+    # Kernel that calculates the learning:
+    if not hasattr(projection, 'hebbian_kernel'):
+        projection.hebbian_kernel = ElementwiseKernel(
+            "float single_conn_lr, long *row, long *col, float *src_activity, float *dest_activity, float *result",
+            "result[col[i]*%d + row[i]] = single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]"%projection.weights.shape[0],
+            "hebbian_learning")
+
+    # Transfering source and destination activities:
     src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32))
     dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
 
-    # Kernel that calculates the learning:
-    hebbian_kernel = ElementwiseKernel(
-        "float single_conn_lr, long *row, long *col, float *src_activity, float *dest_activity, float *result",
-        "result[row[i]*%d + col[i]] = single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]"%projection.weights.shape[1],
-        "hebbian_learning")
-
-    hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learn_results, range=slice(0, projection.nzcount, 1))
-
-    my_result = projection.learn_results.get()
-
-    # Old code:
-
-    single_conn_lr = projection.learning_rate/projection.n_units
-    projection.norm_total *= 0.0
-    projection.weights.Hebbian(projection.src.activity, projection.dest.activity, 
-                               projection.norm_total, single_conn_lr)
-    projection.has_norm_total = True
+    # Computing Hebbian learning weights:
+    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learning_results, range=slice(0, projection.nzcount, 1))
+    # Applying them to the weight matrix:
+    projection.weights_gpu = projection.weights_gpu.geam(projection.learning_results, async=True)
 
 
 def CFPLF_Hebbian_Sparse_opt(projection):
@@ -480,9 +460,9 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
 
     """
     if not hasattr(projection, 'weights_gpu'):
-        projection.weights_gpu = CSR.to_CSR(projection.weights.toarray().astype(np.float64).transpose(), cusparse_handle)
+        projection.weights_gpu = CSR.to_CSR(projection.weights.toarray().astype(np.float32).transpose(), cusparse_handle)
     
-    input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float64))
+    input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32))
     activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, autosync=False)
 
     projection.activity = np.reshape(activity_gpu.get(), projection.activity.shape)
