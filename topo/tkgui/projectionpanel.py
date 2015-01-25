@@ -137,8 +137,8 @@ class UnitsPanel(ProjectionSheetPanel):
             self._tkvars[coord].set(self.initial_args.get(coord,0.0))
 
         l,b,r,t = self.sheet.bounds.lbrt()
-        # CEBALERT: see "CEBERRORALERT: doesn't take account of
-        # exclusive bounds" in topo/param/__init.__.py.
+        # CEBALERT: param.Number's `crop_to_bounds` does not respect exclusive bounds;
+        # see https://github.com/ioam/param/issues/80
         D=0.0000000001
         bounds = {'x':(l,r-D),
                   'y':(b,t-D)}
