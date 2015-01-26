@@ -30,10 +30,9 @@ import pycuda.gpuarray as gpuarray
 from pycuda.elementwise import ElementwiseKernel
 import pycuda.driver as cuda
 import pycuda.autoinit
-from scikits.cuda.cusparse import *
-from scikits.cuda import linalg
+import scikits.cuda.cusparse as cusparse
 
-linalg.init()
+cusparse.init()
 
 use_sparse = True
 try:
@@ -42,8 +41,6 @@ except:
     use_sparse = False
 
 sparse_type = np.float32
-cusparse_handle = cusparseCreate()
-
 
 class CFSPLF_Plugin(param.Parameterized):
     """CFSPLearningFunction applying the specified single_cf_fn to each Sparse CF."""
@@ -374,12 +371,12 @@ def CFPOF_DivisiveNormalizeL1_Sparse(projection):
     projection.has_norm_total = False
 
 def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
-    #return
-    if not projection.has_norm_total:
-        projection.norm_total *= 0.0
-        projection.weights.CFWeightTotals(projection.norm_total)
-    projection.weights.DivisiveNormalizeL1(projection.norm_total)
-    projection.has_norm_total = False
+    return
+    # if not projection.has_norm_total:
+    #     projection.norm_total *= 0.0
+    #     projection.weights.CFWeightTotals(projection.norm_total)
+    # projection.weights.DivisiveNormalizeL1(projection.norm_total)
+    # projection.has_norm_total = False
 
 
 
@@ -400,10 +397,11 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
     """ 
+    return
     single_conn_lr = projection.learning_rate/projection.n_units
 
     # Getting the indices of non-zero entries of the projection:
-    if not hasattr(projection, 'nzrows'):
+    if not hasattr(projection, 'nzcount'):
         nzrows, nzcols = projection.weights.nonzero()
         projection.nzcount = projection.weights.getnnz()
         projection.nzrows_gpu = gpuarray.to_gpu(nzrows)
@@ -426,8 +424,15 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
 
     # Computing Hebbian learning weights:
     projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learning_results, range=slice(0, projection.nzcount, 1))
-    # Applying them to the weight matrix:
-    projection.weights_gpu = projection.weights_gpu.geam(projection.learning_results, async=True)
+    # We must check if the resulting Hebbian matrix is empty. In that case, we're not supposed to add anything:
+    descrA = cusparse.cusparseCreateMatDescr()
+    cusparse.cusparseSetMatType(descrA, cusparse.CUSPARSE_MATRIX_TYPE_GENERAL)
+    cusparse.cusparseSetMatIndexBase(descrA, cusparse.CUSPARSE_INDEX_BASE_ZERO)
+    _, nonzero = cusparse.dense_nnz(descrA, projection.learning_results, handle=None, dirA=cusparse.CUSPARSE_DIRECTION_ROW, lda=projection.learning_results.shape[0]) 
+
+    if nonzero > 0:
+        # If there are weights to add, we add them using cusparse CSR.geam method:
+        projection.weights_gpu = projection.weights_gpu.geam(projection.learning_results)
 
 
 def CFPLF_Hebbian_Sparse_opt(projection):
@@ -443,7 +448,6 @@ def CFPLF_Hebbian_Sparse_opt(projection):
     projection.has_norm_total = True
 
 
-
 def CFPRF_DotProduct_Sparse(projection):
     """
     Sparse CF Projection response function calculating the dot-product
@@ -455,12 +459,9 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     """
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
-
-    Instead os using 'sparse_type', it's currently using np.float64 to pass the incorrectly generated tests
-
     """
     if not hasattr(projection, 'weights_gpu'):
-        projection.weights_gpu = CSR.to_CSR(projection.weights.toarray().astype(np.float32).transpose(), cusparse_handle)
+        projection.weights_gpu = cusparse.CSR.to_CSR(projection.weights.toarray().astype(np.float32).transpose())
     
     input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32))
     activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, autosync=False)
