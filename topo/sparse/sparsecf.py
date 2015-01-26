@@ -397,7 +397,6 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
     """ 
-    return
     single_conn_lr = projection.learning_rate/projection.n_units
 
     # Getting the indices of non-zero entries of the projection:
