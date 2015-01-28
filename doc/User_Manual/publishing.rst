@@ -12,6 +12,8 @@ sizes, faster document generation, and better quality.
 Before discussing Topographica-specific tips, we first provide
 background on image formats and image plotting in general. These
 considerations apply to any image displayed on screen or in a paper.
+Other suggestions for making good figures are available from
+`Rougier et al. (2014)`_.
 
 Image types: photos, bitmaps, and vector graphics
 -------------------------------------------------
@@ -233,4 +235,4 @@ or in BibTeX format:
 .. _batch mode: batch.html
 .. _save\_plotgroup: commandline.html#saving-bitmaps
 .. _appropriate bitmap format: #image-types
-
+.. _Rougier et al. (2014): http://dx.doi.org/10.1371/journal.pcbi.1003833

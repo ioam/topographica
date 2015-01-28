@@ -5,6 +5,10 @@ Papers using or about Topographica
 Journal Articles
 ----------------
 
+-  Ryan T. Philipps and V. Srinivasa Chakravarthy.
+   `The mapping of eccentricity and meridional angle onto orthogonal
+   axes in the primary visual cortex`_: An activity-dependent developmental model.
+   *Frontiers in Computational Neuroscience*, 2015. In press.
 -  Jean-Luc R. Stevens and James A. Bednar. 
    `An automated and reproducible workflow for running and analyzing
    neural simulations using Lancet and IPython Notebook`_.
@@ -159,6 +163,8 @@ MSc Theses
 Please send citations for any Topographica papers not listed above
 to `Jim Bednar`_ so that they can be included here.
 
+
+.. _The mapping of eccentricity and meridional angle onto orthogonal axes in the primary visual cortex: http://journal.frontiersin.org/Journal/10.3389/fncom.2015.00003
 .. _Mechanisms for stable, robust, and adaptive development of orientation maps in the primary visual cortex: http://dx.doi.org/10.1523/JNEUROSCI.1037-13.2013
 .. _Building a mechanistic model of the development and function of the primary visual cortex: http://dx.doi.org/10.1016/j.jphysparis.2011.12.001
 .. _A model of the response of visual area V2 to combinations of orientations: http://dx.doi.org/10.3109/0954898X.2012.690167
