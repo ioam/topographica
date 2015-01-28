@@ -460,12 +460,13 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     between incoming activities and CF weights. Uses GPU.
     """
     if not hasattr(projection, 'weights_gpu'):
-        projection.weights_gpu = cusparse.CSR.to_CSR(projection.weights.toarray().astype(np.float32).transpose())
-    
+        projection.weights_gpu = cusparse.CSR.to_CSR(projection.weights.toSparseArray().transpose())
+        
     input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32))
     activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, autosync=False)
 
     projection.activity = np.reshape(activity_gpu.get(), projection.activity.shape)
+
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
