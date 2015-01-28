@@ -45,11 +45,12 @@ Topographica makes it simple to use an appropriate level of detail and
 complexity, as determined by the available computing power, phenomena of
 interest, and amount of biological data available for validation.
 
-Compared to writing code for such models from scratch, Topographica
-makes it simple to define multiple interconnected sheets, to use
-localized patches of connections, to control the inputs to each sheet
-and analyze the outputs, and to manage results from models and
-simulations as they are developed and improved over time.
+Compared to writing code for such models from scratch in Python or
+Matlab, Topographica makes it simple to define a complex network of
+multiple interconnected populations, to use localized patches of
+connections within each sheet, to control the inputs to each sheet and
+analyze the outputs, and to manage results from models and simulations
+as they are developed and improved over time.
 
 The figure at top right shows an example Topographica model of the early
 stages in the visual system, modeling how retinal input is transformed
@@ -60,12 +61,14 @@ maps, such as touch and hearing, as well as motor areas.
 
 Topographica is freely available for downloading, and is an open source
 project (`BSD license`_) whose capabilities can be extended and modified
-by any user. We welcome contributions from users, and invite interested
+by any user. We welcome contributions from users, usually in the form
+of `GitHub pull requests`_, and invite interested
 people to join our globally distributed development team.
 
 Also see our `Publications list`_ for results from simulations run with
 Topographica, such as this `2012 review paper`_.
 
+.. _GitHub pull requests: https://github.com/ioam/topographica
 .. _Institute for Adaptive and Neural Computation: http://www.anc.ed.ac.uk
 .. _University of Edinburgh: http://www.ed.ac.uk
 .. _Neural Networks Research Group: http://www.cs.utexas.edu/users/nn/
