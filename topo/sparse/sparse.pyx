@@ -244,10 +244,6 @@ cdef class csarray_float:
         return result
 
 
-    def fromarray(self, numpy.ndarray[float, ndim=2] np_array not None):
-        pass
-
-
     def toarray(self):
         """
         Convert this sparse matrix into a numpy array.
