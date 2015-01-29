@@ -410,30 +410,11 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
         projection.nzcount = projection.weights.getnnz()
         projection.nzrows_gpu = gpuarray.to_gpu(np.array(nzrows, np.int32))
         projection.nzcols_gpu = gpuarray.to_gpu(np.array(nzcols, np.int32))
-        # Getting the row pointer and column index arrays:
-        row_ptr = []
-        prev_row = -1
-        for idx, val in enumerate(nzrows):
-            if val != prev_row:
-                row_ptr.append(idx)
-                prev_row = val
-        row_ptr.append(projection.nzcount)
 
-        row_ptr_gpu = gpuarray.to_gpu(np.array(row_ptr, np.int32))
-        col_inds_gpu = gpuarray.to_gpu(np.array([i%projection.weights.shape[0] for i in nzcols], np.int32))
-        # Reserving space for values:
-        projection.learning_values = gpuarray.zeros((projection.nzcount,), np.float32)
-        # Assigning a descriptor:
-        descr = cusparse.cusparseCreateMatDescr()
-        cusparse.cusparseSetMatType(descr, cusparse.CUSPARSE_MATRIX_TYPE_GENERAL)
-        cusparse.cusparseSetMatIndexBase(descr, cusparse.CUSPARSE_INDEX_BASE_ZERO)
-
-        projection.hebbian_CSR = cusparse.CSR(descr, projection.learning_values, row_ptr_gpu, col_inds_gpu, (projection.weights.shape[1], projection.weights.shape[0]))
-    
         # Kernel that calculates the learning:
         projection.hebbian_kernel = ElementwiseKernel(
                         "float single_conn_lr, int *row, int *col, float *src_activity, float *dest_activity, float *result",
-                        "result[i] = single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]",
+                        "result[i] += single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]",
                         "hebbian_learning")
 
     # Transfering source and destination activities:
@@ -441,10 +422,7 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
 
     # Computing Hebbian learning weights:
-    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learning_values, range=slice(0, projection.nzcount, 1))
-    # Always add, even if learning is all zeros:
-    projection.weights_gpu = projection.weights_gpu.geam(projection.hebbian_CSR)
-
+    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
 
 
 def CFPLF_Hebbian_Sparse_opt(projection):
