@@ -399,39 +399,52 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     """ 
     single_conn_lr = projection.learning_rate/projection.n_units
 
-    # Getting the indices of non-zero entries of the projection:
+    # Creating a Hebbian weight matrix on GPU in CSR format during the initialisation:
     if not hasattr(projection, 'nzcount'):
-        nzrows, nzcols = projection.weights.nonzero()
+        # Getting the row and columns indices for the *transposed* matrix:
+        nzcols, nzrows = projection.weights.nonzero()
+        tups = sorted(zip(nzrows, nzcols))
+        nzrows = [x[0] for x in tups]
+        nzcols = [x[1] for x in tups]
+        # Getting them on the GPU:
         projection.nzcount = projection.weights.getnnz()
-        projection.nzrows_gpu = gpuarray.to_gpu(nzrows)
-        projection.nzcols_gpu = gpuarray.to_gpu(nzcols)
+        projection.nzrows_gpu = gpuarray.to_gpu(np.array(nzrows, np.int32))
+        projection.nzcols_gpu = gpuarray.to_gpu(np.array(nzcols, np.int32))
+        # Getting the row pointer and column index arrays:
+        row_ptr = []
+        prev_row = -1
+        for idx, val in enumerate(nzrows):
+            if val != prev_row:
+                row_ptr.append(idx)
+                prev_row = val
+        row_ptr.append(projection.nzcount)
 
-    # Reserving place for learning results:
-    if not hasattr(projection, 'learning_results'):
-        projection.learning_results = gpuarray.zeros((projection.weights.shape[1], projection.weights.shape[0]), np.float32)
+        row_ptr_gpu = gpuarray.to_gpu(np.array(row_ptr, np.int32))
+        col_inds_gpu = gpuarray.to_gpu(np.array([i%projection.weights.shape[0] for i in nzcols], np.int32))
+        # Reserving space for values:
+        projection.learning_values = gpuarray.zeros((projection.nzcount,), np.float32)
+        # Assigning a descriptor:
+        descr = cusparse.cusparseCreateMatDescr()
+        cusparse.cusparseSetMatType(descr, cusparse.CUSPARSE_MATRIX_TYPE_GENERAL)
+        cusparse.cusparseSetMatIndexBase(descr, cusparse.CUSPARSE_INDEX_BASE_ZERO)
 
-    # Kernel that calculates the learning:
-    if not hasattr(projection, 'hebbian_kernel'):
+        projection.hebbian_CSR = cusparse.CSR(descr, projection.learning_values, row_ptr_gpu, col_inds_gpu, (projection.weights.shape[1], projection.weights.shape[0]))
+    
+        # Kernel that calculates the learning:
         projection.hebbian_kernel = ElementwiseKernel(
-            "float single_conn_lr, long *row, long *col, float *src_activity, float *dest_activity, float *result",
-            "result[col[i]*%d + row[i]] = single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]"%projection.weights.shape[0],
-            "hebbian_learning")
+                        "float single_conn_lr, int *row, int *col, float *src_activity, float *dest_activity, float *result",
+                        "result[i] = single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]",
+                        "hebbian_learning")
 
     # Transfering source and destination activities:
     src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32))
     dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
 
     # Computing Hebbian learning weights:
-    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learning_results, range=slice(0, projection.nzcount, 1))
-    # We must check if the resulting Hebbian matrix is empty. In that case, we're not supposed to add anything:
-    descrA = cusparse.cusparseCreateMatDescr()
-    cusparse.cusparseSetMatType(descrA, cusparse.CUSPARSE_MATRIX_TYPE_GENERAL)
-    cusparse.cusparseSetMatIndexBase(descrA, cusparse.CUSPARSE_INDEX_BASE_ZERO)
-    _, nonzero = cusparse.dense_nnz(descrA, projection.learning_results, handle=None, dirA=cusparse.CUSPARSE_DIRECTION_ROW, lda=projection.learning_results.shape[0]) 
+    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.learning_values, range=slice(0, projection.nzcount, 1))
+    # Always add, even if learning is all zeros:
+    projection.weights_gpu = projection.weights_gpu.geam(projection.hebbian_CSR)
 
-    if nonzero > 0:
-        # If there are weights to add, we add them using cusparse CSR.geam method:
-        projection.weights_gpu = projection.weights_gpu.geam(projection.learning_results)
 
 
 def CFPLF_Hebbian_Sparse_opt(projection):
@@ -466,7 +479,6 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, autosync=False)
 
     projection.activity = np.reshape(activity_gpu.get(), projection.activity.shape)
-
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
