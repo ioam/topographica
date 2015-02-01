@@ -425,26 +425,11 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
     """ 
+
+    if not hasattr(projection, 'initialised_gpu'):
+        init_gpu(projection)
+
     single_conn_lr = projection.learning_rate/projection.n_units
-
-    # Creating a Hebbian weight matrix on GPU in CSR format during the initialisation:
-    if not hasattr(projection, 'nzcount'):
-        # Getting the row and columns indices for the *transposed* matrix:
-        nzcols, nzrows = projection.weights.nonzero()
-        tups = sorted(zip(nzrows, nzcols))
-        nzrows = [x[0] for x in tups]
-        nzcols = [x[1] for x in tups]
-        # Getting them on the GPU:
-        projection.nzcount = projection.weights.getnnz()
-        projection.nzrows_gpu = gpuarray.to_gpu(np.array(nzrows, np.int32))
-        projection.nzcols_gpu = gpuarray.to_gpu(np.array(nzcols, np.int32))
-
-        # Kernel that calculates the learning:
-        projection.hebbian_kernel = ElementwiseKernel(
-                        "float single_conn_lr, int *row, int *col, float *src_activity, float *dest_activity, float *result",
-                        "result[i] += single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]",
-                        "hebbian_learning")
-
     # Transfering source and destination activities:
     src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32))
     dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
@@ -478,8 +463,8 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
     """
-    if not hasattr(projection, 'weights_gpu'):
-        projection.weights_gpu = cusparse.CSR.to_CSR(projection.weights.toSparseArray().transpose())
+    if not hasattr(projection, 'initialised_gpu'):
+        init_gpu(projection)
         
     input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32))
     activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, autosync=False)
