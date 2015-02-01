@@ -339,6 +339,34 @@ class CFSPRF_Plugin(param.Parameterized):
         projection.activity *= projection.strength
 
 
+def init_gpu(projection):
+    if not hasattr(projection, 'initialized_gpu') or not projection.initialized_gpu:
+        # Transfering the weights:
+        projection.weights_gpu = cusparse.CSR.to_CSR(projection.weights.toSparseArray().transpose())
+        # Getting the row and columns indices for the *transposed* matrix. Used for Hebbian learning and normalisation:
+        nzcols, nzrows = projection.weights.nonzero()
+        tups = sorted(zip(nzrows, nzcols))
+        nzrows = [x[0] for x in tups]
+        nzcols = [x[1] for x in tups]
+        # Getting them on the GPU:
+        projection.nzcount = projection.weights.getnnz()
+        projection.nzrows_gpu = gpuarray.to_gpu(np.array(nzrows, np.int32))
+        projection.nzcols_gpu = gpuarray.to_gpu(np.array(nzcols, np.int32))
+        # Helper array for normalization:
+        projection.norm_ones_gpu = gpuarray.to_gpu(np.array([1.0] * projection.weights_gpu.shape[1], np.float32))
+        # Kernel that applies the normalisation:
+        projection.normalize_kernel = ElementwiseKernel(
+                        "int *nzrows, float *norm_total, float *weights",
+                        "weights[i] *= 1.0/norm_total[nzrows[i]]",
+                        "divisive_normalize")
+        # Kernel that calculates the learning:
+        projection.hebbian_kernel = ElementwiseKernel(
+                        "float single_conn_lr, int *row, int *col, float *src_activity, float *dest_activity, float *result",
+                        "result[i] += single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]",
+                        "hebbian_learning")
+        projection.initialized_gpu = True
+
+
 def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
     """
     Compute norm_total for each CF in each projection from a group to be
