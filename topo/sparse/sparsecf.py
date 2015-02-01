@@ -399,13 +399,16 @@ def CFPOF_DivisiveNormalizeL1_Sparse(projection):
     projection.has_norm_total = False
 
 def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
-    return
-    # if not projection.has_norm_total:
-    #     projection.norm_total *= 0.0
-    #     projection.weights.CFWeightTotals(projection.norm_total)
-    # projection.weights.DivisiveNormalizeL1(projection.norm_total)
-    # projection.has_norm_total = False
+    '''
+    Divisive normalisation computed on the GPU
+    '''
 
+    if not hasattr(projection, 'initialised_gpu'):
+        init_gpu(projection)
+
+    norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, autosync=False)
+    projection.normalize_kernel(projection.nzrows_gpu, norm_total_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
+    projection.has_norm_total = False
 
 
 def CFPLF_Hebbian_Sparse(projection):
