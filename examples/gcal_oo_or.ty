@@ -203,16 +203,14 @@ topo.sim.connect(
     dest_port=('Activity','JointNormalize','Afferent'),
     connection_type=projection.CFProjection,learning_rate=p.aff_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
-    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083),
-    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083))
 
 topo.sim.connect(
     'LGNOff','V1',delay=0.05,strength=p.aff_strength,name='LGNOffAfferent',
     dest_port=('Activity','JointNormalize','Afferent'),
     connection_type=projection.CFProjection,learning_rate=p.aff_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
-    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083),
-    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083))
 
 topo.sim.connect(
     'V1','V1',delay=0.05,strength=p.exc_strength,name='LateralExcitatory',
