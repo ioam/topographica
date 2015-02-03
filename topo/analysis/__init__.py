@@ -12,7 +12,6 @@ from holoviews.core.options import channels, ChannelOpts
 from holoviews.testing import IPTestCase
 from holoviews.operation.channel import cmap2rgb
 from holoviews.operation.view import chain, operator
-from imagen import Animation
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
 
@@ -34,7 +33,6 @@ class TopoIPTestCase(IPTestCase):
     def __init__(self, *args, **kwargs):
         super(TopoIPTestCase, self).__init__(*args, **kwargs)
         self.addTypeEqualityFunc(CFView,   self.compare_cfviews)
-        self.addTypeEqualityFunc(Animation,   self.compare_animation)
 
     def compare_cfviews(self, view1, view2, msg):
         self.compare_matrix(view1, view2, msg)

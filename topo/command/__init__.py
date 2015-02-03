@@ -370,7 +370,6 @@ Loading error:
     numbergen.TimeAware.time_fn = topo.sim.time
     imagen.Translator.time_fn = topo.sim.time
     imagen.Sweeper.time_fn = topo.sim.time
-    imagen.Animation.time_fn = topo.sim.time
 
 
 
