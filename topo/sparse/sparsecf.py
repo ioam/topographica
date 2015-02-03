@@ -352,18 +352,22 @@ def init_gpu(projection):
         projection.nzcount = projection.weights.getnnz()
         projection.nzrows_gpu = gpuarray.to_gpu(np.array(nzrows, np.int32))
         projection.nzcols_gpu = gpuarray.to_gpu(np.array(nzcols, np.int32))
+        # Allocating a vector of zeros needed for the dot product:
+        projection.zeros_gpu = gpuarray.zeros((projection.weights_gpu.shape[0], ), np.float32)
         # Helper array for normalization:
         projection.norm_ones_gpu = gpuarray.to_gpu(np.array([1.0] * projection.weights_gpu.shape[1], np.float32))
         # Kernel that applies the normalisation:
         projection.normalize_kernel = ElementwiseKernel(
                         "int *nzrows, float *norm_total, float *weights",
                         "weights[i] *= 1.0/norm_total[nzrows[i]]",
-                        "divisive_normalize")
+                        "divisive_normalize",
+                        options=["--use_fast_math"])
         # Kernel that calculates the learning:
         projection.hebbian_kernel = ElementwiseKernel(
                         "float single_conn_lr, int *row, int *col, float *src_activity, float *dest_activity, float *result",
                         "result[i] += single_conn_lr * src_activity[row[i]] * dest_activity[col[i]]",
-                        "hebbian_learning")
+                        "hebbian_learning",
+                        options=["--use_fast_math"])
         projection.initialized_gpu = True
 
 
@@ -406,7 +410,7 @@ def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
     if not hasattr(projection, 'initialised_gpu'):
         init_gpu(projection)
 
-    norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, autosync=False)
+    norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
     projection.normalize_kernel(projection.nzrows_gpu, norm_total_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
     projection.has_norm_total = False
 
@@ -434,8 +438,8 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
 
     single_conn_lr = projection.learning_rate/projection.n_units
     # Transfering source and destination activities:
-    src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32))
-    dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
+    src_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.src.activity).astype(np.float32))
+    dest_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.dest.activity).astype(np.float32))
 
     # Computing Hebbian learning weights:
     projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
@@ -470,7 +474,7 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
         init_gpu(projection)
         
     input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32))
-    activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, autosync=False)
+    activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, y=projection.zeros_gpu, autosync=False)
 
     projection.activity = np.reshape(activity_gpu.get(), projection.activity.shape)
 
