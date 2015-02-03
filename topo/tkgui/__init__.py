@@ -50,7 +50,7 @@ from topoconsole import TopoConsole,ControllableMenu
 
 # When not using the GUI, Topographica does not ordinarily import any of
 # the classes in the separate Topographica packages. For example, none
-# of the pattern types in topo.patterns is imported in Topographica by
+# of the pattern types in topo.pattern is imported in Topographica by
 # default.  But for the GUI, we want all such things to be available
 # as lists from which the user can select.  To do this, we import all
 # pattern types and other such classes here. User-defined classes will
@@ -65,13 +65,14 @@ from topo.pattern import *  # pyflakes:ignore (see comment above)
 from topo.projection import *  # pyflakes:ignore (see comment above)
 from topo.responsefn import *  # pyflakes:ignore (see comment above)
 from topo.sheet import *  # pyflakes:ignore (see comment above)
+from topo.analysis import *  # pyflakes:ignore (see comment above)
 
 
 
 ##########
 ### Which os is being used (for gui purposes)?
 #
-# system_plaform can be:
+# system_platform can be:
 # "linux"
 # "mac"
 # "win"
