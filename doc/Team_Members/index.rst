@@ -9,7 +9,7 @@ the United Kingdom, the United States, and Europe, most recently
 including:
 
 `James A. Bednar`_, Lead author and project manager, 2002 -
- Jim is a Lecturer at the University of Edinburgh. Parts of
+ Jim is a Reader at the University of Edinburgh. Parts of
  Topographica were inspired by Jim's C++ `LISSOM`_ simulator in use
  from 1995-2004, but Topographica was entirely reimplemented in
  Python for extensibility and generality. Jim reviews all code and is
@@ -17,8 +17,8 @@ including:
 
 `Chris Ball`_, 2005 -
  Chris was the main developer from 2005 - 2012, working on nearly
- every part of Topographica. Since January 2009 he has been a PhD
- student in Edinburgh, working on the formation of color maps in V1.
+ every part of Topographica. He was also a PhD student in Edinburgh,
+ working on the formation of color maps in V1.
 
 Jan Antolik, 2006 -
  Jan completed his University of Edinburgh PhD thesis in Autumn 2010,
@@ -26,33 +26,30 @@ Jan Antolik, 2006 -
  continues to use Topographica in his postdoctoral work and has
  contributed a variety of related code.
 
-Wiktor Brodlo, 2012 - 2013
- Wiktor is supervising the split of Topographica into independent
- subprojects, as part of his undergraduate project.
-
-Boris Hristov, 2012 - 2013
- Boris is building an improved test suite for Topographica, as part
- of his undergraduate project.
+Ignotas Sulzenko, 2014-2015
+ Ignotas is working on GP-GPU support for Topographica, as part of his 
+ undergraduate project.
 
 Alessio Plebe, 2010 -
- Alessio teaches at the University of Messina, Italy, and contributes
- code for analyzing higher-order feature maps.
-
-Keith Robertson, 2012 - 2013
- Keith is expanding the Tk GUI support for Topographica, focusing on
- the Model Editor, as part of his undergraduate project.
+ Alessio is an Associate Professor at the University of Messina,
+ Italy, and contributes code for analyzing higher-order feature maps.
 
 Philipp J. F. Rudiger, 2011 -
  Philipp completed his MSc degree at the University of Edinburgh,
  working on RF measurement protocols for two-photon Calcium imaging
  in ferrets and is now pursuing his PhD on feedback, attention and
- contextual processing in V1 using Topographica models.
+ contextual processing in V1 using Topographica models.  He has
+ contributed extensively to Topographica, particularly in the
+ HoloViews and ImaGen submodules.
 
 Jean-Luc Stevens, 2011 -
  Jean-Luc received an MSc degree from the University of Edinburgh
  (project: A temporal model of neural activity and VSD response in
  the primary visual cortex) and is now a PhD student in Edinburgh
- working on temporal processing in V1 using Topographica models.
+ working on temporal processing in V1 using Topographica models.  He
+ has contributed extensively to Topographica, particularly in the
+ Lancet, HoloViews, and ImaGen submodules.
+
 
 Previous contributors
 ---------------------
@@ -61,6 +58,10 @@ James Adwick, 2008 - 2009
  James completed his undergraduate degree at the University of
  Edinburgh, including a project of building Unreal and Blender
  3D-world interfaces for Topographica.
+
+Wiktor Brodlo, 2012 - 2013
+ Wiktor helped integrate the submodules into which Topographica 
+ was split, as part of his undergraduate project.
 
 Andy Cameron, 2008 - 2009
  Andy completed his undergraduate degree at the University of
@@ -98,6 +99,11 @@ Célia Fillion, May - September 2010
  In an undergraduate project in collaboration with ISEN Brest
  (France), Célia implemented real-time OpenCV web camera support.
 
+Tobias Fischer, 2014
+ As part of his MSc project, Tobias implemented a submodel system that
+ allows individual models to be constructed from a recipe, by mixing
+ and matching components according to a simple specification.
+
 Gautham Ganapathy, May - Dec 2011
  Gautham completed his MSc at the University of Edinburgh, including
  a project on realistic lateral connectivity in V1.
@@ -107,10 +113,14 @@ Kateryna Gerasymova, May - September 2008
  (Berlin), Kateryna implemented numerous separate and joint maps and
  analysis routines, e.g. for direction, ocular dominance, and color.
 
+Boris Hristov, 2012 - 2013
+ Boris built an improved test suite for Topographica, as part
+ of his undergraduate project.
+
 John Jacob, Jan - Aug 2009
  John completed his MSc degree at the University of Edinburgh,
- including a project of implementing the compute-intensive portions
- of Topographica on a GP-GPU.
+ including a project of implementing a prototype of the
+ compute-intensive portions of Topographica on a GP-GPU.
 
 Bilal Khan, 2009 - 2011
  Bilal developed audio file support and auditory system models for
@@ -170,6 +180,10 @@ Tikesh Ramtohul, Jan - Aug 2006
  including a project of building a model of disparity selectivity in
  V1, and contributed code for measuring disparity maps.
 
+Keith Robertson, 2012 - 2013
+ Keith expanded expanding the Tk GUI support for Topographica,
+ focusing on the Model Editor, as part of his undergraduate project.
+
 `Yiu Fai Sit`_, May 2005 - 2006
  Sit was a PhD student at the University of Texas, focusing on
  hierarchical visual cortex models and characterizing the V1 optical
@@ -178,10 +192,15 @@ Tikesh Ramtohul, Jan - Aug 2006
  C++ version, and for writing C code to optimize key Topographica
  functions.
 
+Giacomo Spigler, 2014
+ As part of his MSc project, Giacomo added multi-channel support to
+ ImaGen, allowing RGB (and other multichannel inputs) to be generated
+ and manipulated more easily.
+
 Aistis Stankevicius, 2010 - 2011
  Aistis completed his undergraduate degree at the University of
  Edinburgh, and is now an MSc/PhD student in Edinburgh. He worked on
- GP-GPU support and contributed Cython and code coverage support.
+ a GP-GPU prototype and contributed Cython and code coverage support.
 
 Dobromir Stefanov, 2011 - 2012
  As part of Dobromir's undergraduate project at the University of
