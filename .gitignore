@@ -33,3 +33,4 @@ doc/Reference_Manual/*.rst
 topo/optimized/optimized.c
 notebooks/sftp-config.json
 *sftp-config.json
+/benchmarks
