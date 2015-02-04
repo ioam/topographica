@@ -389,6 +389,10 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
         p.norm_total = joint_sum.copy()
 
 
+def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):
+    pass
+
+
 
 def CFPOF_DivisiveNormalizeL1_Sparse(projection):
     """
