@@ -9,7 +9,7 @@ import numpy as np
 
 from holoviews.interface.collector import Reference
 from holoviews.core.options import Store, Channel, Options
-from holoviews.testing import IPTestCase
+from holoviews.ipython import IPTestCase
 from holoviews.operation.rgb import colormap
 from holoviews.operation.element import chain, operator
 import imagen.colorspaces
