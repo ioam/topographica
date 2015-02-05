@@ -121,4 +121,4 @@ class CFView(Matrix):
                       label=self.label, value=self.value)
 
 
-Store.options.CFView = Options('style', interpolation='nearest')
+Store.options.CFView = Options('style', cmap='gray', interpolation='nearest')
