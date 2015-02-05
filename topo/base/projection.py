@@ -10,8 +10,8 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
+from holoviews import Matrix
 from holoviews.interface.collector import AttrDict, AttrTree
-from holoviews.view import Matrix
 
 from sheet import Sheet
 from simulation import EPConnection
@@ -301,7 +301,7 @@ class Projection(EPConnection):
         if timestamp is None:
             timestamp = self.src.simulation.time()
         sv = Matrix(self.activity.copy(), self.dest.bounds,
-                    label='Activity', title='%s {label}' % self.name)
+                    label=self.name, value='Activity')
         sv.metadata=AttrDict(proj_src_name=self.src.name,
                              precedence=self.src.precedence,
                              proj_name=self.name,

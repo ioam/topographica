@@ -14,7 +14,7 @@ import numpy as np
 import param
 from param.parameterized import ParamOverrides
 
-from holoviews import Matrix, ViewMap
+from holoviews import Matrix, HoloMap
 from holoviews.ipython.widgets import ProgressBar
 from holoviews.interface.collector import AttrDict
 
@@ -54,7 +54,7 @@ def update_sheet_activity(sheet_name, force=False):
     if not view:
         sv = Matrix(np.array(sheet.activity), sheet.bounds)
         sv.metadata=metadata
-        view = ViewMap((time, sv), dimensions=[Time])
+        view = HoloMap((time, sv), key_dimensions=[Time])
         view.metadata = metadata
         sheet.views.Maps[name] = view
     else:
@@ -361,7 +361,7 @@ class StorageHook(param.ParameterizedFunction):
     def __call__(self, viewcontainer, **params):
         p = ParamOverrides(self, params)
         objects = dict(topo.sim.objects(), **dict([(proj.name, proj) for proj in topo.sim.connections()]))
-        for path, container in viewcontainer.path_items.items():
+        for path, container in viewcontainer.data.items():
             label, src_name = path
             source = objects[src_name]
             if isinstance(source, Sheet):

@@ -15,6 +15,7 @@ import numpy.version as np_version
 import param
 
 from holoviews.core.ndmapping import NdMapping
+from holoviews.core.tree import AttrTree
 from holoviews.interface.collector import Collector, Collator
 
 from lancet import PrettyPrinted, vcs_metadata
@@ -451,7 +452,6 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       Calls the collector specified by the user in the run_batch
       context. Invoked as an analysis function by RunBatchCommand.
       """
-      from holoviews.interface.collector import AttrTree
       self.collector.interval_hook = topo.sim.run
 
       topo_time = topo.sim.time()
@@ -632,7 +632,7 @@ class BatchCollator(Collator):
            expanded_info *= constant_args
 
         # Compute set of sorted log and file spec tuples
-        sort_fn = lambda k: self.dimension_labels.index(k[0])
+        sort_fn = lambda k: self.get_dimension_index(k[0])
         log_specs = [tuple(sorted(tuple((k, v) for k, v in spec.items()
                                         if k != 'times'), key=sort_fn))
                      for spec in expanded_log.specs]

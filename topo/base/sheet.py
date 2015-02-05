@@ -23,8 +23,8 @@ from numpy import float64
 import param
 
 from holoviews.core import BoundingBox, BoundingRegionParameter, SheetCoordinateSystem
-from holoviews.interface.collector import AttrDict, AttrTree
-from holoviews.view import Matrix
+from holoviews.core.tree import AttrTree
+from holoviews import Matrix
 
 from simulation import EventProcessor
 from functionfamily import TransferFn
@@ -310,7 +310,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
                             timestamp=self.simulation.time())
 
         sv = Matrix(self.activity.copy(), self.bounds,
-                    label=self.name+' Activity', value='Activity')[coords]
+                    label=self.name, value='Activity')[coords]
         sv.metadata=metadata
         return sv
 

@@ -8,10 +8,10 @@ and sets the appropriate Topographica-specific hooks.
 import numpy as np
 
 from holoviews.interface.collector import Reference
-from holoviews.core.options import channels, ChannelOpts
+from holoviews.core.options import Store, Channel, Options
 from holoviews.testing import IPTestCase
-from holoviews.operation.channel import cmap2rgb
-from holoviews.operation.view import chain, operator
+from holoviews.operation.rgb import colormap
+from holoviews.operation.element import chain, operator
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
 
@@ -147,10 +147,8 @@ Collector.for_type(measure_cog,  measurement_hook, mode='merge')
 
 
 # Setting default channel operation for ON-OFF visualization
-ON_sub_OFF = chain.instance(chain=lambda x: [cmap2rgb(operator(x, operator=np.subtract).N, cmap='jet')])
-ChannelOpts.operations['ON_sub_OFF'] = ON_sub_OFF
-channels['ON_sub_OFF'] = ChannelOpts('ON_sub_OFF', "CF Weights * CF Weights")
-
+#Channel.definitions.append(Channel('Matrix.CFs * Matrix.CFs',
+#                                   chain.instance(chain[colormap, operator.instance(operator=np.subtract)]), 'OnOff CFs', cmap='jet'))
 
 # Featuremapper hooks
 

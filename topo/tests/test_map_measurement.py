@@ -19,18 +19,18 @@ test functions are expected to be useful.
 """
 
 import pickle
+from nose.tools import nottest
 
 import numpy
 
-from param import resolve_path
-from holoviews.interface.collector import AttrTree
+from holoviews import AttrTree
 
+from param import resolve_path
 from topo.command.analysis import *
 from topo.command.pylabplot import *
 from topo.plotting.plotgroup import plotgroups
 from topo.misc.util import unit_value
 
-from nose.tools import nottest
 
 
 

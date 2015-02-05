@@ -9,7 +9,7 @@ modified, resolved or instantiated.
 from collections import OrderedDict
 
 import param
-from holoviews.interface.collector import AttrTree
+from holoviews.core.tree import AttrTree
 
 import topo
 
@@ -325,7 +325,7 @@ class ModelSpec(Specification):
             instantiate_options=available_instantiate_options
 
         if 'sheets' in instantiate_options:
-            for sheet_spec in self.sheets.path_items.itervalues():
+            for sheet_spec in self.sheets.data.itervalues():
                 msglevel('Level ' + sheet_spec.level + ': Sheet ' + str(sheet_spec))
                 sheet_spec()
 

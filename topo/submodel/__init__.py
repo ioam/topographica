@@ -16,9 +16,9 @@ import param
 import lancet
 import topo
 import numbergen
+from holoviews.core.tree import AttrTree
 
 from specifications import SheetSpec, ProjectionSpec, ModelSpec, ArraySpec # pyflakes:ignore (API import)
-from holoviews.interface.collector import AttrTree
 from topo.misc.commandline import global_params
 
 
@@ -428,7 +428,7 @@ class Model(param.Parameterized):
 
 
     def _update_sheet_spec_parameters(self, model):
-        for sheet_spec in model.sheets.path_items.values():
+        for sheet_spec in model.sheets.data.values():
             param_method = self.definition.lookup(self.__class__, sheet_spec.level, 'method')
             if not param_method:
                 raise Exception("Parameters for sheet level %r not specified" % sheet_spec.level)
@@ -463,8 +463,8 @@ class Model(param.Parameterized):
         in dest_sheet.matchconditions, create a new ProjectionSpec
         object and add this item to self.projections.
         """
-        sheetspec_product = itertools.product(model.sheets.path_items.values(),
-                                              model.sheets.path_items.values())
+        sheetspec_product = itertools.product(model.sheets.data.values(),
+                                              model.sheets.data.values())
         for src_sheet, dest_sheet in sheetspec_product:
 
             conditions = self.definition.compute_conditions(dest_sheet.level, self,

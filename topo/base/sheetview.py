@@ -14,8 +14,8 @@ import numpy as np
 import param
 
 from holoviews.core import BoundingRegion, SheetCoordinateSystem
-from holoviews.core.options import options, StyleOpts
-from holoviews.view import Matrix
+from holoviews.core.options import Store, Options
+from holoviews import Matrix
 
 
 class SheetView(param.Parameterized):
@@ -25,7 +25,7 @@ class SheetView(param.Parameterized):
     """
 
     timestamp = param.Number(default=None, doc=
-        """ The initial timestamp. If None, the DataView will not all slicing of
+        """ The initial timestamp. If None, the SheetView will not all slicing of
             a time interval and record method will be disabled.""")
 
     bounds = param.Parameter(default=None, doc=
@@ -90,8 +90,12 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
 
 class CFView(Matrix):
 
+    roi_bounds = param.ClassSelector(class_=BoundingRegion, default=None, doc="""
+        The ROI bounds can be set to reduce the space the CFView is
+        embedded in.""")
+
     situated_bounds = param.ClassSelector(class_=BoundingRegion, default=None, doc="""
-        The situated bounds can be set to embed the SheetLayer in a larger
+        The situated bounds can be set to embed the CFView in a larger
         bounded region.""")
 
     input_sheet_slice = param.NumericTuple(default=(0, 0, 0, 0), doc="""
@@ -117,4 +121,4 @@ class CFView(Matrix):
                       label=self.label, value=self.value)
 
 
-options.CFView = StyleOpts(interpolation='nearest')
+Store.options.CFView = Options('style', interpolation='nearest')

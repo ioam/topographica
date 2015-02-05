@@ -20,10 +20,11 @@ CFProjection.
 from copy import copy
 
 import numpy as np
+from holoviews.core.tree import AttrTree
 
 import param
-from holoviews import Grid, Dimension, ViewMap
-from holoviews.interface.collector import AttrTree, AttrDict
+from holoviews import AxisLayout, Dimension, HoloMap
+from holoviews.interface.collector import AttrDict
 from holoviews.core import BoundingBox, BoundingRegionParameter, Slice
 
 import patterngenerator
@@ -641,8 +642,8 @@ class CFProjection(Projection):
 
 
     def _cf_grid(self, shape=None, **kwargs):
-        "Create ProjectionGrid with the correct metadata."
-        grid = Grid({})
+        "Create AxisLayout with the correct metadata."
+        grid = AxisLayout({})
         grid.metadata = AttrDict(timestamp=self.src.simulation.time(),
                                  info=self.name,
                                  proj_src_name=self.src.name,
@@ -744,8 +745,8 @@ class CFProjection(Projection):
         for x, y in coords:
             grid_items[x, y] = self.view(x, y, situated=situated, **kwargs)
 
-        grid = Grid(grid_items, label='CFs',
-                    title=' '.join([self.dest.name, self.name, '{label}']))
+        grid = AxisLayout(grid_items, label=' '.join([self.dest.name, self.name]),
+                          value='CFs')
         grid.metadata = AttrDict(info=self.name,
                                  proj_src_name=self.src.name,
                                  proj_dest_name=self.dest.name,
@@ -778,13 +779,14 @@ class CFProjection(Projection):
 
         sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
                     input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
-                    label=self.name+ " CF Weights", value='CF Weight')
+                    label=self.name, value='CF Weight')
         sv.metadata=AttrDict(timestamp=timestamp)
 
-        viewmap = ViewMap((timestamp, sv), dimensions=[time_dim])
+        viewmap = HoloMap((timestamp, sv), key_dimensions=[time_dim])
         viewmap.metadata = AttrDict(coords=(sheet_x, sheet_y),
                                     dest_name=self.dest.name,
-                                    precedence=self.src.precedence, proj_name=self.name,
+                                    precedence=self.src.precedence,
+                                    proj_name=self.name,
                                     src_name=self.src.name,
                                     row_precedence=self.src.row_precedence,
                                     timestamp=timestamp, **kwargs)

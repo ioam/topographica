@@ -7,7 +7,7 @@ import unittest
 from nose.tools import istest, nottest
 import numpy as np
 
-from holoviews.view import Matrix
+from holoviews import Matrix
 
 from topo.base.sheetcoords import Slice
 from topo.base.sheet import *

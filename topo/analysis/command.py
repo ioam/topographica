@@ -10,9 +10,10 @@ import numpy as np
 
 import param
 from param import ParameterizedFunction, ParamOverrides
-from holoviews import Matrix, ViewMap, Contours
-from holoviews.interface.collector import AttrTree
-from holoviews.core.options import options, StyleOpts
+from holoviews import Matrix, HoloMap
+from holoviews.element.annotation import Contours
+from holoviews.core.options import Store, Options
+from holoviews.core.tree import AttrTree
 
 from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
@@ -204,8 +205,8 @@ class measure_cog(ParameterizedFunction):
                             src_name=sheet.name)
 
         timestamp = topo.sim.time()
-        xsv = Matrix(xcog, sheet.bounds, label='X CoG', title='%s {label}' % proj.name)
-        ysv = Matrix(ycog, sheet.bounds, label='Y CoG', title='%s {label}' % proj.name)
+        xsv = Matrix(xcog, sheet.bounds, label=proj.name, value='X CoG')
+        ysv = Matrix(ycog, sheet.bounds, label=proj.name, value='Y CoG')
 
         lines = []
         hlines, vlines = xsv.data.shape
@@ -213,21 +214,21 @@ class measure_cog(ParameterizedFunction):
             lines.append(np.vstack([xsv.data[hind,:].T, ysv.data[hind,:]]).T)
         for vind in range(vlines)[::p.stride]:
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
-        cogmesh = Contours(lines, lbrt=sheet.bounds.lbrt(),
-                           label='Center of Gravity', title='%s {label}' % proj.name)
+        cogmesh = Contours(lines, extents=sheet.bounds.lbrt(), label=proj.name,
+                           value='Center of Gravity')
 
-        xcog_map = ViewMap((timestamp, xsv), dimensions=[features.Time])
+        xcog_map = HoloMap((timestamp, xsv), key_dimensions=[features.Time])
         xcog_map.metadata = metadata
-        ycog_map = ViewMap((timestamp, ysv), dimensions=[features.Time])
+        ycog_map = HoloMap((timestamp, ysv), key_dimensions=[features.Time])
         ycog_map.metadata = metadata
 
-        contour_map = ViewMap((timestamp, cogmesh), dimensions=[features.Time])
+        contour_map = HoloMap((timestamp, cogmesh), key_dimensions=[features.Time])
         contour_map.metadata = metadata
 
         return {'XCoG': xcog_map, 'YCoG': ycog_map, 'CoG': contour_map}
 
 
-options.Gravity_Contours = StyleOpts(linewidth=1.0)
+Store.options.Contours.Gravity = Options('style', linewidth=1.0)
 
 import types
 

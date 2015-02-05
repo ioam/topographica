@@ -9,7 +9,7 @@ from topo.base.patterngenerator import PatternGenerator,Constant
 from topo.base.simulation import FunctionEvent, PeriodicEventSequence
 
 from holoviews.interface.collector import AttrDict
-from holoviews.view import Matrix
+from holoviews import Matrix
 
 import numpy as np
 

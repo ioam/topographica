@@ -35,7 +35,8 @@ from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
 from holoviews import Overlay
-from holoviews.plotting import OverlayPlot, GridLayout, CurvePlot
+from holoviews.plotting import NdLayout, CurvePlot
+from holoviews.plotting.element import OverlayPlot
 
 from topo.command import Command
 
@@ -620,7 +621,7 @@ class tuning_curve(PylabPlotCommand):
         time = vmap.dim_range('Time')[1]
 
         curves = []
-        if vmap.dimension_labels[0] == 'X':
+        if vmap.dimensions(labels=True) == 'X':
             for coord in p.coords:
                 x, y = coord
                 current_map = vmap[x, y, time, :, :, :]
@@ -630,7 +631,7 @@ class tuning_curve(PylabPlotCommand):
             current_map = vmap[time, :, :, :]
             curve_map = current_map.sample(p.coords).collate(p.x_axis.capitalize())
             overlaid_curves = curve_map.overlay(p.group_by)
-            if not isinstance(curves, GridLayout): curves = [overlaid_curves]
+            if not isinstance(curves, NdLayout): curves = [overlaid_curves]
 
         figs = []
         for coord, curve in zip(p.coords,curves):

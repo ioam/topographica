@@ -146,14 +146,15 @@ class ExportMagic(Magics):
 
 from topo.base.sheetview import CFView
 
+from holoviews.core.options import Store
 from holoviews.ipython import load_ipython_extension as load_imagen_extension
 from holoviews.ipython.display_hooks import map_display, view_display
-from holoviews.plotting import MatrixPlot, Plot
+from holoviews.plotting import MatrixPlot
 
 from holoviews.ipython.widgets import RunProgress
 RunProgress.run_hook = topo.sim.run
 
-Plot.defaults.update({CFView: MatrixPlot})
+Store.defaults.update({CFView: MatrixPlot})
 
 try:
     from lancet import ViewFrame
