@@ -11,7 +11,7 @@ from holoviews.interface.collector import Reference
 from holoviews.core.options import Store, Channel, Options
 from holoviews.ipython import IPTestCase
 from holoviews.operation.rgb import colormap
-from holoviews.operation.element import chain, operator
+from holoviews.operation.element import chain, collapse
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
 
