@@ -28,7 +28,7 @@ import param
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 from topo.sparse.sparsecf import SparseCFProjection, CFPLF_Hebbian_Sparse_GPU,\
                                  CFPOF_DivisiveNormalizeL1_Sparse_GPU, CFPRF_DotProduct_Sparse_GPU,\
-                                 compute_sparse_joint_norm_totals
+                                 compute_sparse_gpu_joint_norm_totals
 
 
 import topo.learningfn.optimized
@@ -169,7 +169,7 @@ topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=p.cortex_density,
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),
     output_fns=[transferfn.misc.HomeostaticResponse()])
 
-topo.sim['V1'].joint_norm_fn=compute_sparse_joint_norm_totals if p.gpu else topo.sheet.optimized.compute_joint_norm_totals_opt
+topo.sim['V1'].joint_norm_fn=compute_sparse_gpu_joint_norm_totals if p.gpu else topo.sheet.optimized.compute_joint_norm_totals_opt
 
 
 ### Connections

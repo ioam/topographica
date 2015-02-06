@@ -390,7 +390,16 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
 
 
 def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):
-    pass
+    assert len(projlist)>=1
+    joint_sum = gpuarray.zeros((projlist[0].weights_gpu.shape[0], ), np.float32)
+    for p in projlist:
+        if not p.has_norm_total:
+            joint_sum = p.weights_gpu.mv(p.norm_ones_gpu, y=p.zeros_gpu, autosync=False)
+            p.has_norm_total=True
+        else:
+            joint_sum += p.norm_total_gpu
+    for p in projlist:
+        p.norm_total_gpu = joint_sum.copy()
 
 
 
@@ -414,8 +423,10 @@ def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
     if not hasattr(projection, 'initialised_gpu'):
         init_gpu(projection)
 
-    norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
-    projection.normalize_kernel(projection.nzrows_gpu, norm_total_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
+    if not projection.has_norm_total:
+        projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
+    
+    projection.normalize_kernel(projection.nzrows_gpu, projection.norm_total_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
     projection.has_norm_total = False
 
 
@@ -442,8 +453,8 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
 
     single_conn_lr = projection.learning_rate/projection.n_units
     # Transfering source and destination activities:
-    src_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.src.activity).astype(np.float32))
-    dest_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.dest.activity).astype(np.float32))
+    src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32))
+    dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
 
     # Computing Hebbian learning weights:
     projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
@@ -477,7 +488,7 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     if not hasattr(projection, 'initialised_gpu'):
         init_gpu(projection)
         
-    input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32))
+    input_buffer_gpu = gpuarray.to_gpu(np.ravel(projection.input_buffer).astype(np.float32))
     activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, y=projection.zeros_gpu, autosync=False)
 
     projection.activity = np.reshape(activity_gpu.get(), projection.activity.shape)
