@@ -139,6 +139,37 @@ class ExportMagic(Magics):
         self.shell.set_hook('complete_command', lambda k,v: ['clear'],
                             str_key = '%%{name}'.format(name=name))
 
+@magics_class
+class TimerMagic(Magics):
+
+    start_time = 0.0
+
+    @staticmethod
+    def elapsed_time():
+        elapsed = time.time() -  TimerMagic.start_time
+        minutes = elapsed // 60
+        seconds = elapsed % 60
+        return "Elapsed %d minutes %d seconds" % (minutes, seconds)
+
+
+    @classmethod
+    def option_completer(cls, k,v):
+        return ['start']
+
+    @line_magic
+    def timer(self, line=''):
+        if line.strip() not in ['', 'start']:
+            print("%timer must be called without arguments or just 'start'.")
+            return
+        elif line.strip() == 'start':
+            TimerMagic.start_time = time.time()
+            timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
+            print("Timer start time: %s" % timestamp)
+            return
+        else:
+            print(self.elapsed_time())
+
+
 
 #===============#
 # Display hooks #
@@ -174,6 +205,8 @@ def load_ipython_extension(ip):
     if not _loaded:
         _loaded = True
         ip.register_magics(ExportMagic)
+        ip.register_magics(TimerMagic)
+        ip.set_hook('complete_command', TimerMagic.option_completer, str_key = '%timer')
 
 
         try:
