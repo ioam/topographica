@@ -142,7 +142,7 @@ class ExportMagic(Magics):
 @magics_class
 class TimerMagic(Magics):
 
-    start_time = 0.0
+    start_time = None
 
     @staticmethod
     def elapsed_time():
@@ -158,14 +158,31 @@ class TimerMagic(Magics):
 
     @line_magic
     def timer(self, line=''):
+        """
+        Timer magic to print initial date/time information and
+        subsequent elapsed time intervals.
+
+        To start the timer, run:
+
+        %timer start
+
+        This will print the start date and time.
+
+        Subsequent calls to %timer will print the elapsed time
+        relative to the time when %timer start was called. Subsequent
+        calls to %timer start may also be used to reset the timer.
+        """
+
         if line.strip() not in ['', 'start']:
-            print("%timer must be called without arguments or just 'start'.")
+            print("Invalid argument to %timer. For more information consult %timer?")
             return
         elif line.strip() == 'start':
             TimerMagic.start_time = time.time()
             timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
             print("Timer start time: %s" % timestamp)
             return
+        elif self.start_time is None:
+            print("Please start timer with %timer start. For more information consult %timer?")
         else:
             print(self.elapsed_time())
 
