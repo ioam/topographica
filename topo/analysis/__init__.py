@@ -11,7 +11,7 @@ from holoviews.interface.collector import Reference
 from holoviews.core.options import Store, Channel, Options
 from holoviews.ipython import IPTestCase
 from holoviews.operation.rgb import colormap
-from holoviews.operation.element import chain, collapse
+from holoviews.operation import chain, collapse, toRGB, matrix_overlay
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
 
@@ -26,6 +26,15 @@ from topo.misc.ipython import RunProgress
 from topo.misc import color
 
 from command import measure_cog
+
+
+
+CoG_spec = ("Matrix.X CoG", "Matrix.Y CoG", "Matrix.BlueChannel")
+XYCoG = chain.instance(value='XYCoG', name='XYCoG',
+                       chain=lambda x: toRGB(matrix_overlay(x, spec=CoG_spec)))
+Channel.register(Channel("Matrix.X CoG * Matrix.Y CoG", XYCoG, 'XYCoG'))
+
+
 
 
 class TopoIPTestCase(IPTestCase):
