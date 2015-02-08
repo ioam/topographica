@@ -148,8 +148,9 @@ class TimerMagic(Magics):
     def elapsed_time():
         elapsed = time.time() -  TimerMagic.start_time
         minutes = elapsed // 60
+        hours = minutes // 60
         seconds = elapsed % 60
-        return "Elapsed %d minutes %d seconds" % (minutes, seconds)
+        return "Timer elapsed: %02d:%02d:%02d" % (hours, minutes, seconds)
 
 
     @classmethod
@@ -179,7 +180,7 @@ class TimerMagic(Magics):
         elif line.strip() == 'start':
             TimerMagic.start_time = time.time()
             timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
-            print("Timer start time: %s" % timestamp)
+            print("Timer start: %s" % timestamp)
             return
         elif self.start_time is None:
             print("Please start timer with %timer start. For more information consult %timer?")
