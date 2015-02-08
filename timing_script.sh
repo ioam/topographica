@@ -1,5 +1,9 @@
 #!/bin/tcsh
 
+echo HOST:"\t"$HOST
+
+echo PARAMS:"\t"$1"\t"$2"\t"$3
+
 echo Loading Topographica ant quitting:
 
 time ./topographica -c quit
