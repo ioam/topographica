@@ -10,7 +10,7 @@ import numpy as np
 
 import param
 from param import ParameterizedFunction, ParamOverrides
-from holoviews import Matrix, HoloMap
+from holoviews import Matrix, HoloMap, Dimension
 from holoviews.element.annotation import Contours
 from holoviews.core.options import Store, Options
 from holoviews.core.tree import AttrTree
@@ -205,8 +205,11 @@ class measure_cog(ParameterizedFunction):
                             src_name=sheet.name)
 
         timestamp = topo.sim.time()
-        xsv = Matrix(xcog, sheet.bounds, label=proj.name, value='X CoG')
-        ysv = Matrix(ycog, sheet.bounds, label=proj.name, value='Y CoG')
+        lbrt = sheet.bounds.lbrt()
+        xsv = Matrix(xcog, sheet.bounds, label=proj.name, value='X CoG',
+                     value_dimensions=[Dimension('X CoG', range=(lbrt[0], lbrt[2]))])
+        ysv = Matrix(ycog, sheet.bounds, label=proj.name, value='Y CoG',
+                     value_dimensions=[Dimension('Y CoG', range=(lbrt[1], lbrt[3]))])
 
         lines = []
         hlines, vlines = xsv.data.shape
