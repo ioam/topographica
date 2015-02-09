@@ -136,7 +136,7 @@ to change the fonts.
 Preference Map plots
 ^^^^^^^^^^^^^^^^^^^^
 
-In the GUI, plots in one of these windows can be saved by right
+In the Tk GUI, plots in one of these windows can be saved by right
 clicking on one and selecting ``Save as PNG``. A unique filename is
 generated automatically. You can also save these images from a
 script, e.g. in batch mode, using `save\_plotgroup`_.
@@ -152,14 +152,14 @@ to use the original vector-format PDF files from which the bitmaps
 were generated. The PDF files will usually be located near the
 bitmap used in the PlotGroup. For instance, the 'Orientation
 Preference' PlotGroup defined in topo/command/analysis.py specifies
-that the key is 'topo/command/or\_key\_white\_vert\_small.png', and
+that the key is 'topo/static/or\_key\_white\_vert\_small.png', and
 the corresponding PDF file is
-'topo/command/or\_key\_white\_vert.pdf'.
+'topo/static/or\_key\_white\_vert.pdf'.
 
 Activity and ConnectionField plots
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Plots in these windows can be saved just as for Preference Map
+Plots in these Tk GUI windows can be saved just as for Preference Map
 plots, using `save\_plotgroup`_.
 
 Note that if you plan to show plots from different Sheets in your
@@ -178,7 +178,7 @@ part of each plot corresponds to the others.
 Projection plots
 ^^^^^^^^^^^^^^^^
 
-The GUI does not yet support saving Projection plots from the
+The Tk GUI does not yet support saving Projection plots from the
 right-click menu. However, they can be saved in PNG format from the
 command line using `save\_plotgroup`_.
 
@@ -201,8 +201,7 @@ Citations
 
 If you use this software in work leading to an academic publication,
 please cite the following paper so that readers will know how to
-replicate your results and build upon them. (Plus, it is only polite
-to cite work done by others that you rely on!)
+replicate your results and build upon them. 
 
     James A. Bednar.
     `Topographica: Building and Analyzing Map-Level Simulations from
