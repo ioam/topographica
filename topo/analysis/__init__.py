@@ -8,7 +8,7 @@ and sets the appropriate Topographica-specific hooks.
 import numpy as np
 
 from holoviews.interface.collector import Reference
-from holoviews.core.options import Store, Channel, Options
+from holoviews.core.options import Store, Options, Compositor
 from holoviews.ipython import IPTestCase
 from holoviews.operation.rgb import colormap
 from holoviews.operation import chain, collapse, toRGB, matrix_overlay
@@ -32,7 +32,7 @@ from command import measure_cog
 CoG_spec = ("Matrix.X CoG", "Matrix.Y CoG", "Matrix.BlueChannel")
 XYCoG = chain.instance(value='XYCoG', name='XYCoG',
                        chain=lambda x: toRGB(matrix_overlay(x, spec=CoG_spec)))
-Channel.register(Channel("Matrix.X CoG * Matrix.Y CoG", XYCoG, 'XYCoG'))
+Compositor.register(Compositor("Matrix.X CoG * Matrix.Y CoG", XYCoG, 'XYCoG', 'data'))
 
 
 
@@ -156,7 +156,7 @@ Collector.for_type(measure_cog,  measurement_hook, mode='merge')
 
 
 # Setting default channel operation for ON-OFF visualization
-#Channel.definitions.append(Channel('Matrix.CFs * Matrix.CFs',
+#Compositor.definitions.append(Compositor('Matrix.CFs * Matrix.CFs',
 #                                   chain.instance(chain[colormap, operator.instance(operator=np.subtract)]), 'OnOff CFs', cmap='jet'))
 
 # Featuremapper hooks
