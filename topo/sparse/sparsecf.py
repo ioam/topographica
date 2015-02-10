@@ -388,6 +388,8 @@ def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
     if not projection.has_norm_total:
         projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
     
+    projection.norm_total_gpu = 1.0/projection.norm_total_gpu
+
     projection.normalize_kernel(projection.nzrows_gpu, projection.norm_total_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
     projection.has_norm_total = False
 
@@ -966,7 +968,7 @@ class GPUSparseCFProjection(SparseCFProjection):
         # Kernel that applies the normalisation:
         self.normalize_kernel = ElementwiseKernel(
                         "int *nzrows, float *norm_total, float *weights",
-                        "weights[i] *= 1.0/norm_total[nzrows[i]]",
+                        "weights[i] *= norm_total[nzrows[i]]",
                         "divisive_normalize")
         # Kernel that calculates the learning:
         self.hebbian_kernel = ElementwiseKernel(
