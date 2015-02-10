@@ -10,10 +10,9 @@ import numpy as np
 
 import param
 from param import ParameterizedFunction, ParamOverrides
-from holoviews import Matrix, HoloMap, Dimension
+from holoviews import Matrix, HoloMap, Dimension, LayoutTree
 from holoviews.element.annotation import Contours
 from holoviews.core.options import Store, Options
-from holoviews.core.tree import AttrTree
 
 from featuremapper import features
 from featuremapper.command import * # pyflakes:ignore (API import)
@@ -156,7 +155,7 @@ class measure_cog(ParameterizedFunction):
         measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
                            if hasattr(s,'measure_maps') and s.measure_maps]
 
-        results = AttrTree()
+        results = LayoutTree()
 
         # Could easily be extended to measure CoG of all projections
         # and e.g. register them using different names (e.g. "Afferent

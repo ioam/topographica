@@ -356,7 +356,7 @@ class StorageHook(param.ParameterizedFunction):
         inserts results into top level views object.""")
 
     only_latest = param.Boolean(default=True, doc="""
-        Whether to replace any existing results in the global AttrTree.""")
+        Whether to replace any existing results in the global LayoutTree.""")
 
     def __call__(self, viewcontainer, **params):
         p = ParamOverrides(self, params)

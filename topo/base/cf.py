@@ -20,10 +20,9 @@ CFProjection.
 from copy import copy
 
 import numpy as np
-from holoviews.core.tree import AttrTree
 
 import param
-from holoviews import AxisLayout, Dimension, HoloMap
+from holoviews import AxisLayout, Dimension, HoloMap, LayoutTree
 from holoviews.interface.collector import AttrDict
 from holoviews.core import BoundingBox, BoundingRegionParameter, Slice
 
@@ -637,7 +636,7 @@ class CFProjection(Projection):
         self.input_buffer = None
         self.activity = np.array(self.dest.activity)
         if 'cfs' not in self.dest.views:
-            self.dest.views.CFs = AttrTree()
+            self.dest.views.CFs = LayoutTree()
         self.dest.views.CFs[self.name] = self._cf_grid()
 
 

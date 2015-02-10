@@ -10,8 +10,8 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from holoviews import Matrix
-from holoviews.interface.collector import AttrDict, AttrTree
+from holoviews import Matrix, LayoutTree
+from holoviews.interface.collector import AttrDict
 
 from sheet import Sheet
 from simulation import EPConnection
@@ -419,7 +419,7 @@ class ProjectionSheet(Sheet):
         self.new_input = False
         self.mask.sheet = self
         self.old_a = self.activity.copy()*0.0
-        self.views['RFs'] = AttrTree()
+        self.views['RFs'] = LayoutTree()
 
 
     def _dest_connect(self, conn):
