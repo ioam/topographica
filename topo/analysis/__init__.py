@@ -8,10 +8,10 @@ and sets the appropriate Topographica-specific hooks.
 import numpy as np
 
 from holoviews.interface.collector import Reference
-from holoviews.core.options import Store, Options, Compositor
+from holoviews.core.options import Compositor
 from holoviews.ipython import IPTestCase
 from holoviews.operation.rgb import colormap
-from holoviews.operation import chain, collapse, toRGB, matrix_overlay
+from holoviews.operation import chain, toRGB, matrix_overlay
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
 
@@ -29,12 +29,10 @@ from command import measure_cog
 
 
 
-CoG_spec = ("Matrix.X CoG", "Matrix.Y CoG", "Matrix.BlueChannel")
+CoG_spec = "Matrix.X CoG * Matrix.Y CoG * Matrix.BlueChannel"
 XYCoG = chain.instance(value='XYCoG', name='XYCoG',
-                       chain=lambda x: toRGB(matrix_overlay(x, spec=CoG_spec)))
-Compositor.register(Compositor("Matrix.X CoG * Matrix.Y CoG", XYCoG, 'XYCoG', 'data'))
-
-
+                       operations = [matrix_overlay.instance(spec=CoG_spec), toRGB.instance()])
+Compositor.register(Compositor("Matrix.X CoG * Matrix.Y CoG", XYCoG, 'XYCoG', 'display'))
 
 
 class TopoIPTestCase(IPTestCase):
