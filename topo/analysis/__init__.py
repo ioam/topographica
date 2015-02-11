@@ -39,14 +39,16 @@ class TopoIPTestCase(IPTestCase):
 
     def __init__(self, *args, **kwargs):
         super(TopoIPTestCase, self).__init__(*args, **kwargs)
-        self.addTypeEqualityFunc(CFView,   self.compare_cfviews)
 
-    def compare_cfviews(self, view1, view2, msg):
-        self.compare_matrix(view1, view2, msg)
+    @classmethod
+    def register(cls):
+        super(TopoIPTestCase, cls).register()
+        cls.equality_type_funcs[CFView] = cls.compare_cfview
+        return cls.equality_type_funcs
 
-    def compare_animation(self, view1, view2, msg):
-        self.compare_viewmap(view1, view2, msg)
-
+    @classmethod
+    def compare_cfview(cls, el1, el2, msg='CFView data'):
+        cls.compare_matrix(el1, el2, msg=msg)
 
 
 class SimRef(Reference):
