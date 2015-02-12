@@ -26,7 +26,7 @@ import numpy
 import param
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
-from topo.sparse.sparsecf import SparseCFProjection, GPUSparseCFProjection, compute_sparse_gpu_joint_norm_totals
+from topo.sparse.sparsecf import SparseCFProjection, GPUSparseCFProjection, compute_sparse_gpu_joint_norm_totals, GPUSettlingCFSheet
 
 
 import topo.learningfn.optimized
@@ -106,6 +106,9 @@ projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveN
 projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 
 
+v1_sheet_type = GPUSettlingCFSheet if p.gpu else sheet.SettlingCFSheet
+
+
 ### Input patterns
 if p.dataset=="Gaussian":
     input_type=pattern.Gaussian
@@ -157,7 +160,7 @@ for s in ['LGNOn','LGNOff']:
                      nominal_bounds_template=sheet.BoundingBox(radius=0.25))
 
 
-topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=p.cortex_density,
+topo.sim['V1'] = v1_sheet_type(nominal_density=p.cortex_density,
     tsettle=16, plastic=True,
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),
     output_fns=[transferfn.misc.HomeostaticResponse()])
