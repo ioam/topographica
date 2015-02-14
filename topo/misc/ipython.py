@@ -179,7 +179,7 @@ class TimerMagic(Magics):
             return
         elif line.strip() == 'start':
             TimerMagic.start_time = time.time()
-            timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
+            timestamp = time.strftime("%Y/%m/%d %H:%M:%S")
             print("Timer start: %s" % timestamp)
             return
         elif self.start_time is None:
