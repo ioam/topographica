@@ -359,11 +359,13 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
 
 
 def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):
+    return
     assert len(projlist)>=1
+    
     joint_sum = gpuarray.zeros((projlist[0].weights_gpu.shape[0], ), np.float32)
     for p in projlist:
         if not p.has_norm_total:
-            p.norm_total_gpu = p.weights_gpu.mv(p.norm_ones_gpu, y=p.zeros_gpu, autosync=True)
+            p.norm_total_gpu = p.weights_gpu.mv(p.norm_ones_gpu, y=p.zeros_gpu, autosync=False)
             p.has_norm_total = True
         joint_sum += p.norm_total_gpu
     for p in projlist:
@@ -386,12 +388,13 @@ def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
     '''
     Divisive normalisation computed on the GPU
     '''
+    return
     if not projection.has_norm_total:
-        projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False, stream=projection.pycuda_stream)
+        projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
     
     projection.norm_total_gpu = 1.0/projection.norm_total_gpu
 
-    projection.normalize_kernel(projection.nzrows_gpu, projection.norm_total_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1), stream=projection.pycuda_stream)
+    projection.normalize_kernel(projection.nzrows_gpu, projection.norm_total_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
     projection.has_norm_total = False
 
 
@@ -412,16 +415,17 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
     """ 
+    return
     single_conn_lr = projection.learning_rate/projection.n_units
     # Transfering source and destination activities:
-    src_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.src.activity).astype(np.float32), stream=projection.pycuda_stream)
-    dest_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.dest.activity).astype(np.float32), stream=projection.pycuda_stream)
+    src_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.src.activity).astype(np.float32), )
+    dest_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.dest.activity).astype(np.float32), )
 
     # Computing Hebbian learning weights:
-    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1), stream=projection.pycuda_stream)
+    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
 
     # Normalisation values:
-    projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False, stream=projection.pycuda_stream)
+    projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
     projection.has_norm_total = True
 
 
@@ -452,8 +456,8 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     """  
     input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32), stream=projection.pycuda_stream)
     activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, y=projection.zeros_gpu, autosync=False, stream=projection.pycuda_stream)
-
-    projection.activity = np.reshape(activity_gpu.get_async(stream=projection.pycuda_stream), projection.activity.shape)
+    # projection.activity = cuda.pagelocked_empty(projection.activity.shape, np.float32)
+    # activity_gpu.get_async(ary=projection.activity)
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
@@ -1005,11 +1009,14 @@ class GPUSettlingCFSheet(SettlingCFSheet):
             self.new_input = False
 
             if self.activation_count == self.mask_init_time:
+                
+                # cuda.Context.synchronize()
                 self.mask.calculate()
 
             if self.tsettle == 0:
                 # Special case: behave just like a CFSheet
-                cuda.Context.synchronize()
+                
+                # cuda.Context.synchronize()
                 self.activate()
                 self.learn()
 
@@ -1025,7 +1032,8 @@ class GPUSettlingCFSheet(SettlingCFSheet):
                 if (self.plastic and not self.continuous_learning):
                     self.learn()
             else:
-                cuda.Context.synchronize()
+                
+                # cuda.Context.synchronize()
                 self.activate()
                 self.activation_count += 1
                 if (self.plastic and self.continuous_learning):
