@@ -359,13 +359,12 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
 
 
 def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):
-    return
     assert len(projlist)>=1
     
     joint_sum = gpuarray.zeros((projlist[0].weights_gpu.shape[0], ), np.float32)
     for p in projlist:
         if not p.has_norm_total:
-            p.norm_total_gpu = p.weights_gpu.mv(p.norm_ones_gpu, y=p.zeros_gpu, autosync=False)
+            p.weights_gpu.mv(p.norm_ones_gpu, y=p.norm_total_gpu, autosync=False)
             p.has_norm_total = True
         joint_sum += p.norm_total_gpu
     for p in projlist:
@@ -388,9 +387,8 @@ def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
     '''
     Divisive normalisation computed on the GPU
     '''
-    return
     if not projection.has_norm_total:
-        projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
+        projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.norm_total_gpu, autosync=False)
     
     projection.norm_total_gpu = 1.0/projection.norm_total_gpu
 
@@ -414,8 +412,7 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     """
     Sparse CF Projection learning function applying Hebbian learning
     to the weights in a projection.
-    """ 
-    return
+    """
     single_conn_lr = projection.learning_rate/projection.n_units
     # Transfering source and destination activities:
     src_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.src.activity).astype(np.float32), )
@@ -425,7 +422,7 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
 
     # Normalisation values:
-    projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.zeros_gpu, autosync=False)
+    projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.norm_total_gpu, autosync=False)
     projection.has_norm_total = True
 
 
@@ -453,11 +450,11 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     """
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
-    """  
-    input_buffer_gpu = gpuarray.to_gpu_async(np.ravel(projection.input_buffer).astype(np.float32), stream=projection.pycuda_stream)
-    activity_gpu = projection.weights_gpu.mv(input_buffer_gpu, alpha=projection.strength, y=projection.zeros_gpu, autosync=False, stream=projection.pycuda_stream)
-    # projection.activity = cuda.pagelocked_empty(projection.activity.shape, np.float32)
-    # activity_gpu.get_async(ary=projection.activity)
+    """
+    projection.input_buffer_pagelocked[:] = np.ravel(projection.input_buffer).astype(np.float32)  
+    projection.input_buffer_gpu = gpuarray.to_gpu_async(projection.input_buffer_pagelocked, stream=projection.pycuda_stream)
+    projection.weights_gpu.mv(projection.input_buffer_gpu, alpha=projection.strength, y=projection.activity_gpu_buffer, autosync=False, stream=projection.pycuda_stream)
+    projection.activity_gpu_buffer.get_async(ary=projection.activity, stream=projection.pycuda_stream)
 
 
 def CFPRF_DotProduct_Sparse_opt(projection):
@@ -963,12 +960,23 @@ class GPUSparseCFProjection(SparseCFProjection):
         tups = sorted(zip(nzrows, nzcols))
         nzrows = [x[0] for x in tups]
         nzcols = [x[1] for x in tups]
+
+        '''
+        Allocating a page-locked piece of memory for the activity so that GPU could transfer data to the
+        main memory without the involvment of the CPU:
+        '''
+        self.activity = cuda.pagelocked_empty(self.activity.shape, np.float32)
+        self.activity_gpu_buffer = gpuarray.zeros(shape=(self.weights_gpu.shape[0],), dtype=np.float32)
+
+        self.input_buffer_pagelocked = cuda.pagelocked_empty(shape=(self.weights_gpu.shape[1],), dtype=np.float32, mem_flags=cuda.host_alloc_flags.WRITECOMBINED)
+        self.input_buffer = gpuarray.zeros(shape=(self.weights_gpu.shape[1], ), dtype=np.float32)
+
+        self.norm_total_gpu = gpuarray.zeros(shape=(self.weights_gpu.shape[0],), dtype=np.float32)
+
         # Getting them on the GPU:
         self.nzcount = self.weights.getnnz()
         self.nzrows_gpu = gpuarray.to_gpu(np.array(nzrows, np.int32))
         self.nzcols_gpu = gpuarray.to_gpu(np.array(nzcols, np.int32))
-        # Allocating a vector of zeros needed for the dot product:
-        self.zeros_gpu = gpuarray.zeros((self.weights_gpu.shape[0], ), np.float32)
         # Helper array for normalization:
         self.norm_ones_gpu = gpuarray.to_gpu(np.array([1.0] * self.weights_gpu.shape[1], np.float32))
         # Kernel that applies the normalisation:
@@ -1010,13 +1018,13 @@ class GPUSettlingCFSheet(SettlingCFSheet):
 
             if self.activation_count == self.mask_init_time:
                 
-                # cuda.Context.synchronize()
+                cuda.Context.synchronize()
                 self.mask.calculate()
 
             if self.tsettle == 0:
                 # Special case: behave just like a CFSheet
                 
-                # cuda.Context.synchronize()
+                cuda.Context.synchronize()
                 self.activate()
                 self.learn()
 
@@ -1033,7 +1041,7 @@ class GPUSettlingCFSheet(SettlingCFSheet):
                     self.learn()
             else:
                 
-                # cuda.Context.synchronize()
+                cuda.Context.synchronize()
                 self.activate()
                 self.activation_count += 1
                 if (self.plastic and self.continuous_learning):
