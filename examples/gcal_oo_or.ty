@@ -26,8 +26,7 @@ import numpy
 import param
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
-from topo.sparse.sparsecf import SparseCFProjection, GPUSparseCFProjection, compute_sparse_gpu_joint_norm_totals, GPUSettlingCFSheet
-
+from topo.sparse.sparsecf import SparseCFProjection
 
 import topo.learningfn.optimized
 import topo.learningfn.projfn
@@ -98,6 +97,12 @@ p.add(
         Sets whether the simulation should be run on a GPU"""))
 
 
+if p.gpu:
+    from topo.gpu.projection import GPUSparseCFProjection
+    from topo.gpu.sheet import compute_sparse_gpu_joint_norm_totals, GPUSettlingCFSheet
+
+
+
 ### Specify weight initialization, response function, and learning function
 projection.CFProjection.cf_shape=pattern.Disk(smoothing=0.0)
 projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
@@ -106,7 +111,6 @@ projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveN
 projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 
 sheet_type = GPUSettlingCFSheet if p.gpu else sheet.SettlingCFSheet
-
 
 ### Input patterns
 if p.dataset=="Gaussian":
