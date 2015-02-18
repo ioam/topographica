@@ -2,6 +2,7 @@ import param
 import numpy as np
 
 from topo.sheet import SettlingCFSheet
+from topo.base.cf import CFSheet
 
 import pycuda.gpuarray as gpuarray
 from pycuda.elementwise import ElementwiseKernel
@@ -81,4 +82,26 @@ class GPUSettlingCFSheet(SettlingCFSheet):
                 self.activation_count += 1
                 if (self.plastic and self.continuous_learning):
                    self.learn()
+
+
+class GPUCFSheet(CFSheet):
+
+    def __init__(self, **params):
+        super(GPUCFSheet, self).__init__(**params)
+
+    def process_current_time(self):
+        """
+        Called by the simulation after all the events are processed for the
+        current time but before time advances.  Allows the event processor
+        to send any events that must be sent before time advances to drive
+        the simulation.
         
+        GPUCFSheet is meant to be used with GPU projections that are called
+        asynchronously and might not have computed the activation. Therefore, we synchronize.
+        """
+        if self.new_input:
+            cuda.Context.synchronize()    
+            self.activate()
+            self.new_input = False
+            if self.plastic:
+                self.learn()        
