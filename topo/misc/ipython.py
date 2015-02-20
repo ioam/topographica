@@ -139,55 +139,6 @@ class ExportMagic(Magics):
         self.shell.set_hook('complete_command', lambda k,v: ['clear'],
                             str_key = '%%{name}'.format(name=name))
 
-@magics_class
-class TimerMagic(Magics):
-
-    start_time = None
-
-    @staticmethod
-    def elapsed_time():
-        elapsed = time.time() -  TimerMagic.start_time
-        minutes = elapsed // 60
-        hours = minutes // 60
-        seconds = elapsed % 60
-        return "Timer elapsed: %02d:%02d:%02d" % (hours, minutes, seconds)
-
-
-    @classmethod
-    def option_completer(cls, k,v):
-        return ['start']
-
-    @line_magic
-    def timer(self, line=''):
-        """
-        Timer magic to print initial date/time information and
-        subsequent elapsed time intervals.
-
-        To start the timer, run:
-
-        %timer start
-
-        This will print the start date and time.
-
-        Subsequent calls to %timer will print the elapsed time
-        relative to the time when %timer start was called. Subsequent
-        calls to %timer start may also be used to reset the timer.
-        """
-
-        if line.strip() not in ['', 'start']:
-            print("Invalid argument to %timer. For more information consult %timer?")
-            return
-        elif line.strip() == 'start':
-            TimerMagic.start_time = time.time()
-            timestamp = time.strftime("%Y/%m/%d %H:%M:%S")
-            print("Timer start: %s" % timestamp)
-            return
-        elif self.start_time is None:
-            print("Please start timer with %timer start. For more information consult %timer?")
-        else:
-            print(self.elapsed_time())
-
-
 
 #===============#
 # Display hooks #
@@ -213,8 +164,6 @@ except:
     pass
 
 
-
-
 _loaded = False
 def load_ipython_extension(ip):
     load_imagen_extension(ip, verbose=False)
@@ -223,10 +172,6 @@ def load_ipython_extension(ip):
     if not _loaded:
         _loaded = True
         ip.register_magics(ExportMagic)
-        ip.register_magics(TimerMagic)
-        ip.set_hook('complete_command', TimerMagic.option_completer, str_key = '%timer')
-
-
         try:
             from lancet import load_ipython_extension as load_lancet_extension
             load_lancet_extension(ip)
