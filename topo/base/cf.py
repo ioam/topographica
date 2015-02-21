@@ -586,6 +586,11 @@ class CFProjection(Projection):
        random weight generation. Format keys available include {name}
        {src} and {dest}.""")
 
+    seed = param.Integer(default=None, allow_None=True, doc="""
+       The random seed used to determine the randomized weight
+       initialization stream. If not None, equivalent to appending the
+       chosen integer to the hash_format.""")
+
     precedence = param.Number(default=0.8)
 
 
@@ -678,6 +683,7 @@ class CFProjection(Projection):
                                         src=self.src.name,
                                         dest=self.dest.name)
 
+        label = label + ('-%d' % self.seed if self.seed is not None else '')
         name = "%s_CF (%.5f, %.5f)" % ('' if label is None else label, x,y)
         try:
             if self.same_cf_shape_for_all_cfs:
