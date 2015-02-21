@@ -32,8 +32,8 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     """
     single_conn_lr = projection.learning_rate/projection.n_units
     # Transfering source and destination activities:
-    src_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.src.activity).astype(np.float32), )
-    dest_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.dest.activity).astype(np.float32), )
+    src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32), )
+    dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32), )
 
     # Computing Hebbian learning weights:
     projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
