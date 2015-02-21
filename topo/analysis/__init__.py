@@ -29,10 +29,10 @@ from command import measure_cog
 
 
 
-CoG_spec = "Matrix.X CoG * Matrix.Y CoG * Matrix.BlueChannel"
+CoG_spec = "Image.X CoG * Image.Y CoG * Image.BlueChannel"
 XYCoG = chain.instance(value='XYCoG', name='XYCoG',
                        operations = [matrix_overlay.instance(spec=CoG_spec), toRGB.instance()])
-Compositor.register(Compositor("Matrix.X CoG * Matrix.Y CoG", XYCoG, 'XYCoG', 'display'))
+Compositor.register(Compositor("Image.X CoG * Image.Y CoG", XYCoG, 'XYCoG', 'display'))
 
 
 class TopoIPTestCase(IPTestCase):
@@ -130,13 +130,13 @@ Collector.interval_hook = RunProgress
 
 def sheet_hook(obj, *args, **kwargs):
     """
-    Return a Matrix of the Sheet activity.
+    Return a Image of the Sheet activity.
     """
     return obj[:]
 
 def projection_hook(obj, *args, **kwargs):
     """
-    Return a Matrix of the projection activity, otherwise if
+    Return a Image of the projection activity, otherwise if
     grid=True, return a Grid of the CFs.
     """
     if kwargs.pop('grid', False):
@@ -156,7 +156,7 @@ Collector.for_type(measure_cog,  measurement_hook, mode='merge')
 
 
 # Setting default channel operation for ON-OFF visualization
-#Compositor.definitions.append(Compositor('Matrix.CFs * Matrix.CFs',
+#Compositor.definitions.append(Compositor('Image.CFs * Image.CFs',
 #                                   chain.instance(chain[colormap, operator.instance(operator=np.subtract)]), 'OnOff CFs', cmap='jet'))
 
 # Featuremapper hooks

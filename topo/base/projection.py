@@ -10,7 +10,7 @@ from numpy import array,asarray,ones,sometrue, logical_and, logical_or
 import param
 from param.parameterized import overridable_property
 
-from holoviews import Matrix, LayoutTree
+from holoviews import Image, Layout
 from holoviews.interface.collector import AttrDict
 
 from sheet import Sheet
@@ -300,15 +300,15 @@ class Projection(EPConnection):
         """Returns the activity in a single projection"""
         if timestamp is None:
             timestamp = self.src.simulation.time()
-        sv = Matrix(self.activity.copy(), self.dest.bounds,
-                    label=self.name, value='Activity')
-        sv.metadata=AttrDict(proj_src_name=self.src.name,
+        im = Image(self.activity.copy(), self.dest.bounds,
+                   label=self.name, value='Activity')
+        im.metadata=AttrDict(proj_src_name=self.src.name,
                              precedence=self.src.precedence,
                              proj_name=self.name,
                              row_precedence=self.src.row_precedence,
                              src_name=self.dest.name,
                              timestamp=timestamp)
-        return sv
+        return im
 
 
     def state_pop(self):
@@ -419,7 +419,7 @@ class ProjectionSheet(Sheet):
         self.new_input = False
         self.mask.sheet = self
         self.old_a = self.activity.copy()*0.0
-        self.views['RFs'] = LayoutTree()
+        self.views['RFs'] = Layout()
 
 
     def _dest_connect(self, conn):

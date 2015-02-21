@@ -7,7 +7,7 @@ import unittest
 from nose.tools import istest, nottest
 import numpy as np
 
-from holoviews import Matrix
+from holoviews import Image
 
 from topo.base.sheetcoords import Slice
 from topo.base.sheet import *
@@ -52,7 +52,7 @@ class TestCoordinateTransforms(unittest.TestCase):
         self.just_out_top_y = self.top + D
         self.just_out_left_x = self.left - D
 
-        # Matrix values around the edge of the matrix
+        # Image values around the edge of the matrix
         self.just_out_right_idx = self.rbound + D
         self.just_out_bottom_idx = self.cbound + D
         self.just_out_top_idx = 0.0 - D
@@ -726,10 +726,10 @@ class ExtraSheetTests(unittest.TestCase):
         s = Sheet()
         s.activity = np.array([[1,2],[3,4]])
         # Call s.sheet_view(..) with a parameter
-        sv2 = Matrix(s.activity,bounds=s.bounds)
-        sv2.metadata = dict(src_name=s.name)
+        im2 = Image(s.activity,bounds=s.bounds)
+        im2.metadata = dict(src_name=s.name)
         self.assertEqual(len(s.views.Maps.keys()),0)
-        s.views.Maps['Activity']=sv2
+        s.views.Maps['Activity']=im2
         self.assertEqual(len(s.views.Maps.keys()),1)
         s.release_sheet_view('Activity')
         self.assertEqual(len(s.views.Maps.keys()),0)

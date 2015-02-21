@@ -149,12 +149,12 @@ from topo.base.sheetview import CFView
 from holoviews.core.options import Store
 from holoviews.ipython import load_ipython_extension as load_imagen_extension
 from holoviews.ipython.display_hooks import map_display, view_display
-from holoviews.plotting import MatrixPlot
+from holoviews.plotting import RasterPlot
 
 from holoviews.ipython.widgets import RunProgress
 RunProgress.run_hook = topo.sim.run
 
-Store.defaults.update({CFView: MatrixPlot})
+Store.defaults.update({CFView: RasterPlot})
 
 try:
     from lancet import ViewFrame

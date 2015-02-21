@@ -14,7 +14,7 @@ import numpy.version as np_version
 
 import param
 
-from holoviews import NdMapping, LayoutTree
+from holoviews import NdMapping, Layout
 from holoviews.interface.collector import Collector, Collator
 
 from lancet import PrettyPrinted, vcs_metadata
@@ -404,7 +404,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
        Spec keys or collector paths to include as metadata in the
        output file along with 'time' (simulation time).
 
-       LayoutTree paths are specified by dotted paths
+       Layout paths are specified by dotted paths
        e.g. 'PinwheelAnalysis.V1' would add the pinwheel analysis on
        V1 to the metadata.
        """)
@@ -459,7 +459,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
                                if self._info.batch_tag else ''),
                               topo_time)
 
-      viewtree = LayoutTree()
+      viewtree = Layout()
       viewtree = self.collector(viewtree, times=[topo_time])
 
       spec_metadata = [(key, self._info.specs[key])

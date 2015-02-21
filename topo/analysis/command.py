@@ -10,8 +10,8 @@ import numpy as np
 
 import param
 from param import ParameterizedFunction, ParamOverrides
-from holoviews import Matrix, HoloMap, Dimension, LayoutTree
-from holoviews.element.annotation import Contours
+from holoviews import Image, HoloMap, Dimension, Layout
+from holoviews.element import Contours
 from holoviews.core.options import Store, Options
 
 from featuremapper import features
@@ -67,7 +67,7 @@ def update_rgb_activities():
             # should this ensure all of r,g,b are present?
             if hasattr(sheet,'activity_%s'%c.lower()):
                 activity_copy = getattr(sheet,'activity_%s'%c.lower()).copy()
-                new_view = Matrix(activity_copy, bounds=sheet.bounds)
+                new_view = Image(activity_copy, bounds=sheet.bounds)
                 new_view.metadata=metadata
                 sheet.views.Maps['%sActivity'%c]=new_view
 
@@ -155,7 +155,7 @@ class measure_cog(ParameterizedFunction):
         measured_sheets = [s for s in topo.sim.objects(CFSheet).values()
                            if hasattr(s,'measure_maps') and s.measure_maps]
 
-        results = LayoutTree()
+        results = Layout()
 
         # Could easily be extended to measure CoG of all projections
         # and e.g. register them using different names (e.g. "Afferent
@@ -205,10 +205,10 @@ class measure_cog(ParameterizedFunction):
 
         timestamp = topo.sim.time()
         lbrt = sheet.bounds.lbrt()
-        xsv = Matrix(xcog, sheet.bounds, label=proj.name, value='X CoG',
-                     value_dimensions=[Dimension('X CoG', range=(lbrt[0], lbrt[2]))])
-        ysv = Matrix(ycog, sheet.bounds, label=proj.name, value='Y CoG',
-                     value_dimensions=[Dimension('Y CoG', range=(lbrt[1], lbrt[3]))])
+        xsv = Image(xcog, sheet.bounds, label=proj.name, value='X CoG',
+                    value_dimensions=[Dimension('X CoG', range=(lbrt[0], lbrt[2]))])
+        ysv = Image(ycog, sheet.bounds, label=proj.name, value='Y CoG',
+                    value_dimensions=[Dimension('Y CoG', range=(lbrt[1], lbrt[3]))])
 
         lines = []
         hlines, vlines = xsv.data.shape

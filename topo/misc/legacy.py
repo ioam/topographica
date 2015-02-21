@@ -6,7 +6,7 @@ import collections as odict
 
 import sys
 import decimal # CEBALERT: when did decimal appear? too late to use?
-from holoviews import Matrix
+from holoviews import Image as Matrix
 
 import param
 
@@ -556,7 +556,8 @@ def featuremapper_legacy():
     # Convert old sheet_views and curve_dict
     from topo.misc.attrdict import AttrDict
     from topo.base.sheet import Sheet
-    from holoviews import NdMapping, Matrix
+    from holoviews import NdMapping
+    from holoviews import Image as Matrix
 
     def _set_sheet_views(instance, state):
         if state['simulation'] is None:

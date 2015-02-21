@@ -14,7 +14,7 @@ import numpy as np
 import param
 from param.parameterized import ParamOverrides
 
-from holoviews import Matrix, HoloMap
+from holoviews import Image, HoloMap
 from holoviews.ipython.widgets import ProgressBar
 from holoviews.interface.collector import AttrDict
 
@@ -40,7 +40,7 @@ def update_sheet_activity(sheet_name, force=False):
     """
     Update the '_activity_buffer' ViewMap for a given sheet by name.
 
-    If force is False and the existing Activity Matrix isn't stale,
+    If force is False and the existing Activity Image isn't stale,
     the existing view is returned.
     """
     name = 'ActivityBuffer'
@@ -52,16 +52,16 @@ def update_sheet_activity(sheet_name, force=False):
                         src_name=sheet.name, shape=sheet.activity.shape,
                         timestamp=time)
     if not view:
-        sv = Matrix(np.array(sheet.activity), sheet.bounds)
-        sv.metadata=metadata
-        view = HoloMap((time, sv), key_dimensions=[Time])
+        im = Image(np.array(sheet.activity), sheet.bounds)
+        im.metadata=metadata
+        view = HoloMap((time, im), key_dimensions=[Time])
         view.metadata = metadata
         sheet.views.Maps[name] = view
     else:
         if force or view.dim_range('Time')[1] < time:
-            sv = Matrix(np.array(sheet.activity), sheet.bounds)
-            sv.metadata=metadata
-            view[time] = sv
+            im = Image(np.array(sheet.activity), sheet.bounds)
+            im.metadata=metadata
+            view[time] = im
     return view
 
 
@@ -356,7 +356,7 @@ class StorageHook(param.ParameterizedFunction):
         inserts results into top level views object.""")
 
     only_latest = param.Boolean(default=True, doc="""
-        Whether to replace any existing results in the global LayoutTree.""")
+        Whether to replace any existing results in the global Layout.""")
 
     def __call__(self, viewcontainer, **params):
         p = ParamOverrides(self, params)

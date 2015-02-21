@@ -17,7 +17,7 @@ import param
 
 from holoviews.core import BoundingBox, NdMapping
 from holoviews.interface.collector import AttrDict
-from holoviews import Matrix
+from holoviews import Image
 
 
 ### This function is defined here, where it might be useful for testing
@@ -74,52 +74,52 @@ class TestPlot(unittest.TestCase):
         ### Find a way to assign randomly the matrix.
         self.matrix1 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds1 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = Matrix(self.matrix1, self.bounds1)
-        sv.metadata=metadata
-        self.sheet_view1 = NdMapping((None, sv))
+        im = Image(self.matrix1, self.bounds1)
+        im.metadata=metadata
+        self.sheet_view1 = NdMapping((None, im))
         self.sheet_view1.metadata = AttrDict(src_name='TestInputParam',
                                             precedence=0.1, row_precedence=0.1,
                                             cyclic_range=None, timestamp=time)
-        self.key1 = 'SV1'
+        self.key1 = 'IM1'
         views[self.key1] = self.sheet_view1
 
         ### SheetView2:
         ### Find a way to assign randomly the matrix.
         self.matrix2 = np.zeros((10,10),dtype=np.float) + 0.3
         self.bounds2 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = Matrix(self.matrix2, self.bounds2)
-        sv.metadata=metadata
-        self.sheet_view2 = NdMapping((None, sv))
+        im = Image(self.matrix2, self.bounds2)
+        im.metadata=metadata
+        self.sheet_view2 = NdMapping((None, im))
         self.sheet_view2.metadata = AttrDict(src_name='TestInputParam',
                                              precedence=0.2, row_precedence=0.2,
                                              cyclic_range=None, timestamp=time)
-        self.key2 = 'SV2'
+        self.key2 = 'IM2'
         views[self.key2] = self.sheet_view2
 
         ### SheetView3:
         ### Find a way to assign randomly the matrix.
         self.matrix3 = np.zeros((10,10),dtype=np.float) + np.random.random((10,10))
         self.bounds3 = BoundingBox(points=((-0.5,-0.5),(0.5,0.5)))
-        sv = Matrix(self.matrix3, self.bounds3)
-        sv.metadata=metadata
-        self.sheet_view3 = NdMapping((None, sv))
+        im = Image(self.matrix3, self.bounds3)
+        im.metadata=metadata
+        self.sheet_view3 = NdMapping((None, im))
         self.sheet_view3.metadata = AttrDict(src_name='TestInputParam',
                                              precedence=0.3, row_precedence=0.3,
                                              cyclic_range=None, timestamp=time)
-        self.key3 = 'SV3'
+        self.key3 = 'IM3'
         views[self.key3] = self.sheet_view3
 
         ### SheetView4: for testing clipping + different bounding box
         ### Find a way to assign randomly the matrix.
         self.matrix4 = np.zeros((10,10),dtype=np.float) + 1.6
         self.bounds4 = BoundingBox(points=((-0.7,-0.7),(0.7,0.7)))
-        sv = Matrix(self.matrix4, self.bounds4)
-        sv.metadata=metadata
-        self.sheet_view4 = NdMapping((None, sv))
+        im = Image(self.matrix4, self.bounds4)
+        im.metadata=metadata
+        self.sheet_view4 = NdMapping((None, im))
         self.sheet_view4.metadata = AttrDict(src_name='TestInputParam',
                                              precedence=0.4, row_precedence=0.4,
                                              cyclic_range=None, timestamp=time)
-        self.key4 = 'SV4'
+        self.key4 = 'IM4'
         views[self.key4] = self.sheet_view4
 
         self.view_dict = {'Strength': views, 'Hue': views, 'Confidence': views}

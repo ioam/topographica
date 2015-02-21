@@ -15,7 +15,7 @@ import param
 
 from holoviews.core import BoundingRegion, SheetCoordinateSystem
 from holoviews.core.options import Store, Options
-from holoviews import Matrix
+from holoviews import Image
 
 
 class SheetView(param.Parameterized):
@@ -88,7 +88,7 @@ def UnitView((data, bounds), x, y, projection, timestamp, **params):
     return unitview
 
 
-class CFView(Matrix):
+class CFView(Image):
 
     roi_bounds = param.ClassSelector(class_=BoundingRegion, default=None, doc="""
         The ROI bounds can be set to reduce the space the CFView is

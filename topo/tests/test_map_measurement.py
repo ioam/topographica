@@ -23,7 +23,7 @@ from nose.tools import nottest
 
 import numpy
 
-from holoviews import LayoutTree
+from holoviews import Layout
 
 from param import resolve_path
 from topo.command.analysis import *
@@ -75,9 +75,9 @@ plotgroups_to_test = [
 
 def _reset_views(sheet):
     if hasattr(sheet.views,'Maps'):
-        sheet.views.Maps = LayoutTree()
+        sheet.views.Maps = Layout()
     if hasattr(sheet.views,'Curves'):
-        sheet.views.Curves = LayoutTree()
+        sheet.views.Curves = Layout()
 
 
 def generate(plotgroup_names):

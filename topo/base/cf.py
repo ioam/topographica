@@ -22,7 +22,7 @@ from copy import copy
 import numpy as np
 
 import param
-from holoviews import AxisLayout, Dimension, HoloMap, LayoutTree
+from holoviews import GridSpace, Dimension, HoloMap, Layout
 from holoviews.interface.collector import AttrDict
 from holoviews.core import BoundingBox, BoundingRegionParameter, Slice
 
@@ -636,13 +636,13 @@ class CFProjection(Projection):
         self.input_buffer = None
         self.activity = np.array(self.dest.activity)
         if 'cfs' not in self.dest.views:
-            self.dest.views.CFs = LayoutTree()
+            self.dest.views.CFs = Layout()
         self.dest.views.CFs[self.name] = self._cf_grid()
 
 
     def _cf_grid(self, shape=None, **kwargs):
-        "Create AxisLayout with the correct metadata."
-        grid = AxisLayout({})
+        "Create GridSpace with the correct metadata."
+        grid = GridSpace({})
         grid.metadata = AttrDict(timestamp=self.src.simulation.time(),
                                  info=self.name,
                                  proj_src_name=self.src.name,
@@ -744,8 +744,8 @@ class CFProjection(Projection):
         for x, y in coords:
             grid_items[x, y] = self.view(x, y, situated=situated, **kwargs)
 
-        grid = AxisLayout(grid_items, label=' '.join([self.dest.name, self.name]),
-                          value='CFs')
+        grid = GridSpace(grid_items, label=' '.join([self.dest.name, self.name]),
+                         value='CFs')
         grid.metadata = AttrDict(info=self.name,
                                  proj_src_name=self.src.name,
                                  proj_dest_name=self.dest.name,
@@ -756,7 +756,7 @@ class CFProjection(Projection):
 
     def view(self, sheet_x, sheet_y, timestamp=None, situated=False, **kwargs):
         """
-        Return a single connection field Matrix, for the unit
+        Return a single connection field Image, for the unit
         located nearest to sheet coordinate (sheet_x,sheet_y).
         """
         if timestamp is None:

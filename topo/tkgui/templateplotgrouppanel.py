@@ -103,7 +103,7 @@ class TemplatePlotGroupPanel(SheetPanel):
     ### Should add the ability to turn off any of the channels
     ### independently (just as the Strength-only button does), and
     ### eventually should allow the user to type in the name of any
-    ### Matrix to change the template as desired to visualize any
+    ### Image to change the template as desired to visualize any
     ### quantity.
     ###
     # CB: something about these methods does not seem to fit the PlotGroup hierarchy.

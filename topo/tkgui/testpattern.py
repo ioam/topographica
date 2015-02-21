@@ -17,7 +17,7 @@ import param
 import paramtk as tk
 
 from holoviews.core import NdMapping
-from holoviews.element import Matrix
+from holoviews.element import Image
 
 import topo
 
@@ -47,17 +47,17 @@ class TestPatternPlotGroup(SheetPlotGroup):
             sheet = kw['sheet']
             views = topo.sim.views[sheet.name].Maps
 
-            sv = Matrix(sheet.input_generator(), bounds=sheet.bounds)
-            sv.metadata=AttrDict(timestamp=topo.sim.time())
+            im = Image(sheet.input_generator(), bounds=sheet.bounds)
+            im.metadata=AttrDict(timestamp=topo.sim.time())
 
             if 'Activity' not in views:
-                views['Activity'] = NdMapping((topo.sim.time(), sv))
+                views['Activity'] = NdMapping((topo.sim.time(), im))
                 views['Activity'].metadata = AttrDict(precedence=sheet.precedence,
                                                       row_precedence=sheet.row_precedence,
                                                       src_name=sheet.name,
                                                       timestamp=topo.sim.time())
             else:
-                views['Activity'][topo.sim.time()] = sv
+                views['Activity'][topo.sim.time()] = im
             channels = {'Strength': 'Activity','Hue':None,'Confidence':None}
 
             view = topo.sim.views[sheet.name].Maps

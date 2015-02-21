@@ -22,7 +22,7 @@ from numpy import float64
 
 import param
 
-from holoviews import Matrix, LayoutTree
+from holoviews import Image, Layout
 from holoviews.core import BoundingBox, BoundingRegionParameter, SheetCoordinateSystem
 from holoviews.interface.collector import AttrDict
 
@@ -115,7 +115,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Initialize this object as an EventProcessor, then also as
         a SheetCoordinateSystem with equal xdensity and ydensity.
 
-        views is an LayoutTree, which stores associated measurements,
+        views is an Layout, which stores associated measurements,
         i.e. representations of the sheet for use by analysis or plotting
         code.
         """
@@ -138,9 +138,9 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         self.__saved_activity = []
         self._plasticity_setting_stack = []
 
-        self.views = LayoutTree()
-        self.views.Maps = LayoutTree()
-        self.views.Curves = LayoutTree()
+        self.views = Layout()
+        self.views.Maps = Layout()
+        self.views.Curves = Layout()
 
 
     ### JABALERT: This should be deleted now that sheet_views is public
@@ -309,9 +309,9 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
                             row_precedence=self.row_precedence,
                             timestamp=self.simulation.time())
 
-        sv = Matrix(self.activity.copy(), self.bounds,
-                    label=self.name, value='Activity')[coords]
-        sv.metadata=metadata
-        return sv
+        image = Image(self.activity.copy(), self.bounds,
+                   label=self.name, value='Activity')[coords]
+        image.metadata=metadata
+        return image
 
 
