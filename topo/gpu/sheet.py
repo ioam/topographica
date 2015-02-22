@@ -20,7 +20,7 @@ def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):
     joint_sum = gpuarray.zeros((projlist[0].weights_gpu.shape[0], ), np.float32)
     for p in projlist:
         if not p.has_norm_total:
-            p.weights_gpu.mv(p.norm_ones_gpu, y=p.norm_total_gpu, autosync=False)
+            p.norm_total_gpu = p.weights_gpu.mv(p.norm_ones_gpu, autosync=True)
             p.has_norm_total = True
         joint_sum += p.norm_total_gpu
     for p in projlist:
