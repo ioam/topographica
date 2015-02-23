@@ -301,7 +301,7 @@ class Projection(EPConnection):
         if timestamp is None:
             timestamp = self.src.simulation.time()
         im = Image(self.activity.copy(), self.dest.bounds,
-                   label=self.name, value='Activity')
+                   label=self.name, group='Activity')
         im.metadata=AttrDict(proj_src_name=self.src.name,
                              precedence=self.src.precedence,
                              proj_name=self.name,

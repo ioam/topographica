@@ -751,7 +751,7 @@ class CFProjection(Projection):
             grid_items[x, y] = self.view(x, y, situated=situated, **kwargs)
 
         grid = GridSpace(grid_items, label=' '.join([self.dest.name, self.name]),
-                         value='CFs')
+                         group='CFs')
         grid.metadata = AttrDict(info=self.name,
                                  proj_src_name=self.src.name,
                                  proj_dest_name=self.dest.name,
@@ -784,7 +784,7 @@ class CFProjection(Projection):
 
         sv = CFView(matrix_data, bounds, situated_bounds=situated_bounds,
                     input_sheet_slice=(r1, r2, c1, c2), roi_bounds=roi_bounds,
-                    label=self.name, value='CF Weight')
+                    label=self.name, group='CF Weight')
         sv.metadata=AttrDict(timestamp=timestamp)
 
         viewmap = HoloMap((timestamp, sv), key_dimensions=[time_dim])

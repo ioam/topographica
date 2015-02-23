@@ -303,7 +303,7 @@ class ElasticNet(Sheet):
 
 
 from holoviews.interface.collector import AttrDict
-from holoviews import Matrix
+from holoviews import Image
 
 
 def update_elastic_net_maps():
@@ -311,11 +311,11 @@ def update_elastic_net_maps():
         metadata = AttrDict(src_name=sheet.name,
                             precedence=sheet.precedence,
                             timestamp=topo.sim.time())
-        sheet.sheet_view_dict['XCoG'] = Matrix(array(sheet.xarray), sheet.bounds)
+        sheet.sheet_view_dict['XCoG'] = Image(array(sheet.xarray), sheet.bounds)
         sheet.sheet_view_dict['XCoG'].metadata = metadata
-        sheet.sheet_view_dict['YCoG'] = Matrix(array(sheet.yarray), sheet.bounds)
+        sheet.sheet_view_dict['YCoG'] = Image(array(sheet.yarray), sheet.bounds)
         sheet.sheet_view_dict['YCoG'].metadata = metadata
-        sheet.sheet_view_dict['OcularPreference'] = Matrix(array(sheet.zarray), sheet.bounds)
+        sheet.sheet_view_dict['OcularPreference'] = Image(array(sheet.zarray), sheet.bounds)
         sheet.sheet_view_dict['OcularPreference'].metadata = metadata
 
 from topo.plotting.plotgroup import plotgroups

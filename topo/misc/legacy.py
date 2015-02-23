@@ -6,7 +6,7 @@ import collections as odict
 
 import sys
 import decimal # CEBALERT: when did decimal appear? too late to use?
-from holoviews import Image as Matrix
+from holoviews import Image
 
 import param
 
@@ -556,8 +556,7 @@ def featuremapper_legacy():
     # Convert old sheet_views and curve_dict
     from topo.misc.attrdict import AttrDict
     from topo.base.sheet import Sheet
-    from holoviews import NdMapping
-    from holoviews import Image as Matrix
+    from holoviews import NdMapping, Image
 
     def _set_sheet_views(instance, state):
         if state['simulation'] is None:
@@ -580,7 +579,7 @@ def featuremapper_legacy():
             svs = state['sheet_views']
             for key, sv in svs.items():
                 data, bounds = sv.view()
-                new_sv = Matrix(data, bounds)
+                new_sv = Image(data, bounds)
                 metadata = dict(dimension_labels=['Time'])
                 metadata_names = ['cyclic_range', 'precedence',
                                   'row_precedence', 'src_name']
@@ -608,7 +607,7 @@ def featuremapper_legacy():
                                                                        label=label,
                                                                        timestamp=old_sv.timestamp)
                         data, bounds = old_sv.view()
-                        sv = Matrix(data, bounds)
+                        sv = Image(data, bounds)
                         curves[key][timestamp][l_val][f_val] = sv
         state.pop('curve_dict', None)
         state.pop('sheet_views', None)
@@ -703,7 +702,7 @@ def fmapper_rename():
     import featuremapper
     allow_import(featuremapper, 'fmapper')
 
-    param_no_restore = {'Matrix': ('bounds',),
+    param_no_restore = {'Image': ('bounds',),
                         'ProjectionGrid': ('bounds',)}
     PicklableClassAttributes.deleted_params.update(param_no_restore)
 
@@ -719,7 +718,7 @@ def fmapper_rename():
             state.pop('scs').bounds
 
 
-    preprocess_state(Matrix, remove_shape)
+    preprocess_state(Image, remove_shape)
     preprocess_state(holoviews.Grid, remove_shape)
 
 support[90800536] = fmapper_rename

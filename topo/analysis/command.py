@@ -11,7 +11,7 @@ import numpy as np
 import param
 from param import ParameterizedFunction, ParamOverrides
 from holoviews import Image, HoloMap, Dimension, Layout
-from holoviews.element import Contours
+from holoviews.element.annotation import Contours
 from holoviews.core.options import Store, Options
 
 from featuremapper import features
@@ -205,9 +205,9 @@ class measure_cog(ParameterizedFunction):
 
         timestamp = topo.sim.time()
         lbrt = sheet.bounds.lbrt()
-        xsv = Image(xcog, sheet.bounds, label=proj.name, value='X CoG',
+        xsv = Image(xcog, sheet.bounds, label=proj.name, group='X CoG',
                     value_dimensions=[Dimension('X CoG', range=(lbrt[0], lbrt[2]))])
-        ysv = Image(ycog, sheet.bounds, label=proj.name, value='Y CoG',
+        ysv = Image(ycog, sheet.bounds, label=proj.name, group='Y CoG',
                     value_dimensions=[Dimension('Y CoG', range=(lbrt[1], lbrt[3]))])
 
         lines = []
@@ -217,7 +217,7 @@ class measure_cog(ParameterizedFunction):
         for vind in range(vlines)[::p.stride]:
             lines.append(np.vstack([xsv.data[:,vind].T, ysv.data[:,vind]]).T)
         cogmesh = Contours(lines, extents=sheet.bounds.lbrt(), label=proj.name,
-                           value='Center of Gravity')
+                           group='Center of Gravity')
 
         xcog_map = HoloMap((timestamp, xsv), key_dimensions=[features.Time])
         xcog_map.metadata = metadata

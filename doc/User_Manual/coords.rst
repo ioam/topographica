@@ -27,7 +27,7 @@ SheetCoordinateSystem, which extends from (-0.5,-0.5) to (0.5,0.5)
 in Sheet coordinates. Any coordinate within the BoundingBox is a
 valid Sheet coordinate.
 
-Matrix coordinates
+Image coordinates
 ------------------
 
 Although users primarily manipulate the abstract, continuous

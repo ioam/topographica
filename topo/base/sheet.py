@@ -115,7 +115,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         Initialize this object as an EventProcessor, then also as
         a SheetCoordinateSystem with equal xdensity and ydensity.
 
-        views is an Layout, which stores associated measurements,
+        views is a Layout, which stores associated measurements,
         i.e. representations of the sheet for use by analysis or plotting
         code.
         """
@@ -310,7 +310,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
                             timestamp=self.simulation.time())
 
         image = Image(self.activity.copy(), self.bounds,
-                   label=self.name, value='Activity')[coords]
+                   label=self.name, group='Activity')[coords]
         image.metadata=metadata
         return image
 

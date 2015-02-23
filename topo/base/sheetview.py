@@ -118,7 +118,7 @@ class CFView(Image):
 
         return CFView(data, self.situated_bounds, roi_bounds=self.bounds,
                       situated_bounds=self.situated_bounds,
-                      label=self.label, value=self.value)
+                      label=self.label, group=self.group)
 
 
 Store.options.CFView = Options('style', cmap='gray', interpolation='nearest')

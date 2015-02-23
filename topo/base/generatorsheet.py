@@ -280,6 +280,6 @@ class ChannelGeneratorSheet(GeneratorSheet):
             arr = self.activity.copy()
 
         im = Image(arr, self.bounds,
-                   label=self.name+' Activity', value='Activity')[coords]
+                   label=self.name+' Activity', group='Activity')[coords]
         im.metadata=metadata
         return im

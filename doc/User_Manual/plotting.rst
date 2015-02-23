@@ -325,7 +325,7 @@ is:
 #. Declare that before trying to plot this data, generate it by
    calling the command "measure\_or\_pref", which is defined next.
 #. To this plot group, add up to one plot per Sheet named
-   "Orientation Preference", plotting any Matrix named
+   "Orientation Preference", plotting any Image named
    OrientationPreference, using a color plot (as the Hue channel).
 #. Add up to one more plot per Sheet, this time plotting the
    Orientation in the Hue channel and the Orientation Selectivity in
@@ -377,11 +377,11 @@ multiple types of plots.
 
 Additionally, the data for plotting can also be calculated in any
 other way (ignoring FeatureMaps and PatternPresenter altogether), as
-long as it results in a Matrix added to the appropriate
+long as it results in a Image added to the appropriate
 sheet\_views dictionary and specified in the template. For instance,
 the `measure\_cog`_ command used in Center of Gravity plots simply
 looks at each ConnectionField individually, computes its center of
-gravity, and builds a Matrix out of that (rather than presenting
+gravity, and builds a Image out of that (rather than presenting
 any input patterns).
 
 .. _LISSOM tutorial: ../Tutorials/lissom_oo_or.html

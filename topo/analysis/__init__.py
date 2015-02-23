@@ -30,7 +30,7 @@ from command import measure_cog
 
 
 CoG_spec = "Image.X CoG * Image.Y CoG * Image.BlueChannel"
-XYCoG = chain.instance(value='XYCoG', name='XYCoG',
+XYCoG = chain.instance(group='XYCoG', name='XYCoG',
                        operations = [matrix_overlay.instance(spec=CoG_spec), toRGB.instance()])
 Compositor.register(Compositor("Image.X CoG * Image.Y CoG", XYCoG, 'XYCoG', 'display'))
 

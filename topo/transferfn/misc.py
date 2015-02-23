@@ -253,13 +253,13 @@ class TemporalScatter(TransferFnWithState):
         """
         views = []
         if mode in ['raw', 'both']:
-            views.append(Image(self.raw_depth_map, label='Pattern',
-                               name='Raw Depth map').hist())
+            views.append(Image(self.raw_depth_map, group='Pattern',
+                               label='Raw Depth map').hist())
 
         if mode in ['discrete', 'both']:
             scaled_map = (self.depth_map * self.timestep)
-            discrete_sv = Image(scaled_map, label='Pattern',
-                                name='Depth map')
+            discrete_sv = Image(scaled_map, group='Pattern',
+                                label='Depth map')
             views.append(discrete_sv.hist(num_bins=self.depth,
                                           bin_range=(0, self.span)))
 
