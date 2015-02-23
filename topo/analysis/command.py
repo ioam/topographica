@@ -11,7 +11,7 @@ import numpy as np
 import param
 from param import ParameterizedFunction, ParamOverrides
 from holoviews import Image, HoloMap, Dimension, Layout
-from holoviews.element.annotation import Contours
+from holoviews.element import Contours
 from holoviews.core.options import Store, Options
 
 from featuremapper import features
