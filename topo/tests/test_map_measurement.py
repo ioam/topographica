@@ -30,9 +30,10 @@ from topo.command.analysis import *
 from topo.command.pylabplot import *
 from topo.plotting.plotgroup import plotgroups
 from topo.misc.util import unit_value
+from topo.analysis.featureresponses import pattern_response
 
 
-
+pattern_response.progress_bar = False
 
 # CEBALERT: change to be the all-in-one model eventually, and
 # uncomment all ocular/disparity/direction groups below.
