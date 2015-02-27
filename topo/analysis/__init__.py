@@ -10,7 +10,6 @@ import numpy as np
 from holoviews.interface.collector import Reference
 from holoviews.core.options import Compositor
 from holoviews.ipython import IPTestCase
-from holoviews.operation.rgb import colormap
 from holoviews.operation import chain, toRGB, matrix_overlay
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
