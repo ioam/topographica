@@ -732,7 +732,7 @@ class ExtraSheetTests(unittest.TestCase):
         s.views.Maps['Activity']=im2
         self.assertEqual(len(s.views.Maps.keys()),1)
         s.release_sheet_view('Activity')
-        self.assertEqual(len(s.views.Maps.keys()),0)
+        self.assertEqual(len([v for v in s.views.Maps.values() if v is  not None]),0)
 
 if __name__ == "__main__":
 	import nose

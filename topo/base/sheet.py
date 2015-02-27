@@ -154,7 +154,7 @@ class Sheet(EventProcessor,SheetCoordinateSystem):  # pylint: disable-msg=W0223
         memory.
         """
         if view_name in self.views.Maps:
-            del self.views.Maps[view_name]
+            self.views.Maps[view_name] = None
 
 
     # CB: what to call this? sheetcoords()? sheetcoords_of_grid()? idxsheetcoords()?

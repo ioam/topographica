@@ -240,8 +240,9 @@ class TemplatePlot(Plot):
             matrix = None
         else:
             matrix = sv.data.copy()
-            if key=='Hue' and sv.cyclic_range is not None:
-                matrix /= sv.cyclic_range
+            if key=='Hue' and sv.value_dimensions[0].cyclic:
+                cyclic_range = sv.value_dimensions[0].range[1] - sv.value_dimensions[0].range[0]
+                matrix /= cyclic_range
 
             # Calculate timestamp for this plot
             timestamp = sv.metadata.timestamp

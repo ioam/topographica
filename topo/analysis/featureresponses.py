@@ -58,7 +58,7 @@ def update_sheet_activity(sheet_name, force=False):
         view.metadata = metadata
         sheet.views.Maps[name] = view
     else:
-        if force or view.dim_range('Time')[1] < time:
+        if force or view.range('Time')[1] < time:
             im = Image(np.array(sheet.activity), sheet.bounds)
             im.metadata=metadata
             view[time] = im
