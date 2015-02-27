@@ -634,7 +634,9 @@ def test_runbatch():
     param.normalize_path.prefix = start_output_path
 
     tiny = os.path.join(find_examples(),"tiny.ty")
-    run_batch(tiny,cortex_density=1,retina_density=1,times=[1],snapshot=True,output_directory="testing123")
+    run_batch(tiny,cortex_density=1,retina_density=1,times=[1],
+              snapshot=True,output_directory="testing123",
+              progress_bar='disabled')
 
     new_output_path = param.normalize_path.prefix
 
