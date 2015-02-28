@@ -18,12 +18,6 @@ time ./topographica -p cortex_density=$1 -p gpu=$3 examples/gcal_oo_or.ty -c "to
 
 echo ----------------------------------
 
-echo Loading Topographica + setting up gcal_oo_or.ty using $1 cortex density + running 1 iteration \(gpu=$3\):
-
-time ./topographica -p cortex_density=$1 -p gpu=$3 examples/gcal_oo_or.ty -c "topo.sim.run(1)"
-
-echo ----------------------------------
-
 echo Loading Topographica + setting up gcal_oo_or.ty using $1 cortex density + running $2 iterations \(gpu=$3\):
 
 time ./topographica -p cortex_density=$1 -p gpu=$3 examples/gcal_oo_or.ty -c "topo.sim.run($2)"
