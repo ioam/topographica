@@ -324,7 +324,7 @@ Topographica levels:
    Limitations:
     Need to do all programming yourself. Can't mix and match code
     with other researchers very easily, because they are unlikely to
-    CHoose similar interfaces or make similar assumptions.
+    choose similar interfaces or make similar assumptions.
 #. Everything in 1., plus event-driven simulator with
    parameterizable objects, debugging output, etc. (using just
    simulation.py from topo/base/ in addition to Parameter support
