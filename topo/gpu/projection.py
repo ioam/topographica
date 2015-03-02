@@ -17,7 +17,7 @@ def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
     Divisive normalisation computed on the GPU
     """
     if not projection.has_norm_total:
-        projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.norm_total_gpu, autosync=True)
+        projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.norm_total_gpu, autosync=False)
     
     projection.norm_total_gpu = 1.0/projection.norm_total_gpu
 
@@ -31,39 +31,15 @@ def CFPLF_Hebbian_Sparse_GPU(projection):
     to the weights in a projection.
     """
     single_conn_lr = projection.learning_rate/projection.n_units
-
     # Transfering source and destination activities:
-    src_activity_gpu = gpuarray.to_gpu(np.ravel(projection.src.activity).astype(np.float32))
-    dest_activity_gpu = gpuarray.to_gpu(np.ravel(projection.dest.activity).astype(np.float32))
-
-
-    # if projection.name == 'LGNOnAfferent':
-
-    #     print projection.name
-    #     print "src:", projection.src.name
-    #     print src_activity_gpu.get()
-    #     print "dest:", projection.dest.name
-    #     print dest_activity_gpu.get()
-
-    #     w = projection.weights_gpu.Val.get()
-    #     r = projection.nzrows_gpu.get()
-    #     c = projection.nzcols_gpu.get()
-
-    #     sa = np.ravel(projection.src.activity)
-    #     da = np.ravel(projection.dest.activity)
-
-    #     for i in range(projection.nzcount):
-    #         print "Initial weight: ", w[i]
-    #         print "Learning: ", single_conn_lr * sa[c[i]] * da[r[i]]
-
+    src_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.src.activity).astype(np.float32), )
+    dest_activity_gpu = gpuarray.to_gpu_async(np.ravel(projection.dest.activity).astype(np.float32), )
 
     # Computing Hebbian learning weights:
-    cuda.Context.synchronize()
-    projection.hebbian_kernel(np.float32(single_conn_lr), projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
-    cuda.Context.synchronize()
-    
+    projection.hebbian_kernel(single_conn_lr, projection.nzrows_gpu, projection.nzcols_gpu, src_activity_gpu, dest_activity_gpu, projection.weights_gpu.Val, range=slice(0, projection.nzcount, 1))
+
     # Normalisation values:
-    projection.norm_total_gpu = projection.weights_gpu.mv(projection.norm_ones_gpu, autosync=True)
+    projection.weights_gpu.mv(projection.norm_ones_gpu, y=projection.norm_total_gpu, autosync=False)
     projection.has_norm_total = True
 
 
@@ -72,12 +48,11 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
     """
-    projection.input_buffer_gpu = gpuarray.to_gpu(np.ravel(projection.input_buffer).astype(np.float32))
-    projection.activity_gpu_buffer = projection.weights_gpu.mv(projection.input_buffer_gpu, alpha=projection.strength, autosync=False)
-    projection.activity = np.reshape(projection.activity_gpu_buffer.get(), projection.activity.shape)
+    projection.input_buffer_pagelocked[:] = np.ravel(projection.input_buffer).astype(np.float32)  
+    projection.input_buffer_gpu = gpuarray.to_gpu_async(projection.input_buffer_pagelocked, stream=projection.pycuda_stream)
+    projection.weights_gpu.mv(projection.input_buffer_gpu, alpha=projection.strength, y=projection.activity_gpu_buffer, autosync=False, stream=projection.pycuda_stream)
+    projection.activity_gpu_buffer.get_async(ary=projection.activity, stream=projection.pycuda_stream)
 
-    # print "Projection: ", projection.name
-    # print "Computed activity: ", projection.activity
 
 
 class GPUSparseCFProjection(SparseCFProjection):
@@ -122,7 +97,6 @@ class GPUSparseCFProjection(SparseCFProjection):
         tups = sorted(zip(nzrows, nzcols))
         nzrows = [x[0] for x in tups]
         nzcols = [x[1] for x in tups]
-
 
         '''
         Allocating a page-locked piece of memory for the activity so that GPU could transfer data to the
