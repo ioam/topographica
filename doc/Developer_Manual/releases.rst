@@ -13,7 +13,7 @@ package being released, e.g. param or imagen.
    in or does not need to be included in the release, and ensure
    that none of it will be checked in until the release is complete.
 #. Increment the release number in ``<project>.__init__.__version__``,
-   ``setup.py``, and the release notes in doc/index.rst. Note that 
+   setup.py, and the release notes in doc/index.rst. Note that 
    some ioam projects (e.g. param) contain more than one package 
    (param and numbergen in param's case).
 #. Update the documentation files, especially README.rst,
