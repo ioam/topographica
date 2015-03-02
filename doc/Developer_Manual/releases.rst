@@ -56,17 +56,21 @@ package being released, e.g. param or imagen.
 #. Are all the buildbot and other continuous tests still passing? You
    might need to trigger new builds to check all platforms are ok.
 #. Save all open files from within any editor, and sure that they 
-   have all been committed to git
-#. Tag the repository with something like::
+   have all been committed to git and pushed to github.
+#. Tag the repository::
 
      git tag -a v1.2.1 -m 'Release version 1.2.1'
-     git push
-   
+
    If you have to repeat this step, the next time you
-   will need ``-f -a``, not just ``-a``, and may need to push using
-   ``git push -f origin v1.2.1``.
+   will need ``-f -a``, not just ``-a``.
 #. In python, do ``import <project> ; project.__version__.verify()`` to test
    that the version information has been declared properly.
+#. Push your tag to github::
+
+     git push origin v1.2.1
+
+   Note that if you are repeating the tagging, you may need to push 
+   using ``git push -f origin v1.2.1``.
 #. Test creating a distribution and inspect the results:
 
    #. ``python setup.py sdist``
