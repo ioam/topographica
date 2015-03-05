@@ -23,6 +23,22 @@ from topo.base.functionfamily import Hebbian,IdentityLF  # pyflakes:ignore (API 
 
 
 
+class AntiHebbian(LearningFn):
+    """
+    Opposite of the basic Hebbian rule.
+
+    Same as Dayan and Abbott, 2001, equation 8.3, except that the
+    weight change is negative.  I.e., each weight decreases in
+    proportion to the product of this neuron's activity and the input
+    activity.
+
+    Requires some form of output_fn normalization for stability.
+    """
+
+    def __call__(self,input_activity, unit_activity, weights, single_connection_learning_rate):
+        weights -= single_connection_learning_rate * unit_activity * input_activity
+
+
 class Oja(LearningFn):
     """
     Oja's rule (Oja, 1982; Dayan and Abbott, 2001, equation 8.16.)
