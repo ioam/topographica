@@ -153,7 +153,7 @@ class Bitmap(param.Parameterized):
             # being accumulated.
             self.clipped_pixels = self.clipped_pixels + to_clip
             inArray.clip(0,max_pixel_value,out=inArray)
-            self.verbose("Bitmap: clipped",to_clip,"image pixels that were out of range")
+            self.verbose("Bitmap: clipped %s image pixels that were out of range",to_clip)
 
         r,c = inArray.shape
         # The size is (width,height), so we swap r and c:

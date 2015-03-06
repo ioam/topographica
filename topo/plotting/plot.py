@@ -134,7 +134,7 @@ def make_template_plot(channels,sheet_views,density=None,
                     # range_ is None means we're calculating the range
                     return plot
 
-     param.Parameterized(name="make_template_plot").verbose('No',name,'plot constructed for this Sheet')
+     param.Parameterized(name="make_template_plot").verbose('No %s plot constructed for this Sheet',name)
      return None
 
 

@@ -162,7 +162,7 @@ class JointNormalizingCFSheet(CFSheet):
 
             for p in projlist:
                 p.apply_learn_output_fns(active_units_mask=active_units_mask)
-                self.debug('  ',p.name)
+                self.debug('  %s',p.name)
 
 
     def learn(self):
@@ -348,8 +348,8 @@ class SettlingCFSheet(JointNormalizingCFSheet):
                if self.activation_count < self.strict_tsettle:
                    if len(conn.dest_port)>2 and conn.dest_port[2] == 'Afferent':
                        continue
-            self.verbose("Sending output on src_port %s via connection %s to %s" %
-                         (str(src_port), conn.name, conn.dest.name))
+            self.verbose("Sending output on src_port %s via connection %s to %s",
+                         src_port, conn.name, conn.dest.name)
             e=EPConnectionEvent(self.simulation.convert_to_time_type(conn.delay)+self.simulation.time(),conn,data)
             self.simulation.enqueue_event(e)
 

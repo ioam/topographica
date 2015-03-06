@@ -358,12 +358,12 @@ def set_output_path(path):
     """
 
     if not os.path.exists(path):
-        cmdline_main.message("Creating %s"%path)
+        cmdline_main.message("Creating %s",path)
         try:
             os.makedirs(path)
         except OSError, e:
             if e.errno != errno.EEXIST:
-                cmdline_main.warning("Unable to set output path %s"%path)
+                cmdline_main.warning("Unable to set output path %s",path)
 
     param.normalize_path.prefix=path
 
@@ -710,7 +710,7 @@ def process_argv(argv):
         import os,multiprocessing
         total_cores = multiprocessing.cpu_count()
         num_threads = int(os.environ.get('OMP_NUM_THREADS',total_cores))
-        openmp_main.verbose("Using %d threads on a machine with %d detected CPUs" % (num_threads, total_cores))
+        openmp_main.verbose("Using %d threads on a machine with %d detected CPUs",num_threads, total_cores)
     except:
         pass
 

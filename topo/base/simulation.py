@@ -489,8 +489,8 @@ class CommandEvent(Event):
         # Presumably here to avoid importing __main__ into the rest of the file
         import __main__
 
-        param.Parameterized(name='CommandEvent').message("Running command %s" \
-                                                         % (self.command_string))
+        param.Parameterized(name='CommandEvent').message("Running command %s",
+                                                         self.command_string)
         try:
             exec self.command_string in __main__.__dict__
         except:
@@ -1320,7 +1320,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
 
             if self.events[0].time < self.time():
                 # Warn and then discard events scheduled *before* the current time
-                self.warning('Discarding stale (unprocessed) event',repr(self.events[0]))
+                self.warning('Discarding stale (unprocessed) event %s',repr(self.events[0]))
                 self.events.pop(0)
 
             elif self.events[0].time > self.time():
@@ -1343,7 +1343,7 @@ class Simulation(param.Parameterized,OptionalSingleton):
             else:
                 # Pop and call the event at the head of the queue.
                 event = self.events.pop(0)
-                self.debug(lambda:"Delivering %s"%(event))
+                self.debug("Delivering %s",event)
                 event(self)
                 did_event=True
 
@@ -1663,7 +1663,7 @@ class RealTimeSimulation(Simulation):
             self.warning("Realtime fault. Sleep delay of %f requires realtime sleep of %.2f ms."
                          %(delay,sleep_ms))
         else:
-            self.debug("sleeping. delay =",delay,"real delay =",sleep_ms,"ms.")
+            self.debug("sleeping. delay = %s real delay = %s ms.",delay,sleep_ms)
             time.sleep(sleep_ms/1000.0)
         self._real_timestamp = self.real_time()
         self.time += delay

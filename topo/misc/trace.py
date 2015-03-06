@@ -536,8 +536,8 @@ class ActivityMovie(param.Parameterized):
         if not os.access(dirname,os.F_OK):
             os.makedirs(dirname)
 
-        self.verbose('Writing',len(self.frames),'to files like "%s"'%filename_pat)
+        self.verbose('Writing %s to files like "%s"',len(self.frames),filename_pat)
         for t,f in zip(self.frame_times,self.frames):
             filename = filename_pat% t
-            self.debug("Writing frame",repr(filename))
+            self.debug("Writing frame %s",filename)
             f.image.save(filename)

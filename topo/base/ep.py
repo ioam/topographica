@@ -36,7 +36,8 @@ class PulseGenerator(EventProcessor):
 
     def input_event(self,conn,data):
         """On input from self, generate output. Ignore all other inputs."""
-        self.verbose("Received event from ",conn.src,'on port',conn.dest_port,'with data',data)
+        self.verbose("Received event from %s on port %s with data %s",
+                     conn.src,conn.dest_port,data)
         self.send_output(data=self.amplitude)
 
     def start(self):
@@ -67,11 +68,11 @@ class ThresholdUnit(EventProcessor):
     def input_event(self,conn,data):
         if conn.dest_port == 'input':
             self.accum += data
-            self.verbose("Received ",data,"; accumulator now",self.accum)
+            self.verbose("Received %s; accumulator now %s",data,self.accum)
             if self.accum > self.threshold:
                 self.send_output(data=self.amplitude)
                 self.accum = 0
-                self.verbose(`self` + ' firing, amplitude = ' + `self.amplitude`)
+                self.verbose('%s firing, amplitude = %s',self,self.amplitude)
 
 
 class SumUnit(EventProcessor):
@@ -85,12 +86,12 @@ class SumUnit(EventProcessor):
 
     def input_event(self,conn,data):
         self.value += data
-        self.debug("received",data,"from",conn.src,"value =",self.value)
+        self.debug("received %s from %s value = %s",data,conn.src,self.value)
 
     def process_current_time(self):
-        self.debug("process_current_time called, time =",self.simulation.time(),"value =",self.value)
+        self.debug("process_current_time called, value = %s",self.value)
         if self.value:
-            self.debug("Sending output:",self.value)
+            self.debug("Sending output: %s",self.value)
             self.send_output(data=self.value)
             self.value = 0.0
 

@@ -120,9 +120,9 @@ class PtzTracker(Sheet):
         self.y_deg_uvc=self.y_deg*64/2
         self.x_deg_uvc=self.x_deg*64/2
 
-        self.message("Coordinates of the new position: (%f,%f)" % (self.coor[0],self.coor[1]))
-        self.verbose("Current position of the camera (%f,%f) along the two directions of the camera" % (self.curr_x,self.curr_y))
-        self.verbose("Movements in degrees of uvcdynctrl (%f,%f)" % (self.x_deg_uvc,self.y_deg_uvc))
+        self.message("Coordinates of the new position: (%f,%f)",self.coor[0],self.coor[1])
+        self.verbose("Current position of the camera (%f,%f) along the two directions of the camera",self.curr_x,self.curr_y)
+        self.verbose("Movements in degrees of uvcdynctrl (%f,%f)",self.x_deg_uvc,self.y_deg_uvc)
 
          #Use class PTZ in order to move the camera with uvcdynctrl
          # Max Ranges (determined with uvcdynctrl -v -c)

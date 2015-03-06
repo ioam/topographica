@@ -55,7 +55,7 @@ class Composer(Sheet):
 
     def input_event(self,conn,data):
 
-        self.verbose("Received %s input from %s." % (NxN(data.shape),conn.src))
+        self.verbose("Received %s input from %s.", NxN(data.shape), conn.src)
 
         self.__dirty = True
 
