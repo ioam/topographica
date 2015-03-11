@@ -582,7 +582,7 @@ def t_action(option,opt_str,value,parser):
     if value in  ["list","unit","flakes","coverage"]:
         local_targets += [value]
         value = None
-    
+
     # Other targets require runtests.py
     if value == "quick":
         local_targets += ["unit","flakes"]
@@ -599,7 +599,12 @@ def t_action(option,opt_str,value,parser):
     # a module, the code it contains for conditionally using xvfb-run
     # can be applied here as well.
     if "flakes" in local_targets:
-        targets = ["topo", "external/param", "external/paramtk", "external/imagen", "external/lancet"]
+        targets = ["topo",
+                   "external/param",
+                   "external/paramtk",
+                   "external/holoviews",
+                   "external/imagen",
+                   "external/lancet"]
         ret = subprocess.call(["python","topo/tests/buildbot/pyflakes-ignore.py","--ignore", "topo/tests","--total"] + targets)
         return_code += abs(ret)
 
@@ -797,7 +802,7 @@ def process_argv(argv):
             except:
                 cmdline_main.warning(
                     "Could not load IPython extension 'topo.misc.ipython'; ignored error was:\n%s"%traceback.format_exc())
-                
+
             ipshell()
 
     global return_code
