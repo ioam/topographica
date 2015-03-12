@@ -330,16 +330,14 @@ class TopoConsole(tk.AppWindow,tk.TkParameterized):
         type.__setattr__(Parameterized,'warning',self.gui_warning)
         #type.__setattr__(Parameterized,'message',self.gui_message)
 
-    def gui_warning(self,*args):
+    def gui_warning(self,msg,*args,**kw):
         stat = self.__get_status_bar()
-        s = string.join(args,' ')
-        stat.warn(s)
-        self.__orig_P_warning(self,*args)
+        stat.warn(msg%args)
+        self.__orig_P_warning(self,msg,*args,**kw)
 
-    def gui_message(self,*args):
+    def gui_message(self,msg,*args,**kw):
         stat = self.__get_status_bar()
-        s = string.join(args,' ')
-        stat.message(s)
+        stat.message(msg%args)
         self.__orig_P_message(self,*args)
 
 
