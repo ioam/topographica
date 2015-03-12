@@ -10,7 +10,7 @@ import numpy as np
 from holoviews.interface.collector import Reference
 from holoviews.core.options import Compositor
 from holoviews.ipython import IPTestCase
-from holoviews.operation import chain, collapse, toRGB, matrix_overlay
+from holoviews.operation import chain, collapse, factory, image_overlay
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
 
@@ -30,7 +30,7 @@ from command import measure_cog
 
 CoG_spec = "Image.X CoG * Image.Y CoG * Image.BlueChannel"
 XYCoG = chain.instance(group='XYCoG', name='XYCoG',
-                       operations = [matrix_overlay.instance(spec=CoG_spec), toRGB.instance()])
+                       operations = [image_overlay.instance(spec=CoG_spec), factory.instance()])
 Compositor.register(Compositor("Image.X CoG * Image.Y CoG", XYCoG, 'XYCoG', 'display'))
 
 
