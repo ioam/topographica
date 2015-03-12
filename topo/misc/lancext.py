@@ -15,7 +15,8 @@ import numpy.version as np_version
 import param
 
 from holoviews import NdMapping, Layout
-from holoviews.interface.collector import Collector, Collator
+from holoviews.interface.collector import Collector
+from holoviews.core.element import Collator
 
 from lancet import PrettyPrinted, vcs_metadata
 from lancet import Command
@@ -466,7 +467,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
                        for key in self.metadata if '.' not in key]
 
 
-      path_metadata = [(key, viewtree.path_items.get(tuple(key.split('.')), float('nan')))
+      path_metadata = [(key, viewtree.items.get(tuple(key.split('.')), float('nan')))
                        for key in self.metadata if '.' in key]
 
       ViewFile(directory= param.normalize_path.prefix,
@@ -513,7 +514,7 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       """Pretty print the collector in a declarative style."""
       split = '\n%s' % (tab*(level+1))
       spec_strs = []
-      for path, val in self.collector.path_items.items():
+      for path, val in self.collector.items():
          key = repr('.'.join(path)) if isinstance(path, tuple) else 'None'
          spec_strs.append('(%s,%s%s%r),' % (key, split, tab, val))
 
