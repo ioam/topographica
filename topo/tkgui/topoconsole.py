@@ -12,7 +12,6 @@ import copy
 import sys
 import re
 import webbrowser
-import string
 from Tkinter import Frame, Button, \
      LEFT, YES, Label, DISABLED, \
      NORMAL, DoubleVar
