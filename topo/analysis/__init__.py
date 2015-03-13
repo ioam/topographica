@@ -8,6 +8,7 @@ and sets the appropriate Topographica-specific hooks.
 import numpy as np
 
 from holoviews.interface.collector import Reference
+from holoviews import HSV, Image
 from holoviews.core.options import Compositor
 from holoviews.ipython import IPTestCase
 from holoviews.operation import chain, collapse, factory, image_overlay
@@ -32,6 +33,56 @@ CoG_spec = "Image.X CoG * Image.Y CoG * Image.BlueChannel"
 XYCoG = chain.instance(group='XYCoG', name='XYCoG',
                        operations = [image_overlay.instance(spec=CoG_spec), factory.instance()])
 Compositor.register(Compositor("Image.X CoG * Image.Y CoG", XYCoG, 'XYCoG', 'display'))
+
+
+import param
+from holoviews import RGB, Image, ElementOperation
+from holoviews.operation.normalization import raster_normalization
+
+
+class colorizeHSV(ElementOperation):
+    """
+    Given an Overlay consisting of two Image elements, colorize the
+    data in the bottom Image with the data in the top Image using
+    the HSV color space.
+    """
+
+    group = param.String(default='ColorizedHSV', doc="""
+        The group string for the colorized output (an RGB element)""")
+
+    output_type = RGB
+
+    def _process(self, overlay, key=None):
+        if len(overlay) != 2:
+            raise Exception("colorizeHSV required an overlay of two Image elements as input.")
+        if (len(overlay[0].value_dimensions), len(overlay[1].value_dimensions)) != (1,1):
+            raise Exception("Each Image element must have single value dimension.")
+        if overlay[0].shape != overlay[1].shape:
+            raise Exception("Mismatch in the shapes of the data in the Image elements.")
+
+
+        hue = overlay[1]
+        Hdim = hue.value_dimensions[0]
+        H = hue.clone(hue.data.copy(),
+                      value_dimensions=[Hdim(cyclic=True, range=hue.range(Hdim.name))])
+
+        normfn = raster_normalization.instance()
+        if self.p.input_ranges:
+            S = normfn.process_element(overlay[0], key, *self.p.input_ranges)
+        else:
+            S = normfn.process_element(overlay[0], key)
+
+        C = Image(np.ones(hue.data.shape),
+                   bounds=self.get_overlay_extents(overlay), group='F', label='G')
+
+        C.value_dimensions[0].range = (0,1)
+        S.value_dimensions[0].range = (0,1)
+        return HSV(H * C * S).relabel(group=self.p.group)
+
+
+Compositor.register(
+    Compositor('CFView.CF Weight * Image.Orientation_Preference',
+               colorizeHSV, 'ColorizedWeights', mode='display'))
 
 
 class TopoIPTestCase(IPTestCase):
