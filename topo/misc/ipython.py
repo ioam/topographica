@@ -154,7 +154,7 @@ from holoviews.plotting import RasterPlot
 from holoviews.ipython.widgets import RunProgress
 RunProgress.run_hook = topo.sim.run
 
-Store.defaults.update({CFView: RasterPlot})
+Store.registry.update({CFView: RasterPlot})
 
 try:
     from lancet import ViewFrame
