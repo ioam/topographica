@@ -226,7 +226,6 @@ sys.modules['topo.pattern.random']=pattern.random
 sys.modules['topo.pattern.patterncoordinator']=pattern.patterncoordinator
 sys.modules['topo.pattern.image']=pattern.image
 sys.modules['topo.pattern.rds']=imagen.random
-pattern.Translator.time_fn = sim.time
 
 from topo.misc.featurecoordinators import feature_coordinators
 imagen.patterncoordinator.PatternCoordinator.feature_coordinators.update(feature_coordinators)
