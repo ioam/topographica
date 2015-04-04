@@ -114,16 +114,9 @@ class Bitmap(param.Parameterized):
         and width, 0.5 is 1/2 the original size.  The original Image
         is not changed.
         """
-        if factor%1==0:
-            # CEBALERT: work around PIL bug (see SF #2820821) so that
-            # integer scaling works in the typical case (where an
-            # image is being enlarged).
-            a = np.array(self.image).repeat(int(factor),axis=0).repeat(int(factor),axis=1)
-            zoomed = Image.fromarray(a,mode=self.image.mode)
-        else:
-            x,y = self.image.size
-            zx, zy = int(x*factor), int(y*factor)
-            zoomed = self.image.resize((zx,zy))
+        x,y = self.image.size
+        zx, zy = int(x*factor), int(y*factor)
+        zoomed = self.image.resize((zx,zy))
 
         return zoomed
 
