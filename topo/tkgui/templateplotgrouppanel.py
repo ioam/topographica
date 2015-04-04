@@ -276,7 +276,8 @@ class SheetPanel(TemplatePlotGroupPanel):
         sheets = [s for s in topo.sim.objects(self.sheet_type).values()]
         channels = ['None']
         for sheet in sheets:
-            channels += [k.replace('Preference','') for k in sheet.views.Maps.keys()
+            paths = [k[0] if isinstance(k, tuple) else k for k in sheet.views.Maps.keys()]
+            channels += [k.replace('Preference','') for k in paths
                          if not k.startswith('_') and 'Preference' in k]
         self.plotgroup.params()['color_channel'].objects = channels
         self.plotgroup.color_channel = 'None'
