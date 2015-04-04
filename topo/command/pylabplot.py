@@ -34,7 +34,8 @@ from topo.plotting.plot import make_template_plot
 from param import ParameterizedFunction, normalize_path
 from param.parameterized import ParamOverrides
 
-from holoviews import Overlay
+from holoviews import HoloMap
+from holoviews.core.overlay import CompositeOverlay
 from holoviews.plotting import NdLayout, CurvePlot
 from holoviews.plotting.element import OverlayPlot
 
@@ -618,10 +619,10 @@ class tuning_curve(PylabPlotCommand):
 
         x_axis = p.x_axis.capitalize()
         vmap = p.sheet.views.Curves[x_axis.capitalize()+"Tuning"]
-        time = vmap.dim_range('Time')[1]
+        time = vmap.range('Time')[1]
 
         curves = []
-        if vmap.dimensions(labels=True) == 'X':
+        if vmap.dimensions(label=True) == 'X':
             for coord in p.coords:
                 x, y = coord
                 current_map = vmap[x, y, time, :, :, :]
@@ -629,17 +630,16 @@ class tuning_curve(PylabPlotCommand):
                 curves.append(curve_map.overlay(p.group_by))
         else:
             current_map = vmap[time, :, :, :]
-            curve_map = current_map.sample(p.coords).collate(p.x_axis.capitalize())
+            curve_map = current_map.sample(p.coords).to.curve(p.x_axis.capitalize(), 'Response')
             overlaid_curves = curve_map.overlay(p.group_by)
             if not isinstance(curves, NdLayout): curves = [overlaid_curves]
 
         figs = []
         for coord, curve in zip(p.coords,curves):
-            fig = plt.figure()
-            ax = plt.subplot(111)
-            plot = OverlayPlot if isinstance(curve.last, Overlay) else CurvePlot
-            plot(curve, center=p.center, relative_labels=p.relative_labels,
-                 show_legend=p.legend)(ax)
+            if isinstance(curve, HoloMap): curve = curve.last
+            plot = OverlayPlot if isinstance(curve, CompositeOverlay) else CurvePlot
+            fig = plot(curve, center=p.center, relative_labels=p.relative_labels,
+                       show_legend=p.legend)()
             self._generate_figure(p, fig)
             figs.append((coord, fig))
 
