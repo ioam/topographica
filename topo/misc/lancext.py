@@ -17,11 +17,11 @@ import param
 from holoviews import NdMapping, Layout
 from holoviews.interface.collector import Collector
 from holoviews.core.element import Collator
+from holoviews.core.io import Pickler
 
 from lancet import PrettyPrinted, vcs_metadata
 from lancet import Command
 from lancet import Launcher, review_and_launch
-from lancet import ViewFile
 from lancet import Log, FileInfo, FileType
 from lancet import List, Args
 
@@ -470,12 +470,11 @@ class BatchCollector(PrettyPrinted, param.Parameterized):
       path_metadata = [(key, viewtree.items.get(tuple(key.split('.')), float('nan')))
                        for key in self.metadata if '.' in key]
 
-      ViewFile(directory= param.normalize_path.prefix,
-               hash_suffix = False).save(filename,
-                                         viewtree,
-                                         metadata=dict(spec_metadata
-                                                     + path_metadata
-                                                     + [('time',topo_time)]))
+
+      Pickler.save(viewtree,
+                   param.normalize_path(filename),
+                   key=dict(spec_metadata + path_metadata + [('time',topo_time)]))
+
 
    def verify(self, specs, model_params):
       """
