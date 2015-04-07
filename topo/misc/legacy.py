@@ -6,14 +6,12 @@ import collections as odict
 
 import sys
 import decimal # CEBALERT: when did decimal appear? too late to use?
-from holoviews import Image
 
 import param
 
 from snapshots import PicklableClassAttributes
 
 from topo import version_int
-from topo.misc.util import unit_value
 
 # CEBALERT: remove the extraneous "import param"s
 

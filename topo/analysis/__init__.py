@@ -36,7 +36,7 @@ Compositor.register(Compositor("Image.X CoG * Image.Y CoG", XYCoG, 'XYCoG', 'dis
 
 
 import param
-from holoviews import RGB, Image, ElementOperation
+from holoviews import RGB, ElementOperation
 from holoviews.operation.normalization import raster_normalization
 
 
