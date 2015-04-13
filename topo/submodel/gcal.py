@@ -2,7 +2,7 @@ import topo
 import param
 import imagen
 
-from topo import projection, responsefn, learningfn, transferfn, sheet, sparse
+from topo import projection, responsefn, learningfn, transferfn, sheet
 import topo.learningfn.optimized
 import topo.transferfn.optimized
 import topo.responsefn.optimized
@@ -209,6 +209,3 @@ class ExamplesGCAL(ModelGCAL):
                                       'lateral_excitatory',
                                       'lateral_inhibitory'])
         return model
-
-
-
