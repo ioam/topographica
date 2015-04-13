@@ -14,10 +14,9 @@ from collections import defaultdict
 
 import param
 import lancet
-import topo
 import numbergen
 from holoviews.core.tree import AttrTree
-
+import topo.sheet, topo.projection
 from specifications import SheetSpec, ProjectionSpec, ModelSpec, ArraySpec # pyflakes:ignore (API import)
 from topo.misc.commandline import global_params
 
@@ -524,27 +523,17 @@ class Model(param.Parameterized):
 
 
 # Register the sheets and projections available in Topographica
-from topo.sheet import optimized as sheetopt
-from topo.projection import optimized as projopt
-from topo import projection
-
-sheet_classes = [c for c in topo.sheet.__dict__.values() if
-                 (isinstance(c, type) and issubclass(c, topo.sheet.Sheet))]
-
-sheet_classes_opt = [c for c in sheetopt.__dict__.values() if
-                     (isinstance(c, type) and issubclass(c, topo.sheet.Sheet))]
-
-projection_classes = [c for c in projection.__dict__.values() if
-                      (isinstance(c, type) and issubclass(c, projection.Projection))]
-
-projection_classes_opt = [c for c in projopt.__dict__.values() if
-                          (isinstance(c, type) and issubclass(c, projection.Projection))]
-
-for obj_class in (sheet_classes + sheet_classes_opt
-                  + projection_classes + projection_classes_opt):
+def register_submodel_decorators(classes,superclass=None):
+    """
+    Register a Model decorator for each of the non-abstract classes provided.
+    Only registers those that are subclasses of the given superclass, if specified.
+    """
     with param.logging_level('CRITICAL'):
-        # Do not create a decorator if declared as abstract
-        if not hasattr(obj_class, "_%s__abstract" % obj_class.name):
-            Model.register_decorator(obj_class)
+        for c in classes:
+            if (isinstance(c, type) and 
+                (superclass==None or issubclass(c, superclass)) and
+                (not hasattr(c, "_%s__abstract" % c.name))):
+               Model.register_decorator(c)
 
-
+register_submodel_decorators(param.concrete_descendents(topo.sheet.Sheet).values())
+register_submodel_decorators(param.concrete_descendents(topo.projection.Projection).values())
