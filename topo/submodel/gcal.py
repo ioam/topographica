@@ -12,9 +12,6 @@ import topo.transferfn.misc
 from topo.submodel import Model, ArraySpec, order_projections # pyflakes:ignore (API import)
 from topo.submodel.earlyvision import EarlyVisionModel
 
-from topo.sparse.sparsecf import SparseConnectionField, CFPLF_Hebbian_Sparse, CFPOF_DivisiveNormalizeL1_Sparse, CFPRF_DotProduct_Sparse, compute_sparse_joint_norm_totals
-
-
 @Model.definition
 class ModelGCAL(EarlyVisionModel):
 
@@ -215,22 +212,3 @@ class ExamplesGCAL(ModelGCAL):
 
 
 
-@Model.definition
-class SparseGCAL(ModelGCAL):
-    """
-    Reproduces the results of the examples/gcal.ty file using sparse representation.
-    """
-
-    @Model.SparseCFProjection
-    def V1_afferent(self, src_properties, dest_properties):
-        params = super(SparseGCAL, self).V1_afferent(src_properties, dest_properties)
-        return dict(params[0],
-                    cf_type = SparseConnectionField,
-                    response_fn = CFPRF_DotProduct_Sparse,
-                    learning_fn = CFPLF_Hebbian_Sparse,
-                    weights_output_fns = [CFPOF_DivisiveNormalizeL1_Sparse])
-
-    @Model.SettlingCFSheet
-    def V1(self, properties):
-        params = super(SparseGCAL, self).V1(properties)
-        return dict(params, joint_norm_fn=compute_sparse_joint_norm_totals)
