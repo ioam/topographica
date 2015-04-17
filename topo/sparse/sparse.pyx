@@ -11,7 +11,7 @@ the sparse matrix are available.
 
 from cython.operator cimport dereference as deref
 from cpython cimport bool
-import numpy, scipy
+import numpy
 cimport numpy
 import cython
 
@@ -259,16 +259,6 @@ cdef class csarray_float:
             result[rowInds[i], colInds[i]] += self.thisPtr.coeff(rowInds[i], colInds[i])
 
         return result
-
-    def toSparseArray(self):
-        """
-        Convert this sparse matrix into scipy.sparse CSR matrix.
-        """
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
-        cdef numpy.ndarray[float, ndim=1, mode="c"] values
-        rowInds, colInds, values = self.getTriplets()
-        return scipy.sparse.csr_matrix((values, (rowInds, colInds)), shape=self.shape)
 
 
     def compress(self):
