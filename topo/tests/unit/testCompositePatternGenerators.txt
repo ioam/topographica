@@ -1,4 +1,4 @@
->>> from topo.pattern import Composite, Gaussian
+>>> from imagen import Composite, Gaussian
 >>> from imagen.deprecated import SeparatedComposite
 >>> from topo import numbergen
 >>> from topo.base.simulation import Simulation

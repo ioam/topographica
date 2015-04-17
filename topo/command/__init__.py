@@ -542,7 +542,7 @@ def default_analysis_function():
             save_plotgroup("Projection",projection=p)
 
     # Test response to a standardized pattern
-    from topo.pattern import Gaussian
+    from imagen import Gaussian
     from analysis import pattern_present
     from math import pi
     pattern_present(inputs=Gaussian(orientation=pi/4,aspect_ratio=4.7))

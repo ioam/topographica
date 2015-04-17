@@ -2,15 +2,12 @@ import unittest, copy, shutil, tempfile
 from numpy.testing import assert_array_equal
 
 from param import normalize_path,resolve_path
-import topo
-import __main__
+from imagen import Gaussian, Line
 
-from topo.base.sheet import Sheet
+import topo
 from topo.sheet import GeneratorSheet
 from topo.command import save_snapshot,load_snapshot
-from topo.pattern import Gaussian, Line
-from topo.base.simulation import Simulation,SomeTimer
-
+from topo.base.simulation import Simulation
 
 SNAPSHOT_NAME = "testsnapshot.typ"
 SIM_NAME = "testsnapshots"

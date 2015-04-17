@@ -16,9 +16,8 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from param import resolve_path
-from topo.base.boundingregion import BoundingBox
-from topo.pattern.image import FileImage
-from topo.transferfn import IdentityTF
+from holoviews import BoundingBox
+from imagen.image import FileImage
 
 
 

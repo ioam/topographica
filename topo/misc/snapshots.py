@@ -30,8 +30,8 @@ class PicklableClassAttributes(object):
     # where we also need to do output_fn=x -> output_fns=[x].
     # Should implement fuller support in legacy, and remove this from here.
     param_name_changes = {}
-    # e.g. you change topo.pattern.Gaussian.aspect_ratio to aspect_ration
-    # _param_name_changes['topo.pattern.Gaussian']={'aspect_ratio':'aspect_ration'}
+    # e.g. you change imagen.Gaussian.aspect_ratio to aspect_ration
+    # _param_name_changes['imagen.Gaussian']={'aspect_ratio':'aspect_ration'}
     #
     # (not yet finished - do we need to add information about version numbers?)
 

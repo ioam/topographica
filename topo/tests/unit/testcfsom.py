@@ -4,20 +4,13 @@ the PlotEngine system from a simulation.
 """
 
 import unittest
-import random
-from pprint import pprint
 from math import pi
 
-import param
+from holoviews import BoundingBox
+from imagen import Gaussian
 
-import topo
-from topo.pattern import Gaussian
-from topo.plotting import plot
-from topo.plotting.bitmap import *
-from topo.base.sheet import Sheet, BoundingBox
 from topo.base.simulation import *
-from topo.base import patterngenerator
-from topo.base.cf import CFProjection, CFSheet
+from topo.base.cf import CFProjection
 from topo.learningfn.optimized import CFPLF_Hebbian_opt
 from topo.sheet import *
 from topo import numbergen
@@ -25,8 +18,7 @@ from topo import numbergen
 ### Only for ImageSaver
 from topo.base.simulation import EventProcessor
 from topo.misc.util import NxN
-from pprint import *
-import Image, ImageOps
+import Image
 
 from nose.tools import istest, nottest
 ### JABALERT: The ImageSaver class should probably be deleted,

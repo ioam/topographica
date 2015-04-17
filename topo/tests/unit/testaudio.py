@@ -4,7 +4,7 @@ import unittest
 from numpy.testing import assert_array_almost_equal
 
 from topo import pattern
-import topo.pattern.audio
+import imagen.audio
 
 from nose.plugins.skip import SkipTest
 raise SkipTest("Daisy not found")
@@ -12,7 +12,7 @@ raise SkipTest("Daisy not found")
 class TestAudio(unittest.TestCase):
 
     def setUp(self):
-        self.audio = pattern.audio.AudioFile(filename="sounds/complex/daisy.wav")
+        self.audio = imagen.audio.AudioFile(filename="sounds/complex/daisy.wav")
 
     def test_basic(self):
         result = self.audio()

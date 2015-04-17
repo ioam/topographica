@@ -4,21 +4,12 @@ Tests for the tkParameterized classes.
 
 
 ## CB: add test for change of po
-
-
-import __main__
 import unittest
 from Tkinter import Frame,Toplevel
 
 import param
 import paramtk as tk
-
-from topo.base.simulation import Simulation
-from topo.base.patterngenerator import PatternGenerator
-from topo.base.sheet import Sheet
-
-from topo.pattern import Gaussian, Ring, Rectangle
-from topo.transferfn import PiecewiseLinear
+from imagen import PatternGenerator, Gaussian, Ring, Rectangle
 
 
 # CEBALERT: will be replaced with call to param.tk.initialize() when

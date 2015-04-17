@@ -6,14 +6,11 @@ SOM-based learning functions for CFProjections.
 from math import ceil
 
 import param
+from imagen import PatternGenerator, Gaussian
+from holoviews import BoundingBox
 
 from topo.base.arrayutil import L2norm, array_argmax
-from topo.base.boundingregion import BoundingBox
 from topo.base.cf import CFPLearningFn
-from topo.base.patterngenerator import PatternGenerator
-
-from topo.pattern import Gaussian
-
 
 ### JABHACKALERT: This class will be removed once the examples no
 ### longer rely upon it
