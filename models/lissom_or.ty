@@ -27,10 +27,11 @@ compared exhaustively to the original simulations.
 """
 
 
-from math import pi, sqrt
+from math import pi
 
-import numpy
 import param
+import imagen
+import imagen.deprecated
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
@@ -78,7 +79,7 @@ inputs=[input_type(x=numbergen.UniformRandom(lbound=-0.75,ubound=0.75,seed=12+i)
                    size=0.088388, aspect_ratio=4.66667, scale=1.0)
         for i in xrange(num_inputs)]
 
-combined_inputs = pattern.SeparatedComposite(min_separation=2.2*0.27083,generators=inputs)
+combined_inputs = imagen.deprecated.SeparatedComposite(min_separation=2.2*0.27083,generators=inputs)
 
 
 
@@ -102,19 +103,19 @@ topo.sim.connect(
     'Retina','V1',delay=0.10,strength=1.0,name='Afferent',
     connection_type=projection.CFProjection,learning_rate=0.9590,
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
-    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083))
+    weights_generator=imagen.random.GaussianCloud(gaussian_size=2*0.27083))
 
 topo.sim.connect(
     'V1','V1',delay=0.05,strength=0.9,name='LateralExcitatory',
     connection_type=projection.ResizableCFProjection,learning_rate=2.55528,
     nominal_bounds_template=sheet.BoundingBox(radius=0.10417),
-    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.10417))
+    weights_generator=imagen.random.GaussianCloud(gaussian_size=2*0.10417))
 
 topo.sim.connect(
     'V1','V1',delay=0.05,strength=-0.9,name='LateralInhibitory',
     connection_type=projection.CFProjection,learning_rate=1.80873,
     nominal_bounds_template=sheet.BoundingBox(radius=0.22917),
-    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.22917))
+    weights_generator=imagen.random.GaussianCloud(gaussian_size=2*0.22917))
 
 
 

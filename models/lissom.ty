@@ -83,10 +83,12 @@ import copy
 
 import numpy
 import param
+import imagen
+import imagen.deprecated
 
 from topo.misc.util import linearly_interpolate
 
-from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
+from topo import learningfn,numbergen,transferfn,projection,responsefn,sheet
 
 import topo.learningfn.optimized
 import topo.learningfn.projfn
@@ -99,17 +101,17 @@ import topo.sheet.optimized
 
 
 ### Specify weight initialization, response function, and learning function
-projection.CFProjection.cf_shape=pattern.Disk(smoothing=0.0)
-projection.CFProjection.weights_generator=pattern.Constant()
+projection.CFProjection.cf_shape=imagen.Disk(smoothing=0.0)
+projection.CFProjection.weights_generator=imagen.Constant()
 projection.CFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
 projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
 projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 
 ### Default for tutorial
-pattern.Line.scale=0.9
-pattern.Gaussian.size=0.08333
-pattern.Gaussian.aspect_ratio=4.0
+imagen.Line.scale=0.9
+imagen.Gaussian.size=0.08333
+imagen.Gaussian.aspect_ratio=4.0
 
 numpy.random.seed((500,500))
 
@@ -249,10 +251,10 @@ sf_relative_sizes=[sf_spacing**(channel-1) for channel in sf_channel_nums]
 num_inputs=1
 
 if p.dataset=="Gaussian":
-    input_type=pattern.Gaussian
+    input_type=imagen.Gaussian
     ids=1.0
 elif p.dataset in natural_image_sets:
-    input_type=pattern.image.FileImage
+    input_type=imagen.image.FileImage
     ids=4.0
 
 
@@ -302,7 +304,7 @@ for e in eyes:
                       2*(r*(cone=='Red')+g*(cone=='Green')+b*(cone=='Blue')) + \
                       numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+5+6*i)*('rg' not in p.dims)))
                 for i in xrange(num_inputs)]
-                input_composite=pattern.SeparatedComposite(min_separation=2.2*v1aff_radius,generators=inputs)
+                input_composite=imagen.deprecated.SeparatedComposite(min_separation=2.2*v1aff_radius,generators=inputs)
 
             elif p.dataset in natural_image_sets:
                 scalingfactor=[1.4*0.9,1.4,1.4*0.97] if 'cr' in p.dims else [1.0,1.0,1.0]
@@ -333,11 +335,11 @@ for e in eyes:
                             (2.0-numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+4+5*i)) if e=='Right' else \
                             numbergen.UniformRandom(lbound=0,ubound=2,seed=input_seed+4+5*i))
                 for f,i in zip(image_filenames,range(len(image_filenames)))]
-                input_composite=pattern.Selector(generators=inputs)
+                input_composite=imagen.Selector(generators=inputs)
 
 
             if n != '':
-                input_moved=pattern.OldSweeper(
+                input_moved=imagen.deprecated.OldSweeper(
                     generator=copy.deepcopy(input_composite),
                     step=int(n),speed=speed,
                     orientation=numbergen.UniformRandom(lbound=-pi,ubound=pi,seed=input_seed-1))
@@ -370,9 +372,9 @@ topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=p.cortex_density,
                                            upper_bound=0.626 if p.dataset in natural_image_sets else 0.633)])
 
 # DoG weights for the LGN
-centerg   = pattern.Gaussian(size=0.07385,aspect_ratio=1.0,
+centerg   = imagen.Gaussian(size=0.07385,aspect_ratio=1.0,
                              output_fns=[transferfn.DivisiveNormalizeL1()])
-surroundg = pattern.Gaussian(size=0.29540,aspect_ratio=1.0,
+surroundg = imagen.Gaussian(size=0.29540,aspect_ratio=1.0,
                              output_fns=[transferfn.DivisiveNormalizeL1()])
 
 # Scale the strength of the afferent connections, depending on how much patterns overlap
@@ -415,7 +417,7 @@ for e in eyes:
                             strength=strength_scale*(-1)**center_polarities.index(l),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
 
-                            weights_generator=pattern.Gaussian(size=0.07385*sf_spacing**(channel-1),aspect_ratio=1.0,
+                            weights_generator=imagen.Gaussian(size=0.07385*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
                         topo.sim.connect(
@@ -425,7 +427,7 @@ for e in eyes:
                             strength=strength_scale*(-1)**(1+center_polarities.index(l)),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
 
-                            weights_generator=pattern.Gaussian(size=0.29540*sf_spacing**(channel-1),aspect_ratio=1.0,
+                            weights_generator=imagen.Gaussian(size=0.29540*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
                 if 'cr' in p.dims:
@@ -472,7 +474,7 @@ for e in eyes:
                             strength=strength_scale*(-1)**center_polarities.index(l)/len(cone_types),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
 
-                            weights_generator=pattern.Gaussian(size=0.07385*sf_spacing**(channel-1),aspect_ratio=1.0,
+                            weights_generator=imagen.Gaussian(size=0.07385*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
                         topo.sim.connect(
@@ -482,7 +484,7 @@ for e in eyes:
                             strength=strength_scale*(-1)**(1+center_polarities.index(l))/len(cone_types),
                             nominal_bounds_template=sheet.BoundingBox(radius=lgnaff_radius*sf_spacing**(channel-1)),
 
-                            weights_generator=pattern.Gaussian(size=0.29540*sf_spacing**(channel-1),aspect_ratio=1.0,
+                            weights_generator=imagen.Gaussian(size=0.29540*sf_spacing**(channel-1),aspect_ratio=1.0,
                                                                output_fns=[transferfn.DivisiveNormalizeL1()]))
 
 
@@ -492,7 +494,7 @@ for e in eyes:
                     dest_port=('Activity','JointNormalize', 'Afferent'),
                     strength=1.0,name=e+opponent+'LGN'+l+'Afferent'+n,
                     connection_type=projection.CFProjection,
-                    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*v1aff_radius),
+                    weights_generator=imagen.random.GaussianCloud(gaussian_size=2*v1aff_radius),
                     nominal_bounds_template=sheet.BoundingBox(radius=v1aff_radius),
                     learning_rate=0.9590/num_aff/ids)
 
@@ -502,7 +504,7 @@ for e in eyes:
                     dest_port=('Activity','JointNormalize', 'Afferent'),
                     strength=1.0,name=e+'LGN'+l+'Afferent'+n+'SF'+str(channel),
                     connection_type=projection.CFProjection,
-                    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*v1aff_radius*sf_spacing**(channel-1)),
+                    weights_generator=imagen.random.GaussianCloud(gaussian_size=2*v1aff_radius*sf_spacing**(channel-1)),
                     nominal_bounds_template=sheet.BoundingBox(radius=v1aff_radius*sf_spacing**(channel-1)),
                     learning_rate=0.9590/num_aff/ids)
 
@@ -510,14 +512,14 @@ for e in eyes:
 topo.sim.connect('V1','V1',delay=0.05,name='LateralExcitatory',
                  connection_type=projection.ResizableCFProjection,
                  strength=1.2 if p.dataset in natural_image_sets else 0.9,
-                 weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.10417),
+                 weights_generator=imagen.random.GaussianCloud(gaussian_size=2*0.10417),
                  nominal_bounds_template=sheet.BoundingBox(radius=0.10417),
                  learning_rate=2.55528/ids)
 
 topo.sim.connect('V1','V1',delay=0.05,name='LateralInhibitory',
                  connection_type=projection.CFProjection,
                  strength=-1.75 if p.dataset in natural_image_sets else -0.9,
-                 weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.22917),
+                 weights_generator=imagen.random.GaussianCloud(gaussian_size=2*0.22917),
                  nominal_bounds_template=sheet.BoundingBox(radius=0.22917),
                  learning_rate=1.80873/ids/5 if p.dataset in natural_image_sets else 1.80873/ids)
 

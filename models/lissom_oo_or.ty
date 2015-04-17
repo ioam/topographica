@@ -31,6 +31,8 @@ from math import pi
 
 import numpy
 import param
+import imagen
+import imagen.deprecated
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
 
@@ -94,7 +96,7 @@ inputs=[input_type(x=numbergen.UniformRandom(lbound=-(p.area/2.0+0.25),
                    size=0.088388, aspect_ratio=4.66667, scale=1.0)
         for i in xrange(total_num_inputs)]
 
-combined_inputs = pattern.SeparatedComposite(min_separation=2.2*0.27083,generators=inputs)
+combined_inputs = imagen.deprecated.SeparatedComposite(min_separation=2.2*0.27083,generators=inputs)
 
 
 ### Sheets
