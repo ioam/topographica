@@ -5,7 +5,6 @@ from topo.sheet import SettlingCFSheet
 from topo.base.cf import CFSheet
 
 import pycuda.gpuarray as gpuarray
-from pycuda.elementwise import ElementwiseKernel
 import pycuda.driver as cuda
 import pycuda.autoinit
 import scikits.cuda.cusparse as cusparse
