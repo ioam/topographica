@@ -4,6 +4,7 @@ Tests for the tkParameterized classes.
 
 
 ## CB: add test for change of po
+import __main__
 import unittest
 from Tkinter import Frame,Toplevel
 

@@ -6,14 +6,15 @@ the PlotEngine system from a simulation.
 import unittest
 from math import pi
 
+import numbergen
 from holoviews import BoundingBox
 from imagen import Gaussian
 
+import topo
 from topo.base.simulation import *
 from topo.base.cf import CFProjection
 from topo.learningfn.optimized import CFPLF_Hebbian_opt
 from topo.sheet import *
-from topo import numbergen
 
 ### Only for ImageSaver
 from topo.base.simulation import EventProcessor

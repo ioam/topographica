@@ -9,7 +9,7 @@ import Tkinter
 import param
 import paramtk as tk
 
-from topo.base.patterngenerator import PatternGenerator
+from imagen import PatternGenerator
 
 # CEBALERT: will be replaced with call to param.tk.initialize() when
 # param.tk doesn't depend on anything from tkgui.__init__ (plus this

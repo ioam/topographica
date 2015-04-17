@@ -1,3 +1,4 @@
+import __main__
 import unittest, copy, shutil, tempfile
 from numpy.testing import assert_array_equal
 
