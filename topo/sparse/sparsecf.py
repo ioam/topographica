@@ -34,6 +34,7 @@ except:
 
 sparse_type = np.float32
 
+
 class CFSPLF_Plugin(param.Parameterized):
     """CFSPLearningFunction applying the specified single_cf_fn to each Sparse CF."""
 
@@ -336,6 +337,7 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
     Compute norm_total for each CF in each projection from a group to be
     normalized jointly.
     """
+
     # Assumes that all Projections in the list have the same r,c size
     assert len(projlist)>=1
     joint_sum = np.zeros(projlist[0].dest.shape,dtype=np.float64)
@@ -349,6 +351,7 @@ def compute_sparse_joint_norm_totals(projlist,active_units_mask=True):
         p.norm_total = joint_sum.copy()
 
 
+
 def CFPOF_DivisiveNormalizeL1_Sparse(projection):
     """
     Sparse CF Projection output function applying L1 divisive normalization
@@ -360,6 +363,7 @@ def CFPOF_DivisiveNormalizeL1_Sparse(projection):
         projection.weights.CFWeightTotals(projection.norm_total)
     projection.weights.DivisiveNormalizeL1(projection.norm_total)
     projection.has_norm_total = False
+
 
 
 def CFPLF_Hebbian_Sparse(projection):
@@ -388,11 +392,13 @@ def CFPLF_Hebbian_Sparse_opt(projection):
     projection.has_norm_total = True
 
 
+
 def CFPRF_DotProduct_Sparse(projection):
     """
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights.
     """
+
     projection.weights.DotProduct(projection.strength, projection.input_buffer, projection.activity)
 
 

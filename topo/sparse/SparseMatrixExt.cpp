@@ -83,8 +83,8 @@ template <class T, int S=Eigen::ColMajor>
       #pragma omp for schedule(guided, 8)
       for (k=0; k<this->outerSize(); ++k) {
 		for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
-          activity[it.col()] += input[it.row()] * it.value();
-        }
+		  activity[it.col()] += input[it.row()] * it.value();
+		}
 	  }
       #pragma omp for schedule(guided, 8)
 	  for (j=0; j<num_cfs; ++j) {
@@ -122,9 +122,9 @@ template <class T, int S=Eigen::ColMajor>
       #pragma omp for schedule(guided, 8)
 	  for (int k=0; k<this->outerSize(); ++k) {
 		for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
-          y = it.col();
+		  y = it.col();
 		  it.valueRef() += dest_act[y] * lr * src_act[it.row()];
-          norm_total[y] += it.value();
+		  norm_total[y] += it.value();
 		}
 	  }
 	}
