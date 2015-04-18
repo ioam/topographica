@@ -1,5 +1,5 @@
 """
-GCAL with high cortical density
+GCAL
 
 Simple but robust single-population V1 model orientation map from:
 
@@ -26,7 +26,6 @@ import numpy
 import param
 
 from topo import learningfn,numbergen,transferfn,pattern,projection,responsefn,sheet
-from topo.sparse.sparsecf import SparseCFProjection
 
 import topo.learningfn.optimized
 import topo.learningfn.projfn
@@ -91,16 +90,7 @@ p.add(
         Learning rate for the lateral excitatory projection to V1."""),
 
     inh_lr=param.Number(default=0.3,bounds=(0.0,None),doc="""
-        Learning rate for the lateral inhibitory projection to V1."""),
-
-    gpu=param.Boolean(default=False,bounds=(0,1),doc="""
-        Sets whether the simulation should be run on a GPU"""))
-
-
-if p.gpu:
-    from topo.gpu.projection import GPUSparseCFProjection
-    from topo.gpu.sheet import compute_sparse_gpu_joint_norm_totals, GPUSettlingCFSheet
-
+        Learning rate for the lateral inhibitory projection to V1."""))
 
 
 ### Specify weight initialization, response function, and learning function
@@ -110,7 +100,6 @@ projection.CFProjection.learning_fn=learningfn.optimized.CFPLF_Hebbian_opt()
 projection.CFProjection.weights_output_fns=[transferfn.optimized.CFPOF_DivisiveNormalizeL1_opt()]
 projection.SharedWeightCFProjection.response_fn=responsefn.optimized.CFPRF_DotProduct_opt()
 
-sheet_type = GPUSettlingCFSheet if p.gpu else sheet.SettlingCFSheet
 
 ### Input patterns
 if p.dataset=="Gaussian":
@@ -148,7 +137,7 @@ topo.sim['Retina']=sheet.GeneratorSheet(nominal_density=p.retina_density,
 
 # LGN has lateral connections for divisive normalization
 for s in ['LGNOn','LGNOff']:
-    topo.sim[s]=sheet.SettlingCFSheet(nominal_density=p.lgn_density,
+    topo.sim[s]=sheet.optimized.SettlingCFSheet_Opt(nominal_density=p.lgn_density,
         nominal_bounds=sheet.BoundingBox(radius=p.area/2.0+0.25+0.5),
         output_fns=[transferfn.misc.HalfRectify()],
         tsettle=2,strict_tsettle=1,measure_maps=False)
@@ -163,12 +152,12 @@ for s in ['LGNOn','LGNOff']:
                      nominal_bounds_template=sheet.BoundingBox(radius=0.25))
 
 
-topo.sim['V1'] = sheet_type(nominal_density=p.cortex_density,
+topo.sim['V1'] = sheet.SettlingCFSheet(nominal_density=p.cortex_density,
     tsettle=16, plastic=True,
     nominal_bounds=sheet.BoundingBox(radius=p.area/2.0),
     output_fns=[transferfn.misc.HomeostaticResponse()])
 
-topo.sim['V1'].joint_norm_fn=compute_sparse_gpu_joint_norm_totals if p.gpu else topo.sheet.optimized.compute_joint_norm_totals_opt
+topo.sim['V1'].joint_norm_fn=topo.sheet.optimized.compute_joint_norm_totals_opt
 
 
 ### Connections
@@ -201,26 +190,28 @@ topo.sim.connect(
 topo.sim.connect(
     'LGNOn','V1',delay=0.05,strength=p.aff_strength,name='LGNOnAfferent',
     dest_port=('Activity','JointNormalize','Afferent'),
-    connection_type=GPUSparseCFProjection if p.gpu else projection.CFProjection,learning_rate=p.aff_lr,
+    connection_type=projection.CFProjection,learning_rate=p.aff_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
-    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083))
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083),
+    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
 
 topo.sim.connect(
     'LGNOff','V1',delay=0.05,strength=p.aff_strength,name='LGNOffAfferent',
     dest_port=('Activity','JointNormalize','Afferent'),
-    connection_type=GPUSparseCFProjection if p.gpu else projection.CFProjection,learning_rate=p.aff_lr,
+    connection_type=projection.CFProjection,learning_rate=p.aff_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.27083),
-    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083))
+    weights_generator=pattern.random.GaussianCloud(gaussian_size=2*0.27083),
+    learning_fn=learningfn.optimized.CFPLF_Hebbian_opt())
 
 topo.sim.connect(
     'V1','V1',delay=0.05,strength=p.exc_strength,name='LateralExcitatory',
-    connection_type=GPUSparseCFProjection if p.gpu else projection.CFProjection,learning_rate=p.exc_lr,
+    connection_type=projection.CFProjection,learning_rate=p.exc_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.104),
     weights_generator=pattern.Gaussian(aspect_ratio=1.0, size=0.05))
 
 topo.sim.connect(
     'V1','V1',delay=0.05,strength=-1.0*p.inh_strength,name='LateralInhibitory',
-    connection_type=GPUSparseCFProjection if p.gpu else projection.CFProjection,learning_rate=p.inh_lr,
+    connection_type=projection.CFProjection,learning_rate=p.inh_lr,
     nominal_bounds_template=sheet.BoundingBox(radius=0.22917),
     weights_generator=pattern.random.GaussianCloud(gaussian_size=0.15))
 

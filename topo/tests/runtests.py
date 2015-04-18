@@ -116,9 +116,12 @@ TRAINSCRIPTS = [
     "models/lissom.ty",
 #    "models/lissom_fsa.ty",  # CEBALERT: disabled for now (needs special case - look_at=fsa not v1, see below)
     "topo/tests/gcal_legacy.ty",
-    "topo/tests/gcal_sparse.ty",
-    "topo/tests/gcal_sparse_gpu.ty"
+    "examples/gcal_sparse.ty"
     ]
+
+GPU_TRAINSCRIPTS = [
+    "topo/tests/gcal_sparse_gpu.ty"
+]
 
 # (and a different list for speedtests - see test_script.py).
 #
@@ -138,6 +141,10 @@ target['training'] = []
 for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
     target['training'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=p.testdp))
+for script in GPU_TRAINSCRIPTS:
+    script_path = os.path.join(scripts_dir,script)
+    target['training'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=5))
+
 
 # CEBALERT: should use the code above but just with the changes for running without weave.
 target['unopt'] = []
