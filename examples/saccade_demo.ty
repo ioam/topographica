@@ -16,8 +16,6 @@ import pdb
 from itertools import cycle
 import pylab
 
-from param.parameterized import VERBOSE,NORMAL,DEBUG
-
 from topo.base.boundingregion import BoundingBox
 from topo.base.cf import CFProjection
 
@@ -38,10 +36,6 @@ import topo.pattern.image
 topo.base.sheet.Sheet.nominal_density = 48
 topo.base.sheet.Sheet.nominal_bounds = BoundingBox(radius=0.5)
 topo.pattern.image.FileImage.size = 2.0
-
-SaccadeController.print_level = NORMAL
-
-ShiftingGeneratorSheet.print_level = NORMAL
 
 
 
