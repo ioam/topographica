@@ -1,0 +1,53 @@
+{
+    "batch_description": "", 
+    "batch_name": "gpu_benchmark", 
+    "batch_tag": "", 
+    "constant_items": [
+        [
+            "gpu", 
+            true
+        ], 
+        [
+            "iterations", 
+            1000
+        ]
+    ], 
+    "constant_keys": [
+        "gpu", 
+        "iterations"
+    ], 
+    "end_time": [
+        2015, 
+        3, 
+        15, 
+        4, 
+        37, 
+        26, 
+        6, 
+        74, 
+        0
+    ], 
+    "launcher": "Launcher(batch_name='gpu_benchmark',args=List(key='cortex_density',values=[48, 142, 162],fp_precision=4) * List(key='iterations',values=[1000],fp_precision=4) * List(key='gpu',values=[True],fp_precision=4),command=ShellCommand(executable='/afs/inf.ed.ac.uk/user/s11/s1137931/honours/topographica/timing_script.sh',posargs=['cortex_density', 'iterations', 'gpu'],long_prefix='--'),description='',tag='',output_directory='benchmarks',subdir=[],metadata={})", 
+    "metadata": {}, 
+    "platform": {
+        "lancet_version": "0.8-38-g0aa2cd2", 
+        "platform": "Linux-2.6.32-431.23.3.el6.x86_64-x86_64-with-redhat-6.5-Carbon", 
+        "python_version": "CPython2.7.8"
+    }, 
+    "root_directory": "/afs/inf.ed.ac.uk/user/s11/s1137931/honours/topographica/benchmarks/2015-03-15_0413-gpu_benchmark", 
+    "timestamp": [
+        2015, 
+        3, 
+        15, 
+        4, 
+        13, 
+        8, 
+        6, 
+        74, 
+        0
+    ], 
+    "timestamp_format": "%Y-%m-%d_%H%M", 
+    "varying_keys": [
+        "cortex_density"
+    ]
+}

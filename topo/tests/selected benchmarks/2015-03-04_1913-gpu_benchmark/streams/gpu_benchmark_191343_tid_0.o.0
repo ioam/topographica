@@ -1,0 +1,22 @@
+HOST:	melmac.inf.ed.ac.uk
+PARAMS:	48	1000	False
+VERSION:	Traditional_topographica
+Loading Topographica ant quitting:
+0.275u 0.153s 0:00.44 95.4%	0+0k 0+16io 0pf+0w
+----------------------------------
+Loading Topographica + setting up gcal_oo_or.ty using 48 cortex density + running 0 iterations (gpu=False):
+In file included from /afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/ndarraytypes.h:1804,
+                 from /afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/ndarrayobject.h:17,
+                 from /afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/arrayobject.h:4,
+                 from /afs/inf.ed.ac.uk/user/s11/s1137931/.cache/scipy/python27_compiled/sc_0502b25215eac479ef9a3f7927031f860.cpp:22:
+/afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/npy_1_7_deprecated_api.h:15:2: warning: #warning "Using deprecated NumPy API, disable it by " "#defining NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION"
+18.931u 0.578s 0:15.27 127.7%	0+0k 0+1096io 0pf+0w
+----------------------------------
+Loading Topographica + setting up gcal_oo_or.ty using 48 cortex density + running 1000 iterations (gpu=False):
+In file included from /afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/ndarraytypes.h:1804,
+                 from /afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/ndarrayobject.h:17,
+                 from /afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/arrayobject.h:4,
+                 from /afs/inf.ed.ac.uk/user/s11/s1137931/.cache/scipy/python27_compiled/sc_c95614b4ff385e809c93acc54e6921f80.cpp:22:
+/afs/inf.ed.ac.uk/user/s11/s1137931/honours/venv/lib/python2.7/site-packages/numpy/core/include/numpy/npy_1_7_deprecated_api.h:15:2: warning: #warning "Using deprecated NumPy API, disable it by " "#defining NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION"
+167.169u 0.834s 0:33.64 499.3%	0+0k 0+1032io 0pf+0w
+----------------------------------
