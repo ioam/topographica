@@ -11,7 +11,7 @@ from holoviews.interface.collector import Reference
 from holoviews import HSV, Image
 from holoviews.core.options import Compositor
 from holoviews.ipython import IPTestCase
-from holoviews.operation import chain, collapse, factory, image_overlay
+from holoviews.operation import chain, operation, factory, image_overlay
 import imagen.colorspaces
 from featuremapper.command import Collector, measure_response
 
@@ -204,10 +204,10 @@ Collector.for_type(Sheet, sheet_hook, referencer=SimRef)
 Collector.for_type(Projection, projection_hook, referencer=SimRef)
 Collector.for_type(measure_cog,  measurement_hook, mode='merge')
 
-# # Setting default channel operation for ON-OFF visualization
+# Setting default channel operation for ON-OFF visualization
+op_subtract = operation.instance(op=lambda x, k: x.collapse(np.subtract))
 Compositor.register(Compositor('CFView.CF_Weight * CFView.CF_Weight',
-                               collapse.instance(operator=np.subtract),
-                               'OnOff CFs', mode='data'))
+                               op_subtract, 'OnOff CFs', mode='data'))
 
 # Featuremapper hooks
 
