@@ -233,6 +233,7 @@ class measure_cog(ParameterizedFunction):
 Store.options.Contours.Gravity = Options('style', linewidth=1.0)
 Store.options.Image.X_CoG = Options('style', cmap='gray')
 Store.options.Image.Y_CoG = Options('style', cmap='gray')
+Store.options.CFView.OnOff_CFs = Options('style', cmap='RdYlBu_r', interpolation='nearest')
 
 import types
 
