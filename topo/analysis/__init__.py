@@ -73,7 +73,7 @@ class colorizeHSV(ElementOperation):
             S = normfn.process_element(overlay[0], key)
 
         C = Image(np.ones(hue.data.shape),
-                   bounds=self.get_overlay_extents(overlay), group='F', label='G')
+                  bounds=self.get_overlay_bounds(overlay), group='F', label='G')
 
         C.value_dimensions[0].range = (0,1)
         S.value_dimensions[0].range = (0,1)
