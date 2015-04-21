@@ -205,7 +205,7 @@ Collector.for_type(Projection, projection_hook, referencer=SimRef)
 Collector.for_type(measure_cog,  measurement_hook, mode='merge')
 
 # Setting default channel operation for ON-OFF visualization
-op_subtract = operation.instance(op=lambda x, k: x.collapse(np.subtract))
+op_subtract = operation.instance(output_type=CFView, op=lambda x, k: x.collapse(np.subtract))
 Compositor.register(Compositor('CFView.CF_Weight * CFView.CF_Weight',
                                op_subtract, 'OnOff CFs', mode='data'))
 
