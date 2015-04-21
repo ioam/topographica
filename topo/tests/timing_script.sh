@@ -2,7 +2,7 @@
 
 echo HOST:"\t"$HOST
 
-echo PARAMS:"\t"$1"\t"$2"\t"$3
+echo PARAMS:"\t"$1"\t"$2"\t"$3"\t"$4
 
 echo VERSION:"\t"`git describe --tags`
 
@@ -12,14 +12,14 @@ time ../../topographica -c quit
 
 echo ----------------------------------
 
-echo Loading Topographica + setting up gcal_sparse.ty using $1 cortex density + running 0 iterations \(gpu=$3\):
+echo Loading Topographica + setting up $1 using $2 cortex density + running 0 iterations \(gpu=$4\):
 
-time ../../topographica -p cortex_density=$1 -p gpu=$3 ../../examples/gcal_sparse.ty -c "topo.sim.run(0)"
+time ../../topographica -p cortex_density=$2 -p gpu=$4 $1 -c "topo.sim.run(0)"
 
 echo ----------------------------------
 
-echo Loading Topographica + setting up gcal_sparse.ty using $1 cortex density + running $2 iterations \(gpu=$3\):
+echo Loading Topographica + setting up $1 using $2 cortex density + running $3 iterations \(gpu=$4\):
 
-time ../../topographica -p cortex_density=$1 -p gpu=$3 ../../examples/gcal_sparse.ty -c "topo.sim.run($2)"
+time ../../topographica -p cortex_density=$2 -p gpu=$4 $1 -c "topo.sim.run($3)"
 
 echo ----------------------------------
