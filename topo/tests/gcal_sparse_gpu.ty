@@ -1,0 +1,13 @@
+"""
+Model equivalent to examples/gcal.ty before moving to class-based
+approach. This version uses sparse representation for projections and GPU for calculations.
+
+This script is used to test against gcal_sparse.ty_DATA. This was the
+original training test data for the GCAL model (the first version of
+gcal.ty_DATA) and should match nearly identically with gcal.ty_DATA.
+"""
+import __main__, param, os
+
+__main__.__dict__['gpu'] = True
+execfile(os.path.join(param.resolve_path(".", path_to_file=False),
+                      'examples/gcal_sparse.ty'), __main__.__dict__)

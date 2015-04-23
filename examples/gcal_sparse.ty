@@ -1,0 +1,94 @@
+"""
+Model equivalent to examples/gcal.ty before moving to class-based
+approach. This version uses sparse representation for projections.
+
+This script is used to test against gcal_sparse.ty_DATA. This was the
+original training test data for the GCAL model (the first version of
+gcal.ty_DATA) and should match nearly identically with gcal.ty_DATA.
+
+The model is designed to use sparse projections with a possibility
+of adding GPU accelleration.
+"""
+
+import param
+from topo.sparse.sparsecf import SparseConnectionField, CFPLF_Hebbian_Sparse,\
+                                 CFPOF_DivisiveNormalizeL1_Sparse, CFPRF_DotProduct_Sparse,\
+                                 compute_sparse_joint_norm_totals
+# Parameters that can be passed on the command line using -p
+from topo.misc.commandline import global_params as p
+
+
+p.add(
+    cortex_density=param.Number(default=48.0,bounds=(0,None),
+        inclusive_bounds=(False,True),doc="""
+        The nominal_density to use for V1."""),
+    gpu=param.Boolean(default=False,bounds=(0,1),doc="""
+        Sets whether the simulation should be run on a GPU"""))
+
+if p.gpu:
+    from topo.gpu.projection import CFPRF_DotProduct_Sparse_GPU, CFPLF_Hebbian_Sparse_GPU,\
+                                    CFPOF_DivisiveNormalizeL1_Sparse_GPU
+    from topo.gpu.sheet import compute_sparse_gpu_joint_norm_totals
+
+from topo.submodel.gcal import ModelGCAL
+from topo.submodel import Model
+
+if p.gpu:
+    joint_norm_fn_type = compute_sparse_gpu_joint_norm_totals
+    projection_dec_type = Model.GPUSparseCFProjection
+    sheet_dec_type = Model.GPUSettlingCFSheet
+    response_fn_type = CFPRF_DotProduct_Sparse_GPU
+    learning_fn_type = CFPLF_Hebbian_Sparse_GPU
+    weights_output_fns_types = [CFPOF_DivisiveNormalizeL1_Sparse_GPU]
+else:
+    joint_norm_fn_type = compute_sparse_joint_norm_totals
+    projection_dec_type = Model.SparseCFProjection
+    sheet_dec_type = Model.SettlingCFSheet
+    response_fn_type = CFPRF_DotProduct_Sparse
+    learning_fn_type = CFPLF_Hebbian_Sparse
+    weights_output_fns_types = [CFPOF_DivisiveNormalizeL1_Sparse]
+
+
+@Model.definition
+class SparseGCAL(ModelGCAL):
+    """
+    Reproduces the results of the examples/gcal.ty file using sparse representation
+    with or without the GPU support.
+    """
+
+    @sheet_dec_type
+    def V1(self, properties):
+        params = super(SparseGCAL, self).V1(properties)
+        return dict(params,
+                    nominal_density=p.cortex_density,
+                    joint_norm_fn=joint_norm_fn_type)
+
+    @projection_dec_type
+    def V1_afferent(self, src_properties, dest_properties):
+        params = super(SparseGCAL, self).V1_afferent(src_properties, dest_properties)
+        return dict(params[0],
+                    cf_type = SparseConnectionField,
+                    response_fn = response_fn_type,
+                    learning_fn = learning_fn_type,
+                    weights_output_fns = weights_output_fns_types)
+
+    @projection_dec_type
+    def lateral_excitatory(self, src_properties, dest_properties):
+        params = super(SparseGCAL, self).lateral_excitatory(src_properties, dest_properties)
+        return dict(params,
+                    cf_type = SparseConnectionField,
+                    response_fn = response_fn_type,
+                    learning_fn = learning_fn_type,
+                    weights_output_fns = weights_output_fns_types)
+
+    @projection_dec_type
+    def lateral_inhibitory(self, src_properties, dest_properties):
+        params = super(SparseGCAL, self).lateral_inhibitory(src_properties, dest_properties)
+        return dict(params,
+                    cf_type = SparseConnectionField,
+                    response_fn = response_fn_type,
+                    learning_fn = learning_fn_type,
+                    weights_output_fns = weights_output_fns_types)
+
+
+topo.sim.model = SparseGCAL()
