@@ -6,7 +6,7 @@ from topo.sparse.sparsecf import SparseCFProjection, SparseConnectionField
 import pycuda.gpuarray as gpuarray
 from pycuda.elementwise import ElementwiseKernel
 import pycuda.driver as cuda
-import pycuda.autoinit
+import pycuda.autoinit                   # pyflakes:ignore (API import)
 import scikits.cuda.cusparse as cusparse
 
 cusparse.init()

@@ -6,7 +6,7 @@ from topo.base.cf import CFSheet
 
 import pycuda.gpuarray as gpuarray
 import pycuda.driver as cuda
-import pycuda.autoinit
+import pycuda.autoinit               # pyflakes:ignore (API import)
 import scikits.cuda.cusparse as cusparse
 
 cusparse.init()
