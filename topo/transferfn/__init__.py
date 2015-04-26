@@ -30,9 +30,9 @@ from numbergen import TimeAwareRandomState
 # Imported here so that all TransferFns will be in the same package
 from imagen.transferfn import TransferFn, TransferFnWithState   # pyflakes:ignore (API import)
 from imagen.transferfn import IdentityTF, Threshold             # pyflakes:ignore (API import)
-from imagen.transferfn import BinaryThreshold,DivisiveNormalizeL1  # pyflakes:ignore (API import)
-from imagen.transferfn import DivisiveNormalizeL2,DivisiveNormalizeLinf # pyflakes:ignore (API import)
-from imagen.transferfn import DivisiveNormalizeLp # pyflakes:ignore (API import)
+from imagen.transferfn import BinaryThreshold, Hysteresis                # pyflakes:ignore (API import)
+from imagen.transferfn import DivisiveNormalizeL1, DivisiveNormalizeL2   # pyflakes:ignore (API import)
+from imagen.transferfn import DivisiveNormalizeLinf, DivisiveNormalizeLp # pyflakes:ignore (API import)
 
 from featuremapper import PatternDrivenAnalysis
 
@@ -502,46 +502,6 @@ class ScalingTF(TransferFnWithState):
                 self.x_avg = (1.0-self.smoothing)*x + self.smoothing*self.x_avg
 
         x *= self.sf
-
-
-class Hysteresis(TransferFnWithState):
-    """
-    Smoothly interpolates a matrix between simulation time steps, with
-    exponential falloff.
-    """
-
-    time_constant  = param.Number(default=0.3,doc="""
-        Controls the time scale of the interpolation.""")
-
-    def __init__(self,**params):
-        super(Hysteresis,self).__init__(**params)
-        self.first_call = True
-        self.__current_state_stack=[]
-        self.old_a = 0
-        PatternDrivenAnalysis.pre_presentation_hooks.append(self.reset)
-
-    def __call__(self,x):
-        if self.first_call is True:
-           self.old_a = x.copy() * 0.0
-           self.first_call = False
-
-        #if (float(topo.sim.time()) %1.0) <= 0.15: self.old_a =  self.old_a* 0
-        new_a = x.copy()
-        self.old_a = self.old_a + (new_a - self.old_a)*self.time_constant
-        x*=0
-        x += self.old_a
-
-    def reset(self):
-        self.old_a *= 0
-
-    def state_push(self):
-        self.__current_state_stack.append((copy.copy(self.old_a), copy.copy(self.first_call)))
-        super(Hysteresis,self).state_push()
-
-    def state_pop(self):
-        self.old_a,self.first_call =  self.__current_state_stack.pop()
-        super(Hysteresis,self).state_pop()
-
 
 _public = list(set([_k for _k,_v in locals().items() if isinstance(_v,type) and issubclass(_v,TransferFn)]))
 
