@@ -325,7 +325,7 @@ class TemporalScatter(TransferFnWithState):
 
 
 
-class HomeostaticResponse(TransferFnWithState):
+class AdaptiveThreshold(TransferFnWithState):
     """
     Adapts the parameters of a linear threshold function to maintain a
     constant desired average activity. Defined in:
@@ -458,6 +458,8 @@ class HomeostaticResponse(TransferFnWithState):
         super(HomeostaticResponse, self).state_pop()
 
 
+# Old alias for AdaptiveThreshold
+HomeostaticResponse = AdaptiveThreshold
 
 class AttributeTrackingTF(TransferFnWithState):
     """
