@@ -34,8 +34,6 @@ from imagen.transferfn import BinaryThreshold, Hysteresis                # pyfla
 from imagen.transferfn import DivisiveNormalizeL1, DivisiveNormalizeL2   # pyflakes:ignore (API import)
 from imagen.transferfn import DivisiveNormalizeLinf, DivisiveNormalizeLp # pyflakes:ignore (API import)
 
-from featuremapper import PatternDrivenAnalysis
-
 # CEBHACKALERT: these need to respect the mask - which will be passed in.
 
 
