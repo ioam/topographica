@@ -19,7 +19,7 @@ def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
     if not projection.has_norm_total:
         projection.weights_gpu.mv(projection.norm_ones_gpu,
                                   y=projection.norm_total_gpu, autosync=False)
-    
+
     projection.norm_total_gpu = 1.0/projection.norm_total_gpu
 
     projection.normalize_kernel(projection.nzrows_gpu,
@@ -55,7 +55,7 @@ def CFPRF_DotProduct_Sparse_GPU(projection):
     Sparse CF Projection response function calculating the dot-product
     between incoming activities and CF weights. Uses GPU.
     """
-    projection.input_buffer_pagelocked[:] = np.ravel(projection.input_buffer).astype(np.float32)  
+    projection.input_buffer_pagelocked[:] = np.ravel(projection.input_buffer).astype(np.float32)
     projection.input_buffer_gpu = gpuarray.to_gpu_async(projection.input_buffer_pagelocked,
                                                         stream=projection.pycuda_stream)
     projection.weights_gpu.mv(projection.input_buffer_gpu, alpha=projection.strength,

@@ -15,7 +15,7 @@ cusparse.init()
 
 def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):
     assert len(projlist)>=1
-    
+
     joint_sum = gpuarray.zeros((projlist[0].weights_gpu.shape[0], ), np.float32)
     for p in projlist:
         if not p.has_norm_total:
@@ -75,7 +75,7 @@ class GPUSettlingCFSheet(SettlingCFSheet):
                 self.new_iteration = True # used by input_event when it is called
                 if (self.plastic and not self.continuous_learning):
                     self.learn()
-            else:                
+            else:
                 cuda.Context.synchronize()
                 self.activate()
                 self.activation_count += 1
@@ -94,13 +94,13 @@ class GPUCFSheet(CFSheet):
         current time but before time advances.  Allows the event processor
         to send any events that must be sent before time advances to drive
         the simulation.
-        
+
         GPUCFSheet is meant to be used with GPU projections that are called
         asynchronously and might not have computed the activation. Therefore, we synchronize.
         """
         if self.new_input:
-            cuda.Context.synchronize()    
+            cuda.Context.synchronize()
             self.activate()
             self.new_input = False
             if self.plastic:
-                self.learn()        
+                self.learn()
