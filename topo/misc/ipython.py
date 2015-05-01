@@ -144,16 +144,10 @@ class ExportMagic(Magics):
 # Display hooks #
 #===============#
 
-from topo.base.sheetview import CFView
-
-from holoviews.core.options import Store
 from holoviews.ipython import load_ipython_extension as load_imagen_extension
-from holoviews.plotting import RasterPlot
 
 from holoviews.ipython.widgets import RunProgress
 RunProgress.run_hook = topo.sim.run
-
-Store.registry.update({CFView: RasterPlot})
 
 _loaded = False
 def load_ipython_extension(ip):

@@ -15,6 +15,7 @@ import param
 
 from holoviews.core import BoundingRegion, SheetCoordinateSystem
 from holoviews.core.options import Store, Options
+from holoviews.plotting import RasterPlot, style_aliases
 from holoviews import Image
 
 
@@ -121,4 +122,10 @@ class CFView(Image):
                       label=self.label, group=self.group)
 
 
-Store.options.CFView = Options('style', cmap='gray', interpolation='nearest')
+Store.registry.update({CFView: RasterPlot})
+
+def topo_options(options):
+    options.CFView = Options('style', cmap='gray', interpolation='nearest')
+
+Store.option_setters.append(topo_options)
+Store.register_plots(style_aliases=style_aliases)
