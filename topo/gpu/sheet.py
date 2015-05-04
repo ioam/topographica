@@ -4,13 +4,17 @@ import numpy as np
 from topo.sheet import SettlingCFSheet
 from topo.base.cf import CFSheet
 
-import pycuda.gpuarray as gpuarray
-import pycuda.driver as cuda
-import pycuda.autoinit               # pyflakes:ignore (API import)
-import scikits.cuda.cusparse as cusparse
+try:
+    import pycuda.gpuarray as gpuarray
+    import pycuda.driver as cuda
+    import pycuda.autoinit               # pyflakes:ignore (API import)
+    import scikits.cuda.cusparse as cusparse
 
-cusparse.init()
-
+    cusparse.init()
+except:
+    from unittest import SkipTest
+    raise SkipTest('PyCuda and scikits.cuda could not be imported, '
+                   'no GPU components available.')
 
 
 def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):

@@ -3,13 +3,18 @@ import param
 
 from topo.sparse.sparsecf import SparseCFProjection, SparseConnectionField
 
-import pycuda.gpuarray as gpuarray
-from pycuda.elementwise import ElementwiseKernel
-import pycuda.driver as cuda
-import pycuda.autoinit                   # pyflakes:ignore (API import)
-import scikits.cuda.cusparse as cusparse
+try:
+    import pycuda.gpuarray as gpuarray
+    from pycuda.elementwise import ElementwiseKernel
+    import pycuda.driver as cuda
+    import pycuda.autoinit                   # pyflakes:ignore (API import)
+    import scikits.cuda.cusparse as cusparse
 
-cusparse.init()
+    cusparse.init()
+except:
+    from unittest import SkipTest
+    raise SkipTest('PyCuda and scikits.cuda could not be imported, '
+                   'no GPU components available.')
 
 
 def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):
