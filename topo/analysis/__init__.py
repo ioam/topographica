@@ -98,7 +98,7 @@ class TopoIPTestCase(IPTestCase):
 
     @classmethod
     def compare_cfview(cls, el1, el2, msg='CFView data'):
-        cls.compare_matrix(el1, el2, msg=msg)
+        cls.compare_image(el1, el2, msg=msg)
 
 
 class SimRef(Reference):
