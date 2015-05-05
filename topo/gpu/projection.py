@@ -12,9 +12,7 @@ try:
 
     cusparse.init()
 except:
-    from unittest import SkipTest
-    raise SkipTest('PyCuda and scikits.cuda could not be imported, '
-                   'no GPU components available.')
+    pass
 
 
 def CFPOF_DivisiveNormalizeL1_Sparse_GPU(projection):

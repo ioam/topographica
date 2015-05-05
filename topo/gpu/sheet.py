@@ -12,9 +12,7 @@ try:
 
     cusparse.init()
 except:
-    from unittest import SkipTest
-    raise SkipTest('PyCuda and scikits.cuda could not be imported, '
-                   'no GPU components available.')
+    pass
 
 
 def compute_sparse_gpu_joint_norm_totals(projlist,active_units_mask=True):
