@@ -141,9 +141,17 @@ target['training'] = []
 for script in TRAINSCRIPTS:
     script_path = os.path.join(scripts_dir,script)
     target['training'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=p.testdp))
-for script in GPU_TRAINSCRIPTS:
-    script_path = os.path.join(scripts_dir,script)
-    target['training'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=5))
+
+try:
+    import pycuda.driver as cuda
+    gpu = cuda.Device.count() > 0
+except:
+    gpu = False
+
+if gpu:
+    for script in GPU_TRAINSCRIPTS:
+        script_path = os.path.join(scripts_dir,script)
+        target['training'].append(topographica_script +  ''' -c "from topo.tests.test_script import test_script; test_script(script=%(script_path)s,decimal=%(dp)s)"'''%dict(script_path=repr(script_path),dp=5))
 
 
 # CEBALERT: should use the code above but just with the changes for running without weave.
