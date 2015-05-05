@@ -55,22 +55,22 @@ class colorizeHSV(ElementOperation):
     def _process(self, overlay, key=None):
         if len(overlay) != 2:
             raise Exception("colorizeHSV required an overlay of two Image elements as input.")
-        if (len(overlay[0].value_dimensions), len(overlay[1].value_dimensions)) != (1,1):
+        if (len(overlay.get(0).value_dimensions), len(overlay.get(1).value_dimensions)) != (1,1):
             raise Exception("Each Image element must have single value dimension.")
         if overlay[0].shape != overlay[1].shape:
             raise Exception("Mismatch in the shapes of the data in the Image elements.")
 
 
-        hue = overlay[1]
+        hue = overlay.get(1)
         Hdim = hue.value_dimensions[0]
         H = hue.clone(hue.data.copy(),
                       value_dimensions=[Hdim(cyclic=True, range=hue.range(Hdim.name))])
 
         normfn = raster_normalization.instance()
         if self.p.input_ranges:
-            S = normfn.process_element(overlay[0], key, *self.p.input_ranges)
+            S = normfn.process_element(overlay.get(0), key, *self.p.input_ranges)
         else:
-            S = normfn.process_element(overlay[0], key)
+            S = normfn.process_element(overlay.get(0), key)
 
         C = Image(np.ones(hue.data.shape),
                   bounds=self.get_overlay_bounds(overlay), group='F', label='G')
