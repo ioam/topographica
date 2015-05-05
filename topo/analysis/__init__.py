@@ -57,7 +57,7 @@ class colorizeHSV(ElementOperation):
             raise Exception("colorizeHSV required an overlay of two Image elements as input.")
         if (len(overlay.get(0).value_dimensions), len(overlay.get(1).value_dimensions)) != (1,1):
             raise Exception("Each Image element must have single value dimension.")
-        if overlay[0].shape != overlay[1].shape:
+        if overlay.get(0).shape != overlay.get(1).shape:
             raise Exception("Mismatch in the shapes of the data in the Image elements.")
 
 
