@@ -216,9 +216,12 @@ class TemplatePlot(Plot):
 
     def _get_sv(self, key):
         sheet_view_key = self.channels.get(key, None)
-        sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
-        if isinstance(sv, NdMapping):
-            sv = sv.last
+        try:
+            sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
+            if isinstance(sv, NdMapping):
+                sv = sv.last
+        except:
+            sv = None
 
         return sv
 
