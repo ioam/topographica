@@ -218,10 +218,11 @@ class TemplatePlot(Plot):
         sheet_view_key = self.channels.get(key, None)
         try:
             sv = self.view_dict.get(key,{}).get(sheet_view_key, None)
-            if isinstance(sv, NdMapping):
-                sv = sv.last
         except:
             sv = None
+        else:
+            if isinstance(sv, NdMapping):
+                sv = sv.last
 
         return sv
 
@@ -264,7 +265,10 @@ class TemplatePlot(Plot):
         """ Set the Plot plot_src_name. Called when Plot is created"""
         for key in self.channels:
             sheet_view_key = self.channels.get(key,None)
-            sv = self.view_dict.get(key,{}).get(sheet_view_key)
+            try:
+                sv = self.view_dict.get(key,{}).get(sheet_view_key)
+            except:
+                sv = None
             if sv != None:
                  self.plot_src_name = sv.metadata.src_name
                  self.precedence = sv.metadata.precedence
@@ -280,8 +284,12 @@ class TemplatePlot(Plot):
         of the SheetViews that constitute the TemplatePlot.
         """
         for channel, name in self.channels.items():
-            sv = self.view_dict.get(channel,{}).get(name, None)
-            if isinstance(sv, NdMapping): sv = sv.last
+            try:
+                sv = self.view_dict.get(channel,{}).get(name, None)
+            except:
+                sv = None
+            else:
+                if isinstance(sv, NdMapping): sv = sv.last
             if sv != None:
                 shape = sv.data.shape
                 box = sv.bounds
